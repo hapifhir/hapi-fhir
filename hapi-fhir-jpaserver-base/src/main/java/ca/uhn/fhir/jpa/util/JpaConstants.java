@@ -24,4 +24,8 @@ public class JpaConstants {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
+	public static final String EXT_SUBSCRIPTION_EMAIL_FROM = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
+	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
+	public static final String EXT_SUBSCRIPTION_BODY_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-body-template";
+
 }

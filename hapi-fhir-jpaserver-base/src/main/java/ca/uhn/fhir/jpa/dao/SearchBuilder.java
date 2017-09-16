@@ -1606,7 +1606,7 @@ public class SearchBuilder implements ISearchBuilder {
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
-			ourLog.info("The include pids are empty");
+			ourLog.debug("The include pids are empty");
 			// return;
 		}
 

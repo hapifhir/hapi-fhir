@@ -47,6 +47,7 @@ public class CanonicalSubscription implements Serializable {
 	private Subscription.SubscriptionStatus myStatus;
 	private IBaseResource myBackingSubscription;
 	private TriggerDefinition myTrigger;
+	private EmailDetails myEmailDetails;
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
@@ -91,6 +92,13 @@ public class CanonicalSubscription implements Serializable {
 
 	public void setCriteriaString(String theCriteriaString) {
 		myCriteriaString = theCriteriaString;
+	}
+
+	public EmailDetails getEmailDetails() {
+		if (myEmailDetails == null) {
+			myEmailDetails = new EmailDetails();
+		}
+		return myEmailDetails;
 	}
 
 	public String getEndpointUrl() {
@@ -159,4 +167,35 @@ public class CanonicalSubscription implements Serializable {
 			myHeaders.add(theHeaders);
 		}
 	}
+
+	public static class EmailDetails {
+		private String myFrom;
+		private String mySubjectTemplate;
+		private String myBodyTemplate;
+
+		public String getBodyTemplate() {
+			return myBodyTemplate;
+		}
+
+		public void setBodyTemplate(String theBodyTemplate) {
+			myBodyTemplate = theBodyTemplate;
+		}
+
+		public String getFrom() {
+			return myFrom;
+		}
+
+		public void setFrom(String theFrom) {
+			myFrom = theFrom;
+		}
+
+		public String getSubjectTemplate() {
+			return mySubjectTemplate;
+		}
+
+		public void setSubjectTemplate(String theSubjectTemplate) {
+			mySubjectTemplate = theSubjectTemplate;
+		}
+	}
+
 }

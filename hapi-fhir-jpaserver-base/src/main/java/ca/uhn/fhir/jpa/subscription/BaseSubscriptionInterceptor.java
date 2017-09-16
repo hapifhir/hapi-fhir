@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -51,6 +52,8 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -85,7 +88,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired(required = false)
 	@Qualifier("myEventDefinitionDaoR4")
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
-
 	/**
 	 * Constructor
 	 */
@@ -139,6 +141,23 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			retVal.setHeaders(subscription.getChannel().getHeader());
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
+
+			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
+				String from;
+				String subjectTemplate;
+				String bodyTemplate;
+				try {
+					from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+					subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+					bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
+				} catch (FHIRException theE) {
+					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+				}
+				retVal.getEmailDetails().setFrom(from);
+				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
+				retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
+			}
+
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(theE);
 		}
@@ -157,6 +176,22 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		retVal.setHeaders(subscription.getChannel().getHeader());
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
+
+		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
+			String from;
+			String subjectTemplate;
+			String bodyTemplate;
+			try {
+				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+				bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getEmailDetails().setFrom(from);
+			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
+			retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
+		}
 
 		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
 		if (topicExts.size() > 0) {
@@ -260,8 +295,78 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 	}
 
+	@SuppressWarnings("unused")
+	@PreDestroy
+	public void preDestroy() {
+		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
+
+		unregisterDeliverySubscriber();
+	}
+
+	protected abstract void registerDeliverySubscriber();
+
+	public void registerSubscription(IIdType theId, S theSubscription) {
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+		Validate.notNull(theSubscription);
+
+		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
+	}
+
+	protected void registerSubscriptionCheckingSubscriber() {
+		if (mySubscriptionCheckingSubscriber == null) {
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
+		}
+		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
+	}
+
+	@Override
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage();
+		msg.setId(theResource.getIdElement());
+		msg.setOperationType(RestOperationTypeEnum.CREATE);
+		msg.setNewPayload(theResource);
+		submitResourceModified(msg);
+	}
+
+	@Override
+	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage();
+		msg.setId(theResource.getIdElement());
+		msg.setOperationType(RestOperationTypeEnum.DELETE);
+		submitResourceModified(msg);
+	}
+
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage();
+		msg.setId(theNewResource.getIdElement());
+		msg.setOperationType(RestOperationTypeEnum.UPDATE);
+		msg.setNewPayload(theNewResource);
+		submitResourceModified(msg);
+	}
+
+	public void setFhirContext(FhirContext theCtx) {
+		myCtx = theCtx;
+	}
+
+	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
+		myResourceDaos = theResourceDaos;
+	}
+
 	@PostConstruct
-	public void postConstruct() {
+	public void start() {
+		for (IFhirResourceDao<?> next : myResourceDaos) {
+			if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
+				mySubscriptionDao = next;
+			}
+		}
+		Validate.notNull(mySubscriptionDao);
+
+		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
+			Validate.notNull(myEventDefinitionDaoR4);
+		}
+
 		if (getProcessingChannel() == null) {
 			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
 			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
@@ -336,75 +441,25 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		initSubscriptions();
 	}
 
-	@SuppressWarnings("unused")
-	@PreDestroy
-	public void preDestroy() {
-		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
-
-		unregisterDeliverySubscriber();
-	}
-
-	protected abstract void registerDeliverySubscriber();
-
-	public void registerSubscription(IIdType theId, S theSubscription) {
-		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
-		Validate.notNull(theSubscription);
-
-		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
-	}
-
-	protected void registerSubscriptionCheckingSubscriber() {
-		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
-		}
-		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
-	}
-
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.CREATE);
-		msg.setNewPayload(theResource);
-		submitResourceModified(msg);
-	}
-
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.DELETE);
-		submitResourceModified(msg);
-	}
-
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theNewResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.UPDATE);
-		msg.setNewPayload(theNewResource);
-		submitResourceModified(msg);
-	}
-
-	@PostConstruct
-	public void start() {
-		for (IFhirResourceDao<?> next : myResourceDaos) {
-			if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
-				mySubscriptionDao = next;
-			}
-		}
-		Validate.notNull(mySubscriptionDao);
-
-		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			Validate.notNull(myEventDefinitionDaoR4);
-		}
-	}
-
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		final GenericMessage<ResourceModifiedMessage> message = new GenericMessage<>(theMsg);
 		mySubscriptionActivatingSubscriber.handleMessage(message);
-		getProcessingChannel().send(message);
+		sendToProcessingChannel(message);
+	}
+
+	protected void sendToProcessingChannel(final GenericMessage<ResourceModifiedMessage> theMessage) {
+		ourLog.trace("Registering synchronization to send resource modified message to processing channel");
+
+		/*
+		 * We only actually submit this item work working after the
+		 */
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCommit() {
+				ourLog.trace("Sending resource modified message to processing channel");
+				getProcessingChannel().send(theMessage);
+			}
+		});
 	}
 
 	protected abstract void unregisterDeliverySubscriber();

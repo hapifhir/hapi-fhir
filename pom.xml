@@ -423,6 +423,16 @@
 				<version>0.9.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.icegreen</groupId>
+				<artifactId>greenmail</artifactId>
+				<version>1.5.5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.icegreen</groupId>
+				<artifactId>greenmail-spring</artifactId>
+				<version>1.5.5</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.bkiers</groupId>
 				<artifactId>Liqp</artifactId>
 				<version>0.6.4</version>
@@ -456,6 +466,11 @@
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
 				<version>3.8.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>1.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>

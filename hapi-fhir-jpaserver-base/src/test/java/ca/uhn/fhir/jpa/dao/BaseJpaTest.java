@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import javax.persistence.EntityManager;
 
@@ -308,4 +309,23 @@ public abstract class BaseJpaTest {
 			fail("Size " + theList.size() + " is != target " + theTarget);
 		}
 	}
+
+	public static void waitForSize(int theTarget, Callable<Number> theCallable) throws Exception {
+		waitForSize(theTarget, 10000, theCallable);
+	}
+
+	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable) throws Exception {
+		StopWatch sw = new StopWatch();
+		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= theTimeout) {
+			fail("Size " + theCallable.call() + " is != target " + theTarget);
+		}
+	}
+
 }

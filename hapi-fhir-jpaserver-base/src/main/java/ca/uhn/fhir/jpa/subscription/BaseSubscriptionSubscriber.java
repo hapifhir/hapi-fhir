@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
@@ -57,6 +58,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	public BaseSubscriptionInterceptor getSubscriptionInterceptor() {
 		return mySubscriptionInterceptor;
 	}
+
 
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?

@@ -50,7 +50,10 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
+		ourLog.trace("Handling resource modified message: {}", theMessage);
+
 		if (!(theMessage.getPayload() instanceof ResourceModifiedMessage)) {
+			ourLog.warn("Unexpected message payload type: {}", theMessage.getPayload());
 			return;
 		}
 
@@ -60,6 +63,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			case UPDATE:
 				break;
 			default:
+				ourLog.trace("Not processing modified message for {}", msg.getOperationType());
 				// ignore anything else
 				return;
 		}
@@ -68,6 +72,9 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		String resourceId = msg.getId().getIdPart();
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getSubscriptions();
+
+		ourLog.trace("Testing {} subscriptions for applicability");
+
 		for (CanonicalSubscription nextSubscription : subscriptions) {
 
 			String nextSubscriptionId = nextSubscription.getIdElement().toUnqualifiedVersionless().getValue();
@@ -78,8 +85,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			}
 
 			// see if the criteria matches the created object
-			ourLog.debug("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
-
+			ourLog.trace("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
 			String criteriaResource = nextCriteriaString;
 			int index = criteriaResource.indexOf("?");
 			if (index != -1) {
@@ -87,7 +93,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			}
 
 			if (resourceType != null && nextCriteriaString != null && !criteriaResource.equals(resourceType)) {
-				ourLog.debug("Skipping subscription search for {} because it does not match the criteria {}", resourceType, nextCriteriaString);
+				ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, nextCriteriaString);
 				continue;
 			}
 
@@ -97,6 +103,9 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			criteria = massageCriteria(criteria);
 
 			IBundleProvider results = performSearch(criteria);
+
+			ourLog.info("Subscription check found {} results for query: {}", results.size(), criteria);
+
 			if (results.size() == 0) {
 				continue;
 			}

@@ -278,12 +278,15 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theRestHookSubscriptionInterceptor) throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
-		while (theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
-			Thread.sleep(50);
+	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theSubscriptionInterceptor) throws InterruptedException {
+		Thread.sleep(50);
+		ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
+		if (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
+			while (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
+				Thread.sleep(50);
+			}
+			ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

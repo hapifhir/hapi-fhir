@@ -21,10 +21,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionSubscriber;
-import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -44,7 +41,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSubscriber {
+public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
 	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
@@ -78,18 +75,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 	}
 
 	@Override
-	public void handleMessage(Message<?> theMessage) throws MessagingException {
-		if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
-			return;
-		}
-		try {
-			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-
-			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription())) {
-				return;
-			}
-
-			CanonicalSubscription subscription = msg.getSubscription();
+	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException {
+			CanonicalSubscription subscription = theMessage.getSubscription();
 
 			// Grab the endpoint from the subscription
 			String endpointUrl = subscription.getEndpointUrl();
@@ -119,11 +106,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 				}
 			}
 
-			deliverPayload(msg, subscription, payloadType, client);
-		} catch (Exception e) {
-			ourLog.error("Failure handling subscription payload", e);
-			throw new MessagingException(theMessage, "Failure handling subscription payload", e);
-		}
+			deliverPayload(theMessage, subscription, payloadType, client);
 	}
 
 }

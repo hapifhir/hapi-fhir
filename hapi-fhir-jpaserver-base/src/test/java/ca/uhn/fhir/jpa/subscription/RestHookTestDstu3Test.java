@@ -46,6 +46,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@After
 	public void afterUnregisterRestHookListener() {
+		ourLog.info("**** Starting @After *****");
+
 		for (IIdType next : mySubscriptionIds){
 			ourClient.delete().resourceById(next).execute();
 		}
@@ -220,6 +222,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourLog.info("About to send observation 1");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
@@ -236,6 +239,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 
 		// Send another observation
+		ourLog.info("About to send observation 2");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
 		// Should see two subscription notifications
@@ -247,6 +251,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 
 		// Send another
+		ourLog.info("About to send observation 3");
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
@@ -370,9 +375,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Update");
 			ourUpdatedObservations.add(theObservation);
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
