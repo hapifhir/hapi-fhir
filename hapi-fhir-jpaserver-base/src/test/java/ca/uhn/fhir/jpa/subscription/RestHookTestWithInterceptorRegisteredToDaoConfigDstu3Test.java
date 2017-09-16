@@ -140,10 +140,10 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
+		Thread.sleep(500);
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
-		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
