@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,8 +46,14 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@Override
 	public void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
+		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+			return;
+		}
 
 		Map<String, Boolean> presenceMap = new HashMap<String, Boolean>(theParamNameToPresence);
 		List<SearchParamPresent> entitiesToSave = new ArrayList<SearchParamPresent>();

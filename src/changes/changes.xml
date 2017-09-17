@@ -379,6 +379,11 @@
 				Subscriptions in JPA server now support "email" delivery type through the 
 				use of a new interceptor which handles that type
 			</action>
+			<action type="add">
+				JPA server can now be configured to not support
+				<![CDATA[<code>:missing</code>]]> modifiers, which
+				increases write performance since fewer indexes are written
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
