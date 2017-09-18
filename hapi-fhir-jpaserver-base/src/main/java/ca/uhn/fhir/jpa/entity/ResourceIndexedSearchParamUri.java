@@ -113,11 +113,12 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	public String toString() {
-		ToStringBuilder builder = new ToStringBuilder(this);
-		builder.append("id", getId());
-		builder.append("paramName", getParamName());
-		builder.append("uri", myUri);
-		return builder.toString();
+		ToStringBuilder b = new ToStringBuilder(this);
+		b.append("id", getId());
+		b.append("resourceId", getResourcePid());
+		b.append("paramName", getParamName());
+		b.append("uri", myUri);
+		return b.toString();
 	}
 
 }

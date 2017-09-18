@@ -136,7 +136,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("lat", getLatitude());
 		b.append("lon", getLongitude());
 		return b.build();

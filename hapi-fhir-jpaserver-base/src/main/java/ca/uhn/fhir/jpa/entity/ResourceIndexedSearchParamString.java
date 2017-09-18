@@ -118,6 +118,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private String myValueNormalized;
 
 	public ResourceIndexedSearchParamString() {
+		super();
 	}
 
 
@@ -191,7 +192,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("value", getValueNormalized());
 		return b.build();
 	}

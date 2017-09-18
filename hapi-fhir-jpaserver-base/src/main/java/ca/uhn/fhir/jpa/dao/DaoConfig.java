@@ -31,15 +31,6 @@ import java.util.*;
 public class DaoConfig {
 
 	/**
-	 * Constructor
-	 */
-	public DaoConfig() {
-		setSubscriptionEnabled(true);
-		setSubscriptionPollDelay(0);
-		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
-	}
-
-	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
 	 * <ul>
@@ -64,25 +55,22 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.ENABLED;
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowExternalReferences = false;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private int myDeferIndexingForCodesystemsOfSize = 2000;
-
 	private boolean myDeleteStaleSearches = true;
-
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myUniqueIndexesCheckedBeforeSave = true;
@@ -119,6 +107,14 @@ public class DaoConfig {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
+	/**
+	 * Constructor
+	 */
+	public DaoConfig() {
+		setSubscriptionEnabled(true);
+		setSubscriptionPollDelay(0);
+		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
+	}
 
 	/**
 	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
@@ -288,6 +284,35 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#ENABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 */
+	public IndexEnabledEnum getIndexMissingFields() {
+		return myIndexMissingFieldsEnabled;
+	}
+
+	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#ENABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 */
+	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
+		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
+		myIndexMissingFieldsEnabled = theIndexMissingFields;
+	}
+
+	/**
 	 * Returns the interceptors which will be notified of operations.
 	 *
 	 * @see #setInterceptors(List)
@@ -418,24 +443,6 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
-		// ignore
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
-		// ignore
 	}
 
 	/**
@@ -814,16 +821,6 @@ public class DaoConfig {
 		mySchedulingDisabled = theSchedulingDisabled;
 	}
 
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
-		// nothing
-	}
-
 	/**
 	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
 	 * result in any chance to a given resource (e.g. an update where the resource body matches the
@@ -926,6 +923,33 @@ public class DaoConfig {
 		}
 	}
 
+	/**
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
+	 */
+	@Deprecated
+	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
+		// nothing
+	}
+
+	/**
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
+	 */
+	@Deprecated
+	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
+		// ignore
+	}
+
+	/**
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
+	 */
+	@Deprecated
+	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
+		// ignore
+	}
+
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
@@ -940,6 +964,11 @@ public class DaoConfig {
 			}
 		}
 
+	}
+
+	public enum IndexEnabledEnum {
+		ENABLED,
+		DISABLED
 	}
 
 }
