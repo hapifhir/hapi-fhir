@@ -601,6 +601,45 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
+		createUniqueNameAndManagingOrganizationSps();
+		List<ResourceIndexedCompositeStringUnique> uniques;
+
+		Organization org = new Organization();
+		org.setId("Organization/ORG");
+		org.setName("ORG");
+		myOrganizationDao.update(org);
+
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("FAMILY1");
+		pt1.setManagingOrganization(new Reference("Organization/ORG"));
+
+		SearchBuilder.resetLastHandlerMechanismForUnitTest();
+		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG").getId().toUnqualifiedVersionless();
+		assertEquals(SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		assertEquals(1, uniques.size());
+		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+		assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
+
+		// Again with a change
+		pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAMILY1");
+		pt1.setManagingOrganization(new Reference("Organization/ORG"));
+
+		SearchBuilder.resetLastHandlerMechanismForUnitTest();
+		id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG").getId().toUnqualifiedVersionless();
+		assertEquals(SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		assertEquals(1, uniques.size());
+		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+		assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
+
+	}
+
+
+	@Test
 	public void testUniqueValuesAreIndexed_StringAndReference_UsingConditional() {
 		createUniqueNameAndManagingOrganizationSps();
 		List<ResourceIndexedCompositeStringUnique> uniques;

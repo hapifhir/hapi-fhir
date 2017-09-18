@@ -60,6 +60,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1258,6 +1259,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
 		 */
+		ourLog.info("Checking for unique index for query: {}", theParams.toNormalizedQueryString(myContext));
 		if (myCallingDao.getConfig().isUniqueIndexesEnabled()) {
 			if (myParams.getIncludes().isEmpty()) {
 				if (myParams.getRevIncludes().isEmpty()) {
@@ -2268,7 +2270,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void ensureHaveQuery() {
 			if (myWrap == null) {
-				ourLog.info("Searching for unique index matches over {} candidate query strings");
+				ourLog.info("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
 				StopWatch sw = new StopWatch();
 				Collection<Long> resourcePids = myCallingDao.getResourceIndexedCompositeStringUniqueDao().findResourcePidsByQueryStrings(myUniqueQueryStrings);
 				ourLog.info("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());

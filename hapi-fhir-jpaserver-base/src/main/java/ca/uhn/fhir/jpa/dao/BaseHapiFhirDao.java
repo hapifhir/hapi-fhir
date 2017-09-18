@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -1366,6 +1367,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setPublished(theUpdateTime);
 		}
 
+		StopWatch sw = new StopWatch(); // "**
 		Collection<ResourceIndexedSearchParamString> existingStringParams = new ArrayList<>();
 		if (theEntity.isParamsStringPopulated()) {
 			existingStringParams.addAll(theEntity.getParamsString());
@@ -1398,10 +1400,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (theEntity.isHasLinks()) {
 			existingResourceLinks.addAll(theEntity.getResourceLinks());
 		}
+		ourLog.info("** Get existing in {}ms", sw.getMillis());
+		sw.getMillisAndRestart();
 		Collection<ResourceIndexedCompositeStringUnique> existingCompositeStringUniques = new ArrayList<>();
 		if (theEntity.isParamsCompositeStringUniquePresent()) {
 			existingCompositeStringUniques.addAll(theEntity.getParamsCompositeStringUnique());
 		}
+		ourLog.info("** Get existing composite in {}ms", sw.getMillis());
 
 		Set<ResourceIndexedSearchParamString> stringParams = null;
 		Set<ResourceIndexedSearchParamToken> tokenParams = null;
@@ -1540,10 +1545,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				/*
 				 * Handle composites
 				 */
+				sw.getMillisAndRestart();
 				compositeStringUniques = extractCompositeStringUniques(theEntity, stringParams, tokenParams, numberParams, quantityParams, dateParams, uriParams, links);
+				ourLog.info("** Extract unique strings in {}ms", sw.getMillis());
 
-
+				sw.getMillisAndRestart();
 				changed = populateResourceIntoEntity(theResource, theEntity, true);
+				ourLog.info("** Populate resource into entity in {}ms", sw.getMillis());
 
 				theEntity.setUpdated(theUpdateTime);
 				if (theResource instanceof IResource) {
@@ -1574,7 +1582,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			} else {
 
+				sw.getMillisAndRestart();
 				changed = populateResourceIntoEntity(theResource, theEntity, false);
+				ourLog.info("** Populate into entity in {}ms", sw.getMillis());
+
 				theEntity.setUpdated(theUpdateTime);
 				// theEntity.setLanguage(theResource.getLanguage().getValue());
 				theEntity.setIndexStatus(null);
@@ -1737,8 +1748,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 			}
-
-			theEntity.toString();
 
 		} // if thePerformIndexing
 

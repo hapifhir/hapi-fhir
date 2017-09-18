@@ -19,6 +19,7 @@ public class ReferenceParamTest {
 		rp.setValueAsQueryToken(ourCtx, null, null, "Location/123");
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
+		assertEquals(null, rp.getQueryParameterQualifier());
 		
 	}
 	
@@ -29,7 +30,21 @@ public class ReferenceParamTest {
 		rp.setValueAsQueryToken(ourCtx, null, ":Location", "123");
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
-		
+		assertEquals(null, rp.getQueryParameterQualifier());
+
+	}
+
+
+	@Test
+	public void testWithResourceTypeAsQualifierAndChain() {
+
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Location.name", "FOO");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("FOO", rp.getIdPart());
+		assertEquals(":Location.name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
+
 	}
 
 	@AfterClass

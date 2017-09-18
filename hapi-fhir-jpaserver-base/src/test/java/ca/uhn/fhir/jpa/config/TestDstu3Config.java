@@ -99,7 +99,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(retVal)
 				// .logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+				.logSlowQueryBySlf4j(100, TimeUnit.MILLISECONDS)
 				.countQuery()
 				.build();
 

@@ -28,12 +28,14 @@ import javax.persistence.*;
 
 @Entity()
 @Table(name = "HFJ_IDX_CMP_STRING_UNIQ", indexes = {
-	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true)
+	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
+	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
 })
 public class ResourceIndexedCompositeStringUnique implements Comparable<ResourceIndexedCompositeStringUnique> {
 
-	public static final int MAX_STRING_LENGTH = 800;
+	public static final int MAX_STRING_LENGTH = 150;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
+	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
 
 	@SequenceGenerator(name = "SEQ_IDXCMPSTRUNIQ_ID", sequenceName = "SEQ_IDXCMPSTRUNIQ_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMPSTRUNIQ_ID")

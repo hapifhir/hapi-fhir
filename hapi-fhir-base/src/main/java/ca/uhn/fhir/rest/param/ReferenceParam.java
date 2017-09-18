@@ -74,11 +74,11 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	@Override
 	String doGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
-		if (isNotBlank(getResourceType())) {
-			b.append(':');
-			b.append(getResourceType());
-		}
 		if (isNotBlank(myChain)) {
+			if (isNotBlank(getResourceType())) {
+				b.append(':');
+				b.append(getResourceType());
+			}
 			b.append('.');
 			b.append(myChain);
 		}
@@ -92,8 +92,12 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (isBlank(myId.getResourceType())) {
 			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
+		} else {
+			if (isBlank(getChain())) {
+				return getResourceType() + "/" + myId.getIdPart();
+			}
+			return myId.getIdPart();
 		}
-		return myId.getIdPart();
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -23,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 import java.util.*;
 
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
