@@ -1085,7 +1085,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theMatchUrl)) {
 			StopWatch sw = new StopWatch();
 			Set<Long> match = processMatchUrl(theMatchUrl, myResourceType);
-			ourLog.info("** Match URL in {}ms", sw.getMillis());
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);
@@ -1134,7 +1133,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Perform update
 		StopWatch sw = new StopWatch();
 		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
-		ourLog.info("** Update entity in {}ms", sw.getMillis());
 
 		/* 
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),

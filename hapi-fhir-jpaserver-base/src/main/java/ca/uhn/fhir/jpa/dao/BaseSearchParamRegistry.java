@@ -91,13 +91,11 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 
 		Map<Set<String>, List<JpaRuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToUniqueSearchParams.get(theResourceName);
 		if (paramNamesToParams == null) {
-			ourLog.info("** No unique search params for resource name {}", theResourceName);
 			return Collections.emptyList();
 		}
 
 		List<JpaRuntimeSearchParam> retVal = paramNamesToParams.get(theParamNames);
 		if (retVal == null) {
-			ourLog.info("** No unique search params [{}] for {} - Have {}", theParamNames, theResourceName, paramNamesToParams.keySet());
 			retVal = Collections.emptyList();
 		}
 		return Collections.unmodifiableList(retVal);

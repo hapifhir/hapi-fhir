@@ -27,7 +27,6 @@ public class ConnectionWrapper implements Connection {
 
 	@Override
 	public void close() throws SQLException {
-//		ourLog.info("** Closing connection");
 		myWrap.close();
 	}
 

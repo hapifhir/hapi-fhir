@@ -483,7 +483,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		/*
 		 * Perform ID substitutions and then index each resource we have saved
 		 */
-		StopWatch sw = new StopWatch();//"**
 
 		FhirTerser terser = getContext().newTerser();
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
@@ -516,13 +515,14 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, false, updateTime, false, true);
 			}
 		}
-		ourLog.info("** Update entity in {}ms", sw.getMillisAndRestart());
 
 		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
-		ourLog.info("** Session has {} inserts and {} updates", session.getActionQueue().numberOfInsertions(), session.getActionQueue().numberOfUpdates());
+		int insertionCount = session.getActionQueue().numberOfInsertions();
+		int updateCount = session.getActionQueue().numberOfUpdates();
 
+		StopWatch sw = new StopWatch();
 		myEntityManager.flush();
-		ourLog.info("** Flush in {}ms", sw.getMillis());
+		ourLog.info("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
