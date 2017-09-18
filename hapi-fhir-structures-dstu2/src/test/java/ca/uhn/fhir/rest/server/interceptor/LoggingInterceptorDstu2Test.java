@@ -169,8 +169,7 @@ public class LoggingInterceptorDstu2Test {
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), startsWith("read - "));
-		int millis = Integer.parseInt(captor.getValue().substring("read - ".length()));
-		assertThat(millis, greaterThan(0));
+		Integer.parseInt(captor.getValue().substring("read - ".length()));
 	}
 
 	@Test
@@ -193,7 +192,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), matchesPattern("[0-9]{3}"));
+		assertThat(captor.getValue(), matchesPattern("[1-9][0-9]{2}"));
 	}
 
 	@Test
