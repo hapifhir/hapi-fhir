@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.utilities.ucum.Canonical;
@@ -68,8 +69,9 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				return;
 		}
 
-		String resourceType = msg.getId().getResourceType();
-		String resourceId = msg.getId().getIdPart();
+		IIdType id = msg.getId(getContext());
+		String resourceType = id.getResourceType();
+		String resourceId = id.getIdPart();
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getSubscriptions();
 
@@ -77,7 +79,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 		for (CanonicalSubscription nextSubscription : subscriptions) {
 
-			String nextSubscriptionId = nextSubscription.getIdElement().toUnqualifiedVersionless().getValue();
+			String nextSubscriptionId = nextSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue();
 			String nextCriteriaString = nextSubscription.getCriteriaString();
 
 			if (StringUtils.isBlank(nextCriteriaString)) {
@@ -115,10 +117,10 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				ourLog.info("Found match: queueing rest-hook notification for resource: {}", nextBase.getIdElement());
 
 				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-				deliveryMsg.setPayload(nextBase);
+				deliveryMsg.setPayload(getContext(), nextBase);
 				deliveryMsg.setSubscription(nextSubscription);
 				deliveryMsg.setOperationType(msg.getOperationType());
-				deliveryMsg.setPayloadId(msg.getId());
+				deliveryMsg.setPayloadId(msg.getId(getContext()));
 
 				getSubscriptionInterceptor().getDeliveryChannel().send(new GenericMessage<>(deliveryMsg));
 			}

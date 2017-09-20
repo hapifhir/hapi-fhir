@@ -42,9 +42,10 @@ import java.util.Map;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements ISubscriptionWebsocketHandler {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
-	private static FhirContext ourCtx;
 	@Autowired
 	private SubscriptionWebsocketInterceptor mySubscriptionWebsocketInterceptor;
+	@Autowired
+	private FhirContext myCtx;
 
 	private IState myState = new InitialState();
 
@@ -118,7 +119,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 		private void deliver() {
 			try {
-				String payload = "ping " + mySubscription.getIdElement().getIdPart();
+				String payload = "ping " + mySubscription.getIdElement(myCtx).getIdPart();
 				ourLog.info("Sending WebSocket message: {}", payload);
 				mySession.sendMessage(new TextMessage(payload));
 			} catch (IOException e) {
@@ -176,7 +177,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			try {
 				Map<String, CanonicalSubscription> idToSubscription = mySubscriptionWebsocketInterceptor.getIdToSubscription();
 				CanonicalSubscription subscription = idToSubscription.get(id.getIdPart());
-				myState = new BoundStaticSubscipriptionState(theSession, subscription);
+				myState = new BoundStaticSubscipriptionState( theSession, subscription);
 			} catch (ResourceNotFoundException e) {
 				try {
 					String message = "Invalid bind request - Unknown subscription: " + id.getValue();

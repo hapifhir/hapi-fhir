@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import com.google.gson.Gson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -28,11 +30,13 @@ import java.io.Serializable;
 
 public class ResourceDeliveryMessage implements Serializable {
 
-	private static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 1L;
 
-	private CanonicalSubscription mySubscription;
-	private IBaseResource myPayoad;
-	private IIdType myPayloadId;
+	private transient CanonicalSubscription mySubscription;
+	private String mySubscriptionString;
+	private transient IBaseResource myPayload;
+	private String myPayoadString;
+	private String myPayloadId;
 	private RestOperationTypeEnum myOperationType;
 
 	public RestOperationTypeEnum getOperationType() {
@@ -43,28 +47,45 @@ public class ResourceDeliveryMessage implements Serializable {
 		myOperationType = theOperationType;
 	}
 
-	public IIdType getPayloadId() {
-		return myPayloadId;
+	public IBaseResource getPayload(FhirContext theCtx) {
+		if (myPayload == null && myPayoadString != null) {
+			myPayload = theCtx.newJsonParser().parseResource(myPayoadString);
+		}
+		return myPayload;
 	}
 
-	public void setPayloadId(IIdType thePayloadId) {
-		myPayloadId = thePayloadId;
-	}
-
-	public IBaseResource getPayload() {
-		return myPayoad;
-	}
-
-	public void setPayload(IBaseResource thePayload) {
-		myPayoad = thePayload;
+	public IIdType getPayloadId(FhirContext theCtx) {
+		IIdType retVal = null;
+		if (myPayloadId != null) {
+			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
+		}
+		return retVal;
 	}
 
 	public CanonicalSubscription getSubscription() {
+		if (mySubscription == null && mySubscriptionString != null) {
+			mySubscription = new Gson().fromJson(mySubscriptionString, CanonicalSubscription.class);
+		}
 		return mySubscription;
 	}
 
 	public void setSubscription(CanonicalSubscription theSubscription) {
 		mySubscription = theSubscription;
+		if (mySubscription != null) {
+			mySubscriptionString = new Gson().toJson(mySubscription);
+		}
+	}
+
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
+		myPayload = thePayload;
+		myPayoadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+	}
+
+	public void setPayloadId(IIdType thePayloadId) {
+		myPayloadId = null;
+		if (thePayloadId != null) {
+			myPayloadId = thePayloadId.getValue();
+		}
 	}
 
 }

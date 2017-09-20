@@ -111,7 +111,7 @@ public class ReferenceClientTest {
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?general-practitioner%3AOrganization=123", get.getURI().toString());
+		assertEquals("http://foo/Patient?general-practitioner=Organization%2F123", get.getURI().toString());
 	}
 
 	private String createBundle() {

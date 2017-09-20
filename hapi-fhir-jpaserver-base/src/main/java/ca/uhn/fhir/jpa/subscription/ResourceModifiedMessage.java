@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,20 +29,27 @@ import java.io.Serializable;
 
 public class ResourceModifiedMessage implements Serializable {
 
-	private static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 1L;
 
-	private IIdType myId;
+	private String myId;
 	private RestOperationTypeEnum myOperationType;
-	private IBaseResource myNewPayload;
+	private String myNewPayloadEncoded;
+	private transient IBaseResource myNewPayload;
 
-	public IIdType getId() {
-		return myId;
+	public IIdType getId(FhirContext theCtx) {
+		IIdType retVal = null;
+		if (myId != null) {
+			retVal = theCtx.getVersion().newIdType().setValue(myId);
+		}
+		return retVal;
 	}
 
-	public void setId(IIdType theId) {
-		myId = theId;
+	public IBaseResource getNewPayload(FhirContext theCtx) {
+		if (myNewPayload == null && myNewPayloadEncoded != null) {
+			myNewPayload = theCtx.newJsonParser().parseResource(myNewPayloadEncoded);
+		}
+		return myNewPayload;
 	}
-
 
 	public RestOperationTypeEnum getOperationType() {
 		return myOperationType;
@@ -51,11 +59,15 @@ public class ResourceModifiedMessage implements Serializable {
 		myOperationType = theOperationType;
 	}
 
-	public IBaseResource getNewPayload() {
-		return myNewPayload;
+	public void setId(IIdType theId) {
+		myId = null;
+		if (theId != null) {
+			myId = theId.getValue();
+		}
 	}
 
-	public void setNewPayload(IBaseResource theNewPayload) {
+	public void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
 		myNewPayload = theNewPayload;
+		myNewPayloadEncoded = theCtx.newJsonParser().encodeResourceToString(theNewPayload);
 	}
 }

@@ -20,13 +20,16 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4.model.TriggerDefinition;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,24 +39,35 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class CanonicalSubscription implements Serializable {
 
-	private static final long serialVersionUID = 364269017L;
+	private static final long serialVersionUID = 1L;
 
-	private IIdType myIdElement;
+	@SerializedName("id")
+	private String myIdElement;
+	@SerializedName("criteria")
 	private String myCriteriaString;
+	@SerializedName("endpointUrl")
 	private String myEndpointUrl;
+	@SerializedName("payload")
 	private String myPayloadString;
+	@SerializedName("headers")
 	private List<String> myHeaders;
+	@SerializedName("channelType")
 	private Subscription.SubscriptionChannelType myChannelType;
+	@SerializedName("status")
 	private Subscription.SubscriptionStatus myStatus;
-	private IBaseResource myBackingSubscription;
-	private TriggerDefinition myTrigger;
+	private transient IBaseResource myBackingSubscription;
+	@SerializedName("backingSubscription")
+	private String myBackingSubscriptionString;
+	@SerializedName("triggerDefinition")
+	private CanonicalEventDefinition myTrigger;
+	@SerializedName("emailDetails")
 	private EmailDetails myEmailDetails;
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
 	 * may change in the future when things stabilize
 	 */
-	public void addTrigger(TriggerDefinition theTrigger) {
+	public void addTrigger(CanonicalEventDefinition theTrigger) {
 		myTrigger = theTrigger;
 	}
 
@@ -66,16 +80,27 @@ public class CanonicalSubscription implements Serializable {
 		CanonicalSubscription that = (CanonicalSubscription) theO;
 
 		return new EqualsBuilder()
-			.append(getIdElement().getIdPart(), that.getIdElement().getIdPart())
+			.append(getIdElementString(), that.getIdElementString())
 			.isEquals();
 	}
 
-	public IBaseResource getBackingSubscription() {
+	public IBaseResource getBackingSubscription(FhirContext theCtx) {
+		if (myBackingSubscription == null && myBackingSubscriptionString != null) {
+			myBackingSubscription = theCtx.newJsonParser().parseResource(myBackingSubscriptionString);
+		}
 		return myBackingSubscription;
 	}
 
-	public void setBackingSubscription(IBaseResource theBackingSubscription) {
+	String getIdElementString() {
+		return myIdElement;
+	}
+
+	public void setBackingSubscription(FhirContext theCtx, IBaseResource theBackingSubscription) {
 		myBackingSubscription = theBackingSubscription;
+		myBackingSubscriptionString = null;
+		if (myBackingSubscription != null) {
+			myBackingSubscriptionString = theCtx.newJsonParser().encodeResourceToString(myBackingSubscription);
+		}
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
@@ -122,12 +147,12 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
-	public IIdType getIdElement() {
-		return myIdElement;
-	}
-
-	public void setIdElement(IIdType theIdElement) {
-		myIdElement = theIdElement;
+	public IIdType getIdElement(FhirContext theContext) {
+		IIdType retVal = null;
+		if (isNotBlank(myIdElement)) {
+			retVal = theContext.getVersion().newIdType().setValue(myIdElement);
+		}
+		return retVal;
 	}
 
 	public String getPayloadString() {
@@ -150,14 +175,14 @@ public class CanonicalSubscription implements Serializable {
 	 * For now we're using the R4 triggerdefinition, but this
 	 * may change in the future when things stabilize
 	 */
-	public TriggerDefinition getTrigger() {
+	public CanonicalEventDefinition getTrigger() {
 		return myTrigger;
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getIdElement().getIdPart())
+			.append(getIdElementString())
 			.toHashCode();
 	}
 
@@ -168,9 +193,19 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
+	public void setIdElement(IIdType theIdElement) {
+		myIdElement = null;
+		if (theIdElement != null) {
+			myIdElement = theIdElement.toUnqualifiedVersionless().getValue();
+		}
+	}
+
 	public static class EmailDetails {
+		@SerializedName("from")
 		private String myFrom;
+		@SerializedName("subjectTemplate")
 		private String mySubjectTemplate;
+		@SerializedName("bodyTemplate")
 		private String myBodyTemplate;
 
 		public String getBodyTemplate() {
@@ -195,6 +230,13 @@ public class CanonicalSubscription implements Serializable {
 
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
+		}
+	}
+
+	public static class CanonicalEventDefinition {
+
+		public CanonicalEventDefinition(EventDefinition theDef) {
+			// nothing yet
 		}
 	}
 

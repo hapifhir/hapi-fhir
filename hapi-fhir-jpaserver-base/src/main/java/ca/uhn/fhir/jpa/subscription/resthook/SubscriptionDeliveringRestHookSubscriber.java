@@ -49,7 +49,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
-		IBaseResource payloadResource = theMsg.getPayload();
+		IBaseResource payloadResource = theMsg.getPayload(getContext());
 
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
@@ -60,7 +60,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				operation = theClient.update().resource(payloadResource);
 				break;
 			case DELETE:
-				operation = theClient.delete().resourceById(theMsg.getPayloadId());
+				operation = theClient.delete().resourceById(theMsg.getPayloadId(getContext()));
 				break;
 			default:
 				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
@@ -69,7 +69,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		operation.encoded(thePayloadType);
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement().toUnqualifiedVersionless().getValue());
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
 
 		operation.execute();
 	}

@@ -171,7 +171,7 @@ public class ResourceProviderInterceptorDstu2Test extends BaseResourceProviderDs
 
 		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, atLeast(3)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
+		verify(myDaoInterceptor, atLeast(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
 		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
 		assertEquals("Bundle", ardCaptor.getAllValues().get(0).getResourceType());
 		assertNotNull(ardCaptor.getAllValues().get(0).getResource());

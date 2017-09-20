@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -35,29 +36,30 @@ import org.springframework.messaging.MessagingException;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
-public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber {
+public class SubscriptionActivatingSubscriber {
+	private final IFhirResourceDao mySubscriptionDao;
+	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+	private FhirContext myCtx;
+	private Subscription.SubscriptionChannelType myChannelType;
 
 	/**
 	 * Constructor
 	 */
 	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
-	}
-
-	private void activateAndRegisterSubscriptionIfRequired(ResourceModifiedMessage theMsg) {
-		IBaseResource subscription = theMsg.getNewPayload();
-		activateAndRegisterSubscriptionIfRequired(subscription);
+		mySubscriptionDao = theSubscriptionDao;
+		mySubscriptionInterceptor = theSubscriptionInterceptor;
+		myChannelType = theChannelType;
+		myCtx = theSubscriptionDao.getContext();
 	}
 
 	public void activateAndRegisterSubscriptionIfRequired(IBaseResource theSubscription) {
-		boolean subscriptionTypeApplies = subscriptionTypeApplies(theSubscription);
+		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(myCtx, theSubscription, myChannelType);
 		if (subscriptionTypeApplies == false) {
 			return;
 		}
 
-		FhirContext ctx = getSubscriptionDao().getContext();
-		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
 		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
@@ -65,59 +67,37 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 		if (requestedStatus.equals(statusString)) {
 			status.setValueAsString(activeStatus);
 			ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
-			getSubscriptionDao().update(theSubscription);
-			getSubscriptionInterceptor().registerSubscription(theSubscription.getIdElement(), theSubscription);
+			mySubscriptionDao.update(theSubscription);
+			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 		} else if (activeStatus.equals(statusString)) {
-			if (!getSubscriptionInterceptor().hasSubscription(theSubscription.getIdElement())) {
+			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 			}
-			getSubscriptionInterceptor().registerSubscription(theSubscription.getIdElement(), theSubscription);
+			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 		} else {
-			if (getSubscriptionInterceptor().hasSubscription(theSubscription.getIdElement())) {
+			if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
 			}
-			getSubscriptionInterceptor().unregisterSubscription(theSubscription.getIdElement());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		}
 	}
 
 
-	private void handleCreate(ResourceModifiedMessage theMsg) {
-		if (!theMsg.getId().getResourceType().equals("Subscription")) {
-			return;
-		}
+	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, IBaseResource theSubscription) throws MessagingException {
 
-		activateAndRegisterSubscriptionIfRequired(theMsg);
-	}
-
-	@Override
-	public void handleMessage(Message<?> theMessage) throws MessagingException {
-
-		if (!(theMessage.getPayload() instanceof ResourceModifiedMessage)) {
-			return;
-		}
-
-		ResourceModifiedMessage msg = (ResourceModifiedMessage) theMessage.getPayload();
-		IIdType id = msg.getId();
-
-		switch (msg.getOperationType()) {
+		switch (theOperationType) {
 			case DELETE:
-				getSubscriptionInterceptor().unregisterSubscription(id);
+				mySubscriptionInterceptor.unregisterSubscription(theId);
 				return;
 			case CREATE:
-				handleCreate(msg);
-				break;
 			case UPDATE:
-				handleUpdate(msg);
+				if (!theId.getResourceType().equals("Subscription")) {
+					return;
+				}
+				activateAndRegisterSubscriptionIfRequired(theSubscription);
 				break;
 		}
 
 	}
 
-	private void handleUpdate(ResourceModifiedMessage theMsg) {
-		if (!theMsg.getId().getResourceType().equals("Subscription")) {
-			return;
-		}
-
-		activateAndRegisterSubscriptionIfRequired(theMsg);
-	}
 }

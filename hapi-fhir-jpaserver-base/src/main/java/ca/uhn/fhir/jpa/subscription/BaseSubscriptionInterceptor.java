@@ -115,7 +115,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setBackingSubscription(theSubscription);
+			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -134,7 +134,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setBackingSubscription(theSubscription);
+			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -169,7 +169,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setBackingSubscription(theSubscription);
+		retVal.setBackingSubscription(myCtx, theSubscription);
 		retVal.setChannelType(subscription.getChannel().getType());
 		retVal.setCriteriaString(subscription.getCriteria());
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -201,7 +201,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			}
 
 			org.hl7.fhir.r4.model.EventDefinition def = myEventDefinitionDaoR4.read(ref.getReferenceElement());
-			retVal.addTrigger(def.getTrigger());
+			retVal.addTrigger(new CanonicalSubscription.CanonicalEventDefinition(def));
 		}
 
 		return retVal;
@@ -325,7 +325,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theResource.getIdElement());
 		msg.setOperationType(RestOperationTypeEnum.CREATE);
-		msg.setNewPayload(theResource);
+		msg.setNewPayload(myCtx, theResource);
 		submitResourceModified(msg);
 	}
 
@@ -342,7 +342,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
 		msg.setOperationType(RestOperationTypeEnum.UPDATE);
-		msg.setNewPayload(theNewResource);
+		msg.setNewPayload(myCtx, theNewResource);
 		submitResourceModified(msg);
 	}
 
@@ -443,7 +443,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		final GenericMessage<ResourceModifiedMessage> message = new GenericMessage<>(theMsg);
-		mySubscriptionActivatingSubscriber.handleMessage(message);
+		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
 		sendToProcessingChannel(message);
 	}
 

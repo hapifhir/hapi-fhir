@@ -41,11 +41,11 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 		}
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription())) {
+			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription(getContext()))) {
 				return;
 			}
 
-			CanonicalSubscription updatedSubscription = (CanonicalSubscription)getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement().getIdPart());
+			CanonicalSubscription updatedSubscription = (CanonicalSubscription)getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
 			}

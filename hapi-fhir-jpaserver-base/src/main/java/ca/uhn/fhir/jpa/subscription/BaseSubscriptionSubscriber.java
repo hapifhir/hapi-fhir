@@ -72,9 +72,17 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
 	protected boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription) {
+		Subscription.SubscriptionChannelType channelType = getChannelType();
+		return subscriptionTypeApplies(theCtx, theSubscription, channelType);
+	}
+
+	/**
+	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
+	 */
+	static boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription, Subscription.SubscriptionChannelType theChannelType) {
 		IPrimitiveType<?> status = theCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class);
 		boolean subscriptionTypeApplies = false;
-		if (getChannelType().toCode().equals(status.getValueAsString())) {
+		if (theChannelType.toCode().equals(status.getValueAsString())) {
 			subscriptionTypeApplies = true;
 		}
 		return subscriptionTypeApplies;
