@@ -118,8 +118,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
-	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
 	@Autowired
@@ -219,6 +217,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Autowired
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 
 	@After()
 	public void afterCleanupDao() {
@@ -250,6 +250,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		ftem.flushToIndexes();
 
 		myDaoConfig.setSchedulingDisabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Before

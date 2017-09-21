@@ -27,13 +27,12 @@ import static org.junit.Assert.fail;
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
+	private Exception myLastStackTrace;
 
 	@Bean()
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
-
-	private Exception myLastStackTrace;
 	
 	@Bean()
 	public DataSource dataSource() {
@@ -48,10 +47,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-					if ("true".equals(System.getProperty("ci"))) {
+//					if ("true".equals(System.getProperty("ci"))) {
 						fail("Exceeded maximum wait for connection: "+ e.toString());
-					}
-					System.exit(1);
+//					}
+//					System.exit(1);
 					retVal = null;
 				}
 				

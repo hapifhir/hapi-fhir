@@ -22,21 +22,30 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import com.fasterxml.jackson.annotation.*;
 import com.google.gson.Gson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.Serializable;
 
-public class ResourceDeliveryMessage implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+public class ResourceDeliveryMessage {
 
 	private static final long serialVersionUID = 1L;
 
+	@JsonIgnore
 	private transient CanonicalSubscription mySubscription;
+	@JsonProperty("subscription")
 	private String mySubscriptionString;
+	@JsonIgnore
 	private transient IBaseResource myPayload;
+	@JsonProperty("payload")
 	private String myPayoadString;
+	@JsonProperty("payloadId")
 	private String myPayloadId;
+	@JsonProperty("operationType")
 	private RestOperationTypeEnum myOperationType;
 
 	public RestOperationTypeEnum getOperationType() {

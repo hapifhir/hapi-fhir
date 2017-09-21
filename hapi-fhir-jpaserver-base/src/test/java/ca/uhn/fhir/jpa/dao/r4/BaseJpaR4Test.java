@@ -258,6 +258,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		ftem.flushToIndexes();
 
 		myDaoConfig.setSchedulingDisabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Before

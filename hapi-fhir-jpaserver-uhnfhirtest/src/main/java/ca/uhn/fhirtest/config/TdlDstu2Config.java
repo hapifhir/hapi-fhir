@@ -66,6 +66,7 @@ public class TdlDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/testDataLibraryDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/testDataLibraryDstu2");
+		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		return retVal;
 	}
 

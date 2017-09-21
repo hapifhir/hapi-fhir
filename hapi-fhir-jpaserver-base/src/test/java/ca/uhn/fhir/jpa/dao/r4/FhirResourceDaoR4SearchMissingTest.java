@@ -22,7 +22,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 
 	@Before
 	public void beforeResetMissing() {
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Test

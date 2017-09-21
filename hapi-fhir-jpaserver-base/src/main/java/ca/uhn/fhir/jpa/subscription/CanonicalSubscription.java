@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,30 +39,33 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CanonicalSubscription implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@SerializedName("id")
+	@JsonProperty("id")
 	private String myIdElement;
-	@SerializedName("criteria")
+	@JsonProperty("criteria")
 	private String myCriteriaString;
-	@SerializedName("endpointUrl")
+	@JsonProperty("endpointUrl")
 	private String myEndpointUrl;
-	@SerializedName("payload")
+	@JsonProperty("payload")
 	private String myPayloadString;
-	@SerializedName("headers")
+	@JsonProperty("headers")
 	private List<String> myHeaders;
-	@SerializedName("channelType")
+	@JsonProperty("channelType")
 	private Subscription.SubscriptionChannelType myChannelType;
-	@SerializedName("status")
+	@JsonProperty("status")
 	private Subscription.SubscriptionStatus myStatus;
+	@JsonIgnore
 	private transient IBaseResource myBackingSubscription;
-	@SerializedName("backingSubscription")
+	@JsonProperty("backingSubscription")
 	private String myBackingSubscriptionString;
-	@SerializedName("triggerDefinition")
+	@JsonProperty("triggerDefinition")
 	private CanonicalEventDefinition myTrigger;
-	@SerializedName("emailDetails")
+	@JsonProperty("emailDetails")
 	private EmailDetails myEmailDetails;
 
 	/**
@@ -89,18 +94,6 @@ public class CanonicalSubscription implements Serializable {
 			myBackingSubscription = theCtx.newJsonParser().parseResource(myBackingSubscriptionString);
 		}
 		return myBackingSubscription;
-	}
-
-	String getIdElementString() {
-		return myIdElement;
-	}
-
-	public void setBackingSubscription(FhirContext theCtx, IBaseResource theBackingSubscription) {
-		myBackingSubscription = theBackingSubscription;
-		myBackingSubscriptionString = null;
-		if (myBackingSubscription != null) {
-			myBackingSubscriptionString = theCtx.newJsonParser().encodeResourceToString(myBackingSubscription);
-		}
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
@@ -138,12 +131,10 @@ public class CanonicalSubscription implements Serializable {
 		return myHeaders;
 	}
 
-	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
+	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
-		for (IPrimitiveType<String> next : theHeader) {
-			if (isNotBlank(next.getValueAsString())) {
-				myHeaders.add(next.getValueAsString());
-			}
+		if (isNotBlank(theHeaders)) {
+			myHeaders.add(theHeaders);
 		}
 	}
 
@@ -153,6 +144,10 @@ public class CanonicalSubscription implements Serializable {
 			retVal = theContext.getVersion().newIdType().setValue(myIdElement);
 		}
 		return retVal;
+	}
+
+	String getIdElementString() {
+		return myIdElement;
 	}
 
 	public String getPayloadString() {
@@ -186,10 +181,20 @@ public class CanonicalSubscription implements Serializable {
 			.toHashCode();
 	}
 
-	public void setHeaders(String theHeaders) {
+	public void setBackingSubscription(FhirContext theCtx, IBaseResource theBackingSubscription) {
+		myBackingSubscription = theBackingSubscription;
+		myBackingSubscriptionString = null;
+		if (myBackingSubscription != null) {
+			myBackingSubscriptionString = theCtx.newJsonParser().encodeResourceToString(myBackingSubscription);
+		}
+	}
+
+	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
 		myHeaders = new ArrayList<>();
-		if (isNotBlank(theHeaders)) {
-			myHeaders.add(theHeaders);
+		for (IPrimitiveType<String> next : theHeader) {
+			if (isNotBlank(next.getValueAsString())) {
+				myHeaders.add(next.getValueAsString());
+			}
 		}
 	}
 
@@ -200,12 +205,14 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class EmailDetails {
-		@SerializedName("from")
+		@JsonProperty("from")
 		private String myFrom;
-		@SerializedName("subjectTemplate")
+		@JsonProperty("subjectTemplate")
 		private String mySubjectTemplate;
-		@SerializedName("bodyTemplate")
+		@JsonProperty("bodyTemplate")
 		private String myBodyTemplate;
 
 		public String getBodyTemplate() {
@@ -233,6 +240,8 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class CanonicalEventDefinition {
 
 		public CanonicalEventDefinition(EventDefinition theDef) {

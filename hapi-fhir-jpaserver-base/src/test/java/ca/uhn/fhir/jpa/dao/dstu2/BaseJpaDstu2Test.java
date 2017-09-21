@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu2Config.class})
+@ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected ApplicationContext myAppCtx;
@@ -84,13 +84,11 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myLocationDaoDstu2")
 	protected IFhirResourceDao<Location> myLocationDao;
 	@Autowired
-		@Qualifier("myMediaDaoDstu2")
-		protected IFhirResourceDao<Media> myMediaDao;
-	
-@Autowired
-@Qualifier("myMedicationAdministrationDaoDstu2")
-protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
-	
+	@Qualifier("myMediaDaoDstu2")
+	protected IFhirResourceDao<Media> myMediaDao;
+	@Autowired
+	@Qualifier("myMedicationAdministrationDaoDstu2")
+	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired
 	@Qualifier("myMedicationDaoDstu2")
 	protected IFhirResourceDao<Medication> myMedicationDao;
@@ -158,6 +156,7 @@ protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationD
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
 	}
+
 	@Before
 	@Transactional
 	public void beforeFlushFT() {
@@ -167,6 +166,7 @@ protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationD
 		ftem.flushToIndexes();
 
 		myDaoConfig.setSchedulingDisabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Before

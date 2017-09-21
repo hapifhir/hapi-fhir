@@ -55,7 +55,7 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
-	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.ENABLED;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -107,6 +107,7 @@ public class DaoConfig {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
+
 	/**
 	 * Constructor
 	 */
@@ -284,7 +285,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#ENABLED})
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
 	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
@@ -292,19 +293,27 @@ public class DaoConfig {
 	 * database) may be much faster on servers which have lots of search parameters and need
 	 * to write quickly.
 	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
+	 * </p>
 	 */
 	public IndexEnabledEnum getIndexMissingFields() {
 		return myIndexMissingFieldsEnabled;
 	}
 
 	/**
-	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#ENABLED})
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
 	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
 	 * supported on the server, but also means that storage and indexing (i.e. writes to the
 	 * database) may be much faster on servers which have lots of search parameters and need
 	 * to write quickly.
+	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
 	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {

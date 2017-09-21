@@ -55,22 +55,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4");
+		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		return retVal;
-	}
-
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
-	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
-		retVal.setDefaultPageSize(20);
-		retVal.setMaximumPageSize(500);
-		return retVal;
-	}
-
-	
-	@Bean 
-	public IServerInterceptor securityInterceptor() {
-		return new PublicSecurityInterceptor();
 	}
 
 	@Bean(name = "myPersistenceDataSourceR4", destroyMethod = "close")
@@ -84,6 +70,15 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
+		return retVal;
+	}
+
+	@Override
+	@Bean(autowire = Autowire.BY_TYPE)
+	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		retVal.setDefaultPageSize(20);
+		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
 
@@ -135,6 +130,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return requestValidator;
 	}
 
+	@Bean
+	public IServerInterceptor securityInterceptor() {
+		return new PublicSecurityInterceptor();
+	}
 
 	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {

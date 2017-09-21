@@ -384,6 +384,15 @@
 				<![CDATA[<code>:missing</code>]]> modifiers, which
 				increases write performance since fewer indexes are written
 			</action>
+			<action type="add">
+				A new JPA configuration option has been added to the DaoConfig which allows
+				support for the <![CDATA[<code>:missing</code>]]> search parameter modifier
+				to be enabled or disabled, and sets the default to DISABLED.
+				<![CDATA[<br/><br/>]]>
+				Support for this parameter causes many more index rows to be inserted in the database,
+				which has a significant impact on write performance. A future HAPI update may allow these
+				rows to be written asynchronously in order to improve this.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

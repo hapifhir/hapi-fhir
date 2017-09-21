@@ -22,18 +22,28 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.Serializable;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceModifiedMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@JsonProperty("resourceId")
 	private String myId;
+	@JsonProperty("operationType")
 	private RestOperationTypeEnum myOperationType;
+	@JsonProperty("newPayload")
 	private String myNewPayloadEncoded;
+	@JsonIgnore
 	private transient IBaseResource myNewPayload;
 
 	public IIdType getId(FhirContext theCtx) {
