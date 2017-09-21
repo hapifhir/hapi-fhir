@@ -9,6 +9,9 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
+/**
+ * ANTLR Generated Lexer for reading URLs.
+ */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class UrlJavaLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }

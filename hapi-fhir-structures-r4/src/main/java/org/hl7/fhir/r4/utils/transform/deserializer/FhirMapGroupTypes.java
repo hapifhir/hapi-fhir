@@ -4,7 +4,9 @@
 
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
-
+/**
+ * Enum for group types.
+ */
 public enum FhirMapGroupTypes
 {
     /**
@@ -24,7 +26,11 @@ public enum FhirMapGroupTypes
 
     public static final int SIZE = java.lang.Integer.SIZE;
 
-    public String getValue()
+  /**
+   * Returns a lowercase string of the relevant values of FhirMapGroupTypes
+   * @return
+   */
+  public String getValue()
     {
         switch (this){
           case Types:

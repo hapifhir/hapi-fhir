@@ -9,6 +9,9 @@ import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
 
+/**
+ * Deep level text parser for ANTLR
+ */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class FhirMapJavaParser extends Parser {
   static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
@@ -101,6 +104,7 @@ public class FhirMapJavaParser extends Parser {
     "identifier", "integer", "quotedIdentifier", "quotedStringWQuotes", "quotedString",
     "quotedUrl", "structureDefinition", "structureMap"
   };
+
 
   private static final String[] _LITERAL_NAMES = {
     null, "'='", "';'", "':'", "'.'", "','", "'..'", "'xxxxyyyyyzzzzzz'",

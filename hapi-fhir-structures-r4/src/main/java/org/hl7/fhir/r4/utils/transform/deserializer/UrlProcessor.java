@@ -77,9 +77,9 @@ public class UrlProcessor
     }
 
     /**
-    * Parse Adl Definition text.
+    * Parse Url Definition text.
     *
-    *  @param UrlText Adl Archetype Text to process
+    *  @param UrlText Url Archetype Text to process
     */
     public UrlData parseUrl(String UrlText) throws Exception {
         UrlJavaParser grammar = this.loadGrammar(UrlText);

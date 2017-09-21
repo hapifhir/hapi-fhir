@@ -59,10 +59,24 @@ public class UrlData
     
     }
 
+  /**
+   * Wrapper for a string's compare call.
+   * @param a the first string to be compared
+   * @param b the second string to be compared
+   * @return the result of the comparison
+   * @throws Exception
+   */
     static int compare(String a, String b) throws Exception {
         return a.compareTo(b);
     }
 
+  /**
+   * Compares integers returning -1, 0, or 1 depending on result.
+   * @param a first integer to be compared.
+   * @param b second integer to be compared.
+   * @return the result of the comparison
+   * @throws Exception
+   */
     static int compare(int a, int b) throws Exception {
         if (a > b)
             return 1;
@@ -73,6 +87,13 @@ public class UrlData
         return 0;
     }
 
+  /**
+   * Wrapper and handler or comparing a UrlSearch array.
+   * @param a the first array to be compared.
+   * @param b the second array to be compared.
+   * @return the result.
+   * @throws Exception
+   */
     static int compare(UrlSearch[] a, UrlSearch[] b) throws Exception {
         int retVal = a.length - b.length;
         if (retVal != 0)
@@ -88,6 +109,13 @@ public class UrlData
         return 0;
     }
 
+  /**
+   *
+   * @param a
+   * @param b
+   * @return
+   * @throws Exception
+   */
     static int compare(String[] a, String[] b) throws Exception {
         int retVal = a.length - b.length;
         if (retVal != 0)

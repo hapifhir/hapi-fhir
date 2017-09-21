@@ -46,8 +46,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return url
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitUrl([NotNull] UrlContext context)
 	@Override
 	public Object visitUrl(UrlJavaParser.UrlContext context) {
 	  UrlData retVal = new UrlData();
@@ -73,8 +71,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return authority name (i.e. http)
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitAuthority([NotNull] AuthorityContext context)
 	@Override
 	public Object visitAuthority(UrlJavaParser.AuthorityContext context)
 	{
@@ -88,8 +84,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return host name
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitHost([NotNull] HostContext context)
 	@Override
 	public Object visitHost(UrlJavaParser.HostContext context)
 	{
@@ -102,8 +96,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return Port number
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitPort([NotNull] PortContext context)
 	@Override
 	public Object visitPort(UrlJavaParser.PortContext context)
 	{
@@ -116,8 +108,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return SearchData array of search components
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitSearch([NotNull] SearchContext context)
 	@Override
 	public Object visitSearch(UrlJavaParser.SearchContext context)
 	{
@@ -136,8 +126,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return Path component
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitSearchParameter([NotNull] SearchParameterContext context)
 	@Override
 	public Object visitSearchParameter(UrlJavaParser.SearchParameterContext context) {
 		try {
@@ -157,8 +145,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String search parameter name
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitSearchParameterName([NotNull] SearchParameterNameContext context)
 	@Override
 	public Object visitSearchParameterName(UrlJavaParser.SearchParameterNameContext context)
 	{
@@ -171,8 +157,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String search parameter value
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitSearchParameterValue([NotNull] SearchParameterValueContext context)
 	@Override
 	public Object visitSearchParameterValue(UrlJavaParser.SearchParameterValueContext context)
 	{
@@ -185,8 +169,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String array of components
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitPath([NotNull] PathContext context)
 	@Override
 	public Object visitPath(UrlJavaParser.PathContext context)
 	{
@@ -208,8 +190,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return LoginData instance
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitLogin([NotNull] LoginContext context)
 	@Override
 	public Object visitLogin(UrlJavaParser.LoginContext context) {
 	  UrlLogin retVal = new UrlLogin();
@@ -225,8 +205,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String user name
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitStringVal([NotNull] StringValContext context)
 	@Override
 	public Object visitStringVal(UrlJavaParser.StringValContext context)
 	{
@@ -239,8 +217,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String user name
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitUser([NotNull] UserContext context)
 	@Override
 	public Object visitUser(UrlJavaParser.UserContext context)
 	{
@@ -253,8 +229,6 @@ import java.util.ArrayList;
 	 @param context
 	 @return String user name
 	*/
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
-//ORIGINAL LINE: public override Object visitPassword([NotNull] PasswordContext context)
 	@Override
 	public Object visitPassword(UrlJavaParser.PasswordContext context)
 	{

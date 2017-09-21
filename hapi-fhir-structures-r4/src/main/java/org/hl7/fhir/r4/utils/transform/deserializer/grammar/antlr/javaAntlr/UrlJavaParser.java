@@ -7,6 +7,9 @@ import org.antlr.v4.runtime.tree.*;
 
 import java.util.List;
 
+/**
+ * ANTLR Generated URL Visitor.
+ */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class UrlJavaParser extends Parser {
   static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
