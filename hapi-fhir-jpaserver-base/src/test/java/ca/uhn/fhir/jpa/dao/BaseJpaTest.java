@@ -58,10 +58,7 @@ public abstract class BaseJpaTest {
 		when(mySrd.getUserData()).thenReturn(new HashMap<Object, Object>());
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.size());
-	}
+	protected abstract FhirContext getContext();
 
 	protected org.hl7.fhir.dstu3.model.Bundle toBundle(IBundleProvider theSearch) {
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
@@ -79,8 +76,34 @@ public abstract class BaseJpaTest {
 		return bundle;
 	}
 
-	protected abstract FhirContext getContext();
+	@SuppressWarnings({ "rawtypes" })
+	protected List toList(IBundleProvider theSearch) {
+		return theSearch.getResources(0, theSearch.size());
+	}
 	
+	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
+		List<String> retVal = new ArrayList<String>();
+
+		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		int size = res.size();
+		ourLog.info("Found {} results", size);
+		for (IBaseResource next : res) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
+		List<String> retVal = new ArrayList<String>();
+		int size = theFound.size();
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
+		}
+		return retVal;
+	}
+
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<String>();
 
@@ -93,14 +116,13 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<String>();
-
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
-		int size = res.size();
+		int size = theFound.size();
 		ourLog.info("Found {} results", size);
-		for (IBaseResource next : res) {
-			retVal.add(next.getIdElement().toUnqualified().getValue());
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}
@@ -150,28 +172,6 @@ public abstract class BaseJpaTest {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			// }
-		}
-		return retVal;
-	}
-
-	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
-		for (IBaseResource next : resources) {
-			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
-		}
-		return retVal;
-	}
-
-	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
-		for (IBaseResource next : resources) {
-			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
 		return retVal;
 	}
@@ -305,8 +305,8 @@ public abstract class BaseJpaTest {
 				throw new Error(theE);
 			}
 		}
-		if (sw.getMillis() >= 10000) {
-			fail("Size " + theList.size() + " is != target " + theTarget);
+		if (sw.getMillis() >= 15000) {
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + theList.toString());
 		}
 	}
 

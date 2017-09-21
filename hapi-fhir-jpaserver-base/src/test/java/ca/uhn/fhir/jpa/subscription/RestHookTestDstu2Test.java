@@ -39,12 +39,12 @@ import static org.junit.Assert.*;
 public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
+	private static List<String> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<String> ourUpdatedObservations = Lists.newArrayList();
 	private List<IIdType> mySubscriptionIds = new ArrayList<IIdType>();
 
 	@After
@@ -278,17 +278,6 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theSubscriptionInterceptor) throws InterruptedException {
-		Thread.sleep(50);
-		ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
-		if (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
-			while (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
-				Thread.sleep(50);
-			}
-			ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
-		}
-	}
-
 	private void waitForQueueToDrain() throws InterruptedException {
 		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
@@ -320,12 +309,24 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourListenerServer.stop();
 	}
 
+	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theSubscriptionInterceptor) throws InterruptedException {
+		Thread.sleep(100);
+		ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
+		if (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
+			while (theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
+				Thread.sleep(50);
+			}
+			ourLog.info("Executor work queue has {} items", theSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
+		}
+		Thread.sleep(100);
+	}
+
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Create");
-			ourCreatedObservations.add(theObservation);
+			ourCreatedObservations.add(theObservation.getIdElement().toUnqualified().getValue());
 			return new MethodOutcome(new IdDt("Observation/1"), true);
 		}
 
@@ -337,7 +338,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Update");
-			ourUpdatedObservations.add(theObservation);
+			ourUpdatedObservations.add(theObservation.getIdElement().toUnqualified().getValue());
 			return new MethodOutcome(new IdDt("Observation/1"), false);
 		}
 
