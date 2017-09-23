@@ -50,7 +50,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -346,6 +345,21 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		submitResourceModified(msg);
 	}
 
+	protected void sendToProcessingChannel(final SimpleJsonMessage<ResourceModifiedMessage> theMessage) {
+		ourLog.trace("Registering synchronization to send resource modified message to processing channel");
+
+		/*
+		 * We only actually submit this item work working after the
+		 */
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCommit() {
+				ourLog.trace("Sending resource modified message to processing channel");
+				getProcessingChannel().send(theMessage);
+			}
+		});
+	}
+
 	public void setFhirContext(FhirContext theCtx) {
 		myCtx = theCtx;
 	}
@@ -442,24 +456,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		final GenericMessage<ResourceModifiedMessage> message = new GenericMessage<>(theMsg);
+		final SimpleJsonMessage<ResourceModifiedMessage> message = new SimpleJsonMessage<>(theMsg);
 		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
 		sendToProcessingChannel(message);
-	}
-
-	protected void sendToProcessingChannel(final GenericMessage<ResourceModifiedMessage> theMessage) {
-		ourLog.trace("Registering synchronization to send resource modified message to processing channel");
-
-		/*
-		 * We only actually submit this item work working after the
-		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCommit() {
-				ourLog.trace("Sending resource modified message to processing channel");
-				getProcessingChannel().send(theMessage);
-			}
-		});
 	}
 
 	protected abstract void unregisterDeliverySubscriber();

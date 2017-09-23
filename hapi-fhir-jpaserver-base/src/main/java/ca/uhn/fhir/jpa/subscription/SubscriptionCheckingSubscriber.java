@@ -30,16 +30,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.utilities.ucum.Canonical;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.GenericMessage;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
@@ -122,7 +118,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId(getContext()));
 
-				getSubscriptionInterceptor().getDeliveryChannel().send(new GenericMessage<>(deliveryMsg));
+				getSubscriptionInterceptor().getDeliveryChannel().send(new SimpleJsonMessage<>(deliveryMsg));
 			}
 		}
 
