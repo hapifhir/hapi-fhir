@@ -37,6 +37,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
+			ourLog.warn("Unexpected payload type: {}", theMessage.getPayload());
 			return;
 		}
 		try {

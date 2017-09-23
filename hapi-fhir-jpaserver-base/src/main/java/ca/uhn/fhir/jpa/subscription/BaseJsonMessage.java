@@ -26,48 +26,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-import java.io.Serializable;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SimpleJsonMessage<T> implements Message<T>, Serializable {
+public abstract class BaseJsonMessage<T> implements Message<T> {
 
 	private static final long serialVersionUID = 1L;
-	@JsonProperty("payload")
-	private T myPayload;
 	@JsonProperty("headers")
 	private MessageHeaders myHeaders;
 
 	/**
 	 * Constructor
 	 */
-	public SimpleJsonMessage(T thePayload) {
-		myPayload = thePayload;
-	}
-
-	/**
-	 * Constructor
-	 */
-	public SimpleJsonMessage() {
+	public BaseJsonMessage() {
 		super();
-	}
-
-	public void setPayload(T thePayload) {
-
-		myPayload = thePayload;
-	}
-
-	public void setHeaders(MessageHeaders theHeaders) {
-		myHeaders = theHeaders;
-	}
-
-	@Override
-	public T getPayload() {
-		return myPayload;
 	}
 
 	@Override
 	public MessageHeaders getHeaders() {
 		return myHeaders;
+	}
+
+	public void setHeaders(MessageHeaders theHeaders) {
+		myHeaders = theHeaders;
 	}
 }

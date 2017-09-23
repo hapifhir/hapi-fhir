@@ -49,12 +49,12 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
-		if (!(theMessage.getPayload() instanceof ResourceModifiedMessage)) {
-			ourLog.warn("Unexpected message payload type: {}", theMessage.getPayload());
+		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
+			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
 		}
 
-		ResourceModifiedMessage msg = (ResourceModifiedMessage) theMessage.getPayload();
+		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		switch (msg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -118,7 +118,8 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId(getContext()));
 
-				getSubscriptionInterceptor().getDeliveryChannel().send(new SimpleJsonMessage<>(deliveryMsg));
+				ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+				getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
 			}
 		}
 

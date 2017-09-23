@@ -345,7 +345,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		submitResourceModified(msg);
 	}
 
-	protected void sendToProcessingChannel(final SimpleJsonMessage<ResourceModifiedMessage> theMessage) {
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Registering synchronization to send resource modified message to processing channel");
 
 		/*
@@ -355,7 +355,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			@Override
 			public void afterCommit() {
 				ourLog.trace("Sending resource modified message to processing channel");
-				getProcessingChannel().send(theMessage);
+				getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
 			}
 		});
 	}
@@ -456,9 +456,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		final SimpleJsonMessage<ResourceModifiedMessage> message = new SimpleJsonMessage<>(theMsg);
 		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
-		sendToProcessingChannel(message);
+		sendToProcessingChannel(theMsg);
 	}
 
 	protected abstract void unregisterDeliverySubscriber();
