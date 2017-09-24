@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1860,11 +1860,11 @@ public class PlanDefinition extends MetadataResource {
     @Block()
     public static class PlanDefinitionActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A user-visible label for the action.
+         * A user-visible prefix for the action.
          */
-        @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="User-visible label for the action (e.g. 1. or A.)", formalDefinition="A user-visible label for the action." )
-        protected StringType label;
+        @Child(name = "prefix", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="User-visible prefix for the action (e.g. 1. or A.)", formalDefinition="A user-visible prefix for the action." )
+        protected StringType prefix;
 
         /**
          * The title of the action displayed to a user.
@@ -2050,7 +2050,7 @@ public class PlanDefinition extends MetadataResource {
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionComponent> action;
 
-        private static final long serialVersionUID = -1404963512L;
+        private static final long serialVersionUID = 891308492L;
 
     /**
      * Constructor
@@ -2060,50 +2060,50 @@ public class PlanDefinition extends MetadataResource {
       }
 
         /**
-         * @return {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         * @return {@link #prefix} (A user-visible prefix for the action.). This is the underlying object with id, value and extensions. The accessor "getPrefix" gives direct access to the value
          */
-        public StringType getLabelElement() { 
-          if (this.label == null)
+        public StringType getPrefixElement() { 
+          if (this.prefix == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.label");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.prefix");
             else if (Configuration.doAutoCreate())
-              this.label = new StringType(); // bb
-          return this.label;
+              this.prefix = new StringType(); // bb
+          return this.prefix;
         }
 
-        public boolean hasLabelElement() { 
-          return this.label != null && !this.label.isEmpty();
+        public boolean hasPrefixElement() { 
+          return this.prefix != null && !this.prefix.isEmpty();
         }
 
-        public boolean hasLabel() { 
-          return this.label != null && !this.label.isEmpty();
+        public boolean hasPrefix() { 
+          return this.prefix != null && !this.prefix.isEmpty();
         }
 
         /**
-         * @param value {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         * @param value {@link #prefix} (A user-visible prefix for the action.). This is the underlying object with id, value and extensions. The accessor "getPrefix" gives direct access to the value
          */
-        public PlanDefinitionActionComponent setLabelElement(StringType value) { 
-          this.label = value;
+        public PlanDefinitionActionComponent setPrefixElement(StringType value) { 
+          this.prefix = value;
           return this;
         }
 
         /**
-         * @return A user-visible label for the action.
+         * @return A user-visible prefix for the action.
          */
-        public String getLabel() { 
-          return this.label == null ? null : this.label.getValue();
+        public String getPrefix() { 
+          return this.prefix == null ? null : this.prefix.getValue();
         }
 
         /**
-         * @param value A user-visible label for the action.
+         * @param value A user-visible prefix for the action.
          */
-        public PlanDefinitionActionComponent setLabel(String value) { 
+        public PlanDefinitionActionComponent setPrefix(String value) { 
           if (Utilities.noString(value))
-            this.label = null;
+            this.prefix = null;
           else {
-            if (this.label == null)
-              this.label = new StringType();
-            this.label.setValue(value);
+            if (this.prefix == null)
+              this.prefix = new StringType();
+            this.prefix.setValue(value);
           }
           return this;
         }
@@ -3337,7 +3337,7 @@ public class PlanDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("label", "string", "A user-visible label for the action.", 0, 1, label));
+          children.add(new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix));
           children.add(new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title));
           children.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description));
           children.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent));
@@ -3367,7 +3367,7 @@ public class PlanDefinition extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 102727412: /*label*/  return new Property("label", "string", "A user-visible label for the action.", 0, 1, label);
+          case -980110702: /*prefix*/  return new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix);
           case 110371416: /*title*/  return new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title);
           case -1724546052: /*description*/  return new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description);
           case -900391049: /*textEquivalent*/  return new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent);
@@ -3406,7 +3406,7 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
+        case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : new Base[] {this.prefix}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -900391049: /*textEquivalent*/ return this.textEquivalent == null ? new Base[0] : new Base[] {this.textEquivalent}; // StringType
@@ -3439,8 +3439,8 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 102727412: // label
-          this.label = castToString(value); // StringType
+        case -980110702: // prefix
+          this.prefix = castToString(value); // StringType
           return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
@@ -3526,8 +3526,8 @@ public class PlanDefinition extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("label")) {
-          this.label = castToString(value); // StringType
+        if (name.equals("prefix")) {
+          this.prefix = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
         } else if (name.equals("description")) {
@@ -3589,7 +3589,7 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 102727412:  return getLabelElement();
+        case -980110702:  return getPrefixElement();
         case 110371416:  return getTitleElement();
         case -1724546052:  return getDescriptionElement();
         case -900391049:  return getTextEquivalentElement();
@@ -3623,7 +3623,7 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 102727412: /*label*/ return new String[] {"string"};
+        case -980110702: /*prefix*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -900391049: /*textEquivalent*/ return new String[] {"string"};
@@ -3655,8 +3655,8 @@ public class PlanDefinition extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("label")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.label");
+        if (name.equals("prefix")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.prefix");
         }
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.title");
@@ -3757,7 +3757,7 @@ public class PlanDefinition extends MetadataResource {
       public PlanDefinitionActionComponent copy() {
         PlanDefinitionActionComponent dst = new PlanDefinitionActionComponent();
         copyValues(dst);
-        dst.label = label == null ? null : label.copy();
+        dst.prefix = prefix == null ? null : prefix.copy();
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         dst.textEquivalent = textEquivalent == null ? null : textEquivalent.copy();
@@ -3840,7 +3840,7 @@ public class PlanDefinition extends MetadataResource {
         if (!(other instanceof PlanDefinitionActionComponent))
           return false;
         PlanDefinitionActionComponent o = (PlanDefinitionActionComponent) other;
-        return compareDeep(label, o.label, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
+        return compareDeep(prefix, o.prefix, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(reason, o.reason, true)
            && compareDeep(documentation, o.documentation, true) && compareDeep(goalId, o.goalId, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
            && compareDeep(condition, o.condition, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
@@ -3859,7 +3859,7 @@ public class PlanDefinition extends MetadataResource {
         if (!(other instanceof PlanDefinitionActionComponent))
           return false;
         PlanDefinitionActionComponent o = (PlanDefinitionActionComponent) other;
-        return compareValues(label, o.label, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
+        return compareValues(prefix, o.prefix, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
            && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(goalId, o.goalId, true) && compareValues(groupingBehavior, o.groupingBehavior, true)
            && compareValues(selectionBehavior, o.selectionBehavior, true) && compareValues(requiredBehavior, o.requiredBehavior, true)
            && compareValues(precheckBehavior, o.precheckBehavior, true) && compareValues(cardinalityBehavior, o.cardinalityBehavior, true)
@@ -3867,7 +3867,7 @@ public class PlanDefinition extends MetadataResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, title, description
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(prefix, title, description
           , textEquivalent, code, reason, documentation, goalId, triggerDefinition, condition
           , input, output, relatedAction, timing, participant, type, groupingBehavior, selectionBehavior
           , requiredBehavior, precheckBehavior, cardinalityBehavior, definition, transform, dynamicValue

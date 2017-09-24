@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -173,15 +173,123 @@ public class ProcessResponse extends DomainResource {
       }
     }
 
+    public enum ProcessingOutcome {
+        /**
+         * The requested processing has completed.
+         */
+        COMPLETE, 
+        /**
+         * The requested processing has been suspended.
+         */
+        PENDED, 
+        /**
+         * The requested processing has terminated with some errors being found.
+         */
+        ERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ProcessingOutcome fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("complete".equals(codeString))
+          return COMPLETE;
+        if ("pended".equals(codeString))
+          return PENDED;
+        if ("error".equals(codeString))
+          return ERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ProcessingOutcome code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case COMPLETE: return "complete";
+            case PENDED: return "pended";
+            case ERROR: return "error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case COMPLETE: return "http://hl7.org/fhir/processoutcomecodes";
+            case PENDED: return "http://hl7.org/fhir/processoutcomecodes";
+            case ERROR: return "http://hl7.org/fhir/processoutcomecodes";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case COMPLETE: return "The requested processing has completed.";
+            case PENDED: return "The requested processing has been suspended.";
+            case ERROR: return "The requested processing has terminated with some errors being found.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case COMPLETE: return "Complete";
+            case PENDED: return "Pended";
+            case ERROR: return "Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ProcessingOutcomeEnumFactory implements EnumFactory<ProcessingOutcome> {
+    public ProcessingOutcome fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("complete".equals(codeString))
+          return ProcessingOutcome.COMPLETE;
+        if ("pended".equals(codeString))
+          return ProcessingOutcome.PENDED;
+        if ("error".equals(codeString))
+          return ProcessingOutcome.ERROR;
+        throw new IllegalArgumentException("Unknown ProcessingOutcome code '"+codeString+"'");
+        }
+        public Enumeration<ProcessingOutcome> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<ProcessingOutcome>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("complete".equals(codeString))
+          return new Enumeration<ProcessingOutcome>(this, ProcessingOutcome.COMPLETE);
+        if ("pended".equals(codeString))
+          return new Enumeration<ProcessingOutcome>(this, ProcessingOutcome.PENDED);
+        if ("error".equals(codeString))
+          return new Enumeration<ProcessingOutcome>(this, ProcessingOutcome.ERROR);
+        throw new FHIRException("Unknown ProcessingOutcome code '"+codeString+"'");
+        }
+    public String toCode(ProcessingOutcome code) {
+      if (code == ProcessingOutcome.COMPLETE)
+        return "complete";
+      if (code == ProcessingOutcome.PENDED)
+        return "pended";
+      if (code == ProcessingOutcome.ERROR)
+        return "error";
+      return "?";
+      }
+    public String toSystem(ProcessingOutcome code) {
+      return code.getSystem();
+      }
+    }
+
     @Block()
     public static class ProcessResponseProcessNoteComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The note purpose: Print/Display.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="display | print | printoper", formalDefinition="The note purpose: Print/Display." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/note-type")
-        protected CodeableConcept type;
+        protected Enumeration<NoteType> type;
 
         /**
          * The note text.
@@ -190,7 +298,7 @@ public class ProcessResponse extends DomainResource {
         @Description(shortDefinition="Comment on the processing", formalDefinition="The note text." )
         protected StringType text;
 
-        private static final long serialVersionUID = 874830709L;
+        private static final long serialVersionUID = 529250161L;
 
     /**
      * Constructor
@@ -200,15 +308,19 @@ public class ProcessResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (The note purpose: Print/Display.)
+         * @return {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public CodeableConcept getType() { 
+        public Enumeration<NoteType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ProcessResponseProcessNoteComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
+              this.type = new Enumeration<NoteType>(new NoteTypeEnumFactory()); // bb
           return this.type;
+        }
+
+        public boolean hasTypeElement() { 
+          return this.type != null && !this.type.isEmpty();
         }
 
         public boolean hasType() { 
@@ -216,10 +328,31 @@ public class ProcessResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The note purpose: Print/Display.)
+         * @param value {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public ProcessResponseProcessNoteComponent setType(CodeableConcept value) { 
+        public ProcessResponseProcessNoteComponent setTypeElement(Enumeration<NoteType> value) { 
           this.type = value;
+          return this;
+        }
+
+        /**
+         * @return The note purpose: Print/Display.
+         */
+        public NoteType getType() { 
+          return this.type == null ? null : this.type.getValue();
+        }
+
+        /**
+         * @param value The note purpose: Print/Display.
+         */
+        public ProcessResponseProcessNoteComponent setType(NoteType value) { 
+          if (value == null)
+            this.type = null;
+          else {
+            if (this.type == null)
+              this.type = new Enumeration<NoteType>(new NoteTypeEnumFactory());
+            this.type.setValue(value);
+          }
           return this;
         }
 
@@ -274,14 +407,14 @@ public class ProcessResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type));
+          children.add(new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type));
           children.add(new Property("text", "string", "The note text.", 0, 1, text));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type);
+          case 3575610: /*type*/  return new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type);
           case 3556653: /*text*/  return new Property("text", "string", "The note text.", 0, 1, text);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -291,7 +424,7 @@ public class ProcessResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<NoteType>
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -302,7 +435,8 @@ public class ProcessResponse extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          value = new NoteTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<NoteType>
           return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
@@ -315,7 +449,8 @@ public class ProcessResponse extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          value = new NoteTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<NoteType>
         } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
         } else
@@ -326,7 +461,7 @@ public class ProcessResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); 
+        case 3575610:  return getTypeElement();
         case 3556653:  return getTextElement();
         default: return super.makeProperty(hash, name);
         }
@@ -336,7 +471,7 @@ public class ProcessResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"code"};
         case 3556653: /*text*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -346,8 +481,7 @@ public class ProcessResponse extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.type");
         }
         else if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.text");
@@ -381,7 +515,7 @@ public class ProcessResponse extends DomainResource {
         if (!(other instanceof ProcessResponseProcessNoteComponent))
           return false;
         ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
-        return compareValues(text, o.text, true);
+        return compareValues(type, o.type, true) && compareValues(text, o.text, true);
       }
 
       public boolean isEmpty() {
@@ -444,10 +578,10 @@ public class ProcessResponse extends DomainResource {
     /**
      * Transaction status: error, complete, held.
      */
-    @Child(name = "outcome", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outcome", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Processing outcome", formalDefinition="Transaction status: error, complete, held." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/process-outcome")
-    protected CodeableConcept outcome;
+    protected Enumeration<ProcessingOutcome> outcome;
 
     /**
      * A description of the status of the adjudication or processing.
@@ -515,7 +649,7 @@ public class ProcessResponse extends DomainResource {
     protected List<CommunicationRequest> communicationRequestTarget;
 
 
-    private static final long serialVersionUID = -2058462467L;
+    private static final long serialVersionUID = -90462490L;
 
   /**
    * Constructor
@@ -759,15 +893,19 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (Transaction status: error, complete, held.)
+     * @return {@link #outcome} (Transaction status: error, complete, held.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public CodeableConcept getOutcome() { 
+    public Enumeration<ProcessingOutcome> getOutcomeElement() { 
       if (this.outcome == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ProcessResponse.outcome");
         else if (Configuration.doAutoCreate())
-          this.outcome = new CodeableConcept(); // cc
+          this.outcome = new Enumeration<ProcessingOutcome>(new ProcessingOutcomeEnumFactory()); // bb
       return this.outcome;
+    }
+
+    public boolean hasOutcomeElement() { 
+      return this.outcome != null && !this.outcome.isEmpty();
     }
 
     public boolean hasOutcome() { 
@@ -775,10 +913,31 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (Transaction status: error, complete, held.)
+     * @param value {@link #outcome} (Transaction status: error, complete, held.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public ProcessResponse setOutcome(CodeableConcept value) { 
+    public ProcessResponse setOutcomeElement(Enumeration<ProcessingOutcome> value) { 
       this.outcome = value;
+      return this;
+    }
+
+    /**
+     * @return Transaction status: error, complete, held.
+     */
+    public ProcessingOutcome getOutcome() { 
+      return this.outcome == null ? null : this.outcome.getValue();
+    }
+
+    /**
+     * @param value Transaction status: error, complete, held.
+     */
+    public ProcessResponse setOutcome(ProcessingOutcome value) { 
+      if (value == null)
+        this.outcome = null;
+      else {
+        if (this.outcome == null)
+          this.outcome = new Enumeration<ProcessingOutcome>(new ProcessingOutcomeEnumFactory());
+        this.outcome.setValue(value);
+      }
       return this;
     }
 
@@ -1131,7 +1290,7 @@ public class ProcessResponse extends DomainResource {
         children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
         children.add(new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, 1, organization));
         children.add(new Property("request", "Reference(Any)", "Original request resource reference.", 0, 1, request));
-        children.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete, held.", 0, 1, outcome));
+        children.add(new Property("outcome", "code", "Transaction status: error, complete, held.", 0, 1, outcome));
         children.add(new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, 1, disposition));
         children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
         children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
@@ -1149,7 +1308,7 @@ public class ProcessResponse extends DomainResource {
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
         case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, 1, organization);
         case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "Original request resource reference.", 0, 1, request);
-        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Transaction status: error, complete, held.", 0, 1, outcome);
+        case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction status: error, complete, held.", 0, 1, outcome);
         case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, 1, disposition);
         case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
         case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
@@ -1170,7 +1329,7 @@ public class ProcessResponse extends DomainResource {
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
-        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<ProcessingOutcome>
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
         case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
@@ -1203,7 +1362,8 @@ public class ProcessResponse extends DomainResource {
           this.request = castToReference(value); // Reference
           return value;
         case -1106507950: // outcome
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new ProcessingOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<ProcessingOutcome>
           return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
@@ -1245,7 +1405,8 @@ public class ProcessResponse extends DomainResource {
         } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
         } else if (name.equals("outcome")) {
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new ProcessingOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<ProcessingOutcome>
         } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
         } else if (name.equals("requestProvider")) {
@@ -1273,7 +1434,7 @@ public class ProcessResponse extends DomainResource {
         case 1028554472:  return getCreatedElement();
         case 1178922291:  return getOrganization(); 
         case 1095692943:  return getRequest(); 
-        case -1106507950:  return getOutcome(); 
+        case -1106507950:  return getOutcomeElement();
         case 583380919:  return getDispositionElement();
         case 1601527200:  return getRequestProvider(); 
         case 599053666:  return getRequestOrganization(); 
@@ -1294,7 +1455,7 @@ public class ProcessResponse extends DomainResource {
         case 1028554472: /*created*/ return new String[] {"dateTime"};
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
-        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case -1106507950: /*outcome*/ return new String[] {"code"};
         case 583380919: /*disposition*/ return new String[] {"string"};
         case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
         case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
@@ -1327,8 +1488,7 @@ public class ProcessResponse extends DomainResource {
           return this.request;
         }
         else if (name.equals("outcome")) {
-          this.outcome = new CodeableConcept();
-          return this.outcome;
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.outcome");
         }
         else if (name.equals("disposition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.disposition");
@@ -1424,8 +1584,8 @@ public class ProcessResponse extends DomainResource {
         if (!(other instanceof ProcessResponse))
           return false;
         ProcessResponse o = (ProcessResponse) other;
-        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
+           && compareValues(disposition, o.disposition, true);
       }
 
       public boolean isEmpty() {

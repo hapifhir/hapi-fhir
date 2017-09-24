@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -170,6 +170,114 @@ public class ClaimResponse extends DomainResource {
       return "?";
       }
     public String toSystem(ClaimResponseStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum RemittanceOutcome {
+        /**
+         * The processing has completed without errors
+         */
+        COMPLETE, 
+        /**
+         * One or more errors have been detected in the Claim
+         */
+        ERROR, 
+        /**
+         * No errors have been detected in the Claim and some of the adjudication has been performed.
+         */
+        PARTIAL, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RemittanceOutcome fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("complete".equals(codeString))
+          return COMPLETE;
+        if ("error".equals(codeString))
+          return ERROR;
+        if ("partial".equals(codeString))
+          return PARTIAL;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case COMPLETE: return "complete";
+            case ERROR: return "error";
+            case PARTIAL: return "partial";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case COMPLETE: return "http://hl7.org/fhir/remittance-outcome";
+            case ERROR: return "http://hl7.org/fhir/remittance-outcome";
+            case PARTIAL: return "http://hl7.org/fhir/remittance-outcome";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case COMPLETE: return "The processing has completed without errors";
+            case ERROR: return "One or more errors have been detected in the Claim";
+            case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case COMPLETE: return "Processing Complete";
+            case ERROR: return "Error";
+            case PARTIAL: return "Partial Processing";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RemittanceOutcomeEnumFactory implements EnumFactory<RemittanceOutcome> {
+    public RemittanceOutcome fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("complete".equals(codeString))
+          return RemittanceOutcome.COMPLETE;
+        if ("error".equals(codeString))
+          return RemittanceOutcome.ERROR;
+        if ("partial".equals(codeString))
+          return RemittanceOutcome.PARTIAL;
+        throw new IllegalArgumentException("Unknown RemittanceOutcome code '"+codeString+"'");
+        }
+        public Enumeration<RemittanceOutcome> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RemittanceOutcome>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("complete".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.COMPLETE);
+        if ("error".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.ERROR);
+        if ("partial".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.PARTIAL);
+        throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
+        }
+    public String toCode(RemittanceOutcome code) {
+      if (code == RemittanceOutcome.COMPLETE)
+        return "complete";
+      if (code == RemittanceOutcome.ERROR)
+        return "error";
+      if (code == RemittanceOutcome.PARTIAL)
+        return "partial";
+      return "?";
+      }
+    public String toSystem(RemittanceOutcome code) {
       return code.getSystem();
       }
     }
@@ -3201,10 +3309,10 @@ public class ClaimResponse extends DomainResource {
         /**
          * The note purpose: Print/Display.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="display | print | printoper", formalDefinition="The note purpose: Print/Display." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/note-type")
-        protected CodeableConcept type;
+        protected Enumeration<NoteType> type;
 
         /**
          * The note text.
@@ -3221,7 +3329,7 @@ public class ClaimResponse extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
         protected CodeableConcept language;
 
-        private static final long serialVersionUID = -944255449L;
+        private static final long serialVersionUID = -385184277L;
 
     /**
      * Constructor
@@ -3276,15 +3384,19 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (The note purpose: Print/Display.)
+         * @return {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public CodeableConcept getType() { 
+        public Enumeration<NoteType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NoteComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
+              this.type = new Enumeration<NoteType>(new NoteTypeEnumFactory()); // bb
           return this.type;
+        }
+
+        public boolean hasTypeElement() { 
+          return this.type != null && !this.type.isEmpty();
         }
 
         public boolean hasType() { 
@@ -3292,10 +3404,31 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The note purpose: Print/Display.)
+         * @param value {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public NoteComponent setType(CodeableConcept value) { 
+        public NoteComponent setTypeElement(Enumeration<NoteType> value) { 
           this.type = value;
+          return this;
+        }
+
+        /**
+         * @return The note purpose: Print/Display.
+         */
+        public NoteType getType() { 
+          return this.type == null ? null : this.type.getValue();
+        }
+
+        /**
+         * @param value The note purpose: Print/Display.
+         */
+        public NoteComponent setType(NoteType value) { 
+          if (value == null)
+            this.type = null;
+          else {
+            if (this.type == null)
+              this.type = new Enumeration<NoteType>(new NoteTypeEnumFactory());
+            this.type.setValue(value);
+          }
           return this;
         }
 
@@ -3375,7 +3508,7 @@ public class ClaimResponse extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("number", "positiveInt", "An integer associated with each note which may be referred to from each service line item.", 0, 1, number));
-          children.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type));
+          children.add(new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type));
           children.add(new Property("text", "string", "The note text.", 0, 1, text));
           children.add(new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language));
         }
@@ -3384,7 +3517,7 @@ public class ClaimResponse extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1034364087: /*number*/  return new Property("number", "positiveInt", "An integer associated with each note which may be referred to from each service line item.", 0, 1, number);
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type);
+          case 3575610: /*type*/  return new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type);
           case 3556653: /*text*/  return new Property("text", "string", "The note text.", 0, 1, text);
           case -1613589672: /*language*/  return new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -3396,7 +3529,7 @@ public class ClaimResponse extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // PositiveIntType
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<NoteType>
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
@@ -3411,7 +3544,8 @@ public class ClaimResponse extends DomainResource {
           this.number = castToPositiveInt(value); // PositiveIntType
           return value;
         case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          value = new NoteTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<NoteType>
           return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
@@ -3429,7 +3563,8 @@ public class ClaimResponse extends DomainResource {
         if (name.equals("number")) {
           this.number = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          value = new NoteTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<NoteType>
         } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
         } else if (name.equals("language")) {
@@ -3443,7 +3578,7 @@ public class ClaimResponse extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1034364087:  return getNumberElement();
-        case 3575610:  return getType(); 
+        case 3575610:  return getTypeElement();
         case 3556653:  return getTextElement();
         case -1613589672:  return getLanguage(); 
         default: return super.makeProperty(hash, name);
@@ -3455,7 +3590,7 @@ public class ClaimResponse extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1034364087: /*number*/ return new String[] {"positiveInt"};
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"code"};
         case 3556653: /*text*/ return new String[] {"string"};
         case -1613589672: /*language*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
@@ -3469,8 +3604,7 @@ public class ClaimResponse extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.number");
         }
         else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.type");
         }
         else if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.text");
@@ -3511,7 +3645,8 @@ public class ClaimResponse extends DomainResource {
         if (!(other instanceof NoteComponent))
           return false;
         NoteComponent o = (NoteComponent) other;
-        return compareValues(number, o.number, true) && compareValues(text, o.text, true);
+        return compareValues(number, o.number, true) && compareValues(type, o.type, true) && compareValues(text, o.text, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -4158,12 +4293,12 @@ public class ClaimResponse extends DomainResource {
     protected Claim requestTarget;
 
     /**
-     * Processing outcome errror, partial or complete processing.
+     * Transaction: error, complete, partial processing.
      */
-    @Child(name = "outcome", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="complete | error | partial", formalDefinition="Processing outcome errror, partial or complete processing." )
+    @Child(name = "outcome", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="complete | error | partial", formalDefinition="Transaction: error, complete, partial processing." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
-    protected CodeableConcept outcome;
+    protected Enumeration<RemittanceOutcome> outcome;
 
     /**
      * A description of the status of the adjudication.
@@ -4271,7 +4406,7 @@ public class ClaimResponse extends DomainResource {
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<InsuranceComponent> insurance;
 
-    private static final long serialVersionUID = -488591755L;
+    private static final long serialVersionUID = 676985103L;
 
   /**
    * Constructor
@@ -4652,15 +4787,19 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (Processing outcome errror, partial or complete processing.)
+     * @return {@link #outcome} (Transaction: error, complete, partial processing.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public CodeableConcept getOutcome() { 
+    public Enumeration<RemittanceOutcome> getOutcomeElement() { 
       if (this.outcome == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ClaimResponse.outcome");
         else if (Configuration.doAutoCreate())
-          this.outcome = new CodeableConcept(); // cc
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory()); // bb
       return this.outcome;
+    }
+
+    public boolean hasOutcomeElement() { 
+      return this.outcome != null && !this.outcome.isEmpty();
     }
 
     public boolean hasOutcome() { 
@@ -4668,10 +4807,31 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (Processing outcome errror, partial or complete processing.)
+     * @param value {@link #outcome} (Transaction: error, complete, partial processing.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public ClaimResponse setOutcome(CodeableConcept value) { 
+    public ClaimResponse setOutcomeElement(Enumeration<RemittanceOutcome> value) { 
       this.outcome = value;
+      return this;
+    }
+
+    /**
+     * @return Transaction: error, complete, partial processing.
+     */
+    public RemittanceOutcome getOutcome() { 
+      return this.outcome == null ? null : this.outcome.getValue();
+    }
+
+    /**
+     * @param value Transaction: error, complete, partial processing.
+     */
+    public ClaimResponse setOutcome(RemittanceOutcome value) { 
+      if (value == null)
+        this.outcome = null;
+      else {
+        if (this.outcome == null)
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory());
+        this.outcome.setValue(value);
+      }
       return this;
     }
 
@@ -5242,7 +5402,7 @@ public class ClaimResponse extends DomainResource {
         children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
         children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
         children.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request));
-        children.add(new Property("outcome", "CodeableConcept", "Processing outcome errror, partial or complete processing.", 0, 1, outcome));
+        children.add(new Property("outcome", "code", "Transaction: error, complete, partial processing.", 0, 1, outcome));
         children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
         children.add(new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType));
         children.add(new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item));
@@ -5270,7 +5430,7 @@ public class ClaimResponse extends DomainResource {
         case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
         case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
         case 1095692943: /*request*/  return new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request);
-        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Processing outcome errror, partial or complete processing.", 0, 1, outcome);
+        case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction: error, complete, partial processing.", 0, 1, outcome);
         case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
         case -316321118: /*payeeType*/  return new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType);
         case 3242771: /*item*/  return new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item);
@@ -5301,7 +5461,7 @@ public class ClaimResponse extends DomainResource {
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
         case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
-        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
         case -316321118: /*payeeType*/ return this.payeeType == null ? new Base[0] : new Base[] {this.payeeType}; // CodeableConcept
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemComponent
@@ -5350,7 +5510,8 @@ public class ClaimResponse extends DomainResource {
           this.request = castToReference(value); // Reference
           return value;
         case -1106507950: // outcome
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
           return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
@@ -5419,7 +5580,8 @@ public class ClaimResponse extends DomainResource {
         } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
         } else if (name.equals("outcome")) {
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
         } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
         } else if (name.equals("payeeType")) {
@@ -5464,7 +5626,7 @@ public class ClaimResponse extends DomainResource {
         case 1601527200:  return getRequestProvider(); 
         case 599053666:  return getRequestOrganization(); 
         case 1095692943:  return getRequest(); 
-        case -1106507950:  return getOutcome(); 
+        case -1106507950:  return getOutcomeElement();
         case 583380919:  return getDispositionElement();
         case -316321118:  return getPayeeType(); 
         case 3242771:  return addItem(); 
@@ -5495,7 +5657,7 @@ public class ClaimResponse extends DomainResource {
         case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
         case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
-        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case -1106507950: /*outcome*/ return new String[] {"code"};
         case 583380919: /*disposition*/ return new String[] {"string"};
         case -316321118: /*payeeType*/ return new String[] {"CodeableConcept"};
         case 3242771: /*item*/ return new String[] {};
@@ -5547,8 +5709,7 @@ public class ClaimResponse extends DomainResource {
           return this.request;
         }
         else if (name.equals("outcome")) {
-          this.outcome = new CodeableConcept();
-          return this.outcome;
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.outcome");
         }
         else if (name.equals("disposition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.disposition");
@@ -5694,8 +5855,8 @@ public class ClaimResponse extends DomainResource {
         if (!(other instanceof ClaimResponse))
           return false;
         ClaimResponse o = (ClaimResponse) other;
-        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
+           && compareValues(disposition, o.disposition, true);
       }
 
       public boolean isEmpty() {

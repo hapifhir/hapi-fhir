@@ -112,12 +112,15 @@ public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge impl
           newResources.add(resource);
         } else if (resource == null) {
           theMessages.add(new ValidationMessage(Source.QuestionnaireResponseValidator,
-              IssueType.INVALID,
-              "Invalid reference '" + nextRef.getValue() + "' - No contained resource with this ID found", IssueSeverity.FATAL));
+             IssueType.INVALID,
+             "",
+				 "Invalid reference '" + nextRef.getValue() + "' - No contained resource with this ID found",
+				 IssueSeverity.FATAL));
         }
       } else if (isBlank(resourceType)) {
         theMessages.add(new ValidationMessage(Source.QuestionnaireResponseValidator,
             IssueType.INVALID,
+            "",
             "Invalid reference '" + nextRef.getValue() + "' - Does not identify resource type", IssueSeverity.FATAL));
       } else if ("ValueSet".equals(resourceType)) {
         if (!theWorkerCtx.getValueSets().containsKey(nextRef.getValue())) {

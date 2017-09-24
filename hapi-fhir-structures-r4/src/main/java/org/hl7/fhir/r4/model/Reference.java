@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -304,7 +304,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -925155509:  return getReferenceElement_();
+        case -925155509:  return (Base) getReferenceElement();
         case -1618432855:  return getIdentifier(); 
         case 1671764162:  return getDisplayElement();
         default: return super.makeProperty(hash, name);

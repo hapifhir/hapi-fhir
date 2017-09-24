@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -296,6 +296,232 @@ public class DocumentReference extends DomainResource {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class DocumentReferenceAgentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Specification of the participation type the agent played.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="How agent participated", formalDefinition="Specification of the participation type the agent played." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participation-role-type")
+        protected CodeableConcept type;
+
+        /**
+         * Identifies who is responsible for adding the information to the document.
+         */
+        @Child(name = "who", type = {Practitioner.class, PractitionerRole.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Who and/or what authored the document", formalDefinition="Identifies who is responsible for adding the information to the document." )
+        protected Reference who;
+
+        /**
+         * The actual object that is the target of the reference (Identifies who is responsible for adding the information to the document.)
+         */
+        protected Resource whoTarget;
+
+        private static final long serialVersionUID = -1480994789L;
+
+    /**
+     * Constructor
+     */
+      public DocumentReferenceAgentComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public DocumentReferenceAgentComponent(Reference who) {
+        super();
+        this.who = who;
+      }
+
+        /**
+         * @return {@link #type} (Specification of the participation type the agent played.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DocumentReferenceAgentComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Specification of the participation type the agent played.)
+         */
+        public DocumentReferenceAgentComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #who} (Identifies who is responsible for adding the information to the document.)
+         */
+        public Reference getWho() { 
+          if (this.who == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DocumentReferenceAgentComponent.who");
+            else if (Configuration.doAutoCreate())
+              this.who = new Reference(); // cc
+          return this.who;
+        }
+
+        public boolean hasWho() { 
+          return this.who != null && !this.who.isEmpty();
+        }
+
+        /**
+         * @param value {@link #who} (Identifies who is responsible for adding the information to the document.)
+         */
+        public DocumentReferenceAgentComponent setWho(Reference value) { 
+          this.who = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #who} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies who is responsible for adding the information to the document.)
+         */
+        public Resource getWhoTarget() { 
+          return this.whoTarget;
+        }
+
+        /**
+         * @param value {@link #who} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies who is responsible for adding the information to the document.)
+         */
+        public DocumentReferenceAgentComponent setWhoTarget(Resource value) { 
+          this.whoTarget = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "Specification of the participation type the agent played.", 0, 1, type));
+          children.add(new Property("who", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, 1, who));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specification of the participation type the agent played.", 0, 1, type);
+          case 117694: /*who*/  return new Property("who", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, 1, who);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 117694: // who
+          this.who = castToReference(value); // Reference
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("who")) {
+          this.who = castToReference(value); // Reference
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); 
+        case 117694:  return getWho(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 117694: /*who*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("who")) {
+          this.who = new Reference();
+          return this.who;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public DocumentReferenceAgentComponent copy() {
+        DocumentReferenceAgentComponent dst = new DocumentReferenceAgentComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.who = who == null ? null : who.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof DocumentReferenceAgentComponent))
+          return false;
+        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(who, o.who, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof DocumentReferenceAgentComponent))
+          return false;
+        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, who);
+      }
+
+  public String fhirType() {
+    return "DocumentReference.agent";
+
+  }
+
+  }
 
     @Block()
     public static class DocumentReferenceRelatesToComponent extends BackboneElement implements IBaseBackboneElement {
@@ -762,7 +988,7 @@ public class DocumentReference extends DomainResource {
         /**
          * Describes the clinical encounter or type of care that the document content is associated with.
          */
-        @Child(name = "encounter", type = {Encounter.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "encounter", type = {Encounter.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Context of the document  content", formalDefinition="Describes the clinical encounter or type of care that the document content is associated with." )
         protected Reference encounter;
 
@@ -774,7 +1000,7 @@ public class DocumentReference extends DomainResource {
         /**
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
-        @Child(name = "event", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "event", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Main clinical acts documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActCode")
         protected List<CodeableConcept> event;
@@ -789,7 +1015,7 @@ public class DocumentReference extends DomainResource {
         /**
          * The kind of facility where the patient was seen.
          */
-        @Child(name = "facilityType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "facilityType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Kind of facility where patient was seen", formalDefinition="The kind of facility where the patient was seen." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-facilitycodes")
         protected CodeableConcept facilityType;
@@ -797,7 +1023,7 @@ public class DocumentReference extends DomainResource {
         /**
          * This property may convey specifics about the practice setting where the content was created, often reflecting the clinical specialty.
          */
-        @Child(name = "practiceSetting", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "practiceSetting", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additional details about where the content was created (e.g. clinical specialty)", formalDefinition="This property may convey specifics about the practice setting where the content was created, often reflecting the clinical specialty." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
         protected CodeableConcept practiceSetting;
@@ -805,7 +1031,7 @@ public class DocumentReference extends DomainResource {
         /**
          * The Patient Information as known when the document was published. May be a reference to a version specific, or contained.
          */
-        @Child(name = "sourcePatientInfo", type = {Patient.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "sourcePatientInfo", type = {Patient.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Patient demographics from source", formalDefinition="The Patient Information as known when the document was published. May be a reference to a version specific, or contained." )
         protected Reference sourcePatientInfo;
 
@@ -817,7 +1043,7 @@ public class DocumentReference extends DomainResource {
         /**
          * Related identifiers or resources associated with the DocumentReference.
          */
-        @Child(name = "related", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "related", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Related identifiers or resources", formalDefinition="Related identifiers or resources associated with the DocumentReference." )
         protected List<DocumentReferenceContextRelatedComponent> related;
 
@@ -1310,14 +1536,14 @@ public class DocumentReference extends DomainResource {
         /**
          * Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifier of related objects or events", formalDefinition="Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing." )
         protected Identifier identifier;
 
         /**
          * Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing.
          */
-        @Child(name = "ref", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "ref", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing." )
         protected Reference ref;
 
@@ -1555,7 +1781,7 @@ public class DocumentReference extends DomainResource {
     /**
      * Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of document (LOINC if possible)", formalDefinition="Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-doc-typecodes")
     protected CodeableConcept type;
@@ -1583,33 +1809,28 @@ public class DocumentReference extends DomainResource {
     /**
      * When the document was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "created", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Document creation time", formalDefinition="When the document was created." )
     protected DateTimeType created;
 
     /**
      * When the document reference was created.
      */
-    @Child(name = "indexed", type = {InstantType.class}, order=8, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "date", type = {InstantType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When this document reference was created", formalDefinition="When the document reference was created." )
-    protected InstantType indexed;
+    protected InstantType date;
 
     /**
-     * Identifies who is responsible for adding the information to the document.
+     * An actor taking an active role in the document.
      */
-    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what authored the document", formalDefinition="Identifies who is responsible for adding the information to the document." )
-    protected List<Reference> author;
-    /**
-     * The actual objects that are the target of the reference (Identifies who is responsible for adding the information to the document.)
-     */
-    protected List<Resource> authorTarget;
-
+    @Child(name = "agent", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Agent involved", formalDefinition="An actor taking an active role in the document." )
+    protected List<DocumentReferenceAgentComponent> agent;
 
     /**
      * Which person or organization authenticates that this document is valid.
      */
-    @Child(name = "authenticator", type = {Practitioner.class, Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "authenticator", type = {Practitioner.class, Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who/what authenticated the document", formalDefinition="Which person or organization authenticates that this document is valid." )
     protected Reference authenticator;
 
@@ -1621,7 +1842,7 @@ public class DocumentReference extends DomainResource {
     /**
      * Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.
      */
-    @Child(name = "custodian", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "custodian", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Organization which maintains the document", formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the document." )
     protected Reference custodian;
 
@@ -1666,7 +1887,7 @@ public class DocumentReference extends DomainResource {
     @Description(shortDefinition="Clinical context of document", formalDefinition="The clinical context in which the document was prepared." )
     protected DocumentReferenceContextComponent context;
 
-    private static final long serialVersionUID = 1465770040L;
+    private static final long serialVersionUID = 1762186370L;
 
   /**
    * Constructor
@@ -1678,11 +1899,9 @@ public class DocumentReference extends DomainResource {
   /**
    * Constructor
    */
-    public DocumentReference(Enumeration<DocumentReferenceStatus> status, CodeableConcept type, InstantType indexed) {
+    public DocumentReference(Enumeration<DocumentReferenceStatus> status) {
       super();
       this.status = status;
-      this.type = type;
-      this.indexed = indexed;
     }
 
     /**
@@ -1993,111 +2212,105 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #indexed} (When the document reference was created.). This is the underlying object with id, value and extensions. The accessor "getIndexed" gives direct access to the value
+     * @return {@link #date} (When the document reference was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
-    public InstantType getIndexedElement() { 
-      if (this.indexed == null)
+    public InstantType getDateElement() { 
+      if (this.date == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DocumentReference.indexed");
+          throw new Error("Attempt to auto-create DocumentReference.date");
         else if (Configuration.doAutoCreate())
-          this.indexed = new InstantType(); // bb
-      return this.indexed;
+          this.date = new InstantType(); // bb
+      return this.date;
     }
 
-    public boolean hasIndexedElement() { 
-      return this.indexed != null && !this.indexed.isEmpty();
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
     }
 
-    public boolean hasIndexed() { 
-      return this.indexed != null && !this.indexed.isEmpty();
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
     }
 
     /**
-     * @param value {@link #indexed} (When the document reference was created.). This is the underlying object with id, value and extensions. The accessor "getIndexed" gives direct access to the value
+     * @param value {@link #date} (When the document reference was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
-    public DocumentReference setIndexedElement(InstantType value) { 
-      this.indexed = value;
+    public DocumentReference setDateElement(InstantType value) { 
+      this.date = value;
       return this;
     }
 
     /**
      * @return When the document reference was created.
      */
-    public Date getIndexed() { 
-      return this.indexed == null ? null : this.indexed.getValue();
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value When the document reference was created.
      */
-    public DocumentReference setIndexed(Date value) { 
-        if (this.indexed == null)
-          this.indexed = new InstantType();
-        this.indexed.setValue(value);
+    public DocumentReference setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new InstantType();
+        this.date.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #author} (Identifies who is responsible for adding the information to the document.)
+     * @return {@link #agent} (An actor taking an active role in the document.)
      */
-    public List<Reference> getAuthor() { 
-      if (this.author == null)
-        this.author = new ArrayList<Reference>();
-      return this.author;
+    public List<DocumentReferenceAgentComponent> getAgent() { 
+      if (this.agent == null)
+        this.agent = new ArrayList<DocumentReferenceAgentComponent>();
+      return this.agent;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DocumentReference setAuthor(List<Reference> theAuthor) { 
-      this.author = theAuthor;
+    public DocumentReference setAgent(List<DocumentReferenceAgentComponent> theAgent) { 
+      this.agent = theAgent;
       return this;
     }
 
-    public boolean hasAuthor() { 
-      if (this.author == null)
+    public boolean hasAgent() { 
+      if (this.agent == null)
         return false;
-      for (Reference item : this.author)
+      for (DocumentReferenceAgentComponent item : this.agent)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addAuthor() { //3
-      Reference t = new Reference();
-      if (this.author == null)
-        this.author = new ArrayList<Reference>();
-      this.author.add(t);
+    public DocumentReferenceAgentComponent addAgent() { //3
+      DocumentReferenceAgentComponent t = new DocumentReferenceAgentComponent();
+      if (this.agent == null)
+        this.agent = new ArrayList<DocumentReferenceAgentComponent>();
+      this.agent.add(t);
       return t;
     }
 
-    public DocumentReference addAuthor(Reference t) { //3
+    public DocumentReference addAgent(DocumentReferenceAgentComponent t) { //3
       if (t == null)
         return this;
-      if (this.author == null)
-        this.author = new ArrayList<Reference>();
-      this.author.add(t);
+      if (this.agent == null)
+        this.agent = new ArrayList<DocumentReferenceAgentComponent>();
+      this.agent.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
      */
-    public Reference getAuthorFirstRep() { 
-      if (getAuthor().isEmpty()) {
-        addAuthor();
+    public DocumentReferenceAgentComponent getAgentFirstRep() { 
+      if (getAgent().isEmpty()) {
+        addAgent();
       }
-      return getAuthor().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Resource> getAuthorTarget() { 
-      if (this.authorTarget == null)
-        this.authorTarget = new ArrayList<Resource>();
-      return this.authorTarget;
+      return getAgent().get(0);
     }
 
     /**
@@ -2425,8 +2638,8 @@ public class DocumentReference extends DomainResource {
         children.add(new Property("class", "CodeableConcept", "A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.", 0, 1, class_));
         children.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).", 0, 1, subject));
         children.add(new Property("created", "dateTime", "When the document was created.", 0, 1, created));
-        children.add(new Property("indexed", "instant", "When the document reference was created.", 0, 1, indexed));
-        children.add(new Property("author", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, java.lang.Integer.MAX_VALUE, author));
+        children.add(new Property("date", "instant", "When the document reference was created.", 0, 1, date));
+        children.add(new Property("agent", "", "An actor taking an active role in the document.", 0, java.lang.Integer.MAX_VALUE, agent));
         children.add(new Property("authenticator", "Reference(Practitioner|Organization)", "Which person or organization authenticates that this document is valid.", 0, 1, authenticator));
         children.add(new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.", 0, 1, custodian));
         children.add(new Property("relatesTo", "", "Relationships that this document has with other document references that already exist.", 0, java.lang.Integer.MAX_VALUE, relatesTo));
@@ -2447,8 +2660,8 @@ public class DocumentReference extends DomainResource {
         case 94742904: /*class*/  return new Property("class", "CodeableConcept", "A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.", 0, 1, class_);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).", 0, 1, subject);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "When the document was created.", 0, 1, created);
-        case 1943292145: /*indexed*/  return new Property("indexed", "instant", "When the document reference was created.", 0, 1, indexed);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, java.lang.Integer.MAX_VALUE, author);
+        case 3076014: /*date*/  return new Property("date", "instant", "When the document reference was created.", 0, 1, date);
+        case 92750597: /*agent*/  return new Property("agent", "", "An actor taking an active role in the document.", 0, java.lang.Integer.MAX_VALUE, agent);
         case 1815000435: /*authenticator*/  return new Property("authenticator", "Reference(Practitioner|Organization)", "Which person or organization authenticates that this document is valid.", 0, 1, authenticator);
         case 1611297262: /*custodian*/  return new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.", 0, 1, custodian);
         case -7765931: /*relatesTo*/  return new Property("relatesTo", "", "Relationships that this document has with other document references that already exist.", 0, java.lang.Integer.MAX_VALUE, relatesTo);
@@ -2472,8 +2685,8 @@ public class DocumentReference extends DomainResource {
         case 94742904: /*class*/ return this.class_ == null ? new Base[0] : new Base[] {this.class_}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case 1943292145: /*indexed*/ return this.indexed == null ? new Base[0] : new Base[] {this.indexed}; // InstantType
-        case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // InstantType
+        case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // DocumentReferenceAgentComponent
         case 1815000435: /*authenticator*/ return this.authenticator == null ? new Base[0] : new Base[] {this.authenticator}; // Reference
         case 1611297262: /*custodian*/ return this.custodian == null ? new Base[0] : new Base[] {this.custodian}; // Reference
         case -7765931: /*relatesTo*/ return this.relatesTo == null ? new Base[0] : this.relatesTo.toArray(new Base[this.relatesTo.size()]); // DocumentReferenceRelatesToComponent
@@ -2515,11 +2728,11 @@ public class DocumentReference extends DomainResource {
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           return value;
-        case 1943292145: // indexed
-          this.indexed = castToInstant(value); // InstantType
+        case 3076014: // date
+          this.date = castToInstant(value); // InstantType
           return value;
-        case -1406328437: // author
-          this.getAuthor().add(castToReference(value)); // Reference
+        case 92750597: // agent
+          this.getAgent().add((DocumentReferenceAgentComponent) value); // DocumentReferenceAgentComponent
           return value;
         case 1815000435: // authenticator
           this.authenticator = castToReference(value); // Reference
@@ -2567,10 +2780,10 @@ public class DocumentReference extends DomainResource {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        } else if (name.equals("indexed")) {
-          this.indexed = castToInstant(value); // InstantType
-        } else if (name.equals("author")) {
-          this.getAuthor().add(castToReference(value));
+        } else if (name.equals("date")) {
+          this.date = castToInstant(value); // InstantType
+        } else if (name.equals("agent")) {
+          this.getAgent().add((DocumentReferenceAgentComponent) value);
         } else if (name.equals("authenticator")) {
           this.authenticator = castToReference(value); // Reference
         } else if (name.equals("custodian")) {
@@ -2601,8 +2814,8 @@ public class DocumentReference extends DomainResource {
         case 94742904:  return getClass_(); 
         case -1867885268:  return getSubject(); 
         case 1028554472:  return getCreatedElement();
-        case 1943292145:  return getIndexedElement();
-        case -1406328437:  return addAuthor(); 
+        case 3076014:  return getDateElement();
+        case 92750597:  return addAgent(); 
         case 1815000435:  return getAuthenticator(); 
         case 1611297262:  return getCustodian(); 
         case -7765931:  return addRelatesTo(); 
@@ -2626,8 +2839,8 @@ public class DocumentReference extends DomainResource {
         case 94742904: /*class*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 1028554472: /*created*/ return new String[] {"dateTime"};
-        case 1943292145: /*indexed*/ return new String[] {"instant"};
-        case -1406328437: /*author*/ return new String[] {"Reference"};
+        case 3076014: /*date*/ return new String[] {"instant"};
+        case 92750597: /*agent*/ return new String[] {};
         case 1815000435: /*authenticator*/ return new String[] {"Reference"};
         case 1611297262: /*custodian*/ return new String[] {"Reference"};
         case -7765931: /*relatesTo*/ return new String[] {};
@@ -2670,11 +2883,11 @@ public class DocumentReference extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.created");
         }
-        else if (name.equals("indexed")) {
-          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.indexed");
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.date");
         }
-        else if (name.equals("author")) {
-          return addAuthor();
+        else if (name.equals("agent")) {
+          return addAgent();
         }
         else if (name.equals("authenticator")) {
           this.authenticator = new Reference();
@@ -2724,11 +2937,11 @@ public class DocumentReference extends DomainResource {
         dst.class_ = class_ == null ? null : class_.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.created = created == null ? null : created.copy();
-        dst.indexed = indexed == null ? null : indexed.copy();
-        if (author != null) {
-          dst.author = new ArrayList<Reference>();
-          for (Reference i : author)
-            dst.author.add(i.copy());
+        dst.date = date == null ? null : date.copy();
+        if (agent != null) {
+          dst.agent = new ArrayList<DocumentReferenceAgentComponent>();
+          for (DocumentReferenceAgentComponent i : agent)
+            dst.agent.add(i.copy());
         };
         dst.authenticator = authenticator == null ? null : authenticator.copy();
         dst.custodian = custodian == null ? null : custodian.copy();
@@ -2766,7 +2979,7 @@ public class DocumentReference extends DomainResource {
         return compareDeep(masterIdentifier, o.masterIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(status, o.status, true) && compareDeep(docStatus, o.docStatus, true) && compareDeep(type, o.type, true)
            && compareDeep(class_, o.class_, true) && compareDeep(subject, o.subject, true) && compareDeep(created, o.created, true)
-           && compareDeep(indexed, o.indexed, true) && compareDeep(author, o.author, true) && compareDeep(authenticator, o.authenticator, true)
+           && compareDeep(date, o.date, true) && compareDeep(agent, o.agent, true) && compareDeep(authenticator, o.authenticator, true)
            && compareDeep(custodian, o.custodian, true) && compareDeep(relatesTo, o.relatesTo, true) && compareDeep(description, o.description, true)
            && compareDeep(securityLabel, o.securityLabel, true) && compareDeep(content, o.content, true) && compareDeep(context, o.context, true)
           ;
@@ -2780,12 +2993,12 @@ public class DocumentReference extends DomainResource {
           return false;
         DocumentReference o = (DocumentReference) other;
         return compareValues(status, o.status, true) && compareValues(docStatus, o.docStatus, true) && compareValues(created, o.created, true)
-           && compareValues(indexed, o.indexed, true) && compareValues(description, o.description, true);
+           && compareValues(date, o.date, true) && compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier
-          , status, docStatus, type, class_, subject, created, indexed, author, authenticator
+          , status, docStatus, type, class_, subject, created, date, agent, authenticator
           , custodian, relatesTo, description, securityLabel, content, context);
       }
 
@@ -2793,6 +3006,26 @@ public class DocumentReference extends DomainResource {
   public ResourceType getResourceType() {
     return ResourceType.DocumentReference;
    }
+
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>When this document reference was created</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DocumentReference.date</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="DocumentReference.date", description="When this document reference was created", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>When this document reference was created</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DocumentReference.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
    * Search parameter: <b>securitylabel</b>
@@ -2813,6 +3046,32 @@ public class DocumentReference extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITYLABEL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITYLABEL);
+
+ /**
+   * Search parameter: <b>agent</b>
+   * <p>
+   * Description: <b>Who and/or what authored the document</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentReference.agent.who</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="agent", path="DocumentReference.agent.who", description="Who and/or what authored the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  public static final String SP_AGENT = "agent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>agent</b>
+   * <p>
+   * Description: <b>Who and/or what authored the document</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentReference.agent.who</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AGENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AGENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:agent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AGENT = new ca.uhn.fhir.model.api.Include("DocumentReference:agent").toLocked();
 
  /**
    * Search parameter: <b>subject</b>
@@ -3139,52 +3398,6 @@ public class DocumentReference extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CUSTODIAN = new ca.uhn.fhir.model.api.Include("DocumentReference:custodian").toLocked();
 
  /**
-   * Search parameter: <b>indexed</b>
-   * <p>
-   * Description: <b>When this document reference was created</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>DocumentReference.indexed</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference was created", type="date" )
-  public static final String SP_INDEXED = "indexed";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
-   * <p>
-   * Description: <b>When this document reference was created</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>DocumentReference.indexed</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam INDEXED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_INDEXED);
-
- /**
-   * Search parameter: <b>author</b>
-   * <p>
-   * Description: <b>Who and/or what authored the document</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DocumentReference.author</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
-  public static final String SP_AUTHOR = "author";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>author</b>
-   * <p>
-   * Description: <b>Who and/or what authored the document</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DocumentReference.author</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>DocumentReference:author</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DocumentReference:author").toLocked();
-
- /**
    * Search parameter: <b>created</b>
    * <p>
    * Description: <b>Document creation time</b><br>
@@ -3249,6 +3462,26 @@ public class DocumentReference extends DomainResource {
    * the path value of "<b>DocumentReference:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DocumentReference:encounter").toLocked();
+
+ /**
+   * Search parameter: <b>contenttype</b>
+   * <p>
+   * Description: <b>Mime type of the content, with charset etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentReference.content.attachment.contentType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="contenttype", path="DocumentReference.content.attachment.contentType", description="Mime type of the content, with charset etc.", type="token" )
+  public static final String SP_CONTENTTYPE = "contenttype";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>contenttype</b>
+   * <p>
+   * Description: <b>Mime type of the content, with charset etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentReference.content.attachment.contentType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTENTTYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTENTTYPE);
 
  /**
    * Search parameter: <b>related-ref</b>

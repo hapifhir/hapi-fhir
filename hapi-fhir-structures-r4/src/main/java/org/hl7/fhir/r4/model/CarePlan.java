@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -342,6 +342,194 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       return "?";
       }
     public String toSystem(CarePlanIntent code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum CarePlanActivityKind {
+        /**
+         * null
+         */
+        APPOINTMENT, 
+        /**
+         * null
+         */
+        COMMUNICATIONREQUEST, 
+        /**
+         * null
+         */
+        DEVICEREQUEST, 
+        /**
+         * null
+         */
+        MEDICATIONREQUEST, 
+        /**
+         * null
+         */
+        NUTRITIONORDER, 
+        /**
+         * null
+         */
+        TASK, 
+        /**
+         * null
+         */
+        PROCEDUREREQUEST, 
+        /**
+         * null
+         */
+        VISIONPRESCRIPTION, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static CarePlanActivityKind fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("Appointment".equals(codeString))
+          return APPOINTMENT;
+        if ("CommunicationRequest".equals(codeString))
+          return COMMUNICATIONREQUEST;
+        if ("DeviceRequest".equals(codeString))
+          return DEVICEREQUEST;
+        if ("MedicationRequest".equals(codeString))
+          return MEDICATIONREQUEST;
+        if ("NutritionOrder".equals(codeString))
+          return NUTRITIONORDER;
+        if ("Task".equals(codeString))
+          return TASK;
+        if ("ProcedureRequest".equals(codeString))
+          return PROCEDUREREQUEST;
+        if ("VisionPrescription".equals(codeString))
+          return VISIONPRESCRIPTION;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CarePlanActivityKind code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case APPOINTMENT: return "Appointment";
+            case COMMUNICATIONREQUEST: return "CommunicationRequest";
+            case DEVICEREQUEST: return "DeviceRequest";
+            case MEDICATIONREQUEST: return "MedicationRequest";
+            case NUTRITIONORDER: return "NutritionOrder";
+            case TASK: return "Task";
+            case PROCEDUREREQUEST: return "ProcedureRequest";
+            case VISIONPRESCRIPTION: return "VisionPrescription";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case APPOINTMENT: return "http://hl7.org/fhir/resource-types";
+            case COMMUNICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
+            case DEVICEREQUEST: return "http://hl7.org/fhir/resource-types";
+            case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
+            case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
+            case TASK: return "http://hl7.org/fhir/resource-types";
+            case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
+            case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case APPOINTMENT: return "";
+            case COMMUNICATIONREQUEST: return "";
+            case DEVICEREQUEST: return "";
+            case MEDICATIONREQUEST: return "";
+            case NUTRITIONORDER: return "";
+            case TASK: return "";
+            case PROCEDUREREQUEST: return "";
+            case VISIONPRESCRIPTION: return "";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case APPOINTMENT: return "Appointment";
+            case COMMUNICATIONREQUEST: return "CommunicationRequest";
+            case DEVICEREQUEST: return "DeviceRequest";
+            case MEDICATIONREQUEST: return "MedicationRequest";
+            case NUTRITIONORDER: return "NutritionOrder";
+            case TASK: return "Task";
+            case PROCEDUREREQUEST: return "ProcedureRequest";
+            case VISIONPRESCRIPTION: return "VisionPrescription";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class CarePlanActivityKindEnumFactory implements EnumFactory<CarePlanActivityKind> {
+    public CarePlanActivityKind fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("Appointment".equals(codeString))
+          return CarePlanActivityKind.APPOINTMENT;
+        if ("CommunicationRequest".equals(codeString))
+          return CarePlanActivityKind.COMMUNICATIONREQUEST;
+        if ("DeviceRequest".equals(codeString))
+          return CarePlanActivityKind.DEVICEREQUEST;
+        if ("MedicationRequest".equals(codeString))
+          return CarePlanActivityKind.MEDICATIONREQUEST;
+        if ("NutritionOrder".equals(codeString))
+          return CarePlanActivityKind.NUTRITIONORDER;
+        if ("Task".equals(codeString))
+          return CarePlanActivityKind.TASK;
+        if ("ProcedureRequest".equals(codeString))
+          return CarePlanActivityKind.PROCEDUREREQUEST;
+        if ("VisionPrescription".equals(codeString))
+          return CarePlanActivityKind.VISIONPRESCRIPTION;
+        throw new IllegalArgumentException("Unknown CarePlanActivityKind code '"+codeString+"'");
+        }
+        public Enumeration<CarePlanActivityKind> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<CarePlanActivityKind>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("Appointment".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.APPOINTMENT);
+        if ("CommunicationRequest".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.COMMUNICATIONREQUEST);
+        if ("DeviceRequest".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.DEVICEREQUEST);
+        if ("MedicationRequest".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.MEDICATIONREQUEST);
+        if ("NutritionOrder".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.NUTRITIONORDER);
+        if ("Task".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.TASK);
+        if ("ProcedureRequest".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.PROCEDUREREQUEST);
+        if ("VisionPrescription".equals(codeString))
+          return new Enumeration<CarePlanActivityKind>(this, CarePlanActivityKind.VISIONPRESCRIPTION);
+        throw new FHIRException("Unknown CarePlanActivityKind code '"+codeString+"'");
+        }
+    public String toCode(CarePlanActivityKind code) {
+      if (code == CarePlanActivityKind.APPOINTMENT)
+        return "Appointment";
+      if (code == CarePlanActivityKind.COMMUNICATIONREQUEST)
+        return "CommunicationRequest";
+      if (code == CarePlanActivityKind.DEVICEREQUEST)
+        return "DeviceRequest";
+      if (code == CarePlanActivityKind.MEDICATIONREQUEST)
+        return "MedicationRequest";
+      if (code == CarePlanActivityKind.NUTRITIONORDER)
+        return "NutritionOrder";
+      if (code == CarePlanActivityKind.TASK)
+        return "Task";
+      if (code == CarePlanActivityKind.PROCEDUREREQUEST)
+        return "ProcedureRequest";
+      if (code == CarePlanActivityKind.VISIONPRESCRIPTION)
+        return "VisionPrescription";
+      return "?";
+      }
+    public String toSystem(CarePlanActivityKind code) {
       return code.getSystem();
       }
     }
@@ -1007,12 +1195,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     @Block()
     public static class CarePlanActivityDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * High-level categorization of the type of activity in a care plan.
+         * A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.
          */
-        @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="diet | drug | encounter | observation | procedure | supply | other", formalDefinition="High-level categorization of the type of activity in a care plan." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity-category")
-        protected CodeableConcept category;
+        @Child(name = "kind", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Kind of resource", formalDefinition="A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity-kind")
+        protected Enumeration<CarePlanActivityKind> kind;
 
         /**
          * Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.
@@ -1148,7 +1336,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         @Description(shortDefinition="Extra info describing activity to perform", formalDefinition="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc." )
         protected StringType description;
 
-        private static final long serialVersionUID = -549984462L;
+        private static final long serialVersionUID = 677010887L;
 
     /**
      * Constructor
@@ -1166,26 +1354,51 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
         /**
-         * @return {@link #category} (High-level categorization of the type of activity in a care plan.)
+         * @return {@link #kind} (A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
          */
-        public CodeableConcept getCategory() { 
-          if (this.category == null)
+        public Enumeration<CarePlanActivityKind> getKindElement() { 
+          if (this.kind == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.category");
+              throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.kind");
             else if (Configuration.doAutoCreate())
-              this.category = new CodeableConcept(); // cc
-          return this.category;
+              this.kind = new Enumeration<CarePlanActivityKind>(new CarePlanActivityKindEnumFactory()); // bb
+          return this.kind;
         }
 
-        public boolean hasCategory() { 
-          return this.category != null && !this.category.isEmpty();
+        public boolean hasKindElement() { 
+          return this.kind != null && !this.kind.isEmpty();
+        }
+
+        public boolean hasKind() { 
+          return this.kind != null && !this.kind.isEmpty();
         }
 
         /**
-         * @param value {@link #category} (High-level categorization of the type of activity in a care plan.)
+         * @param value {@link #kind} (A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
          */
-        public CarePlanActivityDetailComponent setCategory(CodeableConcept value) { 
-          this.category = value;
+        public CarePlanActivityDetailComponent setKindElement(Enumeration<CarePlanActivityKind> value) { 
+          this.kind = value;
+          return this;
+        }
+
+        /**
+         * @return A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.
+         */
+        public CarePlanActivityKind getKind() { 
+          return this.kind == null ? null : this.kind.getValue();
+        }
+
+        /**
+         * @param value A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.
+         */
+        public CarePlanActivityDetailComponent setKind(CarePlanActivityKind value) { 
+          if (value == null)
+            this.kind = null;
+          else {
+            if (this.kind == null)
+              this.kind = new Enumeration<CarePlanActivityKind>(new CarePlanActivityKindEnumFactory());
+            this.kind.setValue(value);
+          }
           return this;
         }
 
@@ -1903,7 +2116,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, 1, category));
+          children.add(new Property("kind", "code", "A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.", 0, 1, kind));
           children.add(new Property("definition", "Reference(PlanDefinition|ActivityDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, definition));
           children.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code));
           children.add(new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
@@ -1924,7 +2137,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, 1, category);
+          case 3292052: /*kind*/  return new Property("kind", "code", "A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest.", 0, 1, kind);
           case -1014418093: /*definition*/  return new Property("definition", "Reference(PlanDefinition|ActivityDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, definition);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code);
           case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
@@ -1955,7 +2168,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<CarePlanActivityKind>
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
@@ -1979,8 +2192,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+        case 3292052: // kind
+          value = new CarePlanActivityKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<CarePlanActivityKind>
           return value;
         case -1014418093: // definition
           this.definition = castToReference(value); // Reference
@@ -2035,8 +2249,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("category")) {
-          this.category = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("kind")) {
+          value = new CarePlanActivityKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<CarePlanActivityKind>
         } else if (name.equals("definition")) {
           this.definition = castToReference(value); // Reference
         } else if (name.equals("code")) {
@@ -2076,7 +2291,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102:  return getCategory(); 
+        case 3292052:  return getKindElement();
         case -1014418093:  return getDefinition(); 
         case 3059181:  return getCode(); 
         case 722137681:  return addReasonCode(); 
@@ -2102,7 +2317,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 3292052: /*kind*/ return new String[] {"code"};
         case -1014418093: /*definition*/ return new String[] {"Reference"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
@@ -2125,9 +2340,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+        if (name.equals("kind")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.kind");
         }
         else if (name.equals("definition")) {
           this.definition = new Reference();
@@ -2200,7 +2414,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public CarePlanActivityDetailComponent copy() {
         CarePlanActivityDetailComponent dst = new CarePlanActivityDetailComponent();
         copyValues(dst);
-        dst.category = category == null ? null : category.copy();
+        dst.kind = kind == null ? null : kind.copy();
         dst.definition = definition == null ? null : definition.copy();
         dst.code = code == null ? null : code.copy();
         if (reasonCode != null) {
@@ -2242,7 +2456,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other instanceof CarePlanActivityDetailComponent))
           return false;
         CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other;
-        return compareDeep(category, o.category, true) && compareDeep(definition, o.definition, true) && compareDeep(code, o.code, true)
+        return compareDeep(kind, o.kind, true) && compareDeep(definition, o.definition, true) && compareDeep(code, o.code, true)
            && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
            && compareDeep(goal, o.goal, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
            && compareDeep(prohibited, o.prohibited, true) && compareDeep(scheduled, o.scheduled, true) && compareDeep(location, o.location, true)
@@ -2257,14 +2471,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other instanceof CarePlanActivityDetailComponent))
           return false;
         CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other;
-        return compareValues(status, o.status, true) && compareValues(statusReason, o.statusReason, true) && compareValues(prohibited, o.prohibited, true)
-           && compareValues(description, o.description, true);
+        return compareValues(kind, o.kind, true) && compareValues(status, o.status, true) && compareValues(statusReason, o.statusReason, true)
+           && compareValues(prohibited, o.prohibited, true) && compareValues(description, o.description, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, definition, code
-          , reasonCode, reasonReference, goal, status, statusReason, prohibited, scheduled
-          , location, performer, product, dailyAmount, quantity, description);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, definition, code, reasonCode
+          , reasonReference, goal, status, statusReason, prohibited, scheduled, location
+          , performer, product, dailyAmount, quantity, description);
       }
 
   public String fhirType() {

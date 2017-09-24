@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
@@ -173,6 +174,13 @@ public class CodeSystemUtilities {
     if ("Normative".equals("status")) 
       return 4;
     return -1;
+  }
+
+  public static Type readProperty(ConceptDefinitionComponent concept, String code) {
+    for (ConceptPropertyComponent p : concept.getProperty())
+      if (p.getCode().equals(code))
+        return p.getValue(); 
+    return null;
   }
 
 }

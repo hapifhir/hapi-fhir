@@ -17,10 +17,10 @@
 	  for this example, we use a real URI, since this example does have a canonical address
 		at which it's posted. Alternatively, We could have used an OID, or a UUID.
 
- Mote that this isn't the identifier for the LOINC codes themeselves - they belong to LOINC, and 
+Mote that this isn't the identifier for the LOINC codes themeselves - they belong to LOINC, and 
 		it has it's own identifier. This is the identifier for this set of codes, and that doesn't 
 		change the codes.
-  -->
+-->
     <url value="http://hl7.org/fhir/ValueSet/example-extensional"/>
     <!--     an imaginary identifier. This is a non FHIR identifier - might be used in a 
 	  v2 context (though you always need to translate namespaces for v2)     -->
@@ -29,8 +29,8 @@
      <value value="loinc-cholesterol-int"/>
     </identifier>
     <!--     for version, we are going to simply use the day of publication. This is also 
- arbitrary - whatever is here is what people use to refer to the version. 
- Could also be a UUID too     -->
+arbitrary - whatever is here is what people use to refer to the version. 
+Could also be a UUID too     -->
     <version value="20150622"/>
     <!--     set of loinc codes for cholesterol for LONC 2.36     -->
     <name value="LOINC Codes for Cholesterol in Serum/Plasma"/>
@@ -50,15 +50,15 @@
 	  we could specify it implicitly by specifying the locked date for the value set
 		
 		So we show this example here, but it's not actually necessary since we also 
- have LOINC version. Note: if you do what this example does, and specify both,
+have LOINC version. Note: if you do what this example does, and specify both,
 		you better get it right, and specify the current version of LOINC at the time
-  -->
+-->
     <lockedDate value="2012-06-13"/>
     <description value="This is an example value set that includes all the LOINC codes for serum/plasma cholesterol from v2.36."/>
     <copyright value="This content from LOINCÂ® is copyright Â© 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use."/>
     <compose>
      <!--     you could have multiple includes, if you wanted to include codes from more than
- one code system, or include codes with different modes. we don't, in this case     -->
+one code system, or include codes with different modes. we don't, in this case     -->
      <include>
       <system value="http://loinc.org"/>
       <version value="2.36"/>
@@ -123,8 +123,8 @@
      <value value="loinc-cholesterol-inl"/>
     </identifier>
     <!--     for version, we are going to simply use the day of publication. This is also 
- arbitrary - whatever is here is what people use to refer to the version. 
- Could also be a UUID too     -->
+arbitrary - whatever is here is what people use to refer to the version. 
+Could also be a UUID too     -->
     <version value="20150622"/>
     <!--     set of loinc codes for cholesterol for LONC 2.36     -->
     <name value="ACME Codes for Cholesterol in Serum/Plasma"/>
@@ -160,8 +160,8 @@
 			are redefined     -->
      <version value="4.2.3"/>
      <!--     it's often unstated - are codes case sensitive or not. And 
-  it can be the cause of operational or clinical safety problems. 
-  So FHIR requires that it always be specified.     -->
+it can be the cause of operational or clinical safety problems. 
+So FHIR requires that it always be specified.     -->
      <caseSensitive value="true"/>
      <!--     
 			ACME's defined definitions. Note that these are not 
@@ -228,8 +228,8 @@
      <value value="loinc-cholesterol-ext"/>
     </identifier>
     <!--     for version, we are going to simply use the day of publication. This is also 
- arbitrary - whatever is here is what people use to refer to the version. 
- Could also be a UUID too     -->
+arbitrary - whatever is here is what people use to refer to the version. 
+Could also be a UUID too     -->
     <version value="20150622"/>
     <!--     set of loinc codes for cholesterol for LONC 2.36     -->
     <name value="LOINC Codes for Cholesterol in Serum/Plasma"/>
@@ -248,7 +248,7 @@
     <copyright value="This content from LOINCÂ® is copyright Â© 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use"/>
     <!--     
 	  in extensional value sets, it's often done
- not to specify a locked date, or a version of the
+not to specify a locked date, or a version of the
 		code system - we're saying, whatever are the right
 		codes in the version you are using 
 	    -->
@@ -256,7 +256,7 @@
      <include>
       <system value="http://loinc.org"/>
       <!--    
-  instead of listing the codes (see the intensional example)
+instead of listing the codes (see the intensional example)
 			  we do something else: all codes in LOINC part LP43571-6
 				
 				Doing it like this means we can't change the displays (per the 
@@ -300,7 +300,7 @@
     <status value="draft"/>
     <experimental value="true"/>
     <!--     Expansions that are not intended for persistence often do not have 
- all the metadata. But this one, intended for persistence, does     -->
+all the metadata. But this one, intended for persistence, does     -->
     <publisher value="FHIR Project team"/>
     <contact>
      <telecom>
@@ -327,7 +327,7 @@
     </compose>
     <!--    
 	ok, and now the expansion 
-  -->
+-->
     <expansion>
      <!--     a reference to the original content - if there is one. Note that 
 		when you store an expansion, there often won't be one     -->
@@ -24230,41 +24230,41 @@
      <include>
       <system value="http://hl7.org/fhir/restful-interaction"/>
       <!--       <concept>
-  <code value="read"/>
-  </concept>
-  <concept>
-  <code value="vread"/>
-  </concept>
-  <concept>
-  <code value="update"/>
-  </concept>
-  <concept>
-  <code value="delete"/>
-  </concept>
-  <concept>
-  <code value="validate"/>
-  </concept>
-  <concept>
-  <code value="create"/>
-  </concept>
-  <concept>
-  <code value="history-instance"/>
-  </concept>
-  <concept>
-  <code value="history-type"/>
-  </concept>
-  <concept>
-  <code value="history-system"/>
-  </concept>
-  <concept>
-  <code value="search-type"/>
-  </concept>
-  <concept>
-  <code value="search-system"/>
-  </concept>
-  <concept>
-  <code value="transaction"/>
-  </concept>  -->
+<code value="read"/>
+</concept>
+<concept>
+<code value="vread"/>
+</concept>
+<concept>
+<code value="update"/>
+</concept>
+<concept>
+<code value="delete"/>
+</concept>
+<concept>
+<code value="validate"/>
+</concept>
+<concept>
+<code value="create"/>
+</concept>
+<concept>
+<code value="history-instance"/>
+</concept>
+<concept>
+<code value="history-type"/>
+</concept>
+<concept>
+<code value="history-system"/>
+</concept>
+<concept>
+<code value="search-type"/>
+</concept>
+<concept>
+<code value="search-system"/>
+</concept>
+<concept>
+<code value="transaction"/>
+</concept>  -->
      </include>
     </compose>
    </ValueSet>
@@ -56844,7 +56844,7 @@
 				<op value="is-a"/>
 				<value value="435681000124103"/>
 			</filter>
- -->
+-->
       <concept>
        <code value="439031000124108"/>
        <display value="honey thick liquid"/>
@@ -57010,9 +57010,9 @@
       <definition value="A department or ward within a hospital (Generally is not applicable to top level organizations)"/>
      </concept>
      <!--   <concept> An intensive care unit is actually a Location (instance or kind) or a service type (of HealthcareService), this is a service delivery type on a location
-  <code value="icu"/>
-  <display value="Intensive Care Unit"/>
- </concept>   -->
+<code value="icu"/>
+<display value="Intensive Care Unit"/>
+</concept>   -->
      <concept>
       <code value="team"/>
       <display value="Organizational team"/>
@@ -78688,7 +78688,7 @@
     <status value="draft"/>
     <experimental value="true"/>
     <!--   Extension: Focal Subject	 Example VS composed from SNOMED CT f and V3 for observation targets donor, fetus, spouse as uses case arise may buidl on this .	
- -->
+-->
     <publisher value="HL7 International - Orders and Observations WG"/>
     <contact>
      <telecom>
@@ -95888,9 +95888,9 @@
     <compose>
      <!--      EH remove for draft
 <include>
-  <system value="http://hl7.org/fhir/v2/0487"/>
- </include>
- -->
+<system value="http://hl7.org/fhir/v2/0487"/>
+</include>
+-->
      <include>
       <system value="http://snomed.info/sct"/>
       <filter>
@@ -96034,7 +96034,7 @@
     <status value="draft"/>
     <experimental value="true"/>
     <!--   ObservationValue	 Example SNOMED CT for coded results which includes Organism names, Findings, and Qualifier, Substance, and  Body Structure hierarchies.  This should cover >90% of observation results .	
- -->
+-->
     <publisher value="HL7 International - Orders and Observations WG"/>
     <contact>
      <telecom>
@@ -97136,9 +97136,9 @@
     <compose>
      <!--      EH remove for draft
 <include>
-  <system value="http://hl7.org/fhir/v2/0487"/>
- </include>
- -->
+<system value="http://hl7.org/fhir/v2/0487"/>
+</include>
+-->
      <include>
       <system value="http://snomed.info/sct"/>
       <filter>

@@ -292,12 +292,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     source = Source.InstanceValidator;
   }
 
-    public InstanceValidator(ValidationEngine engine) {
-	    super();
-	    this.context = engine.getContext();
-		 fpe = engine.getFpe();
-		 source = Source.InstanceValidator;
-    }
 
 
   @Override

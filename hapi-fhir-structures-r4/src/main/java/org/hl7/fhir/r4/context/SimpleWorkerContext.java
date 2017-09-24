@@ -179,11 +179,16 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
       loadBytes(name, stream);
   }
 
-	public String connectToTSServer(String url) throws URISyntaxException {
-	  txServer = new FHIRToolingClient(url);
-	  txServer.setTimeout(30000);
-	  return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
-	}
+  public String connectToTSServer(String url) throws URISyntaxException {
+    txServer = new FHIRToolingClient(url);
+    txServer.setTimeout(30000);
+    return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
+  }
+
+  public String connectToTSServer(FHIRToolingClient client) throws URISyntaxException {
+    txServer = client;
+    return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
+  }
 
 	public void loadFromFile(InputStream stream, String name, IContextResourceLoader loader) throws IOException, FHIRException {
 		Resource f;

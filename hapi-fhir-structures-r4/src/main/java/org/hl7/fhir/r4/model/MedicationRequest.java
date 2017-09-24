@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -254,6 +254,10 @@ public class MedicationRequest extends DomainResource {
          */
         INSTANCEORDER, 
         /**
+         * The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.
+         */
+        OPTION, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -268,6 +272,8 @@ public class MedicationRequest extends DomainResource {
           return ORDER;
         if ("instance-order".equals(codeString))
           return INSTANCEORDER;
+        if ("option".equals(codeString))
+          return OPTION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -279,6 +285,7 @@ public class MedicationRequest extends DomainResource {
             case PLAN: return "plan";
             case ORDER: return "order";
             case INSTANCEORDER: return "instance-order";
+            case OPTION: return "option";
             default: return "?";
           }
         }
@@ -288,6 +295,7 @@ public class MedicationRequest extends DomainResource {
             case PLAN: return "http://hl7.org/fhir/medication-request-intent";
             case ORDER: return "http://hl7.org/fhir/medication-request-intent";
             case INSTANCEORDER: return "http://hl7.org/fhir/medication-request-intent";
+            case OPTION: return "http://hl7.org/fhir/medication-request-intent";
             default: return "?";
           }
         }
@@ -297,6 +305,7 @@ public class MedicationRequest extends DomainResource {
             case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
             case ORDER: return "The request represents a request/demand and authorization for action";
             case INSTANCEORDER: return "The request represents an instance for the particular order, for example a medication administration record.";
+            case OPTION: return "The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
             default: return "?";
           }
         }
@@ -306,6 +315,7 @@ public class MedicationRequest extends DomainResource {
             case PLAN: return "Plan";
             case ORDER: return "Order";
             case INSTANCEORDER: return "Instance Order";
+            case OPTION: return "Option";
             default: return "?";
           }
         }
@@ -324,6 +334,8 @@ public class MedicationRequest extends DomainResource {
           return MedicationRequestIntent.ORDER;
         if ("instance-order".equals(codeString))
           return MedicationRequestIntent.INSTANCEORDER;
+        if ("option".equals(codeString))
+          return MedicationRequestIntent.OPTION;
         throw new IllegalArgumentException("Unknown MedicationRequestIntent code '"+codeString+"'");
         }
         public Enumeration<MedicationRequestIntent> fromType(Base code) throws FHIRException {
@@ -342,6 +354,8 @@ public class MedicationRequest extends DomainResource {
           return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.ORDER);
         if ("instance-order".equals(codeString))
           return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.INSTANCEORDER);
+        if ("option".equals(codeString))
+          return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.OPTION);
         throw new FHIRException("Unknown MedicationRequestIntent code '"+codeString+"'");
         }
     public String toCode(MedicationRequestIntent code) {
@@ -353,6 +367,8 @@ public class MedicationRequest extends DomainResource {
         return "order";
       if (code == MedicationRequestIntent.INSTANCEORDER)
         return "instance-order";
+      if (code == MedicationRequestIntent.OPTION)
+        return "option";
       return "?";
       }
     public String toSystem(MedicationRequestIntent code) {
@@ -1393,17 +1409,17 @@ public class MedicationRequest extends DomainResource {
      * Whether the request is a proposal, plan, or an original order.
      */
     @Child(name = "intent", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposal | plan | order | instance-order", formalDefinition="Whether the request is a proposal, plan, or an original order." )
+    @Description(shortDefinition="proposal | plan | order | instance-order | option", formalDefinition="Whether the request is a proposal, plan, or an original order." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-request-intent")
     protected Enumeration<MedicationRequestIntent> intent;
 
     /**
-     * Indicates the type of medication order and where the medication is expected to be consumed or administered.
+     * Indicates the type of medication request (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient) or the type of treatment (i.e. chemotherapy or endocrine).
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates the type of medication order and where the medication is expected to be consumed or administered." )
+    @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates the type of medication request (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient) or the type of treatment (i.e. chemotherapy or endocrine)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-request-category")
-    protected CodeableConcept category;
+    protected List<CodeableConcept> category;
 
     /**
      * Indicates how quickly the Medication Request should be addressed with respect to other requests.
@@ -1579,7 +1595,7 @@ public class MedicationRequest extends DomainResource {
     protected List<Provenance> eventHistoryTarget;
 
 
-    private static final long serialVersionUID = 592527862L;
+    private static final long serialVersionUID = -511254308L;
 
   /**
    * Constructor
@@ -1896,27 +1912,56 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Indicates the type of medication order and where the medication is expected to be consumed or administered.)
+     * @return {@link #category} (Indicates the type of medication request (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient) or the type of treatment (i.e. chemotherapy or endocrine).)
      */
-    public CodeableConcept getCategory() { 
+    public List<CodeableConcept> getCategory() { 
       if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationRequest.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
+        this.category = new ArrayList<CodeableConcept>();
       return this.category;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationRequest setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
+    }
+
     public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public MedicationRequest addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #category} (Indicates the type of medication order and where the medication is expected to be consumed or administered.)
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public MedicationRequest setCategory(CodeableConcept value) { 
-      this.category = value;
-      return this;
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
     }
 
     /**
@@ -2782,7 +2827,7 @@ public class MedicationRequest extends DomainResource {
         children.add(new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.", 0, 1, groupIdentifier));
         children.add(new Property("status", "code", "A code specifying the current state of the order.  Generally this will be active or completed state.", 0, 1, status));
         children.add(new Property("intent", "code", "Whether the request is a proposal, plan, or an original order.", 0, 1, intent));
-        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication order and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication request (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient) or the type of treatment (i.e. chemotherapy or endocrine).", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("priority", "code", "Indicates how quickly the Medication Request should be addressed with respect to other requests.", 0, 1, priority));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or set of individuals to whom the medication will be given.", 0, 1, subject));
@@ -2812,7 +2857,7 @@ public class MedicationRequest extends DomainResource {
         case -445338488: /*groupIdentifier*/  return new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.", 0, 1, groupIdentifier);
         case -892481550: /*status*/  return new Property("status", "code", "A code specifying the current state of the order.  Generally this will be active or completed state.", 0, 1, status);
         case -1183762788: /*intent*/  return new Property("intent", "code", "Whether the request is a proposal, plan, or an original order.", 0, 1, intent);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication order and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication request (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient) or the type of treatment (i.e. chemotherapy or endocrine).", 0, java.lang.Integer.MAX_VALUE, category);
         case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the Medication Request should be addressed with respect to other requests.", 0, 1, priority);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
@@ -2848,7 +2893,7 @@ public class MedicationRequest extends DomainResource {
         case -445338488: /*groupIdentifier*/ return this.groupIdentifier == null ? new Base[0] : new Base[] {this.groupIdentifier}; // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MedicationRequestStatus>
         case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<MedicationRequestIntent>
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<MedicationRequestPriority>
         case 1998965455: /*medication*/ return this.medication == null ? new Base[0] : new Base[] {this.medication}; // Type
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
@@ -2896,7 +2941,7 @@ public class MedicationRequest extends DomainResource {
           this.intent = (Enumeration) value; // Enumeration<MedicationRequestIntent>
           return value;
         case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1165461084: // priority
           value = new MedicationRequestPriorityEnumFactory().fromType(castToCode(value));
@@ -2975,7 +3020,7 @@ public class MedicationRequest extends DomainResource {
           value = new MedicationRequestIntentEnumFactory().fromType(castToCode(value));
           this.intent = (Enumeration) value; // Enumeration<MedicationRequestIntent>
         } else if (name.equals("category")) {
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("priority")) {
           value = new MedicationRequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<MedicationRequestPriority>
@@ -3027,7 +3072,7 @@ public class MedicationRequest extends DomainResource {
         case -445338488:  return getGroupIdentifier(); 
         case -892481550:  return getStatusElement();
         case -1183762788:  return getIntentElement();
-        case 50511102:  return getCategory(); 
+        case 50511102:  return addCategory(); 
         case -1165461084:  return getPriorityElement();
         case 1458402129:  return getMedication(); 
         case 1998965455:  return getMedication(); 
@@ -3107,8 +3152,7 @@ public class MedicationRequest extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationRequest.intent");
         }
         else if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+          return addCategory();
         }
         else if (name.equals("priority")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationRequest.priority");
@@ -3207,7 +3251,11 @@ public class MedicationRequest extends DomainResource {
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
-        dst.category = category == null ? null : category.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         dst.priority = priority == null ? null : priority.copy();
         dst.medication = medication == null ? null : medication.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -3554,6 +3602,32 @@ public class MedicationRequest extends DomainResource {
    * the path value of "<b>MedicationRequest:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("MedicationRequest:patient").toLocked();
+
+ /**
+   * Search parameter: <b>intended-performer</b>
+   * <p>
+   * Description: <b>Returns the intended performer of the administration of the medication request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationRequest.performer</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="intended-performer", path="MedicationRequest.performer", description="Returns the intended performer of the administration of the medication request", type="reference", target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  public static final String SP_INTENDED_PERFORMER = "intended-performer";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>intended-performer</b>
+   * <p>
+   * Description: <b>Returns the intended performer of the administration of the medication request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationRequest.performer</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INTENDED_PERFORMER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INTENDED_PERFORMER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationRequest:intended-performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INTENDED_PERFORMER = new ca.uhn.fhir.model.api.Include("MedicationRequest:intended-performer").toLocked();
 
  /**
    * Search parameter: <b>context</b>

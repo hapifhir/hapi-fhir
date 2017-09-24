@@ -161,12 +161,12 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchWithMissingDate2() {
 		MedicationRequest mr1 = new MedicationRequest();
-		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		mr1.addCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
 		IIdType id1 = myMedicationRequestDao.create(mr1).getId().toUnqualifiedVersionless();
 
 		MedicationRequest mr2 = new MedicationRequest();
-		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		mr2.addCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map = new SearchParameterMap();

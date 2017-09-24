@@ -466,10 +466,6 @@ public class ValidationMessage implements Comparator<ValidationMessage>, Compara
     // nothing
   }
 
-  public ValidationMessage(Source source, IssueType type, String message, IssueSeverity level) {
-	this(source, type, null, message, level);
-}
-
   public ValidationMessage(Source source, IssueType type, String path, String message, IssueSeverity level) {
     super();
     this.line = -1;
@@ -554,8 +550,7 @@ public class ValidationMessage implements Comparator<ValidationMessage>, Compara
 //      throw new Error("A type must be provided");
 //  }
 
-
-private IssueSeverity determineLevel(String path) {
+  private IssueSeverity determineLevel(String path) {
     if (isGrandfathered(path))
       return IssueSeverity.WARNING;
     else

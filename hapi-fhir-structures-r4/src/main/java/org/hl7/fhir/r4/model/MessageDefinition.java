@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -860,12 +860,11 @@ public class MessageDefinition extends MetadataResource {
 
 
     /**
-     * A coded identifier of a supported messaging event.
+     * Link to the defined event type.
      */
-    @Child(name = "event", type = {Coding.class}, order=6, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Event type", formalDefinition="A coded identifier of a supported messaging event." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-events")
-    protected Coding event;
+    @Child(name = "event", type = {UriType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Link to the Event type", formalDefinition="Link to the defined event type." )
+    protected UriType event;
 
     /**
      * The impact of the content of the message.
@@ -896,7 +895,7 @@ public class MessageDefinition extends MetadataResource {
     @Description(shortDefinition="Responses to this message", formalDefinition="Indicates what types of messages may be sent as an application-level response to this message." )
     protected List<MessageDefinitionAllowedResponseComponent> allowedResponse;
 
-    private static final long serialVersionUID = -219916580L;
+    private static final long serialVersionUID = 677490646L;
 
   /**
    * Constructor
@@ -908,11 +907,10 @@ public class MessageDefinition extends MetadataResource {
   /**
    * Constructor
    */
-    public MessageDefinition(Enumeration<PublicationStatus> status, DateTimeType date, Coding event) {
+    public MessageDefinition(Enumeration<PublicationStatus> status, DateTimeType date) {
       super();
       this.status = status;
       this.date = date;
-      this.event = event;
     }
 
     /**
@@ -1808,15 +1806,19 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #event} (A coded identifier of a supported messaging event.)
+     * @return {@link #event} (Link to the defined event type.). This is the underlying object with id, value and extensions. The accessor "getEvent" gives direct access to the value
      */
-    public Coding getEvent() { 
+    public UriType getEventElement() { 
       if (this.event == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MessageDefinition.event");
         else if (Configuration.doAutoCreate())
-          this.event = new Coding(); // cc
+          this.event = new UriType(); // bb
       return this.event;
+    }
+
+    public boolean hasEventElement() { 
+      return this.event != null && !this.event.isEmpty();
     }
 
     public boolean hasEvent() { 
@@ -1824,10 +1826,31 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #event} (A coded identifier of a supported messaging event.)
+     * @param value {@link #event} (Link to the defined event type.). This is the underlying object with id, value and extensions. The accessor "getEvent" gives direct access to the value
      */
-    public MessageDefinition setEvent(Coding value) { 
+    public MessageDefinition setEventElement(UriType value) { 
       this.event = value;
+      return this;
+    }
+
+    /**
+     * @return Link to the defined event type.
+     */
+    public String getEvent() { 
+      return this.event == null ? null : this.event.getValue();
+    }
+
+    /**
+     * @param value Link to the defined event type.
+     */
+    public MessageDefinition setEvent(String value) { 
+      if (Utilities.noString(value))
+        this.event = null;
+      else {
+        if (this.event == null)
+          this.event = new UriType();
+        this.event.setValue(value);
+      }
       return this;
     }
 
@@ -2051,7 +2074,7 @@ public class MessageDefinition extends MetadataResource {
         children.add(new Property("base", "Reference(MessageDefinition)", "The MessageDefinition that is the basis for the contents of this resource.", 0, 1, base));
         children.add(new Property("parent", "Reference(ActivityDefinition|PlanDefinition)", "Identifies a protocol or workflow that this MessageDefinition represents a step in.", 0, java.lang.Integer.MAX_VALUE, parent));
         children.add(new Property("replaces", "Reference(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces));
-        children.add(new Property("event", "Coding", "A coded identifier of a supported messaging event.", 0, 1, event));
+        children.add(new Property("event", "uri", "Link to the defined event type.", 0, 1, event));
         children.add(new Property("category", "code", "The impact of the content of the message.", 0, 1, category));
         children.add(new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus));
         children.add(new Property("responseRequired", "boolean", "Indicates whether a response is required for this message.", 0, 1, responseRequired));
@@ -2079,7 +2102,7 @@ public class MessageDefinition extends MetadataResource {
         case 3016401: /*base*/  return new Property("base", "Reference(MessageDefinition)", "The MessageDefinition that is the basis for the contents of this resource.", 0, 1, base);
         case -995424086: /*parent*/  return new Property("parent", "Reference(ActivityDefinition|PlanDefinition)", "Identifies a protocol or workflow that this MessageDefinition represents a step in.", 0, java.lang.Integer.MAX_VALUE, parent);
         case -430332865: /*replaces*/  return new Property("replaces", "Reference(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces);
-        case 96891546: /*event*/  return new Property("event", "Coding", "A coded identifier of a supported messaging event.", 0, 1, event);
+        case 96891546: /*event*/  return new Property("event", "uri", "Link to the defined event type.", 0, 1, event);
         case 50511102: /*category*/  return new Property("category", "code", "The impact of the content of the message.", 0, 1, category);
         case 97604824: /*focus*/  return new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus);
         case 791597824: /*responseRequired*/  return new Property("responseRequired", "boolean", "Indicates whether a response is required for this message.", 0, 1, responseRequired);
@@ -2110,7 +2133,7 @@ public class MessageDefinition extends MetadataResource {
         case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Reference
         case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // Reference
         case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // Reference
-        case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // Coding
+        case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // UriType
         case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<MessageSignificanceCategory>
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // MessageDefinitionFocusComponent
         case 791597824: /*responseRequired*/ return this.responseRequired == null ? new Base[0] : new Base[] {this.responseRequired}; // BooleanType
@@ -2179,7 +2202,7 @@ public class MessageDefinition extends MetadataResource {
           this.getReplaces().add(castToReference(value)); // Reference
           return value;
         case 96891546: // event
-          this.event = castToCoding(value); // Coding
+          this.event = castToUri(value); // UriType
           return value;
         case 50511102: // category
           value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
@@ -2239,7 +2262,7 @@ public class MessageDefinition extends MetadataResource {
         } else if (name.equals("replaces")) {
           this.getReplaces().add(castToReference(value));
         } else if (name.equals("event")) {
-          this.event = castToCoding(value); // Coding
+          this.event = castToUri(value); // UriType
         } else if (name.equals("category")) {
           value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
           this.category = (Enumeration) value; // Enumeration<MessageSignificanceCategory>
@@ -2275,7 +2298,7 @@ public class MessageDefinition extends MetadataResource {
         case 3016401:  return getBase(); 
         case -995424086:  return addParent(); 
         case -430332865:  return addReplaces(); 
-        case 96891546:  return getEvent(); 
+        case 96891546:  return getEventElement();
         case 50511102:  return getCategoryElement();
         case 97604824:  return addFocus(); 
         case 791597824:  return getResponseRequiredElement();
@@ -2306,7 +2329,7 @@ public class MessageDefinition extends MetadataResource {
         case 3016401: /*base*/ return new String[] {"Reference"};
         case -995424086: /*parent*/ return new String[] {"Reference"};
         case -430332865: /*replaces*/ return new String[] {"Reference"};
-        case 96891546: /*event*/ return new String[] {"Coding"};
+        case 96891546: /*event*/ return new String[] {"uri"};
         case 50511102: /*category*/ return new String[] {"code"};
         case 97604824: /*focus*/ return new String[] {};
         case 791597824: /*responseRequired*/ return new String[] {"boolean"};
@@ -2375,8 +2398,7 @@ public class MessageDefinition extends MetadataResource {
           return addReplaces();
         }
         else if (name.equals("event")) {
-          this.event = new Coding();
-          return this.event;
+          throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.event");
         }
         else if (name.equals("category")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.category");
@@ -2481,8 +2503,9 @@ public class MessageDefinition extends MetadataResource {
         if (!(other instanceof MessageDefinition))
           return false;
         MessageDefinition o = (MessageDefinition) other;
-        return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true) && compareValues(category, o.category, true)
-           && compareValues(responseRequired, o.responseRequired, true);
+        return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true) && compareValues(event, o.event, true)
+           && compareValues(category, o.category, true) && compareValues(responseRequired, o.responseRequired, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -2700,21 +2723,21 @@ public class MessageDefinition extends MetadataResource {
    * Search parameter: <b>event</b>
    * <p>
    * Description: <b>The event that triggers the message</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>uri</b><br>
    * Path: <b>MessageDefinition.event</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="MessageDefinition.event", description="The event that triggers the message", type="token" )
+  @SearchParamDefinition(name="event", path="MessageDefinition.event", description="The event that triggers the message", type="uri" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
    * <p>
    * Description: <b>The event that triggers the message</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>uri</b><br>
    * Path: <b>MessageDefinition.event</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EVENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EVENT);
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam EVENT = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_EVENT);
 
  /**
    * Search parameter: <b>category</b>

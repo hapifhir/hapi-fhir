@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -555,12 +555,330 @@ public class DeviceComponent extends DomainResource {
 
   }
 
+    @Block()
+    public static class DeviceComponentPropertyComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The code for the device property identifying the property being reported such as 'time capability'.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Code that specifies the property", formalDefinition="The code for the device property identifying the property being reported such as 'time capability'." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-component-property")
+        protected CodeableConcept type;
+
+        /**
+         * The property value when the property being reported is a quantity such as the resolution of a real time clock.
+         */
+        @Child(name = "valueQuantity", type = {Quantity.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Property value as a quantity", formalDefinition="The property value when the property being reported is a quantity such as the resolution of a real time clock." )
+        protected List<Quantity> valueQuantity;
+
+        /**
+         * The property value when the property being reported is a code, such as the code indicating that the device supports a real time clock using absolute time.
+         */
+        @Child(name = "valueCode", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Property value as a code", formalDefinition="The property value when the property being reported is a code, such as the code indicating that the device supports a real time clock using absolute time." )
+        protected List<CodeableConcept> valueCode;
+
+        private static final long serialVersionUID = 1512172633L;
+
     /**
-     * The locally assigned unique identification by the software. For example: handle ID.
+     * Constructor
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Instance id assigned by the software stack", formalDefinition="The locally assigned unique identification by the software. For example: handle ID." )
-    protected Identifier identifier;
+      public DeviceComponentPropertyComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public DeviceComponentPropertyComponent(CodeableConcept type) {
+        super();
+        this.type = type;
+      }
+
+        /**
+         * @return {@link #type} (The code for the device property identifying the property being reported such as 'time capability'.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceComponentPropertyComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The code for the device property identifying the property being reported such as 'time capability'.)
+         */
+        public DeviceComponentPropertyComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #valueQuantity} (The property value when the property being reported is a quantity such as the resolution of a real time clock.)
+         */
+        public List<Quantity> getValueQuantity() { 
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          return this.valueQuantity;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DeviceComponentPropertyComponent setValueQuantity(List<Quantity> theValueQuantity) { 
+          this.valueQuantity = theValueQuantity;
+          return this;
+        }
+
+        public boolean hasValueQuantity() { 
+          if (this.valueQuantity == null)
+            return false;
+          for (Quantity item : this.valueQuantity)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Quantity addValueQuantity() { //3
+          Quantity t = new Quantity();
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
+          return t;
+        }
+
+        public DeviceComponentPropertyComponent addValueQuantity(Quantity t) { //3
+          if (t == null)
+            return this;
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #valueQuantity}, creating it if it does not already exist
+         */
+        public Quantity getValueQuantityFirstRep() { 
+          if (getValueQuantity().isEmpty()) {
+            addValueQuantity();
+          }
+          return getValueQuantity().get(0);
+        }
+
+        /**
+         * @return {@link #valueCode} (The property value when the property being reported is a code, such as the code indicating that the device supports a real time clock using absolute time.)
+         */
+        public List<CodeableConcept> getValueCode() { 
+          if (this.valueCode == null)
+            this.valueCode = new ArrayList<CodeableConcept>();
+          return this.valueCode;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DeviceComponentPropertyComponent setValueCode(List<CodeableConcept> theValueCode) { 
+          this.valueCode = theValueCode;
+          return this;
+        }
+
+        public boolean hasValueCode() { 
+          if (this.valueCode == null)
+            return false;
+          for (CodeableConcept item : this.valueCode)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addValueCode() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.valueCode == null)
+            this.valueCode = new ArrayList<CodeableConcept>();
+          this.valueCode.add(t);
+          return t;
+        }
+
+        public DeviceComponentPropertyComponent addValueCode(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.valueCode == null)
+            this.valueCode = new ArrayList<CodeableConcept>();
+          this.valueCode.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #valueCode}, creating it if it does not already exist
+         */
+        public CodeableConcept getValueCodeFirstRep() { 
+          if (getValueCode().isEmpty()) {
+            addValueCode();
+          }
+          return getValueCode().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "The code for the device property identifying the property being reported such as 'time capability'.", 0, 1, type));
+          children.add(new Property("valueQuantity", "Quantity", "The property value when the property being reported is a quantity such as the resolution of a real time clock.", 0, java.lang.Integer.MAX_VALUE, valueQuantity));
+          children.add(new Property("valueCode", "CodeableConcept", "The property value when the property being reported is a code, such as the code indicating that the device supports a real time clock using absolute time.", 0, java.lang.Integer.MAX_VALUE, valueCode));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The code for the device property identifying the property being reported such as 'time capability'.", 0, 1, type);
+          case -2029823716: /*valueQuantity*/  return new Property("valueQuantity", "Quantity", "The property value when the property being reported is a quantity such as the resolution of a real time clock.", 0, java.lang.Integer.MAX_VALUE, valueQuantity);
+          case -766209282: /*valueCode*/  return new Property("valueCode", "CodeableConcept", "The property value when the property being reported is a code, such as the code indicating that the device supports a real time clock using absolute time.", 0, java.lang.Integer.MAX_VALUE, valueCode);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -2029823716: /*valueQuantity*/ return this.valueQuantity == null ? new Base[0] : this.valueQuantity.toArray(new Base[this.valueQuantity.size()]); // Quantity
+        case -766209282: /*valueCode*/ return this.valueCode == null ? new Base[0] : this.valueCode.toArray(new Base[this.valueCode.size()]); // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -2029823716: // valueQuantity
+          this.getValueQuantity().add(castToQuantity(value)); // Quantity
+          return value;
+        case -766209282: // valueCode
+          this.getValueCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("valueQuantity")) {
+          this.getValueQuantity().add(castToQuantity(value));
+        } else if (name.equals("valueCode")) {
+          this.getValueCode().add(castToCodeableConcept(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); 
+        case -2029823716:  return addValueQuantity(); 
+        case -766209282:  return addValueCode(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -2029823716: /*valueQuantity*/ return new String[] {"Quantity"};
+        case -766209282: /*valueCode*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("valueQuantity")) {
+          return addValueQuantity();
+        }
+        else if (name.equals("valueCode")) {
+          return addValueCode();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public DeviceComponentPropertyComponent copy() {
+        DeviceComponentPropertyComponent dst = new DeviceComponentPropertyComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        if (valueQuantity != null) {
+          dst.valueQuantity = new ArrayList<Quantity>();
+          for (Quantity i : valueQuantity)
+            dst.valueQuantity.add(i.copy());
+        };
+        if (valueCode != null) {
+          dst.valueCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : valueCode)
+            dst.valueCode.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof DeviceComponentPropertyComponent))
+          return false;
+        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(valueQuantity, o.valueQuantity, true) && compareDeep(valueCode, o.valueCode, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof DeviceComponentPropertyComponent))
+          return false;
+        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, valueQuantity, valueCode
+          );
+      }
+
+  public String fhirType() {
+    return "DeviceComponent.property";
+
+  }
+
+  }
+
+    /**
+     * Unique instance identifiers assigned to a device by the software, manufacturers, other organizations or owners. For example: handle ID.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instance identifier", formalDefinition="Unique instance identifiers assigned to a device by the software, manufacturers, other organizations or owners. For example: handle ID." )
+    protected List<Identifier> identifier;
 
     /**
      * The component type as defined in the object-oriented or metric nomenclature partition.
@@ -640,7 +958,14 @@ public class DeviceComponent extends DomainResource {
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeableConcept languageCode;
 
-    private static final long serialVersionUID = 32987426L;
+    /**
+     * Other device properties expressed as a `type` which identifies the property and a value(s) either as a quantity or a code.
+     */
+    @Child(name = "property", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Other Attributes", formalDefinition="Other device properties expressed as a `type` which identifies the property and a value(s) either as a quantity or a code." )
+    protected List<DeviceComponentPropertyComponent> property;
+
+    private static final long serialVersionUID = -972124604L;
 
   /**
    * Constructor
@@ -652,34 +977,62 @@ public class DeviceComponent extends DomainResource {
   /**
    * Constructor
    */
-    public DeviceComponent(Identifier identifier, CodeableConcept type) {
+    public DeviceComponent(CodeableConcept type) {
       super();
-      this.identifier = identifier;
       this.type = type;
     }
 
     /**
-     * @return {@link #identifier} (The locally assigned unique identification by the software. For example: handle ID.)
+     * @return {@link #identifier} (Unique instance identifiers assigned to a device by the software, manufacturers, other organizations or owners. For example: handle ID.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DeviceComponent.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceComponent setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public DeviceComponent addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (The locally assigned unique identification by the software. For example: handle ID.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public DeviceComponent setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1046,9 +1399,62 @@ public class DeviceComponent extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #property} (Other device properties expressed as a `type` which identifies the property and a value(s) either as a quantity or a code.)
+     */
+    public List<DeviceComponentPropertyComponent> getProperty() { 
+      if (this.property == null)
+        this.property = new ArrayList<DeviceComponentPropertyComponent>();
+      return this.property;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceComponent setProperty(List<DeviceComponentPropertyComponent> theProperty) { 
+      this.property = theProperty;
+      return this;
+    }
+
+    public boolean hasProperty() { 
+      if (this.property == null)
+        return false;
+      for (DeviceComponentPropertyComponent item : this.property)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public DeviceComponentPropertyComponent addProperty() { //3
+      DeviceComponentPropertyComponent t = new DeviceComponentPropertyComponent();
+      if (this.property == null)
+        this.property = new ArrayList<DeviceComponentPropertyComponent>();
+      this.property.add(t);
+      return t;
+    }
+
+    public DeviceComponent addProperty(DeviceComponentPropertyComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.property == null)
+        this.property = new ArrayList<DeviceComponentPropertyComponent>();
+      this.property.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #property}, creating it if it does not already exist
+     */
+    public DeviceComponentPropertyComponent getPropertyFirstRep() { 
+      if (getProperty().isEmpty()) {
+        addProperty();
+      }
+      return getProperty().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by the software, manufacturers, other organizations or owners. For example: handle ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, 1, type));
         children.add(new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, 1, lastSystemChange));
         children.add(new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, 1, source));
@@ -1058,12 +1464,13 @@ public class DeviceComponent extends DomainResource {
         children.add(new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, 1, measurementPrinciple));
         children.add(new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
         children.add(new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, 1, languageCode));
+        children.add(new Property("property", "", "Other device properties expressed as a `type` which identifies the property and a value(s) either as a quantity or a code.", 0, java.lang.Integer.MAX_VALUE, property));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by the software, manufacturers, other organizations or owners. For example: handle ID.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, 1, type);
         case -2072475531: /*lastSystemChange*/  return new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, 1, lastSystemChange);
         case -896505829: /*source*/  return new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, 1, source);
@@ -1073,6 +1480,7 @@ public class DeviceComponent extends DomainResource {
         case 24324384: /*measurementPrinciple*/  return new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, 1, measurementPrinciple);
         case -455527222: /*productionSpecification*/  return new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification);
         case -2092349083: /*languageCode*/  return new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, 1, languageCode);
+        case -993141291: /*property*/  return new Property("property", "", "Other device properties expressed as a `type` which identifies the property and a value(s) either as a quantity or a code.", 0, java.lang.Integer.MAX_VALUE, property);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1081,7 +1489,7 @@ public class DeviceComponent extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -2072475531: /*lastSystemChange*/ return this.lastSystemChange == null ? new Base[0] : new Base[] {this.lastSystemChange}; // InstantType
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
@@ -1091,6 +1499,7 @@ public class DeviceComponent extends DomainResource {
         case 24324384: /*measurementPrinciple*/ return this.measurementPrinciple == null ? new Base[0] : new Base[] {this.measurementPrinciple}; // Enumeration<MeasmntPrinciple>
         case -455527222: /*productionSpecification*/ return this.productionSpecification == null ? new Base[0] : this.productionSpecification.toArray(new Base[this.productionSpecification.size()]); // DeviceComponentProductionSpecificationComponent
         case -2092349083: /*languageCode*/ return this.languageCode == null ? new Base[0] : new Base[] {this.languageCode}; // CodeableConcept
+        case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // DeviceComponentPropertyComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1100,7 +1509,7 @@ public class DeviceComponent extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -1130,6 +1539,9 @@ public class DeviceComponent extends DomainResource {
         case -2092349083: // languageCode
           this.languageCode = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case -993141291: // property
+          this.getProperty().add((DeviceComponentPropertyComponent) value); // DeviceComponentPropertyComponent
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1138,7 +1550,7 @@ public class DeviceComponent extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("lastSystemChange")) {
@@ -1158,6 +1570,8 @@ public class DeviceComponent extends DomainResource {
           this.getProductionSpecification().add((DeviceComponentProductionSpecificationComponent) value);
         } else if (name.equals("languageCode")) {
           this.languageCode = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("property")) {
+          this.getProperty().add((DeviceComponentPropertyComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1166,7 +1580,7 @@ public class DeviceComponent extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case 3575610:  return getType(); 
         case -2072475531:  return getLastSystemChangeElement();
         case -896505829:  return getSource(); 
@@ -1176,6 +1590,7 @@ public class DeviceComponent extends DomainResource {
         case 24324384:  return getMeasurementPrincipleElement();
         case -455527222:  return addProductionSpecification(); 
         case -2092349083:  return getLanguageCode(); 
+        case -993141291:  return addProperty(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1194,6 +1609,7 @@ public class DeviceComponent extends DomainResource {
         case 24324384: /*measurementPrinciple*/ return new String[] {"code"};
         case -455527222: /*productionSpecification*/ return new String[] {};
         case -2092349083: /*languageCode*/ return new String[] {"CodeableConcept"};
+        case -993141291: /*property*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1202,8 +1618,7 @@ public class DeviceComponent extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("type")) {
           this.type = new CodeableConcept();
@@ -1237,6 +1652,9 @@ public class DeviceComponent extends DomainResource {
           this.languageCode = new CodeableConcept();
           return this.languageCode;
         }
+        else if (name.equals("property")) {
+          return addProperty();
+        }
         else
           return super.addChild(name);
       }
@@ -1249,7 +1667,11 @@ public class DeviceComponent extends DomainResource {
       public DeviceComponent copy() {
         DeviceComponent dst = new DeviceComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.type = type == null ? null : type.copy();
         dst.lastSystemChange = lastSystemChange == null ? null : lastSystemChange.copy();
         dst.source = source == null ? null : source.copy();
@@ -1267,6 +1689,11 @@ public class DeviceComponent extends DomainResource {
             dst.productionSpecification.add(i.copy());
         };
         dst.languageCode = languageCode == null ? null : languageCode.copy();
+        if (property != null) {
+          dst.property = new ArrayList<DeviceComponentPropertyComponent>();
+          for (DeviceComponentPropertyComponent i : property)
+            dst.property.add(i.copy());
+        };
         return dst;
       }
 
@@ -1285,7 +1712,7 @@ public class DeviceComponent extends DomainResource {
            && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(parameterGroup, o.parameterGroup, true) && compareDeep(measurementPrinciple, o.measurementPrinciple, true)
            && compareDeep(productionSpecification, o.productionSpecification, true) && compareDeep(languageCode, o.languageCode, true)
-          ;
+           && compareDeep(property, o.property, true);
       }
 
       @Override
@@ -1302,7 +1729,7 @@ public class DeviceComponent extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, lastSystemChange
           , source, parent, operationalStatus, parameterGroup, measurementPrinciple, productionSpecification
-          , languageCode);
+          , languageCode, property);
       }
 
   @Override

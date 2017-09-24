@@ -31,7 +31,9 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.r4.model;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.zip.DataFormatException;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;

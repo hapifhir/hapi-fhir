@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -107,6 +107,10 @@ public class ActivityDefinition extends MetadataResource {
          * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
          */
         CARETEAM, 
+        /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        CATALOGENTRY, 
         /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
@@ -236,6 +240,10 @@ public class ActivityDefinition extends MetadataResource {
          */
         EVENTDEFINITION, 
         /**
+         * Example of workflow instance.
+         */
+        EXAMPLESCENARIO, 
+        /**
          * Resource to define constraints on the Expansion of a FHIR ValueSet.
          */
         EXPANSIONPROFILE, 
@@ -336,7 +344,7 @@ public class ActivityDefinition extends MetadataResource {
          */
         MEDICATIONREQUEST, 
         /**
-         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
@@ -480,6 +488,10 @@ public class ActivityDefinition extends MetadataResource {
          */
         SPECIMEN, 
         /**
+         * A kind of specimen with associated set of requirements.
+         */
+        SPECIMENDEFINITION, 
+        /**
          * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.
          */
         STRUCTUREDEFINITION, 
@@ -558,6 +570,8 @@ public class ActivityDefinition extends MetadataResource {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -622,6 +636,8 @@ public class ActivityDefinition extends MetadataResource {
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -744,6 +760,8 @@ public class ActivityDefinition extends MetadataResource {
           return SLOT;
         if ("Specimen".equals(codeString))
           return SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -787,6 +805,7 @@ public class ActivityDefinition extends MetadataResource {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -819,6 +838,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -880,6 +900,7 @@ public class ActivityDefinition extends MetadataResource {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -910,6 +931,7 @@ public class ActivityDefinition extends MetadataResource {
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
+            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -942,6 +964,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
             case EXPANSIONPROFILE: return "http://hl7.org/fhir/resource-types";
             case EXPLANATIONOFBENEFIT: return "http://hl7.org/fhir/resource-types";
             case FAMILYMEMBERHISTORY: return "http://hl7.org/fhir/resource-types";
@@ -1003,6 +1026,7 @@ public class ActivityDefinition extends MetadataResource {
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
+            case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -1033,6 +1057,7 @@ public class ActivityDefinition extends MetadataResource {
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
+            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -1065,6 +1090,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
+            case EXAMPLESCENARIO: return "Example of workflow instance.";
             case EXPANSIONPROFILE: return "Resource to define constraints on the Expansion of a FHIR ValueSet.";
             case EXPLANATIONOFBENEFIT: return "This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.";
             case FAMILYMEMBERHISTORY: return "Significant health conditions for a person related to the patient relevant in the context of care for the patient.";
@@ -1090,7 +1116,7 @@ public class ActivityDefinition extends MetadataResource {
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
-            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
@@ -1126,6 +1152,7 @@ public class ActivityDefinition extends MetadataResource {
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
+            case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
@@ -1156,6 +1183,7 @@ public class ActivityDefinition extends MetadataResource {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -1188,6 +1216,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -1249,6 +1278,7 @@ public class ActivityDefinition extends MetadataResource {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -1298,6 +1328,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return ActivityDefinitionKind.CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return ActivityDefinitionKind.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return ActivityDefinitionKind.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -1362,6 +1394,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return ActivityDefinitionKind.EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return ActivityDefinitionKind.EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return ActivityDefinitionKind.EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -1484,6 +1518,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.SLOT;
         if ("Specimen".equals(codeString))
           return ActivityDefinitionKind.SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return ActivityDefinitionKind.SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return ActivityDefinitionKind.STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -1544,6 +1580,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CARETEAM);
+        if ("CatalogEntry".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -1608,6 +1646,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.EVENTDEFINITION);
+        if ("ExampleScenario".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.EXAMPLESCENARIO);
         if ("ExpansionProfile".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.EXPANSIONPROFILE);
         if ("ExplanationOfBenefit".equals(codeString))
@@ -1730,6 +1770,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SLOT);
         if ("Specimen".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SPECIMEN);
+        if ("SpecimenDefinition".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SPECIMENDEFINITION);
         if ("StructureDefinition".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.STRUCTUREDEFINITION);
         if ("StructureMap".equals(codeString))
@@ -1783,6 +1825,8 @@ public class ActivityDefinition extends MetadataResource {
         return "CarePlan";
       if (code == ActivityDefinitionKind.CARETEAM)
         return "CareTeam";
+      if (code == ActivityDefinitionKind.CATALOGENTRY)
+        return "CatalogEntry";
       if (code == ActivityDefinitionKind.CHARGEITEM)
         return "ChargeItem";
       if (code == ActivityDefinitionKind.CLAIM)
@@ -1847,6 +1891,8 @@ public class ActivityDefinition extends MetadataResource {
         return "EpisodeOfCare";
       if (code == ActivityDefinitionKind.EVENTDEFINITION)
         return "EventDefinition";
+      if (code == ActivityDefinitionKind.EXAMPLESCENARIO)
+        return "ExampleScenario";
       if (code == ActivityDefinitionKind.EXPANSIONPROFILE)
         return "ExpansionProfile";
       if (code == ActivityDefinitionKind.EXPLANATIONOFBENEFIT)
@@ -1969,6 +2015,8 @@ public class ActivityDefinition extends MetadataResource {
         return "Slot";
       if (code == ActivityDefinitionKind.SPECIMEN)
         return "Specimen";
+      if (code == ActivityDefinitionKind.SPECIMENDEFINITION)
+        return "SpecimenDefinition";
       if (code == ActivityDefinitionKind.STRUCTUREDEFINITION)
         return "StructureDefinition";
       if (code == ActivityDefinitionKind.STRUCTUREMAP)

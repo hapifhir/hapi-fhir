@@ -48,6 +48,40 @@ public class CSVReader extends InputStreamReader {
 		super(in, "UTF-8");
 	}
 
+	private String[] cols;
+  private String[] cells;
+  
+	public void readHeaders() throws IOException, FHIRException {
+    cols = parseLine();  
+	}
+	
+
+  public boolean line() throws IOException, FHIRException {
+    if (ready()) {
+      cells = parseLine();
+      return true;
+    }  else
+      return false;
+  }
+
+  public boolean has(String name) {
+    return cell(name) != null;
+  }
+  
+  public String cell(String name) {
+    int index = -1;
+    for (int i = 0; i < cols.length; i++) {
+      if (name.equals(cols[i]))
+        index = i;
+    }
+    if (index == -1)
+      throw new Error("no cell "+name);
+    String s = cells.length >= index ? cells[index] : null;
+    if (Utilities.noString(s))
+      return null;
+    return s;
+  }
+    
 	protected boolean parseBoolean(String column) {
 		if (column == null)
 			return false;
@@ -134,5 +168,6 @@ public class CSVReader extends InputStreamReader {
 		  else 
 			  pc = (char) i;
 	}
+
 
 }

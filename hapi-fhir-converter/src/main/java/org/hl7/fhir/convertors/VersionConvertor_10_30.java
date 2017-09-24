@@ -20,7 +20,6 @@ package org.hl7.fhir.convertors;
  * #L%
  */
 
-
 import java.util.ArrayList;
 import java.util.List;
 

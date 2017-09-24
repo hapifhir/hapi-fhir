@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -42,20 +42,24 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A description of a triggering event.
+ * A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.
  */
 @DatatypeDef(name="TriggerDefinition")
 public class TriggerDefinition extends Type implements ICompositeType {
 
     public enum TriggerType {
         /**
-         * The trigger occurs in response to a specific named event
+         * The trigger occurs in response to a specific named event, and no other information about the trigger is specified. Named events are completely pre-coordinated, and the formal semantics of the trigger are not provided
          */
         NAMEDEVENT, 
         /**
-         * The trigger occurs at a specific time or periodically as described by a timing or schedule
+         * The trigger occurs at a specific time or periodically as described by a timing or schedule. A periodic event cannot have any data elements, but may have a name assigned as a shorthand for the event
          */
         PERIODIC, 
+        /**
+         * The trigger occurs whenever data of a particular type is changed in any way, either added, modified, or removed
+         */
+        DATACHANGED, 
         /**
          * The trigger occurs whenever data of a particular type is added
          */
@@ -87,6 +91,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return NAMEDEVENT;
         if ("periodic".equals(codeString))
           return PERIODIC;
+        if ("data-changed".equals(codeString))
+          return DATACHANGED;
         if ("data-added".equals(codeString))
           return DATAADDED;
         if ("data-modified".equals(codeString))
@@ -106,6 +112,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           switch (this) {
             case NAMEDEVENT: return "named-event";
             case PERIODIC: return "periodic";
+            case DATACHANGED: return "data-changed";
             case DATAADDED: return "data-added";
             case DATAMODIFIED: return "data-modified";
             case DATAREMOVED: return "data-removed";
@@ -118,6 +125,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           switch (this) {
             case NAMEDEVENT: return "http://hl7.org/fhir/trigger-type";
             case PERIODIC: return "http://hl7.org/fhir/trigger-type";
+            case DATACHANGED: return "http://hl7.org/fhir/trigger-type";
             case DATAADDED: return "http://hl7.org/fhir/trigger-type";
             case DATAMODIFIED: return "http://hl7.org/fhir/trigger-type";
             case DATAREMOVED: return "http://hl7.org/fhir/trigger-type";
@@ -128,8 +136,9 @@ public class TriggerDefinition extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case NAMEDEVENT: return "The trigger occurs in response to a specific named event";
-            case PERIODIC: return "The trigger occurs at a specific time or periodically as described by a timing or schedule";
+            case NAMEDEVENT: return "The trigger occurs in response to a specific named event, and no other information about the trigger is specified. Named events are completely pre-coordinated, and the formal semantics of the trigger are not provided";
+            case PERIODIC: return "The trigger occurs at a specific time or periodically as described by a timing or schedule. A periodic event cannot have any data elements, but may have a name assigned as a shorthand for the event";
+            case DATACHANGED: return "The trigger occurs whenever data of a particular type is changed in any way, either added, modified, or removed";
             case DATAADDED: return "The trigger occurs whenever data of a particular type is added";
             case DATAMODIFIED: return "The trigger occurs whenever data of a particular type is modified";
             case DATAREMOVED: return "The trigger occurs whenever data of a particular type is removed";
@@ -142,8 +151,9 @@ public class TriggerDefinition extends Type implements ICompositeType {
           switch (this) {
             case NAMEDEVENT: return "Named Event";
             case PERIODIC: return "Periodic";
+            case DATACHANGED: return "Data Changed";
             case DATAADDED: return "Data Added";
-            case DATAMODIFIED: return "Data Modified";
+            case DATAMODIFIED: return "Data Updated";
             case DATAREMOVED: return "Data Removed";
             case DATAACCESSED: return "Data Accessed";
             case DATAACCESSENDED: return "Data Access Ended";
@@ -161,6 +171,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return TriggerType.NAMEDEVENT;
         if ("periodic".equals(codeString))
           return TriggerType.PERIODIC;
+        if ("data-changed".equals(codeString))
+          return TriggerType.DATACHANGED;
         if ("data-added".equals(codeString))
           return TriggerType.DATAADDED;
         if ("data-modified".equals(codeString))
@@ -185,6 +197,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return new Enumeration<TriggerType>(this, TriggerType.NAMEDEVENT);
         if ("periodic".equals(codeString))
           return new Enumeration<TriggerType>(this, TriggerType.PERIODIC);
+        if ("data-changed".equals(codeString))
+          return new Enumeration<TriggerType>(this, TriggerType.DATACHANGED);
         if ("data-added".equals(codeString))
           return new Enumeration<TriggerType>(this, TriggerType.DATAADDED);
         if ("data-modified".equals(codeString))
@@ -202,6 +216,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
         return "named-event";
       if (code == TriggerType.PERIODIC)
         return "periodic";
+      if (code == TriggerType.DATACHANGED)
+        return "data-changed";
       if (code == TriggerType.DATAADDED)
         return "data-added";
       if (code == TriggerType.DATAMODIFIED)
@@ -219,8 +235,100 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
     }
 
+    public enum ExpressionLanguage {
+        /**
+         * Clinical Quality Language
+         */
+        TEXT_CQL, 
+        /**
+         * FHIRPath
+         */
+        TEXT_FHIRPATH, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ExpressionLanguage fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("text/cql".equals(codeString))
+          return TEXT_CQL;
+        if ("text/fhirpath".equals(codeString))
+          return TEXT_FHIRPATH;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ExpressionLanguage code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case TEXT_CQL: return "text/cql";
+            case TEXT_FHIRPATH: return "text/fhirpath";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case TEXT_CQL: return "http://hl7.org/fhir/expression-language";
+            case TEXT_FHIRPATH: return "http://hl7.org/fhir/expression-language";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case TEXT_CQL: return "Clinical Quality Language";
+            case TEXT_FHIRPATH: return "FHIRPath";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case TEXT_CQL: return "CQL";
+            case TEXT_FHIRPATH: return "FHIRPath";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ExpressionLanguageEnumFactory implements EnumFactory<ExpressionLanguage> {
+    public ExpressionLanguage fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("text/cql".equals(codeString))
+          return ExpressionLanguage.TEXT_CQL;
+        if ("text/fhirpath".equals(codeString))
+          return ExpressionLanguage.TEXT_FHIRPATH;
+        throw new IllegalArgumentException("Unknown ExpressionLanguage code '"+codeString+"'");
+        }
+        public Enumeration<ExpressionLanguage> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<ExpressionLanguage>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("text/cql".equals(codeString))
+          return new Enumeration<ExpressionLanguage>(this, ExpressionLanguage.TEXT_CQL);
+        if ("text/fhirpath".equals(codeString))
+          return new Enumeration<ExpressionLanguage>(this, ExpressionLanguage.TEXT_FHIRPATH);
+        throw new FHIRException("Unknown ExpressionLanguage code '"+codeString+"'");
+        }
+    public String toCode(ExpressionLanguage code) {
+      if (code == ExpressionLanguage.TEXT_CQL)
+        return "text/cql";
+      if (code == ExpressionLanguage.TEXT_FHIRPATH)
+        return "text/fhirpath";
+      return "?";
+      }
+    public String toSystem(ExpressionLanguage code) {
+      return code.getSystem();
+      }
+    }
+
     @Block()
-    public static class TriggerDefinitionEventConditionComponent extends Element implements IBaseDatatypeElement {
+    public static class TriggerDefinitionConditionComponent extends Element implements IBaseDatatypeElement {
         /**
          * A brief, natural language description of the condition that effectively communicates the intended semantics.
          */
@@ -231,24 +339,34 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * The media type of the language for the expression.
          */
-        @Child(name = "language", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
-        protected StringType language;
+        @Child(name = "language", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="text/cql | text/fhirpath | etc", formalDefinition="The media type of the language for the expression." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/expression-language")
+        protected Enumeration<ExpressionLanguage> language;
 
         /**
          * An expression that returns true or false, indicating whether or not the condition is satisfied.
          */
-        @Child(name = "expression", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "expression", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether or not the condition is satisfied." )
         protected StringType expression;
 
-        private static final long serialVersionUID = 1354288281L;
+        private static final long serialVersionUID = -1280303355L;
 
     /**
      * Constructor
      */
-      public TriggerDefinitionEventConditionComponent() {
+      public TriggerDefinitionConditionComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TriggerDefinitionConditionComponent(Enumeration<ExpressionLanguage> language, StringType expression) {
+        super();
+        this.language = language;
+        this.expression = expression;
       }
 
         /**
@@ -257,7 +375,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TriggerDefinitionEventConditionComponent.description");
+              throw new Error("Attempt to auto-create TriggerDefinitionConditionComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -274,7 +392,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #description} (A brief, natural language description of the condition that effectively communicates the intended semantics.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public TriggerDefinitionEventConditionComponent setDescriptionElement(StringType value) { 
+        public TriggerDefinitionConditionComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -289,7 +407,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @param value A brief, natural language description of the condition that effectively communicates the intended semantics.
          */
-        public TriggerDefinitionEventConditionComponent setDescription(String value) { 
+        public TriggerDefinitionConditionComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -303,12 +421,12 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
          */
-        public StringType getLanguageElement() { 
+        public Enumeration<ExpressionLanguage> getLanguageElement() { 
           if (this.language == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TriggerDefinitionEventConditionComponent.language");
+              throw new Error("Attempt to auto-create TriggerDefinitionConditionComponent.language");
             else if (Configuration.doAutoCreate())
-              this.language = new StringType(); // bb
+              this.language = new Enumeration<ExpressionLanguage>(new ExpressionLanguageEnumFactory()); // bb
           return this.language;
         }
 
@@ -323,7 +441,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
          */
-        public TriggerDefinitionEventConditionComponent setLanguageElement(StringType value) { 
+        public TriggerDefinitionConditionComponent setLanguageElement(Enumeration<ExpressionLanguage> value) { 
           this.language = value;
           return this;
         }
@@ -331,21 +449,17 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @return The media type of the language for the expression.
          */
-        public String getLanguage() { 
+        public ExpressionLanguage getLanguage() { 
           return this.language == null ? null : this.language.getValue();
         }
 
         /**
          * @param value The media type of the language for the expression.
          */
-        public TriggerDefinitionEventConditionComponent setLanguage(String value) { 
-          if (Utilities.noString(value))
-            this.language = null;
-          else {
+        public TriggerDefinitionConditionComponent setLanguage(ExpressionLanguage value) { 
             if (this.language == null)
-              this.language = new StringType();
+              this.language = new Enumeration<ExpressionLanguage>(new ExpressionLanguageEnumFactory());
             this.language.setValue(value);
-          }
           return this;
         }
 
@@ -355,7 +469,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         public StringType getExpressionElement() { 
           if (this.expression == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TriggerDefinitionEventConditionComponent.expression");
+              throw new Error("Attempt to auto-create TriggerDefinitionConditionComponent.expression");
             else if (Configuration.doAutoCreate())
               this.expression = new StringType(); // bb
           return this.expression;
@@ -372,7 +486,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
-        public TriggerDefinitionEventConditionComponent setExpressionElement(StringType value) { 
+        public TriggerDefinitionConditionComponent setExpressionElement(StringType value) { 
           this.expression = value;
           return this;
         }
@@ -387,21 +501,17 @@ public class TriggerDefinition extends Type implements ICompositeType {
         /**
          * @param value An expression that returns true or false, indicating whether or not the condition is satisfied.
          */
-        public TriggerDefinitionEventConditionComponent setExpression(String value) { 
-          if (Utilities.noString(value))
-            this.expression = null;
-          else {
+        public TriggerDefinitionConditionComponent setExpression(String value) { 
             if (this.expression == null)
               this.expression = new StringType();
             this.expression.setValue(value);
-          }
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description));
-          children.add(new Property("language", "string", "The media type of the language for the expression.", 0, 1, language));
+          children.add(new Property("language", "code", "The media type of the language for the expression.", 0, 1, language));
           children.add(new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, 1, expression));
         }
 
@@ -409,7 +519,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1724546052: /*description*/  return new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description);
-          case -1613589672: /*language*/  return new Property("language", "string", "The media type of the language for the expression.", 0, 1, language);
+          case -1613589672: /*language*/  return new Property("language", "code", "The media type of the language for the expression.", 0, 1, language);
           case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, 1, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -420,7 +530,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // Enumeration<ExpressionLanguage>
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -434,7 +544,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
           this.description = castToString(value); // StringType
           return value;
         case -1613589672: // language
-          this.language = castToString(value); // StringType
+          value = new ExpressionLanguageEnumFactory().fromType(castToCode(value));
+          this.language = (Enumeration) value; // Enumeration<ExpressionLanguage>
           return value;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
@@ -449,7 +560,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
         if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else if (name.equals("language")) {
-          this.language = castToString(value); // StringType
+          value = new ExpressionLanguageEnumFactory().fromType(castToCode(value));
+          this.language = (Enumeration) value; // Enumeration<ExpressionLanguage>
         } else if (name.equals("expression")) {
           this.expression = castToString(value); // StringType
         } else
@@ -472,7 +584,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1724546052: /*description*/ return new String[] {"string"};
-        case -1613589672: /*language*/ return new String[] {"string"};
+        case -1613589672: /*language*/ return new String[] {"code"};
         case -1795452264: /*expression*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -494,8 +606,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return super.addChild(name);
       }
 
-      public TriggerDefinitionEventConditionComponent copy() {
-        TriggerDefinitionEventConditionComponent dst = new TriggerDefinitionEventConditionComponent();
+      public TriggerDefinitionConditionComponent copy() {
+        TriggerDefinitionConditionComponent dst = new TriggerDefinitionConditionComponent();
         copyValues(dst);
         dst.description = description == null ? null : description.copy();
         dst.language = language == null ? null : language.copy();
@@ -507,9 +619,9 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TriggerDefinitionEventConditionComponent))
+        if (!(other instanceof TriggerDefinitionConditionComponent))
           return false;
-        TriggerDefinitionEventConditionComponent o = (TriggerDefinitionEventConditionComponent) other;
+        TriggerDefinitionConditionComponent o = (TriggerDefinitionConditionComponent) other;
         return compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
@@ -518,9 +630,9 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TriggerDefinitionEventConditionComponent))
+        if (!(other instanceof TriggerDefinitionConditionComponent))
           return false;
-        TriggerDefinitionEventConditionComponent o = (TriggerDefinitionEventConditionComponent) other;
+        TriggerDefinitionConditionComponent o = (TriggerDefinitionConditionComponent) other;
         return compareValues(description, o.description, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
@@ -531,7 +643,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
 
   public String fhirType() {
-    return "TriggerDefinition.eventCondition";
+    return "TriggerDefinition.condition";
 
   }
 
@@ -541,39 +653,39 @@ public class TriggerDefinition extends Type implements ICompositeType {
      * The type of triggering event.
      */
     @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="named-event | periodic | data-added | data-modified | data-removed | data-accessed | data-access-ended", formalDefinition="The type of triggering event." )
+    @Description(shortDefinition="named-event | periodic | data-changed | data-added | data-modified | data-removed | data-accessed | data-access-ended", formalDefinition="The type of triggering event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/trigger-type")
     protected Enumeration<TriggerType> type;
 
     /**
-     * The name of the event (if this is a named-event trigger).
+     * A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.
      */
-    @Child(name = "eventName", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Triggering event name", formalDefinition="The name of the event (if this is a named-event trigger)." )
-    protected StringType eventName;
+    @Child(name = "name", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Name or URI that identifies the event", formalDefinition="A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context." )
+    protected UriType name;
 
     /**
-     * The timing of the event (if this is a period trigger).
+     * The timing of the event (if this is a periodic trigger).
      */
-    @Child(name = "eventTiming", type = {Timing.class, Schedule.class, DateType.class, DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Timing of the event", formalDefinition="The timing of the event (if this is a period trigger)." )
-    protected Type eventTiming;
+    @Child(name = "timing", type = {Timing.class, Schedule.class, DateType.class, DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Timing of the event", formalDefinition="The timing of the event (if this is a periodic trigger)." )
+    protected Type timing;
 
     /**
      * The triggering data of the event (if this is a data trigger).
      */
-    @Child(name = "eventData", type = {DataRequirement.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "data", type = {DataRequirement.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Triggering data of the event", formalDefinition="The triggering data of the event (if this is a data trigger)." )
-    protected DataRequirement eventData;
+    protected DataRequirement data;
 
     /**
      * A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.
      */
-    @Child(name = "eventCondition", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "condition", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Whether the event triggers", formalDefinition="A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires." )
-    protected TriggerDefinitionEventConditionComponent eventCondition;
+    protected TriggerDefinitionConditionComponent condition;
 
-    private static final long serialVersionUID = -1377796374L;
+    private static final long serialVersionUID = 789050637L;
 
   /**
    * Constructor
@@ -636,195 +748,195 @@ public class TriggerDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #eventName} (The name of the event (if this is a named-event trigger).). This is the underlying object with id, value and extensions. The accessor "getEventName" gives direct access to the value
+     * @return {@link #name} (A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
-    public StringType getEventNameElement() { 
-      if (this.eventName == null)
+    public UriType getNameElement() { 
+      if (this.name == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TriggerDefinition.eventName");
+          throw new Error("Attempt to auto-create TriggerDefinition.name");
         else if (Configuration.doAutoCreate())
-          this.eventName = new StringType(); // bb
-      return this.eventName;
+          this.name = new UriType(); // bb
+      return this.name;
     }
 
-    public boolean hasEventNameElement() { 
-      return this.eventName != null && !this.eventName.isEmpty();
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
     }
 
-    public boolean hasEventName() { 
-      return this.eventName != null && !this.eventName.isEmpty();
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
     }
 
     /**
-     * @param value {@link #eventName} (The name of the event (if this is a named-event trigger).). This is the underlying object with id, value and extensions. The accessor "getEventName" gives direct access to the value
+     * @param value {@link #name} (A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
-    public TriggerDefinition setEventNameElement(StringType value) { 
-      this.eventName = value;
+    public TriggerDefinition setNameElement(UriType value) { 
+      this.name = value;
       return this;
     }
 
     /**
-     * @return The name of the event (if this is a named-event trigger).
+     * @return A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.
      */
-    public String getEventName() { 
-      return this.eventName == null ? null : this.eventName.getValue();
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value The name of the event (if this is a named-event trigger).
+     * @param value A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.
      */
-    public TriggerDefinition setEventName(String value) { 
+    public TriggerDefinition setName(String value) { 
       if (Utilities.noString(value))
-        this.eventName = null;
+        this.name = null;
       else {
-        if (this.eventName == null)
-          this.eventName = new StringType();
-        this.eventName.setValue(value);
+        if (this.name == null)
+          this.name = new UriType();
+        this.name.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @return {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public Type getEventTiming() { 
-      return this.eventTiming;
+    public Type getTiming() { 
+      return this.timing;
     }
 
     /**
-     * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @return {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public Timing getEventTimingTiming() throws FHIRException { 
-      if (!(this.eventTiming instanceof Timing))
-        throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
-      return (Timing) this.eventTiming;
+    public Timing getTimingTiming() throws FHIRException { 
+      if (!(this.timing instanceof Timing))
+        throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (Timing) this.timing;
     }
 
-    public boolean hasEventTimingTiming() { 
-      return this.eventTiming instanceof Timing;
+    public boolean hasTimingTiming() { 
+      return this.timing instanceof Timing;
     }
 
     /**
-     * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @return {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public Reference getEventTimingReference() throws FHIRException { 
-      if (!(this.eventTiming instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
-      return (Reference) this.eventTiming;
+    public Reference getTimingReference() throws FHIRException { 
+      if (!(this.timing instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (Reference) this.timing;
     }
 
-    public boolean hasEventTimingReference() { 
-      return this.eventTiming instanceof Reference;
+    public boolean hasTimingReference() { 
+      return this.timing instanceof Reference;
     }
 
     /**
-     * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @return {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public DateType getEventTimingDateType() throws FHIRException { 
-      if (!(this.eventTiming instanceof DateType))
-        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
-      return (DateType) this.eventTiming;
+    public DateType getTimingDateType() throws FHIRException { 
+      if (!(this.timing instanceof DateType))
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (DateType) this.timing;
     }
 
-    public boolean hasEventTimingDateType() { 
-      return this.eventTiming instanceof DateType;
+    public boolean hasTimingDateType() { 
+      return this.timing instanceof DateType;
     }
 
     /**
-     * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @return {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public DateTimeType getEventTimingDateTimeType() throws FHIRException { 
-      if (!(this.eventTiming instanceof DateTimeType))
-        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
-      return (DateTimeType) this.eventTiming;
+    public DateTimeType getTimingDateTimeType() throws FHIRException { 
+      if (!(this.timing instanceof DateTimeType))
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (DateTimeType) this.timing;
     }
 
-    public boolean hasEventTimingDateTimeType() { 
-      return this.eventTiming instanceof DateTimeType;
+    public boolean hasTimingDateTimeType() { 
+      return this.timing instanceof DateTimeType;
     }
 
-    public boolean hasEventTiming() { 
-      return this.eventTiming != null && !this.eventTiming.isEmpty();
+    public boolean hasTiming() { 
+      return this.timing != null && !this.timing.isEmpty();
     }
 
     /**
-     * @param value {@link #eventTiming} (The timing of the event (if this is a period trigger).)
+     * @param value {@link #timing} (The timing of the event (if this is a periodic trigger).)
      */
-    public TriggerDefinition setEventTiming(Type value) { 
-      this.eventTiming = value;
+    public TriggerDefinition setTiming(Type value) { 
+      this.timing = value;
       return this;
     }
 
     /**
-     * @return {@link #eventData} (The triggering data of the event (if this is a data trigger).)
+     * @return {@link #data} (The triggering data of the event (if this is a data trigger).)
      */
-    public DataRequirement getEventData() { 
-      if (this.eventData == null)
+    public DataRequirement getData() { 
+      if (this.data == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TriggerDefinition.eventData");
+          throw new Error("Attempt to auto-create TriggerDefinition.data");
         else if (Configuration.doAutoCreate())
-          this.eventData = new DataRequirement(); // cc
-      return this.eventData;
+          this.data = new DataRequirement(); // cc
+      return this.data;
     }
 
-    public boolean hasEventData() { 
-      return this.eventData != null && !this.eventData.isEmpty();
+    public boolean hasData() { 
+      return this.data != null && !this.data.isEmpty();
     }
 
     /**
-     * @param value {@link #eventData} (The triggering data of the event (if this is a data trigger).)
+     * @param value {@link #data} (The triggering data of the event (if this is a data trigger).)
      */
-    public TriggerDefinition setEventData(DataRequirement value) { 
-      this.eventData = value;
+    public TriggerDefinition setData(DataRequirement value) { 
+      this.data = value;
       return this;
     }
 
     /**
-     * @return {@link #eventCondition} (A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.)
+     * @return {@link #condition} (A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.)
      */
-    public TriggerDefinitionEventConditionComponent getEventCondition() { 
-      if (this.eventCondition == null)
+    public TriggerDefinitionConditionComponent getCondition() { 
+      if (this.condition == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TriggerDefinition.eventCondition");
+          throw new Error("Attempt to auto-create TriggerDefinition.condition");
         else if (Configuration.doAutoCreate())
-          this.eventCondition = new TriggerDefinitionEventConditionComponent(); // cc
-      return this.eventCondition;
+          this.condition = new TriggerDefinitionConditionComponent(); // cc
+      return this.condition;
     }
 
-    public boolean hasEventCondition() { 
-      return this.eventCondition != null && !this.eventCondition.isEmpty();
+    public boolean hasCondition() { 
+      return this.condition != null && !this.condition.isEmpty();
     }
 
     /**
-     * @param value {@link #eventCondition} (A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.)
+     * @param value {@link #condition} (A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.)
      */
-    public TriggerDefinition setEventCondition(TriggerDefinitionEventConditionComponent value) { 
-      this.eventCondition = value;
+    public TriggerDefinition setCondition(TriggerDefinitionConditionComponent value) { 
+      this.condition = value;
       return this;
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("type", "code", "The type of triggering event.", 0, 1, type));
-        children.add(new Property("eventName", "string", "The name of the event (if this is a named-event trigger).", 0, 1, eventName));
-        children.add(new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming));
-        children.add(new Property("eventData", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, eventData));
-        children.add(new Property("eventCondition", "", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, eventCondition));
+        children.add(new Property("name", "uri", "A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.", 0, 1, name));
+        children.add(new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing));
+        children.add(new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, data));
+        children.add(new Property("condition", "", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, condition));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case 3575610: /*type*/  return new Property("type", "code", "The type of triggering event.", 0, 1, type);
-        case 31228997: /*eventName*/  return new Property("eventName", "string", "The name of the event (if this is a named-event trigger).", 0, 1, eventName);
-        case 1120539260: /*eventTiming[x]*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case 125465476: /*eventTiming*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case 1285594350: /*eventTimingTiming*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case -171794393: /*eventTimingReference*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case 376272210: /*eventTimingDate*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case -1923726529: /*eventTimingDateTime*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
-        case 30931300: /*eventData*/  return new Property("eventData", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, eventData);
-        case 94594977: /*eventCondition*/  return new Property("eventCondition", "", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, eventCondition);
+        case 3373707: /*name*/  return new Property("name", "uri", "A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.", 0, 1, name);
+        case 164632566: /*timing[x]*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case -873664438: /*timing*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case -497554124: /*timingTiming*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case -1792466399: /*timingReference*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case 807935768: /*timingDate*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
+        case 3076010: /*data*/  return new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, data);
+        case -861311717: /*condition*/  return new Property("condition", "", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, condition);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -834,10 +946,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<TriggerType>
-        case 31228997: /*eventName*/ return this.eventName == null ? new Base[0] : new Base[] {this.eventName}; // StringType
-        case 125465476: /*eventTiming*/ return this.eventTiming == null ? new Base[0] : new Base[] {this.eventTiming}; // Type
-        case 30931300: /*eventData*/ return this.eventData == null ? new Base[0] : new Base[] {this.eventData}; // DataRequirement
-        case 94594977: /*eventCondition*/ return this.eventCondition == null ? new Base[0] : new Base[] {this.eventCondition}; // TriggerDefinitionEventConditionComponent
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // UriType
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
+        case 3076010: /*data*/ return this.data == null ? new Base[0] : new Base[] {this.data}; // DataRequirement
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // TriggerDefinitionConditionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -850,17 +962,17 @@ public class TriggerDefinition extends Type implements ICompositeType {
           value = new TriggerTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<TriggerType>
           return value;
-        case 31228997: // eventName
-          this.eventName = castToString(value); // StringType
+        case 3373707: // name
+          this.name = castToUri(value); // UriType
           return value;
-        case 125465476: // eventTiming
-          this.eventTiming = castToType(value); // Type
+        case -873664438: // timing
+          this.timing = castToType(value); // Type
           return value;
-        case 30931300: // eventData
-          this.eventData = castToDataRequirement(value); // DataRequirement
+        case 3076010: // data
+          this.data = castToDataRequirement(value); // DataRequirement
           return value;
-        case 94594977: // eventCondition
-          this.eventCondition = (TriggerDefinitionEventConditionComponent) value; // TriggerDefinitionEventConditionComponent
+        case -861311717: // condition
+          this.condition = (TriggerDefinitionConditionComponent) value; // TriggerDefinitionConditionComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -872,14 +984,14 @@ public class TriggerDefinition extends Type implements ICompositeType {
         if (name.equals("type")) {
           value = new TriggerTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<TriggerType>
-        } else if (name.equals("eventName")) {
-          this.eventName = castToString(value); // StringType
-        } else if (name.equals("eventTiming[x]")) {
-          this.eventTiming = castToType(value); // Type
-        } else if (name.equals("eventData")) {
-          this.eventData = castToDataRequirement(value); // DataRequirement
-        } else if (name.equals("eventCondition")) {
-          this.eventCondition = (TriggerDefinitionEventConditionComponent) value; // TriggerDefinitionEventConditionComponent
+        } else if (name.equals("name")) {
+          this.name = castToUri(value); // UriType
+        } else if (name.equals("timing[x]")) {
+          this.timing = castToType(value); // Type
+        } else if (name.equals("data")) {
+          this.data = castToDataRequirement(value); // DataRequirement
+        } else if (name.equals("condition")) {
+          this.condition = (TriggerDefinitionConditionComponent) value; // TriggerDefinitionConditionComponent
         } else
           return super.setProperty(name, value);
         return value;
@@ -889,11 +1001,11 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getTypeElement();
-        case 31228997:  return getEventNameElement();
-        case 1120539260:  return getEventTiming(); 
-        case 125465476:  return getEventTiming(); 
-        case 30931300:  return getEventData(); 
-        case 94594977:  return getEventCondition(); 
+        case 3373707:  return getNameElement();
+        case 164632566:  return getTiming(); 
+        case -873664438:  return getTiming(); 
+        case 3076010:  return getData(); 
+        case -861311717:  return getCondition(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -903,10 +1015,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
-        case 31228997: /*eventName*/ return new String[] {"string"};
-        case 125465476: /*eventTiming*/ return new String[] {"Timing", "Reference", "date", "dateTime"};
-        case 30931300: /*eventData*/ return new String[] {"DataRequirement"};
-        case 94594977: /*eventCondition*/ return new String[] {};
+        case 3373707: /*name*/ return new String[] {"uri"};
+        case -873664438: /*timing*/ return new String[] {"Timing", "Reference", "date", "dateTime"};
+        case 3076010: /*data*/ return new String[] {"DataRequirement"};
+        case -861311717: /*condition*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -917,32 +1029,32 @@ public class TriggerDefinition extends Type implements ICompositeType {
         if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type TriggerDefinition.type");
         }
-        else if (name.equals("eventName")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TriggerDefinition.eventName");
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TriggerDefinition.name");
         }
-        else if (name.equals("eventTimingTiming")) {
-          this.eventTiming = new Timing();
-          return this.eventTiming;
+        else if (name.equals("timingTiming")) {
+          this.timing = new Timing();
+          return this.timing;
         }
-        else if (name.equals("eventTimingReference")) {
-          this.eventTiming = new Reference();
-          return this.eventTiming;
+        else if (name.equals("timingReference")) {
+          this.timing = new Reference();
+          return this.timing;
         }
-        else if (name.equals("eventTimingDate")) {
-          this.eventTiming = new DateType();
-          return this.eventTiming;
+        else if (name.equals("timingDate")) {
+          this.timing = new DateType();
+          return this.timing;
         }
-        else if (name.equals("eventTimingDateTime")) {
-          this.eventTiming = new DateTimeType();
-          return this.eventTiming;
+        else if (name.equals("timingDateTime")) {
+          this.timing = new DateTimeType();
+          return this.timing;
         }
-        else if (name.equals("eventData")) {
-          this.eventData = new DataRequirement();
-          return this.eventData;
+        else if (name.equals("data")) {
+          this.data = new DataRequirement();
+          return this.data;
         }
-        else if (name.equals("eventCondition")) {
-          this.eventCondition = new TriggerDefinitionEventConditionComponent();
-          return this.eventCondition;
+        else if (name.equals("condition")) {
+          this.condition = new TriggerDefinitionConditionComponent();
+          return this.condition;
         }
         else
           return super.addChild(name);
@@ -957,10 +1069,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
         TriggerDefinition dst = new TriggerDefinition();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        dst.eventName = eventName == null ? null : eventName.copy();
-        dst.eventTiming = eventTiming == null ? null : eventTiming.copy();
-        dst.eventData = eventData == null ? null : eventData.copy();
-        dst.eventCondition = eventCondition == null ? null : eventCondition.copy();
+        dst.name = name == null ? null : name.copy();
+        dst.timing = timing == null ? null : timing.copy();
+        dst.data = data == null ? null : data.copy();
+        dst.condition = condition == null ? null : condition.copy();
         return dst;
       }
 
@@ -975,9 +1087,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
         if (!(other instanceof TriggerDefinition))
           return false;
         TriggerDefinition o = (TriggerDefinition) other;
-        return compareDeep(type, o.type, true) && compareDeep(eventName, o.eventName, true) && compareDeep(eventTiming, o.eventTiming, true)
-           && compareDeep(eventData, o.eventData, true) && compareDeep(eventCondition, o.eventCondition, true)
-          ;
+        return compareDeep(type, o.type, true) && compareDeep(name, o.name, true) && compareDeep(timing, o.timing, true)
+           && compareDeep(data, o.data, true) && compareDeep(condition, o.condition, true);
       }
 
       @Override
@@ -987,12 +1098,12 @@ public class TriggerDefinition extends Type implements ICompositeType {
         if (!(other instanceof TriggerDefinition))
           return false;
         TriggerDefinition o = (TriggerDefinition) other;
-        return compareValues(type, o.type, true) && compareValues(eventName, o.eventName, true);
+        return compareValues(type, o.type, true) && compareValues(name, o.name, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, eventName, eventTiming
-          , eventData, eventCondition);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, name, timing, data
+          , condition);
       }
 
 

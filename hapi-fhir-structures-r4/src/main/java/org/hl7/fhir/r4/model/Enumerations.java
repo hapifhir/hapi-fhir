@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -1113,7 +1113,7 @@ public class Enumerations {
          */
         TIMING, 
         /**
-         * A description of a triggering event.
+         * A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.
          */
         TRIGGERDEFINITION, 
         /**
@@ -1463,7 +1463,7 @@ public class Enumerations {
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
-            case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
@@ -2139,7 +2139,7 @@ public class Enumerations {
          */
         TIMING, 
         /**
-         * A description of a triggering event.
+         * A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.
          */
         TRIGGERDEFINITION, 
         /**
@@ -2275,6 +2275,10 @@ public class Enumerations {
          */
         CARETEAM, 
         /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        CATALOGENTRY, 
+        /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
         CHARGEITEM, 
@@ -2403,6 +2407,10 @@ public class Enumerations {
          */
         EVENTDEFINITION, 
         /**
+         * Example of workflow instance.
+         */
+        EXAMPLESCENARIO, 
+        /**
          * Resource to define constraints on the Expansion of a FHIR ValueSet.
          */
         EXPANSIONPROFILE, 
@@ -2503,7 +2511,7 @@ public class Enumerations {
          */
         MEDICATIONREQUEST, 
         /**
-         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
@@ -2646,6 +2654,10 @@ public class Enumerations {
          * A sample to be used for analysis.
          */
         SPECIMEN, 
+        /**
+         * A kind of specimen with associated set of requirements.
+         */
+        SPECIMENDEFINITION, 
         /**
          * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.
          */
@@ -2841,6 +2853,8 @@ public class Enumerations {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -2905,6 +2919,8 @@ public class Enumerations {
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -3027,6 +3043,8 @@ public class Enumerations {
           return SLOT;
         if ("Specimen".equals(codeString))
           return SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -3125,6 +3143,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -3157,6 +3176,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -3218,6 +3238,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -3304,6 +3325,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
+            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -3336,6 +3358,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
             case EXPANSIONPROFILE: return "http://hl7.org/fhir/resource-types";
             case EXPLANATIONOFBENEFIT: return "http://hl7.org/fhir/resource-types";
             case FAMILYMEMBERHISTORY: return "http://hl7.org/fhir/resource-types";
@@ -3397,6 +3420,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
+            case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -3449,7 +3473,7 @@ public class Enumerations {
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
-            case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
@@ -3483,6 +3507,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
+            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -3515,6 +3540,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
+            case EXAMPLESCENARIO: return "Example of workflow instance.";
             case EXPANSIONPROFILE: return "Resource to define constraints on the Expansion of a FHIR ValueSet.";
             case EXPLANATIONOFBENEFIT: return "This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.";
             case FAMILYMEMBERHISTORY: return "Significant health conditions for a person related to the patient relevant in the context of care for the patient.";
@@ -3540,7 +3566,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
-            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
@@ -3576,6 +3602,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
+            case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
@@ -3662,6 +3689,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -3694,6 +3722,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -3755,6 +3784,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -3914,6 +3944,8 @@ public class Enumerations {
           return FHIRAllTypes.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return FHIRAllTypes.CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return FHIRAllTypes.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return FHIRAllTypes.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -3978,6 +4010,8 @@ public class Enumerations {
           return FHIRAllTypes.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return FHIRAllTypes.EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return FHIRAllTypes.EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return FHIRAllTypes.EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -4100,6 +4134,8 @@ public class Enumerations {
           return FHIRAllTypes.SLOT;
         if ("Specimen".equals(codeString))
           return FHIRAllTypes.SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return FHIRAllTypes.SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return FHIRAllTypes.STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -4272,6 +4308,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CARETEAM);
+        if ("CatalogEntry".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -4336,6 +4374,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.EVENTDEFINITION);
+        if ("ExampleScenario".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.EXAMPLESCENARIO);
         if ("ExpansionProfile".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.EXPANSIONPROFILE);
         if ("ExplanationOfBenefit".equals(codeString))
@@ -4458,6 +4498,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SLOT);
         if ("Specimen".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SPECIMEN);
+        if ("SpecimenDefinition".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SPECIMENDEFINITION);
         if ("StructureDefinition".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.STRUCTUREDEFINITION);
         if ("StructureMap".equals(codeString))
@@ -4623,6 +4665,8 @@ public class Enumerations {
         return "CarePlan";
       if (code == FHIRAllTypes.CARETEAM)
         return "CareTeam";
+      if (code == FHIRAllTypes.CATALOGENTRY)
+        return "CatalogEntry";
       if (code == FHIRAllTypes.CHARGEITEM)
         return "ChargeItem";
       if (code == FHIRAllTypes.CLAIM)
@@ -4687,6 +4731,8 @@ public class Enumerations {
         return "EpisodeOfCare";
       if (code == FHIRAllTypes.EVENTDEFINITION)
         return "EventDefinition";
+      if (code == FHIRAllTypes.EXAMPLESCENARIO)
+        return "ExampleScenario";
       if (code == FHIRAllTypes.EXPANSIONPROFILE)
         return "ExpansionProfile";
       if (code == FHIRAllTypes.EXPLANATIONOFBENEFIT)
@@ -4809,6 +4855,8 @@ public class Enumerations {
         return "Slot";
       if (code == FHIRAllTypes.SPECIMEN)
         return "Specimen";
+      if (code == FHIRAllTypes.SPECIMENDEFINITION)
+        return "SpecimenDefinition";
       if (code == FHIRAllTypes.STRUCTUREDEFINITION)
         return "StructureDefinition";
       if (code == FHIRAllTypes.STRUCTUREMAP)
@@ -4980,7 +5028,7 @@ public class Enumerations {
          */
         TIMING, 
         /**
-         * A description of a triggering event.
+         * A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.
          */
         TRIGGERDEFINITION, 
         /**
@@ -5116,6 +5164,10 @@ public class Enumerations {
          */
         CARETEAM, 
         /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        CATALOGENTRY, 
+        /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
         CHARGEITEM, 
@@ -5244,6 +5296,10 @@ public class Enumerations {
          */
         EVENTDEFINITION, 
         /**
+         * Example of workflow instance.
+         */
+        EXAMPLESCENARIO, 
+        /**
          * Resource to define constraints on the Expansion of a FHIR ValueSet.
          */
         EXPANSIONPROFILE, 
@@ -5344,7 +5400,7 @@ public class Enumerations {
          */
         MEDICATIONREQUEST, 
         /**
-         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
@@ -5487,6 +5543,10 @@ public class Enumerations {
          * A sample to be used for analysis.
          */
         SPECIMEN, 
+        /**
+         * A kind of specimen with associated set of requirements.
+         */
+        SPECIMENDEFINITION, 
         /**
          * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.
          */
@@ -5674,6 +5734,8 @@ public class Enumerations {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -5738,6 +5800,8 @@ public class Enumerations {
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -5860,6 +5924,8 @@ public class Enumerations {
           return SLOT;
         if ("Specimen".equals(codeString))
           return SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -5954,6 +6020,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -5986,6 +6053,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -6047,6 +6115,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -6131,6 +6200,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
+            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -6163,6 +6233,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
             case EXPANSIONPROFILE: return "http://hl7.org/fhir/resource-types";
             case EXPLANATIONOFBENEFIT: return "http://hl7.org/fhir/resource-types";
             case FAMILYMEMBERHISTORY: return "http://hl7.org/fhir/resource-types";
@@ -6224,6 +6295,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
+            case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -6274,7 +6346,7 @@ public class Enumerations {
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
-            case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
@@ -6308,6 +6380,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
+            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -6340,6 +6413,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
+            case EXAMPLESCENARIO: return "Example of workflow instance.";
             case EXPANSIONPROFILE: return "Resource to define constraints on the Expansion of a FHIR ValueSet.";
             case EXPLANATIONOFBENEFIT: return "This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.";
             case FAMILYMEMBERHISTORY: return "Significant health conditions for a person related to the patient relevant in the context of care for the patient.";
@@ -6365,7 +6439,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
-            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
@@ -6401,6 +6475,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
+            case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
@@ -6485,6 +6560,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -6517,6 +6593,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -6578,6 +6655,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -6735,6 +6813,8 @@ public class Enumerations {
           return FHIRDefinedType.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return FHIRDefinedType.CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return FHIRDefinedType.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return FHIRDefinedType.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -6799,6 +6879,8 @@ public class Enumerations {
           return FHIRDefinedType.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return FHIRDefinedType.EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return FHIRDefinedType.EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return FHIRDefinedType.EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -6921,6 +7003,8 @@ public class Enumerations {
           return FHIRDefinedType.SLOT;
         if ("Specimen".equals(codeString))
           return FHIRDefinedType.SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return FHIRDefinedType.SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return FHIRDefinedType.STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -7089,6 +7173,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CARETEAM);
+        if ("CatalogEntry".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -7153,6 +7239,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.EVENTDEFINITION);
+        if ("ExampleScenario".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.EXAMPLESCENARIO);
         if ("ExpansionProfile".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.EXPANSIONPROFILE);
         if ("ExplanationOfBenefit".equals(codeString))
@@ -7275,6 +7363,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SLOT);
         if ("Specimen".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SPECIMEN);
+        if ("SpecimenDefinition".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SPECIMENDEFINITION);
         if ("StructureDefinition".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.STRUCTUREDEFINITION);
         if ("StructureMap".equals(codeString))
@@ -7436,6 +7526,8 @@ public class Enumerations {
         return "CarePlan";
       if (code == FHIRDefinedType.CARETEAM)
         return "CareTeam";
+      if (code == FHIRDefinedType.CATALOGENTRY)
+        return "CatalogEntry";
       if (code == FHIRDefinedType.CHARGEITEM)
         return "ChargeItem";
       if (code == FHIRDefinedType.CLAIM)
@@ -7500,6 +7592,8 @@ public class Enumerations {
         return "EpisodeOfCare";
       if (code == FHIRDefinedType.EVENTDEFINITION)
         return "EventDefinition";
+      if (code == FHIRDefinedType.EXAMPLESCENARIO)
+        return "ExampleScenario";
       if (code == FHIRDefinedType.EXPANSIONPROFILE)
         return "ExpansionProfile";
       if (code == FHIRDefinedType.EXPLANATIONOFBENEFIT)
@@ -7622,6 +7716,8 @@ public class Enumerations {
         return "Slot";
       if (code == FHIRDefinedType.SPECIMEN)
         return "Specimen";
+      if (code == FHIRDefinedType.SPECIMENDEFINITION)
+        return "SpecimenDefinition";
       if (code == FHIRDefinedType.STRUCTUREDEFINITION)
         return "StructureDefinition";
       if (code == FHIRDefinedType.STRUCTUREMAP)
@@ -8289,6 +8385,10 @@ public class Enumerations {
          */
         CARETEAM, 
         /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        CATALOGENTRY, 
+        /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
         CHARGEITEM, 
@@ -8417,6 +8517,10 @@ public class Enumerations {
          */
         EVENTDEFINITION, 
         /**
+         * Example of workflow instance.
+         */
+        EXAMPLESCENARIO, 
+        /**
          * Resource to define constraints on the Expansion of a FHIR ValueSet.
          */
         EXPANSIONPROFILE, 
@@ -8517,7 +8621,7 @@ public class Enumerations {
          */
         MEDICATIONREQUEST, 
         /**
-         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
@@ -8661,6 +8765,10 @@ public class Enumerations {
          */
         SPECIMEN, 
         /**
+         * A kind of specimen with associated set of requirements.
+         */
+        SPECIMENDEFINITION, 
+        /**
          * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.
          */
         STRUCTUREDEFINITION, 
@@ -8739,6 +8847,8 @@ public class Enumerations {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -8803,6 +8913,8 @@ public class Enumerations {
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -8925,6 +9037,8 @@ public class Enumerations {
           return SLOT;
         if ("Specimen".equals(codeString))
           return SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -8965,6 +9079,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -8997,6 +9112,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -9058,6 +9174,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -9088,6 +9205,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
+            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -9120,6 +9238,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
             case EXPANSIONPROFILE: return "http://hl7.org/fhir/resource-types";
             case EXPLANATIONOFBENEFIT: return "http://hl7.org/fhir/resource-types";
             case FAMILYMEMBERHISTORY: return "http://hl7.org/fhir/resource-types";
@@ -9181,6 +9300,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
+            case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -9211,6 +9331,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
+            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -9243,6 +9364,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
+            case EXAMPLESCENARIO: return "Example of workflow instance.";
             case EXPANSIONPROFILE: return "Resource to define constraints on the Expansion of a FHIR ValueSet.";
             case EXPLANATIONOFBENEFIT: return "This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.";
             case FAMILYMEMBERHISTORY: return "Significant health conditions for a person related to the patient relevant in the context of care for the patient.";
@@ -9268,7 +9390,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
-            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
@@ -9304,6 +9426,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
+            case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
@@ -9334,6 +9457,7 @@ public class Enumerations {
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
+            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -9366,6 +9490,7 @@ public class Enumerations {
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
+            case EXAMPLESCENARIO: return "ExampleScenario";
             case EXPANSIONPROFILE: return "ExpansionProfile";
             case EXPLANATIONOFBENEFIT: return "ExplanationOfBenefit";
             case FAMILYMEMBERHISTORY: return "FamilyMemberHistory";
@@ -9427,6 +9552,7 @@ public class Enumerations {
             case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
+            case SPECIMENDEFINITION: return "SpecimenDefinition";
             case STRUCTUREDEFINITION: return "StructureDefinition";
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
@@ -9476,6 +9602,8 @@ public class Enumerations {
           return ResourceType.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return ResourceType.CARETEAM;
+        if ("CatalogEntry".equals(codeString))
+          return ResourceType.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return ResourceType.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -9540,6 +9668,8 @@ public class Enumerations {
           return ResourceType.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
           return ResourceType.EVENTDEFINITION;
+        if ("ExampleScenario".equals(codeString))
+          return ResourceType.EXAMPLESCENARIO;
         if ("ExpansionProfile".equals(codeString))
           return ResourceType.EXPANSIONPROFILE;
         if ("ExplanationOfBenefit".equals(codeString))
@@ -9662,6 +9792,8 @@ public class Enumerations {
           return ResourceType.SLOT;
         if ("Specimen".equals(codeString))
           return ResourceType.SPECIMEN;
+        if ("SpecimenDefinition".equals(codeString))
+          return ResourceType.SPECIMENDEFINITION;
         if ("StructureDefinition".equals(codeString))
           return ResourceType.STRUCTUREDEFINITION;
         if ("StructureMap".equals(codeString))
@@ -9722,6 +9854,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CARETEAM);
+        if ("CatalogEntry".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -9786,6 +9920,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.EVENTDEFINITION);
+        if ("ExampleScenario".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.EXAMPLESCENARIO);
         if ("ExpansionProfile".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.EXPANSIONPROFILE);
         if ("ExplanationOfBenefit".equals(codeString))
@@ -9908,6 +10044,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.SLOT);
         if ("Specimen".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.SPECIMEN);
+        if ("SpecimenDefinition".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.SPECIMENDEFINITION);
         if ("StructureDefinition".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.STRUCTUREDEFINITION);
         if ("StructureMap".equals(codeString))
@@ -9961,6 +10099,8 @@ public class Enumerations {
         return "CarePlan";
       if (code == ResourceType.CARETEAM)
         return "CareTeam";
+      if (code == ResourceType.CATALOGENTRY)
+        return "CatalogEntry";
       if (code == ResourceType.CHARGEITEM)
         return "ChargeItem";
       if (code == ResourceType.CLAIM)
@@ -10025,6 +10165,8 @@ public class Enumerations {
         return "EpisodeOfCare";
       if (code == ResourceType.EVENTDEFINITION)
         return "EventDefinition";
+      if (code == ResourceType.EXAMPLESCENARIO)
+        return "ExampleScenario";
       if (code == ResourceType.EXPANSIONPROFILE)
         return "ExpansionProfile";
       if (code == ResourceType.EXPLANATIONOFBENEFIT)
@@ -10147,6 +10289,8 @@ public class Enumerations {
         return "Slot";
       if (code == ResourceType.SPECIMEN)
         return "Specimen";
+      if (code == ResourceType.SPECIMENDEFINITION)
+        return "SpecimenDefinition";
       if (code == ResourceType.STRUCTUREDEFINITION)
         return "StructureDefinition";
       if (code == ResourceType.STRUCTUREMAP)

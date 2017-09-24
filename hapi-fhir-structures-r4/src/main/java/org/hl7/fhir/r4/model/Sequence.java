@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1653,7 +1653,14 @@ public class Sequence extends DomainResource {
         @Description(shortDefinition="F-score", formalDefinition="Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall)." )
         protected DecimalType fScore;
 
-        private static final long serialVersionUID = -383644463L;
+        /**
+         * Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff.
+         */
+        @Child(name = "roc", type = {}, order=15, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Receiver Operator Characteristic (ROC) Curve", formalDefinition="Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff." )
+        protected SequenceQualityRocComponent roc;
+
+        private static final long serialVersionUID = 147678016L;
 
     /**
      * Constructor
@@ -2413,6 +2420,30 @@ public class Sequence extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #roc} (Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff.)
+         */
+        public SequenceQualityRocComponent getRoc() { 
+          if (this.roc == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.roc");
+            else if (Configuration.doAutoCreate())
+              this.roc = new SequenceQualityRocComponent(); // cc
+          return this.roc;
+        }
+
+        public boolean hasRoc() { 
+          return this.roc != null && !this.roc.isEmpty();
+        }
+
+        /**
+         * @param value {@link #roc} (Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff.)
+         */
+        public SequenceQualityComponent setRoc(SequenceQualityRocComponent value) { 
+          this.roc = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "code", "INDEL / SNP / Undefined variant.", 0, 1, type));
@@ -2429,6 +2460,7 @@ public class Sequence extends DomainResource {
           children.add(new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, 1, precision));
           children.add(new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, 1, recall));
           children.add(new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, 1, fScore));
+          children.add(new Property("roc", "", "Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff.", 0, 1, roc));
         }
 
         @Override
@@ -2448,6 +2480,7 @@ public class Sequence extends DomainResource {
           case -1376177026: /*precision*/  return new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, 1, precision);
           case -934922479: /*recall*/  return new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, 1, recall);
           case -1295082036: /*fScore*/  return new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, 1, fScore);
+          case 113094: /*roc*/  return new Property("roc", "", "Receiver Operator Characteristic (ROC) Curve  to give sensitivity/specificity tradeoff.", 0, 1, roc);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2470,6 +2503,7 @@ public class Sequence extends DomainResource {
         case -1376177026: /*precision*/ return this.precision == null ? new Base[0] : new Base[] {this.precision}; // DecimalType
         case -934922479: /*recall*/ return this.recall == null ? new Base[0] : new Base[] {this.recall}; // DecimalType
         case -1295082036: /*fScore*/ return this.fScore == null ? new Base[0] : new Base[] {this.fScore}; // DecimalType
+        case 113094: /*roc*/ return this.roc == null ? new Base[0] : new Base[] {this.roc}; // SequenceQualityRocComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2521,6 +2555,9 @@ public class Sequence extends DomainResource {
         case -1295082036: // fScore
           this.fScore = castToDecimal(value); // DecimalType
           return value;
+        case 113094: // roc
+          this.roc = (SequenceQualityRocComponent) value; // SequenceQualityRocComponent
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -2557,6 +2594,8 @@ public class Sequence extends DomainResource {
           this.recall = castToDecimal(value); // DecimalType
         } else if (name.equals("fScore")) {
           this.fScore = castToDecimal(value); // DecimalType
+        } else if (name.equals("roc")) {
+          this.roc = (SequenceQualityRocComponent) value; // SequenceQualityRocComponent
         } else
           return super.setProperty(name, value);
         return value;
@@ -2579,6 +2618,7 @@ public class Sequence extends DomainResource {
         case -1376177026:  return getPrecisionElement();
         case -934922479:  return getRecallElement();
         case -1295082036:  return getFScoreElement();
+        case 113094:  return getRoc(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2601,6 +2641,7 @@ public class Sequence extends DomainResource {
         case -1376177026: /*precision*/ return new String[] {"decimal"};
         case -934922479: /*recall*/ return new String[] {"decimal"};
         case -1295082036: /*fScore*/ return new String[] {"decimal"};
+        case 113094: /*roc*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2653,6 +2694,10 @@ public class Sequence extends DomainResource {
         else if (name.equals("fScore")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.fScore");
         }
+        else if (name.equals("roc")) {
+          this.roc = new SequenceQualityRocComponent();
+          return this.roc;
+        }
         else
           return super.addChild(name);
       }
@@ -2674,6 +2719,7 @@ public class Sequence extends DomainResource {
         dst.precision = precision == null ? null : precision.copy();
         dst.recall = recall == null ? null : recall.copy();
         dst.fScore = fScore == null ? null : fScore.copy();
+        dst.roc = roc == null ? null : roc.copy();
         return dst;
       }
 
@@ -2689,7 +2735,7 @@ public class Sequence extends DomainResource {
            && compareDeep(method, o.method, true) && compareDeep(truthTP, o.truthTP, true) && compareDeep(queryTP, o.queryTP, true)
            && compareDeep(truthFN, o.truthFN, true) && compareDeep(queryFP, o.queryFP, true) && compareDeep(gtFP, o.gtFP, true)
            && compareDeep(precision, o.precision, true) && compareDeep(recall, o.recall, true) && compareDeep(fScore, o.fScore, true)
-          ;
+           && compareDeep(roc, o.roc, true);
       }
 
       @Override
@@ -2708,11 +2754,723 @@ public class Sequence extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, standardSequence, start
           , end, score, method, truthTP, queryTP, truthFN, queryFP, gtFP, precision
-          , recall, fScore);
+          , recall, fScore, roc);
       }
 
   public String fhirType() {
     return "Sequence.quality";
+
+  }
+
+  }
+
+    @Block()
+    public static class SequenceQualityRocComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Invidual data point representing the GQ (genotype quality) score threshold.
+         */
+        @Child(name = "score", type = {IntegerType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Genotype quality score", formalDefinition="Invidual data point representing the GQ (genotype quality) score threshold." )
+        protected List<IntegerType> score;
+
+        /**
+         * The number of true positives if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "numTP", type = {IntegerType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Roc score true positive numbers", formalDefinition="The number of true positives if the GQ score threshold was set to \"score\" field value." )
+        protected List<IntegerType> numTP;
+
+        /**
+         * The number of false positives if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "numFP", type = {IntegerType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Roc score false positive numbers", formalDefinition="The number of false positives if the GQ score threshold was set to \"score\" field value." )
+        protected List<IntegerType> numFP;
+
+        /**
+         * The number of false negatives if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "numFN", type = {IntegerType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Roc score false negative numbers", formalDefinition="The number of false negatives if the GQ score threshold was set to \"score\" field value." )
+        protected List<IntegerType> numFN;
+
+        /**
+         * Calculated precision if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "precision", type = {DecimalType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Precision of the GQ score", formalDefinition="Calculated precision if the GQ score threshold was set to \"score\" field value." )
+        protected List<DecimalType> precision;
+
+        /**
+         * Calculated sensitivity if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "sensitivity", type = {DecimalType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Sensitivity of the GQ score", formalDefinition="Calculated sensitivity if the GQ score threshold was set to \"score\" field value." )
+        protected List<DecimalType> sensitivity;
+
+        /**
+         * Calculated fScore if the GQ score threshold was set to "score" field value.
+         */
+        @Child(name = "fMeasure", type = {DecimalType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="FScore of the GQ score", formalDefinition="Calculated fScore if the GQ score threshold was set to \"score\" field value." )
+        protected List<DecimalType> fMeasure;
+
+        private static final long serialVersionUID = 1923392132L;
+
+    /**
+     * Constructor
+     */
+      public SequenceQualityRocComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #score} (Invidual data point representing the GQ (genotype quality) score threshold.)
+         */
+        public List<IntegerType> getScore() { 
+          if (this.score == null)
+            this.score = new ArrayList<IntegerType>();
+          return this.score;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setScore(List<IntegerType> theScore) { 
+          this.score = theScore;
+          return this;
+        }
+
+        public boolean hasScore() { 
+          if (this.score == null)
+            return false;
+          for (IntegerType item : this.score)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #score} (Invidual data point representing the GQ (genotype quality) score threshold.)
+         */
+        public IntegerType addScoreElement() {//2 
+          IntegerType t = new IntegerType();
+          if (this.score == null)
+            this.score = new ArrayList<IntegerType>();
+          this.score.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #score} (Invidual data point representing the GQ (genotype quality) score threshold.)
+         */
+        public SequenceQualityRocComponent addScore(int value) { //1
+          IntegerType t = new IntegerType();
+          t.setValue(value);
+          if (this.score == null)
+            this.score = new ArrayList<IntegerType>();
+          this.score.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #score} (Invidual data point representing the GQ (genotype quality) score threshold.)
+         */
+        public boolean hasScore(int value) { 
+          if (this.score == null)
+            return false;
+          for (IntegerType v : this.score)
+            if (v.equals(value)) // integer
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numTP} (The number of true positives if the GQ score threshold was set to "score" field value.)
+         */
+        public List<IntegerType> getNumTP() { 
+          if (this.numTP == null)
+            this.numTP = new ArrayList<IntegerType>();
+          return this.numTP;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setNumTP(List<IntegerType> theNumTP) { 
+          this.numTP = theNumTP;
+          return this;
+        }
+
+        public boolean hasNumTP() { 
+          if (this.numTP == null)
+            return false;
+          for (IntegerType item : this.numTP)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numTP} (The number of true positives if the GQ score threshold was set to "score" field value.)
+         */
+        public IntegerType addNumTPElement() {//2 
+          IntegerType t = new IntegerType();
+          if (this.numTP == null)
+            this.numTP = new ArrayList<IntegerType>();
+          this.numTP.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #numTP} (The number of true positives if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addNumTP(int value) { //1
+          IntegerType t = new IntegerType();
+          t.setValue(value);
+          if (this.numTP == null)
+            this.numTP = new ArrayList<IntegerType>();
+          this.numTP.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #numTP} (The number of true positives if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasNumTP(int value) { 
+          if (this.numTP == null)
+            return false;
+          for (IntegerType v : this.numTP)
+            if (v.equals(value)) // integer
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numFP} (The number of false positives if the GQ score threshold was set to "score" field value.)
+         */
+        public List<IntegerType> getNumFP() { 
+          if (this.numFP == null)
+            this.numFP = new ArrayList<IntegerType>();
+          return this.numFP;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setNumFP(List<IntegerType> theNumFP) { 
+          this.numFP = theNumFP;
+          return this;
+        }
+
+        public boolean hasNumFP() { 
+          if (this.numFP == null)
+            return false;
+          for (IntegerType item : this.numFP)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numFP} (The number of false positives if the GQ score threshold was set to "score" field value.)
+         */
+        public IntegerType addNumFPElement() {//2 
+          IntegerType t = new IntegerType();
+          if (this.numFP == null)
+            this.numFP = new ArrayList<IntegerType>();
+          this.numFP.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #numFP} (The number of false positives if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addNumFP(int value) { //1
+          IntegerType t = new IntegerType();
+          t.setValue(value);
+          if (this.numFP == null)
+            this.numFP = new ArrayList<IntegerType>();
+          this.numFP.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #numFP} (The number of false positives if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasNumFP(int value) { 
+          if (this.numFP == null)
+            return false;
+          for (IntegerType v : this.numFP)
+            if (v.equals(value)) // integer
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numFN} (The number of false negatives if the GQ score threshold was set to "score" field value.)
+         */
+        public List<IntegerType> getNumFN() { 
+          if (this.numFN == null)
+            this.numFN = new ArrayList<IntegerType>();
+          return this.numFN;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setNumFN(List<IntegerType> theNumFN) { 
+          this.numFN = theNumFN;
+          return this;
+        }
+
+        public boolean hasNumFN() { 
+          if (this.numFN == null)
+            return false;
+          for (IntegerType item : this.numFN)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #numFN} (The number of false negatives if the GQ score threshold was set to "score" field value.)
+         */
+        public IntegerType addNumFNElement() {//2 
+          IntegerType t = new IntegerType();
+          if (this.numFN == null)
+            this.numFN = new ArrayList<IntegerType>();
+          this.numFN.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #numFN} (The number of false negatives if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addNumFN(int value) { //1
+          IntegerType t = new IntegerType();
+          t.setValue(value);
+          if (this.numFN == null)
+            this.numFN = new ArrayList<IntegerType>();
+          this.numFN.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #numFN} (The number of false negatives if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasNumFN(int value) { 
+          if (this.numFN == null)
+            return false;
+          for (IntegerType v : this.numFN)
+            if (v.equals(value)) // integer
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #precision} (Calculated precision if the GQ score threshold was set to "score" field value.)
+         */
+        public List<DecimalType> getPrecision() { 
+          if (this.precision == null)
+            this.precision = new ArrayList<DecimalType>();
+          return this.precision;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setPrecision(List<DecimalType> thePrecision) { 
+          this.precision = thePrecision;
+          return this;
+        }
+
+        public boolean hasPrecision() { 
+          if (this.precision == null)
+            return false;
+          for (DecimalType item : this.precision)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #precision} (Calculated precision if the GQ score threshold was set to "score" field value.)
+         */
+        public DecimalType addPrecisionElement() {//2 
+          DecimalType t = new DecimalType();
+          if (this.precision == null)
+            this.precision = new ArrayList<DecimalType>();
+          this.precision.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #precision} (Calculated precision if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addPrecision(BigDecimal value) { //1
+          DecimalType t = new DecimalType();
+          t.setValue(value);
+          if (this.precision == null)
+            this.precision = new ArrayList<DecimalType>();
+          this.precision.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #precision} (Calculated precision if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasPrecision(BigDecimal value) { 
+          if (this.precision == null)
+            return false;
+          for (DecimalType v : this.precision)
+            if (v.equals(value)) // decimal
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #sensitivity} (Calculated sensitivity if the GQ score threshold was set to "score" field value.)
+         */
+        public List<DecimalType> getSensitivity() { 
+          if (this.sensitivity == null)
+            this.sensitivity = new ArrayList<DecimalType>();
+          return this.sensitivity;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setSensitivity(List<DecimalType> theSensitivity) { 
+          this.sensitivity = theSensitivity;
+          return this;
+        }
+
+        public boolean hasSensitivity() { 
+          if (this.sensitivity == null)
+            return false;
+          for (DecimalType item : this.sensitivity)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #sensitivity} (Calculated sensitivity if the GQ score threshold was set to "score" field value.)
+         */
+        public DecimalType addSensitivityElement() {//2 
+          DecimalType t = new DecimalType();
+          if (this.sensitivity == null)
+            this.sensitivity = new ArrayList<DecimalType>();
+          this.sensitivity.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #sensitivity} (Calculated sensitivity if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addSensitivity(BigDecimal value) { //1
+          DecimalType t = new DecimalType();
+          t.setValue(value);
+          if (this.sensitivity == null)
+            this.sensitivity = new ArrayList<DecimalType>();
+          this.sensitivity.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #sensitivity} (Calculated sensitivity if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasSensitivity(BigDecimal value) { 
+          if (this.sensitivity == null)
+            return false;
+          for (DecimalType v : this.sensitivity)
+            if (v.equals(value)) // decimal
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #fMeasure} (Calculated fScore if the GQ score threshold was set to "score" field value.)
+         */
+        public List<DecimalType> getFMeasure() { 
+          if (this.fMeasure == null)
+            this.fMeasure = new ArrayList<DecimalType>();
+          return this.fMeasure;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SequenceQualityRocComponent setFMeasure(List<DecimalType> theFMeasure) { 
+          this.fMeasure = theFMeasure;
+          return this;
+        }
+
+        public boolean hasFMeasure() { 
+          if (this.fMeasure == null)
+            return false;
+          for (DecimalType item : this.fMeasure)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #fMeasure} (Calculated fScore if the GQ score threshold was set to "score" field value.)
+         */
+        public DecimalType addFMeasureElement() {//2 
+          DecimalType t = new DecimalType();
+          if (this.fMeasure == null)
+            this.fMeasure = new ArrayList<DecimalType>();
+          this.fMeasure.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #fMeasure} (Calculated fScore if the GQ score threshold was set to "score" field value.)
+         */
+        public SequenceQualityRocComponent addFMeasure(BigDecimal value) { //1
+          DecimalType t = new DecimalType();
+          t.setValue(value);
+          if (this.fMeasure == null)
+            this.fMeasure = new ArrayList<DecimalType>();
+          this.fMeasure.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #fMeasure} (Calculated fScore if the GQ score threshold was set to "score" field value.)
+         */
+        public boolean hasFMeasure(BigDecimal value) { 
+          if (this.fMeasure == null)
+            return false;
+          for (DecimalType v : this.fMeasure)
+            if (v.equals(value)) // decimal
+              return true;
+          return false;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("score", "integer", "Invidual data point representing the GQ (genotype quality) score threshold.", 0, java.lang.Integer.MAX_VALUE, score));
+          children.add(new Property("numTP", "integer", "The number of true positives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numTP));
+          children.add(new Property("numFP", "integer", "The number of false positives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numFP));
+          children.add(new Property("numFN", "integer", "The number of false negatives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numFN));
+          children.add(new Property("precision", "decimal", "Calculated precision if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, precision));
+          children.add(new Property("sensitivity", "decimal", "Calculated sensitivity if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, sensitivity));
+          children.add(new Property("fMeasure", "decimal", "Calculated fScore if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, fMeasure));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 109264530: /*score*/  return new Property("score", "integer", "Invidual data point representing the GQ (genotype quality) score threshold.", 0, java.lang.Integer.MAX_VALUE, score);
+          case 105180290: /*numTP*/  return new Property("numTP", "integer", "The number of true positives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numTP);
+          case 105179856: /*numFP*/  return new Property("numFP", "integer", "The number of false positives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numFP);
+          case 105179854: /*numFN*/  return new Property("numFN", "integer", "The number of false negatives if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, numFN);
+          case -1376177026: /*precision*/  return new Property("precision", "decimal", "Calculated precision if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, precision);
+          case 564403871: /*sensitivity*/  return new Property("sensitivity", "decimal", "Calculated sensitivity if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, sensitivity);
+          case -18997736: /*fMeasure*/  return new Property("fMeasure", "decimal", "Calculated fScore if the GQ score threshold was set to \"score\" field value.", 0, java.lang.Integer.MAX_VALUE, fMeasure);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 109264530: /*score*/ return this.score == null ? new Base[0] : this.score.toArray(new Base[this.score.size()]); // IntegerType
+        case 105180290: /*numTP*/ return this.numTP == null ? new Base[0] : this.numTP.toArray(new Base[this.numTP.size()]); // IntegerType
+        case 105179856: /*numFP*/ return this.numFP == null ? new Base[0] : this.numFP.toArray(new Base[this.numFP.size()]); // IntegerType
+        case 105179854: /*numFN*/ return this.numFN == null ? new Base[0] : this.numFN.toArray(new Base[this.numFN.size()]); // IntegerType
+        case -1376177026: /*precision*/ return this.precision == null ? new Base[0] : this.precision.toArray(new Base[this.precision.size()]); // DecimalType
+        case 564403871: /*sensitivity*/ return this.sensitivity == null ? new Base[0] : this.sensitivity.toArray(new Base[this.sensitivity.size()]); // DecimalType
+        case -18997736: /*fMeasure*/ return this.fMeasure == null ? new Base[0] : this.fMeasure.toArray(new Base[this.fMeasure.size()]); // DecimalType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 109264530: // score
+          this.getScore().add(castToInteger(value)); // IntegerType
+          return value;
+        case 105180290: // numTP
+          this.getNumTP().add(castToInteger(value)); // IntegerType
+          return value;
+        case 105179856: // numFP
+          this.getNumFP().add(castToInteger(value)); // IntegerType
+          return value;
+        case 105179854: // numFN
+          this.getNumFN().add(castToInteger(value)); // IntegerType
+          return value;
+        case -1376177026: // precision
+          this.getPrecision().add(castToDecimal(value)); // DecimalType
+          return value;
+        case 564403871: // sensitivity
+          this.getSensitivity().add(castToDecimal(value)); // DecimalType
+          return value;
+        case -18997736: // fMeasure
+          this.getFMeasure().add(castToDecimal(value)); // DecimalType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("score")) {
+          this.getScore().add(castToInteger(value));
+        } else if (name.equals("numTP")) {
+          this.getNumTP().add(castToInteger(value));
+        } else if (name.equals("numFP")) {
+          this.getNumFP().add(castToInteger(value));
+        } else if (name.equals("numFN")) {
+          this.getNumFN().add(castToInteger(value));
+        } else if (name.equals("precision")) {
+          this.getPrecision().add(castToDecimal(value));
+        } else if (name.equals("sensitivity")) {
+          this.getSensitivity().add(castToDecimal(value));
+        } else if (name.equals("fMeasure")) {
+          this.getFMeasure().add(castToDecimal(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109264530:  return addScoreElement();
+        case 105180290:  return addNumTPElement();
+        case 105179856:  return addNumFPElement();
+        case 105179854:  return addNumFNElement();
+        case -1376177026:  return addPrecisionElement();
+        case 564403871:  return addSensitivityElement();
+        case -18997736:  return addFMeasureElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109264530: /*score*/ return new String[] {"integer"};
+        case 105180290: /*numTP*/ return new String[] {"integer"};
+        case 105179856: /*numFP*/ return new String[] {"integer"};
+        case 105179854: /*numFN*/ return new String[] {"integer"};
+        case -1376177026: /*precision*/ return new String[] {"decimal"};
+        case 564403871: /*sensitivity*/ return new String[] {"decimal"};
+        case -18997736: /*fMeasure*/ return new String[] {"decimal"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("score")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.score");
+        }
+        else if (name.equals("numTP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.numTP");
+        }
+        else if (name.equals("numFP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.numFP");
+        }
+        else if (name.equals("numFN")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.numFN");
+        }
+        else if (name.equals("precision")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.precision");
+        }
+        else if (name.equals("sensitivity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.sensitivity");
+        }
+        else if (name.equals("fMeasure")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.fMeasure");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SequenceQualityRocComponent copy() {
+        SequenceQualityRocComponent dst = new SequenceQualityRocComponent();
+        copyValues(dst);
+        if (score != null) {
+          dst.score = new ArrayList<IntegerType>();
+          for (IntegerType i : score)
+            dst.score.add(i.copy());
+        };
+        if (numTP != null) {
+          dst.numTP = new ArrayList<IntegerType>();
+          for (IntegerType i : numTP)
+            dst.numTP.add(i.copy());
+        };
+        if (numFP != null) {
+          dst.numFP = new ArrayList<IntegerType>();
+          for (IntegerType i : numFP)
+            dst.numFP.add(i.copy());
+        };
+        if (numFN != null) {
+          dst.numFN = new ArrayList<IntegerType>();
+          for (IntegerType i : numFN)
+            dst.numFN.add(i.copy());
+        };
+        if (precision != null) {
+          dst.precision = new ArrayList<DecimalType>();
+          for (DecimalType i : precision)
+            dst.precision.add(i.copy());
+        };
+        if (sensitivity != null) {
+          dst.sensitivity = new ArrayList<DecimalType>();
+          for (DecimalType i : sensitivity)
+            dst.sensitivity.add(i.copy());
+        };
+        if (fMeasure != null) {
+          dst.fMeasure = new ArrayList<DecimalType>();
+          for (DecimalType i : fMeasure)
+            dst.fMeasure.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SequenceQualityRocComponent))
+          return false;
+        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other;
+        return compareDeep(score, o.score, true) && compareDeep(numTP, o.numTP, true) && compareDeep(numFP, o.numFP, true)
+           && compareDeep(numFN, o.numFN, true) && compareDeep(precision, o.precision, true) && compareDeep(sensitivity, o.sensitivity, true)
+           && compareDeep(fMeasure, o.fMeasure, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SequenceQualityRocComponent))
+          return false;
+        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other;
+        return compareValues(score, o.score, true) && compareValues(numTP, o.numTP, true) && compareValues(numFP, o.numFP, true)
+           && compareValues(numFN, o.numFN, true) && compareValues(precision, o.precision, true) && compareValues(sensitivity, o.sensitivity, true)
+           && compareValues(fMeasure, o.fMeasure, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(score, numTP, numFP, numFN
+          , precision, sensitivity, fMeasure);
+      }
+
+  public String fhirType() {
+    return "Sequence.quality.roc";
 
   }
 
@@ -3255,6 +4013,905 @@ public class Sequence extends DomainResource {
 
   }
 
+    @Block()
+    public static class SequenceStructureVariantComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.
+         */
+        @Child(name = "precision", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Precision of boundaries", formalDefinition="Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries." )
+        protected StringType precision;
+
+        /**
+         * Structural Variant reported aCGH ratio.
+         */
+        @Child(name = "reportedaCGHRatio", type = {DecimalType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant reported aCGH ratio", formalDefinition="Structural Variant reported aCGH ratio." )
+        protected DecimalType reportedaCGHRatio;
+
+        /**
+         * Length of the variant choromosome.
+         */
+        @Child(name = "length", type = {IntegerType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant Length", formalDefinition="Length of the variant choromosome." )
+        protected IntegerType length;
+
+        /**
+         * Structural variant outer.
+         */
+        @Child(name = "outer", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural variant outer", formalDefinition="Structural variant outer." )
+        protected SequenceStructureVariantOuterComponent outer;
+
+        /**
+         * Structural variant inner.
+         */
+        @Child(name = "inner", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural variant inner", formalDefinition="Structural variant inner." )
+        protected SequenceStructureVariantInnerComponent inner;
+
+        private static final long serialVersionUID = 313275793L;
+
+    /**
+     * Constructor
+     */
+      public SequenceStructureVariantComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #precision} (Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         */
+        public StringType getPrecisionElement() { 
+          if (this.precision == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.precision");
+            else if (Configuration.doAutoCreate())
+              this.precision = new StringType(); // bb
+          return this.precision;
+        }
+
+        public boolean hasPrecisionElement() { 
+          return this.precision != null && !this.precision.isEmpty();
+        }
+
+        public boolean hasPrecision() { 
+          return this.precision != null && !this.precision.isEmpty();
+        }
+
+        /**
+         * @param value {@link #precision} (Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         */
+        public SequenceStructureVariantComponent setPrecisionElement(StringType value) { 
+          this.precision = value;
+          return this;
+        }
+
+        /**
+         * @return Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.
+         */
+        public String getPrecision() { 
+          return this.precision == null ? null : this.precision.getValue();
+        }
+
+        /**
+         * @param value Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.
+         */
+        public SequenceStructureVariantComponent setPrecision(String value) { 
+          if (Utilities.noString(value))
+            this.precision = null;
+          else {
+            if (this.precision == null)
+              this.precision = new StringType();
+            this.precision.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #reportedaCGHRatio} (Structural Variant reported aCGH ratio.). This is the underlying object with id, value and extensions. The accessor "getReportedaCGHRatio" gives direct access to the value
+         */
+        public DecimalType getReportedaCGHRatioElement() { 
+          if (this.reportedaCGHRatio == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.reportedaCGHRatio");
+            else if (Configuration.doAutoCreate())
+              this.reportedaCGHRatio = new DecimalType(); // bb
+          return this.reportedaCGHRatio;
+        }
+
+        public boolean hasReportedaCGHRatioElement() { 
+          return this.reportedaCGHRatio != null && !this.reportedaCGHRatio.isEmpty();
+        }
+
+        public boolean hasReportedaCGHRatio() { 
+          return this.reportedaCGHRatio != null && !this.reportedaCGHRatio.isEmpty();
+        }
+
+        /**
+         * @param value {@link #reportedaCGHRatio} (Structural Variant reported aCGH ratio.). This is the underlying object with id, value and extensions. The accessor "getReportedaCGHRatio" gives direct access to the value
+         */
+        public SequenceStructureVariantComponent setReportedaCGHRatioElement(DecimalType value) { 
+          this.reportedaCGHRatio = value;
+          return this;
+        }
+
+        /**
+         * @return Structural Variant reported aCGH ratio.
+         */
+        public BigDecimal getReportedaCGHRatio() { 
+          return this.reportedaCGHRatio == null ? null : this.reportedaCGHRatio.getValue();
+        }
+
+        /**
+         * @param value Structural Variant reported aCGH ratio.
+         */
+        public SequenceStructureVariantComponent setReportedaCGHRatio(BigDecimal value) { 
+          if (value == null)
+            this.reportedaCGHRatio = null;
+          else {
+            if (this.reportedaCGHRatio == null)
+              this.reportedaCGHRatio = new DecimalType();
+            this.reportedaCGHRatio.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value Structural Variant reported aCGH ratio.
+         */
+        public SequenceStructureVariantComponent setReportedaCGHRatio(long value) { 
+              this.reportedaCGHRatio = new DecimalType();
+            this.reportedaCGHRatio.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value Structural Variant reported aCGH ratio.
+         */
+        public SequenceStructureVariantComponent setReportedaCGHRatio(double value) { 
+              this.reportedaCGHRatio = new DecimalType();
+            this.reportedaCGHRatio.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #length} (Length of the variant choromosome.). This is the underlying object with id, value and extensions. The accessor "getLength" gives direct access to the value
+         */
+        public IntegerType getLengthElement() { 
+          if (this.length == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.length");
+            else if (Configuration.doAutoCreate())
+              this.length = new IntegerType(); // bb
+          return this.length;
+        }
+
+        public boolean hasLengthElement() { 
+          return this.length != null && !this.length.isEmpty();
+        }
+
+        public boolean hasLength() { 
+          return this.length != null && !this.length.isEmpty();
+        }
+
+        /**
+         * @param value {@link #length} (Length of the variant choromosome.). This is the underlying object with id, value and extensions. The accessor "getLength" gives direct access to the value
+         */
+        public SequenceStructureVariantComponent setLengthElement(IntegerType value) { 
+          this.length = value;
+          return this;
+        }
+
+        /**
+         * @return Length of the variant choromosome.
+         */
+        public int getLength() { 
+          return this.length == null || this.length.isEmpty() ? 0 : this.length.getValue();
+        }
+
+        /**
+         * @param value Length of the variant choromosome.
+         */
+        public SequenceStructureVariantComponent setLength(int value) { 
+            if (this.length == null)
+              this.length = new IntegerType();
+            this.length.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #outer} (Structural variant outer.)
+         */
+        public SequenceStructureVariantOuterComponent getOuter() { 
+          if (this.outer == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.outer");
+            else if (Configuration.doAutoCreate())
+              this.outer = new SequenceStructureVariantOuterComponent(); // cc
+          return this.outer;
+        }
+
+        public boolean hasOuter() { 
+          return this.outer != null && !this.outer.isEmpty();
+        }
+
+        /**
+         * @param value {@link #outer} (Structural variant outer.)
+         */
+        public SequenceStructureVariantComponent setOuter(SequenceStructureVariantOuterComponent value) { 
+          this.outer = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #inner} (Structural variant inner.)
+         */
+        public SequenceStructureVariantInnerComponent getInner() { 
+          if (this.inner == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.inner");
+            else if (Configuration.doAutoCreate())
+              this.inner = new SequenceStructureVariantInnerComponent(); // cc
+          return this.inner;
+        }
+
+        public boolean hasInner() { 
+          return this.inner != null && !this.inner.isEmpty();
+        }
+
+        /**
+         * @param value {@link #inner} (Structural variant inner.)
+         */
+        public SequenceStructureVariantComponent setInner(SequenceStructureVariantInnerComponent value) { 
+          this.inner = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("precision", "string", "Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.", 0, 1, precision));
+          children.add(new Property("reportedaCGHRatio", "decimal", "Structural Variant reported aCGH ratio.", 0, 1, reportedaCGHRatio));
+          children.add(new Property("length", "integer", "Length of the variant choromosome.", 0, 1, length));
+          children.add(new Property("outer", "", "Structural variant outer.", 0, 1, outer));
+          children.add(new Property("inner", "", "Structural variant inner.", 0, 1, inner));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1376177026: /*precision*/  return new Property("precision", "string", "Identify the exact boundaries of variant sequences. Each type of structure variant requires the DNA duplex to be broken and rejoined, and this creates a new sequence of bases at the rejoined sites, known as breakpoints or boundaries.", 0, 1, precision);
+          case -1872600587: /*reportedaCGHRatio*/  return new Property("reportedaCGHRatio", "decimal", "Structural Variant reported aCGH ratio.", 0, 1, reportedaCGHRatio);
+          case -1106363674: /*length*/  return new Property("length", "integer", "Length of the variant choromosome.", 0, 1, length);
+          case 106111099: /*outer*/  return new Property("outer", "", "Structural variant outer.", 0, 1, outer);
+          case 100355670: /*inner*/  return new Property("inner", "", "Structural variant inner.", 0, 1, inner);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1376177026: /*precision*/ return this.precision == null ? new Base[0] : new Base[] {this.precision}; // StringType
+        case -1872600587: /*reportedaCGHRatio*/ return this.reportedaCGHRatio == null ? new Base[0] : new Base[] {this.reportedaCGHRatio}; // DecimalType
+        case -1106363674: /*length*/ return this.length == null ? new Base[0] : new Base[] {this.length}; // IntegerType
+        case 106111099: /*outer*/ return this.outer == null ? new Base[0] : new Base[] {this.outer}; // SequenceStructureVariantOuterComponent
+        case 100355670: /*inner*/ return this.inner == null ? new Base[0] : new Base[] {this.inner}; // SequenceStructureVariantInnerComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1376177026: // precision
+          this.precision = castToString(value); // StringType
+          return value;
+        case -1872600587: // reportedaCGHRatio
+          this.reportedaCGHRatio = castToDecimal(value); // DecimalType
+          return value;
+        case -1106363674: // length
+          this.length = castToInteger(value); // IntegerType
+          return value;
+        case 106111099: // outer
+          this.outer = (SequenceStructureVariantOuterComponent) value; // SequenceStructureVariantOuterComponent
+          return value;
+        case 100355670: // inner
+          this.inner = (SequenceStructureVariantInnerComponent) value; // SequenceStructureVariantInnerComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("precision")) {
+          this.precision = castToString(value); // StringType
+        } else if (name.equals("reportedaCGHRatio")) {
+          this.reportedaCGHRatio = castToDecimal(value); // DecimalType
+        } else if (name.equals("length")) {
+          this.length = castToInteger(value); // IntegerType
+        } else if (name.equals("outer")) {
+          this.outer = (SequenceStructureVariantOuterComponent) value; // SequenceStructureVariantOuterComponent
+        } else if (name.equals("inner")) {
+          this.inner = (SequenceStructureVariantInnerComponent) value; // SequenceStructureVariantInnerComponent
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1376177026:  return getPrecisionElement();
+        case -1872600587:  return getReportedaCGHRatioElement();
+        case -1106363674:  return getLengthElement();
+        case 106111099:  return getOuter(); 
+        case 100355670:  return getInner(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1376177026: /*precision*/ return new String[] {"string"};
+        case -1872600587: /*reportedaCGHRatio*/ return new String[] {"decimal"};
+        case -1106363674: /*length*/ return new String[] {"integer"};
+        case 106111099: /*outer*/ return new String[] {};
+        case 100355670: /*inner*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("precision")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.precision");
+        }
+        else if (name.equals("reportedaCGHRatio")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.reportedaCGHRatio");
+        }
+        else if (name.equals("length")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.length");
+        }
+        else if (name.equals("outer")) {
+          this.outer = new SequenceStructureVariantOuterComponent();
+          return this.outer;
+        }
+        else if (name.equals("inner")) {
+          this.inner = new SequenceStructureVariantInnerComponent();
+          return this.inner;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SequenceStructureVariantComponent copy() {
+        SequenceStructureVariantComponent dst = new SequenceStructureVariantComponent();
+        copyValues(dst);
+        dst.precision = precision == null ? null : precision.copy();
+        dst.reportedaCGHRatio = reportedaCGHRatio == null ? null : reportedaCGHRatio.copy();
+        dst.length = length == null ? null : length.copy();
+        dst.outer = outer == null ? null : outer.copy();
+        dst.inner = inner == null ? null : inner.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantComponent))
+          return false;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
+        return compareDeep(precision, o.precision, true) && compareDeep(reportedaCGHRatio, o.reportedaCGHRatio, true)
+           && compareDeep(length, o.length, true) && compareDeep(outer, o.outer, true) && compareDeep(inner, o.inner, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantComponent))
+          return false;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
+        return compareValues(precision, o.precision, true) && compareValues(reportedaCGHRatio, o.reportedaCGHRatio, true)
+           && compareValues(length, o.length, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(precision, reportedaCGHRatio
+          , length, outer, inner);
+      }
+
+  public String fhirType() {
+    return "Sequence.structureVariant";
+
+  }
+
+  }
+
+    @Block()
+    public static class SequenceStructureVariantOuterComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        @Child(name = "start", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant Outer Start", formalDefinition="Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive." )
+        protected IntegerType start;
+
+        /**
+         * Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        @Child(name = "end", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant Outer End", formalDefinition="Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position." )
+        protected IntegerType end;
+
+        private static final long serialVersionUID = -1798864889L;
+
+    /**
+     * Constructor
+     */
+      public SequenceStructureVariantOuterComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #start} (Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         */
+        public IntegerType getStartElement() { 
+          if (this.start == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantOuterComponent.start");
+            else if (Configuration.doAutoCreate())
+              this.start = new IntegerType(); // bb
+          return this.start;
+        }
+
+        public boolean hasStartElement() { 
+          return this.start != null && !this.start.isEmpty();
+        }
+
+        public boolean hasStart() { 
+          return this.start != null && !this.start.isEmpty();
+        }
+
+        /**
+         * @param value {@link #start} (Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         */
+        public SequenceStructureVariantOuterComponent setStartElement(IntegerType value) { 
+          this.start = value;
+          return this;
+        }
+
+        /**
+         * @return Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        public int getStart() { 
+          return this.start == null || this.start.isEmpty() ? 0 : this.start.getValue();
+        }
+
+        /**
+         * @param value Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        public SequenceStructureVariantOuterComponent setStart(int value) { 
+            if (this.start == null)
+              this.start = new IntegerType();
+            this.start.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #end} (Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         */
+        public IntegerType getEndElement() { 
+          if (this.end == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantOuterComponent.end");
+            else if (Configuration.doAutoCreate())
+              this.end = new IntegerType(); // bb
+          return this.end;
+        }
+
+        public boolean hasEndElement() { 
+          return this.end != null && !this.end.isEmpty();
+        }
+
+        public boolean hasEnd() { 
+          return this.end != null && !this.end.isEmpty();
+        }
+
+        /**
+         * @param value {@link #end} (Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         */
+        public SequenceStructureVariantOuterComponent setEndElement(IntegerType value) { 
+          this.end = value;
+          return this;
+        }
+
+        /**
+         * @return Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        public int getEnd() { 
+          return this.end == null || this.end.isEmpty() ? 0 : this.end.getValue();
+        }
+
+        /**
+         * @param value Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        public SequenceStructureVariantOuterComponent setEnd(int value) { 
+            if (this.end == null)
+              this.end = new IntegerType();
+            this.end.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("start", "integer", "Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start));
+          children.add(new Property("end", "integer", "Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 109757538: /*start*/  return new Property("start", "integer", "Structural Variant Outer Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start);
+          case 100571: /*end*/  return new Property("end", "integer", "Structural Variant Outer End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // IntegerType
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // IntegerType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 109757538: // start
+          this.start = castToInteger(value); // IntegerType
+          return value;
+        case 100571: // end
+          this.end = castToInteger(value); // IntegerType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("start")) {
+          this.start = castToInteger(value); // IntegerType
+        } else if (name.equals("end")) {
+          this.end = castToInteger(value); // IntegerType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return new String[] {"integer"};
+        case 100571: /*end*/ return new String[] {"integer"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.end");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SequenceStructureVariantOuterComponent copy() {
+        SequenceStructureVariantOuterComponent dst = new SequenceStructureVariantOuterComponent();
+        copyValues(dst);
+        dst.start = start == null ? null : start.copy();
+        dst.end = end == null ? null : end.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantOuterComponent))
+          return false;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
+        return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantOuterComponent))
+          return false;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end);
+      }
+
+  public String fhirType() {
+    return "Sequence.structureVariant.outer";
+
+  }
+
+  }
+
+    @Block()
+    public static class SequenceStructureVariantInnerComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        @Child(name = "start", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant Inner Start", formalDefinition="Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive." )
+        protected IntegerType start;
+
+        /**
+         * Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        @Child(name = "end", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Structural Variant Inner End", formalDefinition="Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position." )
+        protected IntegerType end;
+
+        private static final long serialVersionUID = -1798864889L;
+
+    /**
+     * Constructor
+     */
+      public SequenceStructureVariantInnerComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #start} (Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         */
+        public IntegerType getStartElement() { 
+          if (this.start == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantInnerComponent.start");
+            else if (Configuration.doAutoCreate())
+              this.start = new IntegerType(); // bb
+          return this.start;
+        }
+
+        public boolean hasStartElement() { 
+          return this.start != null && !this.start.isEmpty();
+        }
+
+        public boolean hasStart() { 
+          return this.start != null && !this.start.isEmpty();
+        }
+
+        /**
+         * @param value {@link #start} (Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         */
+        public SequenceStructureVariantInnerComponent setStartElement(IntegerType value) { 
+          this.start = value;
+          return this;
+        }
+
+        /**
+         * @return Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        public int getStart() { 
+          return this.start == null || this.start.isEmpty() ? 0 : this.start.getValue();
+        }
+
+        /**
+         * @param value Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.
+         */
+        public SequenceStructureVariantInnerComponent setStart(int value) { 
+            if (this.start == null)
+              this.start = new IntegerType();
+            this.start.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #end} (Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         */
+        public IntegerType getEndElement() { 
+          if (this.end == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceStructureVariantInnerComponent.end");
+            else if (Configuration.doAutoCreate())
+              this.end = new IntegerType(); // bb
+          return this.end;
+        }
+
+        public boolean hasEndElement() { 
+          return this.end != null && !this.end.isEmpty();
+        }
+
+        public boolean hasEnd() { 
+          return this.end != null && !this.end.isEmpty();
+        }
+
+        /**
+         * @param value {@link #end} (Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         */
+        public SequenceStructureVariantInnerComponent setEndElement(IntegerType value) { 
+          this.end = value;
+          return this;
+        }
+
+        /**
+         * @return Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        public int getEnd() { 
+          return this.end == null || this.end.isEmpty() ? 0 : this.end.getValue();
+        }
+
+        /**
+         * @param value Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
+         */
+        public SequenceStructureVariantInnerComponent setEnd(int value) { 
+            if (this.end == null)
+              this.end = new IntegerType();
+            this.end.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("start", "integer", "Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start));
+          children.add(new Property("end", "integer", "Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 109757538: /*start*/  return new Property("start", "integer", "Structural Variant Inner Start.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start);
+          case 100571: /*end*/  return new Property("end", "integer", "Structural Variant Inner End. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // IntegerType
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // IntegerType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 109757538: // start
+          this.start = castToInteger(value); // IntegerType
+          return value;
+        case 100571: // end
+          this.end = castToInteger(value); // IntegerType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("start")) {
+          this.start = castToInteger(value); // IntegerType
+        } else if (name.equals("end")) {
+          this.end = castToInteger(value); // IntegerType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return new String[] {"integer"};
+        case 100571: /*end*/ return new String[] {"integer"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.end");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SequenceStructureVariantInnerComponent copy() {
+        SequenceStructureVariantInnerComponent dst = new SequenceStructureVariantInnerComponent();
+        copyValues(dst);
+        dst.start = start == null ? null : start.copy();
+        dst.end = end == null ? null : end.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantInnerComponent))
+          return false;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
+        return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SequenceStructureVariantInnerComponent))
+          return false;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end);
+      }
+
+  public String fhirType() {
+    return "Sequence.structureVariant.inner";
+
+  }
+
+  }
+
     /**
      * A unique identifier for this particular sequence instance. This is a FHIR-defined id.
      */
@@ -3386,7 +5043,14 @@ public class Sequence extends DomainResource {
     protected List<Sequence> pointerTarget;
 
 
-    private static final long serialVersionUID = -2101352712L;
+    /**
+     * Information about chromosome structure variation.
+     */
+    @Child(name = "structureVariant", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Structural variant", formalDefinition="Information about chromosome structure variation." )
+    protected List<SequenceStructureVariantComponent> structureVariant;
+
+    private static final long serialVersionUID = 2091706446L;
 
   /**
    * Constructor
@@ -4102,6 +5766,59 @@ public class Sequence extends DomainResource {
       return r;
     }
 
+    /**
+     * @return {@link #structureVariant} (Information about chromosome structure variation.)
+     */
+    public List<SequenceStructureVariantComponent> getStructureVariant() { 
+      if (this.structureVariant == null)
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+      return this.structureVariant;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Sequence setStructureVariant(List<SequenceStructureVariantComponent> theStructureVariant) { 
+      this.structureVariant = theStructureVariant;
+      return this;
+    }
+
+    public boolean hasStructureVariant() { 
+      if (this.structureVariant == null)
+        return false;
+      for (SequenceStructureVariantComponent item : this.structureVariant)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public SequenceStructureVariantComponent addStructureVariant() { //3
+      SequenceStructureVariantComponent t = new SequenceStructureVariantComponent();
+      if (this.structureVariant == null)
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+      this.structureVariant.add(t);
+      return t;
+    }
+
+    public Sequence addStructureVariant(SequenceStructureVariantComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.structureVariant == null)
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+      this.structureVariant.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #structureVariant}, creating it if it does not already exist
+     */
+    public SequenceStructureVariantComponent getStructureVariantFirstRep() { 
+      if (getStructureVariant().isEmpty()) {
+        addStructureVariant();
+      }
+      return getStructureVariant().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A unique identifier for this particular sequence instance. This is a FHIR-defined id.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -4119,6 +5836,7 @@ public class Sequence extends DomainResource {
         children.add(new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, 1, readCoverage));
         children.add(new Property("repository", "", "Configurations of the external repository. The repository shall store target's observedSeq or records related with target's observedSeq.", 0, java.lang.Integer.MAX_VALUE, repository));
         children.add(new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer));
+        children.add(new Property("structureVariant", "", "Information about chromosome structure variation.", 0, java.lang.Integer.MAX_VALUE, structureVariant));
       }
 
       @Override
@@ -4139,6 +5857,7 @@ public class Sequence extends DomainResource {
         case -1798816354: /*readCoverage*/  return new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, 1, readCoverage);
         case 1950800714: /*repository*/  return new Property("repository", "", "Configurations of the external repository. The repository shall store target's observedSeq or records related with target's observedSeq.", 0, java.lang.Integer.MAX_VALUE, repository);
         case -400605635: /*pointer*/  return new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer);
+        case 757269394: /*structureVariant*/  return new Property("structureVariant", "", "Information about chromosome structure variation.", 0, java.lang.Integer.MAX_VALUE, structureVariant);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -4162,6 +5881,7 @@ public class Sequence extends DomainResource {
         case -1798816354: /*readCoverage*/ return this.readCoverage == null ? new Base[0] : new Base[] {this.readCoverage}; // IntegerType
         case 1950800714: /*repository*/ return this.repository == null ? new Base[0] : this.repository.toArray(new Base[this.repository.size()]); // SequenceRepositoryComponent
         case -400605635: /*pointer*/ return this.pointer == null ? new Base[0] : this.pointer.toArray(new Base[this.pointer.size()]); // Reference
+        case 757269394: /*structureVariant*/ return this.structureVariant == null ? new Base[0] : this.structureVariant.toArray(new Base[this.structureVariant.size()]); // SequenceStructureVariantComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -4216,6 +5936,9 @@ public class Sequence extends DomainResource {
         case -400605635: // pointer
           this.getPointer().add(castToReference(value)); // Reference
           return value;
+        case 757269394: // structureVariant
+          this.getStructureVariant().add((SequenceStructureVariantComponent) value); // SequenceStructureVariantComponent
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -4254,6 +5977,8 @@ public class Sequence extends DomainResource {
           this.getRepository().add((SequenceRepositoryComponent) value);
         } else if (name.equals("pointer")) {
           this.getPointer().add(castToReference(value));
+        } else if (name.equals("structureVariant")) {
+          this.getStructureVariant().add((SequenceStructureVariantComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -4277,6 +6002,7 @@ public class Sequence extends DomainResource {
         case -1798816354:  return getReadCoverageElement();
         case 1950800714:  return addRepository(); 
         case -400605635:  return addPointer(); 
+        case 757269394:  return addStructureVariant(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -4300,6 +6026,7 @@ public class Sequence extends DomainResource {
         case -1798816354: /*readCoverage*/ return new String[] {"integer"};
         case 1950800714: /*repository*/ return new String[] {};
         case -400605635: /*pointer*/ return new String[] {"Reference"};
+        case 757269394: /*structureVariant*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -4358,6 +6085,9 @@ public class Sequence extends DomainResource {
         else if (name.equals("pointer")) {
           return addPointer();
         }
+        else if (name.equals("structureVariant")) {
+          return addStructureVariant();
+        }
         else
           return super.addChild(name);
       }
@@ -4405,6 +6135,11 @@ public class Sequence extends DomainResource {
           for (Reference i : pointer)
             dst.pointer.add(i.copy());
         };
+        if (structureVariant != null) {
+          dst.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+          for (SequenceStructureVariantComponent i : structureVariant)
+            dst.structureVariant.add(i.copy());
+        };
         return dst;
       }
 
@@ -4424,7 +6159,8 @@ public class Sequence extends DomainResource {
            && compareDeep(performer, o.performer, true) && compareDeep(quantity, o.quantity, true) && compareDeep(referenceSeq, o.referenceSeq, true)
            && compareDeep(variant, o.variant, true) && compareDeep(observedSeq, o.observedSeq, true) && compareDeep(quality, o.quality, true)
            && compareDeep(readCoverage, o.readCoverage, true) && compareDeep(repository, o.repository, true)
-           && compareDeep(pointer, o.pointer, true);
+           && compareDeep(pointer, o.pointer, true) && compareDeep(structureVariant, o.structureVariant, true)
+          ;
       }
 
       @Override
@@ -4442,7 +6178,7 @@ public class Sequence extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, coordinateSystem
           , patient, specimen, device, performer, quantity, referenceSeq, variant, observedSeq
-          , quality, readCoverage, repository, pointer);
+          , quality, readCoverage, repository, pointer, structureVariant);
       }
 
   @Override
