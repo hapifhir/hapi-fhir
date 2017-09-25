@@ -559,6 +559,23 @@ public class JsonParserDstu3Test {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
 		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
+        
+	@Test
+	public void testEncodeBinaryWithSecurityContext() {
+            Binary bin = new Binary();
+            bin.setContentType("text/plain");
+            bin.setContent("Now is the time".getBytes());
+            Reference securityContext = new Reference();
+            securityContext.setReference("DiagnosticReport/1");
+            bin.setSecurityContext(securityContext);
+            String encoded = ourCtx.newJsonParser().encodeResourceToString(bin);
+            assertThat(encoded, containsString("Binary"));
+            assertThat(encoded, containsString("contentType"));
+            assertThat(encoded, containsString("text/plain"));
+            assertThat(encoded, containsString("Tm93IGlzIHRoZSB0aW1l"));
+            assertThat(encoded, containsString("securityContext"));
+            assertThat(encoded, containsString("{\"reference\":\"DiagnosticReport/1\"}"));
+        }
 
 	/**
 	 * #158
