@@ -3,13 +3,7 @@ package org.hl7.fhir.r4.elementmodel;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.elementmodel.Element.ElementSortComparator;
@@ -616,7 +610,7 @@ public class Element extends Base {
           remove.add(child);
       }
       children.removeAll(remove);
-      java.util.Collections.sort(children, new ElementSortComparator(this, this.property));
+      Collections.sort(children, new ElementSortComparator(this, this.property));
     }
   }
 

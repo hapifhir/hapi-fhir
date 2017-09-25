@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -40,6 +40,8 @@ public class ResourceFactory extends Factory {
             return new Appointment();
         if ("Account".equals(name))
             return new Account();
+        if ("CatalogEntry".equals(name))
+            return new CatalogEntry();
         if ("EventDefinition".equals(name))
             return new EventDefinition();
         if ("DocumentManifest".equals(name))
@@ -238,6 +240,8 @@ public class ResourceFactory extends Factory {
             return new PaymentReconciliation();
         if ("Condition".equals(name))
             return new Condition();
+        if ("SpecimenDefinition".equals(name))
+            return new SpecimenDefinition();
         if ("Composition".equals(name))
             return new Composition();
         if ("DetectedIssue".equals(name))
@@ -256,6 +260,8 @@ public class ResourceFactory extends Factory {
             return new ProcessResponse();
         if ("NamingSystem".equals(name))
             return new NamingSystem();
+        if ("ExampleScenario".equals(name))
+            return new ExampleScenario();
         if ("Schedule".equals(name))
             return new Schedule();
         if ("SupplyDelivery".equals(name))
@@ -399,6 +405,7 @@ public class ResourceFactory extends Factory {
         case -871422185: return new CapabilityStatement();
         case 57208314: return new CarePlan();
         case 57320750: return new CareTeam();
+        case -1007602695: return new CatalogEntry();
         case -883723257: return new ChargeItem();
         case 65189916: return new Claim();
         case 1488475261: return new ClaimResponse();
@@ -441,6 +448,7 @@ public class ResourceFactory extends Factory {
         case 289362821: return new EnrollmentResponse();
         case -1093178557: return new EpisodeOfCare();
         case 1851868013: return new EventDefinition();
+        case 1175230202: return new ExampleScenario();
         case -1136815094: return new ExpansionProfile();
         case -1001676601: return new ExplanationOfBenefit();
         case 1391410207: return new Extension();
@@ -517,6 +525,7 @@ public class ResourceFactory extends Factory {
         case -1097468803: return new SimpleQuantity();
         case 2579998: return new Slot();
         case -2068224216: return new Specimen();
+        case 863741595: return new SpecimenDefinition();
         case 1133777670: return new StructureDefinition();
         case 1958247177: return new StructureMap();
         case 505523517: return new Subscription();

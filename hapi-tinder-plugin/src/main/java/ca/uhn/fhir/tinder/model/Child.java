@@ -1,18 +1,17 @@
 package ca.uhn.fhir.tinder.model;
 
+import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
-import ca.uhn.fhir.model.api.BasePrimitive;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class Child extends BaseElement {
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -2491,9 +2491,16 @@ public class Claim extends DomainResource {
         protected BooleanType focal;
 
         /**
+         * The business identifier for the instance: claim number, pre-determination or pre-authorization number.
+         */
+        @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Claim number", formalDefinition="The business identifier for the instance: claim number, pre-determination or pre-authorization number." )
+        protected Identifier identifier;
+
+        /**
          * Reference to the program or plan identification, underwriter or payor.
          */
-        @Child(name = "coverage", type = {Coverage.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "coverage", type = {Coverage.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Insurance information", formalDefinition="Reference to the program or plan identification, underwriter or payor." )
         protected Reference coverage;
 
@@ -2505,21 +2512,21 @@ public class Claim extends DomainResource {
         /**
          * The contract number of a business agreement which describes the terms and conditions.
          */
-        @Child(name = "businessArrangement", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "businessArrangement", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Business agreement", formalDefinition="The contract number of a business agreement which describes the terms and conditions." )
         protected StringType businessArrangement;
 
         /**
          * A list of references from the Insurer to which these services pertain.
          */
-        @Child(name = "preAuthRef", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "preAuthRef", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Pre-Authorization/Determination Reference", formalDefinition="A list of references from the Insurer to which these services pertain." )
         protected List<StringType> preAuthRef;
 
         /**
          * The Coverages adjudication details.
          */
-        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Adjudication results", formalDefinition="The Coverages adjudication details." )
         protected Reference claimResponse;
 
@@ -2528,7 +2535,7 @@ public class Claim extends DomainResource {
          */
         protected ClaimResponse claimResponseTarget;
 
-        private static final long serialVersionUID = -1216535489L;
+        private static final long serialVersionUID = -1711744215L;
 
     /**
      * Constructor
@@ -2634,6 +2641,30 @@ public class Claim extends DomainResource {
             if (this.focal == null)
               this.focal = new BooleanType();
             this.focal.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #identifier} (The business identifier for the instance: claim number, pre-determination or pre-authorization number.)
+         */
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create InsuranceComponent.identifier");
+            else if (Configuration.doAutoCreate())
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
+        }
+
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
+        }
+
+        /**
+         * @param value {@link #identifier} (The business identifier for the instance: claim number, pre-determination or pre-authorization number.)
+         */
+        public InsuranceComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
           return this;
         }
 
@@ -2839,6 +2870,7 @@ public class Claim extends DomainResource {
           super.listChildren(children);
           children.add(new Property("sequence", "positiveInt", "Sequence of coverage which serves to provide a link and convey coordination of benefit order.", 0, 1, sequence));
           children.add(new Property("focal", "boolean", "A flag to indicate that this Coverage is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal));
+          children.add(new Property("identifier", "Identifier", "The business identifier for the instance: claim number, pre-determination or pre-authorization number.", 0, 1, identifier));
           children.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage));
           children.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement));
           children.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
@@ -2850,6 +2882,7 @@ public class Claim extends DomainResource {
           switch (_hash) {
           case 1349547969: /*sequence*/  return new Property("sequence", "positiveInt", "Sequence of coverage which serves to provide a link and convey coordination of benefit order.", 0, 1, sequence);
           case 97604197: /*focal*/  return new Property("focal", "boolean", "A flag to indicate that this Coverage is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The business identifier for the instance: claim number, pre-determination or pre-authorization number.", 0, 1, identifier);
           case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage);
           case 259920682: /*businessArrangement*/  return new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement);
           case 522246568: /*preAuthRef*/  return new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef);
@@ -2864,6 +2897,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
         case 97604197: /*focal*/ return this.focal == null ? new Base[0] : new Base[] {this.focal}; // BooleanType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
         case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
         case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : this.preAuthRef.toArray(new Base[this.preAuthRef.size()]); // StringType
@@ -2881,6 +2915,9 @@ public class Claim extends DomainResource {
           return value;
         case 97604197: // focal
           this.focal = castToBoolean(value); // BooleanType
+          return value;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           return value;
         case -351767064: // coverage
           this.coverage = castToReference(value); // Reference
@@ -2905,6 +2942,8 @@ public class Claim extends DomainResource {
           this.sequence = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("focal")) {
           this.focal = castToBoolean(value); // BooleanType
+        } else if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("coverage")) {
           this.coverage = castToReference(value); // Reference
         } else if (name.equals("businessArrangement")) {
@@ -2923,6 +2962,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 1349547969:  return getSequenceElement();
         case 97604197:  return getFocalElement();
+        case -1618432855:  return getIdentifier(); 
         case -351767064:  return getCoverage(); 
         case 259920682:  return getBusinessArrangementElement();
         case 522246568:  return addPreAuthRefElement();
@@ -2937,6 +2977,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 1349547969: /*sequence*/ return new String[] {"positiveInt"};
         case 97604197: /*focal*/ return new String[] {"boolean"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -351767064: /*coverage*/ return new String[] {"Reference"};
         case 259920682: /*businessArrangement*/ return new String[] {"string"};
         case 522246568: /*preAuthRef*/ return new String[] {"string"};
@@ -2953,6 +2994,10 @@ public class Claim extends DomainResource {
         }
         else if (name.equals("focal")) {
           throw new FHIRException("Cannot call addChild on a primitive type Claim.focal");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("coverage")) {
           this.coverage = new Reference();
@@ -2977,6 +3022,7 @@ public class Claim extends DomainResource {
         copyValues(dst);
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.focal = focal == null ? null : focal.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.coverage = coverage == null ? null : coverage.copy();
         dst.businessArrangement = businessArrangement == null ? null : businessArrangement.copy();
         if (preAuthRef != null) {
@@ -2995,9 +3041,10 @@ public class Claim extends DomainResource {
         if (!(other instanceof InsuranceComponent))
           return false;
         InsuranceComponent o = (InsuranceComponent) other;
-        return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(coverage, o.coverage, true)
-           && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(preAuthRef, o.preAuthRef, true)
-           && compareDeep(claimResponse, o.claimResponse, true);
+        return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(coverage, o.coverage, true) && compareDeep(businessArrangement, o.businessArrangement, true)
+           && compareDeep(preAuthRef, o.preAuthRef, true) && compareDeep(claimResponse, o.claimResponse, true)
+          ;
       }
 
       @Override
@@ -3012,8 +3059,8 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, focal, coverage
-          , businessArrangement, preAuthRef, claimResponse);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, focal, identifier
+          , coverage, businessArrangement, preAuthRef, claimResponse);
       }
 
   public String fhirType() {

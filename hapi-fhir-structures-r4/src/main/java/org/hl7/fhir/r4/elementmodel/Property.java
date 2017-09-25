@@ -255,12 +255,19 @@ public class Property {
         }
       }
       if (!"xhtml".equals(t)) {
-        final String url;
-        if (StringUtils.isNotBlank(ed.getType().get(0).getProfile())) {
-          url = ed.getType().get(0).getProfile();
-        } else {
-          url = "http://hl7.org/fhir/StructureDefinition/" + t;
+        String url = null;
+        for (TypeRefComponent aType: ed.getType()) {
+          if (aType.getCode().equals(t)) {
+            if (StringUtils.isNotBlank(aType.getProfile())) {
+              url = aType.getProfile();
+            } else {
+              url = "http://hl7.org/fhir/StructureDefinition/" + t;
+            }
+            break;
+          }
         }
+        if (url==null)
+          throw new Error("Unable to find type " + t + " for element " + elementName + " with path " + ed.getPath());
         sd = context.fetchResource(StructureDefinition.class, url);        
         if (sd == null)
           throw new DefinitionException("Unable to find type '"+t+"' for name '"+elementName+"' on property "+definition.getPath());

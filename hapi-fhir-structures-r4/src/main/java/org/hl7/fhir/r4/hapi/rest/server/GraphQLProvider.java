@@ -51,14 +51,6 @@ public class GraphQLProvider {
     myStorageServices = theStorageServices;
   }
 
-  @Initialize
-  public void initialize(RestfulServer theServer) {
-    ourLog.trace("Initializing GraphQL provider");
-    if (theServer.getFhirContext().getVersion().getVersion() != FhirVersionEnum.R4) {
-      throw new ConfigurationException("Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
-    }
-  }
-
   @GraphQL
   public String graphql(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
 
@@ -86,6 +78,14 @@ public class GraphQLProvider {
 
     } catch (Exception theE) {
       throw new InvalidRequestException("Unable to execute GraphQL Expression: " + theE.toString());
+    }
+  }
+
+  @Initialize
+  public void initialize(RestfulServer theServer) {
+    ourLog.trace("Initializing GraphQL provider");
+    if (theServer.getFhirContext().getVersion().getVersion() != FhirVersionEnum.R4) {
+      throw new ConfigurationException("Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
     }
   }
 

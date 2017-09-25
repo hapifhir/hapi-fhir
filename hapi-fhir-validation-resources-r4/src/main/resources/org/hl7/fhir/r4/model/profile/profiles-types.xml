@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="types"/>
  <meta>
-  <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+  <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -10,12 +10,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Element"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Element"/>
     <name value="Element"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -164,12 +164,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="BackboneElement"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/BackboneElement"/>
     <name value="BackboneElement"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -323,12 +323,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="base64Binary"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/base64Binary"/>
     <name value="base64Binary"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -458,12 +458,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="boolean"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/boolean"/>
     <name value="boolean"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -591,12 +591,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="code"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/code"/>
     <name value="code"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -740,12 +740,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="date"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/date"/>
     <name value="date"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -820,7 +820,7 @@
       <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?"/>
+        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?"/>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -854,7 +854,7 @@
       <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?"/>
+        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?"/>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -879,12 +879,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="dateTime"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/dateTime"/>
     <name value="dateTime"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -959,7 +959,7 @@
       <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"/>
+        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"/>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -993,7 +993,7 @@
       <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"/>
+        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"/>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -1018,12 +1018,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="decimal"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/decimal"/>
     <name value="decimal"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1159,12 +1159,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="id"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/id"/>
     <name value="id"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1310,12 +1310,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="instant"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
     <name value="instant"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1445,12 +1445,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="integer"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/integer"/>
     <name value="integer"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1590,12 +1590,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="markdown"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/markdown"/>
     <name value="markdown"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1735,12 +1735,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="oid"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/oid"/>
     <name value="oid"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1886,12 +1886,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="positiveInt"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/positiveInt"/>
     <name value="positiveInt"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2035,12 +2035,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="string"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/string"/>
     <name value="string"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2172,12 +2172,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="time"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/time"/>
     <name value="time"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2311,12 +2311,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="unsignedInt"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/unsignedInt"/>
     <name value="unsignedInt"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2460,12 +2460,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uri"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uri"/>
     <name value="uri"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2595,12 +2595,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uuid"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uuid"/>
     <name value="uuid"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2746,12 +2746,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="xhtml"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/xhtml"/>
     <name value="xhtml"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2875,12 +2875,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Address"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Address"/>
     <name value="Address"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -3664,12 +3664,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Age"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Age"/>
     <name value="Age"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -3954,12 +3954,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Annotation"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Annotation"/>
     <name value="Annotation"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -4228,12 +4228,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Attachment"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Attachment"/>
     <name value="Attachment"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -4763,12 +4763,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="CodeableConcept"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/CodeableConcept"/>
     <name value="CodeableConcept"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5021,12 +5021,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Coding"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Coding"/>
     <name value="Coding"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5423,12 +5423,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactDetail"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactDetail"/>
     <name value="ContactDetail"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5585,12 +5585,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactPoint"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactPoint"/>
     <name value="ContactPoint"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6025,12 +6025,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Contributor"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Contributor"/>
     <name value="Contributor"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6227,12 +6227,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Count"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Count"/>
     <name value="Count"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6519,12 +6519,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="DataRequirement"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/DataRequirement"/>
     <name value="DataRequirement"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6664,7 +6664,7 @@
      <element id="DataRequirement.codeFilter">
       <path value="DataRequirement.codeFilter"/>
       <short value="What codes are expected"/>
-      <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data."/>
+      <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6734,6 +6734,7 @@
       <path value="DataRequirement.codeFilter.path"/>
       <short value="The code-valued attribute of the filter"/>
       <definition value="The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept."/>
+      <comment value="The path attribute is a limited subset of FHIRPath that allows path traversal, but not calculation."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -6744,11 +6745,11 @@
      <element id="DataRequirement.codeFilter.valueSet[x]">
       <path value="DataRequirement.codeFilter.valueSet[x]"/>
       <short value="Valueset for the filter"/>
-      <definition value="The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset."/>
+      <definition value="The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="uri"/>
       </type>
       <type>
        <code value="Reference"/>
@@ -6756,21 +6757,10 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="DataRequirement.codeFilter.valueCode">
-      <path value="DataRequirement.codeFilter.valueCode"/>
+     <element id="DataRequirement.codeFilter.code">
+      <path value="DataRequirement.codeFilter.code"/>
       <short value="What code is expected"/>
-      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-       <code value="code"/>
-      </type>
-      <isSummary value="true"/>
-     </element>
-     <element id="DataRequirement.codeFilter.valueCoding">
-      <path value="DataRequirement.codeFilter.valueCoding"/>
-      <short value="What Coding is expected"/>
-      <definition value="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings."/>
+      <definition value="The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6778,21 +6768,10 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="DataRequirement.codeFilter.valueCodeableConcept">
-      <path value="DataRequirement.codeFilter.valueCodeableConcept"/>
-      <short value="What CodeableConcept is expected"/>
-      <definition value="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts."/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-       <code value="CodeableConcept"/>
-      </type>
-      <isSummary value="true"/>
-     </element>
      <element id="DataRequirement.dateFilter">
       <path value="DataRequirement.dateFilter"/>
       <short value="What dates/date ranges are expected"/>
-      <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements."/>
+      <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6862,6 +6841,7 @@
       <path value="DataRequirement.dateFilter.path"/>
       <short value="The date-valued attribute of the filter"/>
       <definition value="The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing."/>
+      <comment value="The path attribute is a limited subset of FHIRPath that allows path traversal, but not calculation."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -6944,7 +6924,7 @@
      <element id="DataRequirement.codeFilter">
       <path value="DataRequirement.codeFilter"/>
       <short value="What codes are expected"/>
-      <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data."/>
+      <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6956,6 +6936,7 @@
       <path value="DataRequirement.codeFilter.path"/>
       <short value="The code-valued attribute of the filter"/>
       <definition value="The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept."/>
+      <comment value="The path attribute is a limited subset of FHIRPath that allows path traversal, but not calculation."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -6966,11 +6947,11 @@
      <element id="DataRequirement.codeFilter.valueSet[x]">
       <path value="DataRequirement.codeFilter.valueSet[x]"/>
       <short value="Valueset for the filter"/>
-      <definition value="The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset."/>
+      <definition value="The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="uri"/>
       </type>
       <type>
        <code value="Reference"/>
@@ -6978,21 +6959,10 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="DataRequirement.codeFilter.valueCode">
-      <path value="DataRequirement.codeFilter.valueCode"/>
+     <element id="DataRequirement.codeFilter.code">
+      <path value="DataRequirement.codeFilter.code"/>
       <short value="What code is expected"/>
-      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-       <code value="code"/>
-      </type>
-      <isSummary value="true"/>
-     </element>
-     <element id="DataRequirement.codeFilter.valueCoding">
-      <path value="DataRequirement.codeFilter.valueCoding"/>
-      <short value="What Coding is expected"/>
-      <definition value="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings."/>
+      <definition value="The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -7000,21 +6970,10 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="DataRequirement.codeFilter.valueCodeableConcept">
-      <path value="DataRequirement.codeFilter.valueCodeableConcept"/>
-      <short value="What CodeableConcept is expected"/>
-      <definition value="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts."/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-       <code value="CodeableConcept"/>
-      </type>
-      <isSummary value="true"/>
-     </element>
      <element id="DataRequirement.dateFilter">
       <path value="DataRequirement.dateFilter"/>
       <short value="What dates/date ranges are expected"/>
-      <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements."/>
+      <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -7026,6 +6985,7 @@
       <path value="DataRequirement.dateFilter.path"/>
       <short value="The date-valued attribute of the filter"/>
       <definition value="The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing."/>
+      <comment value="The path attribute is a limited subset of FHIRPath that allows path traversal, but not calculation."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -7060,12 +7020,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Distance"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Distance"/>
     <name value="Distance"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -7350,12 +7310,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Dosage"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Dosage"/>
     <name value="Dosage"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -7470,7 +7430,7 @@
       <path value="Dosage.text"/>
       <short value="Free text dosage instructions e.g. SIG"/>
       <definition value="Free text dosage instructions e.g. SIG."/>
-      <requirements value="Free text dosage instructions can be used for cases where the instructions are too complex to code.  The content of this attribute does not include the name or description of the medication. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication. It is expected that the text instructions will always be populated.  If the dosage.timing attribute is also populated, then the dosage.text should reflect the same information as the timing."/>
+      <requirements value="Free text dosage instructions can be used for cases where the instructions are too complex to code.  The content of this attribute does not include the name or description of the medication. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication. It is expected that the text instructions will always be populated.  If the dosage.timing attribute is also populated, then the dosage.text should reflect the same information as the timing.  Additional information about administration or preparation of the medication should be included as text."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -7484,9 +7444,10 @@
      </element>
      <element id="Dosage.additionalInstruction">
       <path value="Dosage.additionalInstruction"/>
-      <short value="Supplemental instruction - e.g. &quot;with meals&quot;"/>
-      <definition value="Supplemental instruction - e.g. &quot;with meals&quot;."/>
-      <requirements value="Additional instruction such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
+      <short value="Supplemental instruction or warnings to the patient - e.g. &quot;with meals&quot;, &quot;may cause drowsiness&quot;"/>
+      <definition value="Supplemental instructions to the patient on how to take the medication  (e.g. &quot;with meals&quot; or&quot;take half to one hour before food&quot;) or warnings for the patient about the medication (e.g. &quot;may cause drowsiness&quot; or &quot;avoid exposure of skin to direct sunlight or sunlamps&quot;)."/>
+      <comment value="Information about administration or preparation of the medication (e.g. &quot;infuse as rapidly as possibly via intraperitoneal port&quot; or &quot;immediately following drug x&quot;) should be populated in dosage.text."/>
+      <requirements value="Additional instruction is intended to be coded, but where no code exists, the element could include text.  For example, &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -7726,7 +7687,7 @@
       <path value="Dosage.rate[x]"/>
       <short value="Amount of medication per unit of time"/>
       <definition value="Amount of medication per unit of time."/>
-      <comment value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied. If the rate is intended to change over time, depending on local rules/regulations, each change should be captured as a new version of the MedicationRequest with an updated rate, or captured with a new MedicationRequest with the new rate."/>
+      <comment value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied. If the rate is intended to change over time, depending on local rules/regulations, each change should be captured as a new version of the MedicationRequest with an updated rate, or captured with a new MedicationRequest with the new rate.&#xd;&#xd;It is possible to specify a rate over time (for example, 100 ml/hour) using either the rateRatio and rateQuantity.  The rateQuantity approach requires systems to have the capability to parse UCUM grammer where ml/hour is included rather than a specific ratio where the time is specified as the denominator.  Where a rate such as 500ml over 2 hours is specified, the use of rateRatio may be more semantically correct than specifying using a rateQuantity of 250 mg/hour."/>
       <requirements value="Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period."/>
       <min value="0"/>
       <max value="1"/>
@@ -7779,7 +7740,7 @@
       <path value="Dosage.text"/>
       <short value="Free text dosage instructions e.g. SIG"/>
       <definition value="Free text dosage instructions e.g. SIG."/>
-      <requirements value="Free text dosage instructions can be used for cases where the instructions are too complex to code.  The content of this attribute does not include the name or description of the medication. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication. It is expected that the text instructions will always be populated.  If the dosage.timing attribute is also populated, then the dosage.text should reflect the same information as the timing."/>
+      <requirements value="Free text dosage instructions can be used for cases where the instructions are too complex to code.  The content of this attribute does not include the name or description of the medication. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication. It is expected that the text instructions will always be populated.  If the dosage.timing attribute is also populated, then the dosage.text should reflect the same information as the timing.  Additional information about administration or preparation of the medication should be included as text."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -7793,9 +7754,10 @@
      </element>
      <element id="Dosage.additionalInstruction">
       <path value="Dosage.additionalInstruction"/>
-      <short value="Supplemental instruction - e.g. &quot;with meals&quot;"/>
-      <definition value="Supplemental instruction - e.g. &quot;with meals&quot;."/>
-      <requirements value="Additional instruction such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
+      <short value="Supplemental instruction or warnings to the patient - e.g. &quot;with meals&quot;, &quot;may cause drowsiness&quot;"/>
+      <definition value="Supplemental instructions to the patient on how to take the medication  (e.g. &quot;with meals&quot; or&quot;take half to one hour before food&quot;) or warnings for the patient about the medication (e.g. &quot;may cause drowsiness&quot; or &quot;avoid exposure of skin to direct sunlight or sunlamps&quot;)."/>
+      <comment value="Information about administration or preparation of the medication (e.g. &quot;infuse as rapidly as possibly via intraperitoneal port&quot; or &quot;immediately following drug x&quot;) should be populated in dosage.text."/>
+      <requirements value="Additional instruction is intended to be coded, but where no code exists, the element could include text.  For example, &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -8035,7 +7997,7 @@
       <path value="Dosage.rate[x]"/>
       <short value="Amount of medication per unit of time"/>
       <definition value="Amount of medication per unit of time."/>
-      <comment value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied. If the rate is intended to change over time, depending on local rules/regulations, each change should be captured as a new version of the MedicationRequest with an updated rate, or captured with a new MedicationRequest with the new rate."/>
+      <comment value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied. If the rate is intended to change over time, depending on local rules/regulations, each change should be captured as a new version of the MedicationRequest with an updated rate, or captured with a new MedicationRequest with the new rate.&#xd;&#xd;It is possible to specify a rate over time (for example, 100 ml/hour) using either the rateRatio and rateQuantity.  The rateQuantity approach requires systems to have the capability to parse UCUM grammer where ml/hour is included rather than a specific ratio where the time is specified as the denominator.  Where a rate such as 500ml over 2 hours is specified, the use of rateRatio may be more semantically correct than specifying using a rateQuantity of 250 mg/hour."/>
       <requirements value="Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period."/>
       <min value="0"/>
       <max value="1"/>
@@ -8065,12 +8027,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Duration"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Duration"/>
     <name value="Duration"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -8355,12 +8317,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ElementDefinition"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ElementDefinition"/>
     <name value="ElementDefinition"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -13022,12 +12984,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Extension"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Extension"/>
     <name value="Extension"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -13442,12 +13404,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="HumanName"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/HumanName"/>
     <name value="HumanName"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -13948,12 +13910,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Identifier"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Identifier"/>
     <name value="Identifier"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14438,12 +14400,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Meta"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Meta"/>
     <name value="Meta"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14727,12 +14689,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Money"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Money"/>
     <name value="Money"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15017,12 +14979,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Narrative"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Narrative"/>
     <name value="Narrative"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15246,12 +15208,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ParameterDefinition"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ParameterDefinition"/>
     <name value="ParameterDefinition"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15563,12 +15525,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Period"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Period"/>
     <name value="Period"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15801,12 +15763,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Quantity"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Quantity"/>
     <name value="Quantity"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16192,12 +16154,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Range"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Range"/>
     <name value="Range"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16433,12 +16395,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Ratio"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Ratio"/>
     <name value="Ratio"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16644,12 +16606,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Reference"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Reference"/>
     <name value="Reference"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16887,12 +16849,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="RelatedArtifact"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/RelatedArtifact"/>
     <name value="RelatedArtifact"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -17165,12 +17127,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SampledData"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SampledData"/>
     <name value="SampledData"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -17520,12 +17482,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Signature"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Signature"/>
     <name value="Signature"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -17549,9 +17511,9 @@
     <snapshot>
      <element id="Signature">
       <path value="Signature"/>
-      <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc."/>
+      <short value="A digital Signature - XML DigSig, JWS, Graphical image of signature, etc."/>
       <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities."/>
-      <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
+      <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWS), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="ele-1"/>
@@ -17724,7 +17686,7 @@
      <element id="Signature.contentType">
       <path value="Signature.contentType"/>
       <short value="The technical format of the signature"/>
-      <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc."/>
+      <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -17745,7 +17707,7 @@
      </element>
      <element id="Signature.blob">
       <path value="Signature.blob"/>
-      <short value="The actual signature content (XML DigSig. JWT, picture, etc.)"/>
+      <short value="The actual signature content (XML DigSig. JWS, picture, etc.)"/>
       <definition value="The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty."/>
       <comment value="Where the signature type is an XML DigSig, the signed content is a FHIR Resource(s), the signature is of the XML form of the Resource(s) using  XML-Signature (XMLDIG) &quot;Detached Signature&quot; form."/>
       <min value="0"/>
@@ -17758,9 +17720,9 @@
     <differential>
      <element id="Signature">
       <path value="Signature"/>
-      <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc."/>
+      <short value="A digital Signature - XML DigSig, JWS, Graphical image of signature, etc."/>
       <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities."/>
-      <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
+      <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWS), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
       <min value="0"/>
       <max value="*"/>
       <mapping>
@@ -17870,7 +17832,7 @@
      <element id="Signature.contentType">
       <path value="Signature.contentType"/>
       <short value="The technical format of the signature"/>
-      <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc."/>
+      <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -17891,7 +17853,7 @@
      </element>
      <element id="Signature.blob">
       <path value="Signature.blob"/>
-      <short value="The actual signature content (XML DigSig. JWT, picture, etc.)"/>
+      <short value="The actual signature content (XML DigSig. JWS, picture, etc.)"/>
       <definition value="The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty."/>
       <comment value="Where the signature type is an XML DigSig, the signed content is a FHIR Resource(s), the signature is of the XML form of the Resource(s) using  XML-Signature (XMLDIG) &quot;Detached Signature&quot; form."/>
       <min value="0"/>
@@ -17910,12 +17872,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Timing"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Timing"/>
     <name value="Timing"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -18911,12 +18873,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="TriggerDefinition"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/TriggerDefinition"/>
     <name value="TriggerDefinition"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -18924,7 +18886,7 @@
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <description value="Base StructureDefinition for TriggerDefinition Type: A description of a triggering event."/>
+    <description value="Base StructureDefinition for TriggerDefinition Type: A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element."/>
     <fhirVersion value="3.1.0"/>
     <mapping>
      <identity value="rim"/>
@@ -18940,7 +18902,8 @@
      <element id="TriggerDefinition">
       <path value="TriggerDefinition"/>
       <short value="Defines an expected trigger for a module"/>
-      <definition value="A description of a triggering event."/>
+      <definition value="A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element."/>
+      <comment value="If an event is a named-event, it means the event is completely pre-coordinated, and no other information can be specified for the event. If the event is one of the data- events, the data and condition elements specify the triggering criteria. The data element specifies the structured component, and the condition element provides additional optional refinement of that structured component. If the event is periodic, the timing element defines when the event is triggered. For both data- and periodic events, a name can be provided as a shorthand for the formal semantics provided by the other elements."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="ele-1"/>
@@ -18951,6 +18914,20 @@
        <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="trd-2"/>
+       <severity value="error"/>
+       <human value="A condition only if there is a data requirement"/>
+       <expression value="condition.exists() implies data.exists()"/>
+       <xpath value="not(exists(f:condition)) or exists(f:data)"/>
+      </constraint>
+      <constraint>
+       <key value="trd-1"/>
+       <severity value="error"/>
+       <human value="Either timing, or a data requirement, but not both"/>
+       <expression value="data.empty() or timing.empty()"/>
+       <xpath value="not(exists(f:data)) or not(exists(*[starts-with(local-name(.), 'timing')))"/>
       </constraint>
       <mapping>
        <identity value="rim"/>
@@ -19009,7 +18986,7 @@
      </element>
      <element id="TriggerDefinition.type">
       <path value="TriggerDefinition.type"/>
-      <short value="named-event | periodic | data-added | data-modified | data-removed | data-accessed | data-access-ended"/>
+      <short value="named-event | periodic | data-changed | data-added | data-modified | data-removed | data-accessed | data-access-ended"/>
       <definition value="The type of triggering event."/>
       <min value="1"/>
       <max value="1"/>
@@ -19028,21 +19005,22 @@
        </valueSetReference>
       </binding>
      </element>
-     <element id="TriggerDefinition.eventName">
-      <path value="TriggerDefinition.eventName"/>
-      <short value="Triggering event name"/>
-      <definition value="The name of the event (if this is a named-event trigger)."/>
+     <element id="TriggerDefinition.name">
+      <path value="TriggerDefinition.name"/>
+      <short value="Name or URI that identifies the event"/>
+      <definition value="A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context."/>
+      <comment value="An event name can be provided for all event types, but is required for named events. If a name is provided for a type other than named events, it is considered to be a shorthand for the semantics described by the formal description of the event."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="uri"/>
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventTiming[x]">
-      <path value="TriggerDefinition.eventTiming[x]"/>
+     <element id="TriggerDefinition.timing[x]">
+      <path value="TriggerDefinition.timing[x]"/>
       <short value="Timing of the event"/>
-      <definition value="The timing of the event (if this is a period trigger)."/>
+      <definition value="The timing of the event (if this is a periodic trigger)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -19060,10 +19038,11 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventData">
-      <path value="TriggerDefinition.eventData"/>
+     <element id="TriggerDefinition.data">
+      <path value="TriggerDefinition.data"/>
       <short value="Triggering data of the event"/>
       <definition value="The triggering data of the event (if this is a data trigger)."/>
+      <comment value="This element shall be present for any data type trigger."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -19071,11 +19050,11 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition">
-      <path value="TriggerDefinition.eventCondition"/>
+     <element id="TriggerDefinition.condition">
+      <path value="TriggerDefinition.condition"/>
       <short value="Whether the event triggers"/>
       <definition value="A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires."/>
-      <comment value="This element can be specified for any type of trigger definition and provides explicit formal semantic for the trigger. For example, when specifying a named event, this element can be used to describe the formal equivalent of the event."/>
+      <comment value="This element can be only be specified for data type triggers and provides additional semantics for the trigger. The context available within the condition is based on the type of data event. For all events, the current resource will be available as context. In addition, for modification events, the previous resource will also be available."/>
       <requirements value="Need to be able to formally describe the triggering criteria."/>
       <min value="0"/>
       <max value="1"/>
@@ -19092,8 +19071,8 @@
       </constraint>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition.id">
-      <path value="TriggerDefinition.eventCondition.id"/>
+     <element id="TriggerDefinition.condition.id">
+      <path value="TriggerDefinition.condition.id"/>
       <representation value="xmlAttr"/>
       <short value="xml:id (or equivalent in JSON)"/>
       <definition value="unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."/>
@@ -19112,8 +19091,8 @@
        <map value="n/a"/>
       </mapping>
      </element>
-     <element id="TriggerDefinition.eventCondition.extension">
-      <path value="TriggerDefinition.eventCondition.extension"/>
+     <element id="TriggerDefinition.condition.extension">
+      <path value="TriggerDefinition.condition.extension"/>
       <slicing>
        <discriminator>
         <type value="value"/>
@@ -19142,8 +19121,8 @@
        <map value="n/a"/>
       </mapping>
      </element>
-     <element id="TriggerDefinition.eventCondition.description">
-      <path value="TriggerDefinition.eventCondition.description"/>
+     <element id="TriggerDefinition.condition.description">
+      <path value="TriggerDefinition.condition.description"/>
       <short value="Natural language description of the condition"/>
       <definition value="A brief, natural language description of the condition that effectively communicates the intended semantics."/>
       <min value="0"/>
@@ -19153,23 +19132,33 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition.language">
-      <path value="TriggerDefinition.eventCondition.language"/>
-      <short value="Language of the expression"/>
+     <element id="TriggerDefinition.condition.language">
+      <path value="TriggerDefinition.condition.language"/>
+      <short value="text/cql | text/fhirpath | etc"/>
       <definition value="The media type of the language for the expression."/>
-      <min value="0"/>
+      <min value="1"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="code"/>
       </type>
       <isSummary value="true"/>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="ExpressionLanguage"/>
+       </extension>
+       <strength value="extensible"/>
+       <description value="The media type of the expression language"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/expression-language"/>
+       </valueSetReference>
+      </binding>
      </element>
-     <element id="TriggerDefinition.eventCondition.expression">
-      <path value="TriggerDefinition.eventCondition.expression"/>
+     <element id="TriggerDefinition.condition.expression">
+      <path value="TriggerDefinition.condition.expression"/>
       <short value="Boolean-valued expression"/>
       <definition value="An expression that returns true or false, indicating whether or not the condition is satisfied."/>
-      <comment value="The expression may be inlined, or may be a reference to a named expression within a logic library referenced by the library element."/>
-      <min value="0"/>
+      <comment value="The expression may be inlined, or may be a simple absolute URI, which is a reference to a named expression within a logic library referenced by a library element or extension within the containing resource. If the expression is a FHIR Path expression, it evaluates in the context of a resource of one of the type identified in the data requirement, and may also refer to the variable %previous for delta comparisons on events of type data-changed, data-modified, and data-deleted which will always have the same type."/>
+      <min value="1"/>
       <max value="1"/>
       <type>
        <code value="string"/>
@@ -19181,13 +19170,28 @@
      <element id="TriggerDefinition">
       <path value="TriggerDefinition"/>
       <short value="Defines an expected trigger for a module"/>
-      <definition value="A description of a triggering event."/>
+      <definition value="A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element."/>
+      <comment value="If an event is a named-event, it means the event is completely pre-coordinated, and no other information can be specified for the event. If the event is one of the data- events, the data and condition elements specify the triggering criteria. The data element specifies the structured component, and the condition element provides additional optional refinement of that structured component. If the event is periodic, the timing element defines when the event is triggered. For both data- and periodic events, a name can be provided as a shorthand for the formal semantics provided by the other elements."/>
       <min value="0"/>
       <max value="*"/>
+      <constraint>
+       <key value="trd-2"/>
+       <severity value="error"/>
+       <human value="A condition only if there is a data requirement"/>
+       <expression value="condition.exists() implies data.exists()"/>
+       <xpath value="not(exists(f:condition)) or exists(f:data)"/>
+      </constraint>
+      <constraint>
+       <key value="trd-1"/>
+       <severity value="error"/>
+       <human value="Either timing, or a data requirement, but not both"/>
+       <expression value="data.empty() or timing.empty()"/>
+       <xpath value="not(exists(f:data)) or not(exists(*[starts-with(local-name(.), 'timing')))"/>
+      </constraint>
      </element>
      <element id="TriggerDefinition.type">
       <path value="TriggerDefinition.type"/>
-      <short value="named-event | periodic | data-added | data-modified | data-removed | data-accessed | data-access-ended"/>
+      <short value="named-event | periodic | data-changed | data-added | data-modified | data-removed | data-accessed | data-access-ended"/>
       <definition value="The type of triggering event."/>
       <min value="1"/>
       <max value="1"/>
@@ -19206,21 +19210,22 @@
        </valueSetReference>
       </binding>
      </element>
-     <element id="TriggerDefinition.eventName">
-      <path value="TriggerDefinition.eventName"/>
-      <short value="Triggering event name"/>
-      <definition value="The name of the event (if this is a named-event trigger)."/>
+     <element id="TriggerDefinition.name">
+      <path value="TriggerDefinition.name"/>
+      <short value="Name or URI that identifies the event"/>
+      <definition value="A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context."/>
+      <comment value="An event name can be provided for all event types, but is required for named events. If a name is provided for a type other than named events, it is considered to be a shorthand for the semantics described by the formal description of the event."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="uri"/>
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventTiming[x]">
-      <path value="TriggerDefinition.eventTiming[x]"/>
+     <element id="TriggerDefinition.timing[x]">
+      <path value="TriggerDefinition.timing[x]"/>
       <short value="Timing of the event"/>
-      <definition value="The timing of the event (if this is a period trigger)."/>
+      <definition value="The timing of the event (if this is a periodic trigger)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -19238,10 +19243,11 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventData">
-      <path value="TriggerDefinition.eventData"/>
+     <element id="TriggerDefinition.data">
+      <path value="TriggerDefinition.data"/>
       <short value="Triggering data of the event"/>
       <definition value="The triggering data of the event (if this is a data trigger)."/>
+      <comment value="This element shall be present for any data type trigger."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -19249,11 +19255,11 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition">
-      <path value="TriggerDefinition.eventCondition"/>
+     <element id="TriggerDefinition.condition">
+      <path value="TriggerDefinition.condition"/>
       <short value="Whether the event triggers"/>
       <definition value="A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires."/>
-      <comment value="This element can be specified for any type of trigger definition and provides explicit formal semantic for the trigger. For example, when specifying a named event, this element can be used to describe the formal equivalent of the event."/>
+      <comment value="This element can be only be specified for data type triggers and provides additional semantics for the trigger. The context available within the condition is based on the type of data event. For all events, the current resource will be available as context. In addition, for modification events, the previous resource will also be available."/>
       <requirements value="Need to be able to formally describe the triggering criteria."/>
       <min value="0"/>
       <max value="1"/>
@@ -19262,8 +19268,8 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition.description">
-      <path value="TriggerDefinition.eventCondition.description"/>
+     <element id="TriggerDefinition.condition.description">
+      <path value="TriggerDefinition.condition.description"/>
       <short value="Natural language description of the condition"/>
       <definition value="A brief, natural language description of the condition that effectively communicates the intended semantics."/>
       <min value="0"/>
@@ -19273,23 +19279,33 @@
       </type>
       <isSummary value="true"/>
      </element>
-     <element id="TriggerDefinition.eventCondition.language">
-      <path value="TriggerDefinition.eventCondition.language"/>
-      <short value="Language of the expression"/>
+     <element id="TriggerDefinition.condition.language">
+      <path value="TriggerDefinition.condition.language"/>
+      <short value="text/cql | text/fhirpath | etc"/>
       <definition value="The media type of the language for the expression."/>
-      <min value="0"/>
+      <min value="1"/>
       <max value="1"/>
       <type>
-       <code value="string"/>
+       <code value="code"/>
       </type>
       <isSummary value="true"/>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="ExpressionLanguage"/>
+       </extension>
+       <strength value="extensible"/>
+       <description value="The media type of the expression language"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/expression-language"/>
+       </valueSetReference>
+      </binding>
      </element>
-     <element id="TriggerDefinition.eventCondition.expression">
-      <path value="TriggerDefinition.eventCondition.expression"/>
+     <element id="TriggerDefinition.condition.expression">
+      <path value="TriggerDefinition.condition.expression"/>
       <short value="Boolean-valued expression"/>
       <definition value="An expression that returns true or false, indicating whether or not the condition is satisfied."/>
-      <comment value="The expression may be inlined, or may be a reference to a named expression within a logic library referenced by the library element."/>
-      <min value="0"/>
+      <comment value="The expression may be inlined, or may be a simple absolute URI, which is a reference to a named expression within a logic library referenced by a library element or extension within the containing resource. If the expression is a FHIR Path expression, it evaluates in the context of a resource of one of the type identified in the data requirement, and may also refer to the variable %previous for delta comparisons on events of type data-changed, data-modified, and data-deleted which will always have the same type."/>
+      <min value="1"/>
       <max value="1"/>
       <type>
        <code value="string"/>
@@ -19306,12 +19322,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="UsageContext"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/UsageContext"/>
     <name value="UsageContext"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -19518,12 +19534,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SimpleQuantity"/>
     <meta>
-     <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
     <name value="SimpleQuantity"/>
     <status value="draft"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>

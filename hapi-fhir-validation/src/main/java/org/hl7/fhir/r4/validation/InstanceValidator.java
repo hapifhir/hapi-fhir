@@ -658,11 +658,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         }
         return false;
       }
-    } else if (system.startsWith("http://loinc.org")) {
-      return true;
-    } else if (system.startsWith("http://unitsofmeasure.org")) {
-      return true;
-    } else if (system.startsWith("http://snomed.info/sct") || system.startsWith("http://loinc.org")) {
+    } else if (context.isNoTerminologyServer() &&  Utilities.existsInList(system, "http://loinc.org", "http://unitsofmeasure.org", "http://snomed.info/sct", "http://www.nlm.nih.gov/research/umls/rxnorm")) {
+      return true; // no checks in this case
+    } else if (startsWithButIsNot(system, "http://snomed.info/sct", "http://loinc.org", "http://unitsofmeasure.org", "http://www.nlm.nih.gov/research/umls/rxnorm")) {
       rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Invalid System URI: "+system);
       return false;
     } else {
@@ -677,6 +675,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         return true;
       }
     }
+  }
+
+  private boolean startsWithButIsNot(String system, String... uri) {
+    for (String s : uri)
+      if (!system.equals(s) && system.startsWith(s))
+        return true;
+    return false;
   }
 
   private void checkCodeableConcept(List<ValidationMessage> errors, String path, Element focus, CodeableConcept fixed) {

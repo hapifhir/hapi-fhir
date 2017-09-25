@@ -1461,7 +1461,8 @@ If-Match: W/"3"]]></pre>
 				<param name="id" value="patch" />
 				<param name="file" value="examples/src/main/java/example/PatchExamples.java" />
 			</macro>
-		</patch>
+
+		</section>
 
 
 		<!-- ****************************************************************** -->

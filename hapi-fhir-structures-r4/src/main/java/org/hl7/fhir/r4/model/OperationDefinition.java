@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1620,7 +1620,7 @@ public class OperationDefinition extends MetadataResource {
      * Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).
      */
     @Child(name = "type", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Invole at the type level?", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context)." )
+    @Description(shortDefinition="Invoke at the type level?", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context)." )
     protected BooleanType type;
 
     /**
@@ -3369,17 +3369,17 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>Invole at the type level?</b><br>
+   * Description: <b>Invoke at the type level?</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invole at the type level?", type="token" )
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at the type level?", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>Invole at the type level?</b><br>
+   * Description: <b>Invoke at the type level?</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.type</b><br>
    * </p>

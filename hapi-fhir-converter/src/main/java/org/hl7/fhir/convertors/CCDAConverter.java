@@ -105,7 +105,7 @@ import org.hl7.fhir.dstu3.model.ResourceFactory;
 import org.hl7.fhir.dstu3.utils.NarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.utilities.ucum.UcumService;
+import org.fhir.ucum.UcumService;
 import org.w3c.dom.Element;
 
 /**
@@ -260,7 +260,7 @@ public class CCDAConverter {
 			r.setText(new Narrative());
 		if (r.getText().getDiv() == null) {
 			r.getText().setStatus(NarrativeStatus.GENERATED);
-//			new NarrativeGenerator("", "", context).generate(r);
+			new NarrativeGenerator("", "", context).generate(r);
 		}
 		r.setMeta(new Meta().setLastUpdatedElement(InstantType.now()));
 		r.setId(id);

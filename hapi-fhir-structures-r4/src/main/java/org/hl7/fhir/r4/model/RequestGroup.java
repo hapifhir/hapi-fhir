@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1405,11 +1405,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     @Block()
     public static class RequestGroupActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A user-visible label for the action.
+         * A user-visible prefix for the action.
          */
-        @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="User-visible label for the action (e.g. 1. or A.)", formalDefinition="A user-visible label for the action." )
-        protected StringType label;
+        @Child(name = "prefix", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="User-visible prefix for the action (e.g. 1. or A.)", formalDefinition="A user-visible prefix for the action." )
+        protected StringType prefix;
 
         /**
          * The title of the action displayed to a user.
@@ -1546,7 +1546,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         @Description(shortDefinition="Sub action", formalDefinition="Sub actions." )
         protected List<RequestGroupActionComponent> action;
 
-        private static final long serialVersionUID = 362859874L;
+        private static final long serialVersionUID = -1597629210L;
 
     /**
      * Constructor
@@ -1556,50 +1556,50 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
         /**
-         * @return {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         * @return {@link #prefix} (A user-visible prefix for the action.). This is the underlying object with id, value and extensions. The accessor "getPrefix" gives direct access to the value
          */
-        public StringType getLabelElement() { 
-          if (this.label == null)
+        public StringType getPrefixElement() { 
+          if (this.prefix == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RequestGroupActionComponent.label");
+              throw new Error("Attempt to auto-create RequestGroupActionComponent.prefix");
             else if (Configuration.doAutoCreate())
-              this.label = new StringType(); // bb
-          return this.label;
+              this.prefix = new StringType(); // bb
+          return this.prefix;
         }
 
-        public boolean hasLabelElement() { 
-          return this.label != null && !this.label.isEmpty();
+        public boolean hasPrefixElement() { 
+          return this.prefix != null && !this.prefix.isEmpty();
         }
 
-        public boolean hasLabel() { 
-          return this.label != null && !this.label.isEmpty();
+        public boolean hasPrefix() { 
+          return this.prefix != null && !this.prefix.isEmpty();
         }
 
         /**
-         * @param value {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         * @param value {@link #prefix} (A user-visible prefix for the action.). This is the underlying object with id, value and extensions. The accessor "getPrefix" gives direct access to the value
          */
-        public RequestGroupActionComponent setLabelElement(StringType value) { 
-          this.label = value;
+        public RequestGroupActionComponent setPrefixElement(StringType value) { 
+          this.prefix = value;
           return this;
         }
 
         /**
-         * @return A user-visible label for the action.
+         * @return A user-visible prefix for the action.
          */
-        public String getLabel() { 
-          return this.label == null ? null : this.label.getValue();
+        public String getPrefix() { 
+          return this.prefix == null ? null : this.prefix.getValue();
         }
 
         /**
-         * @param value A user-visible label for the action.
+         * @param value A user-visible prefix for the action.
          */
-        public RequestGroupActionComponent setLabel(String value) { 
+        public RequestGroupActionComponent setPrefix(String value) { 
           if (Utilities.noString(value))
-            this.label = null;
+            this.prefix = null;
           else {
-            if (this.label == null)
-              this.label = new StringType();
-            this.label.setValue(value);
+            if (this.prefix == null)
+              this.prefix = new StringType();
+            this.prefix.setValue(value);
           }
           return this;
         }
@@ -2473,7 +2473,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("label", "string", "A user-visible label for the action.", 0, 1, label));
+          children.add(new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix));
           children.add(new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title));
           children.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description));
           children.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent));
@@ -2496,7 +2496,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 102727412: /*label*/  return new Property("label", "string", "A user-visible label for the action.", 0, 1, label);
+          case -980110702: /*prefix*/  return new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix);
           case 110371416: /*title*/  return new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title);
           case -1724546052: /*description*/  return new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description);
           case -900391049: /*textEquivalent*/  return new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent);
@@ -2528,7 +2528,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
+        case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : new Base[] {this.prefix}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -900391049: /*textEquivalent*/ return this.textEquivalent == null ? new Base[0] : new Base[] {this.textEquivalent}; // StringType
@@ -2554,8 +2554,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 102727412: // label
-          this.label = castToString(value); // StringType
+        case -980110702: // prefix
+          this.prefix = castToString(value); // StringType
           return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
@@ -2620,8 +2620,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("label")) {
-          this.label = castToString(value); // StringType
+        if (name.equals("prefix")) {
+          this.prefix = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
         } else if (name.equals("description")) {
@@ -2669,7 +2669,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 102727412:  return getLabelElement();
+        case -980110702:  return getPrefixElement();
         case 110371416:  return getTitleElement();
         case -1724546052:  return getDescriptionElement();
         case -900391049:  return getTextEquivalentElement();
@@ -2696,7 +2696,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 102727412: /*label*/ return new String[] {"string"};
+        case -980110702: /*prefix*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -900391049: /*textEquivalent*/ return new String[] {"string"};
@@ -2721,8 +2721,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("label")) {
-          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.label");
+        if (name.equals("prefix")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.prefix");
         }
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.title");
@@ -2801,7 +2801,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public RequestGroupActionComponent copy() {
         RequestGroupActionComponent dst = new RequestGroupActionComponent();
         copyValues(dst);
-        dst.label = label == null ? null : label.copy();
+        dst.prefix = prefix == null ? null : prefix.copy();
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         dst.textEquivalent = textEquivalent == null ? null : textEquivalent.copy();
@@ -2853,7 +2853,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other instanceof RequestGroupActionComponent))
           return false;
         RequestGroupActionComponent o = (RequestGroupActionComponent) other;
-        return compareDeep(label, o.label, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
+        return compareDeep(prefix, o.prefix, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true)
            && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
            && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true) && compareDeep(type, o.type, true)
@@ -2870,7 +2870,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other instanceof RequestGroupActionComponent))
           return false;
         RequestGroupActionComponent o = (RequestGroupActionComponent) other;
-        return compareValues(label, o.label, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
+        return compareValues(prefix, o.prefix, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
            && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(groupingBehavior, o.groupingBehavior, true)
            && compareValues(selectionBehavior, o.selectionBehavior, true) && compareValues(requiredBehavior, o.requiredBehavior, true)
            && compareValues(precheckBehavior, o.precheckBehavior, true) && compareValues(cardinalityBehavior, o.cardinalityBehavior, true)
@@ -2878,7 +2878,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, title, description
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(prefix, title, description
           , textEquivalent, code, documentation, condition, relatedAction, timing, participant
           , type, groupingBehavior, selectionBehavior, requiredBehavior, precheckBehavior, cardinalityBehavior
           , resource, action);
@@ -3688,9 +3688,16 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected Enumeration<RequestPriority> priority;
 
     /**
+     * A code that identifies what the overall request group is.
+     */
+    @Child(name = "code", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What's being requested/ordered", formalDefinition="A code that identifies what the overall request group is." )
+    protected CodeableConcept code;
+
+    /**
      * The subject for which the request group was created.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who the request group is about", formalDefinition="The subject for which the request group was created." )
     protected Reference subject;
 
@@ -3702,7 +3709,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Describes the context of the request group, if any.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Encounter or Episode for the request group", formalDefinition="Describes the context of the request group, if any." )
     protected Reference context;
 
@@ -3714,14 +3721,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Indicates when the request group was created.
      */
-    @Child(name = "authoredOn", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "authoredOn", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the request group was authored", formalDefinition="Indicates when the request group was created." )
     protected DateTimeType authoredOn;
 
     /**
      * Provides a reference to the author of the request group.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "author", type = {Device.class, Practitioner.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Device or practitioner that authored the request group", formalDefinition="Provides a reference to the author of the request group." )
     protected Reference author;
 
@@ -3731,27 +3738,39 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected Resource authorTarget;
 
     /**
-     * Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.
+     * Describes the reason for the request group in coded or textual form.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Reason for the request group", formalDefinition="Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
-    protected Type reason;
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why the request group is needed", formalDefinition="Describes the reason for the request group in coded or textual form." )
+    protected List<CodeableConcept> reasonCode;
+
+    /**
+     * Indicates another resource whose existence justifies this request group.
+     */
+    @Child(name = "reasonReference", type = {Reference.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why the request group is needed", formalDefinition="Indicates another resource whose existence justifies this request group." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Indicates another resource whose existence justifies this request group.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
 
     /**
      * Provides a mechanism to communicate additional information about the response.
      */
-    @Child(name = "note", type = {Annotation.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional notes about the response", formalDefinition="Provides a mechanism to communicate additional information about the response." )
     protected List<Annotation> note;
 
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "action", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
     protected List<RequestGroupActionComponent> action;
 
-    private static final long serialVersionUID = -1812083587L;
+    private static final long serialVersionUID = -998106621L;
 
   /**
    * Constructor
@@ -4175,6 +4194,30 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
+     * @return {@link #code} (A code that identifies what the overall request group is.)
+     */
+    public CodeableConcept getCode() { 
+      if (this.code == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.code");
+        else if (Configuration.doAutoCreate())
+          this.code = new CodeableConcept(); // cc
+      return this.code;
+    }
+
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
+    }
+
+    /**
+     * @param value {@link #code} (A code that identifies what the overall request group is.)
+     */
+    public RequestGroup setCode(CodeableConcept value) { 
+      this.code = value;
+      return this;
+    }
+
+    /**
      * @return {@link #subject} (The subject for which the request group was created.)
      */
     public Reference getSubject() { 
@@ -4341,48 +4384,119 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return {@link #reasonCode} (Describes the reason for the request group in coded or textual form.)
      */
-    public Type getReason() { 
-      return this.reason;
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
-      if (!(this.reason instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.reason;
+    public RequestGroup setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
+      return this;
     }
 
-    public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
+        return false;
+      for (CodeableConcept item : this.reasonCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addReasonCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return t;
+    }
+
+    public RequestGroup addReasonCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return this;
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
      */
-    public Reference getReasonReference() throws FHIRException { 
-      if (!(this.reason instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (Reference) this.reason;
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
+      }
+      return getReasonCode().get(0);
+    }
+
+    /**
+     * @return {@link #reasonReference} (Indicates another resource whose existence justifies this request group.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
+      return this;
     }
 
     public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    public boolean hasReason() { 
-      return this.reason != null && !this.reason.isEmpty();
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public RequestGroup addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #reason} (Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
      */
-    public RequestGroup setReason(Type value) { 
-      this.reason = value;
-      return this;
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
     }
 
     /**
@@ -4501,11 +4615,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         children.add(new Property("status", "code", "The current state of the request. For request groups, the status reflects the status of all the requests in the group.", 0, 1, status));
         children.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.", 0, 1, intent));
         children.add(new Property("priority", "code", "Indicates how quickly the request should be addressed with respect to other requests.", 0, 1, priority));
+        children.add(new Property("code", "CodeableConcept", "A code that identifies what the overall request group is.", 0, 1, code));
         children.add(new Property("subject", "Reference(Patient|Group)", "The subject for which the request group was created.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Describes the context of the request group, if any.", 0, 1, context));
         children.add(new Property("authoredOn", "dateTime", "Indicates when the request group was created.", 0, 1, authoredOn));
         children.add(new Property("author", "Reference(Device|Practitioner)", "Provides a reference to the author of the request group.", 0, 1, author));
-        children.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason));
+        children.add(new Property("reasonCode", "CodeableConcept", "Describes the reason for the request group in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Any)", "Indicates another resource whose existence justifies this request group.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("action", "", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, action));
       }
@@ -4521,14 +4637,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -892481550: /*status*/  return new Property("status", "code", "The current state of the request. For request groups, the status reflects the status of all the requests in the group.", 0, 1, status);
         case -1183762788: /*intent*/  return new Property("intent", "code", "Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.", 0, 1, intent);
         case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the request should be addressed with respect to other requests.", 0, 1, priority);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that identifies what the overall request group is.", 0, 1, code);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The subject for which the request group was created.", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Describes the context of the request group, if any.", 0, 1, context);
         case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "Indicates when the request group was created.", 0, 1, authoredOn);
         case -1406328437: /*author*/  return new Property("author", "Reference(Device|Practitioner)", "Provides a reference to the author of the request group.", 0, 1, author);
-        case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -1146218137: /*reasonReference*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Describes the reason for the request group in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Any)", "Indicates another resource whose existence justifies this request group.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note);
         case -1422950858: /*action*/  return new Property("action", "", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, action);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -4547,11 +4662,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<RequestStatus>
         case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<RequestIntent>
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<RequestPriority>
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -1500852503: /*authoredOn*/ return this.authoredOn == null ? new Base[0] : new Base[] {this.authoredOn}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // RequestGroupActionComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -4589,6 +4706,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           value = new RequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<RequestPriority>
           return value;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
@@ -4601,8 +4721,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1406328437: // author
           this.author = castToReference(value); // Reference
           return value;
-        case -934964668: // reason
-          this.reason = castToType(value); // Type
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
           return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
@@ -4636,6 +4759,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         } else if (name.equals("priority")) {
           value = new RequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<RequestPriority>
+        } else if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("context")) {
@@ -4644,8 +4769,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.authoredOn = castToDateTime(value); // DateTimeType
         } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
-        } else if (name.equals("reason[x]")) {
-          this.reason = castToType(value); // Type
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
         } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
         } else if (name.equals("action")) {
@@ -4666,12 +4793,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -892481550:  return getStatusElement();
         case -1183762788:  return getIntentElement();
         case -1165461084:  return getPriorityElement();
+        case 3059181:  return getCode(); 
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
         case -1500852503:  return getAuthoredOnElement();
         case -1406328437:  return getAuthor(); 
-        case -669418564:  return getReason(); 
-        case -934964668:  return getReason(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
         case 3387378:  return addNote(); 
         case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
@@ -4690,11 +4818,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -892481550: /*status*/ return new String[] {"code"};
         case -1183762788: /*intent*/ return new String[] {"code"};
         case -1165461084: /*priority*/ return new String[] {"code"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case -1500852503: /*authoredOn*/ return new String[] {"dateTime"};
         case -1406328437: /*author*/ return new String[] {"Reference"};
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept", "Reference"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         case -1422950858: /*action*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
@@ -4729,6 +4859,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         else if (name.equals("priority")) {
           throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.priority");
         }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
         else if (name.equals("subject")) {
           this.subject = new Reference();
           return this.subject;
@@ -4744,13 +4878,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.author = new Reference();
           return this.author;
         }
-        else if (name.equals("reasonCodeableConcept")) {
-          this.reason = new CodeableConcept();
-          return this.reason;
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
         }
         else if (name.equals("reasonReference")) {
-          this.reason = new Reference();
-          return this.reason;
+          return addReasonReference();
         }
         else if (name.equals("note")) {
           return addNote();
@@ -4794,11 +4926,21 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
         dst.priority = priority == null ? null : priority.copy();
+        dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.author = author == null ? null : author.copy();
-        dst.reason = reason == null ? null : reason.copy();
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
+        };
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
@@ -4826,9 +4968,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(authoredOn, o.authoredOn, true)
-           && compareDeep(author, o.author, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
-           && compareDeep(action, o.action, true);
+           && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
+           && compareDeep(authoredOn, o.authoredOn, true) && compareDeep(author, o.author, true) && compareDeep(reasonCode, o.reasonCode, true)
+           && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(note, o.note, true) && compareDeep(action, o.action, true)
+          ;
       }
 
       @Override
@@ -4844,8 +4987,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, basedOn
-          , replaces, groupIdentifier, status, intent, priority, subject, context, authoredOn
-          , author, reason, note, action);
+          , replaces, groupIdentifier, status, intent, priority, code, subject, context
+          , authoredOn, author, reasonCode, reasonReference, note, action);
       }
 
   @Override
@@ -4892,6 +5035,26 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>The code of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="code", path="RequestGroup.code", description="The code of the request group", type="token" )
+  public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>The code of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
    * Search parameter: <b>subject</b>

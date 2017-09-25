@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="profiles-others"/>
  <meta>
-  <lastUpdated value="2017-07-09T14:22:53.105-04:00"/>
+  <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -4547,7 +4547,7 @@
     <name value="Shareable ValueSet"/>
     <status value="draft"/>
     <experimental value="false"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7"/>
     <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
     <fhirVersion value="3.1.0"/>
@@ -7974,9 +7974,9 @@
      </element>
      <element id="ProcedureRequest.reasonCode">
       <path value="ProcedureRequest.reasonCode"/>
-      <short value="Explanation/Justification for test"/>
+      <short value="Explanation/Justification for procedure or service"/>
       <definition value="An explanation or justification for why this procedure is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation."/>
-      <comment value="This may be used to decide how the procedure will be performed, or even if it will be performed at all.   Use CodeableConcept text element if the data is free (uncoded) text as shown in the [CT Scan example](procedurerequest-example-di.html)."/>
+      <comment value="This element represents why the referral is being made and may be used to decide how the procedure will be performed, or even if it will be performed at all.   Use `CodeableConcept.text` element if the data is free (uncoded) text as shown in the [CT Scan example](procedurerequest-example-di.html)."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -8021,9 +8021,9 @@
      </element>
      <element id="ProcedureRequest.reasonReference">
       <path value="ProcedureRequest.reasonReference"/>
-      <short value="Explanation/Justification for test"/>
+      <short value="Explanation/Justification for procedure or service"/>
       <definition value="Indicates another resource that provides a justification for why this procedure is being requested.   May relate to the resources referred to in supportingInformation."/>
-      <comment value="This may be used to decide how the procedure will be performed, or even if it will be performed at all.   Use CodeableConcept text element if the data is free (uncoded) text as shown in the [CT Scan example](procedurerequest-example-di.html)."/>
+      <comment value="This element represents why the referral is being made and may be used to decide how the procedure will be performed, or even if it will be performed at all.    To be as specific as possible,  a reference to  *Observation* or *Condition* should be used if available.  Otherwise when referencing  *DiagnosticReport*  it should contain a finding  in `DiagnosticReport.conclusion` and/or `DiagnosticReport.codedDiagnosis`.   When using a  reference to *DocumentReference*, the target document should contain clear findings language providing the relevant reason for this procedure request .  Use  the CodeableConcept text element in `ProcedureRequest.reasonCode` if the data is free (uncoded) text as shown in the [CT Scan example](procedurerequest-example-di.html)."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -8038,6 +8038,14 @@
       <type>
        <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Observation"/>
+      </type>
+      <type>
+       <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport"/>
+      </type>
+      <type>
+       <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -8299,7 +8307,7 @@
     <name value="Shareable CodeSystem"/>
     <status value="draft"/>
     <experimental value="false"/>
-    <date value="2017-07-09T14:22:53-04:00"/>
+    <date value="2017-09-23T17:33:21-04:00"/>
     <publisher value="HL7"/>
     <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
     <fhirVersion value="3.1.0"/>
@@ -10591,7 +10599,7 @@
       <path value="Observation.effectiveDateTime"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -11633,6 +11641,12 @@
        <code value="string"/>
       </type>
       <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
+      </type>
+      <type>
        <code value="Range"/>
       </type>
       <type>
@@ -12282,182 +12296,11 @@
        <code value="Extension"/>
       </type>
      </element>
-     <element id="Observation.extension:dnasequencevariantname">
+     <element id="Observation.extension:gene">
       <path value="Observation.extension"/>
-      <sliceName value="DNASequenceVariantName"/>
-      <short value="DNA sequence variant"/>
-      <definition value="A' is a variant (mutation) of A = definition every instance of A' is either an immediate mutation of some instance of A, or there is a chain of immediate mutation processes linking A' to some instance of A ([variant_of](http://www.sequenceontology.org/browser/current_svn/term/variant_of)). This element is the Human Genome Variation Society ([HGVS](http://varnomen.hgvs.org/)) nomenclature for a single or set of DNA sequence variant(s) identified in testing. Reference sequence ID used for HGVS naming must be annotated."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:dnavariantid">
-      <path value="Observation.extension"/>
-      <sliceName value="DNAVariantId"/>
-      <short value="DNA sequence variant ID"/>
-      <definition value="Identifier for DNA sequence variant.  If a germline variant, ClinVar or dbSNP identifier should be used.  If a somatic variant, COSMIC identifier should be used, unless in ClinVar then either maybe used. Need to provide the code system used (ClinVar, dbSNP, COSMIC)."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:dnasequencevarianttype">
-      <path value="Observation.extension"/>
-      <sliceName value="DNASequenceVariantType"/>
-      <short value="DNA sequence variant type"/>
-      <definition value="Codified type for associated DNA sequence variant. DNA sequence variants use the HGVS notation, which implies the DNA sequence variant type."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantType"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:aminoacidchangename">
-      <path value="Observation.extension"/>
-      <sliceName value="AminoAcidChangeName"/>
-      <short value="Amino acid change"/>
-      <definition value="Human Genome Variation Society (HGVS) nomenclature for an amino acid change. Reference sequence ID used for HGVS naming must be annotated. An amino acid is a sequence feature that corresponds to a single amino acid residue in a polypeptide ([SO:0001237](http://www.sequenceontology.org/browser/current_svn/term/SO:0001237))."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChangeName"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:aminoacidchangetype">
-      <path value="Observation.extension"/>
-      <sliceName value="AminoAcidChangeType"/>
-      <short value="Amino Acid Change Type"/>
-      <definition value="Codified type for associated Amino Acid Change."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChangeType"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:genesymbol">
-      <path value="Observation.extension"/>
-      <sliceName value="GeneSymbol"/>
+      <sliceName value="Gene"/>
       <short value="HGNC gene symbol"/>
-      <definition value="A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions ([SO:0000704](http://www.sequenceontology.org/browser/current_svn/term/SO:0000704)). This element is the official gene symbol approved by the HGNC, which is a short abbreviated form of the gene name ([HGNC](http://www.genenames.org))."/>
-      <comment value="Other systems or genes not defined in HGNC (e.g., BCR-ABL fusion gene) can be added by using a local extension."/>
+      <definition value="A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions ([SO:0000704](http://www.sequenceontology.org/browser/current_svn/term/SO:0000704)). This element is the official gene symbol approved by the HGNC, which is a short abbreviated form of the gene name ([HGNC](http://www.genenames.org)). LOINC Code: ([48018-6](http://loinc.org/48018-6))."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -12491,7 +12334,7 @@
       <path value="Observation.extension"/>
       <sliceName value="DNARegionName"/>
       <short value="DNA region name"/>
-      <definition value="A human readable name for the region of interest. Typically Exon #, Intron # or other. NOTE: This is not standardized and is mainly for convenience and display purposes."/>
+      <definition value="A human readable name for the region of interest. Typically Exon #, Intron # or other. NOTE: This is not standardized and is mainly for convenience and display purposes.  LOINC Code: ([47999-8](http://loinc.org/47999-8))."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -12521,114 +12364,11 @@
        <source value="Extension"/>
       </constraint>
      </element>
-     <element id="Observation.extension:allelename">
-      <path value="Observation.extension"/>
-      <sliceName value="AlleleName"/>
-      <short value="Name of allele"/>
-      <definition value="An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). This element is the common name for the allele."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:allelicstate">
-      <path value="Observation.extension"/>
-      <sliceName value="AllelicState"/>
-      <short value="The level of occurrence of a single DNA sequence variant within a set of chromosomes: Heteroplasmic / Homoplasmic / Homozygous / Heterozygous / Hemizygous"/>
-      <definition value="The level of occurrence of a single DNA Sequence Variant within a set of chromosomes. Heterozygous indicates the DNA sequence variant is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variant is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variant exists in the only single copy of a gene in a non-homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variant is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variant is present in all of the copies of mitochondrial DNA."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllelicState"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:allelicfrequency">
-      <path value="Observation.extension"/>
-      <sliceName value="AllelicFrequency"/>
-      <short value="Allele frequency"/>
-      <definition value="A physical quality which inheres to the allele by virtue of the number instances of the allele within a population."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllelicFrequency"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
      <element id="Observation.extension:copynumberevent">
       <path value="Observation.extension"/>
       <sliceName value="CopyNumberEvent"/>
       <short value="Copy number variation"/>
       <definition value="A variation that increases or decreases the copy number of a given region ([SO:0001019](http://www.sequenceontology.org/browser/current_svn/term/SO:0001019)). Values: amplification/deletion/LOH."/>
-      <comment value="Loss of heterozygosity (LOH) is a functional variant whereby the sequence alteration causes a loss of function of one allele of a gene ([SO:0001786](http://www.sequenceontology.org/browser/current_svn/term/SO:0001786))."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -12662,7 +12402,7 @@
       <path value="Observation.extension"/>
       <sliceName value="GenomicSourceClass"/>
       <short value="Genomic source class"/>
-      <definition value="Source of sample used to determine the sequence in sequencing lab -- germline, somatic, prenatal."/>
+      <definition value="Source of sample used to determine the sequence in sequencing lab -- germline, somatic, prenatal. LOINC Code: ([48002-0](http://loinc.org/48002-0))."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -12673,74 +12413,6 @@
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsGenomicSourceClass"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:phaseset">
-      <path value="Observation.extension"/>
-      <sliceName value="PhaseSet"/>
-      <short value="Phase set identifier (UUID/OID)"/>
-      <definition value="Chromosomal phase set identifier (UUID/OID). All sequences with the same PhaseSet identifier are asserted to be on the same chromosome (cis)."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsPhaseSet"/>
-      </type>
-      <condition value="ele-1"/>
-      <constraint>
-       <key value="ele-1"/>
-       <severity value="error"/>
-       <human value="All FHIR elements must have a @value or children"/>
-       <expression value="hasValue() | (children().count() > id.count())"/>
-       <xpath value="@value|f:*|h:div"/>
-       <source value="Element"/>
-      </constraint>
-      <constraint>
-       <key value="ext-1"/>
-       <severity value="error"/>
-       <human value="Must have either extensions or value[x], not both"/>
-       <expression value="extension.exists() != value.exists()"/>
-       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
-       <source value="Extension"/>
-      </constraint>
-     </element>
-     <element id="Observation.extension:sequence">
-      <path value="Observation.extension"/>
-      <sliceName value="Sequence"/>
-      <short value="Sequence"/>
-      <definition value="Refers to the Sequence resource, representing raw genetics data."/>
-      <min value="0"/>
-      <max value="*"/>
-      <base>
-       <path value="DomainResource.extension"/>
-       <min value="0"/>
-       <max value="*"/>
-      </base>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsSequence"/>
       </type>
       <condition value="ele-1"/>
       <constraint>
@@ -12775,6 +12447,177 @@
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsInterpretation"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="Observation.extension:variant">
+      <path value="Observation.extension"/>
+      <sliceName value="Variant"/>
+      <short value="Variant"/>
+      <definition value="Variant information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsVariant"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="Observation.extension:aminoacidchange">
+      <path value="Observation.extension"/>
+      <sliceName value="AminoAcidChange"/>
+      <short value="AminoAcidChange"/>
+      <definition value="AminoAcidChange information."/>
+      <comment value="Loss of heterozygosity (LOH) is a functional variant whereby the sequence alteration causes a loss of function of one allele of a gene ([SO:0001786](http://www.sequenceontology.org/browser/current_svn/term/SO:0001786))."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChange"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="Observation.extension:allele">
+      <path value="Observation.extension"/>
+      <sliceName value="Allele"/>
+      <short value="Allele"/>
+      <definition value="Allele information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllele"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="Observation.extension:ancestry">
+      <path value="Observation.extension"/>
+      <sliceName value="Ancestry"/>
+      <short value="Ancestry"/>
+      <definition value="Ancestry information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAncestry"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="Observation.extension:phaseset">
+      <path value="Observation.extension"/>
+      <sliceName value="PhaseSet"/>
+      <short value="Phase set"/>
+      <definition value="Phase set information."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsPhaseSet"/>
       </type>
       <condition value="ele-1"/>
       <constraint>
@@ -13130,7 +12973,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="0"/>
@@ -13145,6 +12988,9 @@
       </type>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="Timing"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -13263,6 +13109,9 @@
       </type>
       <type>
        <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
       </type>
       <type>
        <code value="Range"/>
@@ -14179,6 +14028,12 @@
        <code value="string"/>
       </type>
       <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
+      </type>
+      <type>
        <code value="Range"/>
       </type>
       <type>
@@ -14327,72 +14182,11 @@
       <min value="0"/>
       <max value="*"/>
      </element>
-     <element id="Observation.extension:dnasequencevariantname">
+     <element id="Observation.extension:gene">
       <path value="Observation.extension"/>
-      <sliceName value="DNASequenceVariantName"/>
-      <short value="DNA sequence variant"/>
-      <definition value="A' is a variant (mutation) of A = definition every instance of A' is either an immediate mutation of some instance of A, or there is a chain of immediate mutation processes linking A' to some instance of A ([variant_of](http://www.sequenceontology.org/browser/current_svn/term/variant_of)). This element is the Human Genome Variation Society ([HGVS](http://varnomen.hgvs.org/)) nomenclature for a single or set of DNA sequence variant(s) identified in testing. Reference sequence ID used for HGVS naming must be annotated."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName"/>
-      </type>
-     </element>
-     <element id="Observation.extension:dnavariantid">
-      <path value="Observation.extension"/>
-      <sliceName value="DNAVariantId"/>
-      <short value="DNA sequence variant ID"/>
-      <definition value="Identifier for DNA sequence variant.  If a germline variant, ClinVar or dbSNP identifier should be used.  If a somatic variant, COSMIC identifier should be used, unless in ClinVar then either maybe used. Need to provide the code system used (ClinVar, dbSNP, COSMIC)."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId"/>
-      </type>
-     </element>
-     <element id="Observation.extension:dnasequencevarianttype">
-      <path value="Observation.extension"/>
-      <sliceName value="DNASequenceVariantType"/>
-      <short value="DNA sequence variant type"/>
-      <definition value="Codified type for associated DNA sequence variant. DNA sequence variants use the HGVS notation, which implies the DNA sequence variant type."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantType"/>
-      </type>
-     </element>
-     <element id="Observation.extension:aminoacidchangename">
-      <path value="Observation.extension"/>
-      <sliceName value="AminoAcidChangeName"/>
-      <short value="Amino acid change"/>
-      <definition value="Human Genome Variation Society (HGVS) nomenclature for an amino acid change. Reference sequence ID used for HGVS naming must be annotated. An amino acid is a sequence feature that corresponds to a single amino acid residue in a polypeptide ([SO:0001237](http://www.sequenceontology.org/browser/current_svn/term/SO:0001237))."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChangeName"/>
-      </type>
-     </element>
-     <element id="Observation.extension:aminoacidchangetype">
-      <path value="Observation.extension"/>
-      <sliceName value="AminoAcidChangeType"/>
-      <short value="Amino Acid Change Type"/>
-      <definition value="Codified type for associated Amino Acid Change."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChangeType"/>
-      </type>
-     </element>
-     <element id="Observation.extension:genesymbol">
-      <path value="Observation.extension"/>
-      <sliceName value="GeneSymbol"/>
+      <sliceName value="Gene"/>
       <short value="HGNC gene symbol"/>
-      <definition value="A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions ([SO:0000704](http://www.sequenceontology.org/browser/current_svn/term/SO:0000704)). This element is the official gene symbol approved by the HGNC, which is a short abbreviated form of the gene name ([HGNC](http://www.genenames.org))."/>
-      <comment value="Other systems or genes not defined in HGNC (e.g., BCR-ABL fusion gene) can be added by using a local extension."/>
+      <definition value="A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions ([SO:0000704](http://www.sequenceontology.org/browser/current_svn/term/SO:0000704)). This element is the official gene symbol approved by the HGNC, which is a short abbreviated form of the gene name ([HGNC](http://www.genenames.org)). LOINC Code: ([48018-6](http://loinc.org/48018-6))."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -14404,7 +14198,7 @@
       <path value="Observation.extension"/>
       <sliceName value="DNARegionName"/>
       <short value="DNA region name"/>
-      <definition value="A human readable name for the region of interest. Typically Exon #, Intron # or other. NOTE: This is not standardized and is mainly for convenience and display purposes."/>
+      <definition value="A human readable name for the region of interest. Typically Exon #, Intron # or other. NOTE: This is not standardized and is mainly for convenience and display purposes.  LOINC Code: ([47999-8](http://loinc.org/47999-8))."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -14412,48 +14206,11 @@
        <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsDNARegionName"/>
       </type>
      </element>
-     <element id="Observation.extension:allelename">
-      <path value="Observation.extension"/>
-      <sliceName value="AlleleName"/>
-      <short value="Name of allele"/>
-      <definition value="An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). This element is the common name for the allele."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName"/>
-      </type>
-     </element>
-     <element id="Observation.extension:allelicstate">
-      <path value="Observation.extension"/>
-      <sliceName value="AllelicState"/>
-      <short value="The level of occurrence of a single DNA sequence variant within a set of chromosomes: Heteroplasmic / Homoplasmic / Homozygous / Heterozygous / Hemizygous"/>
-      <definition value="The level of occurrence of a single DNA Sequence Variant within a set of chromosomes. Heterozygous indicates the DNA sequence variant is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variant is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variant exists in the only single copy of a gene in a non-homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variant is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variant is present in all of the copies of mitochondrial DNA."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllelicState"/>
-      </type>
-     </element>
-     <element id="Observation.extension:allelicfrequency">
-      <path value="Observation.extension"/>
-      <sliceName value="AllelicFrequency"/>
-      <short value="Allele frequency"/>
-      <definition value="A physical quality which inheres to the allele by virtue of the number instances of the allele within a population."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllelicFrequency"/>
-      </type>
-     </element>
      <element id="Observation.extension:copynumberevent">
       <path value="Observation.extension"/>
       <sliceName value="CopyNumberEvent"/>
       <short value="Copy number variation"/>
       <definition value="A variation that increases or decreases the copy number of a given region ([SO:0001019](http://www.sequenceontology.org/browser/current_svn/term/SO:0001019)). Values: amplification/deletion/LOH."/>
-      <comment value="Loss of heterozygosity (LOH) is a functional variant whereby the sequence alteration causes a loss of function of one allele of a gene ([SO:0001786](http://www.sequenceontology.org/browser/current_svn/term/SO:0001786))."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -14465,36 +14222,12 @@
       <path value="Observation.extension"/>
       <sliceName value="GenomicSourceClass"/>
       <short value="Genomic source class"/>
-      <definition value="Source of sample used to determine the sequence in sequencing lab -- germline, somatic, prenatal."/>
+      <definition value="Source of sample used to determine the sequence in sequencing lab -- germline, somatic, prenatal. LOINC Code: ([48002-0](http://loinc.org/48002-0))."/>
       <min value="0"/>
       <max value="1"/>
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsGenomicSourceClass"/>
-      </type>
-     </element>
-     <element id="Observation.extension:phaseset">
-      <path value="Observation.extension"/>
-      <sliceName value="PhaseSet"/>
-      <short value="Phase set identifier (UUID/OID)"/>
-      <definition value="Chromosomal phase set identifier (UUID/OID). All sequences with the same PhaseSet identifier are asserted to be on the same chromosome (cis)."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsPhaseSet"/>
-      </type>
-     </element>
-     <element id="Observation.extension:sequence">
-      <path value="Observation.extension"/>
-      <sliceName value="Sequence"/>
-      <short value="Sequence"/>
-      <definition value="Refers to the Sequence resource, representing raw genetics data."/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-       <code value="Extension"/>
-       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsSequence"/>
       </type>
      </element>
      <element id="Observation.extension:interpretation">
@@ -14507,6 +14240,67 @@
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsInterpretation"/>
+      </type>
+     </element>
+     <element id="Observation.extension:variant">
+      <path value="Observation.extension"/>
+      <sliceName value="Variant"/>
+      <short value="Variant"/>
+      <definition value="Variant information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsVariant"/>
+      </type>
+     </element>
+     <element id="Observation.extension:aminoacidchange">
+      <path value="Observation.extension"/>
+      <sliceName value="AminoAcidChange"/>
+      <short value="AminoAcidChange"/>
+      <definition value="AminoAcidChange information."/>
+      <comment value="Loss of heterozygosity (LOH) is a functional variant whereby the sequence alteration causes a loss of function of one allele of a gene ([SO:0001786](http://www.sequenceontology.org/browser/current_svn/term/SO:0001786))."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChange"/>
+      </type>
+     </element>
+     <element id="Observation.extension:allele">
+      <path value="Observation.extension"/>
+      <sliceName value="Allele"/>
+      <short value="Allele"/>
+      <definition value="Allele information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAllele"/>
+      </type>
+     </element>
+     <element id="Observation.extension:ancestry">
+      <path value="Observation.extension"/>
+      <sliceName value="Ancestry"/>
+      <short value="Ancestry"/>
+      <definition value="Ancestry information."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsAncestry"/>
+      </type>
+     </element>
+     <element id="Observation.extension:phaseset">
+      <path value="Observation.extension"/>
+      <sliceName value="PhaseSet"/>
+      <short value="Phase set"/>
+      <definition value="Phase set information."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/observation-geneticsPhaseSet"/>
       </type>
      </element>
     </differential>
@@ -15157,7 +14951,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -18058,7 +17852,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -20702,7 +20496,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -23331,7 +23125,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -25960,7 +25754,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -28604,7 +28398,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -31248,7 +31042,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -33892,7 +33686,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -36536,7 +36330,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -39165,7 +38959,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -41794,7 +41588,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -46261,7 +46055,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Often just a dateTime for Vital Signs"/>
       <definition value="Often just a dateTime for Vital Signs."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="1"/>
@@ -49897,7 +49691,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="0"/>
@@ -49912,6 +49706,9 @@
       </type>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="Timing"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -50647,7 +50444,7 @@
      </element>
      <element id="Observation.referenceRange.high">
       <path value="Observation.referenceRange.high"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="High Range, if relevant"/>
       <definition value="&lt;4.5 mmol/L."/>
       <comment value="Per Australian NHF Recommendations."/>
       <min value="1"/>
@@ -51152,6 +50949,12 @@
       </type>
       <type>
        <code value="string"/>
+      </type>
+      <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
       </type>
       <type>
        <code value="Range"/>
@@ -52110,7 +51913,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="0"/>
@@ -52125,6 +51928,9 @@
       </type>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="Timing"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -53134,6 +52940,12 @@
       </type>
       <type>
        <code value="string"/>
+      </type>
+      <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
       </type>
       <type>
        <code value="Range"/>
@@ -54037,7 +53849,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="0"/>
@@ -54052,6 +53864,9 @@
       </type>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="Timing"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -54561,7 +54376,7 @@
      </element>
      <element id="Observation.referenceRange.low">
       <path value="Observation.referenceRange.low"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="Low Range, if relevant"/>
       <definition value=">1.5 mmol/L."/>
       <comment value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="1"/>
@@ -55092,6 +54907,12 @@
       </type>
       <type>
        <code value="string"/>
+      </type>
+      <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
       </type>
       <type>
        <code value="Range"/>
@@ -55995,7 +55816,7 @@
       <path value="Observation.effective[x]"/>
       <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
-      <comment value="At least a date should be present unless this observation is a historical report."/>
+      <comment value="At least a date should be present unless this observation is a historical report.  For recording imprecise or &quot;fuzzy&quot; times (For example, a blood glucose measurement taken &quot;after breakfast&quot;) use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
       <alias value="Occurrence"/>
       <min value="0"/>
@@ -56010,6 +55831,9 @@
       </type>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="Timing"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -56544,7 +56368,7 @@
      </element>
      <element id="Observation.referenceRange.high">
       <path value="Observation.referenceRange.high"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="High Range, if relevant"/>
       <definition value="&lt;3.0 mmol/L."/>
       <comment value="Per Australian NHF Recommendations."/>
       <min value="1"/>
@@ -57049,6 +56873,12 @@
       </type>
       <type>
        <code value="string"/>
+      </type>
+      <type>
+       <code value="boolean"/>
+      </type>
+      <type>
+       <code value="integer"/>
       </type>
       <type>
        <code value="Range"/>
@@ -57668,6 +57498,40 @@
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsAnalysis"/>
+      </type>
+      <condition value="ele-1"/>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <constraint>
+       <key value="ext-1"/>
+       <severity value="error"/>
+       <human value="Must have either extensions or value[x], not both"/>
+       <expression value="extension.exists() != value.exists()"/>
+       <xpath value="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"/>
+       <source value="Extension"/>
+      </constraint>
+     </element>
+     <element id="DiagnosticReport.extension:references">
+      <path value="DiagnosticReport.extension"/>
+      <sliceName value="References"/>
+      <short value="References"/>
+      <definition value="Additional bibliographic reference information about genetics, medications, clinical trials, etc associated with knowledge-based information on genetics/genetic condition."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+       <path value="DomainResource.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsReferences"/>
       </type>
       <condition value="ele-1"/>
       <constraint>
@@ -58526,6 +58390,18 @@
       <type>
        <code value="Extension"/>
        <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsAnalysis"/>
+      </type>
+     </element>
+     <element id="DiagnosticReport.extension:references">
+      <path value="DiagnosticReport.extension"/>
+      <sliceName value="References"/>
+      <short value="References"/>
+      <definition value="Additional bibliographic reference information about genetics, medications, clinical trials, etc associated with knowledge-based information on genetics/genetic condition."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="Extension"/>
+       <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsReferences"/>
       </type>
      </element>
      <element id="DiagnosticReport.codedDiagnosis">
@@ -60359,6 +60235,10 @@
       </type>
       <type>
        <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
+      </type>
+      <type>
+       <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Device"/>
       </type>
       <type>
@@ -60625,6 +60505,10 @@
       <type>
        <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+       <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
       </type>
       <type>
        <code value="Reference"/>
@@ -61688,13 +61572,10 @@
        <description value="Extensions are always sliced by (at least) url"/>
        <rules value="open"/>
       </slicing>
-      <short value="Additional Content defined by implementations"/>
-      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-      <alias value="extensions"/>
-      <alias value="user content"/>
+      <short value="Extension"/>
+      <definition value="An Extension"/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="0"/>
       <base>
        <path value="Element.extension"/>
        <min value="0"/>
@@ -61703,10 +61584,6 @@
       <type>
        <code value="Extension"/>
       </type>
-      <mapping>
-       <identity value="rim"/>
-       <map value="n/a"/>
-      </mapping>
      </element>
      <element id="ElementDefinition.extension:question.url">
       <path value="ElementDefinition.extension.url"/>
@@ -61796,13 +61673,10 @@
        <description value="Extensions are always sliced by (at least) url"/>
        <rules value="open"/>
       </slicing>
-      <short value="Additional Content defined by implementations"/>
-      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-      <alias value="extensions"/>
-      <alias value="user content"/>
+      <short value="Extension"/>
+      <definition value="An Extension"/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="0"/>
       <base>
        <path value="Element.extension"/>
        <min value="0"/>
@@ -61811,10 +61685,6 @@
       <type>
        <code value="Extension"/>
       </type>
-      <mapping>
-       <identity value="rim"/>
-       <map value="n/a"/>
-      </mapping>
      </element>
      <element id="ElementDefinition.extension:allowedunits.url">
       <path value="ElementDefinition.extension.url"/>
@@ -65103,6 +64973,38 @@
        <map value="what"/>
       </mapping>
      </element>
+     <element id="AuditEvent.period">
+      <path value="AuditEvent.period"/>
+      <short value="When the activity occurred"/>
+      <definition value="The period during which the activity occurred."/>
+      <comment value="The period can be a little arbitrary; where possible, the time should correspond to human assessment of the activity time."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="AuditEvent.period"/>
+       <min value="0"/>
+       <max value="1"/>
+      </base>
+      <type>
+       <code value="Period"/>
+      </type>
+      <mapping>
+       <identity value="rim"/>
+       <map value="./effectiveTime[type=IVL_TS]"/>
+      </mapping>
+      <mapping>
+       <identity value="w3c.prov"/>
+       <map value="Activity.startTime &amp; Activity.endTime"/>
+      </mapping>
+      <mapping>
+       <identity value="fhirprovenance"/>
+       <map value="Provenance.period"/>
+      </mapping>
+      <mapping>
+       <identity value="w5"/>
+       <map value="when.done"/>
+      </mapping>
+     </element>
      <element id="AuditEvent.recorded">
       <path value="AuditEvent.recorded"/>
       <short value="Time when the event occurred on source"/>
@@ -65371,6 +65273,51 @@
        <map value="N/A"/>
       </mapping>
      </element>
+     <element id="AuditEvent.agent.type">
+      <path value="AuditEvent.agent.type"/>
+      <short value="How agent participated"/>
+      <definition value="Specification of the participation type the user plays when performing the event."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="AuditEvent.agent.type"/>
+       <min value="0"/>
+       <max value="1"/>
+      </base>
+      <type>
+       <code value="CodeableConcept"/>
+      </type>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="AuditAgentType"/>
+       </extension>
+       <strength value="extensible"/>
+       <description value="The Participation type of the agent to the event"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/participation-role-type"/>
+       </valueSetReference>
+      </binding>
+      <mapping>
+       <identity value="rim"/>
+       <map value=".typeCode and/or .functionCode"/>
+      </mapping>
+      <mapping>
+       <identity value="dicom"/>
+       <map value="RoleIdCode"/>
+      </mapping>
+      <mapping>
+       <identity value="w3c.prov"/>
+       <map value="Agent.Attribution"/>
+      </mapping>
+      <mapping>
+       <identity value="fhirprovenance"/>
+       <map value="Provenance.agent.type"/>
+      </mapping>
+      <mapping>
+       <identity value="w5"/>
+       <map value="who"/>
+      </mapping>
+     </element>
      <element id="AuditEvent.agent.role">
       <path value="AuditEvent.agent.role"/>
       <short value="Agent role in the event"/>
@@ -65392,7 +65339,7 @@
        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
         <valueString value="AuditAgentRole"/>
        </extension>
-       <strength value="extensible"/>
+       <strength value="example"/>
        <description value="What security role enabled the agent to participate in the event"/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/security-role-type"/>
@@ -65400,7 +65347,7 @@
       </binding>
       <mapping>
        <identity value="rim"/>
-       <map value=".role and/or .typeCode and/or .functionCode"/>
+       <map value=".role"/>
       </mapping>
       <mapping>
        <identity value="dicom"/>
@@ -65431,6 +65378,10 @@
        <min value="0"/>
        <max value="1"/>
       </base>
+      <type>
+       <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
+      </type>
       <type>
        <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -66557,6 +66508,7 @@
       <path value="AuditEvent.entity.query"/>
       <short value="Query parameters"/>
       <definition value="The query parameters for a query-type entities."/>
+      <comment value="The meaning and secondary-encoding of the content of base64 encoded blob is specific to the AuditEvent.type, AuditEvent.subtype, AuditEvent.entity.type, and AuditEvent.entity.role.  The base64 is a general-use and safe container for event specific data blobs regardless of the encoding used by the transaction being recorded.  An AuditEvent consuming application must understand the event it is consuming and the formats used by the event. For example if auditing a Oracle network database access, the Oracle formats must be understood as they will be simply encoded in the base64binary blob."/>
       <requirements value="For query events, it may be necessary to capture the actual query input to the query process in order to identify the specific event. Because of differences among query implementations and data encoding for them, this is a base 64 encoded data blob. It may be subsequently decoded or interpreted by downstream audit analysis processing."/>
       <min value="0"/>
       <max value="1"/>
@@ -66713,19 +66665,22 @@
        <map value="context"/>
       </mapping>
      </element>
-     <element id="AuditEvent.entity.detail.value">
-      <path value="AuditEvent.entity.detail.value"/>
+     <element id="AuditEvent.entity.detail.value[x]">
+      <path value="AuditEvent.entity.detail.value[x]"/>
       <short value="Property value"/>
-      <definition value="The details, base64 encoded. Used to carry bulk information."/>
-      <comment value="The value is base64 encoded to enable various encodings or binary content."/>
+      <definition value="The details value."/>
+      <comment value="The value can be string when known to be a string, else base64 encoding should be used to protect binary or undefined content.  The meaning and secondary-encoding of the content of base64 encoded blob is specific to the AuditEvent.type, AuditEvent.subtype, AuditEvent.entity.type, and AuditEvent.entity.role.  The base64 is a general-use and safe container for event specific data blobs regardless of the encoding used by the transaction being recorded.  An AuditEvent consuming application must understand the event it is consuming and the formats used by the event. For example if auditing a Oracle network database access, the Oracle formats must be understood as they will be simply encoded in the base64binary blob."/>
       <requirements value="Should not duplicate the entity value unless absolutely necessary."/>
       <min value="1"/>
       <max value="1"/>
       <base>
-       <path value="AuditEvent.entity.detail.value"/>
+       <path value="AuditEvent.entity.detail.value[x]"/>
        <min value="1"/>
        <max value="1"/>
       </base>
+      <type>
+       <code value="string"/>
+      </type>
       <type>
        <code value="base64Binary"/>
       </type>
@@ -67186,20 +67141,23 @@
        <map value="what"/>
       </mapping>
      </element>
-     <element id="Provenance.period">
-      <path value="Provenance.period"/>
+     <element id="Provenance.occured[x]">
+      <path value="Provenance.occured[x]"/>
       <short value="When the activity occurred"/>
       <definition value="The period during which the activity occurred."/>
       <comment value="The period can be a little arbitrary; where possible, the time should correspond to human assessment of the activity time."/>
       <min value="0"/>
       <max value="1"/>
       <base>
-       <path value="Provenance.period"/>
+       <path value="Provenance.occured[x]"/>
        <min value="0"/>
        <max value="1"/>
       </base>
       <type>
        <code value="Period"/>
+      </type>
+      <type>
+       <code value="dateTime"/>
       </type>
       <mustSupport value="true"/>
       <mapping>
@@ -67319,7 +67277,7 @@
        <max value="*"/>
       </base>
       <type>
-       <code value="Coding"/>
+       <code value="CodeableConcept"/>
       </type>
       <mustSupport value="true"/>
       <binding>
@@ -67361,7 +67319,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="Coding"/>
+       <code value="CodeableConcept"/>
       </type>
       <mustSupport value="true"/>
       <binding>
@@ -67500,11 +67458,50 @@
        <map value="N/A"/>
       </mapping>
      </element>
+     <element id="Provenance.agent.type">
+      <path value="Provenance.agent.type"/>
+      <short value="How the agent participated"/>
+      <definition value="The participation the agent had with respect to the activity."/>
+      <comment value="For example: author, performer, enterer, attester, etc."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="Provenance.agent.type"/>
+       <min value="0"/>
+       <max value="1"/>
+      </base>
+      <type>
+       <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="ProvenanceAgentType"/>
+       </extension>
+       <strength value="extensible"/>
+       <description value="The type of participation that a provenance agent played with respect to the activity."/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/participation-role-type"/>
+       </valueSetReference>
+      </binding>
+      <mapping>
+       <identity value="rim"/>
+       <map value=".role"/>
+      </mapping>
+      <mapping>
+       <identity value="fhirauditevent"/>
+       <map value="AuditEvent.agent.type"/>
+      </mapping>
+      <mapping>
+       <identity value="w3c.prov"/>
+       <map value="Agent.Attribution"/>
+      </mapping>
+     </element>
      <element id="Provenance.agent.role">
       <path value="Provenance.agent.role"/>
       <short value="What the agents role was"/>
       <definition value="The function of the agent with respect to the activity. The security role enabling the agent with respect to the activity."/>
-      <comment value="For example: author, performer, enterer, attester, doctor, nurse, clerk, etc."/>
+      <comment value="For example: doctor, nurse, clerk, etc."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -67515,12 +67512,11 @@
       <type>
        <code value="CodeableConcept"/>
       </type>
-      <isSummary value="true"/>
       <binding>
        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
         <valueString value="ProvenanceAgentRole"/>
        </extension>
-       <strength value="extensible"/>
+       <strength value="example"/>
        <description value="The role that a provenance agent played with respect to the activity."/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/security-role-type"/>
@@ -67528,15 +67524,11 @@
       </binding>
       <mapping>
        <identity value="rim"/>
-       <map value=".role and/or .typecode"/>
+       <map value=".typecode"/>
       </mapping>
       <mapping>
        <identity value="fhirauditevent"/>
        <map value="AuditEvent.agent.role"/>
-      </mapping>
-      <mapping>
-       <identity value="w3c.prov"/>
-       <map value="Agent.Attribution"/>
       </mapping>
      </element>
      <element id="Provenance.agent.who[x]">
@@ -67556,6 +67548,10 @@
       <type>
        <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+       <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
       </type>
       <type>
        <code value="Reference"/>
@@ -67604,6 +67600,10 @@
       </type>
       <type>
        <code value="Reference"/>
+       <targetProfile value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
+      </type>
+      <type>
+       <code value="Reference"/>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
       </type>
       <type>
@@ -67622,39 +67622,6 @@
       <mapping>
        <identity value="rim"/>
        <map value="Person, Practitioner, Organization, Device :* .role [classCode = RoleClassMutualRelationship; role.code and * .scopes[Role](classCode=IDENT) and *.plays [Role.Code]"/>
-      </mapping>
-     </element>
-     <element id="Provenance.agent.relatedAgentType">
-      <path value="Provenance.agent.relatedAgentType"/>
-      <short value="Type of relationship between agents"/>
-      <definition value="The type of relationship between agents."/>
-      <min value="0"/>
-      <max value="1"/>
-      <base>
-       <path value="Provenance.agent.relatedAgentType"/>
-       <min value="0"/>
-       <max value="1"/>
-      </base>
-      <type>
-       <code value="CodeableConcept"/>
-      </type>
-      <binding>
-       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-        <valueString value="RelatedAgentType"/>
-       </extension>
-       <strength value="example"/>
-       <description value="Type of relationship between two provenance agents."/>
-       <valueSetReference>
-        <reference value="http://hl7.org/fhir/ValueSet/v3-RoleLinkType"/>
-       </valueSetReference>
-      </binding>
-      <mapping>
-       <identity value="rim"/>
-       <map value=".typeCode"/>
-      </mapping>
-      <mapping>
-       <identity value="w3c.prov"/>
-       <map value="type"/>
       </mapping>
      </element>
      <element id="Provenance.entity">
@@ -67883,8 +67850,8 @@
       <path value="Provenance.target"/>
       <mustSupport value="true"/>
      </element>
-     <element id="Provenance.period">
-      <path value="Provenance.period"/>
+     <element id="Provenance.occured[x]">
+      <path value="Provenance.occured[x]"/>
       <mustSupport value="true"/>
      </element>
      <element id="Provenance.recorded">

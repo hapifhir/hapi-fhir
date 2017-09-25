@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1409,7 +1409,14 @@ public class MessageHeader extends DomainResource {
     protected List<Resource> focusTarget;
 
 
-    private static final long serialVersionUID = 265309683L;
+    /**
+     * Permanent link to the MessageDefinition for this message.
+     */
+    @Child(name = "definition", type = {UriType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Link to the definition for this message", formalDefinition="Permanent link to the MessageDefinition for this message." )
+    protected UriType definition;
+
+    private static final long serialVersionUID = 1392664358L;
 
   /**
    * Constructor
@@ -1851,6 +1858,55 @@ public class MessageHeader extends DomainResource {
       return this.focusTarget;
     }
 
+    /**
+     * @return {@link #definition} (Permanent link to the MessageDefinition for this message.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     */
+    public UriType getDefinitionElement() { 
+      if (this.definition == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MessageHeader.definition");
+        else if (Configuration.doAutoCreate())
+          this.definition = new UriType(); // bb
+      return this.definition;
+    }
+
+    public boolean hasDefinitionElement() { 
+      return this.definition != null && !this.definition.isEmpty();
+    }
+
+    public boolean hasDefinition() { 
+      return this.definition != null && !this.definition.isEmpty();
+    }
+
+    /**
+     * @param value {@link #definition} (Permanent link to the MessageDefinition for this message.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     */
+    public MessageHeader setDefinitionElement(UriType value) { 
+      this.definition = value;
+      return this;
+    }
+
+    /**
+     * @return Permanent link to the MessageDefinition for this message.
+     */
+    public String getDefinition() { 
+      return this.definition == null ? null : this.definition.getValue();
+    }
+
+    /**
+     * @param value Permanent link to the MessageDefinition for this message.
+     */
+    public MessageHeader setDefinition(String value) { 
+      if (Utilities.noString(value))
+        this.definition = null;
+      else {
+        if (this.definition == null)
+          this.definition = new UriType();
+        this.definition.setValue(value);
+      }
+      return this;
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("event", "Coding", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".", 0, 1, event));
@@ -1864,6 +1920,7 @@ public class MessageHeader extends DomainResource {
         children.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason));
         children.add(new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response));
         children.add(new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus));
+        children.add(new Property("definition", "uri", "Permanent link to the MessageDefinition for this message.", 0, 1, definition));
       }
 
       @Override
@@ -1880,6 +1937,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason);
         case -340323263: /*response*/  return new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response);
         case 97604824: /*focus*/  return new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus);
+        case -1014418093: /*definition*/  return new Property("definition", "uri", "Permanent link to the MessageDefinition for this message.", 0, 1, definition);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1899,6 +1957,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
         case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // MessageHeaderResponseComponent
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // Reference
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1940,6 +1999,9 @@ public class MessageHeader extends DomainResource {
         case 97604824: // focus
           this.getFocus().add(castToReference(value)); // Reference
           return value;
+        case -1014418093: // definition
+          this.definition = castToUri(value); // UriType
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1969,6 +2031,8 @@ public class MessageHeader extends DomainResource {
           this.response = (MessageHeaderResponseComponent) value; // MessageHeaderResponseComponent
         } else if (name.equals("focus")) {
           this.getFocus().add(castToReference(value));
+        } else if (name.equals("definition")) {
+          this.definition = castToUri(value); // UriType
         } else
           return super.setProperty(name, value);
         return value;
@@ -1988,6 +2052,7 @@ public class MessageHeader extends DomainResource {
         case -934964668:  return getReason(); 
         case -340323263:  return getResponse(); 
         case 97604824:  return addFocus(); 
+        case -1014418093:  return getDefinitionElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -2007,6 +2072,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         case -340323263: /*response*/ return new String[] {};
         case 97604824: /*focus*/ return new String[] {"Reference"};
+        case -1014418093: /*definition*/ return new String[] {"uri"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2055,6 +2121,9 @@ public class MessageHeader extends DomainResource {
         else if (name.equals("focus")) {
           return addFocus();
         }
+        else if (name.equals("definition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.definition");
+        }
         else
           return super.addChild(name);
       }
@@ -2086,6 +2155,7 @@ public class MessageHeader extends DomainResource {
           for (Reference i : focus)
             dst.focus.add(i.copy());
         };
+        dst.definition = definition == null ? null : definition.copy();
         return dst;
       }
 
@@ -2103,7 +2173,8 @@ public class MessageHeader extends DomainResource {
         return compareDeep(event, o.event, true) && compareDeep(destination, o.destination, true) && compareDeep(sender, o.sender, true)
            && compareDeep(timestamp, o.timestamp, true) && compareDeep(enterer, o.enterer, true) && compareDeep(author, o.author, true)
            && compareDeep(source, o.source, true) && compareDeep(responsible, o.responsible, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(response, o.response, true) && compareDeep(focus, o.focus, true);
+           && compareDeep(response, o.response, true) && compareDeep(focus, o.focus, true) && compareDeep(definition, o.definition, true)
+          ;
       }
 
       @Override
@@ -2113,12 +2184,14 @@ public class MessageHeader extends DomainResource {
         if (!(other instanceof MessageHeader))
           return false;
         MessageHeader o = (MessageHeader) other;
-        return compareValues(timestamp, o.timestamp, true);
+        return compareValues(timestamp, o.timestamp, true) && compareValues(definition, o.definition, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(event, destination, sender
-          , timestamp, enterer, author, source, responsible, reason, response, focus);
+          , timestamp, enterer, author, source, responsible, reason, response, focus, definition
+          );
       }
 
   @Override

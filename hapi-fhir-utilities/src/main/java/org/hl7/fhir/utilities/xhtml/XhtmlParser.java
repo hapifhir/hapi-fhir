@@ -840,7 +840,9 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
     else if (c.equals("amp"))
       s.append('&');
     else if (c.equals("rsquo"))
-      s.append((char) 8217);
+      s.append((char) 8217); // right single quotation, U+2019 ISOnum 
+      //s.append((char)0x60); // right single quote
+	  //s.append('’');
     else if (c.equals("gt"))
       s.append('>');
     else if (c.equals("lt"))

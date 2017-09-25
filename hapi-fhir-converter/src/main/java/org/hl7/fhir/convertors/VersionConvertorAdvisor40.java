@@ -20,7 +20,6 @@ package org.hl7.fhir.convertors;
  * #L%
  */
 
-
 import org.hl7.fhir.exceptions.FHIRException;
 
 public interface VersionConvertorAdvisor40 {

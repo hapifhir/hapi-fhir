@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.0</version>
 	<name>HAPI-FHIR</name>
 	<url>https://hapifhir.io</url>
 
@@ -1397,14 +1397,14 @@
 								<copy todir="target/site/apidocs">
 									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-dstu">
-									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
-								</copy>
 								<copy todir="target/site/apidocs-dstu2">
 									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu3">
 									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-r4">
+									<fileset dir="hapi-fhir-structures-r4/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
@@ -1803,9 +1803,9 @@
 			<id>SITE</id>
 			<modules>
 				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-dstu3</module>
+				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->

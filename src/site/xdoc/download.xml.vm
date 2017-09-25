@@ -12,76 +12,118 @@
 			<table>
 				<thead>
 					<tr>
-						<td><b>HAPI Structure Library</b></td>
 						<td><b>HAPI Version</b></td>
-						<td><b>FHIR Specification Version</b></td>
+						<td><b>DSTU1</b></td>
+						<td><b>DSTU2</b></td>
+						<td><b>DSTU2.1</b></td>
+						<td><b>DSTU3</b></td>
+						<td><b>R4</b></td>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td rowspan="1">hapi-fhir-structures-dstu</td>
-						<td>HAPI FHIR 1.1 - 2.1</td>
-						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
-					</tr>
-					<tr>
-						<td rowspan="3">hapi-fhir-structures-dstu2</td>
 						<td>HAPI FHIR 1.1</td>
-						<td><a href="http://www.hl7.org/fhir/2015May/index.html">DSTU2 0.5.0</a></td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #EEB;">Draft 0.5.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #EEB;">Draft 0.5.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
-						<td>HAPI FHIR 1.3 - 2.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
+						<td>HAPI FHIR 1.3</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
-						<td rowspan="3">hapi-fhir-structures-hl7org-dstu2</td>
-						<td>HAPI FHIR 1.1</td>
-						<td><a href="http://build.fhir.org/">DSTU2 0.5.0 Snapshot</a> (SVN 5843)</td>
-					</tr>
-					<tr>
-						<td>HAPI FHIR 1.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
-					</tr>
-					<tr>
-						<td>HAPI FHIR 1.3 - 2.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
-					</tr>
-					<tr>
-						<td>hapi-fhir-structures-dstu2.1</td>
-						<td>HAPI FHIR 2.2</td>
-						<td><a href="http://build.fhir.org/">DSTU3 1.4.0 Snapshot</a> (May 2016 / Baltimore)</td>
-					</tr>
-					<tr>
-						<td rowspan="7">hapi-fhir-structures-dstu3</td>
 						<td>HAPI FHIR 1.4</td>
-						<td><a href="http://build.fhir.org/">STU3 1.3.0 Snapshot</a> (SVN 7602)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">Draft 1.3.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.5</td>
-						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8138)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.6</td>
-						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8636)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.0</td>
-						<td><a href="http://build.fhir.org/">STU3 1.6.0</a> (SVN 9663)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">Draft 1.6.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.1</td>
-						<td><a href="http://build.fhir.org/">STU3 1.7.0</a> (SVN 10129)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">Draft 1.7.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.2</td>
-						<td><a href="http://build.fhir.org/">STU3 1.8.0</a> (SVN 10528)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #EEB;">Draft 1.8.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.3</td>
-						<td><a href="http://build.fhir.org/">STU3 1.9.0</a> (SVN 11501)</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #EEB;">Draft 1.9.0</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.4</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.5</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.0.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">Draft 3.1.0-12370</td>
 					</tr>
 				</tbody>
 			</table>
@@ -125,29 +167,6 @@
 				The structures JAR contains classes with the resource and datatype definitions for a given
 				version of FHIR.
 			</p>
-
-			<subsection name="DSTU1 Resources - HAPI Structures">
-				<p>
-					HAPI supports multiple versions of the FHIR specification. Code which
-					needs to interact with or implement the DSTU1 specification (which is
-					now gradually beginning to be replaced by newer specifications) can do
-					so using <code>hapi-fhir-structures-dstu-[version].jar</code>.
-				</p>
-				<p>
-					If you use Maven, you can include these JARs with the following dependency tags
-					to enable DSTU1 support:
-				</p>
-				<source><![CDATA[<dependency>
-   <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-base</artifactId>
-   <version>${project.version}</version>
-</dependency>
-<dependency>
-   <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-structures-dstu</artifactId>
-   <version>${project.version}</version>
-</dependency>]]></source>
-			</subsection>
 
 			<subsection name="DSTU2 Resources - HAPI Structures">
 

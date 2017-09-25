@@ -29,36 +29,36 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 /**
  * A time period defined by a start and end date and optionally time.
  */
 @DatatypeDef(name="Period")
 public class Period extends Type implements ICompositeType {
 
+    private static final long serialVersionUID = 649791751L;
     /**
      * The start of the period. The boundary is inclusive.
      */
     @Child(name = "start", type = {DateTimeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Starting time with inclusive boundary", formalDefinition="The start of the period. The boundary is inclusive." )
     protected DateTimeType start;
-
     /**
      * The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
     @Child(name = "end", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="End time with inclusive boundary, if not ongoing", formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time." )
     protected DateTimeType end;
-
-    private static final long serialVersionUID = 649791751L;
 
   /**
    * Constructor
@@ -67,94 +67,62 @@ public class Period extends Type implements ICompositeType {
       super();
     }
 
-    /**
-     * @return {@link #start} (The start of the period. The boundary is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
-     */
-    public DateTimeType getStartElement() { 
-      if (this.start == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Period.start");
-        else if (Configuration.doAutoCreate())
-          this.start = new DateTimeType(); // bb
-      return this.start;
-    }
-
-    public boolean hasStartElement() { 
-      return this.start != null && !this.start.isEmpty();
-    }
-
-    public boolean hasStart() { 
-      return this.start != null && !this.start.isEmpty();
-    }
-
-    /**
-     * @param value {@link #start} (The start of the period. The boundary is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
-     */
-    public Period setStartElement(DateTimeType value) { 
-      this.start = value;
-      return this;
-    }
-
-    /**
-     * @return The start of the period. The boundary is inclusive.
-     */
-    public Date getStart() { 
-      return this.start == null ? null : this.start.getValue();
-    }
-
-    /**
-     * @param value The start of the period. The boundary is inclusive.
-     */
-    public Period setStart(Date value) { 
-      if (value == null)
-        this.start = null;
-      else {
-        if (this.start == null)
-          this.start = new DateTimeType();
-        this.start.setValue(value);
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Period.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Period.end");
+        }
+        else
+          return super.addChild(name);
       }
-      return this;
-    }
 
-    /**
-     * @return {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public DateTimeType getEndElement() { 
-      if (this.end == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Period.end");
-        else if (Configuration.doAutoCreate())
-          this.end = new DateTimeType(); // bb
-      return this.end;
-    }
+      public Period copy() {
+        Period dst = new Period();
+        copyValues(dst);
+        dst.start = start == null ? null : start.copy();
+        dst.end = end == null ? null : end.copy();
+        return dst;
+      }
 
-    public boolean hasEndElement() { 
-      return this.end != null && !this.end.isEmpty();
-    }
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof Period))
+          return false;
+        Period o = (Period) other;
+        return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
+      }
 
-    public boolean hasEnd() { 
-      return this.end != null && !this.end.isEmpty();
-    }
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof Period))
+          return false;
+        Period o = (Period) other;
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
+      }
 
-    /**
-     * @param value {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public Period setEndElement(DateTimeType value) { 
-      this.end = value;
-      return this;
-    }
+  public String fhirType() {
+    return "Period";
+
+  }
 
     /**
      * @return The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
-    public Date getEnd() { 
+    public Date getEnd() {
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
-    public Period setEnd(Date value) { 
+    public Period setEnd(Date value) {
       if (value == null)
         this.end = null;
       else {
@@ -165,37 +133,25 @@ public class Period extends Type implements ICompositeType {
       return this;
     }
 
-   /**
-   * Sets the value for <b>start</b> ()
-   *
-     * <p>
-     * <b>Definition:</b>
-     * The start of the period. The boundary is inclusive.
-     * </p> 
-   */
-  public Period setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-    start = new DateTimeType(theDate, thePrecision); 
-    return this; 
-  }
+    /**
+     * @return {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public DateTimeType getEndElement() {
+      if (this.end == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Period.end");
+        else if (Configuration.doAutoCreate())
+          this.end = new DateTimeType(); // bb
+      return this.end;
+    }
 
-   /**
-   * Sets the value for <b>end</b> ()
-   *
-     * <p>
-     * <b>Definition:</b>
-     * The end of the period. The boundary is inclusive.
-     * </p> 
-   */
-  public Period setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-    end = new DateTimeType(theDate, thePrecision); 
-    return this; 
-  }
-
-      protected void listChildren(List<Property> children) {
-        super.listChildren(children);
-        children.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, 1, start));
-        children.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, 1, end));
-      }
+    /**
+     * @param value {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public Period setEndElement(DateTimeType value) {
+      this.end = value;
+      return this;
+    }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
@@ -216,6 +172,106 @@ public class Period extends Type implements ICompositeType {
         }
 
       }
+
+    /**
+     * @return The start of the period. The boundary is inclusive.
+     */
+    public Date getStart() {
+      return this.start == null ? null : this.start.getValue();
+    }
+
+    /**
+     * @param value The start of the period. The boundary is inclusive.
+     */
+    public Period setStart(Date value) {
+      if (value == null)
+        this.start = null;
+      else {
+        if (this.start == null)
+          this.start = new DateTimeType();
+        this.start.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #start} (The start of the period. The boundary is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+     */
+    public DateTimeType getStartElement() {
+      if (this.start == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Period.start");
+        else if (Configuration.doAutoCreate())
+          this.start = new DateTimeType(); // bb
+      return this.start;
+    }
+
+    /**
+     * @param value {@link #start} (The start of the period. The boundary is inclusive.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+     */
+    public Period setStartElement(DateTimeType value) {
+      this.start = value;
+      return this;
+    }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return new String[] {"dateTime"};
+        case 100571: /*end*/ return new String[] {"dateTime"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+    public boolean hasEnd() {
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    public boolean hasEndElement() {
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    public boolean hasStart() {
+      return this.start != null && !this.start.isEmpty();
+    }
+
+    public boolean hasStartElement() {
+      return this.start != null && !this.start.isEmpty();
+    }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end);
+      }
+
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, 1, start));
+        children.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, 1, end));
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+   /**
+   * Sets the value for <b>end</b> ()
+   *
+     * <p>
+     * <b>Definition:</b>
+     * The end of the period. The boundary is inclusive.
+     * </p>
+   */
+  public Period setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+    end = new DateTimeType(theDate, thePrecision);
+    return this;
+  }
 
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
@@ -242,77 +298,21 @@ public class Period extends Type implements ICompositeType {
         return value;
       }
 
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 109757538:  return getStartElement();
-        case 100571:  return getEndElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 109757538: /*start*/ return new String[] {"dateTime"};
-        case 100571: /*end*/ return new String[] {"dateTime"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("start")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Period.start");
-        }
-        else if (name.equals("end")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Period.end");
-        }
-        else
-          return super.addChild(name);
-      }
-
-  public String fhirType() {
-    return "Period";
-
+   /**
+   * Sets the value for <b>start</b> ()
+   *
+     * <p>
+     * <b>Definition:</b>
+     * The start of the period. The boundary is inclusive.
+     * </p>
+   */
+  public Period setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+    start = new DateTimeType(theDate, thePrecision);
+    return this;
   }
-
-      public Period copy() {
-        Period dst = new Period();
-        copyValues(dst);
-        dst.start = start == null ? null : start.copy();
-        dst.end = end == null ? null : end.copy();
-        return dst;
-      }
 
       protected Period typedCopy() {
         return copy();
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof Period))
-          return false;
-        Period o = (Period) other;
-        return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof Period))
-          return false;
-        Period o = (Period) other;
-        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end);
       }
 
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -62,10 +62,10 @@ public class Dosage extends Type implements ICompositeType {
     protected StringType text;
 
     /**
-     * Supplemental instruction - e.g. "with meals".
+     * Supplemental instructions to the patient on how to take the medication  (e.g. "with meals" or"take half to one hour before food") or warnings for the patient about the medication (e.g. "may cause drowsiness" or "avoid exposure of skin to direct sunlight or sunlamps").
      */
     @Child(name = "additionalInstruction", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Supplemental instruction - e.g. \"with meals\"", formalDefinition="Supplemental instruction - e.g. \"with meals\"." )
+    @Description(shortDefinition="Supplemental instruction or warnings to the patient - e.g. \"with meals\", \"may cause drowsiness\"", formalDefinition="Supplemental instructions to the patient on how to take the medication  (e.g. \"with meals\" or\"take half to one hour before food\") or warnings for the patient about the medication (e.g. \"may cause drowsiness\" or \"avoid exposure of skin to direct sunlight or sunlamps\")." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/additional-instruction-codes")
     protected List<CodeableConcept> additionalInstruction;
 
@@ -254,7 +254,7 @@ public class Dosage extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #additionalInstruction} (Supplemental instruction - e.g. "with meals".)
+     * @return {@link #additionalInstruction} (Supplemental instructions to the patient on how to take the medication  (e.g. "with meals" or"take half to one hour before food") or warnings for the patient about the medication (e.g. "may cause drowsiness" or "avoid exposure of skin to direct sunlight or sunlamps").)
      */
     public List<CodeableConcept> getAdditionalInstruction() { 
       if (this.additionalInstruction == null)
@@ -675,7 +675,7 @@ public class Dosage extends Type implements ICompositeType {
         super.listChildren(children);
         children.add(new Property("sequence", "integer", "Indicates the order in which the dosage instructions should be applied or interpreted.", 0, 1, sequence));
         children.add(new Property("text", "string", "Free text dosage instructions e.g. SIG.", 0, 1, text));
-        children.add(new Property("additionalInstruction", "CodeableConcept", "Supplemental instruction - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstruction));
+        children.add(new Property("additionalInstruction", "CodeableConcept", "Supplemental instructions to the patient on how to take the medication  (e.g. \"with meals\" or\"take half to one hour before food\") or warnings for the patient about the medication (e.g. \"may cause drowsiness\" or \"avoid exposure of skin to direct sunlight or sunlamps\").", 0, java.lang.Integer.MAX_VALUE, additionalInstruction));
         children.add(new Property("patientInstruction", "string", "Instructions in terms that are understood by the patient or consumer.", 0, 1, patientInstruction));
         children.add(new Property("timing", "Timing", "When medication should be administered.", 0, 1, timing));
         children.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded));
@@ -694,7 +694,7 @@ public class Dosage extends Type implements ICompositeType {
         switch (_hash) {
         case 1349547969: /*sequence*/  return new Property("sequence", "integer", "Indicates the order in which the dosage instructions should be applied or interpreted.", 0, 1, sequence);
         case 3556653: /*text*/  return new Property("text", "string", "Free text dosage instructions e.g. SIG.", 0, 1, text);
-        case 1623641575: /*additionalInstruction*/  return new Property("additionalInstruction", "CodeableConcept", "Supplemental instruction - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstruction);
+        case 1623641575: /*additionalInstruction*/  return new Property("additionalInstruction", "CodeableConcept", "Supplemental instructions to the patient on how to take the medication  (e.g. \"with meals\" or\"take half to one hour before food\") or warnings for the patient about the medication (e.g. \"may cause drowsiness\" or \"avoid exposure of skin to direct sunlight or sunlamps\").", 0, java.lang.Integer.MAX_VALUE, additionalInstruction);
         case 737543241: /*patientInstruction*/  return new Property("patientInstruction", "string", "Instructions in terms that are understood by the patient or consumer.", 0, 1, patientInstruction);
         case -873664438: /*timing*/  return new Property("timing", "Timing", "When medication should be administered.", 0, 1, timing);
         case -544329575: /*asNeeded[x]*/  return new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded);

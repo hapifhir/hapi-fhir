@@ -30,16 +30,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.utilities.ucum.Canonical;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.GenericMessage;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
@@ -53,12 +49,12 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
-		if (!(theMessage.getPayload() instanceof ResourceModifiedMessage)) {
-			ourLog.warn("Unexpected message payload type: {}", theMessage.getPayload());
+		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
+			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
 		}
 
-		ResourceModifiedMessage msg = (ResourceModifiedMessage) theMessage.getPayload();
+		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		switch (msg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -122,7 +118,8 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId(getContext()));
 
-				getSubscriptionInterceptor().getDeliveryChannel().send(new GenericMessage<>(deliveryMsg));
+				ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+				getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
 			}
 		}
 

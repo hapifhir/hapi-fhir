@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -1687,10 +1687,10 @@ public class EligibilityResponse extends DomainResource {
     /**
      * Transaction status: error, complete.
      */
-    @Child(name = "outcome", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outcome", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="complete | error | partial", formalDefinition="Transaction status: error, complete." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
-    protected CodeableConcept outcome;
+    protected Enumeration<RemittanceOutcome> outcome;
 
     /**
      * A description of the status of the adjudication.
@@ -1740,7 +1740,7 @@ public class EligibilityResponse extends DomainResource {
     @Description(shortDefinition="Processing errors", formalDefinition="Mutually exclusive with Services Provided (Item)." )
     protected List<ErrorsComponent> error;
 
-    private static final long serialVersionUID = 954270539L;
+    private static final long serialVersionUID = -1850509253L;
 
   /**
    * Constructor
@@ -2033,15 +2033,19 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (Transaction status: error, complete.)
+     * @return {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public CodeableConcept getOutcome() { 
+    public Enumeration<RemittanceOutcome> getOutcomeElement() { 
       if (this.outcome == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create EligibilityResponse.outcome");
         else if (Configuration.doAutoCreate())
-          this.outcome = new CodeableConcept(); // cc
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory()); // bb
       return this.outcome;
+    }
+
+    public boolean hasOutcomeElement() { 
+      return this.outcome != null && !this.outcome.isEmpty();
     }
 
     public boolean hasOutcome() { 
@@ -2049,10 +2053,31 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (Transaction status: error, complete.)
+     * @param value {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public EligibilityResponse setOutcome(CodeableConcept value) { 
+    public EligibilityResponse setOutcomeElement(Enumeration<RemittanceOutcome> value) { 
       this.outcome = value;
+      return this;
+    }
+
+    /**
+     * @return Transaction status: error, complete.
+     */
+    public RemittanceOutcome getOutcome() { 
+      return this.outcome == null ? null : this.outcome.getValue();
+    }
+
+    /**
+     * @param value Transaction status: error, complete.
+     */
+    public EligibilityResponse setOutcome(RemittanceOutcome value) { 
+      if (value == null)
+        this.outcome = null;
+      else {
+        if (this.outcome == null)
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory());
+        this.outcome.setValue(value);
+      }
       return this;
     }
 
@@ -2332,7 +2357,7 @@ public class EligibilityResponse extends DomainResource {
         children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
         children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
         children.add(new Property("request", "Reference(EligibilityRequest)", "Original request resource reference.", 0, 1, request));
-        children.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, 1, outcome));
+        children.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome));
         children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
         children.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer));
         children.add(new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce));
@@ -2350,7 +2375,7 @@ public class EligibilityResponse extends DomainResource {
         case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
         case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
         case 1095692943: /*request*/  return new Property("request", "Reference(EligibilityRequest)", "Original request resource reference.", 0, 1, request);
-        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, 1, outcome);
+        case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome);
         case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
         case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer);
         case 1945431270: /*inforce*/  return new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce);
@@ -2371,7 +2396,7 @@ public class EligibilityResponse extends DomainResource {
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
         case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
-        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
         case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Reference
         case 1945431270: /*inforce*/ return this.inforce == null ? new Base[0] : new Base[] {this.inforce}; // BooleanType
@@ -2406,7 +2431,8 @@ public class EligibilityResponse extends DomainResource {
           this.request = castToReference(value); // Reference
           return value;
         case -1106507950: // outcome
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
           return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
@@ -2447,7 +2473,8 @@ public class EligibilityResponse extends DomainResource {
         } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
         } else if (name.equals("outcome")) {
-          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
         } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
         } else if (name.equals("insurer")) {
@@ -2474,7 +2501,7 @@ public class EligibilityResponse extends DomainResource {
         case 1601527200:  return getRequestProvider(); 
         case 599053666:  return getRequestOrganization(); 
         case 1095692943:  return getRequest(); 
-        case -1106507950:  return getOutcome(); 
+        case -1106507950:  return getOutcomeElement();
         case 583380919:  return getDispositionElement();
         case 1957615864:  return getInsurer(); 
         case 1945431270:  return getInforceElement();
@@ -2495,7 +2522,7 @@ public class EligibilityResponse extends DomainResource {
         case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
         case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
-        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case -1106507950: /*outcome*/ return new String[] {"code"};
         case 583380919: /*disposition*/ return new String[] {"string"};
         case 1957615864: /*insurer*/ return new String[] {"Reference"};
         case 1945431270: /*inforce*/ return new String[] {"boolean"};
@@ -2531,8 +2558,7 @@ public class EligibilityResponse extends DomainResource {
           return this.request;
         }
         else if (name.equals("outcome")) {
-          this.outcome = new CodeableConcept();
-          return this.outcome;
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityResponse.outcome");
         }
         else if (name.equals("disposition")) {
           throw new FHIRException("Cannot call addChild on a primitive type EligibilityResponse.disposition");
@@ -2619,8 +2645,8 @@ public class EligibilityResponse extends DomainResource {
         if (!(other instanceof EligibilityResponse))
           return false;
         EligibilityResponse o = (EligibilityResponse) other;
-        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
-           && compareValues(inforce, o.inforce, true);
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
+           && compareValues(disposition, o.disposition, true) && compareValues(inforce, o.inforce, true);
       }
 
       public boolean isEmpty() {

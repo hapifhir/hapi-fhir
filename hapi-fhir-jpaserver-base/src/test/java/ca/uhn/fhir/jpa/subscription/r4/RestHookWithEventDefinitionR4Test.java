@@ -95,9 +95,9 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 			.setPurpose("Monitor all admissions to Emergency")
 			.setTrigger(new TriggerDefinition()
 				.setType(TriggerDefinition.TriggerType.DATAADDED)
-				.setEventCondition(new TriggerDefinition.TriggerDefinitionEventConditionComponent()
+				.setCondition(new TriggerDefinition.TriggerDefinitionConditionComponent()
 					.setDescription("Encounter Location = emergency (active/completed encounters, current or previous)")
-					.setLanguage("text/fhirpath")
+					.setLanguage(TriggerDefinition.ExpressionLanguage.TEXT_FHIRPATH)
 					.setExpression("(this | %previous).location.where(location = 'Location/emergency' and status in {'active', 'completed'}).exists()")
 				)
 			);

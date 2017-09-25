@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -49,6 +49,98 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="GraphDefinition", profile="http://hl7.org/fhir/Profile/GraphDefinition")
 @ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "start", "profile", "link"})
 public class GraphDefinition extends MetadataResource {
+
+    public enum GraphCompartmentUse {
+        /**
+         * This compartment rule is a condition for whether the rule applies
+         */
+        CONDITION, 
+        /**
+         * This compartment rule is enforced on any relationships that meet the conditions
+         */
+        REQUIREMENT, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static GraphCompartmentUse fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("condition".equals(codeString))
+          return CONDITION;
+        if ("requirement".equals(codeString))
+          return REQUIREMENT;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown GraphCompartmentUse code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case CONDITION: return "condition";
+            case REQUIREMENT: return "requirement";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case CONDITION: return "http://hl7.org/fhir/graph-compartment-use";
+            case REQUIREMENT: return "http://hl7.org/fhir/graph-compartment-use";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case CONDITION: return "This compartment rule is a condition for whether the rule applies";
+            case REQUIREMENT: return "This compartment rule is enforced on any relationships that meet the conditions";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case CONDITION: return "Condition";
+            case REQUIREMENT: return "Requirement";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class GraphCompartmentUseEnumFactory implements EnumFactory<GraphCompartmentUse> {
+    public GraphCompartmentUse fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("condition".equals(codeString))
+          return GraphCompartmentUse.CONDITION;
+        if ("requirement".equals(codeString))
+          return GraphCompartmentUse.REQUIREMENT;
+        throw new IllegalArgumentException("Unknown GraphCompartmentUse code '"+codeString+"'");
+        }
+        public Enumeration<GraphCompartmentUse> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<GraphCompartmentUse>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("condition".equals(codeString))
+          return new Enumeration<GraphCompartmentUse>(this, GraphCompartmentUse.CONDITION);
+        if ("requirement".equals(codeString))
+          return new Enumeration<GraphCompartmentUse>(this, GraphCompartmentUse.REQUIREMENT);
+        throw new FHIRException("Unknown GraphCompartmentUse code '"+codeString+"'");
+        }
+    public String toCode(GraphCompartmentUse code) {
+      if (code == GraphCompartmentUse.CONDITION)
+        return "condition";
+      if (code == GraphCompartmentUse.REQUIREMENT)
+        return "requirement";
+      return "?";
+      }
+    public String toSystem(GraphCompartmentUse code) {
+      return code.getSystem();
+      }
+    }
 
     public enum CompartmentCode {
         /**
@@ -317,10 +409,10 @@ public class GraphDefinition extends MetadataResource {
     @Block()
     public static class GraphDefinitionLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Path in the resource that contains the link.
+         * A FHIR expression that identifies one of FHIR References to other resources.
          */
-        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Path in the resource that contains the link", formalDefinition="Path in the resource that contains the link." )
+        @Child(name = "path", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Path in the resource that contains the link", formalDefinition="A FHIR expression that identifies one of FHIR References to other resources." )
         protected StringType path;
 
         /**
@@ -354,7 +446,7 @@ public class GraphDefinition extends MetadataResource {
         /**
          * Potential target for the link.
          */
-        @Child(name = "target", type = {}, order=6, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "target", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Potential target for the link", formalDefinition="Potential target for the link." )
         protected List<GraphDefinitionLinkTargetComponent> target;
 
@@ -367,16 +459,8 @@ public class GraphDefinition extends MetadataResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public GraphDefinitionLinkComponent(StringType path) {
-        super();
-        this.path = path;
-      }
-
         /**
-         * @return {@link #path} (Path in the resource that contains the link.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @return {@link #path} (A FHIR expression that identifies one of FHIR References to other resources.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public StringType getPathElement() { 
           if (this.path == null)
@@ -396,7 +480,7 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #path} (Path in the resource that contains the link.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @param value {@link #path} (A FHIR expression that identifies one of FHIR References to other resources.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public GraphDefinitionLinkComponent setPathElement(StringType value) { 
           this.path = value;
@@ -404,19 +488,23 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @return Path in the resource that contains the link.
+         * @return A FHIR expression that identifies one of FHIR References to other resources.
          */
         public String getPath() { 
           return this.path == null ? null : this.path.getValue();
         }
 
         /**
-         * @param value Path in the resource that contains the link.
+         * @param value A FHIR expression that identifies one of FHIR References to other resources.
          */
         public GraphDefinitionLinkComponent setPath(String value) { 
+          if (Utilities.noString(value))
+            this.path = null;
+          else {
             if (this.path == null)
               this.path = new StringType();
             this.path.setValue(value);
+          }
           return this;
         }
 
@@ -667,7 +755,7 @@ public class GraphDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("path", "string", "Path in the resource that contains the link.", 0, 1, path));
+          children.add(new Property("path", "string", "A FHIR expression that identifies one of FHIR References to other resources.", 0, 1, path));
           children.add(new Property("sliceName", "string", "Which slice (if profiled).", 0, 1, sliceName));
           children.add(new Property("min", "integer", "Minimum occurrences for this link.", 0, 1, min));
           children.add(new Property("max", "string", "Maximum occurrences for this link.", 0, 1, max));
@@ -678,7 +766,7 @@ public class GraphDefinition extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3433509: /*path*/  return new Property("path", "string", "Path in the resource that contains the link.", 0, 1, path);
+          case 3433509: /*path*/  return new Property("path", "string", "A FHIR expression that identifies one of FHIR References to other resources.", 0, 1, path);
           case -825289923: /*sliceName*/  return new Property("sliceName", "string", "Which slice (if profiled).", 0, 1, sliceName);
           case 108114: /*min*/  return new Property("min", "integer", "Minimum occurrences for this link.", 0, 1, min);
           case 107876: /*max*/  return new Property("max", "string", "Maximum occurrences for this link.", 0, 1, max);
@@ -862,27 +950,34 @@ public class GraphDefinition extends MetadataResource {
         protected CodeType type;
 
         /**
+         * A set of parameters to look up.
+         */
+        @Child(name = "params", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Criteria for reverse lookup", formalDefinition="A set of parameters to look up." )
+        protected StringType params;
+
+        /**
          * Profile for the target resource.
          */
-        @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "profile", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile for the target resource", formalDefinition="Profile for the target resource." )
         protected UriType profile;
 
         /**
          * Compartment Consistency Rules.
          */
-        @Child(name = "compartment", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "compartment", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Compartment Consistency Rules", formalDefinition="Compartment Consistency Rules." )
         protected List<GraphDefinitionLinkTargetCompartmentComponent> compartment;
 
         /**
          * Additional links from target resource.
          */
-        @Child(name = "link", type = {GraphDefinitionLinkComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "link", type = {GraphDefinitionLinkComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Additional links from target resource", formalDefinition="Additional links from target resource." )
         protected List<GraphDefinitionLinkComponent> link;
 
-        private static final long serialVersionUID = -1862411341L;
+        private static final long serialVersionUID = -341158110L;
 
     /**
      * Constructor
@@ -941,6 +1036,55 @@ public class GraphDefinition extends MetadataResource {
             if (this.type == null)
               this.type = new CodeType();
             this.type.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #params} (A set of parameters to look up.). This is the underlying object with id, value and extensions. The accessor "getParams" gives direct access to the value
+         */
+        public StringType getParamsElement() { 
+          if (this.params == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GraphDefinitionLinkTargetComponent.params");
+            else if (Configuration.doAutoCreate())
+              this.params = new StringType(); // bb
+          return this.params;
+        }
+
+        public boolean hasParamsElement() { 
+          return this.params != null && !this.params.isEmpty();
+        }
+
+        public boolean hasParams() { 
+          return this.params != null && !this.params.isEmpty();
+        }
+
+        /**
+         * @param value {@link #params} (A set of parameters to look up.). This is the underlying object with id, value and extensions. The accessor "getParams" gives direct access to the value
+         */
+        public GraphDefinitionLinkTargetComponent setParamsElement(StringType value) { 
+          this.params = value;
+          return this;
+        }
+
+        /**
+         * @return A set of parameters to look up.
+         */
+        public String getParams() { 
+          return this.params == null ? null : this.params.getValue();
+        }
+
+        /**
+         * @param value A set of parameters to look up.
+         */
+        public GraphDefinitionLinkTargetComponent setParams(String value) { 
+          if (Utilities.noString(value))
+            this.params = null;
+          else {
+            if (this.params == null)
+              this.params = new StringType();
+            this.params.setValue(value);
+          }
           return this;
         }
 
@@ -1102,6 +1246,7 @@ public class GraphDefinition extends MetadataResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "code", "Type of resource this link refers to.", 0, 1, type));
+          children.add(new Property("params", "string", "A set of parameters to look up.", 0, 1, params));
           children.add(new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile));
           children.add(new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment));
           children.add(new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link));
@@ -1111,6 +1256,7 @@ public class GraphDefinition extends MetadataResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "Type of resource this link refers to.", 0, 1, type);
+          case -995427962: /*params*/  return new Property("params", "string", "A set of parameters to look up.", 0, 1, params);
           case -309425751: /*profile*/  return new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile);
           case -397756334: /*compartment*/  return new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment);
           case 3321850: /*link*/  return new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link);
@@ -1123,6 +1269,7 @@ public class GraphDefinition extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
+        case -995427962: /*params*/ return this.params == null ? new Base[0] : new Base[] {this.params}; // StringType
         case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // UriType
         case -397756334: /*compartment*/ return this.compartment == null ? new Base[0] : this.compartment.toArray(new Base[this.compartment.size()]); // GraphDefinitionLinkTargetCompartmentComponent
         case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // GraphDefinitionLinkComponent
@@ -1136,6 +1283,9 @@ public class GraphDefinition extends MetadataResource {
         switch (hash) {
         case 3575610: // type
           this.type = castToCode(value); // CodeType
+          return value;
+        case -995427962: // params
+          this.params = castToString(value); // StringType
           return value;
         case -309425751: // profile
           this.profile = castToUri(value); // UriType
@@ -1155,6 +1305,8 @@ public class GraphDefinition extends MetadataResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
+        } else if (name.equals("params")) {
+          this.params = castToString(value); // StringType
         } else if (name.equals("profile")) {
           this.profile = castToUri(value); // UriType
         } else if (name.equals("compartment")) {
@@ -1170,6 +1322,7 @@ public class GraphDefinition extends MetadataResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getTypeElement();
+        case -995427962:  return getParamsElement();
         case -309425751:  return getProfileElement();
         case -397756334:  return addCompartment(); 
         case 3321850:  return addLink(); 
@@ -1182,6 +1335,7 @@ public class GraphDefinition extends MetadataResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
+        case -995427962: /*params*/ return new String[] {"string"};
         case -309425751: /*profile*/ return new String[] {"uri"};
         case -397756334: /*compartment*/ return new String[] {};
         case 3321850: /*link*/ return new String[] {"@GraphDefinition.link"};
@@ -1194,6 +1348,9 @@ public class GraphDefinition extends MetadataResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type GraphDefinition.type");
+        }
+        else if (name.equals("params")) {
+          throw new FHIRException("Cannot call addChild on a primitive type GraphDefinition.params");
         }
         else if (name.equals("profile")) {
           throw new FHIRException("Cannot call addChild on a primitive type GraphDefinition.profile");
@@ -1212,6 +1369,7 @@ public class GraphDefinition extends MetadataResource {
         GraphDefinitionLinkTargetComponent dst = new GraphDefinitionLinkTargetComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        dst.params = params == null ? null : params.copy();
         dst.profile = profile == null ? null : profile.copy();
         if (compartment != null) {
           dst.compartment = new ArrayList<GraphDefinitionLinkTargetCompartmentComponent>();
@@ -1233,8 +1391,8 @@ public class GraphDefinition extends MetadataResource {
         if (!(other instanceof GraphDefinitionLinkTargetComponent))
           return false;
         GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true) && compareDeep(compartment, o.compartment, true)
-           && compareDeep(link, o.link, true);
+        return compareDeep(type, o.type, true) && compareDeep(params, o.params, true) && compareDeep(profile, o.profile, true)
+           && compareDeep(compartment, o.compartment, true) && compareDeep(link, o.link, true);
       }
 
       @Override
@@ -1244,11 +1402,12 @@ public class GraphDefinition extends MetadataResource {
         if (!(other instanceof GraphDefinitionLinkTargetComponent))
           return false;
         GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
-        return compareValues(type, o.type, true) && compareValues(profile, o.profile, true);
+        return compareValues(type, o.type, true) && compareValues(params, o.params, true) && compareValues(profile, o.profile, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, compartment
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, params, profile, compartment
           , link);
       }
 
@@ -1262,9 +1421,17 @@ public class GraphDefinition extends MetadataResource {
     @Block()
     public static class GraphDefinitionLinkTargetCompartmentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.
+         */
+        @Child(name = "use", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="condition | requirement", formalDefinition="Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/graph-compartment-use")
+        protected Enumeration<GraphCompartmentUse> use;
+
+        /**
          * Identifies the compartment.
          */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifies the compartment", formalDefinition="Identifies the compartment." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/compartment-type")
         protected Enumeration<CompartmentCode> code;
@@ -1272,7 +1439,7 @@ public class GraphDefinition extends MetadataResource {
         /**
          * identical | matching | different | no-rule | custom.
          */
-        @Child(name = "rule", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "rule", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="identical | matching | different | custom", formalDefinition="identical | matching | different | no-rule | custom." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/graph-compartment-rule")
         protected Enumeration<GraphCompartmentRule> rule;
@@ -1280,18 +1447,18 @@ public class GraphDefinition extends MetadataResource {
         /**
          * Custom rule, as a FHIRPath expression.
          */
-        @Child(name = "expression", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Custom rule, as a FHIRPath expression", formalDefinition="Custom rule, as a FHIRPath expression." )
         protected StringType expression;
 
         /**
          * Documentation for FHIRPath expression.
          */
-        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Documentation for FHIRPath expression", formalDefinition="Documentation for FHIRPath expression." )
         protected StringType description;
 
-        private static final long serialVersionUID = -1046660576L;
+        private static final long serialVersionUID = 1023364175L;
 
     /**
      * Constructor
@@ -1303,11 +1470,57 @@ public class GraphDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public GraphDefinitionLinkTargetCompartmentComponent(Enumeration<CompartmentCode> code, Enumeration<GraphCompartmentRule> rule) {
+      public GraphDefinitionLinkTargetCompartmentComponent(Enumeration<GraphCompartmentUse> use, Enumeration<CompartmentCode> code, Enumeration<GraphCompartmentRule> rule) {
         super();
+        this.use = use;
         this.code = code;
         this.rule = rule;
       }
+
+        /**
+         * @return {@link #use} (Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
+         */
+        public Enumeration<GraphCompartmentUse> getUseElement() { 
+          if (this.use == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GraphDefinitionLinkTargetCompartmentComponent.use");
+            else if (Configuration.doAutoCreate())
+              this.use = new Enumeration<GraphCompartmentUse>(new GraphCompartmentUseEnumFactory()); // bb
+          return this.use;
+        }
+
+        public boolean hasUseElement() { 
+          return this.use != null && !this.use.isEmpty();
+        }
+
+        public boolean hasUse() { 
+          return this.use != null && !this.use.isEmpty();
+        }
+
+        /**
+         * @param value {@link #use} (Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
+         */
+        public GraphDefinitionLinkTargetCompartmentComponent setUseElement(Enumeration<GraphCompartmentUse> value) { 
+          this.use = value;
+          return this;
+        }
+
+        /**
+         * @return Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.
+         */
+        public GraphCompartmentUse getUse() { 
+          return this.use == null ? null : this.use.getValue();
+        }
+
+        /**
+         * @param value Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.
+         */
+        public GraphDefinitionLinkTargetCompartmentComponent setUse(GraphCompartmentUse value) { 
+            if (this.use == null)
+              this.use = new Enumeration<GraphCompartmentUse>(new GraphCompartmentUseEnumFactory());
+            this.use.setValue(value);
+          return this;
+        }
 
         /**
          * @return {@link #code} (Identifies the compartment.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
@@ -1499,6 +1712,7 @@ public class GraphDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
+          children.add(new Property("use", "code", "Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.", 0, 1, use));
           children.add(new Property("code", "code", "Identifies the compartment.", 0, 1, code));
           children.add(new Property("rule", "code", "identical | matching | different | no-rule | custom.", 0, 1, rule));
           children.add(new Property("expression", "string", "Custom rule, as a FHIRPath expression.", 0, 1, expression));
@@ -1508,6 +1722,7 @@ public class GraphDefinition extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
+          case 116103: /*use*/  return new Property("use", "code", "Defines how the compartment rule is used - whether it it is used to test whether resources are subject to the rule, or whether it is a rule that must be followed.", 0, 1, use);
           case 3059181: /*code*/  return new Property("code", "code", "Identifies the compartment.", 0, 1, code);
           case 3512060: /*rule*/  return new Property("rule", "code", "identical | matching | different | no-rule | custom.", 0, 1, rule);
           case -1795452264: /*expression*/  return new Property("expression", "string", "Custom rule, as a FHIRPath expression.", 0, 1, expression);
@@ -1520,6 +1735,7 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<GraphCompartmentUse>
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<CompartmentCode>
         case 3512060: /*rule*/ return this.rule == null ? new Base[0] : new Base[] {this.rule}; // Enumeration<GraphCompartmentRule>
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
@@ -1532,6 +1748,10 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case 116103: // use
+          value = new GraphCompartmentUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<GraphCompartmentUse>
+          return value;
         case 3059181: // code
           value = new CompartmentCodeEnumFactory().fromType(castToCode(value));
           this.code = (Enumeration) value; // Enumeration<CompartmentCode>
@@ -1553,7 +1773,10 @@ public class GraphDefinition extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code")) {
+        if (name.equals("use")) {
+          value = new GraphCompartmentUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<GraphCompartmentUse>
+        } else if (name.equals("code")) {
           value = new CompartmentCodeEnumFactory().fromType(castToCode(value));
           this.code = (Enumeration) value; // Enumeration<CompartmentCode>
         } else if (name.equals("rule")) {
@@ -1571,6 +1794,7 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 116103:  return getUseElement();
         case 3059181:  return getCodeElement();
         case 3512060:  return getRuleElement();
         case -1795452264:  return getExpressionElement();
@@ -1583,6 +1807,7 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 116103: /*use*/ return new String[] {"code"};
         case 3059181: /*code*/ return new String[] {"code"};
         case 3512060: /*rule*/ return new String[] {"code"};
         case -1795452264: /*expression*/ return new String[] {"string"};
@@ -1594,7 +1819,10 @@ public class GraphDefinition extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("code")) {
+        if (name.equals("use")) {
+          throw new FHIRException("Cannot call addChild on a primitive type GraphDefinition.use");
+        }
+        else if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type GraphDefinition.code");
         }
         else if (name.equals("rule")) {
@@ -1613,6 +1841,7 @@ public class GraphDefinition extends MetadataResource {
       public GraphDefinitionLinkTargetCompartmentComponent copy() {
         GraphDefinitionLinkTargetCompartmentComponent dst = new GraphDefinitionLinkTargetCompartmentComponent();
         copyValues(dst);
+        dst.use = use == null ? null : use.copy();
         dst.code = code == null ? null : code.copy();
         dst.rule = rule == null ? null : rule.copy();
         dst.expression = expression == null ? null : expression.copy();
@@ -1627,8 +1856,9 @@ public class GraphDefinition extends MetadataResource {
         if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
         GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
-        return compareDeep(code, o.code, true) && compareDeep(rule, o.rule, true) && compareDeep(expression, o.expression, true)
-           && compareDeep(description, o.description, true);
+        return compareDeep(use, o.use, true) && compareDeep(code, o.code, true) && compareDeep(rule, o.rule, true)
+           && compareDeep(expression, o.expression, true) && compareDeep(description, o.description, true)
+          ;
       }
 
       @Override
@@ -1638,13 +1868,14 @@ public class GraphDefinition extends MetadataResource {
         if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
         GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
-        return compareValues(code, o.code, true) && compareValues(rule, o.rule, true) && compareValues(expression, o.expression, true)
-           && compareValues(description, o.description, true);
+        return compareValues(use, o.use, true) && compareValues(code, o.code, true) && compareValues(rule, o.rule, true)
+           && compareValues(expression, o.expression, true) && compareValues(description, o.description, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, rule, expression, description
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, code, rule, expression
+          , description);
       }
 
   public String fhirType() {
