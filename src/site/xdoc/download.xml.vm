@@ -5,10 +5,20 @@
 		<title>Download</title>
 	</properties>
 
+	<head>
+	</head>
+
 	<body>
 
 		<section name="FHIR Versions">
-
+			<p>
+				The following table shows the various versions of the HAPI FHIR library, and
+				the versions of the FHIR standard that they support. Note that support for
+				stable releases of FHIR are shown in 
+				<span style="background: #CEC; padding: 3px;">GREEN</span> 
+				and support for draft pre-release versions of FHIR are shown in 
+				<span style="background: #EEB; padding: 3px;">YELLOW</span>.
+			</p>
 			<table>
 				<thead>
 					<tr>
@@ -24,7 +34,7 @@
 					<tr>
 						<td>HAPI FHIR 1.1</td>
 						<td style="background: #CEC;">0.0.82</td>
-						<td style="background: #EEB;">Draft 0.5.0</td>
+						<td style="background: #EEB;">Draft 0.5.0-5843</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
@@ -32,7 +42,7 @@
 					<tr>
 						<td>HAPI FHIR 1.2</td>
 						<td style="background: #CEC;">0.0.82</td>
-						<td style="background: #EEB;">Draft 0.5.0</td>
+						<td style="background: #EEB;">Draft 0.5.0-5843</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
@@ -50,7 +60,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
-						<td style="background: #EEB;">Draft 1.3.0</td>
+						<td style="background: #EEB;">Draft 1.3.0-7602</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -58,7 +68,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
-						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #EEB;">Draft 1.4.0-8138</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -66,7 +76,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
-						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #EEB;">Draft 1.4.0-8636</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -74,7 +84,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
-						<td style="background: #EEB;">Draft 1.6.0</td>
+						<td style="background: #EEB;">Draft 1.6.0-9663</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -82,7 +92,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
-						<td style="background: #EEB;">Draft 1.7.0</td>
+						<td style="background: #EEB;">Draft 1.7.0-10129</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -90,7 +100,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">Draft 1.4.0</td>
-						<td style="background: #EEB;">Draft 1.8.0</td>
+						<td style="background: #EEB;">Draft 1.8.0-10528</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -98,7 +108,7 @@
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">Draft 1.4.0</td>
-						<td style="background: #EEB;">Draft 1.9.0</td>
+						<td style="background: #EEB;">Draft 1.9.0-11501</td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -128,6 +138,91 @@
 				</tbody>
 			</table>
 
+		</section>
+		
+ 		<section name="HAPI FHIR Modules">
+			<p>
+				The following table shows the modules that make up the HAPI
+				FHIR library.
+			</p>
+			<table class="">
+				<tbody>
+					<tr><td colspan="2" style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;">Core Libraries</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-base</td>
+						<td>
+							This is the core HAPI FHIR library and is always required in order to use
+							the framework. It contains the context, parsers, and other support classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-utilities</td>
+						<td>
+							This is a support library containing various utility methods for working with
+							FHIR. It is always required in order to use the framework.
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Structures</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu</td>
+						<td>
+							This module contains FHIR DSTU1 model classes. It was retired in HAPI FHIR 3.0.0.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu2</td>
+						<td>
+							This module contains FHIR DSTU2 model classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-hl7org-dstu2</td>
+						<td>
+							This module contains alternate FHIR DSTU2 model classes. The HAPI FHIR and FHIR "Java Reference Implementation"
+							libraries were merged in 2015, and at the time there were two parallel sets of DSTU2 model 
+							classes. This set more closely resembles the model classes for DSTU3+ where the other set
+							more closely resembles the DSTU1 model classes. The two DSTU2 model JARs are functionally
+							identital, but the various utility methods on the classes are somewhat different.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu3</td>
+						<td>
+							This module contains FHIR DSTU3 model classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-r4</td>
+						<td>
+							This module contains FHIR R4 model classes.
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Client Framework</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client</td>
+						<td>
+							This module contains the core FHIR client framework, including an 
+							HTTP implementation based on 
+							<a href="https://hc.apache.org/">Apache HttpClient</a>. It is required in order
+							to use client functionality in HAPI.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client-okhttp</td>
+						<td>
+							This module contains an alternate HTTP implementation based on
+							<a href="http://square.github.io/okhttp/">OKHTTP</a>.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-android</td>
+						<td>
+							This module contains the Android HAPI FHIR framework, which is a FHIR
+							client framework which has been tailed specifically to run on Android.
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</section>
 
 		<section name="Downloading HAPI FHIR">
