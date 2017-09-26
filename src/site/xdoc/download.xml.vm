@@ -221,6 +221,68 @@
 							client framework which has been tailed specifically to run on Android.
 						</td>
 					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Validation</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validator</td>
+						<td>
+							This module contains the FHIR Profile Validator, which is used to 
+							validate resource instances against FHIR Profiles (StructureDefinitions,
+							ValueSets, CodeSystems, etc.).
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu2</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU2
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu2.1</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU2.1
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu3</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU3
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-r4</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR R4
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Server</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-server</td>
+						<td>
+							This module contains the HAPI FHIR Server framework, which can be used to 
+							develop FHIR compliant servers against your own data storage layer.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-jpaserver-base</td>
+						<td>
+							This module contains the HAPI FHIR "JPA Server", which is a complete 
+							FHIR server solution including a database and implementations of many 
+							advanced FHIR server features.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-testpage-overlay</td>
+						<td>
+							This module contains the web based "testpage overlay", which is the 
+							UI that powers our 
+							<a href="http://fhirtest.uhn.ca">Public Demo Server</a>
+							and can also be added to your applications.
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		</section>

@@ -1,40 +1,40 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.context.annotation.*;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Configuration
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+	private Exception myLastStackTrace;
 
 	@Bean()
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
 
-	private Exception myLastStackTrace;
-	
 	@Bean()
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
@@ -54,31 +54,31 @@ public class TestR4Config extends BaseJavaConfigR4 {
 //					System.exit(1);
 					retVal = null;
 				}
-				
+
 				try {
 					throw new Exception();
 				} catch (Exception e) {
 					myLastStackTrace = e;
 				}
-				
+
 				return retVal;
 			}
 
 			private void logGetConnectionStackTrace() {
-					StringBuilder b = new StringBuilder();
-					b.append("Last connection request stack trace:");
-					for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
-							b.append("\n   ");
-							b.append(next.getClassName());
-							b.append(".");
-							b.append(next.getMethodName());
-							b.append("(");
-							b.append(next.getFileName());
-							b.append(":");
-							b.append(next.getLineNumber());
-							b.append(")");
-					}
-					ourLog.info(b.toString());
+				StringBuilder b = new StringBuilder();
+				b.append("Last connection request stack trace:");
+				for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
+					b.append("\n   ");
+					b.append(next.getClassName());
+					b.append(".");
+					b.append(next.getMethodName());
+					b.append("(");
+					b.append(next.getFileName());
+					b.append(":");
+					b.append(next.getLineNumber());
+					b.append(")");
+				}
+				ourLog.info(b.toString());
 			}
 
 		};
@@ -97,11 +97,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setMaxTotal(maxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
-				.create(retVal)
-				// .logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
-				.countQuery()
-				.build();
+			.create(retVal)
+			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.countQuery()
+			.build();
 
 		return dataSource;
 	}
