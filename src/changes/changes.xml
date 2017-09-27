@@ -6,8 +6,60 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.0.0" date="TBD">
+		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
+				Support for FHIR R4 (current working draft) has been <![CDATA[<b>added</b>]]>
+				(in a new module called <![CDATA[<code>hapi-fhir-structures-r4</code>]]>)
+				and
+				support for FHIR DSTU1 (<![CDATA[<code>hapi-fhir-structures-dstu</code>]]>)
+				has been <![CDATA[<b>removed</b>]]>. Removing support for the legacy
+				DSTU1 FHIR version was a difficult decision, but it allows us the
+				opportunitity to clean up the codebase quite a bit, and remove some
+				confusing legacy parts of the API (such as the legacy Atom Bundle class).
+				<![CDATA[<br/><br/>>]]>
+				A new redesigned table of HAPI FHIR versions to FHIR version support has been
+				added to the <![CDATA[<a href="http://hapifhir.io/download.html">Download Page</a>]]>
+			</action>
+			<action type="add">
+				HAPI FHIR's modules have been restructured for more consistency and less coupling
+				between unrelated parts of the API.
+				<![CDATA[<br/><br/>>]]>
+				A new complete list of HAPI FHIR modules has been added to the
+				<![CDATA[<a href="http://hapifhir.io/download.html">Download Page</a>]]>. Key changes
+				include:
+				<![CDATA[
+				<ul>
+					<li>
+						HAPI FHIR's <b>client</b> codebase has been moved out of <code>hapi-fhir-base</code>
+						and in to a new module called <code>hapi-fhir-client</code>. Client users now need
+						to explicitly add this JAR to their project (and non-client users now no longer
+						need to depend on it)
+					</li>
+					<li>
+						HAPI FHIR's <b>server</b> codebase has been moved out of <code>hapi-fhir-base</code>
+						and in to a new module called <code>hapi-fhir-server</code>. Server users now need
+						to explicitly add this JAR to their project (and non-server users now no longer
+						need to depend on it)
+					</li>
+					<li>
+						As a result of the client and server changes above, we no longer need to produce
+						a special Android JAR which contains the client, server (which added space but was
+						not used) and structures. There is now a normal module called <code>hapi-fhir-android</code>
+						which is added to your Android Gradle file along with whatever structures JARs you
+						wish to add.
+					</li>
+					<li>
+						A new JAR containing FHIR utilities called <code>hapi-fhir-utilities</code> has been
+						added. This JAR reflects the ongoing harmonization between HAPI FHIR and the FHIR
+						RI codebases and is generally required in order to use HAPI at this point (if you
+						are using a dependency manager such as Maven or Gradle it will be brought in to your
+						project automatically as a dependency)
+					</li>
+				</ul>
+				]]>
+			</action>
+			<action type="add">
+				A number of
 				<![CDATA[
 				<ul>
 					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
