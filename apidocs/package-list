@@ -1,4 +1,5 @@
 ca.uhn.fhir.context
+ca.uhn.fhir.context.api
 ca.uhn.fhir.context.support
 ca.uhn.fhir.fluentpath
 ca.uhn.fhir.i18n
@@ -6,7 +7,6 @@ ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
 ca.uhn.fhir.model.base.composite
 ca.uhn.fhir.model.base.resource
-ca.uhn.fhir.model.dstu.valueset
 ca.uhn.fhir.model.primitive
 ca.uhn.fhir.model.valueset
 ca.uhn.fhir.model.view
@@ -15,19 +15,13 @@ ca.uhn.fhir.parser
 ca.uhn.fhir.parser.json
 ca.uhn.fhir.rest.annotation
 ca.uhn.fhir.rest.api
-ca.uhn.fhir.rest.client
-ca.uhn.fhir.rest.client.apache
+ca.uhn.fhir.rest.api.server
 ca.uhn.fhir.rest.client.api
 ca.uhn.fhir.rest.client.exceptions
-ca.uhn.fhir.rest.client.interceptor
 ca.uhn.fhir.rest.gclient
-ca.uhn.fhir.rest.method
 ca.uhn.fhir.rest.param
-ca.uhn.fhir.rest.server
+ca.uhn.fhir.rest.param.binder
 ca.uhn.fhir.rest.server.exceptions
-ca.uhn.fhir.rest.server.interceptor
-ca.uhn.fhir.rest.server.interceptor.auth
-ca.uhn.fhir.rest.server.servlet
 ca.uhn.fhir.store
 ca.uhn.fhir.util
 ca.uhn.fhir.util.jar
@@ -35,8 +29,3 @@ ca.uhn.fhir.validation
 ca.uhn.fhir.validation.schematron
 org.hl7.fhir.exceptions
 org.hl7.fhir.instance.model.api
-org.hl7.fhir.utilities
-org.hl7.fhir.utilities.ucum
-org.hl7.fhir.utilities.validation
-org.hl7.fhir.utilities.xhtml
-org.hl7.fhir.utilities.xml

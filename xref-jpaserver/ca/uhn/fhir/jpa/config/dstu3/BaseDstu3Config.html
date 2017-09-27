@@ -8,146 +8,137 @@
 <div id="overview"><a href="../../../../../../../apidocs/ca/uhn/fhir/jpa/config/dstu3/BaseDstu3Config.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> ca.uhn.fhir.jpa.config.dstu3;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * limitations under the License.</em>
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * #L%</em>
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> */</em>
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.beans.factory.annotation.Autowire;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Bean;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Configuration;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Lazy;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Primary;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.EnableTransactionManagement;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ParserOptions;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.config.BaseConfig;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.validation.IValidatorModule;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  @Configuration
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  @EnableTransactionManagement
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/config/dstu3/BaseDstu3Config.html">BaseDstu3Config</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../ca/uhn/fhir/jpa/config/BaseConfig.html">BaseConfig</a> {
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Bean
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	@Primary
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	<strong class="jxr_keyword">public</strong> FhirContext fhirContextDstu3() {
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		FhirContext retVal = FhirContext.forDstu3();
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		<em class="jxr_comment">// Don't strip versions in some places</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		ParserOptions parserOptions = retVal.getParserOptions();
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		parserOptions.setDontStripVersionsFromReferencesAtPaths(<span class="jxr_string">"AuditEvent.entity.reference"</span>);
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ParserOptions;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.config.BaseConfig;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.validation.IValidatorModule;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> org.springframework.beans.factory.annotation.Autowire;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Bean;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Configuration;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Lazy;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.context.annotation.Primary;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.EnableTransactionManagement;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> * #%L</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment"> * %%</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment"> * %%</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_comment"> * #L%</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  @Configuration
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  @EnableTransactionManagement
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/config/dstu3/BaseDstu3Config.html">BaseDstu3Config</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../ca/uhn/fhir/jpa/config/BaseConfig.html">BaseConfig</a> {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	@Bean
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	@Primary
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">public</strong> FhirContext fhirContextDstu3() {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		FhirContext retVal = FhirContext.forDstu3();
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<em class="jxr_comment">// Don't strip versions in some places</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		ParserOptions parserOptions = retVal.getParserOptions();
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		parserOptions.setDontStripVersionsFromReferencesAtPaths(<span class="jxr_string">"AuditEvent.entity.reference"</span>);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	}
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	}
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	@Bean(name = <span class="jxr_string">"myInstanceValidatorDstu3"</span>)
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	@Lazy
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	<strong class="jxr_keyword">public</strong> IValidatorModule instanceValidatorDstu3() {
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		FhirInstanceValidator val = <strong class="jxr_keyword">new</strong> FhirInstanceValidator();
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		val.setValidationSupport(validationSupportChainDstu3());
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<strong class="jxr_keyword">return</strong> val;
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	}
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	@Bean(name = <span class="jxr_string">"myJpaValidationSupportDstu3"</span>, autowire = Autowire.BY_NAME)
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	}
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	@Bean(autowire = Autowire.BY_TYPE)
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/IFulltextSearchSvc.html">IFulltextSearchSvc</a> searchDaoDstu3() {
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		FulltextSearchSvcImpl searchDao = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/FulltextSearchSvcImpl.html">FulltextSearchSvcImpl</a>();
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		<strong class="jxr_keyword">return</strong> searchDao;
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	}
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	@Bean(autowire = Autowire.BY_TYPE)
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamExtractorDstu3.html">SearchParamExtractorDstu3</a> searchParamExtractor() {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamExtractorDstu3.html">SearchParamExtractorDstu3</a>();
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	}
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	@Bean
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/ISearchParamRegistry.html">ISearchParamRegistry</a> searchParamRegistry() {
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamRegistryDstu3.html">SearchParamRegistryDstu3</a>();
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	}
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	@Bean(name = <span class="jxr_string">"mySystemDaoDstu3"</span>, autowire = Autowire.BY_NAME)
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	<strong class="jxr_keyword">public</strong> IFhirSystemDao&lt;org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta&gt; systemDaoDstu3() {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3();
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	@Bean(name = <span class="jxr_string">"mySystemProviderDstu3"</span>)
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		retVal.setContext(fhirContextDstu3());
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		retVal.setDao(systemDaoDstu3());
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	@Bean(autowire = Autowire.BY_TYPE)
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/IHapiTerminologyLoaderSvc.html">IHapiTerminologyLoaderSvc</a> terminologyLoaderService() {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/TerminologyLoaderSvc.html">TerminologyLoaderSvc</a>();
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	}
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	@Bean(autowire = Autowire.BY_TYPE)
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/IHapiTerminologySvcDstu3.html">IHapiTerminologySvcDstu3</a> terminologyService() {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/HapiTerminologySvcDstu3.html">HapiTerminologySvcDstu3</a>();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	@Bean(autowire = Autowire.BY_TYPE)
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/dstu3/TerminologyUploaderProviderDstu3.html">TerminologyUploaderProviderDstu3</a> terminologyUploaderProvider() {
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		TerminologyUploaderProviderDstu3 retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/dstu3/TerminologyUploaderProviderDstu3.html">TerminologyUploaderProviderDstu3</a>();
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		retVal.setContext(fhirContextDstu3());
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	}
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	@Primary
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	@Bean(autowire = Autowire.BY_NAME, name = <span class="jxr_string">"myJpaValidationSupportChainDstu3"</span>)
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<strong class="jxr_keyword">public</strong> IValidationSupport validationSupportChainDstu3() {
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/validation/JpaValidationSupportChainDstu3.html">JpaValidationSupportChainDstu3</a>();
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	}
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	@Bean
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@Lazy
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/interceptor/RestHookSubscriptionDstu3Interceptor.html">RestHookSubscriptionDstu3Interceptor</a> restHookSubscriptionDstu3Interceptor() {
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/interceptor/RestHookSubscriptionDstu3Interceptor.html">RestHookSubscriptionDstu3Interceptor</a>();
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	}
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> }
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	@Bean(name = <span class="jxr_string">"myInstanceValidatorDstu3"</span>)
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	@Lazy
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	<strong class="jxr_keyword">public</strong> IValidatorModule instanceValidatorDstu3() {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		FhirInstanceValidator val = <strong class="jxr_keyword">new</strong> FhirInstanceValidator();
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		val.setValidationSupport(validationSupportChainDstu3());
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		<strong class="jxr_keyword">return</strong> val;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	}
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	@Bean(name = <span class="jxr_string">"myJpaValidationSupportDstu3"</span>, autowire = Autowire.BY_NAME)
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Bean(autowire = Autowire.BY_TYPE)
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/IFulltextSearchSvc.html">IFulltextSearchSvc</a> searchDaoDstu3() {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		FulltextSearchSvcImpl searchDao = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/FulltextSearchSvcImpl.html">FulltextSearchSvcImpl</a>();
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">return</strong> searchDao;
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	}
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	@Bean(autowire = Autowire.BY_TYPE)
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamExtractorDstu3.html">SearchParamExtractorDstu3</a> searchParamExtractor() {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamExtractorDstu3.html">SearchParamExtractorDstu3</a>();
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	}
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	@Bean
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/ISearchParamRegistry.html">ISearchParamRegistry</a> searchParamRegistry() {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/dstu3/SearchParamRegistryDstu3.html">SearchParamRegistryDstu3</a>();
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	}
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	@Bean(name = <span class="jxr_string">"mySystemDaoDstu3"</span>, autowire = Autowire.BY_NAME)
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">public</strong> IFhirSystemDao&lt;org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta&gt; systemDaoDstu3() {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3();
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	}
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@Bean(name = <span class="jxr_string">"mySystemProviderDstu3"</span>)
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		retVal.setContext(fhirContextDstu3());
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		retVal.setDao(systemDaoDstu3());
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	}
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	@Bean(autowire = Autowire.BY_TYPE)
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/IHapiTerminologyLoaderSvc.html">IHapiTerminologyLoaderSvc</a> terminologyLoaderService() {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/TerminologyLoaderSvc.html">TerminologyLoaderSvc</a>();
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	}
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	@Bean(autowire = Autowire.BY_TYPE)
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/IHapiTerminologySvcDstu3.html">IHapiTerminologySvcDstu3</a> terminologyService() {
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/HapiTerminologySvcDstu3.html">HapiTerminologySvcDstu3</a>();
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	}
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 	@Bean(autowire = Autowire.BY_TYPE)
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/dstu3/TerminologyUploaderProviderDstu3.html">TerminologyUploaderProviderDstu3</a> terminologyUploaderProvider() {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		TerminologyUploaderProviderDstu3 retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/dstu3/TerminologyUploaderProviderDstu3.html">TerminologyUploaderProviderDstu3</a>();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		retVal.setContext(fhirContextDstu3());
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	}
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	@Primary
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	@Bean(autowire = Autowire.BY_NAME, name = <span class="jxr_string">"myJpaValidationSupportChainDstu3"</span>)
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	<strong class="jxr_keyword">public</strong> IValidationSupport validationSupportChainDstu3() {
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/validation/JpaValidationSupportChainDstu3.html">JpaValidationSupportChainDstu3</a>();
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	}
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

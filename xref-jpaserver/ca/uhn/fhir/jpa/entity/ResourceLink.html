@@ -205,30 +205,38 @@
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setTargetResourceUrl(IIdType theTargetResourceUrl) {
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		Validate.isTrue(theTargetResourceUrl.hasIdPart());
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 		
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		myTargetResourceType = theTargetResourceUrl.getResourceType();
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 		myTargetResourceUrl = theTargetResourceUrl.getValue();
-<a class="jxr_linenumber" name="L204" href="#L204">204</a> 	}
-<a class="jxr_linenumber" name="L205" href="#L205">205</a> 
-<a class="jxr_linenumber" name="L206" href="#L206">206</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setUpdated(Date theUpdated) {
-<a class="jxr_linenumber" name="L207" href="#L207">207</a> 		myUpdated = theUpdated;
-<a class="jxr_linenumber" name="L208" href="#L208">208</a> 	}
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 		<strong class="jxr_keyword">if</strong> (theTargetResourceUrl.hasIdPart()) {
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 			<em class="jxr_comment">// do nothing</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			<em class="jxr_comment">// Must have set an url like http://example.org/something</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 			<em class="jxr_comment">// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 			<em class="jxr_comment">// treated as the id and 'example.org' was treated as the resource type</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			<em class="jxr_comment">// TODO: log a warning?</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 		}
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> 
-<a class="jxr_linenumber" name="L210" href="#L210">210</a> 	@Override
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 		StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		b.append(<span class="jxr_string">"ResourceLink["</span>);
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> 		b.append(<span class="jxr_string">"path="</span>).append(mySourcePath);
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		b.append(<span class="jxr_string">", src="</span>).append(mySourceResourcePid);
-<a class="jxr_linenumber" name="L216" href="#L216">216</a> 		b.append(<span class="jxr_string">", target="</span>).append(myTargetResourcePid);
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		b.append(<span class="jxr_string">", targetUrl="</span>).append(myTargetResourceUrl);
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> 
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		b.append(<span class="jxr_string">"]"</span>);
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">return</strong> b.toString();
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 	}
-<a class="jxr_linenumber" name="L222" href="#L222">222</a> 
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> }
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 		myTargetResourceType = theTargetResourceUrl.getResourceType();
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		myTargetResourceUrl = theTargetResourceUrl.getValue();
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 	}
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setUpdated(Date theUpdated) {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		myUpdated = theUpdated;
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 	}
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 	@Override
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 		b.append(<span class="jxr_string">"ResourceLink["</span>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 		b.append(<span class="jxr_string">"path="</span>).append(mySourcePath);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 		b.append(<span class="jxr_string">", src="</span>).append(mySourceResourcePid);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 		b.append(<span class="jxr_string">", target="</span>).append(myTargetResourcePid);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		b.append(<span class="jxr_string">", targetUrl="</span>).append(myTargetResourceUrl);
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 		b.append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		<strong class="jxr_keyword">return</strong> b.toString();
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 	}
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

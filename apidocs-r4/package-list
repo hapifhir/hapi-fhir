@@ -1,0 +1,13 @@
+org.hl7.fhir.r4.conformance
+org.hl7.fhir.r4.context
+org.hl7.fhir.r4.elementmodel
+org.hl7.fhir.r4.formats
+org.hl7.fhir.r4.hapi.ctx
+org.hl7.fhir.r4.hapi.fluentpath
+org.hl7.fhir.r4.hapi.rest.server
+org.hl7.fhir.r4.model
+org.hl7.fhir.r4.model.codesystems
+org.hl7.fhir.r4.terminologies
+org.hl7.fhir.r4.utils
+org.hl7.fhir.r4.utils.client
+org.hl7.fhir.r4.utils.formats

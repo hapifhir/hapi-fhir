@@ -31,7 +31,7 @@
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.Retention;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.RetentionPolicy;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  @Retention(RetentionPolicy.RUNTIME)
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
@@ -52,7 +52,7 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">	 * for client implementations. </em>
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<em class="jxr_comment">// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere</em>
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Class&lt;? <strong class="jxr_keyword">extends</strong> IResource&gt; type() <strong class="jxr_keyword">default</strong> IResource.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; type() <strong class="jxr_keyword">default</strong> IBaseResource.<strong class="jxr_keyword">class</strong>;
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  }

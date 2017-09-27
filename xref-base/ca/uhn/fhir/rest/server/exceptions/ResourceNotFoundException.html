@@ -34,7 +34,7 @@
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdDt;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.CoverageIgnore;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">/**</em>
@@ -90,7 +90,7 @@
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">super</strong>(STATUS_CODE, createErrorMessage(theId));
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  	}
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/ResourceNotFoundException.html">ResourceNotFoundException</a>(<a href="../../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId, <a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseOperationOutcome.html">IBaseOperationOutcome</a> theOperationOutcome) {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/ResourceNotFoundException.html">ResourceNotFoundException</a>(<a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId, <a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseOperationOutcome.html">IBaseOperationOutcome</a> theOperationOutcome) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		<strong class="jxr_keyword">super</strong>(STATUS_CODE, createErrorMessage(theId), theOperationOutcome);
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  	}
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  
@@ -98,7 +98,7 @@
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  		<strong class="jxr_keyword">super</strong>(STATUS_CODE, theMessage);
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  	}
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String createErrorMessage(Class&lt;? <strong class="jxr_keyword">extends</strong> IResource&gt; theClass, <a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String createErrorMessage(Class&lt;? <strong class="jxr_keyword">extends</strong> IResource&gt; theClass, <a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"Resource of type "</span> + theClass.getSimpleName() + <span class="jxr_string">" with ID "</span> + theId + <span class="jxr_string">" is not known"</span>;
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  	}
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  

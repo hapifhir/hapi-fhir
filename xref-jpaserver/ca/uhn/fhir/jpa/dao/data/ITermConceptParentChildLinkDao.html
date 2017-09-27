@@ -43,8 +43,8 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	@Modifying
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">void</strong> deleteByCodeSystemVersion(@Param(<span class="jxr_string">"cs_pid"</span>) Long thePid);
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	@Query(<span class="jxr_string">"SELECT t FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid"</span>)
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	Collection&lt;TermConceptParentChildLink&gt; findAllWithChild(@Param(<span class="jxr_string">"child_pid"</span>) Long theConceptPid);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	@Query(<span class="jxr_string">"SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid"</span>)
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	Collection&lt;Long&gt; findAllWithChild(@Param(<span class="jxr_string">"child_pid"</span>) Long theConceptPid);
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  	
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  }
 </pre>
