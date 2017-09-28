@@ -336,6 +336,19 @@ public class FhirInstanceValidatorDstu3Test {
 		assertTrue(output.isSuccessful());
 	}
 
+	/**
+	 * See #739
+	 */
+	@Test
+	public void testValidateMedicationIngredient() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bug739.json"), Charsets.UTF_8);
+
+		ValidationResult results = myVal.validateWithResult(input);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome.toString(), containsString("Element 'Medication.ingredient.item[x]': minimum required = 1"));
+
+	}
+
 	@Test
 	public void testValidateQuestionnaireResponse() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/qr_jon.xml"));
