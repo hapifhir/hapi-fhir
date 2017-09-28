@@ -75,19 +75,125 @@
 				GitHub's releases section.
 			</p>
 			<p>
-				This release brings number of bugfixes and improvements. Most importantly
-				for many users, this release brings a significant performance enhacement
-				to the JPA server for searches. Essentially our search module has been
-				rewritten to stream results back to the client as soon as they
-				become available, and to reuse previous cached search results for a period of time.
-				This cacheing behaviour in the JPA server is important to consider,
-				since it does mean that	your clients can see stale search results for
-				a short period of time under some circumstances. The default cache period
-				is 1 minute, but this can be changed or even disabled through configuration.
+				This is a massive release, and includes a huge number of enhancements,
+				fixes, and new features. Unfotunately it also brings a few breaking API changes
+				so we are calling it version 3.0.0 (we are also moving to SemVer versioning).
 			</p>
 			<p>
 				As always, the <a href="./changes-report.html">changelog</a> has the full list
-				of changes in this release. Thanks to everyone who contributed to this release, either
+				of changes in this release. I am outlining a few of the important ones here:
+			</p>
+			<p><b>FHIR R4 and DSTU1 Support</b></p>
+			<p>
+				Support for FHIR R4 (current working draft) has been <b>added</b>
+				(in a new module called <code>hapi-fhir-structures-r4</code>)
+				and
+				support for FHIR DSTU1 (<code>hapi-fhir-structures-dstu</code>)
+				has been <b>removed</b>. Removing support for the legacy
+				DSTU1 FHIR version was a difficult decision, but it allows us the
+				opportunitity to clean up the codebase quite a bit, and remove some
+				confusing legacy parts of the API (such as the legacy Atom Bundle class).
+				<br/><br/>
+				A new redesigned table of HAPI FHIR versions to FHIR version support has been
+				added to the <a href="http://hapifhir.io/download.html">Download Page</a>
+			</p>
+			<p><b>Module Restructuring</b></p>
+			<p>
+				HAPI FHIR's modules have been restructured for more consistency and less coupling
+				between unrelated parts of the API.
+				<br/><br/>
+				A new complete list of HAPI FHIR modules has been added to the
+				<a href="http://hapifhir.io/download.html">Download Page</a>. Key changes
+				include:
+
+				<ul>
+					<li>
+						HAPI FHIR's <b>client</b> codebase has been moved out of <code>hapi-fhir-base</code>
+						and in to a new module called <code>hapi-fhir-client</code>. Client users now need
+						to explicitly add this JAR to their project (and non-client users now no longer
+						need to depend on it)
+					</li>
+					<li>
+						HAPI FHIR's <b>server</b> codebase has been moved out of <code>hapi-fhir-base</code>
+						and in to a new module called <code>hapi-fhir-server</code>. Server users now need
+						to explicitly add this JAR to their project (and non-server users now no longer
+						need to depend on it)
+					</li>
+					<li>
+						As a result of the client and server changes above, we no longer need to produce
+						a special Android JAR which contains the client, server (which added space but was
+						not used) and structures. There is now a normal module called <code>hapi-fhir-android</code>
+						which is added to your Android Gradle file along with whatever structures JARs you
+						wish to add. See the
+						<a href="https://github.com/hapifhir/hapi-fhir-android-integration-test">Android Integration Test</a>
+						to see a sample project using HAPI FHIR 3.0.0. <b>Note that this has been reported to
+						work by some people but others are having issues with it!</b> In order to avoid delaying
+						this release any further we are releasing now despite these issues. If you are an Android
+						guru and want to help iron things out please get in touch. If not, it might be a good
+						idea to stay on HAPI FHIR 2.5 until the next point release of the 3.x series.
+					</li>
+					<li>
+						A new JAR containing FHIR utilities called <code>hapi-fhir-utilities</code> has been
+						added. This JAR reflects the ongoing harmonization between HAPI FHIR and the FHIR
+						RI codebases and is generally required in order to use HAPI at this point (if you
+						are using a dependency manager such as Maven or Gradle it will be brought in to your
+						project automatically as a dependency)
+					</li>
+				</ul>
+
+			</p>
+			<p><b>Package Changes</b></p>
+			<p>
+				In order to allow the reoganizations and decoupling above to happen, a number of important classes
+				and interfaces have been moved to new packages. A sample list of these changes is listed
+				below. When upgrading to 3.0.0 your project may well show a number of compile errors
+				related to missing classes. In most cases this can be resolved by simply removing the HAPI
+				imports from your classes and asking your IDE to "Organize Imports" once again. This is an
+				annoying change we do realize, but it is neccesary in order to allow the project to
+				continue to grow.
+
+				<ul>
+					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
+				</ul>
+
+			</p>
+			<p><b>Fluent Client Search Change</b></p>
+			<p>
+				Because the Atom-based DSTU1 Bundle class has been removed from the library, users of the
+				HAPI FHIR client must now always include a Bundle return type in search calls. For example,
+				the following call would have worked previously:
+
+				<pre>
+Bundle bundle = client.search().forResource(Patient.class)
+	.where(new TokenClientParam("gender").exactly().code("unknown"))
+   .prettyPrint()
+   .execute();
+				</pre>
+
+				This now needs an explicit returnBundle statement, as follows:
+
+				<pre>
+Bundle bundle = client.search().forResource(Patient.class)
+	.where(new TokenClientParam("gender").exactly().code("unknown"))
+   .prettyPrint()
+   .returnBundle(Bundle.class)
+   .execute();
+				</pre>
+
+			</p>
+
+
+			<p>
+				Thanks to everyone who contributed to this release, either
 				by submitting pull requests, suggesting new features, or filing bug requests!
 			</p>
 			<p>

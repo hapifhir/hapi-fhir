@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/changes/1.0.0"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 ./changes.xsd">
 	<properties>
 		<author>James Agnew</author>
@@ -16,14 +16,14 @@
 				DSTU1 FHIR version was a difficult decision, but it allows us the
 				opportunitity to clean up the codebase quite a bit, and remove some
 				confusing legacy parts of the API (such as the legacy Atom Bundle class).
-				<![CDATA[<br/><br/>>]]>
+				<![CDATA[<br/><br/>]]>
 				A new redesigned table of HAPI FHIR versions to FHIR version support has been
 				added to the <![CDATA[<a href="http://hapifhir.io/download.html">Download Page</a>]]>
 			</action>
 			<action type="add">
 				HAPI FHIR's modules have been restructured for more consistency and less coupling
 				between unrelated parts of the API.
-				<![CDATA[<br/><br/>>]]>
+				<![CDATA[<br/><br/>]]>
 				A new complete list of HAPI FHIR modules has been added to the
 				<![CDATA[<a href="http://hapifhir.io/download.html">Download Page</a>]]>. Key changes
 				include:
@@ -46,7 +46,13 @@
 						a special Android JAR which contains the client, server (which added space but was
 						not used) and structures. There is now a normal module called <code>hapi-fhir-android</code>
 						which is added to your Android Gradle file along with whatever structures JARs you
-						wish to add.
+						wish to add. See the
+						<a href="https://github.com/hapifhir/hapi-fhir-android-integration-test">Android Integration Test</a>
+						to see a sample project using HAPI FHIR 3.0.0. <b>Note that this has been reported to
+						work by some people but others are having issues with it!</b> In order to avoid delaying
+						this release any further we are releasing now despite these issues. If you are an Android
+						guru and want to help iron things out please get in touch. If not, it might be a good
+						idea to stay on HAPI FHIR 2.5 until the next point release of the 3.x series.
 					</li>
 					<li>
 						A new JAR containing FHIR utilities called <code>hapi-fhir-utilities</code> has been
@@ -59,9 +65,17 @@
 				]]>
 			</action>
 			<action type="add">
-				A number of
+				In order to allow the reoganizations and decoupling above to happen, a number of important classes
+				and interfaces have been moved to new packages. A sample list of these changes is listed
+				below. When upgrading to 3.0.0 your project may well show a number of compile errors
+				related to missing classes. In most cases this can be resolved by simply removing the HAPI
+				imports from your classes and asking your IDE to "Organize Imports" once again. This is an
+				annoying change we do realize, but it is neccesary in order to allow the project to
+				continue to grow.
 				<![CDATA[
 				<ul>
+					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
 					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
 					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
 					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
@@ -69,14 +83,35 @@
 					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
 					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
 					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
-					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
-					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
 					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
 				</ul>
 				]]>
 			</action>
 			<action type="add">
-				Bump the version of a few dependencies to the
+				Because the Atom-based DSTU1 Bundle class has been removed from the library, users of the
+				HAPI FHIR client must now always include a Bundle return type in search calls. For example,
+				the following call would have worked previously:
+				<![CDATA[
+				<pre>
+Bundle bundle = client.search().forResource(Patient.class)
+	.where(new TokenClientParam("gender").exactly().code("unknown"))
+   .prettyPrint()
+   .execute();
+				</pre>
+				]]>
+				This now needs an explicit returnBundle statement, as follows:
+				<![CDATA[
+				<pre>
+Bundle bundle = client.search().forResource(Patient.class)
+	.where(new TokenClientParam("gender").exactly().code("unknown"))
+   .prettyPrint()
+   .returnBundle(Bundle.class)
+   .execute();
+				</pre>
+				]]>
+			</action>
+			<action type="add">
+				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>

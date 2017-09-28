@@ -7,13 +7,15 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ExamineTestTrace {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExamineTestTrace.class);
 
 	public static void main(String[] aaa) {
-		String input = "Running ca.uhn.fhir.jpa.config.IdentifierLengthTest\n" +
-			"Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.913 sec - in ca.uhn.fhir.jpa.subscription.r4.RestHookTestWithInterceptorRegisteredToDaoConfigR4Test";
+		String input = "Running ca.uhn.fhir.model.primitive.BaseResourceReferenceDtTest\n" +
+			"Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.896 sec - in ca.uhn.fhir.rest.server.OperationServerWithSearchParamTypesDstu2Test";
 
 		Set<String> started = new HashSet<>();
 		Set<String> finished = new HashSet<>();
@@ -22,6 +24,8 @@ public class ExamineTestTrace {
 				started.add(next.substring("Running ".length()));
 			} else if (next.startsWith("Tests run: ")) {
 				finished.add(next.substring(next.indexOf(" - in ") + " - in ".length()));
+			} else if (isBlank(next)) {
+				continue;
 			} else {
 				throw new IllegalStateException();
 			}
