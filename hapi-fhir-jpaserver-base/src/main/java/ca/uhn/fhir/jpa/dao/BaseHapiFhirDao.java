@@ -1659,63 +1659,63 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 */
 		if (thePerformIndexing) {
 
-			for (ResourceIndexedSearchParamString next : existingStringParams) {
+			for (ResourceIndexedSearchParamString next : removeCommon(existingStringParams, stringParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamString next : stringParams) {
+			for (ResourceIndexedSearchParamString next : removeCommon(stringParams, existingStringParams)) {
 				myEntityManager.persist(next);
 			}
 
-			for (ResourceIndexedSearchParamToken next : existingTokenParams) {
+			for (ResourceIndexedSearchParamToken next : removeCommon(existingTokenParams, tokenParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamToken next : tokenParams) {
+			for (ResourceIndexedSearchParamToken next : removeCommon(tokenParams, existingTokenParams)) {
 				myEntityManager.persist(next);
 			}
 
-			for (ResourceIndexedSearchParamNumber next : existingNumberParams) {
+			for (ResourceIndexedSearchParamNumber next : removeCommon(existingNumberParams, numberParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamNumber next : numberParams) {
+			for (ResourceIndexedSearchParamNumber next : removeCommon(numberParams, existingNumberParams)) {
 				myEntityManager.persist(next);
 			}
 
-			for (ResourceIndexedSearchParamQuantity next : existingQuantityParams) {
+			for (ResourceIndexedSearchParamQuantity next : removeCommon(existingQuantityParams, quantityParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamQuantity next : quantityParams) {
+			for (ResourceIndexedSearchParamQuantity next : removeCommon(quantityParams, existingQuantityParams)) {
 				myEntityManager.persist(next);
 			}
 
 			// Store date SP's
-			for (ResourceIndexedSearchParamDate next : existingDateParams) {
+			for (ResourceIndexedSearchParamDate next : removeCommon(existingDateParams, dateParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamDate next : dateParams) {
+			for (ResourceIndexedSearchParamDate next : removeCommon(dateParams, existingDateParams)) {
 				myEntityManager.persist(next);
 			}
 
 			// Store URI SP's
-			for (ResourceIndexedSearchParamUri next : existingUriParams) {
+			for (ResourceIndexedSearchParamUri next : removeCommon(existingUriParams, uriParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamUri next : uriParams) {
+			for (ResourceIndexedSearchParamUri next : removeCommon(uriParams, existingUriParams)) {
 				myEntityManager.persist(next);
 			}
 
 			// Store Coords SP's
-			for (ResourceIndexedSearchParamCoords next : existingCoordsParams) {
+			for (ResourceIndexedSearchParamCoords next : removeCommon(existingCoordsParams, coordsParams)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceIndexedSearchParamCoords next : coordsParams) {
+			for (ResourceIndexedSearchParamCoords next : removeCommon(coordsParams, existingCoordsParams)) {
 				myEntityManager.persist(next);
 			}
 
 			// Store resource links
-			for (ResourceLink next : existingResourceLinks) {
+			for (ResourceLink next : removeCommon(existingResourceLinks, links)) {
 				myEntityManager.remove(next);
 			}
-			for (ResourceLink next : links) {
+			for (ResourceLink next : removeCommon(links, existingResourceLinks)) {
 				myEntityManager.persist(next);
 			}
 			// make sure links are indexed
@@ -1752,6 +1752,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		return theEntity;
 	}
+
+	private <T> Collection<T> removeCommon(Collection<T> theInput, Collection<T> theToRemove) {
+		assert theInput != theToRemove;
+
+		if (theInput.isEmpty()) {
+			return theInput;
+		}
+
+		ArrayList<T> retVal = new ArrayList<>(theInput);
+		retVal.removeAll(theToRemove);
+		return retVal;
+	}
+
 
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
 		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);

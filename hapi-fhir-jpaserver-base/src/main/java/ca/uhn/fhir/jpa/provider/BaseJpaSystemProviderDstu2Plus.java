@@ -34,7 +34,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name="status")
 	})
 	public IBaseResource markAllResourcesForReindexing() {
-		int count = getDao().markAllResourcesForReindexing();
+		Integer count = getDao().markAllResourcesForReindexing();
 		
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 		
@@ -48,11 +48,16 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name="status")
 	})
 	public IBaseResource performReindexingPass() {
-		int count = getDao().performReindexingPass(1000);
+		Integer count = getDao().performReindexingPass(1000);
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
-		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
+		IPrimitiveType<?> string;
+		if (count == null) {
+			string = ParametersUtil.createString(getContext(), "Index pass already proceeding");
+		} else {
+			string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
+		}
 		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
 
 		return retVal;

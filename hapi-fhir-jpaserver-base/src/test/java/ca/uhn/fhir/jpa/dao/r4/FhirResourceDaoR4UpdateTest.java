@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.*;
 
+import net.ttddyy.dsproxy.QueryCountHolder;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,19 +29,10 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UpdateTest.class);
 
-	@Test
-	public void testReCreateMatchResource() {
-
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
-
-		myCodeSystemDao.delete(id);
-
-		codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
-
+	@After
+	public void afterResetDao() {
+		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Test
@@ -112,59 +104,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
-	@After
-	public void afterResetDao() {
-		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
-	}
-	
-	@Test
-	public void testHardMetaCapIsEnforcedOnCreate() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
-
-		IIdType id;
-		{
-			Patient patient = new Patient();
-			patient.getMeta().addTag().setSystem("http://foo").setCode("1");
-			patient.getMeta().addTag().setSystem("http://foo").setCode("2");
-			patient.getMeta().addTag().setSystem("http://foo").setCode("3");
-			patient.getMeta().addTag().setSystem("http://foo").setCode("4");
-			patient.setActive(true);
-			try {
-				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-				fail();
-			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
-			}
-		}
-	}
-	
-	@Test
-	public void testHardMetaCapIsEnforcedOnMetaAdd() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
-
-		IIdType id;
-		{
-			Patient patient = new Patient();
-			patient.setActive(true);
-			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		
-		{
-			Meta meta = new Meta();
-			meta.addTag().setSystem("http://foo").setCode("1");
-			meta.addTag().setSystem("http://foo").setCode("2");
-			meta.addTag().setSystem("http://foo").setCode("3");
-			meta.addTag().setSystem("http://foo").setCode("4");
-			try {
-				myPatientDao.metaAddOperation(id, meta, null);
-				fail();
-			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
-			}
-
-		}
-	}
-	
 	@Test
 	public void testDuplicateTagsOnAddTagsIgnored() {
 		IIdType id;
@@ -179,7 +118,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
 		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
 		myPatientDao.metaAddOperation(id, meta, null);
-		
+
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
@@ -190,7 +129,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 
 	}
-
+	
 	@Test
 	public void testDuplicateTagsOnUpdateIgnored() {
 		IIdType id;
@@ -209,7 +148,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
 			myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		// Do a read on second version
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
@@ -243,6 +182,54 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testHardMetaCapIsEnforcedOnCreate() {
+		myDaoConfig.setResourceMetaCountHardLimit(3);
+
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setSystem("http://foo").setCode("1");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("2");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("3");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("4");
+			patient.setActive(true);
+			try {
+				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+				fail();
+			} catch (UnprocessableEntityException e) {
+				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void testHardMetaCapIsEnforcedOnMetaAdd() {
+		myDaoConfig.setResourceMetaCountHardLimit(3);
+
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			Meta meta = new Meta();
+			meta.addTag().setSystem("http://foo").setCode("1");
+			meta.addTag().setSystem("http://foo").setCode("2");
+			meta.addTag().setSystem("http://foo").setCode("3");
+			meta.addTag().setSystem("http://foo").setCode("4");
+			try {
+				myPatientDao.metaAddOperation(id, meta, null);
+				fail();
+			} catch (UnprocessableEntityException e) {
+				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+			}
+
+		}
+	}
+	
 	@Test
 	public void testMultipleUpdatesWithNoChangesDoesNotResultInAnUpdateForDiscreteUpdates() {
 
@@ -288,6 +275,21 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
 		assertThat(id, endsWith("Patient/A/_history/2"));
+
+	}
+
+	@Test
+	public void testReCreateMatchResource() {
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
+
+		myCodeSystemDao.delete(id);
+
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
 
 	}
 
@@ -660,6 +662,31 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			ourLog.error("Good", e);
 		}
 
+	}
+
+	@Test
+	public void testUpdateReusesIndexes() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		QueryCountHolder.clear();
+
+		Patient pt = new Patient();
+		pt.setActive(true);
+		pt.addName().setFamily("FAMILY1").addGiven("GIVEN1A").addGiven("GIVEN1B");
+		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
+		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
+		QueryCountHolder.clear();
+
+		pt.setId(id);
+		pt.getNameFirstRep().addGiven("GIVEN1C");
+		myPatientDao.update(pt);
+
+		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
+		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
+		assertEquals(0, QueryCountHolder.getGrandTotal().getDelete());
+		assertEquals(4, QueryCountHolder.getGrandTotal().getInsert());
 	}
 
 	@Test

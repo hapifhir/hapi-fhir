@@ -6,6 +6,13 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.1.0" date="TBD">
+			<action type="add">
+				A performance to the JPA server has been made which reduces the number
+				of changes to index tables when updating a resource with contents that
+				only make minor changes
+			</action>
+		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
 				Support for FHIR R4 (current working draft) has been <![CDATA[<b>added</b>]]>
