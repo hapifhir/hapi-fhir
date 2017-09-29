@@ -65,7 +65,7 @@ public class StopWatch {
 	}
 
 	/**
-	 * Formats value in the format hh:mm:ss.SSSS
+	 * Formats value in the format [DD d ]HH:mm:ss.SSSS
 	 */
 	@Override
 	public String toString() {
@@ -75,8 +75,14 @@ public class StopWatch {
 	static public String formatMillis(long val) {
 		StringBuilder buf = new StringBuilder(20);
 		if (val >= DateUtils.MILLIS_PER_DAY) {
-			append(buf, "", 1, ((val / DateUtils.MILLIS_PER_DAY)));
-			append(buf, "d", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+			long days = val / DateUtils.MILLIS_PER_DAY;
+			append(buf, "", 1, days);
+			if (days > 1) {
+				buf.append(" days ");
+			} else if (days == 1) {
+				buf.append(" day ");
+			}
+			append(buf, "", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
 		} else {
 			append(buf, "", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
 		}

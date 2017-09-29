@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
+import ca.uhn.fhir.jpa.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -52,6 +53,8 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		Thread.sleep(10);
 
+		final StopWatch sw = new StopWatch();
+
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
@@ -65,7 +68,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				assertNotNull("Failed after " + sw.toString(), mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
 			}
 		});
 

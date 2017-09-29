@@ -53,9 +53,9 @@ public class StopWatchTest {
 		assertEquals("00:00:01.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
 		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("01:00:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR));
-		assertEquals("1d00:00:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY));
-		assertEquals("2d00:00:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY*2));
-		assertEquals("2d00:00:00.001", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY*2)+1));
+		assertEquals("1 day 00:00:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY));
+		assertEquals("2 days 00:00:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY*2));
+		assertEquals("2 days 00:00:00.001", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY*2)+1));
 	}
 
 }
