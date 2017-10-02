@@ -12,6 +12,21 @@
 				of changes to index tables when updating a resource with contents that
 				only make minor changes
 			</action>
+			<action type="fix">
+				In FHIR DSTU3 the
+				<![CDATA[<code>ValueSet/$expand?identifier=foo</code>]]>
+				and
+				<![CDATA[<code>ValueSet/$validate-code?identifier=foo</code>]]>
+				parameters were changed to
+				<![CDATA[<code>ValueSet/$expand?url=foo</code>]]>
+				and
+				<![CDATA[<code>ValueSet/$validate-code?url=foo</code>]]>
+				respectively, but the JPA server had not caught up. The
+				JPA DSTU3 server has been adjusted to accept either "identifier"
+				or "url" (with "url" taking precedence), and the JPA R4 server
+				has been changed to only accept "url".
+				Thanks to Avinash Shanbhag for reporting!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

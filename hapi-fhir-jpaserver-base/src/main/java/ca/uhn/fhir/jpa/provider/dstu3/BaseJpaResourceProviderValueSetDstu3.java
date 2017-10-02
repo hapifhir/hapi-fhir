@@ -20,35 +20,42 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hl7.fhir.dstu3.model.*;
-
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDstu3<ValueSet> {
 
-	//@formatter:off
 	@Operation(name = "$expand", idempotent = true)
 	public ValueSet expand(
-			HttpServletRequest theServletRequest,
-			@IdParam(optional=true) IdType theId,
-			@OperationParam(name="valueSet", min=0, max=1) ValueSet theValueSet,
-			@OperationParam(name="identifier", min=0, max=1) UriType theIdentifier,
-			@OperationParam(name = "filter", min=0, max=1) StringType theFilter, 
-			RequestDetails theRequestDetails) {
-		//@formatter:on
-		
+		HttpServletRequest theServletRequest,
+		@IdParam(optional = true) IdType theId,
+		@OperationParam(name = "valueSet", min = 0, max = 1) ValueSet theValueSet,
+		// Note: url is correct and identifier is not, but identifier was only added as
+		// of 3.1.0 so we'll leave url for now. See: https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
+		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
+		@OperationParam(name = "identifier", min = 0, max = 1) UriType theIdentifier,
+		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
+		RequestDetails theRequestDetails) {
+
 		boolean haveId = theId != null && theId.hasIdPart();
-		boolean haveIdentifier = theIdentifier != null && isNotBlank(theIdentifier.getValue());
+		UriType url = theIdentifier;
+		if (theUrl != null && isNotBlank(theUrl.getValue())) {
+			url = theUrl;
+		}
+
+		boolean haveIdentifier = url != null && isNotBlank(url.getValue());
 		boolean haveValueSet = theValueSet != null && theValueSet.isEmpty() == false;
-		
+
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
 		}
@@ -56,18 +63,18 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
-		
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			if (haveId) {
 				return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 			} else if (haveIdentifier) {
-				return dao.expandByIdentifier(theIdentifier.getValue(), toFilterString(theFilter));
+				return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
 			} else {
 				return dao.expand(theValueSet, toFilterString(theFilter));
 			}
-			
+
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -79,30 +86,34 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 	}
 
 
-	//@formatter:off
 	@SuppressWarnings("unchecked")
-	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
-		@OperationParam(name="result", type=BooleanType.class, min=1),
-		@OperationParam(name="message", type=StringType.class),
-		@OperationParam(name="display", type=StringType.class)
+	@Operation(name = "$validate-code", idempotent = true, returnParameters = {
+		@OperationParam(name = "result", type = BooleanType.class, min = 1),
+		@OperationParam(name = "message", type = StringType.class),
+		@OperationParam(name = "display", type = StringType.class)
 	})
 	public Parameters validateCode(
-			HttpServletRequest theServletRequest,
-			@IdParam(optional=true) IdType theId, 
-			@OperationParam(name="identifier", min=0, max=1) UriType theValueSetIdentifier, 
-			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
-			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="display", min=0, max=1) StringType theDisplay,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
-			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConcept theCodeableConcept, 
-			RequestDetails theRequestDetails
-			) {
-		//@formatter:on
-		
+		HttpServletRequest theServletRequest,
+		@IdParam(optional = true) IdType theId,
+		@OperationParam(name = "identifier", min = 0, max = 1) UriType theValueSetIdentifier,
+		@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
+		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
+		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theCodeableConcept,
+		RequestDetails theRequestDetails
+	) {
+
+		UriType url = theValueSetIdentifier;
+		if (theValueSetUrl != null && isNotBlank(theValueSetUrl.getValue())) {
+			url = theValueSetUrl;
+		}
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			ValidateCodeResult result = dao.validateCode(url, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("result").setValue(new BooleanType(result.isResult()));
 			if (isNotBlank(result.getMessage())) {
@@ -117,8 +128,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		}
 	}
 
-	
-	
+
 	private static boolean moreThanOneTrue(boolean... theBooleans) {
 		boolean haveOne = false;
 		for (boolean next : theBooleans) {
@@ -133,5 +143,5 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		return false;
 	}
 
-	
+
 }
