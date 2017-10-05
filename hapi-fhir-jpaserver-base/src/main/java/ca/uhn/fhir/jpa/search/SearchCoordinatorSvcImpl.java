@@ -24,6 +24,8 @@ import java.util.concurrent.*;
 
 import javax.persistence.EntityManager;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -55,7 +57,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
-
+	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<String, SearchTask>();
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -63,7 +65,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private EntityManager myEntityManager;
 	private ExecutorService myExecutor;
-	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<String, SearchTask>();
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
@@ -179,7 +180,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public IBundleProvider registerSearch(final IDao theCallingDao, final SearchParameterMap theParams, String theResourceType) {
+	public IBundleProvider registerSearch(final IDao theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective) {
 		StopWatch w = new StopWatch();
 		final String searchUuid = UUID.randomUUID().toString();
 
@@ -187,7 +188,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
 
-		if (theParams.isLoadSynchronous()) {
+		final Integer loadSynchronousUpTo;
+		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
+			if (theCacheControlDirective.getMaxResults() != null) {
+				loadSynchronousUpTo = theCacheControlDirective.getMaxResults();
+				if (loadSynchronousUpTo > myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit()) {
+					throw new InvalidRequestException(Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
+				}
+			} else {
+				loadSynchronousUpTo = 100;
+			}
+		} else {
+			loadSynchronousUpTo = null;
+		}
+
+		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -202,6 +217,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
 					while (resultIter.hasNext()) {
 						pids.add(resultIter.next());
+						if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
+							break;
+						}
 						if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
 							break;
 						}
@@ -231,9 +249,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * See if there are any cached searches whose results we can return
 		 * instead
 		 */
+		boolean useCache = true;
+		if (theCacheControlDirective != null && theCacheControlDirective.isNoCache() == true) {
+			useCache = false;
+		}
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		if (theParams.getEverythingMode() == null) {
-			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
+			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null && useCache) {
 
 				final Date createdCutoff = new Date(System.currentTimeMillis() - myDaoConfig.getReuseCachedSearchResultsForMillis());
 				final String resourceType = theResourceType;
@@ -394,16 +416,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	public class SearchTask implements Callable<Void> {
 
-		private boolean myAbortRequested;
 		private final IDao myCallingDao;
 		private final CountDownLatch myCompletionLatch;
-		private int myCountSaved = 0;
 		private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
 		private final SearchParameterMap myParams;
 		private final String myResourceType;
 		private final Search mySearch;
 		private final ArrayList<Long> mySyncedPids = new ArrayList<Long>();
 		private final ArrayList<Long> myUnsyncedPids = new ArrayList<Long>();
+		private boolean myAbortRequested;
+		private int myCountSaved = 0;
 		private String mySearchUuid;
 
 		public SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, String theSearchUuid) {

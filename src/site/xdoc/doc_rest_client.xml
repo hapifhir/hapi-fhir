@@ -534,6 +534,34 @@
 			
 		</section>
 
+		<section name="Additional Properties">
+
+			<p>
+				This section contains ways of customizing the request sent by the client
+			</p>
+
+			<subsection name="Cache-Control">
+
+				<p>
+					The <code>Cache-Control</code> header can be used by the client in a request
+					to signal to the server (or any cache in front of it) that the client wants specific
+					behaviour from the cache, or wants the cache to not act on the request altogether.
+					Naturally, not all servers will honour this header.
+				</p>
+
+				<p>
+					To add a cache control directive in a request:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="cacheControl" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+
+			</subsection>
+
+		</section>
+
 	</body>
 
 </document>

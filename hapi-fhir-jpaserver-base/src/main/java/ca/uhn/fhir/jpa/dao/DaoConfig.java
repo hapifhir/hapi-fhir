@@ -107,6 +107,7 @@ public class DaoConfig {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
+	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 
 	/**
 	 * Constructor
@@ -129,6 +130,26 @@ public class DaoConfig {
 			myTreatReferencesAsLogical = new HashSet<String>();
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
+	}
+
+	/**
+	 * Specifies the highest number that a client is permitted to use in a
+	 * <code>Cache-Control: nostore, max-results=NNN</code>
+	 * directive. If the client tries to exceed this limit, the
+	 * request will be denied. Defaults to 1000.
+	 */
+	public Integer getCacheControlNoStoreMaxResultsUpperLimit() {
+		return myCacheControlNoStoreMaxResultsUpperLimit;
+	}
+
+	/**
+	 * Specifies the highest number that a client is permitted to use in a
+	 * <code>Cache-Control: nostore, max-results=NNN</code>
+	 * directive. If the client tries to exceed this limit, the
+	 * request will be denied. Defaults to 1000.
+	 */
+	public void setCacheControlNoStoreMaxResultsUpperLimit(Integer theCacheControlNoStoreMaxResults) {
+		myCacheControlNoStoreMaxResultsUpperLimit = theCacheControlNoStoreMaxResults;
 	}
 
 	/**
@@ -336,8 +357,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
@@ -434,6 +458,11 @@ public class DaoConfig {
 	 * This approach can improve performance, especially under heavy load, but can also mean that
 	 * searches may potentially return slightly out-of-date results.
 	 * </p>
+	 * <p>
+	 * Note that if this is set to a non-null value, clients may override this setting by using
+	 * the <code>Cache-Control</code> header. If this is set to <code>null</code>, the Cache-Control
+	 * header will be ignored.
+	 * </p>
 	 */
 	public Long getReuseCachedSearchResultsForMillis() {
 		return myReuseCachedSearchResultsForMillis;
@@ -448,6 +477,11 @@ public class DaoConfig {
 	 * <p>
 	 * This approach can improve performance, especially under heavy load, but can also mean that
 	 * searches may potentially return slightly out-of-date results.
+	 * </p>
+	 * <p>
+	 * Note that if this is set to a non-null value, clients may override this setting by using
+	 * the <code>Cache-Control</code> header. If this is set to <code>null</code>, the Cache-Control
+	 * header will be ignored.
 	 * </p>
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
@@ -925,11 +959,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**

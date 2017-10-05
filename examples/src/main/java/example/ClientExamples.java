@@ -1,5 +1,6 @@
 package example;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import org.hl7.fhir.dstu3.model.Bundle;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.*;
+import org.hl7.fhir.r4.model.Patient;
 
 public class ClientExamples {
 
@@ -51,6 +53,26 @@ public class ClientExamples {
             .execute();
       // END SNIPPET: processMessage
    }
+
+	@SuppressWarnings("unused")
+	public void cacheControl() {
+		FhirContext ctx = FhirContext.forDstu3();
+
+		// Create the client
+		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+
+		Bundle bundle = new Bundle();
+		// ..populate the bundle..
+
+		// START SNIPPET: cacheControl
+		Bundle response = client
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoCache(true)) // <-- add a directive
+			.execute();
+		// END SNIPPET: cacheControl
+	}
 
    @SuppressWarnings("unused")
    public void createOkHttp() {

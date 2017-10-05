@@ -198,15 +198,72 @@ public DaoConfig daoConfig() {
 					(see <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html#setTreatReferencesAsLogical-java.util.Set-">JavaDoc</a>).
 					For example:
 				</p>
-				<code>
+				<div class="source">
+				<pre>
 					// Treat specific URL as logical
 					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
 					
 					// Treat all references with given prefix as logical
 					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
-				</code>
+				</pre>
+				</div>
+				<a name="search_result caching"/>
 			</subsection>
-			
+
+			<subsection name="Search Result Caching">
+
+				<p>
+					By default, search results will be cached for one minute. This means that
+					if a client performs a search for <code>Patient?name=smith</code> and gets back
+					500 results, if a client performs the same search within 60000 milliseconds the
+					previously loaded search results will be returned again. This also means that
+					any new Patient resources named "Smith" within the last minute will not be
+					reflected in the results.
+				</p>
+				<p>
+					Under many normal scenarios this is a n acceptable performance tradeoff,
+					but in some cases it is not. If you want to disable caching, you have two
+					options:
+				</p>
+				<p><b>Globally Disable / Change Caching Timeout</b></p>
+				<p>
+					You can change the global cache using the following setting:
+				</p>
+				<div class="source">
+				<pre>
+					myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+				</pre>
+				</div>
+				<p><b>Disable Cache at the Request Level</b></p>
+				<p>
+					Clients can selectively disable caching for an individual request
+					using the Cache-Control header:
+				</p>
+				<div class="source">
+				<pre>
+					Cache-Control: nocache
+				</pre>
+				</div>
+				<p><b>Disable Paging at the Request Level</b></p>
+				<p>
+					If the client knows that they will only want a small number of results
+					(for example, a UI containing 20 results is being shown and the client
+					knows that they will never load the next page of results) the client
+					may also use the <code>nostore</code> directive along with a HAPI FHIR
+					extension called <code>max-results</code> in order to specify that
+					only the given number of results should be fetched. This directive
+					disabled paging entirely for the request and causes the request to
+					return immediately when the given number of results is found. This
+					can cause a noticeable performance improvement in some cases.
+				</p>
+				<div class="source">
+					<pre>
+						Cache-Control: nostore, max-results=20
+					</pre>
+				</div>
+
+			</subsection>
+
 		</section>
 		
 		<section name="Architecture">
@@ -263,7 +320,7 @@ public DaoConfig daoConfig() {
 			</ul>
 			
 		</section>
-		
+
 		<section name="Additional Information">
 		
 			<ul>
