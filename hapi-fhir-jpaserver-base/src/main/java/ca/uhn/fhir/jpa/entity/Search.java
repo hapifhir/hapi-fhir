@@ -50,6 +50,7 @@ public class Search implements Serializable {
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 
 	private static final long serialVersionUID = 1L;
+	public static final int MAX_SEARCH_QUERY_STRING = 10000;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="CREATED", nullable=false, updatable=false)
@@ -100,8 +101,8 @@ public class Search implements Serializable {
 	private Date mySearchLastReturned;
 
 	@Lob()
-	@Basic(fetch=FetchType.LAZY)	
-	@Column(name="SEARCH_QUERY_STRING", nullable=true, updatable=false)
+	@Basic(fetch=FetchType.LAZY)
+	@Column(name="SEARCH_QUERY_STRING", nullable=true, updatable=false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
 
 	@Column(name="SEARCH_QUERY_STRING_HASH", nullable=true, updatable=false)
@@ -256,7 +257,11 @@ public class Search implements Serializable {
 	}
 
 	public void setSearchQueryString(String theSearchQueryString) {
-		mySearchQueryString = theSearchQueryString;
+		if (theSearchQueryString != null && theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
+			mySearchQueryString = null;
+		} else {
+			mySearchQueryString = theSearchQueryString;
+		}
 	}
 
 	public void setSearchQueryStringHash(Integer theSearchQueryStringHash) {

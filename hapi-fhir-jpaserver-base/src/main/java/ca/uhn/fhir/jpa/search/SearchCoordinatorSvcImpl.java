@@ -78,13 +78,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
-	// @Autowired
-	// private DataSource myDataSource;
-	// @PostConstruct
-	// public void start() {
-	// JpaTransactionManager txManager = (JpaTransactionManager) myManagedTxManager;
-	// }
-
 	/**
 	 * Constructor
 	 */

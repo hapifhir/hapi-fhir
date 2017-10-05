@@ -27,6 +27,11 @@
 				has been changed to only accept "url".
 				Thanks to Avinash Shanbhag for reporting!
 			</action>
+			<action type="fix" issue="744">
+				Fix an error in JPA server when using Derby Database, where search queries with
+				a search URL longer than 255 characters caused a mysterious failure. Thanks to
+				Chris Schuler and Bryn Rhodes for all of their help in reproducing this issue.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

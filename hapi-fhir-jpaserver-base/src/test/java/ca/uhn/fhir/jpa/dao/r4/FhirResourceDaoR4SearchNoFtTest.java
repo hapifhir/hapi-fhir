@@ -44,9 +44,90 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
 	@Before
-	public void beforeDisableResultReuse() {
+	public void beforeDidsableCacheReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	@After
+	public void afterResetSearchSize() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
+	}
+
+	/**
+	 * See #744
+	 */
+	@Test
+	public void testSearchWithVeryLongUrlShorter() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+
+		Patient p = new Patient();
+		p.addName().setFamily("A1");
+		myPatientDao.create(p);
+
+		assertEquals(0, mySearchEntityDao.count());
+
+		SearchParameterMap map = new SearchParameterMap();
+		StringOrListParam or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		map.add(Patient.SP_NAME, or);
+		IBundleProvider results = myPatientDao.search(map);
+		assertEquals(1, results.getResources(0, 10).size());
+		assertEquals(1, mySearchEntityDao.count());
+
+		map = new SearchParameterMap();
+		or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		map.add(Patient.SP_NAME, or);
+		results = myPatientDao.search(map);
+		assertEquals(1, results.getResources(0, 10).size());
+		assertEquals(1, mySearchEntityDao.count());
+
+	}
+
+	/**
+	 * See #744
+	 */
+	@Test
+	public void testSearchWithVeryLongUrlLonger() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+
+		Patient p = new Patient();
+		p.addName().setFamily("A1");
+		myPatientDao.create(p);
+
+		assertEquals(0, mySearchEntityDao.count());
+
+		SearchParameterMap map = new SearchParameterMap();
+		StringOrListParam or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		for (int i = 0; i < 50; i++) {
+			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char)('A' + i))));
+		}
+		map.add(Patient.SP_NAME, or);
+		IBundleProvider results = myPatientDao.search(map);
+		assertEquals(1, results.getResources(0, 10).size());
+		assertEquals(1, mySearchEntityDao.count());
+
+		map = new SearchParameterMap();
+		or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam("A1"));
+		for (int i = 0; i < 50; i++) {
+			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char)('A' + i))));
+		}
+		map.add(Patient.SP_NAME, or);
+		results = myPatientDao.search(map);
+		assertEquals(1, results.getResources(0, 10).size());
+		// We expect a new one because we don't cache the search URL for very long search URLs
+		assertEquals(2, mySearchEntityDao.count());
+
 	}
 
 	/**
