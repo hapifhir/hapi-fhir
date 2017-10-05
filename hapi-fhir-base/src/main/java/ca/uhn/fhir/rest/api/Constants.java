@@ -25,6 +25,9 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
+	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
+	public static final String CACHE_CONTROL_NO_STORE = "no-store";
 	public static final String CHARSET_NAME_UTF8 = "UTF-8";
 	public static final Charset CHARSET_UTF8;
 	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
@@ -67,6 +70,7 @@ public class Constants {
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
+	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";

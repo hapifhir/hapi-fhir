@@ -27,6 +27,16 @@
 				has been changed to only accept "url".
 				Thanks to Avinash Shanbhag for reporting!
 			</action>
+			<action type="add">
+				JPA server now supports the use of the
+				<![CDATA[<code>Cache-Control</code>]]>
+				header in order to allow the client to selectively disable the
+				search result cache. This directive can also be used to disable result paging
+				and return results faster when only a small number of results is needed.
+				See the
+				<![CDATA[<a href="http://hapifhir.io/doc_jpa.html">JPA Page</a>]]>
+				for more information.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

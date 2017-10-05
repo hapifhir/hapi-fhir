@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -66,7 +67,7 @@ public class FhirResourceDaoPatientR4 extends FhirResourceDaoR4<Patient>implemen
 			paramMap.setLoadSynchronous(true);
 		}
 		
-		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName());
+		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)));
 	}
 
 	@Override
