@@ -17,7 +17,7 @@ import org.hibernate.search.cfg.SearchMapping;
 /**
  * Factory for defining the analysers.
  */
-public class SearchMappingFactory {
+public class LuceneSearchMappingFactory {
 	@Factory
 	public SearchMapping getSearchMapping() {
 		SearchMapping mapping = new SearchMapping();
