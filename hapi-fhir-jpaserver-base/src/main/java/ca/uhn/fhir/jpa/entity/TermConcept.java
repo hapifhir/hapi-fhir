@@ -52,16 +52,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.AnalyzerDef;
-import org.hibernate.search.annotations.AnalyzerDefs;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Fields;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
-import org.hibernate.search.annotations.TokenizerDef;
 
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
@@ -72,12 +68,6 @@ import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
 }, indexes= {
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList="INDEX_STATUS") 
-})
-@AnalyzerDefs({
-	@AnalyzerDef(name = "conceptParentPidsAnalyzer",
-		tokenizer = @TokenizerDef(factory = WhitespaceTokenizerFactory.class),
-		filters = {
-		})
 })
 public class TermConcept implements Serializable {
 	private static final int MAX_DESC_LENGTH = 400;
