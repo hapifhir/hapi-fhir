@@ -93,7 +93,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		int maxThreads = (int) (Math.random() * 6) + 1;
+		int maxThreads = (int) (Math.random() * 6.0) + 1;
 		retVal.setMaxTotal(maxThreads);
 
 		return retVal;
@@ -105,8 +105,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(basicDataSource())
-				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-//				.logSlowQueryBySlf4j(100, TimeUnit.MILLISECONDS)
+//				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
 				.countQuery()
 				.build();
 

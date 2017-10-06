@@ -51,7 +51,9 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	@After
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			IIdType nextId = next.toUnqualifiedVersionless();
+			ourLog.info("Deleting: {}", nextId);
+			ourClient.delete().resourceById(nextId).execute();
 		}
 		mySubscriptionIds.clear();
 
