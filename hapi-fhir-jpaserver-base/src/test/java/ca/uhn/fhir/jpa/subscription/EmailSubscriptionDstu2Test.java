@@ -71,6 +71,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriber.setEmailSender(emailSender);
 		mySubscriber.setResourceDaos(myResourceDaos);
 		mySubscriber.setFhirContext(myFhirCtx);
+		mySubscriber.setTxManager(ourTxManager);
 		mySubscriber.start();
 		ourRestServer.registerInterceptor(mySubscriber);
 

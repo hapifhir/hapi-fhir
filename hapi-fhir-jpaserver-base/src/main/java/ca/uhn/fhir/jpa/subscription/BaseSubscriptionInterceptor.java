@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -373,6 +374,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
 		myResourceDaos = theResourceDaos;
+	}
+
+	@VisibleForTesting
+	public void setTxManager(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
 	}
 
 	@PostConstruct

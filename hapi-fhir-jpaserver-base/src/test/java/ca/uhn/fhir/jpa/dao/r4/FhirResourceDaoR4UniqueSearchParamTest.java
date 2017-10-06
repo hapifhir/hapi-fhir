@@ -303,7 +303,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		String id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getIdPart();
+		String id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
