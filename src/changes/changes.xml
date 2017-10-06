@@ -37,6 +37,13 @@
 				<![CDATA[<a href="http://hapifhir.io/doc_jpa.html">JPA Page</a>]]>
 				for more information.
 			</action>
+			<action type="fix">
+				In certain cases in the JPA server, if multiple threads all attempted to 
+				update the same resource simultaneously, the optimistic lock failure caused
+				a "gap" in the history numbers to occur. This would then cause a mysterious
+				failure when trying to update this resource further. This has been 
+				resolved.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -38,12 +37,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -2499,7 +2495,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 
         /*
-         * Again!
+			* Again!
          */
 
 		bundle = new Bundle();
@@ -2819,91 +2815,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		res = myOrganizationDao.search(map);
 		assertEquals(1, res.size().intValue());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
-
-	}
-
-
-	@Test
-	public void testMultipleConcurrentWritesToSameResource() throws InterruptedException {
-
-		ThreadPoolExecutor exec = new ThreadPoolExecutor(10, 10,
-			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>());
-
-		final AtomicInteger errors = new AtomicInteger();
-
-		List<Future> futures = new ArrayList<>();
-		for (int i = 0; i < 50; i++) {
-			final Patient p = new Patient();
-			p.setId("PID");
-			p.setActive(true);
-			p.setBirthDate(new Date());
-			p.addIdentifier().setSystem("foo1");
-			p.addIdentifier().setSystem("foo2");
-			p.addIdentifier().setSystem("foo3");
-			p.addIdentifier().setSystem("foo4");
-			p.addName().setFamily("FOO" + i);
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB1");
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB2");
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB3");
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB4");
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB5");
-			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB6");
-
-			Organization o = new Organization();
-			o.setName("ORG" + i);
-
-			final Bundle t = new Bundle();
-			t.setType(BundleType.TRANSACTION);
-			t.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient/PID")
-				.setMethod(HTTPVerb.PUT);
-			t.addEntry()
-				.setResource(o)
-				.getRequest()
-				.setUrl("Organization")
-				.setMethod(HTTPVerb.POST);
-
-			if (i == 0) {
-				mySystemDao.transaction(mySrd, t);
-			}
-			futures.add(exec.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						mySystemDao.transaction(mySrd, t);
-					} catch (Exception e) {
-						ourLog.error("Failed to update", e);
-						errors.incrementAndGet();
-					}
-				}
-			}));
-		}
-
-		ourLog.info("Shutting down excutor");
-		StopWatch sw = new StopWatch();
-		for (Future next : futures) {
-			while (!next.isDone()) {
-				Thread.sleep(20);
-			}
-		}
-		exec.shutdown();
-		ourLog.info("Shut down excutor in {}ms", sw.getMillis());
-		ourLog.info("Had {} errors", errors.get());
-
-		Patient currentPatient = myPatientDao.read(new IdType("Patient/PID"));
-		Long currentVersion = currentPatient.getIdElement().getVersionIdPartAsLong();
-		ourLog.info("Current version: {}", currentVersion);
-
-		IBundleProvider historyBundle = myPatientDao.history(new IdType("Patient/PID"),null,null,mySrd);
-		Patient lastPatient = (Patient) historyBundle.getResources(0,1).get(0);
-		Long lastVersion = lastPatient.getIdElement().getVersionIdPartAsLong();
-		ourLog.info("Last version: {}", lastVersion);
-
-		assertEquals(currentVersion, lastVersion);
-
 
 	}
 
