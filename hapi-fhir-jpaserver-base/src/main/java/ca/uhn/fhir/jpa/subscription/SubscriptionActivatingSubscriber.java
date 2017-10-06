@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,22 +55,27 @@ public class SubscriptionActivatingSubscriber {
 		myCtx = theSubscriptionDao.getContext();
 	}
 
-	public void activateAndRegisterSubscriptionIfRequired(IBaseResource theSubscription) {
+	public void activateAndRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(myCtx, theSubscription, myChannelType);
 		if (subscriptionTypeApplies == false) {
 			return;
 		}
 
-		IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		final IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
-		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
-		String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
+		final String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
+		final String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
 		if (requestedStatus.equals(statusString)) {
-			status.setValueAsString(activeStatus);
-			ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
-			mySubscriptionDao.update(theSubscription);
-			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCommit() {
+					status.setValueAsString(activeStatus);
+					ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
+					mySubscriptionDao.update(theSubscription);
+					mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+				}
+			});
 		} else if (activeStatus.equals(statusString)) {
 			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());

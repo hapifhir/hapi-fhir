@@ -1011,14 +1011,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			changed = true;
 		}
 
-		if (theResource instanceof IResource) {
-			String title = ResourceMetadataKeyEnum.TITLE.get((IResource) theResource);
-			if (title != null && title.length() > BaseHasResource.MAX_TITLE_LENGTH) {
-				title = title.substring(0, BaseHasResource.MAX_TITLE_LENGTH);
-			}
-			theEntity.setTitle(title);
-		}
-
 		return changed;
 	}
 
@@ -1051,10 +1043,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
-
-		if (theEntity.getTitle() != null) {
-			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
-		}
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
 		if (theEntity.isHasTags()) {

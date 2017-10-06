@@ -303,7 +303,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		String id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
@@ -316,7 +316,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params);
 		String searchId = results.getUuid();
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
 		assertEquals(SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 
 		// Other order
@@ -326,7 +326,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		results = myPatientDao.search(params);
 		assertEquals(searchId, results.getUuid());
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
 		// Null because we just reuse the last search
 		assertEquals(null, SearchBuilder.getLastHandlerMechanismForUnitTest());
 

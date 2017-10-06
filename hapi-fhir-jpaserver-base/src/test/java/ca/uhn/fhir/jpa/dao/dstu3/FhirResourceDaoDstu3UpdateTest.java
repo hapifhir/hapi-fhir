@@ -252,6 +252,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		String id = myPatientDao.update(p).getId().getValue();
 		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		// Second time should not result in an update
 		p = new Patient();
@@ -259,6 +260,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
 		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		// And third time should not result in an update
 		p = new Patient();
@@ -266,6 +268,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
 		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		myPatientDao.read(new IdType("Patient/A"));
 		myPatientDao.read(new IdType("Patient/A/_history/1"));
