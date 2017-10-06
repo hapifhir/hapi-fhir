@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,9 +38,12 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -61,43 +65,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
-
-	@Test
-	public void testTransactionWhichFailsPersistsNothing() {
-
-		// Run a transaction which points to that practitioner
-		// in a field that isn't allowed to refer to a practitioner
-		Bundle input = new Bundle();
-		input.setType(BundleType.TRANSACTION);
-
-		Patient pt = new Patient();
-		pt.setId("PT");
-		pt.setActive(true);
-		pt.addName().setFamily("FAMILY");
-		input.addEntry()
-			.setResource(pt)
-			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/PT");
-
-		Observation obs = new Observation();
-		obs.setId("OBS");
-		obs.getCode().addCoding().setSystem("foo").setCode("bar");
-		obs.addPerformer().setReference("Practicioner/AAAAA");
-		input.addEntry()
-			.setResource(obs)
-			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/OBS");
-
-		try {
-			mySystemDao.transaction(mySrd, input);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
-		}
-
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-
-	}
-
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
 
@@ -207,6 +174,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		}
 		fail();
 		return null;
+	}
+
+	private Bundle loadBundle(String theFileName) throws IOException {
+		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream(theFileName), StandardCharsets.UTF_8);
+		return myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
 	}
 
 	@Test
@@ -1222,8 +1194,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
-		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bundle-dstu3.xml"), StandardCharsets.UTF_8);
-		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+		Bundle request = loadBundle("/bundle-dstu3.xml");
 		mySystemDao.transaction(mySrd, request);
 	}
 
@@ -1702,13 +1673,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		//@formatter:off
 		/*
 		 * Transaction Order, per the spec:
-		 * 
+		 *
 		 * Process any DELETE interactions
 		 * Process any POST interactions
 		 * Process any PUT interactions
 		 * Process any GET interactions
-		 * 
-		 * This test creates a transaction bundle that includes 
+		 *
+		 * This test creates a transaction bundle that includes
 		 * these four operations in the reverse order and verifies
 		 * that they are invoked correctly.
 		 */
@@ -2145,6 +2116,42 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid placeholder ID found: cid:observation1 - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testTransactionWhichFailsPersistsNothing() {
+
+		// Run a transaction which points to that practitioner
+		// in a field that isn't allowed to refer to a practitioner
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		pt.addName().setFamily("FAMILY");
+		input.addEntry()
+			.setResource(pt)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/PT");
+
+		Observation obs = new Observation();
+		obs.setId("OBS");
+		obs.getCode().addCoding().setSystem("foo").setCode("bar");
+		obs.addPerformer().setReference("Practicioner/AAAAA");
+		input.addEntry()
+			.setResource(obs)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/OBS");
+
+		try {
+			mySystemDao.transaction(mySrd, input);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
+		}
+
+		assertThat(myResourceTableDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+
 	}
 
 	/**
@@ -2814,6 +2821,92 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 	}
+
+
+	@Test
+	public void testMultipleConcurrentWritesToSameResource() throws InterruptedException {
+
+		ThreadPoolExecutor exec = new ThreadPoolExecutor(10, 10,
+			0L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<Runnable>());
+
+		final AtomicInteger errors = new AtomicInteger();
+
+		List<Future> futures = new ArrayList<>();
+		for (int i = 0; i < 50; i++) {
+			final Patient p = new Patient();
+			p.setId("PID");
+			p.setActive(true);
+			p.setBirthDate(new Date());
+			p.addIdentifier().setSystem("foo1");
+			p.addIdentifier().setSystem("foo2");
+			p.addIdentifier().setSystem("foo3");
+			p.addIdentifier().setSystem("foo4");
+			p.addName().setFamily("FOO" + i);
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB1");
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB2");
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB3");
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB4");
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB5");
+			p.addName().addGiven("AAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBB6");
+
+			Organization o = new Organization();
+			o.setName("ORG" + i);
+
+			final Bundle t = new Bundle();
+			t.setType(BundleType.TRANSACTION);
+			t.addEntry()
+				.setResource(p)
+				.getRequest()
+				.setUrl("Patient/PID")
+				.setMethod(HTTPVerb.PUT);
+			t.addEntry()
+				.setResource(o)
+				.getRequest()
+				.setUrl("Organization")
+				.setMethod(HTTPVerb.POST);
+
+			if (i == 0) {
+				mySystemDao.transaction(mySrd, t);
+			}
+			futures.add(exec.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						mySystemDao.transaction(mySrd, t);
+					} catch (Exception e) {
+						ourLog.error("Failed to update", e);
+						errors.incrementAndGet();
+					}
+				}
+			}));
+		}
+
+		ourLog.info("Shutting down excutor");
+		StopWatch sw = new StopWatch();
+		for (Future next : futures) {
+			while (!next.isDone()) {
+				Thread.sleep(20);
+			}
+		}
+		exec.shutdown();
+		ourLog.info("Shut down excutor in {}ms", sw.getMillis());
+		ourLog.info("Had {} errors", errors.get());
+
+		Patient currentPatient = myPatientDao.read(new IdType("Patient/PID"));
+		Long currentVersion = currentPatient.getIdElement().getVersionIdPartAsLong();
+		ourLog.info("Current version: {}", currentVersion);
+
+		IBundleProvider historyBundle = myPatientDao.history(new IdType("Patient/PID"),null,null,mySrd);
+		Patient lastPatient = (Patient) historyBundle.getResources(0,1).get(0);
+		Long lastVersion = lastPatient.getIdElement().getVersionIdPartAsLong();
+		ourLog.info("Last version: {}", lastVersion);
+
+		assertEquals(currentVersion, lastVersion);
+
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

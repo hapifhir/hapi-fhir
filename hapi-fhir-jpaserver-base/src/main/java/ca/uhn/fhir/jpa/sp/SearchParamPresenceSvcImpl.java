@@ -89,7 +89,7 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 					searchParam = new SearchParam();
 					searchParam.setResourceName(resourceType);
 					searchParam.setParamName(paramName);
-					searchParam = mySearchParamDao.saveAndFlush(searchParam);
+					searchParam = mySearchParamDao.save(searchParam);
 					ourLog.info("Added search param {} with pid {}", paramName, searchParam.getId());
 					// Don't add the newly saved entity to the map in case the save fails
 				}
