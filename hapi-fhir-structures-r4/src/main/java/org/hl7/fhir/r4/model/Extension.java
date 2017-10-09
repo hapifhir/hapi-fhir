@@ -343,7 +343,7 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
         else if (name.equals("valueIdentifier")) {
           this.value = new Identifier();
           return this.value;
-        }
+        } 
         else if (name.equals("valueCodeableConcept")) {
           this.value = new CodeableConcept();
           return this.value;

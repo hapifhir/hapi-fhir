@@ -154,6 +154,11 @@ public class ParseImpl implements IFhirMapExecutor {
   }
 
   @Override
+  public void groupCall(String id, List<String> params) {
+    return;
+  }
+
+  @Override
   public void transformCoding(List<String> context, UrlData system, String code, String display, String targetVariable) throws Exception {
     this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
 
@@ -277,6 +282,16 @@ public class ParseImpl implements IFhirMapExecutor {
 
     this.currentRule.addTarget(this.currentTarget);
 
+  }
+
+  @Override
+  public void transformExtension(List<String> context, String targetVariable){
+    this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
+    this.currentTarget.setContext(context.get(0));
+    this.currentTarget.setElement(context.get(1));
+    this.currentTarget.setTransform(StructureMap.StructureMapTransform.EXTENSION);
+    this.currentTarget.setElement(targetVariable);
+    this.currentRule.addTarget(this.currentTarget);
   }
 
   @Override

@@ -401,15 +401,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse grammar rule ruleInput.
+     Parse grammar rule GroupInput.
 
      @param context
-     @return FhirMapRuleInput
+     @return FhirMapGroupInput
      */
     @Override
-    public Object visitRuleInput(FhirMapJavaParser.RuleInputContext context)  {
+    public Object visitGroupInput(FhirMapJavaParser.GroupInputContext context)  {
         try {
-            this.executor.groupInput( (String) this.visit(context.ruleInputName()), (String) this.visit(context.ruleInputType()), (FhirMapInputModes) this.visit(context.ruleInputMode()));
+            this.executor.groupInput( (String) this.visit(context.groupInputName()), (String) this.visit(context.groupInputType()), (FhirMapInputModes) this.visit(context.groupInputMode()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -417,38 +417,52 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse grammar rule ruleInputModes.
+     Parse grammar rule GroupInputModes.
 
      @param context
      @return FhirMapInputModes
      */
     @Override
-    public Object visitRuleInputMode(FhirMapJavaParser.RuleInputModeContext context)  {
-            return this.visit(context.ruleInputModes());
+    public Object visitGroupInputMode(FhirMapJavaParser.GroupInputModeContext context)  {
+            return this.visit(context.groupInputModes());
     }
 
     /**
-     Parse grammar rule ruleInputModesSource.
+     Parse grammar rule GroupInputModesSource.
 
      @param context
      @return FhirMapInputModes.Source
      */
     @Override
-    public Object visitRuleInputModesSource(FhirMapJavaParser.RuleInputModesSourceContext context)
+    public Object visitGroupInputModesSource(FhirMapJavaParser.GroupInputModesSourceContext context)
     {
         return FhirMapInputModes.Source;
     }
 
     /**
-     Parse grammar rule ruleInputModesTarget.
+     Parse grammar rule GroupInputModesTarget.
 
      @param context
      @return FhirMapInputModes.Target
      */
     @Override
-    public Object visitRuleInputModesTarget(FhirMapJavaParser.RuleInputModesTargetContext context)
+    public Object visitGroupInputModesTarget(FhirMapJavaParser.GroupInputModesTargetContext context)
     {
         return FhirMapInputModes.Target;
+    }
+
+    @Override
+    public Object visitGroupCall(FhirMapJavaParser.GroupCallContext context){
+      String id = null;
+      List<String> params = null;
+      this.executor.groupCall((String) this.visit(context.identifier()), (List<String>) this.visit(context.groupCallParameters()));
+      return null;
+    }
+
+    @Override
+    public Object visitGroupCallParameters(FhirMapJavaParser.GroupCallParametersContext context){
+      return null;
+        //Todo:not implemented
     }
 
     /**
@@ -926,6 +940,16 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Object visitRuleTargetExtension(FhirMapJavaParser.RuleTargetExtensionContext context){
+      try {
+        this.executor.transformExtension((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetVariable()));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return null;
     }
 
     /**

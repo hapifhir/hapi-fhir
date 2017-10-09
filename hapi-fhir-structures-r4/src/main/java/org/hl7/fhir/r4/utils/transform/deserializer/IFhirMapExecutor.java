@@ -109,7 +109,12 @@ public interface IFhirMapExecutor
     */
     void transformCast(List<String> context, String sourceVariable, String typeName, String targetVariable) throws Exception ;
 
-    /**
+  /**
+   *
+   */
+  void groupCall(String id, List<String> params);
+
+  /**
     * Execute Coding transform.
     *
     *  @param context
@@ -189,6 +194,8 @@ public interface IFhirMapExecutor
     *  @param targetVariable may be null
     */
     void transformEscape(List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception ;
+
+    void transformExtension(List<String> context, String targetVariable) throws Exception;
 
     /**
     * Execute evaluate transform

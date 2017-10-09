@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.DebugParseListener;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowErrorHandler;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowExceptionErrorListener;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaLexer;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
@@ -69,6 +70,7 @@ public class FhirMapProcessor
         }
          
         grammar.removeErrorListeners();
+        grammar.setErrorHandler(new ThrowErrorHandler());
         grammar.addErrorListener(new ThrowExceptionErrorListener(text));
         return grammar;
     }

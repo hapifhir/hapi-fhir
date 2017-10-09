@@ -1,4 +1,4 @@
-// Generated from UrlJava.g4 by ANTLR 4.7
+// Generated from Url.g4 by ANTLR 4.7
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -9,9 +9,6 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
-/**
- * ANTLR Generated Lexer for reading URLs.
- */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class UrlJavaLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
@@ -82,7 +79,7 @@ public class UrlJavaLexer extends Lexer {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "UrlJava.g4"; }
+	public String getGrammarFileName() { return "Url.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }

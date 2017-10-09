@@ -32,7 +32,7 @@ public class UrlJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUrl(UrlJavaParser.UrlContext ctx) throws InstantiationException, IllegalAccessException { return visitChildren(ctx); }
+	@Override public T visitUrl(UrlJavaParser.UrlContext ctx)  { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -88,7 +88,7 @@ public class UrlJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSearchParameter(UrlJavaParser.SearchParameterContext ctx) throws Exception { return visitChildren(ctx); }
+	@Override public T visitSearchParameter(UrlJavaParser.SearchParameterContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -116,7 +116,7 @@ public class UrlJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogin(UrlJavaParser.LoginContext ctx) throws InstantiationException, IllegalAccessException { return visitChildren(ctx); }
+	@Override public T visitLogin(UrlJavaParser.LoginContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

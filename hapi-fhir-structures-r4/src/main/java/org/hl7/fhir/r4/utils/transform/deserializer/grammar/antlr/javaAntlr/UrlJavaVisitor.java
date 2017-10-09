@@ -1,4 +1,4 @@
-// Generated from UrlJava.g4 by ANTLR 4.7
+// Generated from Url.g4 by ANTLR 4.7
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -27,7 +27,7 @@ public interface UrlJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitUrl(UrlJavaParser.UrlContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitUrl(UrlJavaParser.UrlContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link UrlJavaParser#authority}.
 	 * @param ctx the parse tree
@@ -75,7 +75,7 @@ public interface UrlJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSearchParameter(UrlJavaParser.SearchParameterContext ctx) throws Exception;
+	T visitSearchParameter(UrlJavaParser.SearchParameterContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link UrlJavaParser#searchParameterName}.
 	 * @param ctx the parse tree
@@ -99,7 +99,7 @@ public interface UrlJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogin(UrlJavaParser.LoginContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitLogin(UrlJavaParser.LoginContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link UrlJavaParser#password}.
 	 * @param ctx the parse tree
