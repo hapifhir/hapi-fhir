@@ -254,8 +254,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			deletedResources.add(entity);
 
-			validateOkToDelete(deleteConflicts, entity);
 			T resourceToDelete = toResource(myResourceType, entity, false);
+			validateOkToDelete(deleteConflicts, entity);
 
 			// Notify interceptors
 			IdDt idToDelete = entity.getIdDt();
@@ -267,6 +267,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Perform delete
 			Date updateTime = new Date();
 			updateEntity(null, entity, updateTime, updateTime);
+	        resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
 			if (theRequestDetails != null) {
