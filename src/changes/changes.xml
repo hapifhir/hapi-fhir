@@ -55,6 +55,10 @@
 				the ID of the search, meaning that if a search returns results from the Query
 				cache, it will reuse the ID of the previously returned Bundle
 			</action>
+			<action type="fix">
+				Fix a NullPointerException when validating a Bundle (in DSTU3/R4) with no
+				<![CDATA[<code>Bundle.type</code>]]> value
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

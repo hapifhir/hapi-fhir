@@ -71,10 +71,12 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 	private void deleteSearch(final Long theSearchPid) {
 		Search searchToDelete = mySearchDao.findOne(theSearchPid);
-		ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
-		mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-		mySearchResultDao.deleteForSearch(searchToDelete.getId());
-		mySearchDao.delete(searchToDelete);
+		if (searchToDelete != null) {
+			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
+			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
+			mySearchResultDao.deleteForSearch(searchToDelete.getId());
+			mySearchDao.delete(searchToDelete);
+		}
 	}
 
 	@Override

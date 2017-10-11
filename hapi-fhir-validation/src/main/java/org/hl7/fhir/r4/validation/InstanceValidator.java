@@ -667,9 +667,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       try {
         if (context.fetchResourceWithException(ValueSet.class, system) != null) {
           rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Invalid System URI: "+system+" - cannot use a value set URI as a system");
-          return false;
-        } else
-          return true;
+          // Lloyd: This error used to prohibit checking for downstream issues, but there are some cases where that checking needs to occur.  Please talk to me before changing the code back. 
+        }
+        return true;
       }
       catch (Exception e) {
         return true;
@@ -1445,7 +1445,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         refType = "bundle";
       }
     }
-    ReferenceValidationPolicy pol = refType.equals("contained") ? ReferenceValidationPolicy.CHECK_VALID : fetcher == null ? ReferenceValidationPolicy.IGNORE : fetcher.validationPolicy(hostContext.appContext, path, ref);
+    ReferenceValidationPolicy pol = refType.equals("contained") || refType.equals("bundle") ? ReferenceValidationPolicy.CHECK_VALID : fetcher == null ? ReferenceValidationPolicy.IGNORE : fetcher.validationPolicy(hostContext.appContext, path, ref);
 
     if (pol.checkExists()) {
       if (we == null) {
@@ -2783,6 +2783,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     List<Element> entries = new ArrayList<Element>();
     bundle.getNamedChildren("entry", entries);
     String type = bundle.getNamedChildValue("type");
+    type = StringUtils.defaultString(type);
+
     if (entries.size() == 0) {
       rule(errors, IssueType.INVALID, stack.getLiteralPath(), !(type.equals("document") || type.equals("message")), "Documents or Messages must contain at least one entry");
     } else {

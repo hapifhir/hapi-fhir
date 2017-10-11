@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
+
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult;
@@ -105,6 +105,7 @@ import org.w3c.dom.Node;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 import ca.uhn.fhir.util.ObjectUtil;
 
@@ -291,8 +292,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     fpe.setHostServices(hostServices);
     source = Source.InstanceValidator;
   }
-
-
 
   @Override
   public boolean isNoInvariantChecks() {
@@ -1358,33 +1357,19 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkFixedValue(errors, path + ".denominator", focus.getNamedChild("denominator"), fixed.getDenominator(), "denominator", focus);
   }
 
-	private Reference readAsReference(Element item) {
-		Reference r = new Reference();
-		r.setDisplay(item.getNamedChildValue("display"));
-		r.setReference(item.getNamedChildValue("reference"));
-		List<Element> identifier = item.getChildrenByName("identifier");
-		if (identifier.isEmpty() == false) {
-			r.setIdentifier(readAsIdentifier(identifier.get(0)));
-		}
-		return r;
-	}
-	private Identifier readAsIdentifier(Element item) {
-		Identifier r = new Identifier();
-		r.setSystem(item.getNamedChildValue("system"));
-		r.setValue(item.getNamedChildValue("value"));
-		return r;
-	}
-
   private void checkReference(Object appContext, List<ValidationMessage> errors, String path, Element element, StructureDefinition profile, ElementDefinition container, String parentType, NodeStack stack) throws FHIRException, IOException {
-	  Reference reference = readAsReference(element);
-
-	  String ref = reference.getReference();
-	  if (Utilities.noString(ref)) {
-		  if (Utilities.noString(reference.getIdentifier().getSystem()) && Utilities.noString(reference.getIdentifier().getValue())) {
-			  warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference or identifier should have a display");
-		  }
-		  return;
-	  }
+    String ref = null;
+    try {
+      // Do this inside a try because invalid instances might provide more than one reference.
+      ref = element.getNamedChildValue("reference");
+    } catch (Error e) {
+      
+    }
+    if (Utilities.noString(ref)) {
+      // todo - what should we do in this case?
+      warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference should have a display");
+      return;
+    }
 
     Element we = localResolve(ref, stack, errors, path);
     String refType;
@@ -2816,6 +2801,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     List<Element> entries = new ArrayList<Element>();
     bundle.getNamedChildren("entry", entries);
     String type = bundle.getNamedChildValue("type");
+    type = StringUtils.defaultString(type);
+
     if (entries.size() == 0) {
       rule(errors, IssueType.INVALID, stack.getLiteralPath(), !(type.equals("document") || type.equals("message")), "Documents or Messages must contain at least one entry");
     } else {

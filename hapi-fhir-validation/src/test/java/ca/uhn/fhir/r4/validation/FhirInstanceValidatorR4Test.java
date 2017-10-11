@@ -1,4 +1,4 @@
-package ca.uhn.fhir.validation;
+package ca.uhn.fhir.r4.validation;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -17,7 +17,12 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidatorDstu3Test;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.*;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
@@ -532,6 +537,16 @@ public class FhirInstanceValidatorR4Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 0, output.getMessages().size());
 	}
+
+	@Test
+	public void testValidateBundleWithNoType() throws Exception {
+		String vsContents = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/bundle-with-no-type.json"), "UTF-8");
+
+		ValidationResult output = myVal.validateWithResult(vsContents);
+		logResultsAndReturnNonInformationalOnes(output);
+		assertThat(output.getMessages().toString(), containsString("Element 'Bundle.type': minimum required = 1"));
+	}
+
 
 	@Test
 	public void testValidateRawXmlResourceWithEmptyPrimitive() {

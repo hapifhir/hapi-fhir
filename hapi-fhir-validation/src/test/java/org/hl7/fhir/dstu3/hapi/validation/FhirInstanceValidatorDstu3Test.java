@@ -336,6 +336,15 @@ public class FhirInstanceValidatorDstu3Test {
 		assertTrue(output.isSuccessful());
 	}
 
+	@Test
+	public void testValidateBundleWithNoType() throws Exception {
+		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bundle-with-no-type.json"), "UTF-8");
+
+		ValidationResult output = myVal.validateWithResult(vsContents);
+		logResultsAndReturnNonInformationalOnes(output);
+		assertThat(output.getMessages().toString(), containsString("Element 'Bundle.type': minimum required = 1"));
+	}
+
 	/**
 	 * See #739
 	 */

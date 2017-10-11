@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SubscriptionsRequireManualActivationInterceptorDstu2 extends ServerOperationInterceptorAdapter {
 
 	@Autowired
-	@Qualifier("mySubscriptionDaoR4")
+	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> myDao;
 
 	@Override
