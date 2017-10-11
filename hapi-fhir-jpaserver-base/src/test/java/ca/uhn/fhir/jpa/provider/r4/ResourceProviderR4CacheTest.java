@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
@@ -19,8 +18,7 @@ import org.springframework.test.util.AopTestUtils;
 import java.io.IOException;
 import java.util.Date;
 
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
@@ -166,8 +164,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals(1, results1.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
-		assertThat(results1.getMeta().getLastUpdated(), DateMatchers.after(beforeFirst));
-		assertThat(results1.getMeta().getLastUpdated(), DateMatchers.before(new Date()));
+		assertThat(results1.getMeta().getLastUpdated(), greaterThan(beforeFirst));
+		assertThat(results1.getMeta().getLastUpdated(), lessThan(new Date()));
 		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();
