@@ -41,7 +41,8 @@ public class ${className}ResourceProvider extends
 	@Search(allowUnknownParams=true)
 	public ca.uhn.fhir.rest.api.server.IBundleProvider search(
 			javax.servlet.http.HttpServletRequest theServletRequest,
-			
+			javax.servlet.http.HttpServletResponse theServletResponse,
+
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
@@ -154,7 +155,7 @@ public class ${className}ResourceProvider extends
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
-			ca.uhn.fhir.rest.api.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails);
+			ca.uhn.fhir.rest.api.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails, theServletResponse);
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);

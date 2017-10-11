@@ -4,8 +4,11 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
@@ -14,13 +17,18 @@ import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
+import java.util.Date;
 
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CacheTest.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
+	private CapturingInterceptor myCapturingInterceptor;
 
 	@Override
 	@After
@@ -28,6 +36,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		super.after();
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(new DaoConfig().getCacheControlNoStoreMaxResultsUpperLimit());
+
+		ourClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
 	@Override
@@ -35,6 +45,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+
+		myCapturingInterceptor = new CapturingInterceptor();
+		ourClient.registerInterceptor(myCapturingInterceptor);
 	}
 
 	@Test
@@ -53,6 +66,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(1, results.getEntry().size());
 		assertEquals(0, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -67,6 +81,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(2, results.getEntry().size());
 		assertEquals(0, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
 
@@ -88,6 +103,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(5, results.getEntry().size());
 		assertEquals(0, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
 
@@ -118,6 +134,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -132,6 +149,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(2, results.getEntry().size());
 		assertEquals(2, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
 
@@ -142,18 +160,26 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		pt1.addName().setFamily("FAM");
 		ourClient.create().resource(pt1).execute();
 
-		Bundle results = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
-		assertEquals(1, results.getEntry().size());
+		Date beforeFirst = new Date();
+
+		Bundle results1 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+		assertEquals(1, results1.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(results1.getMeta().getLastUpdated(), DateMatchers.after(beforeFirst));
+		assertThat(results1.getMeta().getLastUpdated(), DateMatchers.before(new Date()));
+		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
 		ourClient.create().resource(pt2).execute();
 
-		results = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
-		assertEquals(1, results.getEntry().size());
+		Bundle results2 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+		assertEquals(1, results2.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
-
+		assertEquals("HIT from " + ourServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
+		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
+		assertEquals(results1.getId(), results2.getId());
 	}
 
 	@AfterClass

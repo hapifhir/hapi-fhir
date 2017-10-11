@@ -9,8 +9,9 @@
 		<release version="3.1.0" date="TBD">
 			<action type="add">
 				A performance to the JPA server has been made which reduces the number
-				of changes to index tables when updating a resource with contents that
-				only make minor changes
+				of writes to index tables when updating a resource with contents that
+				only make minor changes to the resource content. In many cases this can
+				noticeably improve update performance.
 			</action>
 			<action type="fix">
 				In FHIR DSTU3 the
@@ -48,6 +49,11 @@
 				a "gap" in the history numbers to occur. This would then cause a mysterious
 				failure when trying to update this resource further. This has been 
 				resolved.
+			</action>
+			<action type="add">
+				JPA Server search/history results now set the ID of the returned Bundle to
+				the ID of the search, meaning that if a search returns results from the Query
+				cache, it will reuse the ID of the previously returned Bundle
 			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">

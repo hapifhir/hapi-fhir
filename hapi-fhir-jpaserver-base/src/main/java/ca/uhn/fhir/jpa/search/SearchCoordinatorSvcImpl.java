@@ -281,6 +281,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
 
 							retVal = new PersistedJpaBundleProvider(searchToUse.getUuid(), theCallingDao);
+							retVal.setCacheHit(true);
+
 							populateBundleProvider(retVal);
 						}
 
