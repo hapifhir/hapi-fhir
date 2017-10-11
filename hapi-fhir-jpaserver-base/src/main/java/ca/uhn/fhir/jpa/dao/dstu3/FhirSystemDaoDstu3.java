@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import javax.persistence.TypedQuery;
 
 import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hibernate.Session;
@@ -438,7 +439,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				DaoMethodOutcome outcome;
 				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
-					res.setId(new IdType(parts.getResourceType(), parts.getResourceId()));
+					String version = null;
+					if (isNotBlank(nextReqEntry.getRequest().getIfMatch())) {
+						version = ParameterUtil.parseETagValue(nextReqEntry.getRequest().getIfMatch());
+					}
+					res.setId(new IdType(parts.getResourceType(), parts.getResourceId(), version));
 					outcome = resourceDao.update(res, null, false, theRequestDetails);
 				} else {
 					res.setId((String) null);

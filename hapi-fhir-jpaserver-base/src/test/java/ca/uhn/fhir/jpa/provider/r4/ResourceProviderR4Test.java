@@ -116,6 +116,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testUpdateWrongResourceType() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/dstu3-person.json"), StandardCharsets.UTF_8);
+
+		try {
+			MethodOutcome resp = ourClient.update().resource(input).withId("Patient/PERSON1").execute();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+
+		MethodOutcome resp = ourClient.update().resource(input).withId("Person/PERSON1").execute();
+		assertEquals("Person/PERSON1/_history/1", resp.getId().toUnqualified().getValue());
+	}
+
 	/**
 	 * See #484
 	 */
