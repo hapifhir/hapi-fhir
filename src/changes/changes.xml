@@ -64,6 +64,11 @@
 				If-Match header when passed in via 
 				<![CDATA[<code>Bundle.entry.request.ifMatch</code>]]> value
 			</action>
+			<action type="add">
+				In Apache client, remove a log message at WARN level when the response does not
+				specify a charset. This log line often showed up any time a server was not supplying
+				a response, making client logs quite noisy
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

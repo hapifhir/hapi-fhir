@@ -98,24 +98,23 @@ public class ApacheHttpResponse implements IHttpResponse {
 		}
 		if (charset == null) {
 			if (Constants.STATUS_HTTP_204_NO_CONTENT != myResponse.getStatusLine().getStatusCode()) {
-				ourLog.warn("Response did not specify a charset.");
+				ourLog.debug("Response did not specify a charset, defaulting to utf-8");
 			}
 			charset = Charset.forName("UTF-8");
 		}
 
-		Reader reader = new InputStreamReader(readEntity(), charset);
-		return reader;
+		return new InputStreamReader(readEntity(), charset);
 	}
 
 	@Override
 	public Map<String, List<String>> getAllHeaders() {
-		Map<String, List<String>> headers = new HashMap<String, List<String>>();
+		Map<String, List<String>> headers = new HashMap<>();
 		if (myResponse.getAllHeaders() != null) {
 			for (Header next : myResponse.getAllHeaders()) {
 				String name = next.getName().toLowerCase();
 				List<String> list = headers.get(name);
 				if (list == null) {
-					list = new ArrayList<String>();
+					list = new ArrayList<>();
 					headers.put(name, list);
 				}
 				list.add(next.getValue());
@@ -131,7 +130,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 		if (headers == null) {
 			headers = new Header[0];
 		}
-		List<String> retVal = new ArrayList<String>();
+		List<String> retVal = new ArrayList<>();
 		for (Header next : headers) {
 			retVal.add(next.getValue());
 		}
