@@ -3194,6 +3194,77 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(SearchEntryMode.INCLUDE, found.getEntry().get(1).getSearch().getMode());
 	}
 
+	@Test
+	public void testSearchWithCountNotSet() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(null, found.getTotalElement().getValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
+	@Test
+	public void testSearchWithCountSearchResultsUpTo5() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		myDaoConfig.setCountSearchResultsUpTo(5);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(null, found.getTotalElement().getValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
+	@Test
+	public void testSearchWithCountSearchResultsUpTo20() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		myDaoConfig.setCountSearchResultsUpTo(20);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(10, found.getTotalElement().getValue().intValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
 	@Test()
 	public void testSearchWithInvalidNumberPrefix() throws Exception {
 		try {

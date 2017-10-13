@@ -509,6 +509,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			myIdToSearchTask.remove(mySearch.getUuid());
+			myInitialCollectionLatch.countDown();
 			myCompletionLatch.countDown();
 			return null;
 		}
@@ -574,7 +575,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			}
 
-			ArrayList<Long> retVal = new ArrayList<Long>();
+			ArrayList<Long> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {
 				verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
@@ -645,7 +646,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			});
 
-			myInitialCollectionLatch.countDown();
+			int numSynced;
+			synchronized (mySyncedPids) {
+				numSynced = mySyncedPids.size();
+			}
+
+			if (myDaoConfig.getCountSearchResultsUpTo() == null ||
+				myDaoConfig.getCountSearchResultsUpTo() <= 0 ||
+				myDaoConfig.getCountSearchResultsUpTo() <= numSynced) {
+				myInitialCollectionLatch.countDown();
+			}
 		}
 
 	}

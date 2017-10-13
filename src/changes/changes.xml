@@ -69,6 +69,19 @@
 				specify a charset. This log line often showed up any time a server was not supplying
 				a response, making client logs quite noisy
 			</action>
+			<action type="add">
+				A new configuration item has been added to the JPA server DaoConfig
+				called
+				<![CDATA[<code>getCountSearchResultsUpTo()</code>]]>.
+				This setting governs how many search results the search
+				coordinator should try to find before returning an initial
+				search response	to the user, which has an effect on whether
+				the
+				<![CDATA[<code>Bundle.total</code>]]>
+				field is always populated in search responses. This has now
+				been set to 20000 on out public server (fhirtest.uhn.ca)
+				so most search results should now include a total.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
