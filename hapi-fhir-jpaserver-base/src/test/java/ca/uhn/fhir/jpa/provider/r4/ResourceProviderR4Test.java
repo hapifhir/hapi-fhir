@@ -75,7 +75,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		
+		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
+
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
@@ -114,20 +115,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 		}
 		return retVal;
-	}
-
-	@Test
-	public void testUpdateWrongResourceType() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/dstu3-person.json"), StandardCharsets.UTF_8);
-
-		try {
-			MethodOutcome resp = ourClient.update().resource(input).withId("Patient/PERSON1").execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
-		}
-
-		MethodOutcome resp = ourClient.update().resource(input).withId("Person/PERSON1").execute();
-		assertEquals("Person/PERSON1/_history/1", resp.getId().toUnqualified().getValue());
 	}
 
 	/**
@@ -553,7 +540,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			response.close();
 		}
 	}
-	
+
 	@Test
 	public void testCreateWithForcedId() throws IOException {
 		String methodName = "testCreateWithForcedId";
@@ -566,7 +553,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(methodName, optId.getIdPart());
 		assertEquals("1", optId.getVersionIdPart());
 	}
-
+	
 	@Test
 	public void testDeepChaining() {
 		Location l1 = new Location();
@@ -1571,6 +1558,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testGetResourceCountsOperation() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().setFamily(methodName);
+		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
+		} finally {
+			response.close();
+		}
+	}
+
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {
@@ -1595,27 +1603,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	// ourClient.delete().resource(next).execute();
 	// }
 	// }
-
-	@Test
-	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
-
-		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
-		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
-
-		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
-		} finally {
-			response.close();
-		}
-	}
 
 	@Test
 	public void testHasParameter() throws Exception {
@@ -1653,7 +1640,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
-	
+
 	@Test
 	public void testHasParameterNoResults() throws Exception {
 
@@ -1668,7 +1655,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 	}
-
+	
 	@Test
 	public void testHistoryWithAtParameter() throws Exception {
 		String methodName = "testHistoryWithFromAndTo";
@@ -3138,12 +3125,83 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchWithCountNotSet() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(null, found.getTotalElement().getValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
+	@Test
+	public void testSearchWithCountSearchResultsUpTo20() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		myDaoConfig.setCountSearchResultsUpTo(20);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(10, found.getTotalElement().getValue().intValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
+	@Test
+	public void testSearchWithCountSearchResultsUpTo5() throws Exception {
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		myDaoConfig.setCountSearchResultsUpTo(5);
+
+		for (int i =0; i < 10; i++) {
+			Patient pat = new Patient();
+			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			ourClient.create().resource(pat).execute();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+
+		// If this fails under load, try increasing the throttle above
+		assertEquals(null, found.getTotalElement().getValue());
+		assertEquals(1, found.getEntry().size());
+	}
+
+	@Test
 	public void testSearchWithEmptyParameter() throws Exception {
 		Observation obs= new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
 		ourClient.create().resource(obs).execute();
-		
+
 		testSearchWithEmptyParameter("/Observation?value-quantity=");
 		testSearchWithEmptyParameter("/Observation?code=bar&value-quantity=");
 		testSearchWithEmptyParameter("/Observation?value-date=");
@@ -3192,77 +3250,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(SearchEntryMode.MATCH, found.getEntry().get(0).getSearch().getMode());
 		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
 		assertEquals(SearchEntryMode.INCLUDE, found.getEntry().get(1).getSearch().getMode());
-	}
-
-	@Test
-	public void testSearchWithCountNotSet() throws Exception {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
-
-		for (int i =0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
-			ourClient.create().resource(pat).execute();
-		}
-
-		Bundle found = ourClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		// If this fails under load, try increasing the throttle above
-		assertEquals(null, found.getTotalElement().getValue());
-		assertEquals(1, found.getEntry().size());
-	}
-
-	@Test
-	public void testSearchWithCountSearchResultsUpTo5() throws Exception {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
-		myDaoConfig.setCountSearchResultsUpTo(5);
-
-		for (int i =0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
-			ourClient.create().resource(pat).execute();
-		}
-
-		Bundle found = ourClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		// If this fails under load, try increasing the throttle above
-		assertEquals(null, found.getTotalElement().getValue());
-		assertEquals(1, found.getEntry().size());
-	}
-
-	@Test
-	public void testSearchWithCountSearchResultsUpTo20() throws Exception {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
-		myDaoConfig.setCountSearchResultsUpTo(20);
-
-		for (int i =0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
-			ourClient.create().resource(pat).execute();
-		}
-
-		Bundle found = ourClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		// If this fails under load, try increasing the throttle above
-		assertEquals(10, found.getTotalElement().getValue().intValue());
-		assertEquals(1, found.getEntry().size());
 	}
 
 	@Test()
@@ -4067,6 +4054,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} finally {
 			response.close();
 		}
+	}
+
+	@Test
+	public void testUpdateWrongResourceType() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/dstu3-person.json"), StandardCharsets.UTF_8);
+
+		try {
+			MethodOutcome resp = ourClient.update().resource(input).withId("Patient/PERSON1").execute();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+
+		MethodOutcome resp = ourClient.update().resource(input).withId("Person/PERSON1").execute();
+		assertEquals("Person/PERSON1/_history/1", resp.getId().toUnqualified().getValue());
 	}
 
 	@Test
