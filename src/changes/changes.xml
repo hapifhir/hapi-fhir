@@ -82,6 +82,11 @@
 				been set to 20000 on out public server (fhirtest.uhn.ca)
 				so most search results should now include a total.
 			</action>
+			<action type="fix">
+				Remove a bunch of exceptions in the org.hl7.fhir.exception package from the
+				hapi-fhir-base module, as they were also duplicated in the
+				hapi-fhir-utilities module.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

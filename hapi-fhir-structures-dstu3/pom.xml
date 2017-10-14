@@ -14,6 +14,101 @@
 
 	<name>HAPI FHIR Structures - DSTU3</name>
 
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<show>public</show>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<classFolders>
+						<classFolder>${basedir}/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
+					</classFolders>
+					<sourceFolders>
+						<sourceFolder>${basedir}/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
+					</sourceFolders>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<!-- Don't add UHN licenses to RI structures -->
+					<skipUpdateLicense>true</skipUpdateLicense>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<printEqualFiles>false</printEqualFiles>
+					<failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+					<failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
+					<failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+					<checkCompileClasspath>true</checkCompileClasspath>
+					<checkRuntimeClasspath>false</checkRuntimeClasspath>
+					<checkTestClasspath>false</checkTestClasspath>
+					<skip>false</skip>
+					<quiet>false</quiet>
+					<preferLocal>true</preferLocal>
+					<useResultFile>true</useResultFile>
+					<resultFileMinClasspathCount>2</resultFileMinClasspathCount>
+					<resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -25,9 +120,9 @@
 			<artifactId>hapi-fhir-utilities</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<!--
-		Test dependencies on other optional parts of HAPI 
+		Test dependencies on other optional parts of HAPI
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -48,13 +143,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>xpp3</groupId>
-			<artifactId>xpp3</artifactId>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- 
+		<!--
 		The JPA project uses a newer API but we'll try to hold to this version
 		as much as possible. See #283.
 		-->
@@ -65,10 +154,10 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- 
-		Android includes an old version of commons-codec, so 
+		<!--
+		Android includes an old version of commons-codec, so
 		we compile against the old version to make sure we can compile
-		against it 
+		against it
 		-->
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -79,11 +168,19 @@
 
 		<dependency>
 			<groupId>xpp3</groupId>
+			<artifactId>xpp3</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>xpp3</groupId>
 			<artifactId>xpp3_min</artifactId>
 			<version>1.1.4c</version>
+			<optional>true</optional>
 		</dependency>
+		-->
 
-		<!-- 
+		<!--
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
@@ -202,71 +299,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<show>public</show>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
-					</sourceFolders>
-					<dumpOnExit>true</dumpOnExit>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default-prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<!-- Don't add UHN licenses to RI structures -->
-					<skipUpdateLicense>true</skipUpdateLicense>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
