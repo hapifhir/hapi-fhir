@@ -995,6 +995,11 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.basepom.maven</groupId>
+					<artifactId>duplicate-finder-maven-plugin</artifactId>
+					<version>1.2.1</version>
+				</plugin>
+				<plugin>
 					<groupId>de.juplo</groupId>
 					<artifactId>hibernate-maven-plugin</artifactId>
 					<version>2.0.0</version>
@@ -1908,6 +1913,9 @@
 		</profile>
 		<profile>
 			<id>ERRORPRONE</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>

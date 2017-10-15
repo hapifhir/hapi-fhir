@@ -215,6 +215,9 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 			case RETIRED:
 				status = RuntimeSearchParamStatusEnum.RETIRED;
 				break;
+			case UNKNOWN:
+				status = RuntimeSearchParamStatusEnum.UNKNOWN;
+				break;
 			case NULL:
 				break;
 			}

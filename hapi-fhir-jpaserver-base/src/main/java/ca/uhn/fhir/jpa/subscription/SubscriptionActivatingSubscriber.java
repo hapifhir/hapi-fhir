@@ -103,6 +103,8 @@ public class SubscriptionActivatingSubscriber {
 				}
 				activateAndRegisterSubscriptionIfRequired(theSubscription);
 				break;
+			default:
+				break;
 		}
 
 	}

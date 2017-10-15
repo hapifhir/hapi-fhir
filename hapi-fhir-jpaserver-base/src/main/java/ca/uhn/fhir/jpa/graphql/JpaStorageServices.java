@@ -115,6 +115,8 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 						break;
 					case URI:
 						break;
+					case HAS:
+						break;
 				}
 
 				params.add(nextArgument.getName(), param);

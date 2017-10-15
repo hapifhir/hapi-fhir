@@ -339,10 +339,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       switch (bpWarnings) {
       case Error:
         rule(errors, invalid, line, col, literalPath, test, message);
+        break;
       case Warning:
         warning(errors, invalid, line, col, literalPath, test, message);
+        break;
       case Hint:
         hint(errors, invalid, line, col, literalPath, test, message);
+        break;
       default: // do nothing
       }
     }
@@ -2452,6 +2455,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         else if (itemType.equals("integer")) checkOption(errors, answer, ns, qsrc, qItem, "integer");
         else if (itemType.equals("string")) checkOption(errors, answer, ns, qsrc, qItem, "string", true);
         break;
+      case QUESTION:
+      case NULL:
+        break;
       }
       validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress);
     }
@@ -3050,11 +3056,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       if (ei.path.endsWith(".extension"))
         rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition != null, "Element is unknown or does not match any slice (url=\"" + ei.element.getNamedChildValue("url") + "\")" + (profile==null ? "" : " for profile " + profile.getUrl()));
       else if (!unsupportedSlicing)
-        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
           hint(errors, IssueType.INFORMATIONAL, ei.line(), ei.col(), ei.path, (ei.definition != null),
               "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
         else
-          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
             rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, (ei.definition != null),
                 "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
           else
@@ -3230,7 +3236,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                       goodProfiles.put(typeProfile, profileErrors);
                   }
                   if (goodProfiles.size()==1) {
-                    errors.addAll(goodProfiles.get(0));
+                    errors.addAll(goodProfiles.values().iterator().next());
                   } else if (goodProfiles.size()==0) {
                     rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Unable to find matching profile among choices: " + StringUtils.join("; ", profiles));
                     for (List<ValidationMessage> messages : badProfiles) {
