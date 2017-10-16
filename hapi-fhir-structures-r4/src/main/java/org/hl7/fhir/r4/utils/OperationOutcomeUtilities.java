@@ -35,6 +35,7 @@ public class OperationOutcomeUtilities {
     case ERROR : return IssueSeverity.ERROR;
     case WARNING : return IssueSeverity.WARNING;
     case INFORMATION : return IssueSeverity.INFORMATION;
+	 case NULL : return IssueSeverity.NULL;
     }
     return IssueSeverity.NULL;
   }
@@ -70,6 +71,7 @@ public class OperationOutcomeUtilities {
     case TIMEOUT: return IssueType.TIMEOUT;
     case THROTTLED: return IssueType.THROTTLED;
     case INFORMATIONAL: return IssueType.INFORMATIONAL;
+	 case NULL: return IssueType.NULL;
     }
     return IssueType.NULL;
   }

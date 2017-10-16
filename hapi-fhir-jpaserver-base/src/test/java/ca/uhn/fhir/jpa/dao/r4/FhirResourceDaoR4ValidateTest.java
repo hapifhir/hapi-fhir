@@ -133,6 +133,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			} catch (PreconditionFailedException e) {
 				return (OperationOutcome) e.getOperationOutcome();
 			}
+			break;
 		case XML:
 			encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
 			try {
@@ -141,6 +142,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			} catch (PreconditionFailedException e) {
 				return (OperationOutcome) e.getOperationOutcome();
 			}
+			break;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here

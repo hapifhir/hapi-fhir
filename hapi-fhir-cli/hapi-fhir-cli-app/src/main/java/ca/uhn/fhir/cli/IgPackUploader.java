@@ -73,6 +73,7 @@ public class IgPackUploader extends BaseCommand {
 							.and(StructureDefinition.URL.matches().value(nextResourceUrl))
 							.execute();
 					}
+					break;
 				default:
 					throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
 			}

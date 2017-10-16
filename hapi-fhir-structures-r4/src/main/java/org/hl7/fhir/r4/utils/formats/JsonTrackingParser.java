@@ -364,6 +364,9 @@ public class JsonTrackingParser {
 				break;
 			case Eof : 
 				throw lexer.error("Unexpected End of File");
+			case End:
+				// TODO GG: This isn't handled. Should it be?
+				break;
 			}
 			next();
 		}
@@ -405,6 +408,10 @@ public class JsonTrackingParser {
         break;
 	    case Eof : 
 	    	throw lexer.error("Unexpected End of File");
+		 case End:
+		 case Boolean:
+			// TODO GG: These aren't handled. SHould they be?
+			break;
 	    }
 	    next();
 	  }

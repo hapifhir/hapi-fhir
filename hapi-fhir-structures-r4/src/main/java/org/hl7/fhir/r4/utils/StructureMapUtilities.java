@@ -365,11 +365,14 @@ public class StructureMapUtilities {
   private static void renderGroup(StringBuilder b, StructureMapGroupComponent g) {
 		b.append("group ");
     switch (g.getTypeMode()) {
-    case TYPES: b.append("for types");
-    case TYPEANDTYPES: b.append("for type+types ");
+    case TYPES: 
+		 b.append("for types");
+		 break;
+    case TYPEANDTYPES: 
+		 b.append("for type+types ");
+		 break;
     default: // NONE, NULL
     }
-      b.append("for types ");
 		b.append(g.getName());
 		if (g.hasExtends()) {
 			b.append(" extends ");

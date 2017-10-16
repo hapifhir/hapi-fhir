@@ -118,8 +118,13 @@ public abstract class BaseJpaTest {
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
+		Integer size = theFound.size();
 		ourLog.info("Found {} results", size);
+
+		if (size == null) {
+			size = 99999;
+		}
+
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
