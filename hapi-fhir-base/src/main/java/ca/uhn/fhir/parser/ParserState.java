@@ -1559,7 +1559,8 @@ class ParserState<T> {
 
 			if (theEvent.isEndElement()) {
 				if (myDepth == 0) {
-					myDt.setValue(myEvents);
+					String eventsAsString = XmlUtil.encode(myEvents);
+					myDt.setValue(eventsAsString);
 					doPop();
 				}
 			}

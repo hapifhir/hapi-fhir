@@ -87,6 +87,15 @@
 				hapi-fhir-base module, as they were also duplicated in the
 				hapi-fhir-utilities module.
 			</action>
+			<action type="add">
+				The DSTU2 XhtmlDt type has been modified so that it no longer uses
+				the StAX XMLEvent type as its internal model, and instead simply uses
+				a String. New methods called "parse" and "encode" have been added
+				to HAPI FHIR's XmlUtil class, which can be used to convert
+				between a String and an XML representatio. This should allow
+				HAPI FHIR to run in environments where StAX is not available, such
+				as Android phones.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

@@ -50,10 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
@@ -2043,7 +2040,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		StringBuilder b = new StringBuilder();
 		if (theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-			List<XMLEvent> xmlEvents = resource.getText().getDiv().getValue();
+			List<XMLEvent> xmlEvents = XmlUtil.parse(resource.getText().getDiv().getValue());
 			if (xmlEvents != null) {
 				for (XMLEvent next : xmlEvents) {
 					if (next.isCharacters()) {
@@ -2056,8 +2053,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			IDomainResource resource = (IDomainResource) theResource;
 			try {
 				String divAsString = resource.getText().getDivAsString();
-				XhtmlDt xhtml = new XhtmlDt(divAsString);
-				List<XMLEvent> xmlEvents = xhtml.getValue();
+				List<XMLEvent> xmlEvents = XmlUtil.parse(divAsString);
 				if (xmlEvents != null) {
 					for (XMLEvent next : xmlEvents) {
 						if (next.isCharacters()) {

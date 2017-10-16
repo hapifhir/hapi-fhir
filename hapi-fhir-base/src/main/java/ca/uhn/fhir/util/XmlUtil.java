@@ -20,12 +20,13 @@ package ca.uhn.fhir.util;
  * #L%
  */
 import java.io.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.stream.*;
+import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
@@ -36,6 +37,8 @@ import com.ctc.wstx.stax.WstxOutputFactory;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.jar.DependencyLogFactory;
 import ca.uhn.fhir.util.jar.IDependencyLog;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utility methods for working with the StAX API.
@@ -1506,6 +1509,74 @@ public class XmlUtil {
 		
 		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
 	}
+
+	/**
+	 * Parses an XML string into a set of StAX events
+	 */
+	public static List<XMLEvent> parse(String theValue) {
+		if (isBlank(theValue)) {
+			return Collections.emptyList();
+		}
+
+		String val = theValue.trim();
+		if (!val.startsWith("<")) {
+			val = XhtmlDt.DIV_OPEN_FIRST + val + "</div>";
+		}
+		boolean hasProcessingInstruction = val.startsWith("<?");
+		if (hasProcessingInstruction && val.endsWith("?>")) {
+			return null;
+		}
+
+
+		try {
+			ArrayList<XMLEvent> value = new ArrayList<>();
+			StringReader reader = new StringReader(val);
+			XMLEventReader er = XmlUtil.createXmlReader(reader);
+			boolean first = true;
+			while (er.hasNext()) {
+				XMLEvent next = er.nextEvent();
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (er.hasNext()) {
+					// don't add the last event
+					value.add(next);
+				}
+			}
+			return value;
+
+		} catch (XMLStreamException e) {
+			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException(e);
+		}
+	}
+
+	/**
+	 * Encode a set of StAX events into a String
+	 */
+	public static String encode(List<XMLEvent> theEvents) {
+		try {
+			StringWriter w = new StringWriter();
+			XMLEventWriter ew = XmlUtil.createXmlFragmentWriter(w);
+
+			for (XMLEvent next : theEvents) {
+				if (next.isCharacters()) {
+					ew.add(next);
+				} else {
+					ew.add(next);
+				}
+			}
+			ew.close();
+			return w.toString();
+		} catch (XMLStreamException e) {
+			throw new DataFormatException("Problem with the contained XML events", e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException(e);
+		}
+	}
+
 
 	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
 		try {

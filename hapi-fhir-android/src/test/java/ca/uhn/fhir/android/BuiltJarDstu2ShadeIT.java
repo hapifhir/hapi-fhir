@@ -9,6 +9,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -21,6 +22,7 @@ public class BuiltJarDstu2ShadeIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2ShadeIT.class);
 
 	@Test
+	@Ignore
 	public void testParserXml() throws Exception {
 
 		FhirContext ctx = FhirContext.forDstu2();
