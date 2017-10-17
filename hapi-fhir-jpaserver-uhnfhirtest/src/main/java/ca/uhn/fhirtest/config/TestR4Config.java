@@ -34,7 +34,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
 	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_R4 = "${fhir.lucene.location.r4}";
-	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 20000;
+	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
 
 	@Value(TestR4Config.FHIR_DB_USERNAME)
 	private String myDbUsername;

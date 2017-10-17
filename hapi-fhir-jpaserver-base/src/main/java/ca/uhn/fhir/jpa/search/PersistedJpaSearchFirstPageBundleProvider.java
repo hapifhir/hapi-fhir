@@ -67,8 +67,11 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Override
 	public Integer size() {
-		mySearchTask.awaitInitialSync();
+		Integer size = mySearchTask.awaitInitialSync();
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+		if (size != null) {
+			return size;
+		}
 		return super.size();
 	}
 

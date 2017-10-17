@@ -17,7 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
+ * #L%family
  */
 import java.util.*;
 import java.util.concurrent.*;
@@ -439,7 +439,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySearchUuid = theSearchUuid;
 		}
 
-		public void awaitInitialSync() {
+		public Integer awaitInitialSync() {
 			ourLog.trace("Awaiting initial sync");
 			do {
 				try {
@@ -451,6 +451,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			} while (mySearch.getStatus() == SearchStatusEnum.LOADING);
 			ourLog.trace("Initial sync completed");
+
+			return mySearch.getTotalCount();
 		}
 
 		@Override
@@ -636,8 +638,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						myUnsyncedPids.clear();
 
 						if (theResultIter.hasNext() == false) {
-							mySearch.setStatus(SearchStatusEnum.FINISHED);
 							mySearch.setTotalCount(myCountSaved);
+							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 					}
 					mySearch.setNumFound(myCountSaved);
