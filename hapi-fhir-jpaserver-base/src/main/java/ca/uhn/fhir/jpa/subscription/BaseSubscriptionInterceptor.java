@@ -459,7 +459,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager);
 		}
 
 		registerSubscriptionCheckingSubscriber();

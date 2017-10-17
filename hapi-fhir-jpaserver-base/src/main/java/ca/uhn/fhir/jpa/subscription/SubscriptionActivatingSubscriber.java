@@ -27,20 +27,21 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.utilities.ucum.Canonical;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SuppressWarnings("unchecked")
 public class SubscriptionActivatingSubscriber {
 	private final IFhirResourceDao mySubscriptionDao;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
+	private final PlatformTransactionManager myTransactionManager;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	private FhirContext myCtx;
 	private Subscription.SubscriptionChannelType myChannelType;
@@ -48,11 +49,12 @@ public class SubscriptionActivatingSubscriber {
 	/**
 	 * Constructor
 	 */
-	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTransactionManager) {
 		mySubscriptionDao = theSubscriptionDao;
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
 		myChannelType = theChannelType;
 		myCtx = theSubscriptionDao.getContext();
+		myTransactionManager = theTransactionManager;
 	}
 
 	public void activateAndRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
@@ -90,7 +92,7 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 
-	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, IBaseResource theSubscription) throws MessagingException {
+	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
 
 		switch (theOperationType) {
 			case DELETE:
@@ -101,7 +103,13 @@ public class SubscriptionActivatingSubscriber {
 				if (!theId.getResourceType().equals("Subscription")) {
 					return;
 				}
-				activateAndRegisterSubscriptionIfRequired(theSubscription);
+				TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+				txTemplate.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						activateAndRegisterSubscriptionIfRequired(theSubscription);
+					}
+				});
 				break;
 			default:
 				break;
