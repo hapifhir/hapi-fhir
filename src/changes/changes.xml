@@ -7,6 +7,17 @@
 	</properties>
 	<body>
 		<release version="3.1.0" date="TBD">
+			<action type="fix">
+				The Android client module has been restored to working order, and no longer
+				requires a special classifier or an XML parser to be present in order to
+				work. This means that the hapi-fhir-android library is much less likely
+				to cause conflicts with other libraries imported into an Android application
+				via Gradle.
+				<![CDATA[<br/><br/>]]>
+				See the
+				<![CDATA[<a href="http://hapifhir.io/doc_android.html">HAPI FHIR Android Documentation</a>]]>
+				for more information.
+			</action>
 			<action type="add">
 				A performance to the JPA server has been made which reduces the number
 				of writes to index tables when updating a resource with contents that
@@ -102,7 +113,7 @@
 				classes (which are Java Enums for the various FHIR codesystems).
 				These were accidentally removed in HAPI FHIR 3.0.0. Thanks to
 				GitHub user @CarthageKing for reporting!
-			</action> 
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

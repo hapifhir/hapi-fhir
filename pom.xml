@@ -1646,7 +1646,6 @@
 						<artifactId>maven-scm-api</artifactId>
 						<version>1.9.5</version>
 					</dependency>
-					<!-- <dependency> <groupId>org.apache.maven.doxia</groupId> <artifactId>doxia-core</artifactId> <version>1.7</version> </dependency> -->
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
@@ -1686,17 +1685,11 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> <groupId>com.github.github</groupId> <artifactId>site-maven-plugin</artifactId> <version>0.12</version> <configuration> <message>Building site for ${project.version}</message> <server>github</server> 
-				</configuration> <executions> <execution> <goals> <goal>site</goal> </goals> <phase>site-deploy</phase> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
 
 	<reporting>
 		<plugins>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
-				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
-			<!-- <plugin> <groupId>org.jacoco</groupId> <artifactId>jacoco-maven-plugin</artifactId> <version>0.7.7.201606060606</version> <reportSets> <reportSet> <reports> <report>report</report> </reports> <configuration> 
-				<dataFileIncludes>${baseDir}/hapi-fhir-base/target/jacoco.exec</dataFileIncludes> </configuration> </reportSet> </reportSets> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>

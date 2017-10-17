@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.util.*;
 import java.util.Map.Entry;
 
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -47,7 +48,7 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 	@Qualifier("mySystemDaoDstu2")
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
-	@Autowired
+	@Autowired(required = false)
 	private IFulltextSearchSvc mySearchDao;
 	
 	//@formatter:off
@@ -178,7 +179,8 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 			@OperationParam(name="searchParam", min=1, max=1) String theSearchParam,
 			@OperationParam(name="text", min=1, max=1) String theText
 		) {
-		
+		JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
+
 		if (isBlank(theContext)) {
 			throw new InvalidRequestException("Parameter 'context' must be provided");
 		}
@@ -188,16 +190,14 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		if (isBlank(theText)) {
 			throw new InvalidRequestException("Parameter 'text' must be provided");
 		}
-		
+
 		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText);
 		
 		Parameters retVal = new Parameters();
 		for (Suggestion next : keywords) {
-			//@formatter:off
 			retVal.addParameter()
 					.addPart(new Parameter().setName("keyword").setValue(new StringDt(next.getTerm())))
 					.addPart(new Parameter().setName("score").setValue(new DecimalDt(next.getScore())));
-			//@formatter:on
 		}
 
 		return retVal;
