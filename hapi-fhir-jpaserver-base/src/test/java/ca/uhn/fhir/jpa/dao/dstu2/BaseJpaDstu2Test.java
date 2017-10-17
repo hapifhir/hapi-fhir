@@ -120,7 +120,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected Object myResourceProviders;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
+	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
