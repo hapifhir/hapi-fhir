@@ -96,6 +96,13 @@
 				HAPI FHIR to run in environments where StAX is not available, such
 				as Android phones.
 			</action>
+			<action type="add" issue="761">
+				Restored the 
+				<![CDATA[<code>org.hl7.fhir.r4.model.codesystem.*</code>]]>
+				classes (which are Java Enums for the various FHIR codesystems).
+				These were accidentally removed in HAPI FHIR 3.0.0. Thanks to
+				GitHub user @CarthageKing for reporting!
+			</action> 
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

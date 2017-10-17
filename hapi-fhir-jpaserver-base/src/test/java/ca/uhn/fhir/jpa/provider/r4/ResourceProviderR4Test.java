@@ -3127,7 +3127,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithCountNotSet() throws Exception {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 
 		for (int i =0; i < 10; i++) {
 			Patient pat = new Patient();
