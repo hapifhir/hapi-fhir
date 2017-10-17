@@ -111,52 +111,14 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>dstu2_shade</id>
+						<id>it</id>
 						<goals>
 							<goal>integration-test</goal>
-							<goal>verify</goal>
 						</goals>
 						<configuration>
 							<includes>
-								<include>**/*Dstu2ShadeIT.java</include>
+								<include>**/*IT.java</include>
 							</includes>
-							<classpathDependencyExcludes>
-								<!--<classpathDependencyExclude>ca.uhn.hapi.fhir:*</classpathDependencyExclude>-->
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>dstu2</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*Dstu2IT.java</include>
-							</includes>
-							<classpathDependencyExcludes>
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>dstu3</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*Dstu3IT.java</include>
-							</includes>
-							<classpathDependencyExcludes>
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
 						</configuration>
 					</execution>
 				</executions>
