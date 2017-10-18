@@ -1,9 +1,11 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.r4.validation;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.junit.AfterClass;
 import org.junit.Test;
 

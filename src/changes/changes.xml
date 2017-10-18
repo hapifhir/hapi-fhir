@@ -114,6 +114,12 @@
 				These were accidentally removed in HAPI FHIR 3.0.0. Thanks to
 				GitHub user @CarthageKing for reporting!
 			</action>
+			<action type="fix">
+				The resource Profile Validator has been enhanced to not try to validate
+				bound fields where the binding strength is "example", and a crash was
+				resolved when validating QuestionnaireResponse answers with a type
+				of "choice" where the choice was bound to a ValueSet.
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

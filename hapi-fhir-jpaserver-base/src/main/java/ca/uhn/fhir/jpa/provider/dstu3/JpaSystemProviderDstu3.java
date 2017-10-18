@@ -180,7 +180,7 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
 		@OperationParam(name = "text", min = 1, max = 1) String theText
 	) {
-		JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
+
 
 		if (isBlank(theContext)) {
 			throw new InvalidRequestException("Parameter 'context' must be provided");
