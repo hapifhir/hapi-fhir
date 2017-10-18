@@ -1,4 +1,4 @@
-package ca.uhn.fhir.r4.validation;
+package org.hl7.fhir.r4.validation;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -241,9 +241,9 @@ public class FhirInstanceValidatorR4Test {
 
 		myVal.registerValidatorModule(myInstanceVal);
 
-		mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
+		mySupportedCodeSystemsForExpansion = new HashMap<>();
 
-		myValidConcepts = new ArrayList<String>();
+		myValidConcepts = new ArrayList<>();
 
 		when(myMockSupport.expandValueSet(any(FhirContext.class), any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
