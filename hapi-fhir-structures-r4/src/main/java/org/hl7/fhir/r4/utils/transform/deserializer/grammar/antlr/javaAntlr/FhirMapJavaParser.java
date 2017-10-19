@@ -1,6 +1,5 @@
-// Generated from FhirMap.g4 by ANTLR 4.7
+// Generated from FhirMapJava.g4 by ANTLR 4.7
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
-
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -163,7 +162,7 @@ public class FhirMapJavaParser extends Parser {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "FhirMap.g4"; }
+	public String getGrammarFileName() { return "FhirMapJava.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -680,7 +679,7 @@ public class FhirMapJavaParser extends Parser {
 			setState(305);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EXTENSION) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
 				{
 				{
 				setState(302);
@@ -1393,7 +1392,7 @@ public class FhirMapJavaParser extends Parser {
 			setState(366);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EXTENSION) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
 				{
 				setState(365);
 				groupCallParameters();
@@ -1857,6 +1856,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -2288,7 +2288,7 @@ public class FhirMapJavaParser extends Parser {
 			setState(472);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EXTENSION) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
 				{
 				{
 				setState(469);
@@ -2731,6 +2731,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -2933,6 +2934,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -3153,6 +3155,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -3730,6 +3733,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -4388,14 +4392,14 @@ public class FhirMapJavaParser extends Parser {
 			{
 			setState(685);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << QIDENTIFIER) | (1L << QSTRING) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) {
+			switch ( getInterpreter().adaptivePredict(_input,62,_ctx) ) {
+			case 1:
 				{
 				setState(684);
 				ruleTargetContext();
 				}
+				break;
 			}
-
 			setState(687);
 			match(EXTENSION);
 			setState(688);
@@ -5745,6 +5749,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -6316,6 +6321,7 @@ public class FhirMapJavaParser extends Parser {
 			case DEFAULT:
 			case DISPLAY:
 			case ESCAPE:
+			case EXTENSION:
 			case EVALUATE:
 			case ID:
 			case MAP:
@@ -6553,6 +6559,7 @@ public class FhirMapJavaParser extends Parser {
 		public TerminalNode DATEOP() { return getToken(FhirMapJavaParser.DATEOP, 0); }
 		public TerminalNode DEFAULT() { return getToken(FhirMapJavaParser.DEFAULT, 0); }
 		public TerminalNode ESCAPE() { return getToken(FhirMapJavaParser.ESCAPE, 0); }
+		public TerminalNode EXTENSION() { return getToken(FhirMapJavaParser.EXTENSION, 0); }
 		public TerminalNode EVALUATE() { return getToken(FhirMapJavaParser.EVALUATE, 0); }
 		public TerminalNode ID() { return getToken(FhirMapJavaParser.ID, 0); }
 		public TerminalNode MAP() { return getToken(FhirMapJavaParser.MAP, 0); }
@@ -6584,7 +6591,7 @@ public class FhirMapJavaParser extends Parser {
 			{
 			setState(903);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SOURCE) | (1L << TARGET) | (1L << QUERIED) | (1L << PRODUCED) | (1L << APPEND) | (1L << CAST) | (1L << C) | (1L << CC) | (1L << CODE) | (1L << CP) | (1L << CODEABLECONCEPT) | (1L << CODING) | (1L << COPY) | (1L << CREATE) | (1L << DATEOP) | (1L << DEFAULT) | (1L << DISPLAY) | (1L << ESCAPE) | (1L << EXTENSION) | (1L << EVALUATE) | (1L << ID) | (1L << MAP) | (1L << POINTER) | (1L << QTY) | (1L << REFERENCE) | (1L << SYSTEM) | (1L << TRANSLATE) | (1L << TRUNCATE) | (1L << TYPES) | (1L << UUID) | (1L << IDENTIFIER))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -6933,12 +6940,12 @@ public class FhirMapJavaParser extends Parser {
 		"\u00a6\u00a8\u00aa\u00ac\u00ae\u00b0\u00b2\u00b4\u00b6\u00b8\u00ba\u00bc"+
 		"\u00be\u00c0\u00c2\u00c4\u00c6\u00c8\u00ca\u00cc\u00ce\u00d0\u00d2\u00d4"+
 		"\u00d6\u00d8\u00da\u00dc\u00de\u00e0\u00e2\u00e4\u00e6\u00e8\u00ea\u00ec"+
-		"\u00ee\u00f0\u00f2\u00f4\u00f6\u00f8\u00fa\2\4\r\2\20\23\26\26\30\34\36"+
-		"$&&((,,\60\64\668::==\3\2\24\25\2\u0390\2\u00fc\3\2\2\2\4\u010a\3\2\2"+
-		"\2\6\u010f\3\2\2\2\b\u011a\3\2\2\2\n\u011c\3\2\2\2\f\u011e\3\2\2\2\16"+
-		"\u0120\3\2\2\2\20\u0122\3\2\2\2\22\u0124\3\2\2\2\24\u0129\3\2\2\2\26\u0138"+
-		"\3\2\2\2\30\u0140\3\2\2\2\32\u0143\3\2\2\2\34\u0145\3\2\2\2\36\u014a\3"+
-		"\2\2\2 \u014c\3\2\2\2\"\u014e\3\2\2\2$\u0150\3\2\2\2&\u015a\3\2\2\2(\u015c"+
+		"\u00ee\u00f0\u00f2\u00f4\u00f6\u00f8\u00fa\2\4\f\2\20\23\26\26\30\34\36"+
+		"$&(,,\60\64\668::==\3\2\24\25\2\u0390\2\u00fc\3\2\2\2\4\u010a\3\2\2\2"+
+		"\6\u010f\3\2\2\2\b\u011a\3\2\2\2\n\u011c\3\2\2\2\f\u011e\3\2\2\2\16\u0120"+
+		"\3\2\2\2\20\u0122\3\2\2\2\22\u0124\3\2\2\2\24\u0129\3\2\2\2\26\u0138\3"+
+		"\2\2\2\30\u0140\3\2\2\2\32\u0143\3\2\2\2\34\u0145\3\2\2\2\36\u014a\3\2"+
+		"\2\2 \u014c\3\2\2\2\"\u014e\3\2\2\2$\u0150\3\2\2\2&\u015a\3\2\2\2(\u015c"+
 		"\3\2\2\2*\u015e\3\2\2\2,\u0163\3\2\2\2.\u0165\3\2\2\2\60\u0167\3\2\2\2"+
 		"\62\u016b\3\2\2\2\64\u016d\3\2\2\2\66\u0174\3\2\2\28\u017c\3\2\2\2:\u0183"+
 		"\3\2\2\2<\u018b\3\2\2\2>\u0193\3\2\2\2@\u01a6\3\2\2\2B\u01b0\3\2\2\2D"+

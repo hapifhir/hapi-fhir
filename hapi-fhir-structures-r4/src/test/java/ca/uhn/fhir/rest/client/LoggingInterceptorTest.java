@@ -2,11 +2,8 @@ package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 
 import java.net.URL;
 
@@ -65,12 +62,12 @@ public class LoggingInterceptorTest {
 		myLoggerRoot.addAppender(myMockAppender);
 	}
 
-	@Test
+	/*@Test Old logger on old Mockito code
 	public void testLogger() throws Exception {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		
+
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
@@ -87,11 +84,16 @@ public class LoggingInterceptorTest {
 
 		// Unregister the interceptor
 		client.unregisterInterceptor(interceptor);
-		
+
 		patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			@Override
+			public boolean matches(ILoggingEvent argument) {
+				return false;
+			}
+
 			@Override
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
@@ -99,6 +101,39 @@ public class LoggingInterceptorTest {
 				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
 		}));
+
+	}*/
+
+	@Test
+	public void testLogger() throws Exception {
+		System.out.println("Starting testLogger");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		client.registerInterceptor(interceptor);
+		Patient patient = client.read(Patient.class, "1");
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+
+		verify(myMockAppender, times(1)).doAppend(argThat(argument -> {
+            String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+            System.out.println("Verifying: " + formattedMessage);
+            return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
+        }));
+
+		// Unregister the interceptor
+		client.unregisterInterceptor(interceptor);
+		
+		patient = client.read(Patient.class, "1");
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+
+		//			@Override
+//			public boolean matches(final Object argument) {
+//				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+//				System.out.println("Verifying: " + formattedMessage);
+//				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
+//			}
+		verify(myMockAppender, times(1)).doAppend(argThat(argument -> false));
 
 	}
 

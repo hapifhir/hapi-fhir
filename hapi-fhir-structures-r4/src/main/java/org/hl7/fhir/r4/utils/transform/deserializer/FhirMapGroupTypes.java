@@ -36,7 +36,7 @@ public enum FhirMapGroupTypes
           case Types:
             return "types";
           case TypeTypes:
-            return "type+types";
+            return "type-and-types";
           default:
             return "?";
         }

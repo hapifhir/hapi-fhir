@@ -411,7 +411,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
         try {
             this.executor.groupInput( (String) this.visit(context.groupInputName()), (String) this.visit(context.groupInputType()), (FhirMapInputModes) this.visit(context.groupInputMode()));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getStackTrace());
         }
         return null;
     }
@@ -945,7 +945,11 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     @Override
     public Object visitRuleTargetExtension(FhirMapJavaParser.RuleTargetExtensionContext context){
       try {
-        this.executor.transformExtension((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetVariable()));
+        String variable = null;
+        if (context.ruleTargetVariable() != null){
+          variable = (String) this.visit(context.ruleTargetVariable());
+        }
+        this.executor.transformExtension((List<String>) this.visit(context.ruleTargetContext()), variable);
       } catch (Exception e) {
         e.printStackTrace();
       }

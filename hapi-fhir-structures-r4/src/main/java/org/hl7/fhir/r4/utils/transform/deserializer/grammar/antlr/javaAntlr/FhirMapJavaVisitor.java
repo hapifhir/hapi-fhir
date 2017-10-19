@@ -1,6 +1,5 @@
-// Generated from FhirMap.g4 by ANTLR 4.7
-package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
-
+// Generated from FhirMapJava.g4 by ANTLR 4.7
+  package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 

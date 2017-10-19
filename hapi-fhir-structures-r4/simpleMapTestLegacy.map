@@ -1,0 +1,13 @@
+map "http://foo.com/StructureMap/MyMap" = "My map"
+
+uses "http://opencimi.org/structuredefinition/TestStructure" as source
+uses "http://hl7.org/fhir/StructureDefinition/Coding" as target
+
+group for type+types TestStructure
+
+	input source : TestStructure as source
+	input target : Coding as target
+
+	TestStructure.someValue : for source.someValue as val make target.extension as ext, ext.value = val
+
+endgroup

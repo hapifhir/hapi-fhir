@@ -13,36 +13,36 @@ import java.util.ArrayList;
 // </copyright>
 
 
-  /** 
+  /**
    ANTLR visitor class.
   */
   public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   {
-	/** 
+	/**
 	 Delegate for optional dumping of info.
-	 
+
 	*/
 	public interface DumpDelegate
 	{
 		void invoke(String msg);
 	}
 
-	/** 
+	/**
 	 Set this to callback function to dump parsing messages.
 	*/
 	public DumpDelegate DumpFcn = null;
 
-	/** 
+	/**
 	 Constructor.
-	 
+
 	*/
 	public UrlVisitor()
 	{
 	}
 
-	/** 
+	/**
 	 Parse grammar rule url
-	 
+
 	 @param context
 	 @return url
 	*/
@@ -64,10 +64,10 @@ import java.util.ArrayList;
 			return retVal;
 	}
 
-	/** 
+	/**
 	 Parse grammar rule authority
 	 Return Uri authority field
-	 
+
 	 @param context
 	 @return authority name (i.e. http)
 	*/
@@ -77,10 +77,10 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule hostName
 	 Return host name
-	 
+
 	 @param context
 	 @return host name
 	*/
@@ -90,9 +90,9 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule port
-	 
+
 	 @param context
 	 @return Port number
 	*/
@@ -102,9 +102,9 @@ import java.util.ArrayList;
 	  return Integer.parseInt(context.getText());
 	}
 
-	/** 
+	/**
 	 Parse grammar rule search
-	 
+
 	 @param context
 	 @return SearchData array of search components
 	*/
@@ -120,9 +120,9 @@ import java.util.ArrayList;
      return retVal;
 	}
 
-	/** 
+	/**
 	 Parse grammar rule searchParameter
-	 
+
 	 @param context
 	 @return Path component
 	*/
@@ -139,9 +139,9 @@ import java.util.ArrayList;
 		return null;
 	}
 
-	/** 
+	/**
 	 Parse grammar rule searchParameterName
-	 
+
 	 @param context
 	 @return String search parameter name
 	*/
@@ -151,9 +151,9 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule searchParameterValue
-	 
+
 	 @param context
 	 @return String search parameter value
 	*/
@@ -163,9 +163,9 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule path
-	 
+
 	 @param context
 	 @return String array of components
 	*/
@@ -183,10 +183,10 @@ import java.util.ArrayList;
 	  return VisitorExtensions.<String>VisitMultiple(this, context.stringVal(), values);
 	}
 
-	/** 
+	/**
 	 Parse grammar rule login
 	 Load LoginData instance with parsed login data.
-	 
+
 	 @param context
 	 @return LoginData instance
 	*/
@@ -199,9 +199,9 @@ import java.util.ArrayList;
 	  return retVal;
 	}
 
-	/** 
+	/**
 	 Parse grammar rule string
-	 
+
 	 @param context
 	 @return String user name
 	*/
@@ -211,9 +211,9 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule user
-	 
+
 	 @param context
 	 @return String user name
 	*/
@@ -223,9 +223,9 @@ import java.util.ArrayList;
 	  return context.getText();
 	}
 
-	/** 
+	/**
 	 Parse grammar rule password
-	 
+
 	 @param context
 	 @return String user name
 	*/

@@ -1,6 +1,5 @@
-// Generated from FhirMap.g4 by ANTLR 4.7
+// Generated from FhirMapJava.g4 by ANTLR 4.7
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
-
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -108,7 +107,7 @@ public class FhirMapJavaLexer extends Lexer {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "FhirMap.g4"; }
+	public String getGrammarFileName() { return "FhirMapJava.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }

@@ -1,6 +1,5 @@
 // Generated from UrlJava.g4 by ANTLR 4.7
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
-
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -32,7 +31,7 @@ public class UrlJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUrl(UrlJavaParser.UrlContext ctx)  { return visitChildren(ctx); }
+	@Override public T visitUrl(UrlJavaParser.UrlContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

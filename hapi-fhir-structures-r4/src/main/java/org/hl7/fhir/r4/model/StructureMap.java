@@ -943,7 +943,7 @@ public class StructureMap extends MetadataResource {
             case QTY: return "qty";
             case ID: return "id";
             case CP: return "cp";
-            case EXTENSION: return "cp";
+            case EXTENSION: return "extension";
             default: return "?";
           }
         }
