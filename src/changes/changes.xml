@@ -130,6 +130,11 @@
 				resolved when validating QuestionnaireResponse answers with a type
 				of "choice" where the choice was bound to a ValueSet.
 			</action>
+			<action type="fix">
+				Remove the fake "Test" resource from DSTU2 structures. This was not
+				a real resource type, and caused conflicts with the .NET client. Thanks to
+				Vlad Ignatov for reporting!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
