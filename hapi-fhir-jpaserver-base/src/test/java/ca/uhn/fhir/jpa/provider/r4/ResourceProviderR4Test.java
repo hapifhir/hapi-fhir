@@ -3150,7 +3150,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithCountSearchResultsUpTo20() throws Exception {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myDaoConfig.setCountSearchResultsUpTo(20);
 
 		for (int i =0; i < 10; i++) {
@@ -3174,7 +3174,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithCountSearchResultsUpTo5() throws Exception {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(100);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myDaoConfig.setCountSearchResultsUpTo(5);
 
 		for (int i =0; i < 10; i++) {

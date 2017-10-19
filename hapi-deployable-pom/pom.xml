@@ -111,6 +111,10 @@
 							<groupId>org.jscience</groupId>
 							<artifactId>jscience</artifactId>
 						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-jcl</artifactId>
+						</dependency>
 					</ignoredDependencies>
 					<ignoredResources>
 						<ignoredResource>changelog.txt</ignoredResource>

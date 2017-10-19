@@ -7,6 +7,16 @@
 	</properties>
 	<body>
 		<release version="3.1.0" date="TBD">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Spring (JPA): 4.3.10 -&gt; 5.0.0</li>
+					</ul>
+				]]>
+			</action>
+
 			<action type="fix">
 				The Android client module has been restored to working order, and no longer
 				requires a special classifier or an XML parser to be present in order to
