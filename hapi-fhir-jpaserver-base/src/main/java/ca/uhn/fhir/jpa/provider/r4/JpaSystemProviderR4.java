@@ -45,7 +45,7 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
-	@Autowired
+	@Autowired(required = false)
 	private IFulltextSearchSvc mySearchDao;
 	
 	//@formatter:off
@@ -175,6 +175,7 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 			@OperationParam(name="searchParam", min=1, max=1) String theSearchParam,
 			@OperationParam(name="text", min=1, max=1) String theText
 		) {
+		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
 		
 		if (isBlank(theContext)) {
 			throw new InvalidRequestException("Parameter 'context' must be provided");
