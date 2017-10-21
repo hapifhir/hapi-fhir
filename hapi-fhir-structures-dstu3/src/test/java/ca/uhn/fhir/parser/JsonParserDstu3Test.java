@@ -77,6 +77,22 @@ public class JsonParserDstu3Test {
 		}
 	}
 
+
+	/**
+	 * See #720
+	 */
+	@Test
+	public void testParseCustomResourceType() {
+		String input = "{\"resourceType\":\"Bug720ResourceType\",\"meta\":{\"profile\":[\"http://example.com/StructureDefinition/dontuse#Bug720ResourceType\"]},\"supportedVersion\":\"2.5.x\",\"templatesConsentTemplate\":[{\"domainName\":\"name\",\"Name\":\"template_01\",\"version\":\"1.0\",\"title\":\"title\",\"comment\":\"comment\",\"contact\":{\"resourceType\":\"Person\",\"name\":[{\"family\":\"Mustermann\",\"given\":[\"Max\"]}],\"telecom\":[{\"system\":\"email\",\"value\":\"max.mustermann@mail.de\"},{\"system\":\"phone\",\"value\":\"+49 1234 23232\"}],\"address\":[{\"text\":\"street 1-2\",\"city\":\"city\",\"postalCode\":\"12345\",\"country\":\"Germany\"}]}}]}";
+		Bug720ResourceType parsed = ourCtx.newJsonParser().parseResource(Bug720ResourceType.class, input);
+
+		assertEquals(1, parsed.getTemplates().size());
+		assertEquals(Bug720Datatype.class, parsed.getTemplates().get(0).getClass());
+		assertEquals("Mustermann", ((Bug720Datatype)parsed.getTemplates().get(0)).getContact().getNameFirstRep().getFamily());
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed));
+	}
+
 	/**
 	 * See #563
 	 */

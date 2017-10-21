@@ -125,6 +125,11 @@
 				a real resource type, and caused conflicts with the .NET client. Thanks to
 				Vlad Ignatov for reporting!
 			</action>
+			<action type="fix" issue="720">
+				Parsing a DSTU3/R4 custom structure which contained a field of
+				a custom type caused a crash during parsing. Thanks to 
+				GitHub user @mosaic-hgw for reporting!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

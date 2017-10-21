@@ -877,6 +877,18 @@ public class FhirInstanceValidatorDstu3Test {
 
 	}
 
+	@Test
+	public void testGoal() {
+		Goal goal = new Goal();
+		goal.setSubject(new Reference("Patient/123"));
+		goal.setDescription(new CodeableConcept().addCoding(new Coding("http://foo","some other goal","")));
+		goal.setStatus(Goal.GoalStatus.INPROGRESS);
+
+		ValidationResult results = myVal.validateWithResult(goal);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertEquals(0, outcome.size());
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
