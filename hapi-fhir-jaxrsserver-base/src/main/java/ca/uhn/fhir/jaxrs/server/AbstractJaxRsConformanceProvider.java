@@ -66,6 +66,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
 
 	/** the conformance. It is created once during startup */
+	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
 	private CapabilityStatement myDstu3CapabilityStatement;
 	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
 	private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
@@ -126,7 +127,11 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
 		hardcodedServerAddressStrategy.setValue(getBaseForServer());
 		serverConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
-		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.R4)) {
+			org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider serverCapabilityStatementProvider = new org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
+			serverCapabilityStatementProvider.initializeOperations();
+			myR4CapabilityStatement = serverCapabilityStatementProvider.getServerConformance(null);
+		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			ServerCapabilityStatementProvider serverCapabilityStatementProvider = new ServerCapabilityStatementProvider(serverConfiguration);
 			serverCapabilityStatementProvider.initializeOperations();
 			myDstu3CapabilityStatement = serverCapabilityStatementProvider.getServerConformance(null);
@@ -177,7 +182,10 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
 		
 		IBaseResource conformance = null;
-		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.R4)) {
+			conformance = myR4CapabilityStatement;
+//			return (Response) response.returnResponse(ParseAction.create(myDstu3CapabilityStatement), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
+		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			conformance = myDstu3CapabilityStatement;
 //			return (Response) response.returnResponse(ParseAction.create(myDstu3CapabilityStatement), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
 		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2_1)) {
@@ -271,7 +279,9 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<IBaseResource> getResourceType() {
-		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.R4)) {
+			return Class.class.cast(org.hl7.fhir.r4.model.CapabilityStatement.class);
+		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			return Class.class.cast(CapabilityStatement.class);
 		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2_1)) {
 			return Class.class.cast(org.hl7.fhir.dstu2016may.model.Conformance.class);

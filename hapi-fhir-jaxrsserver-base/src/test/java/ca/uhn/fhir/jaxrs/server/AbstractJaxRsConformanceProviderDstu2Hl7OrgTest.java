@@ -12,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.*;
 
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2Hl7Org;
 import org.glassfish.jersey.internal.MapPropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2Hl7Org;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -48,7 +48,7 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 	@Test
 	public void testConformance() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
+		providers.put(TestJaxRsDummyPatientProviderDstu2Hl7Org.class, new TestJaxRsDummyPatientProviderDstu2Hl7Org());
 		Response response = createConformanceProvider(providers).conformance();
 		System.out.println(response);
 	}
@@ -56,7 +56,7 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 	@Test
 	public void testConformanceUsingOptions() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
+		providers.put(TestJaxRsDummyPatientProviderDstu2Hl7Org.class, new TestJaxRsDummyPatientProviderDstu2Hl7Org());
 		Response response = createConformanceProvider(providers).conformanceUsingOptions();
 		System.out.println(response);
 	}
