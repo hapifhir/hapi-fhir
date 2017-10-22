@@ -81,7 +81,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	private IBaseOperationOutcome createOutcome(final DataFormatException theException) {
 		final IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getFhirContext());
-		final String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
+		final String detailsValue = theException.getMessage() + (this.withStackTrace() ? "\n\n" + ExceptionUtils.getStackTrace(theException) : "");
 		OperationOutcomeUtil.addIssue(getFhirContext(), oo, ERROR, detailsValue, null, PROCESSING);
 		return oo;
 	}
