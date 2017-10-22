@@ -21,12 +21,9 @@ package org.hl7.fhir.instance.conf;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.jar.Manifest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -71,7 +68,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-  private RestulfulServerConfiguration myServerConfiguration;
+	private RestulfulServerConfiguration myServerConfiguration;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
      this.myServerConfiguration = theRestfulServer.createConfiguration();
@@ -91,10 +88,10 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		super();
 	}
 
-	@Override
-	public void setRestfulServer (RestfulServer theRestfulServer) {
+   @Override
+   public void setRestfulServer (RestfulServer theRestfulServer) {
      myServerConfiguration = theRestfulServer.createConfiguration();
-	}
+   }
 
   RestulfulServerConfiguration getServerConfiguration() {
     return myServerConfiguration;
