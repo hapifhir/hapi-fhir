@@ -47,6 +47,10 @@ public class InvalidRequestException extends BaseServerResponseException {
 	public InvalidRequestException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
+
+	public InvalidRequestException(Throwable theCause) {
+		super(STATUS_CODE, theCause);
+	}
 	
 	/**
 	 * Constructor
