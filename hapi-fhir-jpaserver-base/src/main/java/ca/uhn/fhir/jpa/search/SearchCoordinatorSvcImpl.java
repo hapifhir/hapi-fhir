@@ -184,6 +184,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		StopWatch w = new StopWatch();
 		final String searchUuid = UUID.randomUUID().toString();
 
+		ourLog.info("Registering new search {}", searchUuid);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
@@ -203,6 +205,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+
+			ourLog.info("Search {} is loading in synchronous mode", searchUuid);
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);

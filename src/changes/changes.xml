@@ -13,6 +13,7 @@
 				<![CDATA[
 					<ul>
 						<li>Spring (JPA): 4.3.10 -&gt; 5.0.0</li>
+						<li>Jackson (JPA): 2.8.1 -&gt; 2.9.2</li>
 					</ul>
 				]]>
 			</action>

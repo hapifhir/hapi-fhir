@@ -52,14 +52,14 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	@After
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -83,7 +83,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -114,7 +114,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = ourClient.create().resource(subscription).execute();
+		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 
 	}

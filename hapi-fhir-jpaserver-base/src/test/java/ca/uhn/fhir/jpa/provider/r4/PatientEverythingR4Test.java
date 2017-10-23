@@ -57,41 +57,41 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient2 = new Patient();
 		patient2.getManagingOrganization().setReference(orgId);
-		myWrongPatId = ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
 		enc1.getSubject().setReference(patId);
 		enc1.getServiceProvider().setReference(orgId);
-		encId1 = ourClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
+		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
 		enc2.getSubject().setReference(patId);
 		enc2.getServiceProvider().setReference(orgId);
-		encId2 = ourClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter wrongEnc1 = new Encounter();
 		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
 		wrongEnc1.getSubject().setReference(myWrongPatId);
 		wrongEnc1.getServiceProvider().setReference(orgId);
-		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongEnc1 = myClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		myObsIds = new ArrayList<String>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			myObsIds.add(obsId);
 		}
 
