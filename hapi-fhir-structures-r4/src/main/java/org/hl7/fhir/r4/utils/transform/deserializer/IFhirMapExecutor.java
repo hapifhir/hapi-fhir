@@ -6,7 +6,6 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 
-import org.eclipse.sisu.Nullable;
 
 import java.util.List;
 
@@ -16,8 +15,7 @@ import java.util.List;
 */
 public interface IFhirMapExecutor   
 {
-  //TODO: FIX FIELDS TO BE NULLABLE
-    /**
+  /**
     * Called when map .... comand found.
     * 
     *  @param structureMap 
@@ -46,7 +44,7 @@ public interface IFhirMapExecutor
     *  @param groupName name of group
     *  @param groupType Group type. In grammar this is optional in which case this will be set to GroupTypesUnset)
     */
-    void groupStart(String groupName, FhirMapGroupTypes groupType, @Nullable String groupExtendName) throws Exception ;
+    void groupStart(String groupName, FhirMapGroupTypes groupType, String groupExtendName) throws Exception ;
 
     /**
     * Called at end of group definitions.
@@ -80,7 +78,7 @@ public interface IFhirMapExecutor
     *  @param wherePath Optional where fhir path. . Null if unset
     *  @param checkPath Optional check fhir path. . Null if unset
     */
-    void ruleSource(List<String> context, @Nullable FhirMapRuleType type, @Nullable String defaultValue, @Nullable FhirMapListOptions listOptions, @Nullable String variable, @Nullable String wherePath, @Nullable String checkPath) throws Exception ;
+    void ruleSource(List<String> context,  FhirMapRuleType type,  String defaultValue,  FhirMapListOptions listOptions,  String variable,  String wherePath,  String checkPath) throws Exception ;
 
     /**
     * Execute transform similar to following.

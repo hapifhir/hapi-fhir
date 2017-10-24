@@ -12,6 +12,12 @@ import java.util.List;
 */
 public class FhirMapRuleType   
 {
+  public FhirMapRuleType(String typeName, List<Integer> occurances){
+    this.TypeName = typeName;
+    this.Occurances = occurances;
+  }
+  public FhirMapRuleType() {
+  }
     /**
     * Compare two instances to each other.
     * 

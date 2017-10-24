@@ -5,19 +5,17 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.transform.deserializer.*;
 
 import java.util.List;
+import java.util.Stack;
 
 public class ParseImpl implements IFhirMapExecutor {
 
   public StructureMap structureMap = new StructureMap();
   StructureMap.StructureMapGroupComponent currentGroup;
-  StructureMap.StructureMapGroupRuleComponent currentRule;
   StructureMap.StructureMapGroupInputComponent currentInput;
   StructureMap.StructureMapGroupRuleSourceComponent currentSource;
   StructureMap.StructureMapGroupRuleTargetComponent currentTarget;
 
-  StructureMap.StructureMapGroupRuleComponent parentRule;
-
-  boolean isChildRule = false;
+  Stack<StructureMap.StructureMapGroupRuleComponent> ruleComponentStack = new Stack<>();
 
   @Override
   public void map(UrlData structureMap, String name) throws Exception {
@@ -45,6 +43,7 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentGroup.setName(groupName);
     this.currentGroup.setTypeMode(StructureMap.StructureMapGroupTypeMode.fromCode(groupType.getValue()));
     this.currentGroup.setExtends(groupExtendName);
+    this.ruleComponentStack.clear(); //Clear the stack for good measure, anything that isn't resolved gets lost to the aether.
   }
 
   @Override
@@ -63,10 +62,7 @@ public class ParseImpl implements IFhirMapExecutor {
 
   @Override
   public void ruleStart(List<String> ruleName) throws Exception {
-    if (!this.currentGroup.getRule().contains(this.currentRule)){
-
-    }
-    this.currentRule = new StructureMap.StructureMapGroupRuleComponent();
+    this.ruleComponentStack.push(new StructureMap.StructureMapGroupRuleComponent());
     String name = "";
     for (String s : ruleName){
       if (name.length()==0){
@@ -76,7 +72,7 @@ public class ParseImpl implements IFhirMapExecutor {
         name += "."+s;
       }
     }
-    this.currentRule.setName(name);
+    this.ruleComponentStack.peek().setName(name);
   }
 
   @Override
@@ -98,7 +94,7 @@ public class ParseImpl implements IFhirMapExecutor {
       this.currentSource.setCondition(wherePath);
     if (checkPath != null)
       this.currentSource.setCheck(checkPath);
-    this.currentRule.addSource(this.currentSource);
+    this.ruleComponentStack.peek().addSource(this.currentSource);
   }
 
   @Override
@@ -111,7 +107,7 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentTarget.setVariable(targetVariable);
     //this.currentTarget.setTransform(StructureMap.StructureMapTransfor);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -137,7 +133,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.APPEND);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -160,7 +156,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.CAST);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -184,7 +180,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.C);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -202,7 +198,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.CC);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -217,7 +213,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.CC);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -227,12 +223,17 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentTarget.setContext(context.get(0));
     this.currentTarget.setElement(context.get(1));
 
-    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType(copyVariable)));
+    if (copyVariable.contains("\"")){
+      this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(copyVariable.substring(1, copyVariable.length() - 1))));
+    }
+    else {
+      this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType(copyVariable)));
+    }
     if (targetVariable != null){
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.COPY);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -248,7 +249,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.CP);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -265,7 +266,7 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(createVariable)));
     this.currentTarget.setVariable(targetVariable);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -281,7 +282,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.DATEOP);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -297,7 +298,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.ESCAPE);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -309,7 +310,7 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentTarget.setTransform(StructureMap.StructureMapTransform.EXTENSION);
     if (targetVariable != null){
 	this.currentTarget.setVariable(targetVariable);
-}    this.currentRule.addTarget(this.currentTarget);
+}    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -322,7 +323,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.EVALUATE);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -337,7 +338,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.ID);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
 
   }
@@ -352,7 +353,7 @@ public class ParseImpl implements IFhirMapExecutor {
     if (targetVariable != null){
 	this.currentTarget.setVariable(targetVariable);
 }
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
 
   }
@@ -367,7 +368,7 @@ public class ParseImpl implements IFhirMapExecutor {
     if (targetVariable != null){
 	this.currentTarget.setVariable(targetVariable);
 }
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -383,7 +384,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }
     this.currentTarget.setTransform(StructureMap.StructureMapTransform.QTY);
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -398,7 +399,7 @@ public class ParseImpl implements IFhirMapExecutor {
     this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType(type)));
     if (targetVariable != null){
 	this.currentTarget.setVariable(targetVariable);
-}    this.currentRule.addTarget(this.currentTarget);
+}    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
 
   }
@@ -412,7 +413,7 @@ public class ParseImpl implements IFhirMapExecutor {
     //this.currentTarget.setVariable(targetVariable);
     this.currentTarget.setTransform(StructureMap.StructureMapTransform.REFERENCE);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -428,7 +429,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.TRANSLATE);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
@@ -443,7 +444,7 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.TRUNCATE);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
 
   }
 
@@ -456,11 +457,17 @@ public class ParseImpl implements IFhirMapExecutor {
 	this.currentTarget.setVariable(targetVariable);
 }    this.currentTarget.setTransform(StructureMap.StructureMapTransform.UUID);
 
-    this.currentRule.addTarget(this.currentTarget);
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
   }
 
   @Override
   public void ruleComplete() throws Exception {
-    this.currentGroup.addRule(this.currentRule);
+    StructureMap.StructureMapGroupRuleComponent rule = this.ruleComponentStack.pop(); //resolve a rule from the stack
+    if (this.ruleComponentStack.empty()) {
+      this.currentGroup.addRule(rule);
+    }
+    else {
+      this.ruleComponentStack.peek().addRule(rule);
+    }
   }
 }

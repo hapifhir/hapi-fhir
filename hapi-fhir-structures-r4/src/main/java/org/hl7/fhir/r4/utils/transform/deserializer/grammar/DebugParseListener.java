@@ -35,7 +35,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 
 	/**
-	 Functio for printing message.
+	 Function for printing message.
 	*/
 	private MsgFcn msgFcn;
 

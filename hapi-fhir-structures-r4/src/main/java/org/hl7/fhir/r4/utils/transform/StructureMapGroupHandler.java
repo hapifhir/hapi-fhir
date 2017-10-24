@@ -64,7 +64,7 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
     for (StructureMap.StructureMapGroupRuleComponent rule : getRuleGroup().getRule()) {
       StructureMapRuleRunner ruleRunner = new StructureMapRuleRunner(getStructureMap(), getTransformationEngine(), this, rule, getWorker());
-      ruleRunner.analyseRule(context, indent + "  ", result);
+      ruleRunner.analyseRule(context, indent + "  ", result, vars);
     }
   }
 

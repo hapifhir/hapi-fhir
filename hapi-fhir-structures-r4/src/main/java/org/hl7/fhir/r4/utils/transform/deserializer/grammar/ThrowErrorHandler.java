@@ -42,7 +42,6 @@ public class ThrowErrorHandler extends DefaultErrorStrategy implements ANTLRErro
   @Override
   public void reportError(Parser recognizer, RecognitionException e) {
     e.printStackTrace();
-    System.err.println(e.getMessage());
     System.exit(1);
   }
 }

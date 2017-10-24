@@ -2,8 +2,8 @@ package org.hl7.fhir.r4.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
-import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.PrePopulatedValidationSupport;
@@ -12,166 +12,33 @@ import org.hl7.fhir.r4.utils.StructureMapUtilities;
 import org.hl7.fhir.r4.utils.transform.BatchContext;
 import org.hl7.fhir.r4.utils.transform.FhirTransformationEngine;
 import org.hl7.fhir.r4.utils.transform.MappingIO;
-import org.hl7.fhir.r4.utils.transform.ParseImpl;
+import org.hl7.fhir.r4.utils.transform.MapHandler;
 import org.hl7.fhir.r4.utils.transform.deserializer.*;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
+import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.xml.SchematronWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.VoidAnswer1;
-import org.mockito.stubbing.VoidAnswer3;
 
 import java.io.File;
 import java.io.FileReader;
+import java.net.URL;
 import java.util.*;
 
 import static org.mockito.AdditionalAnswers.answerVoid;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class ANTLRParseTest {
 
-	@Test
-	public void FilePathing(){
-		File file = new File("");
-		System.out.println(file.getAbsolutePath());
-	}
 
-	@Test
-	public void TestFHIRAntlr() throws Exception {
-		//Init a implementor of the code
-		ParseImpl parse = new ParseImpl();
-
-
-		//Init a new visitor
-		FhirMapVisitor visitor = new FhirMapVisitor(parse);
-
-		MappingIO mappingIO = new MappingIO();
-		mappingIO.setMappingFile(new File("colorectal3.map"));
-		String map = mappingIO.readFile();
-
-		//Make a processsor
-		FhirMapProcessor p = new FhirMapProcessor(); //Is this part correct in the implementation?
-		{
-			FhirMapJavaParser grammar = p.loadGrammar(map);
-			ParseTree tree = grammar.structureMap();
-			visitor.visit(tree);
-		}
-		parse = (ParseImpl) visitor.getExecutor();//And this? I need to be able to pull a structure map from this object
-		StructureMap structureMap = parse.structureMap;
-	}
-
-	@Test
-	public void testparse() throws Exception {
-		ParseImpl parse = new ParseImpl();
-
-		//Read the Map into a string
-		MappingIO mapping = new MappingIO();
-		mapping.setMappingFile(new File("simpleMapTest.map"));
-		String map = mapping.readFile();
-
-		FhirMapProcessor processor = new FhirMapProcessor();
-
-		processor.parseFhirMap(map, parse);
-
-		System.out.println(parse.structureMap);
-
-	}
-
-	@Test
-	public void testUrlPrse() throws Exception{
-		UrlProcessor processor = new UrlProcessor();
-		processor.parseUrl("\"http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap\"");
-	}
-
-	@Test
-	public void testTransform() throws Exception {
-		FhirTransformationEngine scu = null;
-		StructureDefinition sd1 = null;
-		BatchContext bc = new BatchContext();
-		PrePopulatedValidationSupport validation = new PrePopulatedValidationSupport();
-		Map<String, StructureMap> maps = new HashMap<String, StructureMap>();
-
-		FhirContext context = FhirContext.forR4();
-		context.setValidationSupport(validation);
-		sd1 = this.createTestStructure();
-
-		//sd1 = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(new File("C:\\JCimiProject\\hapi-fhir-resource-profile-generator\\target\\classes\\mapping\\logical\\structuredefinition-colorectal.xml")));
-		if (sd1.getId().contains("/"))
-			sd1.setId(sd1.getId().split("/")[sd1.getId().split("/").length - 1]);
-		validation.addStructureDefinition(sd1);
-		bc.addStructureDefinition(sd1);
-		for (StructureDefinition sd : new DefaultProfileValidationSupport().fetchAllStructureDefinitions(FhirContext.forR4())){
-			bc.addStructureDefinition(sd);
-			validation.addStructureDefinition(sd);
-		}
-		StructureMap map = null;
-		ParseImpl parse = new ParseImpl();
-		HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
-		scu = new FhirTransformationEngine(hapiContext);
-		MappingIO mapping = new MappingIO();
-		//mapping.setMappingFile(new File("colorectal3.map"));
-		mapping.setMappingFile(new File("simpleMapTest.map"));
-		String mapText = mapping.readFile();
-
-		FhirMapProcessor processor = new FhirMapProcessor();
-
-		processor.parseFhirMap(mapText, parse);
-		map = parse.structureMap;
-		List<StructureDefinition> result = scu.analyse(bc, null, map).getProfiles();
-
-		ProfileUtilities profileUtilities = new ProfileUtilities(hapiContext, null, null);
-
-		StructureDefinition newCode = result.get(0);
-		profileUtilities.generateSnapshot(validation.fetchStructureDefinition(context, "http://hl7.org/fhir/StructureDefinition/Coding"), newCode, "http://foo.com/StructureDefinition/MyMap-Coding", "MyMap-Coding");
-
-		for (StructureDefinition sd : result) {
-			System.out.println(sd.toString());
-			System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd));
-		}
-	}
-
-	@Test
-	public void legacyTestTransform() throws Exception {
-		StructureMapUtilities scu = null;
-		StructureDefinition sd1 = null;
-		PrePopulatedValidationSupport validation = new PrePopulatedValidationSupport();
-		Map<String, StructureMap> maps = new HashMap<String, StructureMap>();
-
-		FhirContext context = FhirContext.forR4();
-		context.setValidationSupport(validation);
-		sd1 = this.createTestStructure();
-
-		//sd1 = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(new File("C:\\JCimiProject\\hapi-fhir-resource-profile-generator\\target\\classes\\mapping\\logical\\structuredefinition-colorectal.xml")));
-		if (sd1.getId().contains("/"))
-			sd1.setId(sd1.getId().split("/")[sd1.getId().split("/").length - 1]);
-		validation.addStructureDefinition(sd1);
-		for (StructureDefinition sd : new DefaultProfileValidationSupport().fetchAllStructureDefinitions(FhirContext.forR4())){
-			validation.addStructureDefinition(sd);
-		}
-		StructureMap map = null;
-		ParseImpl parse = new ParseImpl();
-		HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
-		scu = new StructureMapUtilities(hapiContext);
-		MappingIO mapping = new MappingIO();
-		//mapping.setMappingFile(new File("colorectal3.map"));
-		mapping.setMappingFile(new File("simpleMapTestLegacy.map"));
-		String mapText = mapping.readFile();
-
-		FhirMapProcessor processor = new FhirMapProcessor();
-		processor.parseFhirMap(mapText, parse);
-		map = parse.structureMap;
-		List<StructureDefinition> result = scu.analyse( null, map).getProfiles();
-
-		ProfileUtilities profileUtilities = new ProfileUtilities(hapiContext, null, null);
-
-		StructureDefinition newCode = result.get(0);
-		profileUtilities.generateSnapshot(validation.fetchStructureDefinition(context, "http://hl7.org/fhir/StructureDefinition/Coding"), newCode, "http://foo.com/StructureDefinition/MyMap-Coding", "MyMap-Coding");
-
-		for (StructureDefinition sd : result) {
-			System.out.println(sd.toString());
-			System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd));
-		}
-	}
 
 
 
@@ -186,11 +53,16 @@ public class ANTLRParseTest {
 
 
 	public void testRuleInput(String fhirMapText, String name, String type, FhirMapInputModes inputMode) throws Exception{
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+		MapHandler mock = Mockito.mock(MapHandler.class);
 
-		doAnswer(answerVoid(
-			(VoidAnswer3<String, String, FhirMapInputModes>) (_name, _type, _inputMode) -> System.out.println("Pass")
-		)).when(mock).groupInput(name, type, inputMode);
+		doAnswer(invocation ->
+		{
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(name.equals(args[0]));
+			Assert.assertTrue(type.equals(args[1]));
+			Assert.assertTrue(inputMode.equals(args[2]));
+			return null;
+		}).when(mock).groupInput(anyString(), anyString(), any(FhirMapInputModes.class));
 
 		FhirMapProcessor p = createProcessor();
 		{
@@ -209,11 +81,23 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleSource(String fhirMapText, List<String> context, FhirMapRuleType type, String defaultValue, FhirMapListOptions listOptions, String variable, String wherePath, String checkPath) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).ruleSource(context, type, defaultValue, listOptions, variable, wherePath, checkPath);
+		MapHandler mock = Mockito.mock(MapHandler.class);
 
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			if (type != null)
+				Assert.assertTrue(type.equals(args[1]));
+			if (defaultValue != null)
+				Assert.assertTrue(defaultValue.equals(args[2]));
+			if (variable != null)
+				Assert.assertTrue(variable.equals(args[3]));
+			if (wherePath != null)
+				Assert.assertTrue(wherePath.equals(args[4]));
+			if (checkPath != null)
+				Assert.assertTrue(checkPath.equals(args[5]));
+			return null;
+		}).when(mock).ruleSource(anyList(), any(FhirMapRuleType.class), anyString(), any(FhirMapListOptions.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -225,25 +109,21 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleSource() throws Exception {
-		FhirMapRuleType ruletype = new FhirMapRuleType();
-		ruletype.Occurances = Arrays.asList(1, 3);
-		ruletype.TypeName = "typeName";
-		testRuleSource("a.b.c : typeName 1..3 default defaultValue as variableValue where \"whereFhirePath\" check \"checkFhirePath\"",
-			new ArrayList<String>(Arrays.asList("a", "b", "c")),
-			ruletype,
-			"defaultValue",
-			FhirMapListOptions.NotSet,
-			"variableValue",
-			"whereFhirePath",
-			"checkFhirePath");
+		testRuleSource("a.b.c", Arrays.asList("a","b","c"), null, null, FhirMapListOptions.NotSet, null, null, null);
+		testRuleSource("a.b.c : typeName 1..3 as variableValue", new ArrayList<String>(Arrays.asList("a", "b", "c")), new FhirMapRuleType("typeName", Arrays.asList(1,3)) , null, null, "variableValue", null, null);
 	}
 
 
 	public void testRuleAssign(String fhirMapText, List<String> context, String assignValue, String targetValue) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCopy(context, assignValue, targetValue);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(assignValue.equals(args[1]));
+			if (targetValue != null)
+				Assert.assertTrue(targetValue.equals(args[2]));
+			return null;
+		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -262,10 +142,16 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleEvaluate(String fhirMapText, List<String> context, String obj, String objElement, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformEvaluate(context, obj, objElement, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(obj.equals(args[1]));
+			Assert.assertTrue(objElement.equals(args[2]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[3]));
+			return null;
+		}).when(mock).transformEvaluate(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -282,10 +168,15 @@ public class ANTLRParseTest {
 	}
 
 	public void testRulePointer(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformPointer(context, resource, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(resource.equals(args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformPointer(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -302,10 +193,15 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleQty1(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformQty(context, resource, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(resource.equals(args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformQty(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -323,10 +219,20 @@ public class ANTLRParseTest {
 
 
 	public void testRuleQty2(String fhirMapText, List<String> context, String value, String unitString, String system, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformQty(context, value, unitString, system, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		UrlData urlData = new UrlData();
+		urlData.CompleteUrl = system;
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(value.equals(args[1]));
+			Assert.assertTrue(unitString.equals(args[2]));
+			UrlData arg = (UrlData) args[3];
+			Assert.assertTrue(system.equals(arg.CompleteUrl));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformQty(anyList(), anyString(), anyString(), any(UrlData.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -343,10 +249,17 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleQty3(String fhirMapText, List<String> context, String value, String unitString, String type, String targetVariable) throws  Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformQty(context, value, unitString, type, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(value.equals(args[1]));
+			Assert.assertTrue(unitString.equals(args[2]));
+			Assert.assertTrue(type.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformQty(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -363,12 +276,20 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleId(String fhirMapText, List<String> context, String system, String value, String type, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData systemUrl = new UrlData();
 		systemUrl.CompleteUrl = system;
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformId(context, systemUrl, value, type, targetVariable);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			UrlData arg = (UrlData) args[1];
+			Assert.assertTrue(system.equals(arg.CompleteUrl));
+			Assert.assertTrue(value.equals(args[2]));
+			Assert.assertTrue(type.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformId(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -388,10 +309,15 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleCopy(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCopy(context, copyValue, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(copyValue.equals(args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -408,10 +334,15 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleCreate(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception{
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCreate(context, copyValue, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(copyValue.equals(args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformCreate(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -428,10 +359,15 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleAppend(String fhirMapText, List<String> context, List<String> appendValues, String targetVariable) throws Exception{
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformAppend(context, appendValues, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(appendValues.containsAll((Collection<?>) args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformAppend(anyList(), anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -443,15 +379,18 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleAppend() throws Exception {
-		testRuleAppend("cdr.subject = append(a, \"bn\", \"d e f\")", Arrays.asList("cdr", "subject"), Arrays.asList("a", "b\n", "d e f"), null);
-		testRuleAppend("cdr.subject = append(a, \"bn\", \"d e f\") as xyzzy", Arrays.asList("cdr", "subject"), Arrays.asList("a", "b\n", "d e f"), "xyzzy");
+		testRuleAppend("cdr.subject = append(a, \"b\n\", \"d e f\")", Arrays.asList("cdr", "subject"), Arrays.asList("a", "\"b\n\"", "\"d e f\""), null);
+		testRuleAppend("cdr.subject = append(a, \"b\n\", \"d e f\") as xyzzy", Arrays.asList("cdr", "subject"), Arrays.asList("a", "\"b\n\"", "\"d e f\""), "xyzzy");
 	}
 
 	public void testGroupCall(String fhirMapText, String groupName, List<String> parameters) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).groupCall(groupName, parameters);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(groupName.equals(args[0]));
+			Assert.assertTrue(parameters.containsAll((Collection<?>) args[1]));
+			return null;
+		}).when(mock).groupCall(anyString(), anyList());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -467,10 +406,17 @@ public class ANTLRParseTest {
 	}
 
 	void testRuleTruncate(String fhirMapText, List<String> context, String truncateVariable, int length, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformTruncate(context, truncateVariable, length, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(truncateVariable.equals(args[1]));
+			Integer arg = (Integer) args[2];
+			Assert.assertTrue(length == arg);
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[3]));
+			return null;
+		}).when(mock).transformTruncate(anyList(), anyString(), anyInt(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -487,10 +433,16 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleCast(String fhirMapText, List<String> context, String source, String type, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCast(context, source, type, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(source.equals(args[1]));
+			Assert.assertTrue(type.equals(args[2]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[3]));
+			return null;
+		}).when(mock).transformCast(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -502,17 +454,25 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleCast() throws Exception {
-		testRuleCast("cdr.subject = cast(source, xxYYz)", Arrays.asList(), "source", "xxYYz", null);
-		testRuleCast("cdr.subject = cast(source, xxYYz) as xyzzy", Arrays.asList(), "source", "xxYYz", "xyzzy");
+		testRuleCast("cdr.subject = cast(source, xxYYz)", Arrays.asList("cdr", "subject"), "source", "xxYYz", null);
+		testRuleCast("cdr.subject = cast(source, xxYYz) as xyzzy", Arrays.asList("cdr", "subject"), "source", "xxYYz", "xyzzy");
 	}
 
 	public void testRuleCoding(String fhirMapText, List<String> context, String completeUrl, String system, String code, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData _completeUrl = new UrlData();
 		_completeUrl.CompleteUrl = completeUrl;
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCoding(context, _completeUrl, system, code, targetVariable);
+		doAnswer(invocation ->{
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			UrlData arg = (UrlData) args[1];
+			Assert.assertTrue(completeUrl.equals(arg.CompleteUrl));
+			Assert.assertTrue(system.equals(args[2]));
+			Assert.assertTrue(code.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformCoding(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -524,16 +484,21 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleCoding() throws Exception {
-		testRuleCoding("a.b = c\"http://fhir.hl7.org.au\", system)", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", null, null);
-		testRuleCoding("a.b = c\"http://fhir.hl7.org.au\", system, \"display\")", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "display", null);
-		testRuleCoding("a.b = c\"http://fhir.hl7.org.au\", system, \"display\") as xyzzy", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "display", "xyzzy");
+		testRuleCoding("a.b = c(\"http://fhir.hl7.org.au\", system)", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", null, null);
+		testRuleCoding("a.b = c(\"http://fhir.hl7.org.au\", system, \"display\")", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "display", null);
+		testRuleCoding("a.b = c(\"http://fhir.hl7.org.au\", system, \"display\") as xyzzy", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "display", "xyzzy");
 	}
 
 	public void testRuleCodeableConcept1(String fhirMapText, List<String> context, String textValue, String targetValue) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCodeableConcept(context, textValue, targetValue);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(textValue.equals(args[1]));
+			if (targetValue != null)
+				Assert.assertTrue(targetValue.equals(args[2]));
+			return null;
+		}).when(mock).transformCodeableConcept(context, textValue, targetValue);
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -549,15 +514,36 @@ public class ANTLRParseTest {
 		testRuleCodeableConcept1("a.b = cc(\"abcdef\") as xyzzy", Arrays.asList("a", "b"), "abcdef", "xyzzy");
 	}
 
-	public void testRuleCodeableConcept2(String fhirMapText, List<String> context, String completeUrl, String system, String code, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+	public void testRuleCodeableConcept2(String fhirMapText, List<String> context, String completeUrl, String code, String display, String targetVariable) throws Exception {
+		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData _completeUrl = new UrlData();
 		_completeUrl.CompleteUrl = completeUrl;
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			UrlData arg = (UrlData) args[1];
+			Assert.assertTrue(completeUrl.equals(arg.CompleteUrl));
+			Assert.assertTrue(code.equals(args[2]));
+			Assert.assertTrue(display.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformCodeableConcept(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			ParseTree parseTree = grammar.ruleTarget();
+			FhirMapVisitor visitor = new FhirMapVisitor(mock);
+			visitor.visit(parseTree);
+		}
+
 	}
 
 	@Test
 	public void parseRuleCodeableConcept2() throws Exception {
-		//TODO: the C# test method is incorrect.
+		testRuleCodeableConcept2("a.b = cc(\"http://fhir.hl7.org.au\", \"code\")", Arrays.asList("a","b"), "http://fhir.hl7.org.au", "\"code\"", null, null);
+		testRuleCodeableConcept2("a.b = cc(\"http://fhir.hl7.org.au\", \"code\", \"display name\")", Arrays.asList("a","b"), "http://fhir.hl7.org.au", "\"code\"", "display name", null);
+		testRuleCodeableConcept2("a.b = cc(\"http://fhir.hl7.org.au\", \"code\", \"display name\") as xyzzy", Arrays.asList("a","b"), "http://fhir.hl7.org.au", "\"code\"", "display name", "xyzzy");
 	}
 
 	@Test
@@ -572,13 +558,20 @@ public class ANTLRParseTest {
 		}
 	}
 
-	public void testRuleCp(String fhirMapText, List<String> context, String completeUrl, String varialbe, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+	public void testRuleCp(String fhirMapText, List<String> context, String completeUrl, String variable, String targetVariable) throws Exception {
+		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData data = new UrlData();
 		data.CompleteUrl = completeUrl;
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).transformCp(context, data, varialbe, targetVariable);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			UrlData arg = (UrlData) args[1];
+			Assert.assertTrue(completeUrl.equals(arg.CompleteUrl));
+			Assert.assertTrue(variable.equals(args[2]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[3]));
+			return null;
+		}).when(mock).transformCp(anyList(), any(UrlData.class), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -596,12 +589,20 @@ public class ANTLRParseTest {
 	}
 
 	public void testRuleTranslate(String fhirMapText, List<String> context, String variable, String mapUrl, FhirMapTranslateOutputTypes outputType, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
+		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData data = new UrlData();
 		data.CompleteUrl = mapUrl;
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText + " passes")
-		)).when(mock).transformTranslate(context, variable, data, outputType, targetVariable);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(variable.equals(args[1]));
+			UrlData arg = (UrlData) args[2];
+			Assert.assertTrue(mapUrl.equals(arg.CompleteUrl));
+			Assert.assertTrue(outputType.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformTranslate(anyList(), anyString(), any(UrlData.class), any(FhirMapTranslateOutputTypes.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -648,10 +649,14 @@ public class ANTLRParseTest {
 		UrlData urlData = new UrlData();
 		String name = "Colorectal --> DiagnosticReport Map";
 		urlData.CompleteUrl = "http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap";
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Pass")
-		)).when(mock).map(urlData, name);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			UrlData arg = (UrlData) args[0];
+			Assert.assertTrue(urlData.CompleteUrl.equals(arg.CompleteUrl));
+			Assert.assertTrue(name.equals(args[1]));
+			return null;
+		}).when(mock).map(any(UrlData.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 
@@ -691,24 +696,31 @@ public class ANTLRParseTest {
 	public void parseRuleTargetAs() throws Exception {
 		final List<String> context = Arrays.asList("do", "requester");
 		final String identifier = "prr";
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println("Identifier Pass")
-		)).when(mock).transformAs(context, identifier);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(identifier.equals(args[1]));
+			return null;
+		}).when(mock).transformAs(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar("do.requester as prr");
-			ParseTree parseTree = grammar.ruleContext();
+			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
 		}
 	}
 
-	public void testRuleExtension(String fhirMapText, List<String> context, String variable, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText+" passes")
-		)).when(mock).transformExtension(context, targetVariable);
+	public void testRuleExtension(String fhirMapText, List<String> context, String targetVariable) throws Exception {
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[1]));
+			return null;
+		}).when(mock).transformExtension(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -720,15 +732,23 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleExtension() throws Exception {
-		testRuleExtension("a.b = extension()", Arrays.asList("a", "b"), null, null);
-		testRuleExtension("a.b = extension() as xyzzy", Arrays.asList("a","b"), null, "xyzzy");
+		testRuleExtension("a.b = extension()", Arrays.asList("a", "b"),  null);
+		testRuleExtension("a.b = extension() as xyzzy", Arrays.asList("a","b"),  "xyzzy");
 	}
 
 	public void testRuleEscape(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText+" passes")
-		)).when(mock).transformEscape(context, variable, string1, string2, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(variable.equals(args[1]));
+			Assert.assertTrue(string1.equals(args[2]));
+			if (string2 != null)
+				Assert.assertTrue(string2.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformEscape(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -747,10 +767,17 @@ public class ANTLRParseTest {
 
 
 	public void testRuleDateOp(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText+" passes")
-		)).when(mock).transformDateOp(context, variable, string1, string2, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(variable.equals(args[1]));
+			Assert.assertTrue(string1.equals(args[2]));
+			Assert.assertTrue(string2.equals(args[3]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[4]));
+			return null;
+		}).when(mock).transformDateOp(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -763,15 +790,20 @@ public class ANTLRParseTest {
 	@Test
 	public void parseRuleDateOp() throws Exception {
 		testRuleDateOp("a.b = dateOp(abcdef, \"aaa\")", Arrays.asList("a", "b"), "abcdef", "aaa", null, null);
-		testRuleDateOp("a.b = dateOp(abcdef, \"aaa\", \"bbb\")", Arrays.asList("a", "b"), "abcdef", "aaa", "bbb", null);
-		testRuleDateOp("a.b = dateOp(abcdef, \"aaa\", \"bbb\") as xyzzy", Arrays.asList("a", "b"), "abcdef", "aaa", "bbb", "xyzzy");
+		//testRuleDateOp("a.b = dateOp(abcdef, \"aaa\", \"bbb\")", Arrays.asList("a", "b"), "abcdef", "aaa", "bbb", null);
+		//testRuleDateOp("a.b = dateOp(abcdef, \"aaa\", \"bbb\") as xyzzy", Arrays.asList("a", "b"), "abcdef", "aaa", "bbb", "xyzzy");
 	}
 
 	public void testRuleReference(String fhirMapText, List<String> context, String variable, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText+" passes")
-		)).when(mock).transformReference(context, variable, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			Assert.assertTrue(variable.equals(args[1]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[2]));
+			return null;
+		}).when(mock).transformReference(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -789,10 +821,14 @@ public class ANTLRParseTest {
 
 
 	public void testRuleUuid(String fhirMapText, List<String> context, String targetVariable) throws Exception {
-		ParseImpl mock = Mockito.mock(ParseImpl.class);
-		doAnswer(answerVoid(
-			(VoidAnswer1<?>) (_answer) -> System.out.println(fhirMapText+" passes")
-		)).when(mock).transformUuid(context, targetVariable);
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
+			if (targetVariable != null)
+				Assert.assertTrue(targetVariable.equals(args[1]));
+			return null;
+		}).when(mock).transformUuid(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
 			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
@@ -808,114 +844,125 @@ public class ANTLRParseTest {
 		testRuleUuid("a.b = uuid() as xyzzy", Arrays.asList("a","b"), "xyzzy");
 	}
 
-
-
-
-
-
-
-	public StructureDefinition createTestStructure(){
-		StructureDefinition sd = new StructureDefinition();
-		sd.setId("TestStructure");
-		sd.setUrl("http://opencimi.org/structuredefinition/TestStructure");
-		sd.setStatus(Enumerations.PublicationStatus.DRAFT);
-		sd.setName("TestStructure");
-		sd.setType("TestStructure");
-		sd.setSnapshot(this.createTestSnapshot());
-		sd.setDifferential(this.createTestDiff());
-		sd.setKind(StructureDefinition.StructureDefinitionKind.LOGICAL);
-
-		return sd;
-	}
-	public StructureDefinition.StructureDefinitionSnapshotComponent createTestSnapshot(){
-		StructureDefinition.StructureDefinitionSnapshotComponent retVal = new StructureDefinition.StructureDefinitionSnapshotComponent();
-		List<ElementDefinition> eList = new ArrayList<>();
-		ElementDefinition ed0 = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-		ed0.setId("TestStructure");
-		ed0.setSliceName("TestStructure");
-		ed0.setPath("TestStructure");
-		// ed0.setBase(base);
-		ed0.setMin(1);
-		ed0.setMax("1");
-		eList.add(ed0);
-
-
-		ElementDefinition ed = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-		ed.setId("system");
-		ed.setSliceName("system");
-		ed.setPath("TestStructure.system");
-		//ed.setBase(base);
-		ed.setFixed(new UriType().setValue("HTTP://opencimi.org/structuredefinition/TestStructure.html#Debugging"));
-		//ed.setType(this.createTypeRefList());
-		ed.setMin(1);
-		ed.setMax("1");
-		eList.add(ed);
-
-		ed = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-		ed.setId("someValue");
-		ed.setSliceName("someValue");
-		ed.setPath("TestStructure.someValue");
-		//ed.setBase(base);
-		ed.setFixed(new StringType().setValue("my value"));
-		//ed.setType(this.createTypeRefList());
-		ed.setMin(1);
-		ed.setMax("0");
-		eList.add(ed);
-
-
-		retVal.setElement(eList);
-		return retVal;
-
-
+	public void testRuleName(String fhirMapText, List<String> excpectedValue) throws Exception {
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			ParseTree parseTree = grammar.ruleContext();
+			FhirMapVisitor visitor = new FhirMapVisitor(null);
+			List<String> parsedValue = (List<String>) visitor.visit(parseTree);
+			Assert.assertTrue(excpectedValue.containsAll(parsedValue));
+		}
 	}
 
-	public StructureDefinition.StructureDefinitionDifferentialComponent createTestDiff(){
-		StructureDefinition.StructureDefinitionDifferentialComponent retVal = new StructureDefinition.StructureDefinitionDifferentialComponent();
-		List<ElementDefinition> eList = new ArrayList<>();
-		ElementDefinition ed0 = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-		ed0.setId("TestStructure");
-		ed0.setSliceName("TestStructure");
-		ed0.setPath("TestStructure");
-		// ed0.setBase(base);
-		ed0.setMin(1);
-		ed0.setMax("1");
-		eList.add(ed0);
-
-
-		ElementDefinition ed = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-//		ed.setId("system");
-//		ed.setSliceName("system");
-//		ed.setPath("TestStructure.system");
-//		//ed.setBase(base);
-//		ed.setFixed(new UriType().setValue("HTTP://opencimi.org/structuredefinition/TestStructure.html#Debugging"));
-//		//ed.setType(this.createTypeRefList());
-//		eList.add(ed);
-
-		ed = new ElementDefinition();
-		//ElementDefinition.ElementDefinitionBaseComponent base = new ElementDefinition.ElementDefinitionBaseComponent();
-		//base.setId("http://hl7.org/fhir/StructureDefinition/Element");
-		ed.setId("someValue");
-		ed.setSliceName("someValue");
-		ed.setPath("TestStructure.someValue");
-		//ed.setBase(base);
-		ed.setFixed(new StringType().setValue("my value"));
-		//ed.setType(this.createTypeRefList());
-		eList.add(ed);
-
-		retVal.setElement(eList);
-		return retVal;
+	@Test
+	public void parseRuleName() throws Exception {
+		testRuleName("xxyyzz", Arrays.asList("xxyyzz"));
+		testRuleName("a.b.ccc.def", Arrays.asList("a","b","ccc","def"));
+		testRuleName("a.b.\"c c ccc\".def", Arrays.asList("a", "b", "\"c c ccc\"", "def"));
 	}
 
+	@Test
+	public void parseKeyImport() throws Exception {
+		UrlData urlData = new UrlData();
+		urlData.CompleteUrl = "http://fhir.hl7.org.au";
+		MapHandler mock = Mockito.mock(MapHandler.class);
 
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar("imports \"http://fhir.hl7.org.au\"");
+			ParseTree parseTree = grammar.keyImports();
+			FhirMapVisitor visitor = new FhirMapVisitor(mock);
+			visitor.visit(parseTree);
+			Assert.assertTrue(urlData.CompleteUrl == "http://fhir.hl7.org.au");
+		}
+	}
 
+	public void testKeyUses(String fhirMapText, String url, FhirMapUseNames useNames) throws Exception {
+		UrlData urlData = new UrlData();
+		urlData.CompleteUrl = url;
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			UrlData arg = (UrlData) args[0];
+			Assert.assertTrue(url.equals(arg.CompleteUrl));
+			Assert.assertTrue(useNames.equals(args[1]));
+			return null;
+		}).when(mock).uses(any(UrlData.class), any(FhirMapUseNames.class));
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			ParseTree parseTree = grammar.keyUses();
+			FhirMapVisitor visitor = new FhirMapVisitor(mock);
+			visitor.visit(parseTree);
+		}
+	}
+
+	@Test
+	public void  parseKeyUses() throws Exception {
+		testKeyUses("uses \"http://www.xyz.com\" as target", "http://www.xyz.com", FhirMapUseNames.Target);
+		testKeyUses("uses \"http://www.xyz.com\" as source", "http://www.xyz.com", FhirMapUseNames.Source);
+		testKeyUses("uses \"http://www.xyz.com\" as produced", "http://www.xyz.com", FhirMapUseNames.Produced);
+		testKeyUses("uses \"http://www.xyz.com\" as queried", "http://www.xyz.com", FhirMapUseNames.Queried);
+	}
+
+	public void testKeyUsesName(String fhirMapText, FhirMapUseNames useName) throws Exception{
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			ParseTree parseTree = grammar.keyUsesName();
+			FhirMapVisitor visitor = new FhirMapVisitor(null);
+			FhirMapUseNames parsedData = (FhirMapUseNames)visitor.visit(parseTree);
+			Assert.assertTrue(parsedData == useName);
+		}
+	}
+
+	@Test
+	public void parseKeyUsesNames() throws Exception {
+		testKeyUsesName("source", FhirMapUseNames.Source);
+		testKeyUsesName("target", FhirMapUseNames.Target);
+		testKeyUsesName("queried", FhirMapUseNames.Queried);
+		testKeyUsesName("produced", FhirMapUseNames.Produced);
+	}
+
+	public void testGroupStart(String fhirMapText, String groupName, FhirMapGroupTypes groupTypes, String extendsName) throws Exception {
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+			Object[] args = invocation.getArguments();
+			Assert.assertTrue(groupName.equals(args[0]));
+			Assert.assertTrue(groupTypes.equals(args[1]));
+			if (extendsName != null)
+				Assert.assertTrue(extendsName.equals(args[2]));
+			return null;
+		}).when(mock).groupStart(anyString(), any(FhirMapGroupTypes.class), anyString());
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			ParseTree parseTree = grammar.groupStart();
+			FhirMapVisitor visitor = new FhirMapVisitor(mock);
+			visitor.visit(parseTree);
+		}
+	}
+
+	@Test
+	public void parseGroupStart() throws Exception {
+		testGroupStart("group for types cleverGroupName endgroup", "cleverGroupName", FhirMapGroupTypes.Types, null);
+		testGroupStart("group for type+types cleverGroupName endgroup", "cleverGroupName", FhirMapGroupTypes.TypeTypes, null);
+		testGroupStart("group cleverGroupName extends xxx endgroup", "cleverGroupName", FhirMapGroupTypes.NotSet, "xxx");
+	}
+
+	@Test
+	public void parseGroupEnd() throws Exception {
+		MapHandler mock = Mockito.mock(MapHandler.class);
+		doAnswer(invocation -> {
+            return null;
+        }).when(mock).groupEnd();
+		FhirMapProcessor p = this.createProcessor();
+		{
+			FhirMapJavaParser grammar = p.loadGrammar("endgroup");
+			ParseTree parseTree = grammar.groupEnd();
+			FhirMapVisitor visitor = new FhirMapVisitor(mock);
+			visitor.visit(parseTree);
+		}
+	}
 }

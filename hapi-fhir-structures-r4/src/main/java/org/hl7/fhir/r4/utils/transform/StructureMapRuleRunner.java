@@ -18,8 +18,10 @@ public class StructureMapRuleRunner extends BaseRunner {
 
   private StructureMap.StructureMapGroupRuleComponent rule;
   private StructureMap.StructureMapGroupComponent parentGroup;
+  private Stack<StructureMap.StructureMapGroupRuleComponent> ruleStack;
   private StructureMapGroupHandler parentGroupRunner;
   private FhirTransformationEngine transformationEngine;
+  private VariablesForProfiling parentVars;
 
   public StructureMapRuleRunner(StructureMap map, FhirTransformationEngine transformationEngine, StructureMapGroupHandler parentGroupRunner, StructureMap.StructureMapGroupRuleComponent rule) {
     setStructureMap(map);
@@ -79,13 +81,13 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param result
    * @throws Exception
    */
-  protected void analyseRule(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
+  protected void analyseRule(BatchContext context, String indent, StructureMapAnalysis result, VariablesForProfiling vars) throws Exception {
     log(indent + "Analyse rule : " + rule.getName());
     XhtmlNode tr = result.getSummary().addTag("tr");
     XhtmlNode xs = tr.addTag("td");
     XhtmlNode xt = tr.addTag("td");
 
-    VariablesForProfiling srcVars = getParentGroupRunner().getVars().copy();
+    VariablesForProfiling srcVars = vars.copy();
     if (rule.getSource().size() != 1) {
       throw new UnsupportedOperationException("Unsupported configuration at this time: Rule \"" + rule.getName() + "\": declares more than one source input.");
     }
@@ -98,7 +100,14 @@ public class StructureMapRuleRunner extends BaseRunner {
     tw.commit(xt);
 
     for (StructureMap.StructureMapGroupRuleComponent childrule : rule.getRule()) {
-      analyseRule(context, indent + "  ", result);
+      if (ruleStack == null){
+        ruleStack = new Stack<>();
+      }
+      parentVars = source.copy();
+      ruleStack.push(rule);
+      rule = childrule;
+      analyseRule(context, indent + "  ", result, source);
+      rule = ruleStack.pop();
     }
 //    for (StructureMapGroupRuleDependentComponent dependent : rule.getDependent()) {
 //      executeDependency(indent+"  ", context, map, v, group, dependent); // do we need group here?

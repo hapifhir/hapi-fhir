@@ -3,8 +3,4 @@
  */
 grammar FhirMapJava;
 
-@header {
-  package common.grammar.antlr;
-}
-
 import FhirMapBase ;

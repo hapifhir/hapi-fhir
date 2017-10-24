@@ -19,6 +19,7 @@ import java.util.List;
 /**
 * ANTLR Visitor class.
 */
+@SuppressWarnings("ALL")
 public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 {
     /**
@@ -322,15 +323,19 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     @Override
     public Object visitGroupStart(FhirMapJavaParser.GroupStartContext context)  {
         try {
-          FhirMapJavaParser.GroupExtendsContext extendsContext = context.groupExtends();
-          String extension;
+          String identifier = null;
+          if (context.identifier() != null){
+            identifier = (String) this.visit(context.identifier());
+          }
+          FhirMapGroupTypes group = FhirMapGroupTypes.NotSet;
+          if (context.groupType() != null){
+            group = (FhirMapGroupTypes) this.visit(context.groupType());
+          }
+          String extension = null;
           if (context.groupExtends() != null){
-            extension = (String) this.visit(extendsContext);
+            extension = (String) this.visit(context.groupExtends());
           }
-          else {
-            extension = null;
-          }
-            this.executor.groupStart( (String) this.visit(context.identifier()), (FhirMapGroupTypes) this.visit(context.groupType()), extension);
+            this.executor.groupStart(identifier, group, extension);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -526,9 +531,16 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String truncateSource = (String) this.visit(context.ruleTargetTruncateSource());
+      Integer truncateLength = (Integer) this.visit(context.ruleTargetTruncateLength());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
             //Not implented in fhir code
-            this.executor.transformTruncate((List<String>) this.visit(context.ruleTargetContext()), (String)  this.visit(context.ruleTargetTruncateSource()), (Integer) this.visit(context.ruleTargetTruncateLength()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformTruncate(ctx, truncateSource, truncateLength, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -543,8 +555,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String castSource = (String) this.visit(context.ruleTargetCastSource());
+      String castType = (String) this.visit(context.ruleTargetCastType());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
-            this.executor.transformCast((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetCastSource()), (String) this.visit(context.ruleTargetCastType()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformCast(ctx, castSource, castType, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -603,9 +622,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext context) {
-        try {
-
-            this.executor.transformCopy((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetCopySource()), (String) this.visit(context.ruleTargetVariable()));
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String sourceVar = (String) this.visit(context.ruleTargetCopySource());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null) {
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
+      try {
+          this.executor.transformCopy(ctx, sourceVar, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -747,8 +771,18 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      UrlData cpSystem = null;
+      if (context.ruleTargetCpSystem() != null){
+        cpSystem = (UrlData) this.visit(context.ruleTargetCpSystem());
+      }
+      String cpVar = (String) this.visit(context.ruleTargetCpVariable());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
-            this.executor.transformCp((List<String>) this.visit(context.ruleTargetContext()), (UrlData) this.visit(context.ruleTargetCpSystem()), (String) this.visit(context.ruleTargetCpVariable()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformCp(ctx, cpSystem, cpVar, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -763,9 +797,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext context) {
-        try {
-          //Not implemented
-            this.executor.transformAppend((List<String>) this.visit(context.ruleTargetContext()), (List<String>) this.visit(context.ruleTargetAppendSources()), (String) this.visit(context.ruleTargetVariable()));
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      List<String> appendSource = (List<String>) this.visit(context.ruleTargetAppendSources());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
+      try {
+            this.executor.transformAppend(ctx, appendSource, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -838,8 +877,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String ccText = (String) this.visit(context.ruleTargetCC1Text());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
-            this.executor.transformCodeableConcept((List<String>) this.visit(context.ruleTargetContext()),(String)  this.visit(context.ruleTargetCC1Text()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformCodeableConcept(ctx, ccText, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -996,8 +1041,19 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      UrlData idSystem = (UrlData) this.visit(context.ruleTargetIdSystem());
+      String idValue = (String) this.visit(context.ruleTargetIdValue());
+      String idType = null;
+      if (context.ruleTargetIdType() != null) {
+        idType = (String) this.visit(context.ruleTargetIdType());
+      }
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
-            this.executor.transformId((List<String>) this.visit(context.ruleTargetContext()), (UrlData) this.visit(context.ruleTargetIdSystem()),  (String) this.visit(context.ruleTargetIdValue()), (String) this.visit(context.ruleTargetIdType()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformId(ctx, idSystem, idValue, idType, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1012,9 +1068,17 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext context) {
+      List<String> ctx = null;
+      String pointerResource = null;
+      String tgtVar = null;
+      if (context.ruleTargetContext() != null)
+        ctx = (List<String>) this.visit(context.ruleTargetContext());
+      if (context.ruleTargetPointerResource() != null)
+        pointerResource = (String) this.visit(context.ruleTargetPointerResource());
+      if (context.ruleTargetVariable() != null)
+        tgtVar = (String) this.visit(context.ruleTargetVariable());
         try {
-          //Not Implemented
-            this.executor.transformPointer((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetPointerResource()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformPointer(ctx, pointerResource, tgtVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1036,10 +1100,10 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
           if (context.ruleTargetContext() != null){
             ctx = (List<String>) this.visit(context.ruleTargetContext());
           }
-          if (context.ruleTargetContext() != null){
+          if (context.ruleTargetQty1Text() != null){
             text = (String) this.visit(context.ruleTargetQty1Text());
           }
-          if (context.ruleTargetContext() != null){
+          if (context.ruleTargetVariable() != null){
             targetVar = (String) this.visit(context.ruleTargetVariable());
           }
             this.executor.transformQty(ctx,text,targetVar);
@@ -1095,18 +1159,16 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     public Object visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context context) {
         try {
           List<String> ctx = null;
-          String value = null;
-          String unitString = null;
-          String codeVar = null;
+          ctx = (List<String>) this.visit(context.ruleTargetContext());
+          String value = (String) this.visit(context.ruleTargetQty3Value());
+
+          String unitString = (String) this.visit(context.ruleTargetQty3UnitString());
+          String codeVar = (String) this.visit(context.ruleTargetQty3CodeVariable());
           String targetVar = null;
-          if (context.ruleTargetContext() != null){
-            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
           }
-            this.executor.transformQty((List<String>) this.visit(context.ruleTargetContext()),
-              (String) this.visit(context.ruleTargetQty3Value()),
-              (String) this.visit(context.ruleTargetQty3UnitString()),
-              (String) this.visit(context.ruleTargetQty3CodeVariable()),
-              (String) this.visit(context.ruleTargetVariable()));
+          this.executor.transformQty(ctx, value, unitString, codeVar, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1121,9 +1183,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext context) {
-        try {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
+      try {
           //not implemented
-            this.executor.transformUuid((List<String>) this.visit( context.ruleTargetContext()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformUuid(ctx, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1138,9 +1205,19 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext context) {
+      List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
+      String dateOpVar = (String) this.visit(context.ruleTargetDateOpVariable());
+      String operation = (String) this.visit(context.ruleTargetDateOpOperation());
+      String dateOpVar2 = null;
+      if (context.ruleTargetDateOpVariable2() != null){
+        dateOpVar2 = (String) this.visit(context.ruleTargetDateOpVariable2());
+      }
+      String targetVar = null;
+      if (context.ruleTargetVariable() != null){
+        targetVar = (String) this.visit(context.ruleTargetVariable());
+      }
         try {
-          //not implemented
-            this.executor.transformDateOp((List<String>) this.visit(context.ruleTargetContext()),(String)  this.visit(context.ruleTargetDateOpVariable()), (String) this.visit(context.ruleTargetDateOpOperation()), (String) this.visit(context.ruleTargetDateOpVariable2()), (String) this.visit(context.ruleTargetVariable()));
+            this.executor.transformDateOp(ctx, dateOpVar, operation, dateOpVar2, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1179,7 +1256,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
         try {
           List<String> ctx = null;
           FhirMapJavaParser.RuleTypeContext typeContext = context.ruleType();
-          FhirMapRuleType type;
+          FhirMapRuleType type = null;
           FhirMapJavaParser.RuleDefaultContext defaultContext = context.ruleDefault();
           String defaultVal = null;
           FhirMapJavaParser.RuleListOptionContext listOptionContext = context.ruleListOption();
@@ -1193,9 +1270,6 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
           ctx = (List<String>) this.visit(context.ruleContext());
           if (typeContext != null){
             type = (FhirMapRuleType) this.visit(typeContext);
-          }
-          else {
-            type = null;
           }
           if (defaultContext != null ){
             defaultVal = (String) this.visit(defaultContext);
