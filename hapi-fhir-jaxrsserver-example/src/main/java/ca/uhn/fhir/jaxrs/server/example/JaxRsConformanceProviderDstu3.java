@@ -33,7 +33,7 @@ public class JaxRsConformanceProviderDstu3 extends AbstractJaxRsConformanceProvi
 	 * Standard Constructor
 	 */
 	public JaxRsConformanceProviderDstu3() {
-		super(FhirContext.forDstu3(), SERVER_VERSION, SERVER_DESCRIPTION, SERVER_NAME);
+		super(FhirContext.forDstu3(), SERVER_DESCRIPTION, SERVER_NAME, SERVER_VERSION);
 	}
 
 	@Override

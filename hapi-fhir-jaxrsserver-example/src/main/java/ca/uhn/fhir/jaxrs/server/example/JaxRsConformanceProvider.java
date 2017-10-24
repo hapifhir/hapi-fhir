@@ -32,7 +32,7 @@ public class JaxRsConformanceProvider extends AbstractJaxRsConformanceProvider {
 	 * Standard Constructor
 	 */
 	public JaxRsConformanceProvider() {
-		super(SERVER_VERSION, SERVER_DESCRIPTION, SERVER_NAME);
+		super(SERVER_DESCRIPTION, SERVER_NAME, SERVER_VERSION);
 	}
 
 	@Override
