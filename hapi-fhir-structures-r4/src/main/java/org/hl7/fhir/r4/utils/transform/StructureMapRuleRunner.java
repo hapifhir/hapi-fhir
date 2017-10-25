@@ -422,7 +422,7 @@ public class StructureMapRuleRunner extends BaseRunner {
         context.addStructureDefinition(extensionStructureDef);
       }
       profiles.add(extensionStructureDef);
-      extensionReferences = extensionGenerator.generateExtensionElementDefinitions(false, targetContextVariable.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
+      extensionReferences = extensionGenerator.generateExtensionElementDefinitions(true, targetContextVariable.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
     } else {
       boolean mapsSrc = false;
       for (StructureMap.StructureMapGroupRuleTargetParameterComponent parameter : ruleTarget.getParameter()) {
