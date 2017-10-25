@@ -1,6 +1,5 @@
 package org.hl7.fhir.r4.utils.transform;
 
-import org.eclipse.sisu.Nullable;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.transform.deserializer.*;
 
@@ -24,11 +23,6 @@ public class MapHandler implements IFhirMapExecutor {
   private StructureMap.StructureMapGroupComponent currentGroup;
 
   /**
-   * The current input being populated
-   */
-  private StructureMap.StructureMapGroupInputComponent currentInput;
-
-  /**
    * The current source that is being populated
    */
   private StructureMap.StructureMapGroupRuleSourceComponent currentSource;
@@ -41,7 +35,7 @@ public class MapHandler implements IFhirMapExecutor {
   /**
    * For handling rules, if a rule has nested rules within it, it will remain on the stack below the child rules until they are resolved, then the parent can resolve itself and be added to the group or even a parent rule.
    */
-  Stack<StructureMap.StructureMapGroupRuleComponent> ruleComponentStack = new Stack<>();
+  private Stack<StructureMap.StructureMapGroupRuleComponent> ruleComponentStack = new Stack<>();
 
   /**
    * Read accessor for the Structure Map
@@ -55,7 +49,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates the basic values in a structure map
    * @param structureMap prospected Url value for structure map
    * @param name prospected name for structure map
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void map(UrlData structureMap, String name) throws Exception {
@@ -68,7 +62,7 @@ public class MapHandler implements IFhirMapExecutor {
    * populates a structure used within the Structure Map
    * @param structureDefinition Url of the Structure Definition
    * @param name name of the Structure Definition which will aos determine its mode. The name determined in this statement will dictate the behavior of the structure.
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void uses(UrlData structureDefinition, FhirMapUseNames name) throws Exception {
@@ -81,7 +75,7 @@ public class MapHandler implements IFhirMapExecutor {
   /**
    * Populates an import value for the structure
    * @param structureMap the import value
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void imports(UrlData structureMap) throws Exception {
@@ -92,8 +86,8 @@ public class MapHandler implements IFhirMapExecutor {
    * Initializes the group value and allows base properties to be populated.
    * @param groupName name of group
    * @param groupType Group type. In grammar this is optional in which case this will be set to GroupTypesUnset)
-   * @param groupExtendName
-   * @throws Exception
+   * @param groupExtendName extends value fo rthe group
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void groupStart(String groupName, FhirMapGroupTypes groupType, String groupExtendName) throws Exception {
@@ -106,7 +100,7 @@ public class MapHandler implements IFhirMapExecutor {
 
   /**
    * Signals to perform final operations and add the group to the structure map.
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void groupEnd() throws Exception {
@@ -118,47 +112,50 @@ public class MapHandler implements IFhirMapExecutor {
    * @param name name of input
    * @param type type of input
    * @param mode input mode
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void groupInput(String name, String type, FhirMapInputModes mode) throws Exception {
-    this.currentInput = new StructureMap.StructureMapGroupInputComponent();
-    this.currentInput.setName(name);
-    this.currentInput.setType(type);
-    this.currentInput.setMode(StructureMap.StructureMapInputMode.fromCode(mode.getValue()));
-    this.currentGroup.addInput(this.currentInput);
+    /*
+    The current input being populated
+   */
+    StructureMap.StructureMapGroupInputComponent currentInput = new StructureMap.StructureMapGroupInputComponent();
+    currentInput.setName(name);
+    currentInput.setType(type);
+    currentInput.setMode(StructureMap.StructureMapInputMode.fromCode(mode.getValue()));
+    this.currentGroup.addInput(currentInput);
   }
 
   /**
    * Creates a rule putting it on the stack while populating base values.
    * @param ruleName Name of rule
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void ruleStart(List<String> ruleName) throws Exception {
     this.ruleComponentStack.push(new StructureMap.StructureMapGroupRuleComponent());
-    String name = "";
+    StringBuilder name = new StringBuilder();
     for (String s : ruleName){
       if (name.length()==0){
-        name = s;
+        name = new StringBuilder(s);
       }
       else {
-        name += "."+s;
+        name.append(".").append(s);
       }
     }
-    this.ruleComponentStack.peek().setName(name);
+    this.ruleComponentStack.peek().setName(name.toString());
   }
 
   /**
    * Populates a rule source and adds it to the top rule in the stack.
    * @param context source context
-   * @param type optional type name and cardinality. Handled if left null
+   * @param type optional type name and cardinality. Null if unset
    * @param defaultValue optional default value.
-   * @param listOptions Optional list opeions. FhirMappingListOpeions.NotSet if unset
-   * @param variable Optional assigment variable. Handled if left null
-   * @param wherePath Optional where fhir path. . Handled if left null
-   * @param checkPath Optional check fhir path. . Handled if left null
-   * @throws Exception
+   * @param listOptions Optional list options. FhirMappingListOpeions.NotSet if unset
+   * @param variable Optional assignment variable. Null if unset
+   * @param wherePath Optional where fhir path. Null if unset
+   * @param checkPath Optional check fhir path. Null if unset
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void ruleSource(List<String> context,  FhirMapRuleType type,  String defaultValue,  FhirMapListOptions listOptions,  String variable,  String wherePath,  String checkPath) throws Exception {
@@ -186,7 +183,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates the target and adds it to the top rule on the stack.
    * @param context Target Context
    * @param targetVariable variable being assigned
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformAs(List<String> context, String targetVariable) throws Exception {
@@ -206,21 +203,21 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target context
    * @param appendVariables value appended in transform
    * @param targetVariable target variable assigned, can be null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformAppend(List<String> context, List<String> appendVariables, String targetVariable) throws Exception {
     this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
-    String ctx = "";
+    StringBuilder ctx = new StringBuilder();
     for (String s : context){
       if (s.length()==0){
-        ctx = s;
+        ctx = new StringBuilder(s);
       }
       else {
-        ctx += "."+s;
+        ctx.append(".").append(s);
       }
     }
-    this.currentSource.setContext(ctx);
+    this.currentSource.setContext(ctx.toString());
 
     for (String appendVar : appendVariables){
       StructureMap.StructureMapGroupRuleTargetParameterComponent param = new StructureMap.StructureMapGroupRuleTargetParameterComponent();
@@ -240,21 +237,21 @@ public class MapHandler implements IFhirMapExecutor {
    * @param sourceVariable Source variable
    * @param typeName Type of value to cast to, may be null
    * @param targetVariable variable to assign value to
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCast(List<String> context, String sourceVariable, String typeName, String targetVariable) throws Exception {
     this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
-    String ctx = "";
+    StringBuilder ctx = new StringBuilder();
     for (String s : context){
       if (s.length()==0){
-        ctx = s;
+        ctx = new StringBuilder(s);
       }
       else {
-        ctx += "."+s;
+        ctx.append(".").append(s);
       }
     }
-    this.currentSource.setContext(ctx);
+    this.currentSource.setContext(ctx.toString());
 
     this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType(sourceVariable)));
     this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType(typeName)));
@@ -267,8 +264,8 @@ public class MapHandler implements IFhirMapExecutor {
 
   /**
    * Not soundly implemented.
-   * @param id
-   * @param params
+   * @param id Group name
+   * @param params parameters to go into the gorup
    */
   @Override
   public void groupCall(String id, List<String> params) {
@@ -283,7 +280,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param code the code value
    * @param display display value for the Coding object
    * @param targetVariable variable to be assigned the Coding object, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCoding(List<String> context, UrlData system, String code, String display, String targetVariable) throws Exception {
@@ -311,7 +308,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param code Code in the Codeable Concept
    * @param display Display value for the Codeable Concept, may be left null
    * @param targetVariable Variable to hold the Codeable Concept object
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCodeableConcept(List<String> context, UrlData system, String code, String display, String targetVariable) throws Exception {
@@ -336,7 +333,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target context
    * @param text text for Codeable Concept
    * @param targetVariable Variable to hold the Codeable Concept object
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCodeableConcept(List<String> context, String text, String targetVariable) throws Exception {
@@ -359,7 +356,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target context
    * @param copyVariable Varaible or value copied
    * @param targetVariable Variable that will hold the result of the transform
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCopy(List<String> context, String copyVariable, String targetVariable) throws Exception {
@@ -386,7 +383,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param system System value for the transform
    * @param cpVariable Cp variable to be added
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCp(List<String> context,  UrlData system, String cpVariable, String targetVariable) throws Exception {
@@ -410,7 +407,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target Context
    * @param createVariable type of object to be created
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformCreate(List<String> context, String createVariable, String targetVariable) throws Exception {
@@ -436,7 +433,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param operation type of operation performed
    * @param variable2 optional variable to be fed into the transform
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformDateOp(List<String> context, String variable, String operation, String variable2, String targetVariable) throws Exception {
@@ -461,7 +458,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param string1 String fed into the transform
    * @param string2 Second string fed into the transform, may be left null
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformEscape(List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
@@ -501,7 +498,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param obj object type
    * @param objElement element within object
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformEvaluate(List<String> context, String obj, String objElement, String targetVariable) throws Exception {
@@ -523,7 +520,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param value The Id Value
    * @param type type value
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformId(List<String> context, UrlData system, String value, String type, String targetVariable) throws Exception {
@@ -547,7 +544,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target Context
    * @param resource Resource to be pointed to
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformPointer(List<String> context, String resource, String targetVariable) throws Exception {
@@ -569,7 +566,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target Context
    * @param text Text of quantity
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformQty(List<String> context, String text, String targetVariable) throws Exception {
@@ -592,7 +589,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param unitString Unit of measure
    * @param system system of the quantity
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformQty(List<String> context, String value, String unitString, UrlData system, String targetVariable) throws Exception {
@@ -617,7 +614,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param unitString unit of measure
    * @param type type
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformQty(List<String> context, String value, String unitString, String type, String targetVariable) throws Exception {
@@ -640,7 +637,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context Target context
    * @param text reference value
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformReference(List<String> context, String text, String targetVariable) throws Exception {
@@ -659,10 +656,10 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates a target for a Translate transform, adds it to the top rule on the stack
    * @param context Target context
    * @param variable variable of the translate
-   * @param mapUri the Map URL of the transation
+   * @param mapUri the Map URL of the translation
    * @param outputType the type of output expected
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformTranslate(List<String> context, String variable, UrlData mapUri, FhirMapTranslateOutputTypes outputType, String targetVariable) throws Exception {
@@ -685,7 +682,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param variable variable to be truncated
    * @param length length of string to truncate to
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformTruncate(List<String> context, String variable, int length, String targetVariable) throws Exception {
@@ -708,7 +705,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates a target for a UUID transform, adds it to the top rule on the stack
    * @param context Target context
    * @param targetVariable Variable that will hold the result of the transform, may be left null
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void transformUuid(List<String> context, String targetVariable) throws Exception {
@@ -724,7 +721,7 @@ public class MapHandler implements IFhirMapExecutor {
 
   /**
    * Signals to complete the rule, add it to its respective parent, and remove it from the stack.
-   * @throws Exception
+   * @throws Exception if it fails to populate correctly
    */
   @Override
   public void ruleComplete() throws Exception {

@@ -21,7 +21,7 @@ public class UrlSearch
     /**
     * Default constructor
     */
-    public UrlSearch() throws Exception {
+    UrlSearch() throws Exception {
     }
 
     /**

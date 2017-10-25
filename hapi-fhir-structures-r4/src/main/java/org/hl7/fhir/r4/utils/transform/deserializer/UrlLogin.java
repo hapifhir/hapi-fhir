@@ -17,7 +17,7 @@ public class UrlLogin
     /**
     * Url Login password.Blank if no
     */
-    public String Password = "";
+    String Password = "";
     /**
     * Compare this url to another one.
     * 

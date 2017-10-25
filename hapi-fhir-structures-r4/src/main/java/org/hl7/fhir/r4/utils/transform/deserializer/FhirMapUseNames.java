@@ -5,6 +5,8 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
+import java.util.Objects;
+
 public enum FhirMapUseNames
 {
     /**
@@ -61,16 +63,16 @@ public enum FhirMapUseNames
   public static FhirMapUseNames forValue(String value)
   {
 
-    if (value == "Source"){
+    if (Objects.equals(value, "Source")){
       return FhirMapUseNames.Source;
     }
-    else if (value == "Target"){
+    else if (Objects.equals(value, "Target")){
       return FhirMapUseNames.Target;
     }
-    else if (value == "Queried"){
+    else if (Objects.equals(value, "Queried")){
       return FhirMapUseNames.Queried;
     }
-    else if (value == "Produced"){
+    else if (Objects.equals(value, "Produced")){
       return FhirMapUseNames.Produced;
     }
     else

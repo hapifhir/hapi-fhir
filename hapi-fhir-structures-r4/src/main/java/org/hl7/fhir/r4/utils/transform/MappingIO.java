@@ -132,7 +132,7 @@ public class MappingIO {
 
   /**
    * returns the MapHandler
-   * @return
+   * @return the structure map handler
    */
   public MapHandler getMapHandler() {
     return this.mapHandler;
@@ -140,8 +140,8 @@ public class MappingIO {
 
   /**
    * Executes the parse of the StructureMap using
-   * @return
-   * @throws Exception
+   * @return the structure map within the processed handler
+   * @throws Exception if the map handler fails to safely be processed
    */
   public StructureMap getStructureMap() throws Exception {
     this.processor.parseFhirMap(this.readFile(), this.mapHandler);
@@ -152,7 +152,7 @@ public class MappingIO {
    * Executes a parse of the structure map argument
    * @param file the file of the StructureMap
    * @return a Parsed StructureMap
-   * @throws Exception
+   * @throws Exception if the map handler fails to safely be processed
    */
   public StructureMap getStructureMapFromFile(File file) throws Exception {
     this.setMappingFile(file);

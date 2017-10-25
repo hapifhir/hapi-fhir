@@ -62,14 +62,14 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 			  {
 				  if (mappings == null)
 				  {
-					  mappings = new java.util.HashMap<Integer, FhirMapConceptMapOperators>();
+					  mappings = new java.util.HashMap<>();
 				  }
 			  }
 		  }
 		  return mappings;
 	  }
 
-	  private FhirMapConceptMapOperators(int value)
+	  FhirMapConceptMapOperators(int value)
 	  {
 		  intValue = value;
 		  getMappings().put(value, this);

@@ -29,7 +29,7 @@ public class DefaultStructureMapParser {
     this.fhirPathEngine = fhirPathEngine;
   }
 
-  public FHIRPathEngine getFhirPathEngine() {
+  private FHIRPathEngine getFhirPathEngine() {
     return fhirPathEngine;
   }
 
@@ -428,11 +428,11 @@ public class DefaultStructureMapParser {
     } else if (name != null) {
       target.setTransform(StructureMap.StructureMapTransform.COPY);
       if (!isConstant) {
-        String id = name;
+        StringBuilder id = new StringBuilder(name);
         while (lexer.hasToken(".")) {
-          id = id + lexer.take() + lexer.take();
+          id.append(lexer.take()).append(lexer.take());
         }
-        target.addParameter().setValue(new IdType(id));
+        target.addParameter().setValue(new IdType(id.toString()));
       } else
         target.addParameter().setValue(readConstant(name, lexer));
     }
@@ -441,14 +441,19 @@ public class DefaultStructureMapParser {
       target.setVariable(lexer.take());
     }
     while (Utilities.existsInList(lexer.getCurrent(), "first", "last", "share", "collate")) {
-      if (lexer.getCurrent().equals("share")) {
-        target.addListMode(StructureMap.StructureMapTargetListMode.SHARE);
-        lexer.next();
-        target.setListRuleId(lexer.take());
-      } else if (lexer.getCurrent().equals("first"))
-        target.addListMode(StructureMap.StructureMapTargetListMode.FIRST);
-      else
-        target.addListMode(StructureMap.StructureMapTargetListMode.LAST);
+      switch (lexer.getCurrent()) {
+        case "share":
+          target.addListMode(StructureMap.StructureMapTargetListMode.SHARE);
+          lexer.next();
+          target.setListRuleId(lexer.take());
+          break;
+        case "first":
+          target.addListMode(StructureMap.StructureMapTargetListMode.FIRST);
+          break;
+        default:
+          target.addListMode(StructureMap.StructureMapTargetListMode.LAST);
+          break;
+      }
       lexer.next();
     }
   }

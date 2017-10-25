@@ -36,7 +36,7 @@ import java.util.ArrayList;
 	 Constructor.
 
 	*/
-	public UrlVisitor()
+   UrlVisitor()
 	{
 	}
 

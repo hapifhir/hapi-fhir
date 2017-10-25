@@ -17,19 +17,19 @@ public class UrlData
     /**
     * Url Authority.
     */
-    public String Authority = "";
+    String Authority = "";
     /**
     * Url Login data . Null if no login
     */
-    public UrlLogin Login = null;
+    UrlLogin Login = null;
     /**
     * Url host .Blank if no
     */
-    public String Host = "";
+    String Host = "";
     /**
     * Url Port.
     */
-    public int Port = -1;
+    int Port = -1;
     /**
     * Url Path.
     */
@@ -66,7 +66,7 @@ public class UrlData
    * @return the result of the comparison
    * @throws Exception
    */
-    static int compare(String a, String b) throws Exception {
+    private static int compare(String a, String b) throws Exception {
         return a.compareTo(b);
     }
 
@@ -77,7 +77,7 @@ public class UrlData
    * @return the result of the comparison
    * @throws Exception
    */
-    static int compare(int a, int b) throws Exception {
+    private static int compare(int a, int b) throws Exception {
         if (a > b)
             return 1;
          
@@ -94,7 +94,7 @@ public class UrlData
    * @return the result.
    * @throws Exception
    */
-    static int compare(UrlSearch[] a, UrlSearch[] b) throws Exception {
+    private static int compare(UrlSearch[] a, UrlSearch[] b) throws Exception {
         int retVal = a.length - b.length;
         if (retVal != 0)
             return retVal;
@@ -116,7 +116,7 @@ public class UrlData
    * @return
    * @throws Exception
    */
-    static int compare(String[] a, String[] b) throws Exception {
+    private static int compare(String[] a, String[] b) throws Exception {
         int retVal = a.length - b.length;
         if (retVal != 0)
             return retVal;

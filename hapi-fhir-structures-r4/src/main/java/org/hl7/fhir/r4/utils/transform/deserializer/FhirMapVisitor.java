@@ -12,8 +12,6 @@ import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.Fhir
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -53,7 +53,7 @@ public class UrlProcessor
     *  @param text Adl text
     *  @return ANTLR parser
     */
-    public UrlJavaParser loadGrammar(String text) throws Exception {
+    private UrlJavaParser loadGrammar(String text) throws Exception {
       CharBuffer buffer = CharBuffer.allocate(text.length());
       buffer.append(text);
       buffer.position(0);
@@ -62,12 +62,9 @@ public class UrlProcessor
       lexer.addErrorListener(new ThrowExceptionErrorListener(text));
       CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
       UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
-        if (this.getDebugFlag() == true)
+        if (this.getDebugFlag())
         {
-            DebugParseListener parseListener = new DebugParseListener(grammar, (s) ->
-            {
-                System.err.println(s);
-            });
+            DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
             grammar.addParseListener(parseListener);
         }
 
@@ -85,8 +82,7 @@ public class UrlProcessor
         UrlJavaParser grammar = this.loadGrammar(UrlText);
         ParseTree parseTree = grammar.url();
         UrlVisitor visitor = new UrlVisitor();
-        UrlData retVal = (UrlData)visitor.visit(parseTree);
-        return retVal;
+      return (UrlData)visitor.visit(parseTree);
     }
 
 }

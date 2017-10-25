@@ -3,9 +3,8 @@ map "http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap" = "Colorectal 
 uses "http://fhir.hl7.org.au/fhir/rcpa/StructureDefinition/Colorectal" as source
 
 group for types Colorectal
-  input source : Colorectal as source
-
+   input source : Colorectal as source
    Colorectal : for source make  create("DiagnosticReport") as cdr then {
-    Colorectal.subject : for source.subject : Reference 1..1 as v make cdr.subject = v
+      Colorectal.subject : for source.subject : Reference 1..1 as v make cdr.subject = v
 	}
 endgroup

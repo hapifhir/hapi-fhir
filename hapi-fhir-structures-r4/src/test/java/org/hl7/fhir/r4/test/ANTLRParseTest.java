@@ -36,16 +36,12 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * For testing the ANTLR parser, uses a Mock object in most cases before
+ * asserting which pieces of the mapping language is correct. Errors will be
+ * thrown if the value recieved is incorrect.
+ */
 public class ANTLRParseTest {
-
-
-
-
-
-	/*
-		FROM HERE: Tests for each part of the ANTLR parse
-	 */
-
 
 	FhirMapProcessor createProcessor() throws Exception {
 		return new FhirMapProcessor();

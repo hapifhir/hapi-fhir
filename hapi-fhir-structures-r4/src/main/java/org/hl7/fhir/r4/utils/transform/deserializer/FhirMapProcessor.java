@@ -4,22 +4,17 @@
 
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
-import org.antlr.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CodePointBuffer;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.DebugParseListener;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowErrorHandler;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowExceptionErrorListener;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaLexer;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 
 /**
 * Process Adl Language data.
@@ -30,11 +25,11 @@ public class FhirMapProcessor
     * If true, output debug info during parsing.
     */
     private boolean __DebugFlag;
-    public boolean getDebugFlag() {
+    private boolean getDebugFlag() {
         return __DebugFlag;
     }
 
-    public void setDebugFlag(boolean value) {
+    private void setDebugFlag(boolean value) {
         __DebugFlag = value;
     }
 
@@ -60,12 +55,9 @@ public class FhirMapProcessor
         lexer.addErrorListener(new ThrowExceptionErrorListener(text));
         CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
         FhirMapJavaParser grammar = new FhirMapJavaParser(commonTokenStream);
-        if (this.getDebugFlag() == true)
+        if (this.getDebugFlag())
         {
-            DebugParseListener parseListener = new DebugParseListener(grammar, (s) ->
-            {
-                System.err.println(s);
-            });
+            DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
             grammar.addParseListener(parseListener);
         }
          
