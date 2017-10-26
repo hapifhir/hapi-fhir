@@ -146,6 +146,12 @@
 				includes a check for R4 servers. Thanks to Clayton Bodendein
 				for the pull request, including a number of great tests!
 			</action>
+			<action type="add" issue="714">
+				JAX-RS client framework now supports the ability to
+				register your own JAX-RS Component Classes against the client,
+				as well as better documentation about thread safety. Thanks
+				to Sébastien Rivière for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
