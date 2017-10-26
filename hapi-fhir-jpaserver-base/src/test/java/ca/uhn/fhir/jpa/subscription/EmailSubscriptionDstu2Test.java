@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
@@ -34,6 +36,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
 	private static GreenMail ourTestSmtp;
+	private static int ourListenerPort;
 	private SubscriptionEmailInterceptor mySubscriber;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
@@ -59,7 +62,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		JavaMailEmailSender emailSender = new JavaMailEmailSender();
 		emailSender.setSmtpServerHostname("localhost");
-		emailSender.setSmtpServerPort(3025);
+		emailSender.setSmtpServerPort(ourListenerPort);
 		emailSender.start();
 
 		mySubscriber = new SubscriptionEmailInterceptor();
@@ -167,7 +170,10 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourTestSmtp = new GreenMail(ServerSetupTest.SMTP);
+		ourListenerPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		smtp.setServerStartupTimeout(2000);
+		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
 	}
 

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -13,12 +14,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetupTest;
+import com.icegreen.greenmail.util.ServerSetup;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
 
@@ -44,10 +45,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
-	private static RestfulServer ourListenerRestServer;
-	private static Server ourListenerServer;
-	private static String ourListenerServerBase;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
@@ -77,6 +74,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourTestSmtp.purgeEmailFromAllMailboxes();;
 		ourRestServer.registerInterceptor(ourEmailSubscriptionInterceptor);
 
+		JavaMailEmailSender emailSender = new JavaMailEmailSender();
+		emailSender.setSmtpServerHostname("localhost");
+		emailSender.setSmtpServerPort(ourListenerPort);
+		emailSender.start();
+
+		ourEmailSubscriptionInterceptor.setEmailSender(emailSender);
 		ourEmailSubscriptionInterceptor.setDefaultFromAddress("123@hapifhir.io");
 	}
 
@@ -87,13 +90,16 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourTestSmtp = new GreenMail(ServerSetupTest.SMTP);
+		ourListenerPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		smtp.setServerStartupTimeout(2000);
+		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
 	}
 
 
 
-	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -138,15 +144,20 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		createSubscription(criteria1, payload, ourListenerServerBase);
+		createSubscription(criteria1, payload);
 		waitForQueueToDrain();
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
-		waitForSize(1, received);
+		waitForSize(1, 20000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
 
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("123@hapifhir.io", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
@@ -163,7 +174,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		Subscription sub1 = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription sub1 = createSubscription(criteria1, payload);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
 		Assert.assertNotNull(subscriptionTemp);
@@ -185,9 +196,14 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
-		waitForSize(1, received);
+		waitForSize(1, 20000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
 
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 		assertEquals(1, received.size());
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
@@ -201,58 +217,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		RestHookTestDstu2Test.waitForQueueToDrain(ourEmailSubscriptionInterceptor);
-	}
-
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
-
-		ourListenerServer = new Server(ourListenerPort);
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
-	}
-
-	@AfterClass
-	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
-	}
-
-	public static class ObservationListener implements IResourceProvider {
-
-		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourCreatedObservations.add(theObservation);
-			return new MethodOutcome(new IdType("Observation/1"), true);
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Observation.class;
-		}
-
-		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
-			return new MethodOutcome(new IdType("Observation/1"), false);
-		}
-
 	}
 
 }
