@@ -69,15 +69,16 @@ public class SubscriptionActivatingSubscriber {
 		final String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
 		final String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
 		if (requestedStatus.equals(statusString)) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public void afterCommit() {
-					status.setValueAsString(activeStatus);
-					ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
-					mySubscriptionDao.update(theSubscription);
-					mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
-				}
-			});
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					@Override
+					public void afterCommit() {
+						activateSubscription(status, activeStatus, theSubscription, requestedStatus);
+					}
+				});
+			} else {
+				activateSubscription(status, activeStatus, theSubscription, requestedStatus);
+			}
 		} else if (activeStatus.equals(statusString)) {
 			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
@@ -89,6 +90,13 @@ public class SubscriptionActivatingSubscriber {
 			}
 			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		}
+	}
+
+	private void activateSubscription(IPrimitiveType<?> theStatus, String theActiveStatus, IBaseResource theSubscription, String theRequestedStatus) {
+		theStatus.setValueAsString(theActiveStatus);
+		ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
+		mySubscriptionDao.update(theSubscription);
+		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 	}
 
 

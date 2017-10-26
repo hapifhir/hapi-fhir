@@ -184,7 +184,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		StopWatch w = new StopWatch();
 		final String searchUuid = UUID.randomUUID().toString();
 
-		ourLog.info("Registering new search {}", searchUuid);
+		ourLog.debug("Registering new search {}", searchUuid);
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
@@ -206,7 +206,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
 
-			ourLog.info("Search {} is loading in synchronous mode", searchUuid);
+			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -561,25 +561,25 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
 			ourLog.info("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
-			CountDownLatch latch = null;
-			synchronized (mySyncedPids) {
-				if (mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING) {
-					int latchSize = theToIndex - mySyncedPids.size();
-					ourLog.trace("Registering latch to await {} results (want {} total)", latchSize, theToIndex);
-					latch = new CountDownLatch(latchSize);
-				}
-			}
-
-			if (latch != null) {
-				while (latch.getCount() > 0 && mySearch.getStatus() == SearchStatusEnum.LOADING) {
-					try {
-						ourLog.trace("Awaiting latch with {}", latch.getCount());
-						latch.await(500, TimeUnit.MILLISECONDS);
-					} catch (InterruptedException e) {
-						// ok
+			boolean keepWaiting;
+			do {
+				synchronized (mySyncedPids) {
+					keepWaiting = false;
+					if (mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING) {
+						keepWaiting = true;
 					}
 				}
-			}
+				if (keepWaiting) {
+					ourLog.info("Waiting, as we only have {} results", mySyncedPids.size());
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException theE) {
+						// ignore
+					}
+				} else {
+					ourLog.info("Proceeding, as we have {} results", mySyncedPids.size());
+				}
+			} while (keepWaiting);
 
 			ArrayList<Long> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {

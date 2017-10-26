@@ -2,9 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
-import ca.uhn.fhir.jpa.subscription.email.EmailDetails;
-import ca.uhn.fhir.jpa.subscription.email.EmailSender;
-import ca.uhn.fhir.jpa.subscription.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -14,9 +12,6 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import com.icegreen.greenmail.imap.ImapConstants;
-import com.icegreen.greenmail.store.MailFolder;
-import com.icegreen.greenmail.store.Store;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -62,7 +57,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	public void before() throws Exception {
 		super.before();
 
-		EmailSender emailSender = new EmailSender();
+		JavaMailEmailSender emailSender = new JavaMailEmailSender();
 		emailSender.setSmtpServerHost("localhost");
 		emailSender.setSmtpServerPort(3025);
 		emailSender.start();
@@ -129,7 +124,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testSubscribeAndDeliver() throws Exception {
-		String payload = "application/json";
+		String payload = "A subscription update has been received";
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
@@ -153,12 +148,12 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(messages[msgIdx]));
 		assertEquals("HAPI FHIR Subscriptions", messages[msgIdx].getSubject());
 		assertEquals(1, messages[msgIdx].getFrom().length);
-		assertEquals("unknown@sender.com", ((InternetAddress) messages[msgIdx].getFrom()[0]).getAddress());
+		assertEquals("noreply@unknown.com", ((InternetAddress) messages[msgIdx].getFrom()[0]).getAddress());
 		assertEquals(2, messages[msgIdx].getAllRecipients().length);
 		assertEquals("to1@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[0]).getAddress());
 		assertEquals("to2@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[1]).getAddress());
 		assertEquals(1, messages[msgIdx].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=UTF-8", messages[msgIdx].getHeader("Content-Type")[0]);
+		assertEquals("text/plain; charset=us-ascii", messages[msgIdx].getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(messages[msgIdx]);
 		assertEquals("A subscription update has been received", foundBody);
 

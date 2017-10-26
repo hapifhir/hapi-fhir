@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.search.*;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -93,15 +94,6 @@ public class BaseConfig implements SchedulingConfigurer {
 		return new StaleSearchDeletingSvcImpl();
 	}
 
-	// @PostConstruct
-	// public void wireResourceDaos() {
-	// Map<String, IDao> daoBeans = myAppCtx.getBeansOfType(IDao.class);
-	// List bean = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
-	// for (IDao next : daoBeans.values()) {
-	// next.setResourceDaos(bean);
-	// }
-	// }
-
 	@Bean
 	@Lazy
 	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
@@ -114,15 +106,23 @@ public class BaseConfig implements SchedulingConfigurer {
 		return new SubscriptionWebsocketInterceptor();
 	}
 
+	/**
+	 * Note: If you're going to use this, you need to provide a bean
+	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
+	 * in your own Spring config
+	 */
+	@Bean
+	@Lazy
+	public SubscriptionEmailInterceptor subscriptionEmailInterceptor() {
+		return new SubscriptionEmailInterceptor();
+	}
+
 	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
 		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
-//		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
-//		retVal.setPoolSize(5);
-//		return retVal;
 	}
 
 	/**

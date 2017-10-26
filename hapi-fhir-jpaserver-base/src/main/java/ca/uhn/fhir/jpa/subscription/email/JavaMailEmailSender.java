@@ -22,11 +22,11 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
@@ -35,6 +35,9 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import javax.annotation.PostConstruct;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,9 +45,9 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class EmailSender implements IEmailSender {
+public class JavaMailEmailSender implements IEmailSender {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(EmailSender.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JavaMailEmailSender.class);
 	private String mySmtpServerHost;
 	private int mySmtpServerPort = 25;
 	private JavaMailSenderImpl mySender;
@@ -61,7 +64,8 @@ public class EmailSender implements IEmailSender {
 
 	@Override
 	public void send(EmailDetails theDetails) {
-		ourLog.info("Sending email to recipients: {}", theDetails.getTo());
+		String subscriptionId = theDetails.getSubscription().toUnqualifiedVersionless().getValue();
+		ourLog.info("Sending email for subscription {} to recipients: {}", subscriptionId, theDetails.getTo());
 		StopWatch sw = new StopWatch();
 
 		StringTemplateResolver templateResolver = new StringTemplateResolver();
@@ -80,12 +84,18 @@ public class EmailSender implements IEmailSender {
 		String body = engine.process(theDetails.getBodyTemplate(), context);
 		String subject = engine.process(theDetails.getSubjectTemplate(), context);
 
-		SimpleMailMessage email = new SimpleMailMessage();
-		email.setFrom(trim(theDetails.getFrom()));
-		email.setTo(toTrimmedStringArray(theDetails.getTo()));
-		email.setSubject(subject);
-		email.setText(body);
-		email.setSentDate(new Date());
+		MimeMessage email = mySender.createMimeMessage();
+
+		try {
+			email.setFrom(trim(theDetails.getFrom()));
+			email.setRecipients(Message.RecipientType.TO, toTrimmedCommaSeparatedString(theDetails.getTo()));
+			email.setSubject(subject);
+			email.setText(body);
+			email.setSentDate(new Date());
+			email.addHeader("X-FHIR-Subscription", subscriptionId);
+		} catch (MessagingException e) {
+			throw new InternalErrorException("Failed to create email messaage", e);
+		}
 
 		mySender.send(email);
 
@@ -106,13 +116,14 @@ public class EmailSender implements IEmailSender {
 		mySmtpServerPort = theSmtpServerPort;
 	}
 
-	private static String[] toTrimmedStringArray(List<String> theTo) {
+	private static String toTrimmedCommaSeparatedString(List<String> theTo) {
 		List<String> to = new ArrayList<>();
 		for (String next : theTo) {
 			if (isNotBlank(next)) {
 				to.add(next);
 			}
 		}
-		return to.toArray(new String[to.size()]);
+
+		return StringUtils.join(to, ",");
 	}
 }

@@ -32,6 +32,12 @@
 			<version>3.5</version>
 		</dependency>
 -->
+
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>woodstox-core-asl</artifactId>
+     </dependency>
+
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>

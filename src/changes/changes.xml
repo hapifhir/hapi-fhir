@@ -17,7 +17,6 @@
 					</ul>
 				]]>
 			</action>
-
 			<action type="fix">
 				The Android client module has been restored to working order, and no longer
 				requires a special classifier or an XML parser to be present in order to

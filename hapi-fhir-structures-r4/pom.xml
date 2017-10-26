@@ -29,6 +29,11 @@
 		<!-- 
 		Optional dependencies from RI codebase
 		-->
+      <dependency>
+         <groupId>org.codehaus.woodstox</groupId>
+         <artifactId>woodstox-core-asl</artifactId>
+         <scope>test</scope>
+      </dependency>
 		<dependency>
 			<groupId>es.nitaur.markdown</groupId>
 			<artifactId>txtmark</artifactId>

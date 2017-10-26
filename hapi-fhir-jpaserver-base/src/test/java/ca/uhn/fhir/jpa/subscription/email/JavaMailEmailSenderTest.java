@@ -1,8 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,21 +18,23 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
-public class EmailSenderTest {
+public class JavaMailEmailSenderTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(EmailSenderTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JavaMailEmailSenderTest.class);
 	private static GreenMail ourTestSmtp;
+	private static int ourPort;
 
 	@Test
 	public void testSend() throws Exception {
-		EmailSender sender = new EmailSender();
+		JavaMailEmailSender sender = new JavaMailEmailSender();
 		sender.setSmtpServerHost("localhost");
-		sender.setSmtpServerPort(3025);
+		sender.setSmtpServerPort(ourPort);
 		sender.start();
 
 		String body = "foo";
 
 		EmailDetails details = new EmailDetails();
+		details.setSubscription(new IdType("Subscription/123"));
 		details.setFrom("foo@example.com ");
 		details.setTo(Arrays.asList(" to1@example.com", "to2@example.com   "));
 		details.setSubjectTemplate("test subject");
@@ -46,7 +51,7 @@ public class EmailSenderTest {
 		assertEquals("to1@example.com", ((InternetAddress)messages[0].getAllRecipients()[0]).getAddress());
 		assertEquals("to2@example.com", ((InternetAddress)messages[0].getAllRecipients()[1]).getAddress());
 		assertEquals(1, messages[0].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=UTF-8", messages[0].getHeader("Content-Type")[0]);
+		assertEquals("text/plain; charset=us-ascii", messages[0].getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(messages[0]);
 		assertEquals("foo", foundBody);
 	}
@@ -58,7 +63,10 @@ public class EmailSenderTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourTestSmtp = new GreenMail(ServerSetupTest.SMTP);
+		ourPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourPort, null, ServerSetup.PROTOCOL_SMTP);
+		smtp.setServerStartupTimeout(2000);
+		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
 	}
 

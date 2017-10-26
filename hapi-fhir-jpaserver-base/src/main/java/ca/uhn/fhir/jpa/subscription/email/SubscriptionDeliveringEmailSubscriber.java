@@ -54,32 +54,29 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		List<String> destinationAddresses = new ArrayList<>();
 		String[] destinationAddressStrings = StringUtils.split(endpointUrl, ",");
 		for (String next : destinationAddressStrings) {
+			next = trim(defaultString(next));
+			if (next.startsWith("mailto:")) {
+				next = next.substring("mailto:".length());
+			}
 			if (isNotBlank(next)) {
-				destinationAddresses.add(trim(next));
+				destinationAddresses.add(next);
 			}
 		}
 
-		String from = defaultString(subscription.getEmailDetails().getFrom(), provideDefaultFrom());
+		String from = defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionEmailInterceptor.getDefaultFromAddress());
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
-		String bodyTemplate = defaultString(subscription.getEmailDetails().getBodyTemplate(), provideDefaultBodyTemplate());
 
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
-		details.setBodyTemplate(bodyTemplate);
+		details.setBodyTemplate(subscription.getPayloadString());
 		details.setSubjectTemplate(subjectTemplate);
+		details.setSubscription(subscription.getIdElement(getContext()));
 
 		IEmailSender emailSender = mySubscriptionEmailInterceptor.getEmailSender();
 		emailSender.send(details);
 	}
 
-	private String provideDefaultBodyTemplate() {
-		return "A subscription update has been received";
-	}
-
-	private String provideDefaultFrom() {
-		return "unknown@sender.com";
-	}
 
 	private String provideDefaultSubjectTemplate() {
 		return "HAPI FHIR Subscriptions";

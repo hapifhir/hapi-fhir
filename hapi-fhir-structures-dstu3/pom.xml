@@ -101,6 +101,11 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+      <dependency>
+         <groupId>org.codehaus.woodstox</groupId>
+         <artifactId>woodstox-core-asl</artifactId>
+			<scope>test</scope>
+      </dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
@@ -122,6 +127,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
+			<optional>true</optional>
 		</dependency>
 
 		<!--

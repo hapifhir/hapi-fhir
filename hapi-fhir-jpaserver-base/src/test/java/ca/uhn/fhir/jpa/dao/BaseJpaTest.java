@@ -303,7 +303,7 @@ public abstract class BaseJpaTest {
 
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
-		while (theList.size() != theTarget && sw.getMillis() < 10000) {
+		while (theList.size() != theTarget && sw.getMillis() <= 15000) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
