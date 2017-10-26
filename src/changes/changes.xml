@@ -152,6 +152,11 @@
 				as well as better documentation about thread safety. Thanks
 				to Sébastien Rivière for the pull request!
 			</action>
+			<action type="fix" issue="717">
+				Processing of the If-Modified-Since header on FHIR read operations was reversed,
+				returning a 304 when the resource had been modified recently. Thanks to
+				Michael Lawley for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
