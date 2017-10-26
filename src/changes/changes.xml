@@ -140,6 +140,12 @@
 				a custom type caused a crash during parsing. Thanks to 
 				GitHub user @mosaic-hgw for reporting!
 			</action>
+			<action type="add" issue="711">
+				Client logic for checking the version of the connected
+				server to ensure it is for the correct version of FHIR now
+				includes a check for R4 servers. Thanks to Clayton Bodendein
+				for the pull request, including a number of great tests!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
