@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,29 +62,9 @@ public class CorsInterceptor extends InterceptorAdapter {
 		this(createDefaultCorsConfig());
 	}
 
-	private static CorsConfiguration createDefaultCorsConfig() {
-		CorsConfiguration retVal = new CorsConfiguration();
-
-		// *********************************************************
-		// Update constructor documentation if you change these:
-		// *********************************************************
-
-		retVal.addAllowedHeader("Origin");
-		retVal.addAllowedHeader("Accept");
-		retVal.addAllowedHeader("X-Requested-With");
-		retVal.addAllowedHeader("Content-Type");
-		retVal.addAllowedHeader("Access-Control-Request-Method");
-		retVal.addAllowedHeader("Access-Control-Request-Headers");
-		retVal.addAllowedOrigin("*");
-		retVal.addExposedHeader("Location");
-		retVal.addExposedHeader("Content-Location");
-
-		return retVal;
-	}
-
 	/**
 	 * Constructor which accepts the given configuration
-	 * 
+	 *
 	 * @param theConfiguration
 	 *           The CORS configuration
 	 */
@@ -94,17 +75,17 @@ public class CorsInterceptor extends InterceptorAdapter {
 	}
 
 	/**
-	 * Sets the CORS configuration
-	 */
-	public void setConfig(CorsConfiguration theConfiguration) {
-		myConfig = theConfiguration;
-	}
-
-	/**
 	 * Gets the CORS configuration
 	 */
 	public CorsConfiguration getConfig() {
 		return myConfig;
+	}
+
+	/**
+	 * Sets the CORS configuration
+	 */
+	public void setConfig(CorsConfiguration theConfiguration) {
+		myConfig = theConfiguration;
 	}
 
 	@Override
@@ -122,6 +103,28 @@ public class CorsInterceptor extends InterceptorAdapter {
 		}
 
 		return super.incomingRequestPreProcessed(theRequest, theResponse);
+	}
+
+	private static CorsConfiguration createDefaultCorsConfig() {
+		CorsConfiguration retVal = new CorsConfiguration();
+
+		// *********************************************************
+		// Update constructor documentation if you change these:
+		// *********************************************************
+
+		retVal.addAllowedHeader("Origin");
+		retVal.addAllowedHeader("Accept");
+		retVal.addAllowedHeader("X-Requested-With");
+		retVal.addAllowedHeader("Content-Type");
+		retVal.addAllowedHeader("Access-Control-Request-Method");
+		retVal.addAllowedHeader("Access-Control-Request-Headers");
+		retVal.addAllowedHeader("Cache-Control");
+		retVal.addAllowedOrigin("*");
+		retVal.addExposedHeader("Location");
+		retVal.addExposedHeader("Content-Location");
+		retVal.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+		return retVal;
 	}
 
 }

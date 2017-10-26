@@ -48,18 +48,48 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class JavaMailEmailSender implements IEmailSender {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JavaMailEmailSender.class);
-	private String mySmtpServerHost;
+	private String mySmtpServerHostname;
 	private int mySmtpServerPort = 25;
 	private JavaMailSenderImpl mySender;
+	private String mySmtpServerUsername;
+	private String mySmtpServerPassword;
 
-	@PostConstruct
-	public void start() {
-		Validate.notBlank(mySmtpServerHost, "No SMTP host defined");
+	public String getSmtpServerHostname() {
+		return mySmtpServerHostname;
+	}
 
-		mySender = new JavaMailSenderImpl();
-		mySender.setHost(mySmtpServerHost);
-		mySender.setPort(mySmtpServerPort);
-		mySender.setDefaultEncoding(Constants.CHARSET_UTF8.name());
+	/**
+	 * Set the SMTP server host to use for outbound mail
+	 */
+	public void setSmtpServerHostname(String theSmtpServerHostname) {
+		mySmtpServerHostname = theSmtpServerHostname;
+	}
+
+	public String getSmtpServerPassword() {
+		return mySmtpServerPassword;
+	}
+
+	public void setSmtpServerPassword(String theSmtpServerPassword) {
+		mySmtpServerPassword = theSmtpServerPassword;
+	}
+
+	public int getSmtpServerPort() {
+		return mySmtpServerPort;
+	}
+
+	/**
+	 * Set the SMTP server port to use for outbound mail
+	 */
+	public void setSmtpServerPort(int theSmtpServerPort) {
+		mySmtpServerPort = theSmtpServerPort;
+	}
+
+	public String getSmtpServerUsername() {
+		return mySmtpServerUsername;
+	}
+
+	public void setSmtpServerUsername(String theSmtpServerUsername) {
+		mySmtpServerUsername = theSmtpServerUsername;
 	}
 
 	@Override
@@ -102,18 +132,16 @@ public class JavaMailEmailSender implements IEmailSender {
 		ourLog.info("Done sending email (took {}ms)", sw.getMillis());
 	}
 
-	/**
-	 * Set the SMTP server host to use for outbound mail
-	 */
-	public void setSmtpServerHost(String theSmtpServerHost) {
-		mySmtpServerHost = theSmtpServerHost;
-	}
+	@PostConstruct
+	public void start() {
+		Validate.notBlank(mySmtpServerHostname, "No SMTP host defined");
 
-	/**
-	 * Set the SMTP server port to use for outbound mail
-	 */
-	public void setSmtpServerPort(int theSmtpServerPort) {
-		mySmtpServerPort = theSmtpServerPort;
+		mySender = new JavaMailSenderImpl();
+		mySender.setHost(getSmtpServerHostname());
+		mySender.setPort(getSmtpServerPort());
+		mySender.setUsername(getSmtpServerUsername());
+		mySender.setPassword(getSmtpServerPassword());
+		mySender.setDefaultEncoding(Constants.CHARSET_UTF8.name());
 	}
 
 	private static String toTrimmedCommaSeparatedString(List<String> theTo) {

@@ -174,6 +174,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
+
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 

@@ -181,6 +181,7 @@ public class TestRestfulServer extends RestfulServer {
 		config.addAllowedHeader("Content-Type");
 		config.addAllowedHeader("Access-Control-Request-Method");
 		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedHeader("Cache-Control");
 		config.addAllowedOrigin("*");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");

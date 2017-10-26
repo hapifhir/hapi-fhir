@@ -58,7 +58,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		super.before();
 
 		JavaMailEmailSender emailSender = new JavaMailEmailSender();
-		emailSender.setSmtpServerHost("localhost");
+		emailSender.setSmtpServerHostname("localhost");
 		emailSender.setSmtpServerPort(3025);
 		emailSender.start();
 

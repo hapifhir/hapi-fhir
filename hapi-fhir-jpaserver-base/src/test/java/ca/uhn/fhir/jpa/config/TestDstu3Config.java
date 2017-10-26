@@ -118,7 +118,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean
 	public IEmailSender emailSender() {
 		JavaMailEmailSender retVal = new JavaMailEmailSender();
-		retVal.setSmtpServerHost("localhost");
+		retVal.setSmtpServerHostname("localhost");
 		retVal.setSmtpServerPort(3025);
 		return retVal;
 	}

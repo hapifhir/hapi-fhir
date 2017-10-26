@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,8 +26,10 @@ public class JavaMailEmailSenderTest {
 	@Test
 	public void testSend() throws Exception {
 		JavaMailEmailSender sender = new JavaMailEmailSender();
-		sender.setSmtpServerHost("localhost");
+		sender.setSmtpServerHostname("localhost");
 		sender.setSmtpServerPort(ourPort);
+		sender.setSmtpServerUsername(null);
+		sender.setSmtpServerPassword(null);
 		sender.start();
 
 		String body = "foo";
