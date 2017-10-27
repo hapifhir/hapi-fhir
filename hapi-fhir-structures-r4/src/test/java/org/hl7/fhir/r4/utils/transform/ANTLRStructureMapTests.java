@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.test;
+package org.hl7.fhir.r4.utils.transform;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
@@ -60,9 +60,9 @@ public class ANTLRStructureMapTests {
 
 		FhirContext context = FhirContext.forR4();
 		context.setValidationSupport(validation);
-		//sd1 = this.createTestStructure();
+		sd1 = this.createTestStructure();
 
-		sd1 = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(new File("C:\\JCimiProject\\hapi-fhir-resource-profile-generator\\target\\classes\\mapping\\logical\\structuredefinition-colorectal.xml")));
+		//sd1 = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(new File("C:\\JCimiProject\\hapi-fhir-resource-profile-generator\\target\\classes\\mapping\\logical\\structuredefinition-colorectal.xml")));
 		if (sd1.getId().contains("/"))
 			sd1.setId(sd1.getId().split("/")[sd1.getId().split("/").length - 1]);
 		validation.addStructureDefinition(sd1);
@@ -74,7 +74,7 @@ public class ANTLRStructureMapTests {
 		StructureMap map = null;
 		HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
 		scu = new FhirTransformationEngine(hapiContext);
-		MappingIO mapping = new MappingIO("colorectal3.map");
+		MappingIO mapping = new MappingIO("simpleMapTest.map");
 		//mapping.setMappingFile(new File("colorectal3.map"));
 		//mapping.setMappingFile(new File("simpleMapTest.map"));
 		//String mapText = mapping.readFile();

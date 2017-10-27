@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.test;
+package org.hl7.fhir.r4.utils.transform;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -46,7 +46,6 @@ public class ANTLRParseTest {
 	FhirMapProcessor createProcessor() throws Exception {
 		return new FhirMapProcessor();
 	}
-
 
 	public void testRuleInput(String fhirMapText, String name, String type, FhirMapInputModes inputMode) throws Exception{
 		MapHandler mock = Mockito.mock(MapHandler.class);
