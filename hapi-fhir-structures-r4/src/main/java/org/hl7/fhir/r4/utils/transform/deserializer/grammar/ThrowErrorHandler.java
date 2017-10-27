@@ -11,7 +11,7 @@ public class ThrowErrorHandler extends DefaultErrorStrategy implements ANTLRErro
   public void reset(Parser recognizer) {
     super.reset(recognizer);
   }
-
+  
   @Override
   public Token recoverInline(Parser recognizer) throws RecognitionException {
     return super.recoverInline(recognizer);

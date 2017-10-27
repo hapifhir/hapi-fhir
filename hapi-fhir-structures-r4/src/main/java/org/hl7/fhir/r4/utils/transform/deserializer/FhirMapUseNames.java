@@ -9,56 +9,56 @@ import java.util.Objects;
 
 public enum FhirMapUseNames
 {
-    /**
-     'source'
-     */
-    NotSet,
+  /**
+  'source'
+  */
+  NotSet,
+  
+  /**
+  'source'
+  */
+  Source,
 
-    /**
-     'source'
-     */
-    Source,
+  /**
+  'target'
+  */
+  Target,
 
-    /**
-     'target'
-     */
-    Target,
+  /**
+  'queried'
+  */
+  Queried,
 
-    /**
-     'queried'
-     */
-    Queried,
+  /**
+  'produced'
+  */
+  Produced;
 
-    /**
-     'produced'
-     */
-    Produced;
+  public static final int SIZE = java.lang.Integer.SIZE;
 
-    public static final int SIZE = java.lang.Integer.SIZE;
-
-    public String getValue()
-    {
-      switch (this) {
-        case Source:
-          return "source";
-        case Queried:
-          return "queried";
-        case Target:
-          return "target";
-        case Produced:
-          return "produced";
-        default:
-          return "?";
-      }
+  public String getValue()
+  {
+    switch (this) {
+      case Source:
+      return "source";
+      case Queried:
+      return "queried";
+      case Target:
+      return "target";
+      case Produced:
+      return "produced";
+      default:
+      return "?";
     }
+  }
 
 
 
 
-    public static FhirMapUseNames forValue(int value)
-    {
-        return values()[value];
-    }
+  public static FhirMapUseNames forValue(int value)
+  {
+    return values()[value];
+  }
 
   public static FhirMapUseNames forValue(String value)
   {
@@ -76,7 +76,6 @@ public enum FhirMapUseNames
       return FhirMapUseNames.Produced;
     }
     else
-      return FhirMapUseNames.NotSet;
+    return FhirMapUseNames.NotSet;
   }
 }
-

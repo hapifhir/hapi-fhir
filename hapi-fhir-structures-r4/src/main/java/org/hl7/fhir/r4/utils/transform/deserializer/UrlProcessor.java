@@ -27,64 +27,62 @@ import java.nio.charset.Charset;
 */
 public class UrlProcessor
 {
-    /**
-    * If true, output debug info during parsing.
-    */
-    private boolean __DebugFlag;
-    public boolean getDebugFlag() {
-        return __DebugFlag;
+  /**
+  * If true, output debug info during parsing.
+  */
+  private boolean __DebugFlag;
+  public boolean getDebugFlag() {
+    return __DebugFlag;
+  }
+
+  public void setDebugFlag(boolean value) {
+    __DebugFlag = value;
+  }
+
+  /**
+  * Constructor.
+  *
+  */
+  public UrlProcessor() throws Exception {
+    setDebugFlag(false);
+  }
+
+  /**
+  * Method to load string grammar.
+  *
+  *  @param text Adl text
+  *  @return ANTLR parser
+  */
+  private UrlJavaParser loadGrammar(String text) throws Exception {
+    CharBuffer buffer = CharBuffer.allocate(text.length());
+    buffer.append(text);
+    buffer.position(0);
+
+    UrlJavaLexer lexer = new UrlJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
+    lexer.addErrorListener(new ThrowExceptionErrorListener(text));
+    CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+    UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
+    if (this.getDebugFlag())
+    {
+      DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
+      grammar.addParseListener(parseListener);
     }
 
-    public void setDebugFlag(boolean value) {
-        __DebugFlag = value;
-    }
+    grammar.removeErrorListeners();
+    grammar.addErrorListener(new ThrowExceptionErrorListener(text));
+    return grammar;
+  }
 
-    /**
-    * Constructor.
-    *
-    */
-    public UrlProcessor() throws Exception {
-        setDebugFlag(false);
-    }
-
-    /**
-    * Method to load string grammar.
-    *
-    *  @param text Adl text
-    *  @return ANTLR parser
-    */
-    private UrlJavaParser loadGrammar(String text) throws Exception {
-      CharBuffer buffer = CharBuffer.allocate(text.length());
-      buffer.append(text);
-      buffer.position(0);
-
-      UrlJavaLexer lexer = new UrlJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
-      lexer.addErrorListener(new ThrowExceptionErrorListener(text));
-      CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-      UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
-        if (this.getDebugFlag())
-        {
-            DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
-            grammar.addParseListener(parseListener);
-        }
-
-        grammar.removeErrorListeners();
-        grammar.addErrorListener(new ThrowExceptionErrorListener(text));
-        return grammar;
-    }
-
-    /**
-    * Parse Url Definition text.
-    *
-    *  @param UrlText Url Archetype Text to process
-    */
-    public UrlData parseUrl(String UrlText) throws Exception {
-        UrlJavaParser grammar = this.loadGrammar(UrlText);
-        ParseTree parseTree = grammar.url();
-        UrlVisitor visitor = new UrlVisitor();
-      return (UrlData)visitor.visit(parseTree);
-    }
+  /**
+  * Parse Url Definition text.
+  *
+  *  @param UrlText Url Archetype Text to process
+  */
+  public UrlData parseUrl(String UrlText) throws Exception {
+    UrlJavaParser grammar = this.loadGrammar(UrlText);
+    ParseTree parseTree = grammar.url();
+    UrlVisitor visitor = new UrlVisitor();
+    return (UrlData)visitor.visit(parseTree);
+  }
 
 }
-
-
