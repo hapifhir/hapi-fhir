@@ -108,9 +108,9 @@ public class MappingIO {
    * @return mapping text
    */
   private String readFile(){
-    while (reader.hasNext()){
-      this.mappingText += this.reader.nextLine()+"\n";
-    }
+    StringBuilder sb = new StringBuilder();
+    while (reader.hasNext())
+      sb.append(this.reader.nextLine()).append("\n");
     return this.mappingText;
   }
 

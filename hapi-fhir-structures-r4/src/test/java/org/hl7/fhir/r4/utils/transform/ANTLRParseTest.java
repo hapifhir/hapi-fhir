@@ -1,33 +1,12 @@
 package org.hl7.fhir.r4.utils.transform;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.lang3.builder.ToStringExclude;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.StructureMapUtilities;
-import org.hl7.fhir.r4.utils.transform.BatchContext;
-import org.hl7.fhir.r4.utils.transform.FhirTransformationEngine;
-import org.hl7.fhir.r4.utils.transform.MappingIO;
-import org.hl7.fhir.r4.utils.transform.MapHandler;
 import org.hl7.fhir.r4.utils.transform.deserializer.*;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
-import org.hl7.fhir.utilities.TextFile;
-import org.hl7.fhir.utilities.xml.SchematronWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.VoidAnswer1;
 
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
 import java.util.*;
 
 import static org.mockito.AdditionalAnswers.answerVoid;
@@ -633,9 +612,9 @@ public class ANTLRParseTest {
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			FhirMapRuleType parsed = (FhirMapRuleType)visitor.visit(parseTree);
 			Assert.assertTrue(parsed.TypeName.equals("code"));
-			Assert.assertTrue(parsed.Occurances.size() == 2);
-			Assert.assertTrue(parsed.Occurances.get(0) == 0);
-			Assert.assertTrue(parsed.Occurances.get(1) == 1);
+			Assert.assertTrue(parsed.Occurrences.size() == 2);
+			Assert.assertTrue(parsed.Occurrences.get(0) == 0);
+			Assert.assertTrue(parsed.Occurrences.get(1) == 1);
 		}
 	}
 

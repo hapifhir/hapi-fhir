@@ -1312,16 +1312,16 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
         for (ParseTree treeItem : context.integer())
             {
                 List<Integer> occurances;
-              if (tempVar.Occurances == null) {
+              if (tempVar.Occurrences == null) {
                 occurances = new ArrayList<>();
               }
               else {
-                  occurances =tempVar.Occurances;
+                  occurances =tempVar.Occurrences;
 
               }
               int i = (int) this.visit(treeItem);
                   occurances.add(i);
-                tempVar.Occurances = occurances;
+                tempVar.Occurrences = occurances;
             }
 
         return tempVar;

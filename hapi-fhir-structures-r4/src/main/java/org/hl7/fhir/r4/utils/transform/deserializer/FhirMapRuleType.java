@@ -14,7 +14,7 @@ public class FhirMapRuleType
 {
   public FhirMapRuleType(String typeName, List<Integer> occurances){
     this.TypeName = typeName;
-    this.Occurances = occurances;
+    this.Occurrences = occurances;
   }
   public FhirMapRuleType() {
   }
@@ -37,22 +37,22 @@ public class FhirMapRuleType
         if (retVal != 0)
             return retVal;
          
-        if ((a.Occurances == null) && (b.Occurances == null))
+        if ((a.Occurrences == null) && (b.Occurrences == null))
             return 0;
          
-        if (a.Occurances == null)
+        if (a.Occurrences == null)
             return -1;
          
-        if (b.Occurances == null)
+        if (b.Occurrences == null)
             return 1;
          
-        retVal = a.Occurances.size() - b.Occurances.size();
+        retVal = a.Occurrences.size() - b.Occurrences.size();
         if (retVal != 0)
             return retVal;
          
-        for (int i = 0;i < a.Occurances.size();i++)
+        for (int i = 0; i < a.Occurrences.size(); i++)
         {
-            retVal = a.Occurances.get(i) - b.Occurances.get(i);
+            retVal = a.Occurrences.get(i) - b.Occurrences.get(i);
             if (retVal != 0)
                 return retVal;
              
@@ -67,7 +67,7 @@ public class FhirMapRuleType
     /**
     * Cardinality (minimum, maximum) Zero length if unset.
     */
-    public List<Integer> Occurances;
+    public List<Integer> Occurrences;
 }
 
 
