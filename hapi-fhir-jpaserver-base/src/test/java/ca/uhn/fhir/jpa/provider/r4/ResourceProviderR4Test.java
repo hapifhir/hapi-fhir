@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -34,6 +35,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -71,6 +73,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
+	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
 	@After
@@ -87,6 +90,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
 
+		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
 	@Override
@@ -95,6 +99,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
+		myClient.registerInterceptor(myCapturingInterceptor);
 	}
 
 	@Before
@@ -3146,6 +3151,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("** Done searching with count of 1");
 
+		ourLog.info(myCapturingInterceptor.getLastResponse().getAllHeaders().toString());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
+
 		assertThat(sw.getMillis(), lessThan(1000L));
 
 		// If this fails under load, try increasing the throttle above
@@ -3201,6 +3210,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.count(1)
 			.execute();
+
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
 
 		assertThat(sw.getMillis(), lessThan(1000L));
 
