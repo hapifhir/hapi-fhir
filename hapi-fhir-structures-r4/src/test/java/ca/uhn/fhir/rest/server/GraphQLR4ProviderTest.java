@@ -94,14 +94,14 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals("{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAMILY\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"  }]\n" +
-				"}", responseContent);
+			assertEquals("{" +
+				"  \"name\":[{" +
+				"    \"family\":\"FAMILY\"," +
+				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]" +
+				"  },{" +
+				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]" +
+				"  }]" +
+				"}", responseContent.replace("\n", "").replace("\r", ""));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
 
 		} finally {
