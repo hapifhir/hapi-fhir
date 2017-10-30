@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.XmlDetectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
 
 import java.util.List;
@@ -77,7 +78,7 @@ public class XhtmlDt extends BasePrimitive<String> {
 
 	@Override
 	protected String parse(String theValue) {
-		if (XmlUtil.isStaxPresent()) {
+		if (XmlDetectionUtil.isStaxPresent()) {
 			// for validation
 			XmlUtil.parse(theValue);
 		}

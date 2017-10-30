@@ -189,6 +189,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
 
+
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 

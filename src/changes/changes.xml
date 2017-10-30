@@ -26,7 +26,11 @@
 				<![CDATA[<br/><br/>]]>
 				See the
 				<![CDATA[<a href="http://hapifhir.io/doc_android.html">HAPI FHIR Android Documentation</a>]]>
-				for more information.
+				for more information. As a part of this fix, all dependencies on 
+				the StAX API have been removed in environments where StAX is not 
+				present (such as Android). The client will now detect this case, and
+				explicitly request JSON payloads from servers, meaning that Android clients
+				no longer need to include two parser stacks
 			</action>
 			<action type="add">
 				A performance to the JPA server has been made which reduces the number

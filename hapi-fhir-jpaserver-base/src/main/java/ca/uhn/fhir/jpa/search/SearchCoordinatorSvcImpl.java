@@ -576,10 +576,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					} catch (InterruptedException theE) {
 						// ignore
 					}
-				} else {
-					ourLog.info("Proceeding, as we have {} results", mySyncedPids.size());
 				}
 			} while (keepWaiting);
+
+			ourLog.info("Proceeding, as we have {} results", mySyncedPids.size());
 
 			ArrayList<Long> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {
@@ -593,6 +593,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					retVal.add(mySyncedPids.get(i));
 				}
 			}
+
+			ourLog.info("Done syncing results", mySyncedPids.size());
 
 			return retVal;
 		}
