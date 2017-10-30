@@ -35,7 +35,7 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	 * @param headerValue the value to add for the header
 	 * @throws NullPointerException if either parameter is {@code null}
 	 */
-	public void addHeaderValue(String headerName, String headerValue) throws NullPointerException {
+	public void addHeaderValue(String headerName, String headerValue) {
 		Objects.requireNonNull(headerName, "headerName cannot be null");
 		Objects.requireNonNull(headerValue, "headerValue cannot be null");
 
@@ -49,7 +49,7 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	 * @param headerValues the list of values to add for the header
 	 * @throws NullPointerException if either parameter is {@code null}
 	 */
-	public void addAllHeaderValues(String headerName, List<String> headerValues) throws NullPointerException {
+	public void addAllHeaderValues(String headerName, List<String> headerValues) {
 		Objects.requireNonNull(headerName, "headerName cannot be null");
 		Objects.requireNonNull(headerValues, "headerValues cannot be null");
 
