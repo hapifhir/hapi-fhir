@@ -362,6 +362,10 @@
 			<id>rhausam</id>
 			<name>Rob Hausam</name>
 		</developer>
+		<developer>
+			<id>patrick-werner</id>
+			<name>Patrick Werner</name>
+		</developer>
 	</developers>
 
 	<licenses>
