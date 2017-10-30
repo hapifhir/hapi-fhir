@@ -157,6 +157,11 @@
 				returning a 304 when the resource had been modified recently. Thanks to
 				Michael Lawley for the pull request!
 			</action>
+			<action type="add">
+				Add <![CDATA[<code>Prefer</code>]]> to the list of headers which are declared as
+				being acceptable for CORS requests in CorsInterceptor, CLI, and JPA Example.
+				Thanks to Patrick Werner for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
