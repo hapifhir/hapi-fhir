@@ -54,16 +54,13 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		List<String> destinationAddresses = new ArrayList<>();
 		String[] destinationAddressStrings = StringUtils.split(endpointUrl, ",");
 		for (String next : destinationAddressStrings) {
-			next = trim(defaultString(next));
-			if (next.startsWith("mailto:")) {
-				next = next.substring("mailto:".length());
-			}
+			next = processEmailAddressUri(next);
 			if (isNotBlank(next)) {
 				destinationAddresses.add(next);
 			}
 		}
 
-		String from = defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionEmailInterceptor.getDefaultFromAddress());
+		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionEmailInterceptor.getDefaultFromAddress()));
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();
@@ -75,6 +72,14 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 		IEmailSender emailSender = mySubscriptionEmailInterceptor.getEmailSender();
 		emailSender.send(details);
+	}
+
+	private String processEmailAddressUri(String next) {
+		next = trim(defaultString(next));
+		if (next.startsWith("mailto:")) {
+         next = next.substring("mailto:".length());
+      }
+		return next;
 	}
 
 

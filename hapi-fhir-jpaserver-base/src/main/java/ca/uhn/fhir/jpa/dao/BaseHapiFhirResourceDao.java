@@ -56,8 +56,12 @@ import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
@@ -89,6 +93,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -371,8 +377,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
 		theResource.setId(entity.getIdDt());
 
-		
-		/* 
+
+		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
@@ -551,6 +557,26 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return true;
 		}
 		return false;
+	}
+
+	protected void markResourcesMatchingExpressionAsNeedingReindexing(String theExpression) {
+		if (isNotBlank(theExpression)) {
+			final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
+			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
+
+			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus theStatus) {
+					return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+				}
+			});
+
+			ourLog.info("Marked {} resources for reindexing", updatedCount);
+		}
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Override

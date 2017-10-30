@@ -180,6 +180,53 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Assert.assertNotNull(subscriptionTemp);
 		subscriptionTemp.getChannel().addExtension()
 			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setValue(new StringType("mailto:myfrom@from.com"));
+		subscriptionTemp.getChannel().addExtension()
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setValue(new StringType("This is a subject"));
+		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
+
+		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		waitForQueueToDrain();
+
+
+		sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		waitForSize(1, 20000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
+
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+		assertEquals(1, received.size());
+		assertEquals(1, received.get(0).getFrom().length);
+		assertEquals("myfrom@from.com", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
+		assertEquals(1, received.get(0).getAllRecipients().length);
+		assertEquals("foo@example.com", ((InternetAddress)received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
+		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
+		assertEquals("This is the body", received.get(0).getContent().toString().trim());
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+	}
+
+	@Test
+	public void testEmailSubscriptionWithCustomNoMailtoOnFrom() throws Exception {
+		String payload = "This is the body";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		Subscription sub1 = createSubscription(criteria1, payload);
+
+		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
+		Assert.assertNotNull(subscriptionTemp);
+		subscriptionTemp.getChannel().addExtension()
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
 			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)

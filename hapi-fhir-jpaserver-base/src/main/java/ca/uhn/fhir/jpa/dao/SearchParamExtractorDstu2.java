@@ -227,6 +227,15 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, new BigDecimal(nextValue.getValue()));
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
+				} else if (nextObject instanceof DecimalDt) {
+					DecimalDt nextValue = (DecimalDt) nextObject;
+					if (nextValue.getValue() == null) {
+						continue;
+					}
+
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue());
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());

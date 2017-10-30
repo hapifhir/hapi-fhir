@@ -20,19 +20,34 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<SearchParameter>implements IFhirResourceDaoSearchParameter<SearchParameter> {
+public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
-	
+
+	protected void markAffectedResources(SearchParameter theResource) {
+		markResourcesMatchingExpressionAsNeedingReindexing(theResource != null ? theResource.getXpath() : null);
+	}
+
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will
 	 * just check and find that there are no resources requiring re-indexing. In that case the method just returns
@@ -40,7 +55,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 	 * reindexing and then return.
 	 */
 	@Override
-	@Scheduled(fixedDelay=DateUtils.MILLIS_PER_MINUTE)
+	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
 	public void performReindexingPass() {
 		if (getConfig().isSchedulingDisabled()) {
 			return;
@@ -55,7 +70,42 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 				break;
 			}
 		}
-		
+
 	}
-	
+
+	@Override
+	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
+		super.postPersist(theEntity, theResource);
+		markAffectedResources(theResource);
+	}
+
+	@Override
+	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
+		super.postUpdate(theEntity, theResource);
+		markAffectedResources(theResource);
+	}
+
+	@Override
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
+		super.preDelete(theResourceToDelete, theEntityToDelete);
+		markAffectedResources(theResourceToDelete);
+	}
+
+	@Override
+	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
+
+		Enum<?> status = theResource.getStatusElement().getValueAsEnum();
+		List<BoundCodeDt<ResourceTypeEnum>> base = Collections.emptyList();
+		if (theResource.getBase() != null) {
+			base = Arrays.asList(theResource.getBaseElement());
+		}
+		String expression = theResource.getXpath();
+		FhirContext context = getContext();
+		SearchParamTypeEnum type = theResource.getTypeElement().getValueAsEnum();
+
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
+	}
+
+
 }
