@@ -142,20 +142,7 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(new FifoMemoryPagingProvider(10));
 
 		// Register a CORS filter
-		CorsConfiguration config = new CorsConfiguration();
-		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("x-fhir-starter");
-		config.addAllowedHeader("Origin");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("Prefer");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
-		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
 
 		/*

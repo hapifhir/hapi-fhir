@@ -158,7 +158,7 @@
 				Michael Lawley for the pull request!
 			</action>
 			<action type="add">
-				Add <![CDATA[<code>Prefer</code>]]> to the list of headers which are declared as
+				Add <![CDATA[<code>Prefer</code> and <code>Cache-Control</code>]]> to the list of headers which are declared as
 				being acceptable for CORS requests in CorsInterceptor, CLI, and JPA Example.
 				Thanks to Patrick Werner for the pull request!
 			</action>

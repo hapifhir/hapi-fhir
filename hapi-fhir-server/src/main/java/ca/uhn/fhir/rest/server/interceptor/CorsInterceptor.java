@@ -21,11 +21,13 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.Validate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
@@ -44,14 +46,16 @@ public class CorsInterceptor extends InterceptorAdapter {
 	 * a FHIR server. This includes:
 	 * <ul>
 	 * <li>Allowed Origin: *</li>
-	 * <li>Allowed Header: Origin</li>
 	 * <li>Allowed Header: Accept</li>
-	 * <li>Allowed Header: X-Requested-With</li>
-	 * <li>Allowed Header: Content-Type</li>
-	 * <li>Allowed Header: Access-Control-Request-Method</li>
 	 * <li>Allowed Header: Access-Control-Request-Headers</li>
-	 * <li>Exposed Header: Location</li>
+	 * <li>Allowed Header: Access-Control-Request-Method</li>
+	 * <li>Allowed Header: Cache-Control</li>
 	 * <li>Exposed Header: Content-Location</li>
+	 * <li>Allowed Header: Content-Type</li>
+	 * <li>Exposed Header: Location</li>
+	 * <li>Allowed Header: Origin</li>
+	 * <li>Allowed Header: Prefer</li>
+	 * <li>Allowed Header: X-Requested-With</li>
 	 * </ul>
 	 * Note that this configuration is useful for quickly getting CORS working, but
 	 * in a real production system you probably want to consider whether it is
@@ -108,21 +112,14 @@ public class CorsInterceptor extends InterceptorAdapter {
 	private static CorsConfiguration createDefaultCorsConfig() {
 		CorsConfiguration retVal = new CorsConfiguration();
 
-		// *********************************************************
-		// Update constructor documentation if you change these:
-		// *********************************************************
+		retVal.setAllowedHeaders(new ArrayList<>(Constants.CORS_ALLOWED_HEADERS));
+		retVal.setAllowedMethods(new ArrayList<>(Constants.CORS_ALLWED_METHODS));
 
-		retVal.addAllowedHeader("Origin");
-		retVal.addAllowedHeader("Accept");
-		retVal.addAllowedHeader("X-Requested-With");
-		retVal.addAllowedHeader("Content-Type");
-		retVal.addAllowedHeader("Access-Control-Request-Method");
-		retVal.addAllowedHeader("Access-Control-Request-Headers");
-		retVal.addAllowedHeader("Cache-Control");
-		retVal.addAllowedOrigin("*");
-		retVal.addExposedHeader("Location");
 		retVal.addExposedHeader("Content-Location");
-		retVal.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		retVal.addExposedHeader("Location");
+
+		retVal.addAllowedOrigin("*");
+
 
 		return retVal;
 	}
