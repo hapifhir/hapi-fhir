@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Conformance.*;
@@ -165,7 +166,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     Conformance retVal = new Conformance();
 
     retVal.setPublisher(myPublisher);
-    retVal.setDate(conformanceDate());
+    retVal.setDateElement(conformanceDate());
     retVal.setFhirVersion(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString());
     retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
     // needs to be modified to actually allow it
@@ -303,17 +304,16 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     return retVal;
   }
 
-  private Date conformanceDate() {
+  private DateTimeType conformanceDate() {
     String buildDate = myServerConfiguration.getConformanceDate();
     if (buildDate != null) {
-      DateFormat dateFormat = new SimpleDateFormat();
       try {
-        return dateFormat.parse(buildDate);
-      } catch (ParseException e) {
+        return new DateTimeType(buildDate);
+      } catch (DataFormatException e) {
         // fall through
       }
     }
-    return new Date();
+    return DateTimeType.now();
   }
 
   private void handleDynamicSearchMethodBinding(ConformanceRestResourceComponent resource,
