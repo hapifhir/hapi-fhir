@@ -8,6 +8,7 @@ group for type+types TestStructure
 	input source : TestStructure as source
 	input target : Coding as target
 
-	TestStructure.someValue : for source.someValue as val make target.extension = extension()
+	TestStructure.someValue : for source.someValue as val make target.extension = extension() as ext
+	Coding.display : for source.someValue as v make target.display = v
 
 endgroup

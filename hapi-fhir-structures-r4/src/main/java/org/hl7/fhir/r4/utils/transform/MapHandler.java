@@ -493,6 +493,32 @@ public class MapHandler implements IFhirMapExecutor {
   }
 
   /**
+   * Populates a target for an Extension transform, adds it to the top rule on the stack
+   * @param context Target Context
+   * @param targetVariable Variable that will hold the result of the transform, may be left null
+   */
+  @Override
+  public void transformExtension(List<String> context, UrlData extUri, String title, String mode, String parent, String text1, String text2, int min, String max, String type, String targetVariable){
+    this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
+    this.currentTarget.setContext(context.get(0));
+    this.currentTarget.setElement(context.get(1));
+    this.currentTarget.setTransform(StructureMap.StructureMapTransform.EXTENSION);
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(extUri.CompleteUrl)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(title)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(mode)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(parent)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(text1)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(text2)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IntegerType(min)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(max)));
+    this.currentTarget.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType(type)));
+    if (targetVariable != null){
+      this.currentTarget.setVariable(targetVariable);
+    }
+    this.ruleComponentStack.peek().addTarget(this.currentTarget);
+  }
+
+  /**
    * Populates a target for an Evaluate transform, adds it to the top rule on the stack
    * @param context Target Context
    * @param obj object type

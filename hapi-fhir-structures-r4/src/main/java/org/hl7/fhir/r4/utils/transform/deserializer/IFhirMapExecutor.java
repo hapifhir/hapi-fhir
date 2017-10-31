@@ -201,6 +201,13 @@ public interface IFhirMapExecutor
   void transformExtension(List<String> context, String targetVariable) throws Exception;
 
   /**
+   * Populates a target for an Extension transform, adds it to the top rule on the stack
+   * @param context Target Context
+   * @param targetVariable Variable that will hold the result of the transform, may be left null
+   */
+  void transformExtension(List<String> context, UrlData extUri, String title, String mode, String parent, String text1, String text2, int min, String max, String type, String targetVariable) throws Exception;
+
+  /**
   * Execute evaluate transform
   *
   * @param context Target Context

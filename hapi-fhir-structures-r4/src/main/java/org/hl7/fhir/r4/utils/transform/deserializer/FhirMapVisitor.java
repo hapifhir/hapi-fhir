@@ -986,13 +986,37 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   }
 
   @Override
-  public Object visitRuleTargetExtension(FhirMapJavaParser.RuleTargetExtensionContext context){
+  public Object visitRuleTargetExtension1(FhirMapJavaParser.RuleTargetExtension1Context context){
     try {
       String variable = null;
       if (context.ruleTargetVariable() != null){
         variable = (String) this.visit(context.ruleTargetVariable());
       }
       this.executor.transformExtension((List<String>) this.visit(context.ruleTargetContext()), variable);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public Object visitRuleTargetExtension2(FhirMapJavaParser.RuleTargetExtension2Context context){
+    try {
+      String variable = null;
+      if (context.ruleTargetVariable() != null){
+        variable = (String) this.visit(context.ruleTargetVariable());
+      }
+      this.executor.transformExtension((List<String>) this.visit(context.ruleTargetContext()),
+        (UrlData) this.visit(context.ruleTargetExtension2Uri()),
+        (String) this.visit(context.ruleTargetExtension2Title()),
+        (String) this.visit(context.ruleTargetExtension2Mode()),
+        (String) this.visit(context.ruleTargetExtension2Parent()),
+        (String) this.visit(context.ruleTargetExtension2Text1()),
+        (String) this.visit(context.ruleTargetExtension2Text2()),
+        (Integer) this.visit(context.ruleTargetExtension2Min()),
+        (String) this.visit(context.ruleTargetExtension2Max()),
+        (String) this.visit(context.ruleTargetExtension2Type()),
+        variable);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -1337,11 +1361,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   */
   @Override
   public Object visitRuleDefault(FhirMapJavaParser.RuleDefaultContext context)  {
+    String identifier = null;
+
     try {
-      return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (InstantiationException e) {
+//      return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
+      if (context.identifier() != null){
+        identifier = (String) this.visit(context.identifier());
+      }
+    } catch (Exception e){
       e.printStackTrace();
     }
     return null;

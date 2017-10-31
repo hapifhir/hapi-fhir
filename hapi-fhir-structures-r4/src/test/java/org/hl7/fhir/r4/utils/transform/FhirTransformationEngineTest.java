@@ -118,7 +118,7 @@ public class FhirTransformationEngineTest {
 			codedTextToCodingMap = createCodedTextToCodingMap();
 			maps.put(codedTextToCodingMap.getUrl(), codedTextToCodingMap);
 			BatchContext batchContext = new BatchContext();
-			List<StructureDefinition> result = transformEngine.analyse(batchContext,null, codedTextToCodingMap).getProfiles();
+			List<StructureDefinition> result = transformEngine.analyse(batchContext, null, codedTextToCodingMap).getProfiles();
 			File currentDir = new File(".");
 			String filePath = currentDir.getAbsolutePath();
 
@@ -126,9 +126,9 @@ public class FhirTransformationEngineTest {
 
 			StructureDefinition generatedFhirProfile = result.get(0);
 			List<ElementDefinition> definitions = generatedFhirProfile.getDifferential().getElement();
-			assertEquals(7, definitions.size());//TODO Really should be 8 if we include the slicing definition for extensions.
+			assertEquals(8, definitions.size());//TODO Really should be 8 if we include the slicing definition for extensions.
 			final Map<String, ElementDefinition> definitionMap = new HashMap<>();
-			for(ElementDefinition eltDefinition : definitions) {
+			for (ElementDefinition eltDefinition : definitions) {
 				definitionMap.put(eltDefinition.getPath(), eltDefinition);
 			}
 			assertNotNull(definitionMap.get("Coding"));
@@ -140,7 +140,7 @@ public class FhirTransformationEngineTest {
 			assertNotNull(definitionMap.get("Coding.extension"));
 			ElementDefinition userSelected = definitionMap.get("Coding.userSelected");
 			assertTrue(userSelected.getFixed() instanceof BooleanType);
-			assertFalse(((BooleanType)userSelected.getFixed()).booleanValue());
+			assertFalse(((BooleanType) userSelected.getFixed()).booleanValue());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -150,6 +150,7 @@ public class FhirTransformationEngineTest {
 
 	/**
 	 * Creates a hard coded Structure Map for testing
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -164,10 +165,9 @@ public class FhirTransformationEngineTest {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
-	public List<StructureMap.StructureMapStructureComponent> createMapStructureList(){
+	public List<StructureMap.StructureMapStructureComponent> createMapStructureList() {
 		List<StructureMap.StructureMapStructureComponent> retVal = new ArrayList<>();
 		StructureMap.StructureMapStructureComponent source = new StructureMap.StructureMapStructureComponent();
 		StructureMap.StructureMapStructureComponent target = new StructureMap.StructureMapStructureComponent();
@@ -181,11 +181,10 @@ public class FhirTransformationEngineTest {
 	}
 
 	/**
-	 *
 	 * @return
 	 * @throws Exception
 	 */
-	public List<StructureMap.StructureMapGroupComponent> buildTestGroup() throws Exception{
+	public List<StructureMap.StructureMapGroupComponent> buildTestGroup() throws Exception {
 		List<StructureMap.StructureMapGroupComponent> retVal = new ArrayList<>();
 		StructureMap.StructureMapGroupComponent group = new StructureMap.StructureMapGroupComponent();
 		group.setName("TestStructureToCoding");
@@ -198,9 +197,10 @@ public class FhirTransformationEngineTest {
 
 	/**
 	 * Builds teh structure map inputs for testing
+	 *
 	 * @return
 	 */
-	public List<StructureMap.StructureMapGroupInputComponent> buildTestInput(){
+	public List<StructureMap.StructureMapGroupInputComponent> buildTestInput() {
 		List<StructureMap.StructureMapGroupInputComponent> retVal = new ArrayList<>();
 		StructureMap.StructureMapGroupInputComponent sourceIn = new StructureMap.StructureMapGroupInputComponent();
 		StructureMap.StructureMapGroupInputComponent targetIn = new StructureMap.StructureMapGroupInputComponent();
@@ -216,11 +216,10 @@ public class FhirTransformationEngineTest {
 	}
 
 	/**
-	 *
 	 * @return Creates Rules for testing
 	 * @throws Exception
 	 */
-	public List<StructureMap.StructureMapGroupRuleComponent> buildTestRules() throws Exception{
+	public List<StructureMap.StructureMapGroupRuleComponent> buildTestRules() throws Exception {
 		List<StructureMap.StructureMapGroupRuleComponent> retVal = new ArrayList<>();
 		StructureMap.StructureMapGroupRuleComponent userSelected = new StructureMap.StructureMapGroupRuleComponent();
 		StructureMap.StructureMapGroupRuleComponent system = new StructureMap.StructureMapGroupRuleComponent();
@@ -230,7 +229,7 @@ public class FhirTransformationEngineTest {
 		StructureMap.StructureMapGroupRuleComponent display = new StructureMap.StructureMapGroupRuleComponent();
 
         /*
-         * Coding.System
+			* Coding.System
          */
 		system.setName("Coding.system");
 		StructureMap.StructureMapGroupRuleSourceComponent source = new StructureMap.StructureMapGroupRuleSourceComponent();

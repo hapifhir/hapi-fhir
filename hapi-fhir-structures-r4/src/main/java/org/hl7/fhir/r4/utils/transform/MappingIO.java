@@ -111,6 +111,7 @@ public class MappingIO {
     StringBuilder sb = new StringBuilder();
     while (reader.hasNext())
       sb.append(this.reader.nextLine()).append("\n");
+    this.mappingText = sb.toString();
     return this.mappingText;
   }
 

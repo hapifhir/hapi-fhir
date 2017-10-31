@@ -19,13 +19,12 @@ public final class VisitorExtensions
   @return null or value of Visit method
   */
 
-  public static <Result> Result VisitOrDefault(AbstractParseTreeVisitor<Object> visitor, ParseTree tree, Class<?> resultClass) throws IllegalAccessException, InstantiationException {
+/*  public static <Result> Result VisitOrDefault(AbstractParseTreeVisitor<Object> visitor, ParseTree tree, Class<?> resultClass) throws IllegalAccessException, InstantiationException {
     Result result = (Result) resultClass.newInstance();
     return VisitOrDefault(visitor, tree, result);
   }
 
-  //C# TO JAVA CONVERTER NOTE: Java does not support optional parameters. Overloaded method(s) are created above:
-  //ORIGINAL LINE: public static Result VisitOrDefault<Result>(AbstractParseTreeVisitor<Object> visitor, IParseTree tree, Result defaultValue = default(Result))
+
   public static <Result> Result VisitOrDefault(AbstractParseTreeVisitor<Object> visitor, ParseTree tree, Result defaultValue)
   {
     if (tree == null)
@@ -33,15 +32,15 @@ public final class VisitorExtensions
       return defaultValue;
     }
     return (Result)visitor.visit(tree);
-  }
+  }*/
 
-  /**
+/*  *//**
   Call visit if tree non null, otherwise return null.
 
   @param visitor Visitor derived class
   @param tree parse tree (may be null)
   @return null or value of Visit method
-  */
+  *//*
   public static <Result> Result VisitSingleOrDefault(AbstractParseTreeVisitor<Object> visitor, List<? extends ParseTree> tree)
   {
     if (tree == null)
@@ -57,15 +56,15 @@ public final class VisitorExtensions
       default:
       throw new RuntimeException("Expected single parse tree block");
     }
-  }
+  }*/
 
-  /**
+ /* *//**
   Call visit if tree non null, otherwise return null.
 
   @param visitor Visitor derived class
   @param tree parse tree (may be null)
   @return null or value of Visit method
-  */
+  *//*
   @SuppressWarnings("Unchecked")
   public static <Result> Result[] VisitMultiple(AbstractParseTreeVisitor<Object> visitor, List<? extends ParseTree> tree, ArrayList<Result> results)
   {
@@ -79,5 +78,5 @@ public final class VisitorExtensions
       }
     }
     return results.toArray(retVal);
-  }
+  }*/
 }

@@ -43,39 +43,39 @@ public class ThrowExceptionErrorListener extends BaseErrorListener implements AN
     String[] lines = this.text.split("[\\n]", -1);
     if (line - 3 >= 0)
     {
-      sb.append(lines[line - 3] + "\r\n");
+      sb.append(lines[line - 3]).append("\r\n");
     }
     if (line - 2 >= 0)
     {
-      sb.append(lines[line - 2] + "\r\n");
+      sb.append(lines[line - 2]).append("\r\n");
     }
     if (line - 1 >= 0)
     {
-      sb.append(lines[line - 1] + "\r\n");
+      sb.append(lines[line - 1]).append("\r\n");
     }
     if (charPositionInLine == 0)
     {
-      sb.append(String.format("-->%1$s", lines[line]) + "\r\n");
+      sb.append(String.format("-->%1$s", lines[line])).append("\r\n");
     }
     else if (charPositionInLine == lines[line].length())
     {
-      sb.append(String.format("%1$s<--", lines[line]) + "\r\n");
+      sb.append(String.format("%1$s<--", lines[line])).append("\r\n");
     }
     else
     {
-      sb.append(String.format("%1$s-->%2$s", lines[line].substring(0, charPositionInLine), lines[line].substring(charPositionInLine)) + "\r\n");
+      sb.append(String.format("%1$s-->%2$s", lines[line].substring(0, charPositionInLine), lines[line].substring(charPositionInLine))).append("\r\n");
     }
     if (line + 1 < lines.length)
     {
-      sb.append(lines[line + 1] + "\r\n");
+      sb.append(lines[line + 1]).append("\r\n");
     }
     if (line + 2 < lines.length)
     {
-      sb.append(lines[line + 2] + "\r\n");
+      sb.append(lines[line + 2]).append("\r\n");
     }
     if (line + 3 < lines.length)
     {
-      sb.append(lines[line + 3] + "\r\n");
+      sb.append(lines[line + 3]).append("\r\n");
     }
   }
 
@@ -94,8 +94,8 @@ public class ThrowExceptionErrorListener extends BaseErrorListener implements AN
   public void SyntaxError(StringBuilder output, Recognizer recognizer, Token offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format("Rule %1$s token %2$s", e.getCause(), offendingSymbol.getText()) + "\r\n");
-    sb.append(String.format("Parse error: Line %1$s Pos %2$s. Msg %3$s ", line, charPositionInLine, msg) + "\r\n");
+    sb.append(String.format("Rule %1$s token %2$s", e.getCause(), offendingSymbol.getText())).append("\r\n");
+    sb.append(String.format("Parse error: Line %1$s Pos %2$s. Msg %3$s ", line, charPositionInLine, msg)).append("\r\n");
     this.AppendInfo(sb, line, charPositionInLine);
     throw new IllegalArgumentException(sb.toString());
   }
@@ -114,8 +114,8 @@ public class ThrowExceptionErrorListener extends BaseErrorListener implements AN
   public final void SyntaxError(StringBuilder output, Recognizer recognizer, int offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format("Rule %1$s", e.getCtx().getText()) + "\r\n");
-    sb.append(String.format("Parse error: Line %1$s Pos %2$s. Msg %3$s ", line, charPositionInLine, msg) + "\r\n");
+    sb.append(String.format("Rule %1$s", e.getCtx().getText())).append("\r\n");
+    sb.append(String.format("Parse error: Line %1$s Pos %2$s. Msg %3$s ", line, charPositionInLine, msg)).append("\r\n");
     this.AppendInfo(sb, line, charPositionInLine);
 
     throw new IllegalArgumentException(sb.toString());

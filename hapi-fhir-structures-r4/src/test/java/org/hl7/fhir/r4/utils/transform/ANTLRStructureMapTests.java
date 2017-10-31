@@ -74,19 +74,12 @@ public class ANTLRStructureMapTests {
 		StructureMap map = null;
 		HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
 		scu = new FhirTransformationEngine(hapiContext);
-		MappingIO mapping = new MappingIO("simpleMapTest.map");
+		map = new MappingIO("simpleMapTest.map").getStructureMap();
 		//mapping.setMappingFile(new File("colorectal3.map"));
 		//mapping.setMappingFile(new File("simpleMapTest.map"));
 		//String mapText = mapping.readFile();
-
-		map = mapping.getStructureMap();
 		if (_ANALYSE) {
 			List<StructureDefinition> result = scu.analyse(bc, null, map).getProfiles();
-
-			ProfileUtilities profileUtilities = new ProfileUtilities(hapiContext, null, null);
-
-			StructureDefinition newCode = result.get(0);
-			//profileUtilities.generateSnapshot(validation.fetchStructureDefinition(context, "http://hl7.org/fhir/StructureDefinition/Coding"), newCode, "http://foo.com/StructureDefinition/MyMap-Coding", "MyMap-Coding");
 
 			for (StructureDefinition sd : result) {
 				System.out.println(sd.toString());
@@ -176,7 +169,7 @@ public class ANTLRStructureMapTests {
 		ed.setPath("TestStructure.system");
 		//ed.setBase(base);
 		ed.setFixed(new UriType().setValue("HTTP://opencimi.org/structuredefinition/TestStructure.html#Debugging"));
-		//ed.setType(this.createTypeRefList());
+		ed.addType(new ElementDefinition.TypeRefComponent().setCode("uri"));
 		ed.setMin(1);
 		ed.setMax("1");
 		eList.add(ed);
@@ -189,7 +182,7 @@ public class ANTLRStructureMapTests {
 		ed.setPath("TestStructure.someValue");
 		//ed.setBase(base);
 		ed.setFixed(new StringType().setValue("my value"));
-		//ed.setType(this.createTypeRefList());
+		ed.addType(new ElementDefinition.TypeRefComponent().setCode("string"));
 		ed.setMin(1);
 		ed.setMax("0");
 		eList.add(ed);
@@ -234,8 +227,8 @@ public class ANTLRStructureMapTests {
 		ed.setSliceName("someValue");
 		ed.setPath("TestStructure.someValue");
 		//ed.setBase(base);
-		ed.setFixed(new StringType().setValue("my value"));
-		//ed.setType(this.createTypeRefList());
+		//ed.setFixed(new StringType().setValue("my value"));
+		ed.addType(new ElementDefinition.TypeRefComponent().setCode("string"));
 		eList.add(ed);
 
 		retVal.setElement(eList);

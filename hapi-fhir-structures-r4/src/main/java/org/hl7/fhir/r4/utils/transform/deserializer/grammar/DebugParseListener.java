@@ -48,7 +48,7 @@ public class DebugParseListener implements ParseTreeListener
   public DebugParseListener(Parser parser, MsgFcn msgFcn)
   {
     this.parser = parser;
-    this.msgFcn = (String message) -> msgFcn.invoke(message);
+    this.msgFcn = msgFcn;
   }
 
   /**

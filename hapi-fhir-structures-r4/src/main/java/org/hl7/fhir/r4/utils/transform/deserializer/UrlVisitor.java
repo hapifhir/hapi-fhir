@@ -5,7 +5,9 @@ import org.hl7.fhir.r4.utils.transform.deserializer.grammar.VisitorExtensions;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaBaseVisitor;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 // <copyright company="Applicadia LLC">
 // Copyright (c) 2017
@@ -48,6 +50,11 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   */
   @Override
   public Object visitUrl(UrlJavaParser.UrlContext context) {
+    String authority = null;
+    String login = null;
+    String host = null;
+    int port = 0;
+
     UrlData retVal = new UrlData();
     retVal.CompleteUrl = context.getText();
     retVal.Authority = (String) this.visit( context.authority());
@@ -57,8 +64,10 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
     retVal.Host = (String) this.visit(context.host());
     if (context.port() != null)
     retVal.Port = (int) this.visit(context.port());
-    if (context.path() != null)
-    retVal.Path = (String[]) this.visit(context.path());
+    if (context.path() != null) {
+      List<String> temp = (ArrayList<String>) this.visit(context.path());
+      retVal.Path = temp.toArray(retVal.Path);
+    }
     if (context.search() != null)
     retVal.Search = (UrlSearch[]) this.visit(context.search());
     return retVal;
@@ -180,7 +189,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
         values.add((String) this.visit(treeItem));
       }
     }
-    return VisitorExtensions.<String>VisitMultiple(this, context.stringVal(), values);
+    return values;
   }
 
   /**

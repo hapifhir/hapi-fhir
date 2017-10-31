@@ -31,11 +31,11 @@ public class UrlProcessor
   * If true, output debug info during parsing.
   */
   private boolean __DebugFlag;
-  public boolean getDebugFlag() {
+  private boolean getDebugFlag() {
     return __DebugFlag;
   }
 
-  public void setDebugFlag(boolean value) {
+  private void setDebugFlag(boolean value) {
     __DebugFlag = value;
   }
 
