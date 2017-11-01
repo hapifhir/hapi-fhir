@@ -50,7 +50,7 @@ public class GraphQLEngineTest {
 			"    \"unit\":\"cm\"\n" +
 			"  }\n" +
 			"}";
-		assertEquals(expected, outputBuilder.toString());
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 
@@ -95,7 +95,7 @@ public class GraphQLEngineTest {
 			"    }\n" +
 			"  }\n" +
 			"}";
-		assertEquals(expected, outputBuilder.toString());
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 
