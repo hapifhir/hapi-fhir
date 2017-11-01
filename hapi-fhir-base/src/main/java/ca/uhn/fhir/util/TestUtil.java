@@ -20,33 +20,34 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.HapiLocalizer;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.HapiLocalizer;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
-	 * 
+	 * <p>
 	 * When we run the unit tests in cobertura, JUnit doesn't seem to clean up static fields which leads to
 	 * tons of memory being used by the end and the JVM crashes in Travis. Manually clearing all of the
 	 * static fields seems to solve this.
 	 */
 	public static void clearAllStaticFieldsForUnitTest() {
 		HapiLocalizer.setOurFailOnMissingMessage(true);
-		
+
 		Class<?> theType;
 		try {
 			throw new Exception();
@@ -104,7 +105,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void randomizeLocale() {
-		Locale[] availableLocales = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
+		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
 		if (Math.random() < 0.5) {
@@ -116,10 +117,19 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
-		String availableTimeZones[] = { "GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30" };
+		String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
 		String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
+	}
+
+	/**
+	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
+	 * <p>
+	 * Strip \r chars from a string to account for line ending platform differences
+	 */
+	public static String stripReturns(String theString) {
+		return defaultString(theString).replace("\r", "");
 	}
 
 }
