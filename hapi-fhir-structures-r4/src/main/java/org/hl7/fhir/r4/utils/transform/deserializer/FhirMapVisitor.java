@@ -33,7 +33,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   public IFhirMapExecutor getExecutor() {
     return executor;
   }
-  public void setExecutor(IFhirMapExecutor executor){
+  public void setExecutor(IFhirMapExecutor executor) {
     this.executor = executor;
   }
 
@@ -68,8 +68,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   Constructor.
 
   */
-  public FhirMapVisitor(IFhirMapExecutor executor)
-  {
+  public FhirMapVisitor(IFhirMapExecutor executor) {
     this.executor = executor;
   }
 
@@ -90,7 +89,6 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     } catch (Exception e) {
       e.printStackTrace();
     }
-
     return null;
   }
 
@@ -103,7 +101,6 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @Override
   public Object visitStructureMap(FhirMapJavaParser.StructureMapContext context) {
     return (UrlData) this.visit(context.quotedUrl());
-
   }
 
   /**
@@ -117,7 +114,6 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   public Object visitKeyImports(FhirMapJavaParser.KeyImportsContext context) {
     UrlData urlData = null;
     urlData = (UrlData) this.visit(context.structureMap());
-
     try {
       this.executor.imports(urlData);
     } catch (Exception e) {
@@ -145,11 +141,9 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return String identifier
   */
   @Override
-  public Object visitIdentifier(FhirMapJavaParser.IdentifierContext context)
-  {
+  public Object visitIdentifier(FhirMapJavaParser.IdentifierContext context) {
     String retVal = context.getText(); // get string characters
-    if (retVal.length() > MaxNameLength)
-    {
+    if (retVal.length() > MaxNameLength) {
       throw new RuntimeException("Identifier must be less than {MaxNameLength} characters.  '{retVal}'");
     }
     return retVal;
@@ -162,8 +156,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return String without the surrounding quotes
   */
   @Override
-  public Object visitQuotedIdentifier(FhirMapJavaParser.QuotedIdentifierContext context)
-  {
+  public Object visitQuotedIdentifier(FhirMapJavaParser.QuotedIdentifierContext context) {
     String retVal = context.getText(); // get string characters
     retVal = retVal.substring(1, 1 + retVal.length() - 2); // remove surrounding double quotes.
     return retVal;
@@ -176,8 +169,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return String without the surrounding quotes
   */
   @Override
-  public Object visitQuotedString(FhirMapJavaParser.QuotedStringContext context)
-  {
+  public Object visitQuotedString(FhirMapJavaParser.QuotedStringContext context) {
     String retVal = context.getText(); // get string characters
     retVal = retVal.substring(1, 1 + retVal.length() - 2); // remove surrounding double quotes.
     return retVal;
@@ -190,8 +182,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return String without the surrounding quotes
   */
   @Override
-  public Object visitQuotedStringWQuotes(FhirMapJavaParser.QuotedStringWQuotesContext context)
-  {
+  public Object visitQuotedStringWQuotes(FhirMapJavaParser.QuotedStringWQuotesContext context) {
     String retVal = context.getText(); // get string characters
     return retVal;
   }
@@ -204,8 +195,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return Int32 value
   */
   @Override
-  public Object visitInteger(FhirMapJavaParser.IntegerContext context)
-  {
+  public Object visitInteger(FhirMapJavaParser.IntegerContext context) {
     return Integer.parseInt(context.getText());
   }
 
@@ -221,9 +211,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @Override
   public Object visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext context) {
     String urlStr = null;
-
     urlStr = (String) this.visit(context.quotedString());
-
     try {
       return this.getUrlProcessor().parseUrl(urlStr);
     } catch (Exception e) {
@@ -243,7 +231,6 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   public Object visitKeyUses(FhirMapJavaParser.KeyUsesContext context) {
     UrlData urlData = null;
     urlData = (UrlData) this.visit(context.structureDefinition());
-
     FhirMapUseNames name = (FhirMapUseNames) this.visit(context.keyUsesName());
     try {
       this.executor.uses(urlData, name);
@@ -260,8 +247,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return null
   */
   @Override
-  public Object visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext context)
-  {
+  public Object visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext context) {
     return this.visitChildren(context);
   }
 
@@ -272,8 +258,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return UseNames.Source
   */
   @Override
-  public Object visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext context)
-  {
+  public Object visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext context) {
     return FhirMapUseNames.Source;
   }
 
@@ -284,8 +269,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return UseNames.Target
   */
   @Override
-  public Object visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext context)
-  {
+  public Object visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext context) {
     return FhirMapUseNames.Target;
   }
 
@@ -296,8 +280,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return UseNames.Queried
   */
   @Override
-  public Object visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext context)
-  {
+  public Object visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext context) {
     return FhirMapUseNames.Queried;
   }
 
@@ -308,8 +291,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return UseNames.Produced
   */
   @Override
-  public Object visitKeyUsesNameProduced(FhirMapJavaParser.KeyUsesNameProducedContext context)
-  {
+  public Object visitKeyUsesNameProduced(FhirMapJavaParser.KeyUsesNameProducedContext context) {
     return FhirMapUseNames.Produced;
   }
   /**
@@ -319,7 +301,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
   @return GroupTypes
   */
   @Override
-  public Object visitGroupStart(FhirMapJavaParser.GroupStartContext context)  {
+  public Object visitGroupStart(FhirMapJavaParser.GroupStartContext context) {
     try {
       String identifier = null;
       if (context.identifier() != null){

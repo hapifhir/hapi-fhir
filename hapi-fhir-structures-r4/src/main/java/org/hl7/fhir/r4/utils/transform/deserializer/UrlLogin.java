@@ -24,23 +24,26 @@ public class UrlLogin
   *  @return
   */
   public static int compare(UrlLogin a, UrlLogin b) throws Exception {
-    if ((a == null) && (b == null))
-    return 0;
+    if ((a == null) && (b == null)) {
+      return 0;
+    }
+    if (a == null) {
+      return -1;
+    }
 
-    if (a == null)
-    return -1;
-
-    if (b == null)
-    return 1;
+    if (b == null) {
+      return 1;
+    }
 
     int retVal;
     retVal = a.Name.compareTo(b.Name);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = a.Password.compareTo(b.Password);
-    if (retVal != 0)
-    return retVal;
+    if (retVal != 0) {
+      return retVal;
+    }
 
     return 0;
   }

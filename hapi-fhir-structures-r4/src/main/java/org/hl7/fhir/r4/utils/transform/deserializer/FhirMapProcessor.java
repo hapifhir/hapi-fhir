@@ -19,8 +19,7 @@ import java.nio.CharBuffer;
 /**
 * Process Adl Language data.
 */
-public class FhirMapProcessor
-{
+public class FhirMapProcessor {
   /**
   * If true, output debug info during parsing.
   */
@@ -55,12 +54,10 @@ public class FhirMapProcessor
     lexer.addErrorListener(new ThrowExceptionErrorListener(text));
     CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
     FhirMapJavaParser grammar = new FhirMapJavaParser(commonTokenStream);
-    if (this.getDebugFlag())
-    {
+    if (this.getDebugFlag()) {
       DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
       grammar.addParseListener(parseListener);
     }
-
     grammar.removeErrorListeners();
     grammar.setErrorHandler(new ThrowErrorHandler());
     grammar.addErrorListener(new ThrowExceptionErrorListener(text));

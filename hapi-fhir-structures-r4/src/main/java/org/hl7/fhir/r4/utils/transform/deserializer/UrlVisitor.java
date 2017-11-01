@@ -24,8 +24,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   Delegate for optional dumping of info.
 
   */
-  public interface DumpDelegate
-  {
+  public interface DumpDelegate {
     void invoke(String msg);
   }
 
@@ -38,8 +37,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   Constructor.
 
   */
-  UrlVisitor()
-  {
+  UrlVisitor() {
   }
 
   /**
@@ -58,18 +56,22 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
     UrlData retVal = new UrlData();
     retVal.CompleteUrl = context.getText();
     retVal.Authority = (String) this.visit( context.authority());
-    if (context.login() != null)
-    retVal.Login = (UrlLogin) this.visit( context.login());
-    if (context.host()!= null)
-    retVal.Host = (String) this.visit(context.host());
-    if (context.port() != null)
-    retVal.Port = (int) this.visit(context.port());
+    if (context.login() != null) {
+      retVal.Login = (UrlLogin) this.visit( context.login());
+    }
+    if (context.host()!= null) {
+      retVal.Host = (String) this.visit(context.host());
+    }
+    if (context.port() != null) {
+      retVal.Port = (int) this.visit(context.port());
+    }
     if (context.path() != null) {
       List<String> temp = (ArrayList<String>) this.visit(context.path());
       retVal.Path = temp.toArray(retVal.Path);
     }
-    if (context.search() != null)
-    retVal.Search = (UrlSearch[]) this.visit(context.search());
+    if (context.search() != null) {
+      retVal.Search = (UrlSearch[]) this.visit(context.search());
+    }
     return retVal;
   }
 
@@ -81,8 +83,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return authority name (i.e. http)
   */
   @Override
-  public Object visitAuthority(UrlJavaParser.AuthorityContext context)
-  {
+  public Object visitAuthority(UrlJavaParser.AuthorityContext context) {
     return context.getText();
   }
 
@@ -94,8 +95,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return host name
   */
   @Override
-  public Object visitHost(UrlJavaParser.HostContext context)
-  {
+  public Object visitHost(UrlJavaParser.HostContext context) {
     return context.getText();
   }
 
@@ -106,8 +106,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return Port number
   */
   @Override
-  public Object visitPort(UrlJavaParser.PortContext context)
-  {
+  public Object visitPort(UrlJavaParser.PortContext context) {
     return Integer.parseInt(context.getText());
   }
 
@@ -118,11 +117,10 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return SearchData array of search components
   */
   @Override
-  public Object visitSearch(UrlJavaParser.SearchContext context)
-  {
+  public Object visitSearch(UrlJavaParser.SearchContext context) {
     ArrayList<UrlSearch> retVal = new ArrayList<UrlSearch>();
-    if (context.searchParameter()!= null){
-      for (ParseTree treeItem : context.searchParameter()){
+    if (context.searchParameter()!= null) {
+      for (ParseTree treeItem : context.searchParameter()) {
         retVal.add((UrlSearch)this.visit(treeItem));
       }
     }
@@ -155,8 +153,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String search parameter name
   */
   @Override
-  public Object visitSearchParameterName(UrlJavaParser.SearchParameterNameContext context)
-  {
+  public Object visitSearchParameterName(UrlJavaParser.SearchParameterNameContext context) {
     return context.getText();
   }
 
@@ -167,8 +164,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String search parameter value
   */
   @Override
-  public Object visitSearchParameterValue(UrlJavaParser.SearchParameterValueContext context)
-  {
+  public Object visitSearchParameterValue(UrlJavaParser.SearchParameterValueContext context) {
     return context.getText();
   }
 
@@ -179,8 +175,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String array of components
   */
   @Override
-  public Object visitPath(UrlJavaParser.PathContext context)
-  {
+  public Object visitPath(UrlJavaParser.PathContext context) {
     ArrayList<String> values = new ArrayList<String>();
     String[] retVals = new String[context.stringVal().size()];
     if (context.stringVal() != null){
@@ -215,8 +210,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String user name
   */
   @Override
-  public Object visitStringVal(UrlJavaParser.StringValContext context)
-  {
+  public Object visitStringVal(UrlJavaParser.StringValContext context) {
     return context.getText();
   }
 
@@ -227,8 +221,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String user name
   */
   @Override
-  public Object visitUser(UrlJavaParser.UserContext context)
-  {
+  public Object visitUser(UrlJavaParser.UserContext context) {
     return context.getText();
   }
 
@@ -239,8 +232,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object>
   @return String user name
   */
   @Override
-  public Object visitPassword(UrlJavaParser.PasswordContext context)
-  {
+  public Object visitPassword(UrlJavaParser.PasswordContext context) {
     return context.getText();
   }
 }

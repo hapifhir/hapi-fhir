@@ -28,8 +28,7 @@ public class DebugParseListener implements ParseTreeListener
 
   */
   @FunctionalInterface
-  public interface MsgFcn
-  {
+  public interface MsgFcn {
     void invoke(String message);
   }
 
@@ -41,12 +40,11 @@ public class DebugParseListener implements ParseTreeListener
 
   /**
   Constructor.
-  
+
   @param parser ANTLR parser being executed
   @param msgFcn Message function to call
   */
-  public DebugParseListener(Parser parser, MsgFcn msgFcn)
-  {
+  public DebugParseListener(Parser parser, MsgFcn msgFcn) {
     this.parser = parser;
     this.msgFcn = msgFcn;
   }
@@ -56,8 +54,7 @@ public class DebugParseListener implements ParseTreeListener
 
   @param node node being visited
   */
-  public final void visitTerminal(TerminalNode node)
-  {
+  public final void visitTerminal(TerminalNode node) {
     this.msgFcn.invoke(String.format("Terminal %1$s", node.getSymbol().getText()));
   }
 
@@ -66,8 +63,7 @@ public class DebugParseListener implements ParseTreeListener
 
   @param node node being visited
   */
-  public final void visitErrorNode(ErrorNode node)
-  {
+  public final void visitErrorNode(ErrorNode node) {
     this.msgFcn.invoke(String.format("Error Node %1$s", node.getSymbol().getText()));
   }
 
@@ -76,8 +72,7 @@ public class DebugParseListener implements ParseTreeListener
 
   @param ctx Context of rule being entered
   */
-  public final void enterEveryRule(ParserRuleContext ctx)
-  {
+  public final void enterEveryRule(ParserRuleContext ctx) {
     this.msgFcn.invoke("Enter: " + this.parser.getRuleNames()[ctx.getRuleIndex()]);
   }
 
@@ -86,8 +81,7 @@ public class DebugParseListener implements ParseTreeListener
 
   @param ctx Context of rule being exited
   */
-  public final void exitEveryRule(ParserRuleContext ctx)
-  {
+  public final void exitEveryRule(ParserRuleContext ctx) {
     this.msgFcn.invoke("Exit: " + this.parser.getRuleNames()[ctx.getRuleIndex()]);
   }
 }

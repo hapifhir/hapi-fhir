@@ -23,13 +23,13 @@ public enum FhirMapInputModes
   Target;
 
   public String getValue(){
-    switch (this){
+    switch (this) {
       case Source:
-      return "source";
+        return "source";
       case Target:
-      return "target";
+        return "target";
       default:
-      return "?";
+        return "?";
     }
   }
 }

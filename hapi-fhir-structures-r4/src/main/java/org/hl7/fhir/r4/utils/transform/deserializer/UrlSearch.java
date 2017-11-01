@@ -8,8 +8,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 /**
 * Stored Antls Search rule parsed data
 */
-public class UrlSearch
-{
+public class UrlSearch {
   /**
   * Name Authority.
   */
@@ -34,9 +33,9 @@ public class UrlSearch
 
   public static int compare(UrlSearch a, UrlSearch b) throws Exception {
     int retVal = a.Name.compareTo(b.Name);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     return a.Value.compareTo(b.Value);
   }
 

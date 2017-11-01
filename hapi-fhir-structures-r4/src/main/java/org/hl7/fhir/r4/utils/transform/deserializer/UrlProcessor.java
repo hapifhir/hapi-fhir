@@ -25,8 +25,7 @@ import java.nio.charset.Charset;
 /**
 * Process Adl Language data.
 */
-public class UrlProcessor
-{
+public class UrlProcessor {
   /**
   * If true, output debug info during parsing.
   */
@@ -62,8 +61,7 @@ public class UrlProcessor
     lexer.addErrorListener(new ThrowExceptionErrorListener(text));
     CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
     UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
-    if (this.getDebugFlag())
-    {
+    if (this.getDebugFlag()) {
       DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
       grammar.addParseListener(parseListener);
     }

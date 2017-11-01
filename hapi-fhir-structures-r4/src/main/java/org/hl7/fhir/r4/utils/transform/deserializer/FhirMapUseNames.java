@@ -13,7 +13,7 @@ public enum FhirMapUseNames
   'source'
   */
   NotSet,
-  
+
   /**
   'source'
   */
@@ -36,8 +36,7 @@ public enum FhirMapUseNames
 
   public static final int SIZE = java.lang.Integer.SIZE;
 
-  public String getValue()
-  {
+  public String getValue() {
     switch (this) {
       case Source:
       return "source";
@@ -55,14 +54,11 @@ public enum FhirMapUseNames
 
 
 
-  public static FhirMapUseNames forValue(int value)
-  {
+  public static FhirMapUseNames forValue(int value) {
     return values()[value];
   }
 
-  public static FhirMapUseNames forValue(String value)
-  {
-
+  public static FhirMapUseNames forValue(String value) {
     if (Objects.equals(value, "Source")){
       return FhirMapUseNames.Source;
     }
@@ -75,7 +71,8 @@ public enum FhirMapUseNames
     else if (Objects.equals(value, "Produced")){
       return FhirMapUseNames.Produced;
     }
-    else
-    return FhirMapUseNames.NotSet;
+    else {
+      return FhirMapUseNames.NotSet;
+    }
   }
 }

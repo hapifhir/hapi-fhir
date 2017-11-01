@@ -44,19 +44,15 @@ public class UrlData
   *  @return
   */
   public String toString() {
-    try
-    {
+    try {
       return CompleteUrl;
     }
-    catch (RuntimeException __dummyCatchVar0)
-    {
+    catch (RuntimeException __dummyCatchVar0) {
       throw __dummyCatchVar0;
     }
-    catch (Exception __dummyCatchVar0)
-    {
+    catch (Exception __dummyCatchVar0) {
       throw new RuntimeException(__dummyCatchVar0);
     }
-
   }
 
   /**
@@ -78,12 +74,12 @@ public class UrlData
   * @throws Exception
   */
   private static int compare(int a, int b) throws Exception {
-    if (a > b)
-    return 1;
-
-    if (a < b)
-    return -1;
-
+    if (a > b) {
+      return 1;
+    }
+    if (a < b) {
+      return -1;
+    }
     return 0;
   }
 
@@ -96,15 +92,14 @@ public class UrlData
   */
   private static int compare(UrlSearch[] a, UrlSearch[] b) throws Exception {
     int retVal = a.length - b.length;
-    if (retVal != 0)
-    return retVal;
-
-    for (int i = 0;i < a.length;i++)
-    {
-      retVal = UrlSearch.compare(a[i],b[i]);
-      if (retVal != 0)
+    if (retVal != 0) {
       return retVal;
-
+    }
+    for (int i = 0; i < a.length; i++) {
+      retVal = UrlSearch.compare(a[i],b[i]);
+      if (retVal != 0) {
+        return retVal;
+      }
     }
     return 0;
   }
@@ -124,9 +119,9 @@ public class UrlData
     for (int i = 0;i < a.length;i++)
     {
       retVal = a[i].compareTo(b[i]);
-      if (retVal != 0)
-      return retVal;
-
+      if (retVal != 0) {
+        return retVal;
+      }
     }
     return 0;
   }
@@ -140,29 +135,29 @@ public class UrlData
   public int compareTo(UrlData other) throws Exception {
     int retVal;
     retVal = compare(this.Authority,other.Authority);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = UrlLogin.compare(this.Login,other.Login);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = compare(this.Host,other.Host);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = compare(this.Port,other.Port);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = compare(this.Path,other.Path);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     retVal = compare(this.Search,other.Search);
-    if (retVal != 0)
-    return retVal;
-
+    if (retVal != 0) {
+      return retVal;
+    }
     return 0;
   }
 

@@ -7,8 +7,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 /**
 * Enum for group types.
 */
-public enum FhirMapGroupTypes
-{
+public enum FhirMapGroupTypes {
   /**
   Unset value
   */
@@ -30,20 +29,18 @@ public enum FhirMapGroupTypes
   * Returns a lowercase string of the relevant values of FhirMapGroupTypes
   * @return
   */
-  public String getValue()
-  {
-    switch (this){
+  public String getValue() {
+    switch (this) {
       case Types:
-      return "types";
+        return "types";
       case TypeTypes:
-      return "type-and-types";
+        return "type-and-types";
       default:
-      return "?";
+        return "?";
     }
   }
 
-  public static FhirMapGroupTypes forValue(int value)
-  {
+  public static FhirMapGroupTypes forValue(int value) {
     return values()[value];
   }
 }

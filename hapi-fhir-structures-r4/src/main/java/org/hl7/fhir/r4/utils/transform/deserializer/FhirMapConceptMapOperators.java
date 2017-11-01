@@ -19,7 +19,7 @@ public enum FhirMapConceptMapOperators
   '='
   */
   Equal(2),
-  
+
   /**
   '=='
   */
@@ -54,8 +54,7 @@ public enum FhirMapConceptMapOperators
 
   private int intValue;
   private static java.util.HashMap<Integer, FhirMapConceptMapOperators> mappings;
-  private static java.util.HashMap<Integer, FhirMapConceptMapOperators> getMappings()
-  {
+  private static java.util.HashMap<Integer, FhirMapConceptMapOperators> getMappings() {
     if (mappings == null)
     {
       synchronized (FhirMapConceptMapOperators.class)
@@ -69,19 +68,16 @@ public enum FhirMapConceptMapOperators
     return mappings;
   }
 
-  FhirMapConceptMapOperators(int value)
-  {
+  FhirMapConceptMapOperators(int value) {
     intValue = value;
     getMappings().put(value, this);
   }
 
-  public int getValue()
-  {
+  public int getValue() {
     return intValue;
   }
 
-  public static FhirMapConceptMapOperators forValue(int value)
-  {
+  public static FhirMapConceptMapOperators forValue(int value) {
     return getMappings().get(value);
   }
 }

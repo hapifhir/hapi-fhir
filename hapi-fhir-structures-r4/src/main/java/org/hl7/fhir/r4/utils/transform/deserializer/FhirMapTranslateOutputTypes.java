@@ -34,20 +34,24 @@ public enum FhirMapTranslateOutputTypes
 
   public static final int SIZE = java.lang.Integer.SIZE;
 
-  public String getValue()
-  {
-    switch (this){
-      case Code: return "Code";
-      case Coding: return "Coding";
-      case System: return "System";
-      case Display: return "Display";
-      case CodeableConcept: return "CodeableConcept";
-      default: return "?";
+  public String getValue() {
+    switch (this) {
+      case Code:
+        return "Code";
+      case Coding:
+        return "Coding";
+      case System:
+        return "System";
+      case Display:
+        return "Display";
+      case CodeableConcept:
+        return "CodeableConcept";
+      default:
+        return "?";
     }
   }
 
-  public static FhirMapTranslateOutputTypes forValue(int value)
-  {
+  public static FhirMapTranslateOutputTypes forValue(int value) {
     return values()[value];
   }
 }

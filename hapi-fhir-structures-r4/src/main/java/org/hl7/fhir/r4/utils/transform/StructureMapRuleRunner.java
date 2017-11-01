@@ -21,7 +21,6 @@ public class StructureMapRuleRunner extends BaseRunner {
   private Stack<StructureMap.StructureMapGroupRuleComponent> ruleStack;
   private StructureMapGroupHandler parentGroupRunner;
   private FhirTransformationEngine transformationEngine;
-  private VariablesForProfiling parentVars;
 
   public StructureMapRuleRunner(StructureMap map, FhirTransformationEngine transformationEngine, StructureMapGroupHandler parentGroupRunner, StructureMap.StructureMapGroupRuleComponent rule) {
     setStructureMap(map);
@@ -103,7 +102,6 @@ public class StructureMapRuleRunner extends BaseRunner {
       if (ruleStack == null){
         ruleStack = new Stack<>();
       }
-      parentVars = source.copy();
       ruleStack.push(rule);
       rule = childrule;
       analyseRule(context, indent + "  ", result, source);

@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class ANTLRStructureMapTests {
 	@Test
-	public void FilePathing(){
+	public void FilePathing() {
 		File file = new File("");
 		System.out.println(file.getAbsolutePath());
 	}
@@ -63,18 +63,19 @@ public class ANTLRStructureMapTests {
 		sd1 = this.createTestStructure();
 
 		//sd1 = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(new File("C:\\JCimiProject\\hapi-fhir-resource-profile-generator\\target\\classes\\mapping\\logical\\structuredefinition-colorectal.xml")));
-		if (sd1.getId().contains("/"))
+		if (sd1.getId().contains("/")) {
 			sd1.setId(sd1.getId().split("/")[sd1.getId().split("/").length - 1]);
+		}
 		validation.addStructureDefinition(sd1);
 		bc.addStructureDefinition(sd1);
-		for (StructureDefinition sd : new DefaultProfileValidationSupport().fetchAllStructureDefinitions(FhirContext.forR4())){
+		for (StructureDefinition sd : new DefaultProfileValidationSupport().fetchAllStructureDefinitions(FhirContext.forR4())) {
 			bc.addStructureDefinition(sd);
 			validation.addStructureDefinition(sd);
 		}
 		StructureMap map = null;
 		HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
 		scu = new FhirTransformationEngine(hapiContext);
-		map = new MappingIO("simpleMapTest.map").getStructureMap();
+		map = MappingIO.readStructureMap("simpleMapTest.map");
 		//mapping.setMappingFile(new File("colorectal3.map"));
 		//mapping.setMappingFile(new File("simpleMapTest.map"));
 		//String mapText = mapping.readFile();
