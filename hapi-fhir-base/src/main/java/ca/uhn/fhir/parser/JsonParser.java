@@ -650,8 +650,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			if (isBlank(versionIdPart)) {
 				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
 			}
+			List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = getExtensionMetadataKeys(resource);
 
-			if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
+			if (super.shouldEncodeResourceMeta(resource) && (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) || !extensionMetadataKeys.isEmpty()) {
 				beginObject(theEventWriter, "meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
@@ -691,6 +692,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					theEventWriter.endArray();
 				}
 
+				addExtensionMetadata(extensionMetadataKeys, theEventWriter);
+
 				theEventWriter.endObject(); // end meta
 			}
 		}
@@ -710,6 +713,41 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		theEventWriter.endObject();
+	}
+
+	private void addExtensionMetadata(List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys, JsonLikeWriter theEventWriter) throws IOException {
+		if (extensionMetadataKeys.isEmpty()) {
+			return;
+		}
+
+		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionKeys = new ArrayList<>(extensionMetadataKeys.size());
+		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> modifierExtensionKeys = new ArrayList<>(extensionKeys.size());
+		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : extensionMetadataKeys) {
+			if (!((ExtensionDt) entry.getValue()).isModifier()) {
+				extensionKeys.add(entry);
+			} else {
+				modifierExtensionKeys.add(entry);
+			}
+		}
+
+		writeMetadataExtensions(extensionKeys, "extension", theEventWriter);
+		writeMetadataExtensions(extensionKeys, "modifierExtension", theEventWriter);
+	}
+
+	private void writeMetadataExtensions(List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensions, String arrayName, JsonLikeWriter theEventWriter) throws IOException {
+		if (extensions.isEmpty()) {
+			return;
+		}
+		beginArray(theEventWriter, arrayName);
+		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> key : extensions) {
+			ExtensionDt extension = (ExtensionDt) key.getValue();
+			theEventWriter.beginObject();
+			writeOptionalTagWithTextNode(theEventWriter, "url", extension.getUrl());
+			String extensionDatatype = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildNameByDatatype(extension.getValue().getClass());
+			writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, extension.getValueAsPrimitive());
+			theEventWriter.endObject();
+		}
+		theEventWriter.endArray();
 	}
 
 	/**

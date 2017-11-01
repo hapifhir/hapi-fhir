@@ -1,9 +1,11 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -1688,19 +1690,65 @@ public class JsonParserDstu2Test {
 		Patient p = parser.parseResource(Patient.class, input);
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(peh, times(4)).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
-
-		//@formatter:off
-		List<String> strings = capt.getAllValues();
-		assertThat(strings, contains(
-			"extension",
-			"extension",
-			"modifierExtension",
-			"modifierExtension"
-		));
-		//@formatter:off
-		
+		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
 		assertEquals("Smith", p.getName().get(0).getGiven().get(0).getValue());
+		assertExtensionMetadata(p, "fhir-request-method", false, StringDt.class, "POST");
+		assertExtensionMetadata(p, "fhir-request-uri", false, UriDt.class, "Patient");
+		assertExtensionMetadata(p, "modified-fhir-request-method", true, StringDt.class, "POST");
+		assertExtensionMetadata(p, "modified-fhir-request-uri", true, UriDt.class, "Patient");
+	}
+
+	private void assertExtensionMetadata(
+		BaseResource resource,
+		String url,
+		boolean isModifier,
+		Class<?> expectedType,
+		String expectedValue) {
+		ExtensionDt extension = (ExtensionDt) resource.getResourceMetadata().get(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(url));
+		assertThat(extension.getValue(), instanceOf(expectedType));
+		assertThat(extension.isModifier(), equalTo(isModifier));
+		assertThat(extension.getValueAsPrimitive().getValueAsString(), equalTo(expectedValue));
+	}
+
+	@Test
+	public void testEncodeResourceWithExtensionMetadata() throws Exception {
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setStatus(ProcedureRequestStatusEnum.ACCEPTED);
+		addExtensionResourceMetadataKeyToResource(procedureRequest, false, "http://someurl.com", "SomeValue");
+		addExtensionResourceMetadataKeyToResource(procedureRequest, false, "http://someurl2.com", "SomeValue2");
+		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier", "SomeValue");
+		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier2", "SomeValue2");
+
+		String json = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedureRequest);
+
+		// @formatter:off
+		assertThat(json, stringContainsInOrder("\"meta\": {",
+			"\"extension\": [", "{",
+			"\"url\": \"http://someurl.com\",",
+			"\"valueString\": \"SomeValue\"",
+			"},",
+			"{",
+			"\"url\": \"http://someurl2.com\",",
+			"\"valueString\": \"SomeValue2\"",
+			"}",
+			"],",
+			"\"modifierExtension\": [",
+			"{",
+			"\"url\": \"http://someurl.com\",",
+			"\"valueString\": \"SomeValue\"",
+			"},",
+			"{",
+			"\"url\": \"http://someurl2.com\",",
+			"\"valueString\": \"SomeValue2\"",
+			"}",
+			"]"));
+		// @formatter:on
+	}
+
+	private void addExtensionResourceMetadataKeyToResource(BaseResource resource, boolean isModifier, String url, String value) {
+		ExtensionDt extensionDt = new ExtensionDt(isModifier, url, new StringDt(value));
+		resource.getResourceMetadata()
+			.put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(extensionDt.getUrl()), extensionDt);
 	}
 
 	@Test
