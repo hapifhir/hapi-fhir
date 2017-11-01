@@ -29,40 +29,36 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
+// Generated on Mon, Jan 16, 2017 12:12-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
 
-public class DeviceStatusEnumFactory implements EnumFactory<DeviceStatus> {
+public class DevicestatusEnumFactory implements EnumFactory<Devicestatus> {
 
-  public DeviceStatus fromCode(String codeString) throws IllegalArgumentException {
+  public Devicestatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("active".equals(codeString))
-      return DeviceStatus.ACTIVE;
-    if ("inactive".equals(codeString))
-      return DeviceStatus.INACTIVE;
+    if ("available".equals(codeString))
+      return Devicestatus.AVAILABLE;
+    if ("not-available".equals(codeString))
+      return Devicestatus.NOTAVAILABLE;
     if ("entered-in-error".equals(codeString))
-      return DeviceStatus.ENTEREDINERROR;
-    if ("unknown".equals(codeString))
-      return DeviceStatus.UNKNOWN;
-    throw new IllegalArgumentException("Unknown DeviceStatus code '"+codeString+"'");
+      return Devicestatus.ENTEREDINERROR;
+    throw new IllegalArgumentException("Unknown Devicestatus code '"+codeString+"'");
   }
 
-  public String toCode(DeviceStatus code) {
-    if (code == DeviceStatus.ACTIVE)
-      return "active";
-    if (code == DeviceStatus.INACTIVE)
-      return "inactive";
-    if (code == DeviceStatus.ENTEREDINERROR)
+  public String toCode(Devicestatus code) {
+    if (code == Devicestatus.AVAILABLE)
+      return "available";
+    if (code == Devicestatus.NOTAVAILABLE)
+      return "not-available";
+    if (code == Devicestatus.ENTEREDINERROR)
       return "entered-in-error";
-    if (code == DeviceStatus.UNKNOWN)
-      return "unknown";
     return "?";
   }
 
-    public String toSystem(DeviceStatus code) {
+    public String toSystem(Devicestatus code) {
       return code.getSystem();
       }
 
