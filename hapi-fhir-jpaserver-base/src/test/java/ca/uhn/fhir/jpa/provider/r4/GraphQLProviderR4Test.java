@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,14 +31,14 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(resp, "{\n" +
+			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAM\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}");
+				"}"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -55,7 +56,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(resp, "{\n" +
+			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -68,7 +69,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}");
+				"}"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
