@@ -613,5 +613,30 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		public abstract void put(IAnyResource theResource, T2 theObject);
 
 	}
+
+	public static final class ExtensionResourceMetadataKey extends ResourceMetadataKeyEnum<ExtensionDt> {
+		public ExtensionResourceMetadataKey(String url) {
+			super(url);
+		}
+
+		@Override
+		public ExtensionDt get(IResource theResource) {
+			Object retValObj = theResource.getResourceMetadata().get(this);
+			if (retValObj == null) {
+				return null;
+			} else if (retValObj instanceof ExtensionDt) {
+				return (ExtensionDt) retValObj;
+			}
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName()
+				+ "' in resource metadata for key " + this.name() + " - Expected "
+				+ ExtensionDt.class.getCanonicalName());
+		}
+
+		@Override
+		public void put(IResource theResource, ExtensionDt theObject) {
+			theResource.getResourceMetadata().put(this, theObject);
+		}
+	}
+
 	
 }
