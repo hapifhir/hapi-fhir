@@ -82,6 +82,23 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodeBinaryWithSecurityContext() {
+		Binary bin = new Binary();
+		bin.setContentType("text/plain");
+		bin.setContent("Now is the time".getBytes());
+		Reference securityContext = new Reference();
+		securityContext.setReference("DiagnosticReport/1");
+		bin.setSecurityContext(securityContext);
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(bin);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("Binary"));
+		assertThat(encoded, containsString("<contentType value=\"text/plain\"/>"));
+		assertThat(encoded, containsString("<securityContext><reference value=\"DiagnosticReport/1\"/></securityContext>"));
+		assertThat(encoded, containsString("<content value=\"Tm93IGlzIHRoZSB0aW1l\"/>"));
+	}
+
+
 	/**
 	 * See #544
 	 */

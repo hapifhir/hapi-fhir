@@ -130,4 +130,19 @@ public class TestUtil {
 		}
 	}
 
+	public static void sleepAtLeast(int theMillis) {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() <= start + theMillis) {
+			try {
+				long timeSinceStarted = System.currentTimeMillis() - start;
+				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
+				ourLog.info("Sleeping for {}ms", timeToSleep);
+				Thread.sleep(timeToSleep);
+			} catch (InterruptedException theE) {
+				theE.printStackTrace();
+			}
+		}
+	}
+
+
 }

@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.util.BinaryUtil;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -580,9 +581,16 @@ public class RestfulServerUtils {
 			} else {
 				contentType = Constants.CT_OCTET_STREAM;
 			}
+
 			// Force binary resources to download - This is a security measure to prevent
 			// malicious images or HTML blocks being served up as content.
 			response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+
+			IBaseReference securityContext = BinaryUtil.getSecurityContext(theServer.getFhirContext(), bin);
+			String securityContextRef = securityContext.getReferenceElement().getValue();
+			if (isNotBlank(securityContextRef)) {
+				response.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, securityContextRef);
+			}
 
 			return response.sendAttachmentResponse(bin, theStausCode, contentType);
 		}

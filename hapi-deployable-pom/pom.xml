@@ -118,6 +118,7 @@
 					</ignoredDependencies>
 					<ignoredResources>
 						<ignoredResource>changelog.txt</ignoredResource>
+						<ignoredResource>javac.bat</ignoredResource>
 					</ignoredResources>
 				</configuration>
 			</plugin>

@@ -175,6 +175,11 @@
 				was not encoded correctly. Thanks to Malcolm McRoberts for the pull
 				request with fix and test case!
 			</action>
+			<action type="add">
+				The Binary resource endpoint now supports the `X-Security-Context` header when
+				reading or writing Binary contents using their native Content-Type (i.e exchanging
+				the raw binary with the server, as opposed to exchanging a FHIR resource).
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
