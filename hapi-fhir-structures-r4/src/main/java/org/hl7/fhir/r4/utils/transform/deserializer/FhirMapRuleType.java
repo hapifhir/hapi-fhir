@@ -1,28 +1,36 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 import java.util.List;
 
 /**
-* Names that can be used in mapping 'uses ... as' clause.
-*/
-public class FhirMapRuleType
-{
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
+public class FhirMapRuleType {
+
+  /**
+   * constructor
+   *
+   * @param typeName   string value of the type to be instantiated with
+   * @param occurances numeric list of occurances to be instantiated with
+   */
   public FhirMapRuleType(String typeName, List<Integer> occurances) {
     this.TypeName = typeName;
     this.Occurrences = occurances;
   }
+
+  /**
+   * constructor, empty
+   */
   public FhirMapRuleType() {
   }
+
   /**
-  * Compare two instances to each other.
-  *
-  *  @return
-  */
+   * Compare two instances to each other.
+   *
+   * @return numeric result of the comparison
+   */
   public static int compare(FhirMapRuleType a, FhirMapRuleType b) throws Exception {
     if ((a == null) && (b == null)) {
       return 0;
@@ -50,8 +58,7 @@ public class FhirMapRuleType
     if (retVal != 0) {
       return retVal;
     }
-    for (int i = 0; i < a.Occurrences.size(); i++)
-    {
+    for (int i = 0; i < a.Occurrences.size(); i++) {
       retVal = a.Occurrences.get(i) - b.Occurrences.get(i);
       if (retVal != 0) {
         return retVal;
@@ -61,11 +68,11 @@ public class FhirMapRuleType
   }
 
   /**
-  * Type name
-  */
+   * Type name
+   */
   public String TypeName;
   /**
-  * Cardinality (minimum, maximum) Zero length if unset.
-  */
+   * Cardinality (minimum, maximum) Zero length if unset.
+   */
   public List<Integer> Occurrences;
 }

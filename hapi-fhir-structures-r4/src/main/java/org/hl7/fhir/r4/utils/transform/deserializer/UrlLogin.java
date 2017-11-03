@@ -1,28 +1,27 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 /**
-* Stored Antls Url rule parsed data
-*/
-public class UrlLogin
-{
+ * Stored Antls Url rule parsed data
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
+public class UrlLogin {
   /**
-  * Url Login name.Blank if no login
-  */
+   * Url Login name.Blank if no login
+   */
   public String Name = "";
   /**
-  * Url Login password.Blank if no
-  */
+   * Url Login password.Blank if no
+   */
   String Password = "";
+
   /**
-  * Compare this url to another one.
-  *
-  *  @return
-  */
+   * Compare this url to another one.
+   *
+   * @return
+   */
   public static int compare(UrlLogin a, UrlLogin b) throws Exception {
     if ((a == null) && (b == null)) {
       return 0;

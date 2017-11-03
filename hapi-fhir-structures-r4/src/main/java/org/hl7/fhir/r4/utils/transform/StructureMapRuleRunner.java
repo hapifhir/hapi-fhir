@@ -10,6 +10,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 
 import static org.hl7.fhir.r4.utils.transform.FhirTransformationEngine.*;
@@ -99,7 +100,7 @@ public class StructureMapRuleRunner extends BaseRunner {
     tw.commit(xt);
 
     for (StructureMap.StructureMapGroupRuleComponent childrule : rule.getRule()) {
-      if (ruleStack == null){
+      if (ruleStack == null) {
         ruleStack = new Stack<>();
       }
       ruleStack.push(rule);
@@ -392,11 +393,11 @@ public class StructureMapRuleRunner extends BaseRunner {
 
     if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.CREATE) {
       String s = getParamString(vars, ruleTarget.getParameter().get(0));
-      if (getWorker().getResourceNames().contains(s)){
+      if (getWorker().getResourceNames().contains(s)) {
         tw.newResource(ruleTarget.getVariable(), s);
       }
-      if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())){
-        String finalURL = context.getBaseGeneratedProfileUrl()+"/"+type.getType().substring(type.getType().lastIndexOf("/")+1);
+      if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())) {
+        String finalURL = context.getBaseGeneratedProfileUrl() + "/" + type.getType().substring(type.getType().lastIndexOf("/") + 1);
         ruleTarget.setUserData("profile-url", finalURL);
       }
     } else if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.EXTENSION) {
@@ -415,7 +416,7 @@ public class StructureMapRuleRunner extends BaseRunner {
       contexts.add(new StringType(extContext));
       FhirExtensionGenerator extensionGenerator = new FhirExtensionGenerator();
       StructureDefinition extensionStructureDef = context.getStructureDefinition(extensionUri);
-      if(extensionStructureDef == null) {
+      if (extensionStructureDef == null) {
         extensionStructureDef = extensionGenerator.generateExtensionStructureDefinition(extensionName, contexts, shortDescription, longDescription, min, max, extType);
         context.addStructureDefinition(extensionStructureDef);
       }
@@ -449,20 +450,20 @@ public class StructureMapRuleRunner extends BaseRunner {
       //Check if there is already a StructureDefinition with that URL. If so,
       //do not create the profile.
       String finalURL = ruleTarget.getUserString("profile-url");
-      if (finalURL == null || context.getStructureDefinition(finalURL) == null){
+      if (finalURL == null || context.getStructureDefinition(finalURL) == null) {
         prop = updateProfile(targetContextVariable, ruleTarget.getElement(), type, map, profiles, sliceName, fixed, ruleTarget);
         context.addStructureDefinition(prop.getProfileProperty().getStructure());
-      }  
+      }
     }
-    
+
     if (ruleTarget.hasVariable() && prop != null) {
-        if (ruleTarget.hasElement()) {
-            vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
-        } else {
-            vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
-        }
+      if (ruleTarget.hasElement()) {
+        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
+      } else {
+        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
+      }
     }
-    
+
   }
 
   private void processTarget(String ruleId, TransformContext context, Variables vars, StructureMap map, StructureMap.StructureMapGroupComponent group, StructureMap.StructureMapGroupRuleTargetComponent tgt, String srcVar) throws FHIRException {
@@ -671,9 +672,7 @@ public class StructureMapRuleRunner extends BaseRunner {
 
   private boolean isParamId(VariablesForProfiling vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) {
     Type p = parameter.getValue();
-    if (p == null || !(p instanceof IdType))
-      return false;
-    return vars.get(null, p.primitiveValue()) != null;
+    return p != null && p instanceof IdType && vars.get(null, p.primitiveValue()) != null;
   }
 
   private TypeDetails getParam(VariablesForProfiling vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) throws DefinitionException {
@@ -1036,9 +1035,7 @@ public class StructureMapRuleRunner extends BaseRunner {
   }
 
   private boolean isType(Base item, String type) {
-    if (type.equals(item.fhirType()))
-      return true;
-    return false;
+    return type.equals(item.fhirType());
   }
 
 }

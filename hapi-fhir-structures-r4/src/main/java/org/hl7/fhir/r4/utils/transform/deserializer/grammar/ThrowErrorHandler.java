@@ -2,16 +2,23 @@ package org.hl7.fhir.r4.utils.transform.deserializer.grammar;
 
 import org.antlr.v4.runtime.*;
 
+/**
+ * Handles how errors are processed by gracefully shutting down the program.
+ */
 public class ThrowErrorHandler extends DefaultErrorStrategy implements ANTLRErrorStrategy {
 
-  public ThrowErrorHandler(){
+  /**
+   * Constructor
+   */
+  public ThrowErrorHandler() {
     super();
   }
+
   @Override
   public void reset(Parser recognizer) {
     super.reset(recognizer);
   }
-  
+
   @Override
   public Token recoverInline(Parser recognizer) throws RecognitionException {
     return super.recoverInline(recognizer);

@@ -1,39 +1,48 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
+/**
+ * Defines the Translate outputs when using a translate transform
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
 
-public enum FhirMapTranslateOutputTypes
-{
+public enum FhirMapTranslateOutputTypes {
   /**
-  FhirMapTranslateOutputTypes.Code
-  */
+   * FhirMapTranslateOutputTypes.Code
+   */
   Code,
 
   /**
-  FhirMapTranslateOutputTypes.System,
-  */
+   * FhirMapTranslateOutputTypes.System,
+   */
   System,
 
   /**
-  FhirMapTranslateOutputTypes.Display
-  */
+   * FhirMapTranslateOutputTypes.Display
+   */
   Display,
 
   /**
-  FhirMapTranslateOutputTypes.Coding
-  */
+   * FhirMapTranslateOutputTypes.Coding
+   */
   Coding,
 
   /**
-  FhirMapTranslateOutputTypes.CodeableConcept
-  */
+   * FhirMapTranslateOutputTypes.CodeableConcept
+   */
   CodeableConcept;
 
+  /**
+   * Constant size of the Integer object
+   */
   public static final int SIZE = java.lang.Integer.SIZE;
 
+  /**
+   * Returns a string representation of the enumerated value
+   *
+   * @return the desired string value based on the enumeration
+   */
   public String getValue() {
     switch (this) {
       case Code:

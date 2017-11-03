@@ -1,28 +1,33 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
-
-public enum FhirMapInputModes
-{
+/**
+ * Describes the Inputs for Fhir StructureMaps
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
+public enum FhirMapInputModes {
   /**
-  * Fhir mapper .
-  *
-  * Unset value
-  */
+   * Fhir mapper .
+   * <p>
+   * Unset value
+   */
   NotSet,
   /**
-  * Source mode
-  */
+   * Source mode
+   */
   Source,
   /**
-  * Target mode
-  */
+   * Target mode
+   */
   Target;
 
-  public String getValue(){
+  /**
+   * gets the string representation of the current enumerated value
+   *
+   * @return lowercase string representation
+   */
+  public String getValue() {
     switch (this) {
       case Source:
         return "source";

@@ -1,66 +1,71 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
+import java.util.HashMap;
+
 /**
-Concept mapping operators.
-*/
-public enum FhirMapConceptMapOperators
-{
+ * Concept mapping operators.
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
+public enum FhirMapConceptMapOperators {
   /**
-  Unset value
-  */
+   * Unset value
+   */
   NotSet(0),
 
   /**
-  '<='
-  */
+   * '<='
+   */
   LessThanOrEqual(1),
 
   /**
-  '='
-  */
+   * '='
+   */
   Equal(2),
 
   /**
-  '=='
-  */
+   * '=='
+   */
   DoubleEqual(3),
 
   /**
-  '!='
-  */
+   * '!='
+   */
   NotEqual(4),
 
   /**
-  '>='
-  */
+   * '>='
+   */
   GreaterThanOrEqual(5),
 
   /**
-  '>-'
-  */
+   * '>-'
+   */
   GreaterThanMinus(6),
 
   /**
-  '<-'
-  */
+   * '<-'
+   */
   LessThanMinus(7),
 
   /**
-  '~'
-  */
+   * '~'
+   */
   Tilde(8);
 
+  /**
+   * Constant int value of the size of the Integer object
+   */
   public static final int SIZE = java.lang.Integer.SIZE;
 
   private int intValue;
-  private static java.util.HashMap<Integer, FhirMapConceptMapOperators> mappings;
-  private static java.util.HashMap<Integer, FhirMapConceptMapOperators> getMappings() {
-    if (mappings == null)
-    {
-      synchronized (FhirMapConceptMapOperators.class)
-      {
-        if (mappings == null)
-        {
+  private static HashMap<Integer, FhirMapConceptMapOperators> mappings;
+
+  private static HashMap<Integer, FhirMapConceptMapOperators> getMappings() {
+    if (mappings == null) {
+      synchronized (FhirMapConceptMapOperators.class) {
+        if (mappings == null) {
           mappings = new java.util.HashMap<>();
         }
       }

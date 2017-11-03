@@ -13,7 +13,6 @@ import java.util.Map;
 import static org.hl7.fhir.r4.utils.transform.FhirTransformationEngine.*;
 
 /**
- *
  * @author Grahame Grieve
  */
 public class DefaultStructureMapParser {

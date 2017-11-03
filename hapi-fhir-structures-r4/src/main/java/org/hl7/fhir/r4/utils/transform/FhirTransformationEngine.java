@@ -74,7 +74,7 @@ public class FhirTransformationEngine extends BaseRunner {
   }
 
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services) {
-    this(worker,library);
+    this(worker, library);
     setServices(services);
   }
 
@@ -253,7 +253,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * - a list or profiles for what it will create. First profile is the target
    * - a table with a summary (in xhtml) for easy human undertanding of the mapping
    *
-     * @param batchContext
+   * @param batchContext
    * @param appInfo
    * @param map
    * @return
@@ -263,7 +263,7 @@ public class FhirTransformationEngine extends BaseRunner {
     setStructureMap(map);
     getIds().clear();
     TransformContext context = batchContext.getTransformationContext(map.getUrl());//In case transform context is added prior to invocation of analyze.
-    if(context == null) {
+    if (context == null) {
       context = new TransformContext(appInfo);
       batchContext.addTransformationContext(map.getUrl(), context);
     }
@@ -280,7 +280,7 @@ public class FhirTransformationEngine extends BaseRunner {
 
     log("Start Profiling Transform " + map.getUrl());
     StructureMapGroupHandler groupRunner = new StructureMapGroupHandler(getStructureMap(), getWorker(), this, map.getGroup().get(0));
-    groupRunner.analyzeGroup( batchContext,"", result);
+    groupRunner.analyzeGroup(batchContext, "", result);
     //analyseGroup("", context, map, vars, start, result);
     ProfileUtilities pu = new ProfileUtilities(getWorker(), null, pkp);
     for (StructureDefinition sd : result.getProfiles())
@@ -303,7 +303,7 @@ public class FhirTransformationEngine extends BaseRunner {
     ElementDefinition root = sd.getSnapshot().getElementFirstRep();
     String m = getMapping(root, id);
     if (m != null)
-      b.append(m + "\r\n");
+      b.append(m).append("\r\n");
     addChildMappings(b, id, "", sd, root, false);
     b.append("\r\n");
     b.append(suffix);
@@ -335,13 +335,13 @@ public class FhirTransformationEngine extends BaseRunner {
       }
       String map = getMapping(child, id);
       if (map != null) {
-        b.append(indent + "  " + child.getPath() + ": " + map);
+        b.append(indent).append("  ").append(child.getPath()).append(": ").append(map);
         addChildMappings(b, id, indent + "  ", sd, child, true);
         b.append("\r\n");
       }
     }
     if (!first && inner)
-      b.append(indent + "}");
+      b.append(indent).append("}");
 
   }
 
@@ -355,7 +355,6 @@ public class FhirTransformationEngine extends BaseRunner {
 
 
   private String getLogicalMappingId(StructureDefinition sd) {
-    String id = null;
     for (StructureDefinitionMappingComponent map : sd.getMapping()) {
       if ("http://hl7.org/fhir/logical".equals(map.getUri()))
         return map.getIdentity();

@@ -8,6 +8,8 @@ import java.util.List;
 /**
  * Utility class for the generation of a FHIR StructureDefinition of type Extension and
  * a definition of elements referencing this definition in a given profile.
+ *
+ * @author Claude Nanjo
  */
 public class FhirExtensionGenerator {
 
@@ -30,7 +32,7 @@ public class FhirExtensionGenerator {
 
   public List<ElementDefinition> generateExtensionElementDefinitions(boolean addExtensionSlicingDefinition, String rootPath, String extensionId, String shortDescription, String definition, int min, String max, String extensionUrl) {
     List<ElementDefinition> extensionElementDefinitions = new ArrayList<>();
-    if(addExtensionSlicingDefinition) {
+    if (addExtensionSlicingDefinition) {
       ElementDefinition extensionSliceDefinition = new ElementDefinition(new StringType(rootPath + ".extension"));
       extensionSliceDefinition.getSlicing().addDiscriminator().setType(ElementDefinition.DiscriminatorType.VALUE).setPath("url");
       extensionSliceDefinition.getSlicing().setRules(ElementDefinition.SlicingRules.OPEN);

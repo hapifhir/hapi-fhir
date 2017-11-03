@@ -1,77 +1,93 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 import java.util.Objects;
 
-public enum FhirMapUseNames
-{
+/**
+ * Defines the Useage types when declaring the strcture definitions in the mapping language
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
+
+public enum FhirMapUseNames {
   /**
-  'source'
-  */
+   * 'source'
+   */
   NotSet,
 
   /**
-  'source'
-  */
+   * 'source'
+   */
   Source,
 
   /**
-  'target'
-  */
+   * 'target'
+   */
   Target,
 
   /**
-  'queried'
-  */
+   * 'queried'
+   */
   Queried,
 
   /**
-  'produced'
-  */
+   * 'produced'
+   */
   Produced;
 
+  /**
+   * constant size of the Integer object
+   */
   public static final int SIZE = java.lang.Integer.SIZE;
 
+  /**
+   * For procuring a string value of one of the enumerated values.
+   *
+   * @return lowercase string representation of the enumerated value.
+   */
   public String getValue() {
     switch (this) {
       case Source:
-      return "source";
+        return "source";
       case Queried:
-      return "queried";
+        return "queried";
       case Target:
-      return "target";
+        return "target";
       case Produced:
-      return "produced";
+        return "produced";
       default:
-      return "?";
+        return "?";
     }
   }
 
-
-
-
-  public static FhirMapUseNames forValue(int value) {
+  /**
+   * Get the enumerated value based on the position in the enumeration
+   *
+   * @param value integer value of the desired enumerated value
+   * @return the enumerated value
+   * @throws Exception if the value is out of bounds or invalid.
+   */
+  public static FhirMapUseNames forValue(int value) throws Exception {
     return values()[value];
   }
 
+  /**
+   * Processes a string and returns the corresponding enumerated value based on the inputs
+   *
+   * @param value string represnation
+   * @return the corresponding enumerated value
+   */
   public static FhirMapUseNames forValue(String value) {
-    if (Objects.equals(value, "Source")){
+    if (Objects.equals(value.toLowerCase(), "source")) {
       return FhirMapUseNames.Source;
-    }
-    else if (Objects.equals(value, "Target")){
+    } else if (Objects.equals(value.toLowerCase(), "target")) {
       return FhirMapUseNames.Target;
-    }
-    else if (Objects.equals(value, "Queried")){
+    } else if (Objects.equals(value.toLowerCase(), "queried")) {
       return FhirMapUseNames.Queried;
-    }
-    else if (Objects.equals(value, "Produced")){
+    } else if (Objects.equals(value.toLowerCase(), "produced")) {
       return FhirMapUseNames.Produced;
-    }
-    else {
+    } else {
       return FhirMapUseNames.NotSet;
     }
   }

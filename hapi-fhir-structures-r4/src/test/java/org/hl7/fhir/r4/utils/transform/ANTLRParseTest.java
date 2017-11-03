@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 * asserting which pieces of the mapping language is correct. Errors will be
 * thrown if the value recieved is incorrect.
 */
+@SuppressWarnings("unchecked")
 public class ANTLRParseTest {
 
 	FhirMapProcessor createProcessor() throws Exception {
@@ -61,15 +62,15 @@ public class ANTLRParseTest {
 			Object[] args = invocation.getArguments();
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			if (type != null)
-			Assert.assertTrue(type.equals(args[1]));
+				Assert.assertTrue(type.equals(args[1]));
 			if (defaultValue != null)
-			Assert.assertTrue(defaultValue.equals(args[2]));
+				Assert.assertTrue(defaultValue.equals(args[2]));
 			if (variable != null)
-			Assert.assertTrue(variable.equals(args[3]));
+				Assert.assertTrue(variable.equals(args[3]));
 			if (wherePath != null)
-			Assert.assertTrue(wherePath.equals(args[4]));
+				Assert.assertTrue(wherePath.equals(args[4]));
 			if (checkPath != null)
-			Assert.assertTrue(checkPath.equals(args[5]));
+				Assert.assertTrue(checkPath.equals(args[5]));
 			return null;
 		}).when(mock).ruleSource(anyList(), any(FhirMapRuleType.class), anyString(), any(FhirMapListOptions.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -95,7 +96,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(assignValue.equals(args[1]));
 			if (targetValue != null)
-			Assert.assertTrue(targetValue.equals(args[2]));
+				Assert.assertTrue(targetValue.equals(args[2]));
 			return null;
 		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -123,7 +124,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(obj.equals(args[1]));
 			Assert.assertTrue(objElement.equals(args[2]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[3]));
+				Assert.assertTrue(targetVariable.equals(args[3]));
 			return null;
 		}).when(mock).transformEvaluate(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -148,7 +149,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(resource.equals(args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformPointer(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -173,7 +174,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(resource.equals(args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformQty(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -204,7 +205,7 @@ public class ANTLRParseTest {
 			UrlData arg = (UrlData) args[3];
 			Assert.assertTrue(system.equals(arg.CompleteUrl));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformQty(anyList(), anyString(), anyString(), any(UrlData.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -231,7 +232,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(unitString.equals(args[2]));
 			Assert.assertTrue(type.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformQty(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -261,7 +262,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(value.equals(args[2]));
 			Assert.assertTrue(type.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformId(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -289,7 +290,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(copyValue.equals(args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -314,7 +315,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(copyValue.equals(args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformCreate(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -339,7 +340,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(appendValues.containsAll((Collection<?>) args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformAppend(anyList(), anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -388,7 +389,7 @@ public class ANTLRParseTest {
 			Integer arg = (Integer) args[2];
 			Assert.assertTrue(length == arg);
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[3]));
+				Assert.assertTrue(targetVariable.equals(args[3]));
 			return null;
 		}).when(mock).transformTruncate(anyList(), anyString(), anyInt(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -414,7 +415,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(source.equals(args[1]));
 			Assert.assertTrue(type.equals(args[2]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[3]));
+				Assert.assertTrue(targetVariable.equals(args[3]));
 			return null;
 		}).when(mock).transformCast(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -444,7 +445,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(system.equals(args[2]));
 			Assert.assertTrue(code.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformCoding(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -470,7 +471,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(textValue.equals(args[1]));
 			if (targetValue != null)
-			Assert.assertTrue(targetValue.equals(args[2]));
+				Assert.assertTrue(targetValue.equals(args[2]));
 			return null;
 		}).when(mock).transformCodeableConcept(context, textValue, targetValue);
 		FhirMapProcessor p = this.createProcessor();
@@ -500,7 +501,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(code.equals(args[2]));
 			Assert.assertTrue(display.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformCodeableConcept(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -543,7 +544,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(completeUrl.equals(arg.CompleteUrl));
 			Assert.assertTrue(variable.equals(args[2]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[3]));
+				Assert.assertTrue(targetVariable.equals(args[3]));
 			return null;
 		}).when(mock).transformCp(anyList(), any(UrlData.class), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -574,7 +575,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(mapUrl.equals(arg.CompleteUrl));
 			Assert.assertTrue(outputType.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformTranslate(anyList(), anyString(), any(UrlData.class), any(FhirMapTranslateOutputTypes.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -692,7 +693,7 @@ public class ANTLRParseTest {
 			Object[] args = invocation.getArguments();
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[1]));
+				Assert.assertTrue(targetVariable.equals(args[1]));
 			return null;
 		}).when(mock).transformExtension(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -710,7 +711,7 @@ public class ANTLRParseTest {
 		testRuleExtension1("a.b = extension() as xyzzy", Arrays.asList("a","b"),  "xyzzy");
 	}
 
-/*
+
 	public void testRuleExtension2(String fhirMapText, List<String> context, String extUri, String title, String mode, String parent, String text1, String text2, Integer min, String max, String type, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData urlData = new UrlData();
@@ -740,18 +741,18 @@ public class ANTLRParseTest {
 			visitor.visit(parseTree);
 		}
 	}
-*/
+
 
 //
 
-	//	@Test
-//	public void parseRuleExtension2() throws Exception {
-//
-//		testRuleExtension2("a.b = extension(\"http://opencimi.org/fhir/extension/coding/coded_text_uri.html\", \"coded_text_uri\", \"Resource\", \"Coding\", \"URI representing the specific concept\", \"URI representing the specific concept\", 0, \"1\", \"uri\")", Arrays.asList("a","b"),
-//			"http://opencimi.org/fhir/extension/coding/coded_text_uri.html", "coded_text_uri", "Resource", "Coding", "URI representing the specific concept", "URI representing the specific concept", 0, "1", "uri", null);
-//		testRuleExtension2("a.b = extension(\"http://opencimi.org/fhir/extension/coding/coded_text_uri.html\", \"coded_text_uri\", \"Resource\", \"Coding\", \"URI representing the specific concept\", \"URI representing the specific concept\", 0, \"1\", \"uri\") as xyzzy", Arrays.asList("a","b"),
-//			"http://opencimi.org/fhir/extension/coding/coded_text_uri.html", "coded_text_uri", "Resource", "Coding", "URI representing the specific concept", "URI representing the specific concept", 0, "1", "uri", "xyzzy");
-//	}
+		@Test
+	public void parseRuleExtension2() throws Exception {
+
+		testRuleExtension2("a.b = extension(\"http://opencimi.org/fhir/extension/coding/coded_text_uri.html\", \"coded_text_uri\", \"Resource\", \"Coding\", \"URI representing the specific concept\", \"URI representing the specific concept\", 0, \"1\", \"uri\")", Arrays.asList("a","b"),
+			"http://opencimi.org/fhir/extension/coding/coded_text_uri.html", "coded_text_uri", "Resource", "Coding", "URI representing the specific concept", "URI representing the specific concept", 0, "1", "uri", null);
+		testRuleExtension2("a.b = extension(\"http://opencimi.org/fhir/extension/coding/coded_text_uri.html\", \"coded_text_uri\", \"Resource\", \"Coding\", \"URI representing the specific concept\", \"URI representing the specific concept\", 0, \"1\", \"uri\") as xyzzy", Arrays.asList("a","b"),
+			"http://opencimi.org/fhir/extension/coding/coded_text_uri.html", "coded_text_uri", "Resource", "Coding", "URI representing the specific concept", "URI representing the specific concept", 0, "1", "uri", "xyzzy");
+	}
 	public void testRuleEscape(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
@@ -760,9 +761,9 @@ public class ANTLRParseTest {
 			Assert.assertTrue(variable.equals(args[1]));
 			Assert.assertTrue(string1.equals(args[2]));
 			if (string2 != null)
-			Assert.assertTrue(string2.equals(args[3]));
+				Assert.assertTrue(string2.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformEscape(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -791,7 +792,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(string1.equals(args[2]));
 			Assert.assertTrue(string2.equals(args[3]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[4]));
+				Assert.assertTrue(targetVariable.equals(args[4]));
 			return null;
 		}).when(mock).transformDateOp(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -817,7 +818,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			Assert.assertTrue(variable.equals(args[1]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[2]));
+				Assert.assertTrue(targetVariable.equals(args[2]));
 			return null;
 		}).when(mock).transformReference(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -842,7 +843,7 @@ public class ANTLRParseTest {
 			Object[] args = invocation.getArguments();
 			Assert.assertTrue(context.containsAll((Collection<?>) args[0]));
 			if (targetVariable != null)
-			Assert.assertTrue(targetVariable.equals(args[1]));
+				Assert.assertTrue(targetVariable.equals(args[1]));
 			return null;
 		}).when(mock).transformUuid(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
@@ -873,7 +874,7 @@ public class ANTLRParseTest {
 
 	@Test
 	public void parseRuleName() throws Exception {
-		testRuleName("xxyyzz", Arrays.asList("xxyyzz"));
+		testRuleName("xxyyzz", Collections.singletonList("xxyyzz"));
 		testRuleName("a.b.ccc.def", Arrays.asList("a","b","ccc","def"));
 		testRuleName("a.b.\"c c ccc\".def", Arrays.asList("a", "b", "\"c c ccc\"", "def"));
 	}
@@ -890,7 +891,7 @@ public class ANTLRParseTest {
 			ParseTree parseTree = grammar.keyImports();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
-			Assert.assertTrue(urlData.CompleteUrl == "http://fhir.hl7.org.au");
+			Assert.assertTrue(Objects.equals(urlData.CompleteUrl, "http://fhir.hl7.org.au"));
 		}
 	}
 
@@ -948,7 +949,7 @@ public class ANTLRParseTest {
 			Assert.assertTrue(groupName.equals(args[0]));
 			Assert.assertTrue(groupTypes.equals(args[1]));
 			if (extendsName != null)
-			Assert.assertTrue(extendsName.equals(args[2]));
+				Assert.assertTrue(extendsName.equals(args[2]));
 			return null;
 		}).when(mock).groupStart(anyString(), any(FhirMapGroupTypes.class), anyString());
 		FhirMapProcessor p = this.createProcessor();

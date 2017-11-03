@@ -12,8 +12,12 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author Claude Nanjo
+ */
 public abstract class BaseRunner {
 
   private IWorkerContext worker;
@@ -88,7 +92,7 @@ public abstract class BaseRunner {
   }
 
   protected PropertyWithType createProfile(StructureMap map, List<StructureDefinition> profiles, PropertyWithType prop, String sliceName, Base ctxt) throws DefinitionException {
-      
+
     if (prop.getBaseProperty().getDefinition().getPath().contains("."))
       throw new DefinitionException("Unable to process entry point");
 
@@ -103,9 +107,9 @@ public abstract class BaseRunner {
       ids.put(type, 0);
 
     String finalURL = StringUtils.isBlank(ctxt.getUserString("profile-url")) ?
-        map.getUrl().replace("StructureMap", "StructureDefinition") + "-" + type + suffix :
-        ctxt.getUserString("profile-url");
-    
+      map.getUrl().replace("StructureMap", "StructureDefinition") + "-" + type + suffix :
+      ctxt.getUserString("profile-url");
+
     StructureDefinition profile = new StructureDefinition();
     profiles.add(profile);
     profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);

@@ -7,6 +7,8 @@ import java.util.Map;
 
 /**
  * Shared context for a set of transformation executions.
+ *
+ * @author Claude Nanjo
  */
 public class BatchContext {
   private Map<String, TransformContext> transformationContextMap;
@@ -35,7 +37,7 @@ public class BatchContext {
   }
 
   public String getBaseGeneratedProfileUrl() {
-    return baseGeneratedProfileUrl == null ? null : baseGeneratedProfileUrl.endsWith("/") ? baseGeneratedProfileUrl.substring(0, baseGeneratedProfileUrl.length()-1) : baseGeneratedProfileUrl;
+    return baseGeneratedProfileUrl == null ? null : baseGeneratedProfileUrl.endsWith("/") ? baseGeneratedProfileUrl.substring(0, baseGeneratedProfileUrl.length() - 1) : baseGeneratedProfileUrl;
   }
 
   public void setBaseGeneratedProfileUrl(String baseGeneratedProfileUrl) {

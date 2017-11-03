@@ -1,34 +1,35 @@
-//
-//
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
+
 /**
-* Enum for group types.
-*/
+ * Enum for group types.
+ *
+ * @author Travis Lukach
+ * (c) Applicadia LLC.
+ */
 public enum FhirMapGroupTypes {
   /**
-  Unset value
-  */
+   * Unset value
+   */
   NotSet,
 
   /**
-  Group type types
-  */
+   * Group type types
+   */
   Types,
 
   /**
-  Group type type types
-  */
+   * Group type type types
+   */
   TypeTypes;
 
   public static final int SIZE = java.lang.Integer.SIZE;
 
   /**
-  * Returns a lowercase string of the relevant values of FhirMapGroupTypes
-  * @return
-  */
+   * Returns a lowercase string of the relevant values of FhirMapGroupTypes
+   *
+   * @return lowercase string representation
+   */
   public String getValue() {
     switch (this) {
       case Types:
@@ -40,7 +41,14 @@ public enum FhirMapGroupTypes {
     }
   }
 
-  public static FhirMapGroupTypes forValue(int value) {
+  /**
+   * to get an enumerated value based on its position
+   *
+   * @param value numeric value desired
+   * @return the enumeration based on position
+   * @throws Exception if value is invalid or out of bounds
+   */
+  public static FhirMapGroupTypes forValue(int value) throws Exception {
     return values()[value];
   }
 }

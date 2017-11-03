@@ -29,7 +29,6 @@ public class StructureMapGroupHandler extends BaseRunner {
   }
 
 
-
   protected void initialize(BatchContext context, StructureMapAnalysis result) throws DefinitionException {
     vars = new VariablesForProfiling(false, false);
     for (StructureMap.StructureMapGroupInputComponent t : ruleGroup.getInput()) {
@@ -37,11 +36,11 @@ public class StructureMapGroupHandler extends BaseRunner {
       if (t.getMode() == StructureMap.StructureMapInputMode.SOURCE) {
         vars.add(VariableMode.INPUT, t.getName(), ti);
       } else {
-          if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())){
-            String finalURL = context.getBaseGeneratedProfileUrl()+"/"+ti.getBaseProperty().getDefinition().getPath();
-            ruleGroup.setUserData("profile-url", finalURL);
-          }
-          
+        if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())) {
+          String finalURL = context.getBaseGeneratedProfileUrl() + "/" + ti.getBaseProperty().getDefinition().getPath();
+          ruleGroup.setUserData("profile-url", finalURL);
+        }
+
         PropertyWithType profile = createProfile(getStructureMap(), result.getProfiles(), ti, ruleGroup.getName(), ruleGroup);
         vars.add(VariableMode.OUTPUT, t.getName(), profile);
       }

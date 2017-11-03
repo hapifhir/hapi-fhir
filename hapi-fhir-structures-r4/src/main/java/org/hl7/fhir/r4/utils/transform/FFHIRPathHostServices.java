@@ -7,6 +7,9 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
 
+/**
+ * @author Claude Nanjo
+ */
 class FFHIRPathHostServices implements FHIRPathEngine.IEvaluationContext {
 
   private FhirTransformationEngine transformationEngine;
