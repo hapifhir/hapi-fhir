@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -81,7 +83,56 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		patient = myClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
 		assertEquals(id.getValue(), patient.getId());
 	}
-	
+
+	/**
+	 * See #751
+	 */
+	@Test
+	public void testDeleteInCompartmentIsBlocked() {
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType id = myClient.update().resource(patient).execute().getId();
+
+		Observation obs = new Observation();
+		obs.setId("Observation/B");
+		obs.getSubject().setReference("Patient/A");
+		myClient.update().resource(obs).execute();
+
+		obs = new Observation();
+		obs.setId("Observation/C");
+		obs.setStatus(ObservationStatus.FINAL);
+		myClient.update().resource(obs).execute();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().delete().allResources().inCompartment("Patient", new IdType("Patient/A")).andThen()
+					.allow().read().allResources().withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		myClient.delete().resourceById(new IdType("Observation/B")).execute();
+
+		try {
+			myClient.read().resource(Observation.class).withId("Observation/B").execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myClient.delete().resourceById(new IdType("Observation/C")).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
 
 	/**
 	 * See #503
