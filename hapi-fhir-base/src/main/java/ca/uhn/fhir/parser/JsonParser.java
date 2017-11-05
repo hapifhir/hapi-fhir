@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_DATATYPE;
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
+import java.lang.reflect.Method;
 
 /**
  * This class is the FHIR JSON parser/encoder. Users should not interact with this class directly, but should use
@@ -705,6 +706,21 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			if (isNotBlank(contentAsBase64)) {
 				write(theEventWriter, "content", contentAsBase64);
 			}
+                        try {
+                            Method getSC = bin.getClass().getMethod("getSecurityContext");
+                            Object securityContext = getSC.invoke(bin);
+                            if (securityContext != null) {
+                                Method getRef = securityContext.getClass().getMethod("getReference");
+                                String securityContextRef = (String) getRef.invoke(securityContext);
+                                if (securityContextRef != null) {
+                                    beginObject(theEventWriter, "securityContext");
+                                    writeOptionalTagWithTextNode(theEventWriter, "reference", securityContextRef);
+                                    theEventWriter.endObject();
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 		} else {
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, theContainedResource, theSubResource, new CompositeChildElement(resDef, theSubResource));
 		}

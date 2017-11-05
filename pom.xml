@@ -366,6 +366,10 @@
 			<id>patrick-werner</id>
 			<name>Patrick Werner</name>
 		</developer>
+		<developer>
+			<id>malcolmm83</id>
+			<name>Malcolm McRoberts</name>
+		</developer>
 	</developers>
 
 	<licenses>

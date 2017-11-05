@@ -170,6 +170,11 @@
 				DSTU2-hl7org and DSTU2.1 structures did not copy resource IDs when invoking 
 				copyValues(). Thanks to Clayton Bodendein for the pull request!
 			</action>
+			<action type="fix" issue="734">
+				When encoding a Binary resource, the Binary.securityContext field
+				was not encoded correctly. Thanks to Malcolm McRoberts for the pull
+				request with fix and test case!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
