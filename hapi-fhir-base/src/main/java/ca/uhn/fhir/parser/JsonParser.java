@@ -734,6 +734,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		beginArray(theEventWriter, arrayName);
 		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> key : extensions) {
 			ExtensionDt extension = (ExtensionDt) key.getValue();
+			if (!extension.getAllUndeclaredExtensions().isEmpty()) {
+				throw new IllegalArgumentException("Sub-extensions on metadata isn't supported");
+			}
 			theEventWriter.beginObject();
 			writeOptionalTagWithTextNode(theEventWriter, "url", extension.getUrl());
 			String extensionDatatype = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildNameByDatatype(extension.getValue().getClass());
