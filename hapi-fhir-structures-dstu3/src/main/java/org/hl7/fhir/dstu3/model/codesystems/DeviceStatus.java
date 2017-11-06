@@ -39,19 +39,19 @@ public enum DeviceStatus {
         /**
          * The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.
          */
-        ACTIVE, 
+        ACTIVE,
         /**
          * The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.
          */
-        INACTIVE, 
+        INACTIVE,
         /**
          * The Device was entered in error and voided.
          */
-        ENTEREDINERROR, 
+        ENTEREDINERROR,
         /**
          * The status of the device has not been determined.
          */
-        UNKNOWN, 
+        UNKNOWN,
         /**
          * added to help the parsers
          */
