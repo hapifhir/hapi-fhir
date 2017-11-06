@@ -400,7 +400,6 @@
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.11</phloc_commons_version>
 		<spring_version>5.0.0.RELEASE</spring_version>
@@ -1118,7 +1117,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.0.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
@@ -1141,7 +1140,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
