@@ -125,6 +125,7 @@
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
+			<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -137,6 +138,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 		</plugins>
 		<resources>
 			<resource>
