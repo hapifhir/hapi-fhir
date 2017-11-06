@@ -1719,29 +1719,25 @@ public class JsonParserDstu2Test {
 		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier", "SomeValue");
 		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier2", "SomeValue2");
 
-		String json = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedureRequest);
+		String json = ourCtx.newJsonParser().encodeResourceToString(procedureRequest);
 
 		// @formatter:off
-		assertThat(json, stringContainsInOrder("\"meta\": {",
-			"\"extension\": [", "{",
-			"\"url\": \"http://someurl.com\",",
-			"\"valueString\": \"SomeValue\"",
-			"},",
-			"{",
-			"\"url\": \"http://someurl2.com\",",
-			"\"valueString\": \"SomeValue2\"",
-			"}",
-			"],",
-			"\"modifierExtension\": [",
-			"{",
-			"\"url\": \"http://someurl.com\",",
-			"\"valueString\": \"SomeValue\"",
-			"},",
-			"{",
-			"\"url\": \"http://someurl2.com\",",
-			"\"valueString\": \"SomeValue2\"",
-			"}",
-			"]"));
+		assertThat(json, stringContainsInOrder(
+			"\"meta\":{",
+			"\"extension\":[{",
+			"\"url\":\"http://someurl.com\",",
+			"\"valueString\":\"SomeValue\"",
+			"},{",
+			"\"url\":\"http://someurl2.com\",",
+			"\"valueString\":\"SomeValue2\"",
+			"}],",
+			"\"modifierExtension\":[{",
+			"\"url\":\"http://someurl.com/modifier\",",
+			"\"valueString\":\"SomeValue\"",
+			"},{",
+			"\"url\":\"http://someurl.com/modifier2\",",
+			"\"valueString\":\"SomeValue2\"",
+			"}]"));
 		// @formatter:on
 	}
 

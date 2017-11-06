@@ -721,7 +721,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		writeMetadataExtensions(extensionKeys, "extension", theEventWriter);
-		writeMetadataExtensions(extensionKeys, "modifierExtension", theEventWriter);
+		writeMetadataExtensions(modifierExtensionKeys, "modifierExtension", theEventWriter);
 	}
 
 	private void writeMetadataExtensions(List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensions, String arrayName, JsonLikeWriter theEventWriter) throws IOException {
