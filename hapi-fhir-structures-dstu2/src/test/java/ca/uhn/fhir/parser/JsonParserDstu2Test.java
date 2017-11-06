@@ -1745,6 +1745,17 @@ public class JsonParserDstu2Test {
 		// @formatter:on
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testCannotEncodeSubextensionsOnMeta() {
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setStatus(ProcedureRequestStatusEnum.ACCEPTED);
+		ExtensionDt parent = new ExtensionDt(false, "#parent");
+		parent.addUndeclaredExtension(new ExtensionDt(false, "#child", new DurationDt().setValue(123)));
+		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(parent.getUrl()), parent);
+
+		String json = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedureRequest);
+	}
+
 	private void addExtensionResourceMetadataKeyToResource(BaseResource resource, boolean isModifier, String url, String value) {
 		ExtensionDt extensionDt = new ExtensionDt(isModifier, url, new StringDt(value));
 		resource.getResourceMetadata()
