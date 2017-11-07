@@ -19,11 +19,12 @@ public class BinaryUtil {
 	public static IBaseReference getSecurityContext(FhirContext theCtx, IBaseBinary theBinary) {
 		RuntimeResourceDefinition def = theCtx.getResourceDefinition("Binary");
 		BaseRuntimeChildDefinition child = def.getChildByName("securityContext");
-
-		List<IBase> values = child.getAccessor().getValues(theBinary);
 		IBaseReference retVal = null;
-		if (values.size() > 0) {
-			retVal = (IBaseReference) values.get(0);
+		if (child != null) {
+			List<IBase> values = child.getAccessor().getValues(theBinary);
+			if (values.size() > 0) {
+				retVal = (IBaseReference) values.get(0);
+			}
 		}
 		return retVal;
 	}

@@ -176,9 +176,24 @@
 				request with fix and test case!
 			</action>
 			<action type="add">
+				Bundle resources did not have their version encoded when serializing
+				in FHIR resource (XML/JSON) format.
+			</action>
+			<action type="add">
 				The Binary resource endpoint now supports the `X-Security-Context` header when
 				reading or writing Binary contents using their native Content-Type (i.e exchanging
 				the raw binary with the server, as opposed to exchanging a FHIR resource).
+			</action>
+			<action type="fix">
+				When paging through multiple pages of search results, if the 
+				client had requested a subset of resources to be returned using the
+				<![CDATA[<code>_elements</code>]]> parameter, the elements list
+				was lost after the first page of results.
+				In addition, elements will not remove elements from
+				search/history Bundles (i.e. elements from the Bundle itself, as opposed
+				to elements in the entry resources) unless the Bundle elements are
+				explicitly listed, e.g. <![CDATA[<code>_include=Bundle.total</code>]]>.
+				Thanks to @parisni for reporting!
 			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">

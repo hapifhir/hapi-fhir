@@ -1499,7 +1499,7 @@ public class JsonParserDstu2_1Test {
 
 		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		String expected = "{\"resourceType\":\"Binary\",\"id\":\"11\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}";
+		String expected = "{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}";
 		ourLog.info("Expected: {}", expected);
 		ourLog.info("Actual  : {}", val);
 		assertEquals(expected, val);

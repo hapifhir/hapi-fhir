@@ -332,7 +332,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 
 		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
-		bundleFactory.addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
+		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;
