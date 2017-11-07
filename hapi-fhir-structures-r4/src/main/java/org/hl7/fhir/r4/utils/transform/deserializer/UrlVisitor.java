@@ -166,9 +166,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
   @Override
   public Object visitPath(UrlJavaParser.PathContext context) {
     ArrayList<String> values = new ArrayList<String>();
-    String[] retVals = new String[context.stringVal().size()];
     if (context.stringVal() != null) {
-      int count = context.stringVal().size();
       for (ParseTree treeItem : context.stringVal()) {
         values.add((String) this.visit(treeItem));
       }

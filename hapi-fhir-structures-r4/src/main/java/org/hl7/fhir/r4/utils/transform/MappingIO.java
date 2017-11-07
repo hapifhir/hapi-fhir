@@ -62,7 +62,7 @@ public class MappingIO {
    * Constructor, populates the mappingFile object directly
    *
    * @param mappingFile file object to set the mapping file
-   * @throws Exception
+   * @throws Exception if file is invalid
    */
   public MappingIO(File mappingFile) throws Exception {
     this.setMappingFile(mappingFile);
@@ -74,7 +74,7 @@ public class MappingIO {
   /**
    * Constructor using a string path for the mapping file
    *
-   * @param filePath string represntation of the file
+   * @param filePath string representation of the file
    * @throws Exception if anything goes wrong on creation of processor or map handler
    */
   public MappingIO(String filePath) throws Exception {
@@ -87,7 +87,7 @@ public class MappingIO {
   /**
    * gets the file object for the StructureMap
    *
-   * @return
+   * @return the file value
    */
   public File getMappingFile() {
     return this.mappingFile;
@@ -97,7 +97,7 @@ public class MappingIO {
    * Sets and validates the mapping file
    *
    * @param mappingFile the mappingFile
-   * @throws IOException
+   * @throws IOException if file isn't found
    */
   public void setMappingFile(File mappingFile) throws IOException {
     if (!mappingFile.getAbsolutePath().endsWith(".map") && mappingFile.exists()) {
@@ -183,6 +183,9 @@ public class MappingIO {
     return this.mapHandler.getStructureMap();
   }
 
+  /**
+   * Safely closes and makes null all objects in this class
+   */
   public void close() {
     this.mappingText = null;
     this.mapHandler = null;

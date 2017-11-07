@@ -1,7 +1,3 @@
-//
-// Translated by Java2J (http://www.cs2j.com): 8/18/2017 3:07:36 PM
-//
-
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
@@ -75,7 +71,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * Parse grammar rule keyMap.
    * This will trigger a Executor.Map callback.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return null
    */
   @Override
@@ -94,7 +90,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule structureMap.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UrlData instance
    */
   @Override
@@ -106,7 +102,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * Parse grammar rule keyImports.
    * This will trigger a Executor.Imports callback.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return null
    */
   @Override
@@ -124,7 +120,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule structureDefinition.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UrlData instance
    */
   @Override
@@ -136,7 +132,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * Parse grammar rule identifier
    * This verifies that thwe identifier is not too long.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String identifier
    */
   @Override
@@ -151,7 +147,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule quotedIdentifier
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String without the surrounding quotes
    */
   @Override
@@ -164,7 +160,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule quotedString
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String without the surrounding quotes
    */
   @Override
@@ -177,7 +173,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule quotedStringWQuotes
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String without the surrounding quotes
    */
   @Override
@@ -189,7 +185,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * Parse grammar rule int
    * created.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return Int32 value
    */
   @Override
@@ -203,7 +199,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * grammars. Here we pass the url portion to this seperate parser and return the UrlData
    * created.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UrlData instance
    */
   @Override
@@ -223,7 +219,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * Parse grammar rule keyUses.
    * This will trigger a Executor.Uses callback.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return null
    */
   @Override
@@ -242,7 +238,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule keyUsesName.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return null
    */
   @Override
@@ -253,7 +249,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule keyUsesNameSource.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UseNames.Source
    */
   @Override
@@ -264,7 +260,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule keyUsesNameTarget.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UseNames.Target
    */
   @Override
@@ -275,7 +271,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule keyUsesNameQueried.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UseNames.Queried
    */
   @Override
@@ -286,7 +282,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule keyUsesNameProduced.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return UseNames.Produced
    */
   @Override
@@ -297,7 +293,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupStart.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return GroupTypes
    */
   @Override
@@ -325,7 +321,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupEnd.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return GroupTypes
    */
   @Override
@@ -341,7 +337,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupExtends.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String> of group
    */
   @Override
@@ -352,7 +348,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupType.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return GroupTypes
    */
   @Override
@@ -363,7 +359,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupTypeType.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return GroupTypes.Type
    */
   @Override
@@ -374,7 +370,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule groupTypeTypeTypes.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return GroupTypes.TypeTypes
    */
   @Override
@@ -385,7 +381,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule GroupInput.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapGroupInput
    */
   @Override
@@ -401,7 +397,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule GroupInputModes.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapInputModes
    */
   @Override
@@ -412,7 +408,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule GroupInputModesSource.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapInputModes.Source
    */
   @Override
@@ -423,7 +419,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule GroupInputModesTarget.
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapInputModes.Target
    */
   @Override
@@ -442,13 +438,13 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   @Override
   public Object visitGroupCallParameters(FhirMapJavaParser.GroupCallParametersContext context) {
     return null;
-    //Todo:not implemented
+    //TODO:not implemented
   }
 
   /**
    * Parse grammar rule ruleInstance
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return null
    */
   @Override
@@ -470,7 +466,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetReference
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -501,7 +497,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTruncate
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -525,7 +521,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCast
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -548,7 +544,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetAs
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -564,7 +560,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetAssign
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -592,7 +588,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCopy
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -614,7 +610,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCreate
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -642,7 +638,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslate
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -681,7 +677,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslateOutputCode
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -692,7 +688,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslateOutputSystem
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -703,7 +699,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslateOutputDisplay
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -714,7 +710,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslateOutputCoding
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -725,7 +721,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetTranslateOutputCodeableConcept
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -736,7 +732,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCp
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -762,7 +758,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetAppend
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -784,7 +780,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetAppendSources
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -802,7 +798,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetC
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -839,7 +835,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCC1
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -861,7 +857,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetCC2
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -897,7 +893,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetContext
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -908,7 +904,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetVariable
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -919,7 +915,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetEscape
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -953,6 +949,11 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
     return null;
   }
 
+  /**
+   * Parse grammar rule ruleTargetExtension1 (no arguments)
+   * @param context contextual value containing the data to be processed
+   * @return null
+   */
   @Override
   public Object visitRuleTargetExtension1(FhirMapJavaParser.RuleTargetExtension1Context context) {
     try {
@@ -967,6 +968,11 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
     return null;
   }
 
+  /**
+   * Parse grammar rule ruleTargetExtension2 (with arguments arguments)
+   * @param context contextual value containing the data to be processed
+   * @return null
+   */
   @Override
   public Object visitRuleTargetExtension2(FhirMapJavaParser.RuleTargetExtension2Context context) {
     try {
@@ -994,7 +1000,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetEvaluate
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1026,7 +1032,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetId
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1053,7 +1059,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetPointer
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1078,7 +1084,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetQty1
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1106,7 +1112,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetQty2
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1142,7 +1148,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetQty3
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1168,7 +1174,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetUuid
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1190,7 +1196,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleTargetEscape
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1217,7 +1223,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleName
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1235,7 +1241,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleSource
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapRuleType instance
    */
   @Override
@@ -1290,7 +1296,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleType
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return FhirMapRuleType instance
    */
   @Override
@@ -1318,7 +1324,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * #! Verify format of default value. Currently accepts an identifier.
    * #! Also write test for this...
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String
    */
   @Override
@@ -1339,7 +1345,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleVariable
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String
    */
   @Override
@@ -1350,7 +1356,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleContext
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return List<String>
    */
   @Override
@@ -1367,7 +1373,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   /**
    * Parse grammar rule ruleContextElement
    *
-   * @param context
+   * @param context contextual value containing the data to be processed
    * @return String
    */
   @Override

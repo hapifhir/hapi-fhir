@@ -4,7 +4,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
- * This class provides an empty implementation of {@link UrlVisitor},
+ * This class provides an empty implementation of {@link UrlJavaVisitor},
  * which can be extended to create a visitor which only needs to handle a subset
  * of the available methods.
  *

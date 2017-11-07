@@ -20,77 +20,181 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class BaseRunner {
 
+  /**
+   * Worker context
+   */
   private IWorkerContext worker;
+  /**
+   * Structure map object
+   */
   private StructureMap structureMap;
+  /**
+   * Map of ids to corresponding integers
+   */
   private Map<String, Integer> ids = new HashMap<String, Integer>();
+  /**
+   * Transformation service interface
+   */
   private ITransformerServices services;
+  /**
+   * Pathing engine
+   */
   private FHIRPathEngine fhirPathEngine;
+  /**
+   * Libary of structure maps
+   */
   private Map<String, StructureMap> library;
 
+  /**
+   * get accessor for worker
+   *
+   * @return the worker object
+   */
   public IWorkerContext getWorker() {
     return worker;
   }
 
+  /**
+   * set accessor for worker
+   *
+   * @param worker worker object
+   */
   public void setWorker(IWorkerContext worker) {
     this.worker = worker;
   }
 
+  /**
+   * get accessor for structureMap object
+   *
+   * @return the structureMap object
+   */
   public StructureMap getStructureMap() {
     return structureMap;
   }
 
+  /**
+   * set accessor for structureMap object
+   *
+   * @param structureMap structureMap object
+   */
   public void setStructureMap(StructureMap structureMap) {
     this.structureMap = structureMap;
   }
 
+  /**
+   * get accessor for ids
+   *
+   * @return ids map
+   */
   public Map<String, Integer> getIds() {
     return ids;
   }
 
+  /**
+   * set accessor for ids
+   *
+   * @param ids map value for ids
+   */
   public void setIds(Map<String, Integer> ids) {
     this.ids = ids;
   }
 
+  /**
+   * get accessor for services
+   *
+   * @return services
+   */
   public ITransformerServices getServices() {
     return services;
   }
 
+  /**
+   * set accessor for services
+   *
+   * @param services any object that implements ITransformationServices
+   */
   public void setServices(ITransformerServices services) {
     this.services = services;
   }
 
+  /**
+   * get accessor for fhirPathEngine
+   *
+   * @return the fhirPathEngine object
+   */
   public FHIRPathEngine getFhirPathEngine() {
     return fhirPathEngine;
   }
 
+  /**
+   * set accessor for fhirPathEngine
+   *
+   * @param fhirPathEngine any FHIRPathEngine object
+   */
   public void setFhirPathEngine(FHIRPathEngine fhirPathEngine) {
     this.fhirPathEngine = fhirPathEngine;
   }
 
+  /**
+   * get accessor for the library map
+   *
+   * @return the library object
+   */
   public Map<String, StructureMap> getLibrary() {
     return library;
   }
 
+  /**
+   * set accessor for library map
+   *
+   * @param library any Map object that uses Strings as keys and has StructureMap objects as values
+   */
   public void setLibrary(Map<String, StructureMap> library) {
     this.library = library;
   }
 
-
+  /**
+   * instantiates the library object.
+   */
   public void initializeLibrary() {
     library = new HashMap<String, StructureMap>();
   }
 
+  /**
+   * logging call
+   *
+   * @param cnt message for log
+   */
   protected void log(String cnt) {
     if (getServices() != null)
       getServices().log(cnt);
   }
 
+  /**
+   * Inputs a variable into an Xhtml Node
+   *
+   * @param vars VariablesForProfiling object
+   * @param inp  Input Component
+   * @param mode Mode of the variable
+   * @param xs   target node
+   */
   protected void noteInput(VariablesForProfiling vars, StructureMap.StructureMapGroupInputComponent inp, VariableMode mode, XhtmlNode xs) {
     VariableForProfiling v = vars.get(mode, inp.getName());
     if (v != null)
       xs.addText("Input: " + v.getProperty().getPath());
   }
 
+  /**
+   * creates a Profile using the StructureMap and a set of Structure Definitions
+   *
+   * @param map       StructureMap object
+   * @param profiles  list of profiles
+   * @param prop      Property with type
+   * @param sliceName Slice Name
+   * @param ctxt      context base
+   * @return PropertyWithType
+   * @throws DefinitionException if one of the arguments contains an invalid value
+   */
   protected PropertyWithType createProfile(StructureMap map, List<StructureDefinition> profiles, PropertyWithType prop, String sliceName, Base ctxt) throws DefinitionException {
 
     if (prop.getBaseProperty().getDefinition().getPath().contains("."))
@@ -139,6 +243,14 @@ public abstract class BaseRunner {
     return prop;
   }
 
+  /**
+   * Builds a Coding structure definition
+   *
+   * @param uri  uri system of the coding
+   * @param code code value of the coding
+   * @return new Coding object
+   * @throws FHIRException if either of the values are invalid
+   */
   protected Coding buildCoding(String uri, String code) throws FHIRException {
     // if we can get this as a valueSet, we will
     String system = null;
@@ -173,11 +285,27 @@ public abstract class BaseRunner {
     return new Coding().setSystem(system).setCode(code).setDisplay(display);
   }
 
+  /**
+   * Builds a coding object through instantiation through Type objects
+   *
+   * @param value1 first PrimitiveType value
+   * @param value2 second PrimitiveType value
+   * @return new Coding object
+   */
   @SuppressWarnings("rawtypes")
   protected Coding buildCoding(Type value1, Type value2) {
     return new Coding().setSystem(((PrimitiveType) value1).asStringValue()).setCode(((PrimitiveType) value2).asStringValue());
   }
 
+  /**
+   * Attempts to resolve a group reference call
+   *
+   * @param map    the StructureMap
+   * @param source Source Component
+   * @param name   name of the group
+   * @return Resolved group reference
+   * @throws FHIRException if any arguments contain invalid values
+   */
   protected ResolvedGroup resolveGroupReference(StructureMap map, StructureMap.StructureMapGroupComponent source, String name) throws FHIRException {
     String kn = "ref^" + name;
     if (source.hasUserData(kn))
@@ -224,6 +352,12 @@ public abstract class BaseRunner {
     return res;
   }
 
+  /**
+   * Searches the library to find a map of the same name input
+   *
+   * @param value name of the map
+   * @return list of StructureMaps with the name desired
+   */
   protected List<StructureMap> findMatchingMaps(String value) {
     List<StructureMap> res = new ArrayList<StructureMap>();
     if (value.contains("*")) {
@@ -247,10 +381,26 @@ public abstract class BaseRunner {
     return res;
   }
 
+  /**
+   * tests to see if the URL matches
+   *
+   * @param mask mask of the URL to be matched
+   * @param url  url being tested
+   * @return if there is a match
+   */
   public boolean urlMatches(String mask, String url) {
     return url.length() > mask.length() && url.startsWith(mask.substring(0, mask.indexOf("*"))) && url.endsWith(mask.substring(mask.indexOf("*") + 1));
   }
 
+  /**
+   * returns a non-null string of variables
+   *
+   * @param vars      Variables to get the base
+   * @param parameter parameter component
+   * @param message   message of context
+   * @return constructed string with the primitive value
+   * @throws FHIRException if the base does not have a value of
+   */
   protected String getParamStringNoNull(Variables vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter, String message) throws FHIRException {
     Base b = getParam(vars, parameter);
     if (b == null)
@@ -260,6 +410,14 @@ public abstract class BaseRunner {
     return b.primitiveValue();
   }
 
+  /**
+   * Gets a parameter string, even if its null
+   *
+   * @param vars      Variables to get the base
+   * @param parameter the target parameter
+   * @return
+   * @throws DefinitionException
+   */
   protected String getParamString(Variables vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) throws DefinitionException {
     Base b = getParam(vars, parameter);
     if (b == null || !b.hasPrimitiveValue())
@@ -267,7 +425,12 @@ public abstract class BaseRunner {
     return b.primitiveValue();
   }
 
-
+  /**
+   * @param vars
+   * @param parameter
+   * @return
+   * @throws DefinitionException
+   */
   protected Base getParam(Variables vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) throws DefinitionException {
     Type p = parameter.getValue();
     if (!(p instanceof IdType))

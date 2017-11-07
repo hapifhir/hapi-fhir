@@ -50,8 +50,8 @@ public class StructureMapGroupHandler extends BaseRunner {
   public void analyzeGroup(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
     initialize(context, result);
     log(indent + "Analyse Group : " + getRuleGroup().getName());
-    // todo: extends
-    // todo: check inputs
+    // TODO: extends
+    // TODO: check inputs
     XhtmlNode tr = result.getSummary().addTag("tr").setAttribute("class", "diff-title"); //TODO Find a cleaner way to handle documentation during an execution
     XhtmlNode xs = tr.addTag("td");
     XhtmlNode xt = tr.addTag("td");
@@ -69,7 +69,7 @@ public class StructureMapGroupHandler extends BaseRunner {
 
   protected void executeGroup(String indent, TransformContext context, Variables vars) throws FHIRException {
     log(indent + "Group : " + getRuleGroup().getName());
-    // todo: check inputs
+    // TODO: check inputs
     if (getRuleGroup().hasExtends()) {
       ResolvedGroup rg = resolveGroupReference(getStructureMap(), getRuleGroup(), getRuleGroup().getExtends());
       StructureMapGroupHandler groupRunner = new StructureMapGroupHandler(rg.targetMap, getTransformationEngine(), rg.target);
@@ -112,8 +112,7 @@ public class StructureMapGroupHandler extends BaseRunner {
    * @param map  The StructureMap representing this transformation
    * @param type The type declared for the given source or target transformation parameter
    * @param mode Source or Target
-   * @return
-   * @throws Exception Error thrown when no structure definition cannot be found for a map import or for the source or target type specified
+   * @return PropertyWithType value
    */
   private PropertyWithType resolveType(IWorkerContext worker, StructureMap map, String type, StructureMap.StructureMapInputMode mode) {
     for (StructureMap.StructureMapStructureComponent imp : map.getStructure()) {

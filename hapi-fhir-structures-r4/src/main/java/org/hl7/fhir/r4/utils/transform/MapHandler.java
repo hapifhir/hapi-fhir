@@ -271,15 +271,16 @@ public class MapHandler implements IFhirMapExecutor {
   }
 
   /**
-   * Not soundly implemented.
+   * Not soundly implemented, and not implemented .
    *
    * @param id     Group name
    * @param params parameters to go into the gorup
    */
   @Override
   public void groupCall(String id, List<String> params) {
-    //TODO: is there a property in the mapping that allows another group to be target on a call
-    return;
+    this.currentTarget = new StructureMap.StructureMapGroupRuleTargetComponent();
+//    this.currentTarget.setContext(context.get(0));
+//    this.currentTarget.setElement(context.get(1));
   }
 
   /**
@@ -361,7 +362,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates a target for a Copy transform, adds it to the top rule on the stack
    *
    * @param context        Target context
-   * @param copyVariable   Varaible or value copied
+   * @param copyVariable   Variable or value copied
    * @param targetVariable Variable that will hold the result of the transform
    * @throws Exception if it fails to populate correctly
    */

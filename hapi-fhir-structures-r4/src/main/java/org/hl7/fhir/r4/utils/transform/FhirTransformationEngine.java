@@ -40,17 +40,35 @@ import java.util.*;
  * analyse(appInfo, map) - generate profiles and other analysis artifacts for the targets of the transform
  * map generateMapFromMappings(StructureDefinition) - build a mapping from a structure definition with loigcal mappings
  *
- * @author Grahame Grieve
+ * @author Grahame Grieve, modified by Claude Nanjo
  */
 public class FhirTransformationEngine extends BaseRunner {
 
+  /**
+   *
+   */
   public static final String MAP_WHERE_CHECK = "map.where.check";
+  /**
+   *
+   */
   public static final String MAP_WHERE_EXPRESSION = "map.where.expression";
+  /**
+   *
+   */
   public static final String MAP_SEARCH_EXPRESSION = "map.search.expression";
+  /**
+   *
+   */
   public static final String MAP_EXPRESSION = "map.transform.expression";
 
+  /**
+   *
+   */
   private ProfileKnowledgeProvider pkp;
 
+  /**
+   * @param worker
+   */
   public FhirTransformationEngine(IWorkerContext worker) {
     super();
     setWorker(worker);
@@ -58,6 +76,10 @@ public class FhirTransformationEngine extends BaseRunner {
     getFhirPathEngine().setHostServices(new FFHIRPathHostServices(this));
   }
 
+  /**
+   * @param worker
+   * @param services
+   */
   public FhirTransformationEngine(IWorkerContext worker, ITransformerServices services) {
     this(worker);
     this.initializeLibrary();
@@ -68,21 +90,41 @@ public class FhirTransformationEngine extends BaseRunner {
     setServices(services);
   }
 
+  /**
+   * @param worker
+   * @param library
+   */
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library) {
     this(worker);
     setLibrary(library);
   }
 
+  /**
+   * @param worker
+   * @param library
+   * @param services
+   */
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services) {
     this(worker, library);
     setServices(services);
   }
 
+  /**
+   * @param worker
+   * @param library
+   * @param services
+   * @param pkp
+   */
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services, ProfileKnowledgeProvider pkp) {
     this(worker, library, services);
     this.pkp = pkp;
   }
 
+  /**
+   * @param map
+   * @return
+   * @throws FHIRException
+   */
   public StructureDefinition getTargetType(StructureMap map) throws FHIRException {
     boolean found = false;
     StructureDefinition res = null;
@@ -101,6 +143,13 @@ public class FhirTransformationEngine extends BaseRunner {
     return res;
   }
 
+  /**
+   * @param appInfo
+   * @param source
+   * @param map
+   * @param target
+   * @throws FHIRException
+   */
   public void transform(Object appInfo, Base source, StructureMap map, Base target) throws FHIRException {
     TransformContext context = new TransformContext(appInfo);
     log("Start Transform " + map.getUrl());
@@ -115,6 +164,13 @@ public class FhirTransformationEngine extends BaseRunner {
       ((Element) target).sort();
   }
 
+  /**
+   * @param g
+   * @param mode
+   * @param def
+   * @return
+   * @throws DefinitionException
+   */
   private String getInputName(StructureMapGroupComponent g, StructureMapInputMode mode, String def) throws DefinitionException {
     String name = null;
     for (StructureMapGroupInputComponent inp : g.getInput()) {
@@ -127,7 +183,14 @@ public class FhirTransformationEngine extends BaseRunner {
     return name == null ? def : name;
   }
 
-
+  /**
+   * @param context
+   * @param map
+   * @param vars
+   * @param parameter
+   * @return
+   * @throws FHIRException
+   */
   protected Base translate(TransformContext context, StructureMap map, Variables vars, List<StructureMapGroupRuleTargetParameterComponent> parameter) throws FHIRException {
     Base src = getParam(vars, parameter.get(0));
     String id = getParamString(vars, parameter.get(1));
@@ -135,10 +198,17 @@ public class FhirTransformationEngine extends BaseRunner {
     return translate(context, map, src, id, fld);
   }
 
+  /**
+   *
+   */
   private class SourceElementComponentWrapper {
     private ConceptMapGroupComponent group;
     private SourceElementComponent comp;
 
+    /**
+     * @param group
+     * @param comp
+     */
     public SourceElementComponentWrapper(ConceptMapGroupComponent group, SourceElementComponent comp) {
       super();
       this.group = group;
@@ -146,6 +216,15 @@ public class FhirTransformationEngine extends BaseRunner {
     }
   }
 
+  /**
+   * @param context
+   * @param map
+   * @param source
+   * @param conceptMapUrl
+   * @param fieldToReturn
+   * @return
+   * @throws FHIRException
+   */
   public Base translate(TransformContext context, StructureMap map, Base source, String conceptMapUrl, String fieldToReturn) throws FHIRException {
     Coding src = new Coding();
     if (source.isPrimitive()) {
@@ -320,11 +399,23 @@ public class FhirTransformationEngine extends BaseRunner {
   }
 
 
+  /**
+   * @param url
+   * @return
+   */
   private String tail(String url) {
     return url.substring(url.lastIndexOf("/") + 1);
   }
 
-
+  /**
+   * @param b
+   * @param id
+   * @param indent
+   * @param sd
+   * @param ed
+   * @param inner
+   * @throws DefinitionException
+   */
   private void addChildMappings(StringBuilder b, String id, String indent, StructureDefinition sd, ElementDefinition ed, boolean inner) throws DefinitionException {
     boolean first = true;
     List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);
@@ -345,7 +436,11 @@ public class FhirTransformationEngine extends BaseRunner {
 
   }
 
-
+  /**
+   * @param ed
+   * @param id
+   * @return
+   */
   private String getMapping(ElementDefinition ed, String id) {
     for (ElementDefinitionMappingComponent map : ed.getMapping())
       if (id.equals(map.getIdentity()))
@@ -353,7 +448,10 @@ public class FhirTransformationEngine extends BaseRunner {
     return null;
   }
 
-
+  /**
+   * @param sd
+   * @return
+   */
   private String getLogicalMappingId(StructureDefinition sd) {
     for (StructureDefinitionMappingComponent map : sd.getMapping()) {
       if ("http://hl7.org/fhir/logical".equals(map.getUri()))

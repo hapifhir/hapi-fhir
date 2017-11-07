@@ -1,7 +1,7 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 /**
- * Stored Antls Url rule parsed data
+ * Stored ANTLR Url rule parsed data
  *
  * @author Travis Lukach
  * (c) Applicadia LLC.
@@ -39,7 +39,7 @@ public class UrlData {
   /**
    * Overload of ToString. Returns complete formatter url.
    *
-   * @return
+   * @return string representation of the object.
    */
   public String toString() {
     try {
@@ -72,13 +72,7 @@ public class UrlData {
    * @throws Exception if either values for comparison are invalid
    */
   private static int compare(int a, int b) throws Exception {
-    if (a > b) {
-      return 1;
-    }
-    if (a < b) {
-      return -1;
-    }
-    return 0;
+    return Integer.compare(a, b);
   }
 
   /**

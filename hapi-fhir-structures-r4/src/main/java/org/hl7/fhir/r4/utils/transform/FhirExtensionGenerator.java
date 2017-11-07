@@ -13,6 +13,16 @@ import java.util.List;
  */
 public class FhirExtensionGenerator {
 
+  /**
+   * @param name
+   * @param contexts
+   * @param shortDescription
+   * @param definition
+   * @param min
+   * @param max
+   * @param type
+   * @return
+   */
   public StructureDefinition generateExtensionStructureDefinition(String name, List<StringType> contexts, String shortDescription, String definition, int min, String max, String type) {
     StructureDefinition extensionStructureDefinition = new StructureDefinition();
     extensionStructureDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -30,6 +40,17 @@ public class FhirExtensionGenerator {
     return extensionStructureDefinition;
   }
 
+  /**
+   * @param addExtensionSlicingDefinition
+   * @param rootPath
+   * @param extensionId
+   * @param shortDescription
+   * @param definition
+   * @param min
+   * @param max
+   * @param extensionUrl
+   * @return
+   */
   public List<ElementDefinition> generateExtensionElementDefinitions(boolean addExtensionSlicingDefinition, String rootPath, String extensionId, String shortDescription, String definition, int min, String max, String extensionUrl) {
     List<ElementDefinition> extensionElementDefinitions = new ArrayList<>();
     if (addExtensionSlicingDefinition) {
@@ -51,12 +72,28 @@ public class FhirExtensionGenerator {
     return extensionElementDefinitions;
   }
 
+  /**
+   * @param extensionElementDefinition
+   * @param extensionName
+   * @param shortDescription
+   * @param definition
+   * @param min
+   * @param max
+   * @param type
+   */
   protected void populateDifferential(StructureDefinition extensionElementDefinition, String extensionName, String shortDescription, String definition, int min, String max, String type) {
     populateExtensionElement(extensionElementDefinition, shortDescription, definition, min, max);
     populateExtensionUrlElement(extensionElementDefinition, extensionName);
     populateExtensionValueElement(extensionElementDefinition, type, type, shortDescription, definition);
   }
 
+  /**
+   * @param extensionStructureDefinition
+   * @param shortDescription
+   * @param definition
+   * @param min
+   * @param max
+   */
   private void populateExtensionElement(StructureDefinition extensionStructureDefinition, String shortDescription, String definition, int min, String max) {
     ElementDefinition extension = new ElementDefinition(new StringType("Extension"));
     extension.setId("Extension");
@@ -67,6 +104,10 @@ public class FhirExtensionGenerator {
     extensionStructureDefinition.getDifferential().addElement(extension);
   }
 
+  /**
+   * @param extensionStructureDefinition
+   * @param extensionName
+   */
   private void populateExtensionUrlElement(StructureDefinition extensionStructureDefinition, String extensionName) {
     ElementDefinition extension = new ElementDefinition(new StringType("Extension.url"));
     extension.setId("Extension.url");
@@ -75,6 +116,13 @@ public class FhirExtensionGenerator {
     extensionStructureDefinition.getDifferential().addElement(extension);
   }
 
+  /**
+   * @param extensionStructureDefinition
+   * @param type
+   * @param typeSuffix
+   * @param shortDescription
+   * @param definition
+   */
   private void populateExtensionValueElement(StructureDefinition extensionStructureDefinition, String type, String typeSuffix, String shortDescription, String definition) {
     ElementDefinition extension = new ElementDefinition(new StringType("Extension.value" + typeSuffix));
     extension.setId("Extension.value[x]:value" + typeSuffix);

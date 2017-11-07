@@ -20,7 +20,7 @@ public class UrlLogin {
   /**
    * Compare this url to another one.
    *
-   * @return
+   * @return integer value of the compare
    */
   public static int compare(UrlLogin a, UrlLogin b) throws Exception {
     if ((a == null) && (b == null)) {

@@ -40,6 +40,7 @@ public class UrlProcessor {
    *
    * @param text Adl text
    * @return ANTLR parser
+   * @throws Exception if grammar is invalid
    */
   private UrlJavaParser loadGrammar(String text) throws Exception {
     CharBuffer buffer = CharBuffer.allocate(text.length());
@@ -63,7 +64,9 @@ public class UrlProcessor {
   /**
    * Parse Url Definition text.
    *
-   * @param UrlText Url Archetype Text to process
+   * @param UrlText Url Archetype Text to process.
+   * @return UrlData object
+   * @throws Exception if UrlText is invalid
    */
   public UrlData parseUrl(String UrlText) throws Exception {
     UrlJavaParser grammar = this.loadGrammar(UrlText);

@@ -75,7 +75,7 @@ public enum FhirMapUseNames {
   /**
    * Processes a string and returns the corresponding enumerated value based on the inputs
    *
-   * @param value string represnation
+   * @param value string representation
    * @return the corresponding enumerated value
    */
   public static FhirMapUseNames forValue(String value) {

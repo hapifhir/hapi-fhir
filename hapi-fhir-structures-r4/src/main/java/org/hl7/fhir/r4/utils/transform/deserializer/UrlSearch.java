@@ -41,6 +41,7 @@ public class UrlSearch {
    * @param a the first of compared values
    * @param b the other compared value
    * @return the int value of the comparison
+   * @throws Exception on bad UrlSearch values
    */
   public static int compare(UrlSearch a, UrlSearch b) throws Exception {
     int retVal = a.Name.compareTo(b.Name);
