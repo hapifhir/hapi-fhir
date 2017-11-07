@@ -16,7 +16,6 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author Claude Nanjo
  */
 public abstract class BaseRunner {
 

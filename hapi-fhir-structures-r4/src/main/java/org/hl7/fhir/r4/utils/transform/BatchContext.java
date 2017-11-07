@@ -7,8 +7,6 @@ import java.util.Map;
 
 /**
  * Shared context for a set of transformation executions.
- *
- * @author Claude Nanjo
  */
 public class BatchContext {
   /**
