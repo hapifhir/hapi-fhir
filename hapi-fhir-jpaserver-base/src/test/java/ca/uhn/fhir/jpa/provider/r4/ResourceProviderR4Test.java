@@ -3155,11 +3155,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
 
-		assertThat(sw.getMillis(), lessThan(1000L));
-
 		// If this fails under load, try increasing the throttle above
 		assertEquals(null, found.getTotalElement().getValue());
 		assertEquals(1, found.getEntry().size());
+		assertThat(sw.getMillis(), lessThan(1000L));
+
 	}
 
 	@Test
@@ -3214,11 +3214,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
 
-		assertThat(sw.getMillis(), lessThan(1000L));
-
 		// If this fails under load, try increasing the throttle above
 		assertEquals(null, found.getTotalElement().getValue());
 		assertEquals(1, found.getEntry().size());
+		assertThat(sw.getMillis(), lessThan(1000L));
 	}
 
 	@Test
