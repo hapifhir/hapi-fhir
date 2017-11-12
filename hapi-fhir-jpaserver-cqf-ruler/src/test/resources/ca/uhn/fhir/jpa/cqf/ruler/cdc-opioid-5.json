@@ -1,0 +1,144 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "cdc-opioid-guidance",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">CDC Opioid Prescribing Guideline Recommendation #5</div>"
+  },
+  "url": "http://hl7.org/fhir/ig/opioid-cds/PlanDefinition/cdc-opioid-05",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "cdc-opioid-guidance"
+    }
+  ],
+  "version": "0.1.0",
+  "name": "cdc-opioid-05",
+  "title": "CDC Opioid Prescribing Guideline Recommendation #5",
+  "type": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ]
+  },
+  "status": "draft",
+  "date": "2017-04-23",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "When opioids are started, providers should prescribe the lowest effective dosage.",
+  "purpose": "CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.",
+  "usage": "Providers should use caution when prescribing opioids at any dosage, should carefully reassess evidence of individual benefits and risks when considering increasing dosage to ≥50 morphine milligram equivalents (MME)/day, and should avoid increasing dosage to ≥90 MME/day or carefully justify a decision to titrate dosage to >90 MME/day",
+  "topic": [
+    {
+      "text": "Opioid Prescribing"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "display": "CDC guideline for prescribing opioids for chronic pain",
+      "url": "https://guidelines.gov/summaries/summary/50153/cdc-guideline-for-prescribing-opioids-for-chronic-pain---united-states-2016#420"
+    },
+    {
+      "type": "documentation",
+      "display": "MME Conversion Tables",
+      "url": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/OpioidCdsStu3"
+    }
+  ],
+  "action": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqif-strengthOfRecommendation",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/recommendation-strength",
+                "code": "strong",
+                "display": "Strong"
+              }
+            ]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqif-qualityOfEvidence",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/evidence-quality",
+                "code": "low",
+                "display": "Low quality"
+              }
+            ]
+          }
+        }
+      ],
+      "title": "High risk for opioid overdose.",
+      "_title": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "'High risk for opioid overdose - ' + case when MME >= 90 then 'taper now' else 'consider tapering' end"
+          }
+        ]
+      },
+      "description": "Total morphine milligram equivalent (MME) exceeds recommended amount. Taper to less than 50.",
+      "_description": {
+        "fhir_comments": [
+          " TODO: This description needs to include the table for MME? "
+        ],
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "'Total morphine milligram equivalent (MME) is ' + ToString(MME) + '. Taper to less than 50.'"
+          }
+        ]
+      },
+      "documentation": [
+        {
+          "type": "documentation",
+          "display": "CDC guideline for prescribing opioids for chronic pain",
+          "url": "https://guidelines.gov/summaries/summary/50153/cdc-guideline-for-prescribing-opioids-for-chronic-pain---united-states-2016#420"
+        },
+        {
+          "type": "documentation",
+          "display": "MME Conversion Tables",
+          "url": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+        }
+      ],
+      "triggerDefinition": [
+        {
+          "type": "named-event",
+          "eventName": "medication-prescribe"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "description": "Is total MME >= 50?",
+          "language": "text/cql",
+          "expression": "IsMME50OrMore"
+        }
+      ],
+      "groupingBehavior": "visual-group",
+      "selectionBehavior": "exactly-one",
+      "dynamicValue": [
+        {
+          "description": "Dynamic title generation",
+          "expression": "DynamicTitle"
+        },
+        {
+          "description": "Dynamic description generation",
+          "expression": "DynamicDescription"
+        }
+      ]
+    }
+  ]
+}

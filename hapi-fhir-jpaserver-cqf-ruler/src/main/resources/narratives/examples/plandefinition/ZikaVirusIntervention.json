@@ -1,0 +1,217 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "zika-virus-intervention",
+  "contained": [
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "administer-zika-virus-exposure-assessment",
+      "url": "http://example.org/ActivityDefinition/administer-zika-virus-exposure-assessment",
+      "status": "draft",
+      "description": "Administer Zika Virus Exposure Assessment",
+      "category": "procedure",
+      "code": {
+        "coding": [
+          {
+            "system": "http://example.org/questionnaires",
+            "code": "zika-virus-exposure-assessment"
+          }
+        ]
+      },
+      "timingTiming": {
+        "event": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                "valueString": "Now()"
+              }
+            ]
+          }
+        ]
+      },
+      "participantType": [
+        "practitioner"
+      ]
+    },
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "order-serum-zika-dengue-virus-igm",
+      "url": "http://example.org/ActivityDefinition/serum-zika-dengue-virus-igm",
+      "status": "draft",
+      "description": "Order Serum Zika and Dengue Virus IgM",
+      "relatedArtifact": [
+        {
+          "type": "documentation",
+          "display": "Explanation of diagnostic tests for Zika virus and which to use based on the patient’s clinical and exposure history.",
+          "url": "http://www.cdc.gov/zika/hc-providers/diagnostic.html"
+        }
+      ],
+      "category": "diagnostic",
+      "code": {
+        "text": "Serum Zika and Dengue Virus IgM"
+      },
+      "timingTiming": {
+        "event": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                "valueString": "Now()"
+              }
+            ]
+          }
+        ]
+      },
+      "participantType": [
+        "practitioner"
+      ]
+    },
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "provide-mosquito-prevention-advice",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provide Mosquito Prevention Advice</div>"
+      },
+      "url": "http://example.org/ActivityDefinition/provide-mosquito-prevention-advice",
+      "status": "draft",
+      "description": "Provide mosquito prevention advice",
+      "relatedArtifact": [
+        {
+          "type": "documentation",
+          "display": "Advice for patients about how to avoid Mosquito bites.",
+          "url": "http://www.cdc.gov/zika/prevention/index.html"
+        },
+        {
+          "type": "documentation",
+          "display": "Advice for patients about which mosquito repellents are effective and safe to use in pregnancy. [DEET, IF3535 and Picardin are safe during]",
+          "url": "https://www.epa.gov/insect-repellents/find-insect-repellent-right-you"
+        }
+      ],
+      "category": "communication",
+      "code": {
+        "text": "Provide Mosquito Prevention Advice"
+      },
+      "timingTiming": {
+        "event": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                "valueString": "Now()"
+              }
+            ]
+          }
+        ]
+      },
+      "participantType": [
+        "practitioner"
+      ]
+    }
+  ],
+  "url": "http://example.org/PlanDefinition/zika-virus-intervention",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "zika-virus-intervention"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Example Zika Virus Intervention",
+  "status": "active",
+  "date": "2016-11-14",
+  "description": "Zika Virus Management intervention describing the CDC Guidelines for Zika Virus Reporting and Management.",
+  "topic": [
+    {
+      "text": "Zika Virus Management"
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/zika-virus-intervention-logic"
+    }
+  ],
+  "actionDefinition": [
+    {
+      "title": "Zika Virus Assessment",
+      "triggerDefinition": [
+        {
+          "type": "named-event",
+          "eventName": "patient-view"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": "Is Patient Pregnant"
+        }
+      ],
+      "actionDefinition": [
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": "Should Administer Zika Virus Exposure Assessment"
+            }
+          ],
+          "activityDefinition": {
+            "reference": "#administer-zika-virus-exposure-assessment"
+          }
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": "Should Order Serum + Urine rRT-PCR Test"
+            }
+          ],
+          "activityDefinition": {
+            "reference": "ActivityDefinition/order-serum-urine-rrt-pcr-test"
+          }
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": "Should Order Serum Zika Virus IgM + Dengue Virus IgM"
+            }
+          ],
+          "activityDefinition": {
+            "reference": "#order-serum-zika-dengue-virus-igm"
+          }
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": "Should Consider IgM Antibody Testing"
+            }
+          ],
+          "activityDefinition": {
+            "reference": "ActivityDefinition/consider-igm-antibody-testing"
+          }
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": "Should Provide Mosquito Prevention and Contraception Advice"
+            }
+          ],
+          "actionDefinition": [
+            {
+              "activityDefinition": {
+                "reference": "#provide-mosquito-prevention-advice"
+              }
+            },
+            {
+              "activityDefinition": {
+                "reference": "ActivityDefinition/provide-contraception-advice"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

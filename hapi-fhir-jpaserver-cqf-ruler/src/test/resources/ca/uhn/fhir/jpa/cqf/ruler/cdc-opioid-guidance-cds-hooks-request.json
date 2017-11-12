@@ -1,0 +1,132 @@
+{
+  "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
+  "fhirServer": "https://sb-fhir-dstu2.smarthealthit.org/smartdstu2/open",
+  "hook": "medication-prescribe",
+  "user": "Practitioner/example",
+  "context": [
+    {
+      "resourceType": "MedicationOrder",
+      "id": "medrx001",
+      "dateWritten": "2017-05-05",
+      "status": "draft",
+      "patient": {
+        "reference": "Patient/Patient-12214"
+      },
+      "medicationCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "197696"
+          }
+        ]
+      },
+      "dosageInstruction": [
+        {
+          "text": "Take 40mg three times daily",
+          "timing": {
+            "repeat": {
+              "frequency": 3,
+              "frequencyMax": 3,
+              "period": 1,
+              "unit": "d"
+            }
+          },
+          "asNeededBoolean": false,
+          "doseQuantity": {
+            "value": 40,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ],
+      "dispenseRequest": {
+        "quantity": {
+          "value": 3000,
+          "unit": "mg",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg"
+        }
+      }
+    }
+  ],
+  "patient": "Patient/Patient-12214",
+  "prefetch": {
+    "medication": {
+      "resource": {
+        "resourceType": "Bundle",
+        "id": "25c04bfd-8996-445f-9bbd-3725614c1508",
+        "meta": {
+          "lastUpdated": "2017-10-21T20:55:54.241+00:00"
+        },
+        "type": "searchset",
+        "total": 1,
+        "link": [
+          {
+            "relation": "self",
+            "url": "https://sb-fhir-dstu2.smarthealthit.org/smartdstu2/open/MedicationOrder?patient=Patient-12214&status=active"
+          }
+        ],
+        "entry": [
+          {
+            "fullUrl": "https://sb-fhir-dstu2.smarthealthit.org/smartdstu2/open/MedicationOrder/medrx002",
+            "resource": {
+              "resourceType": "MedicationOrder",
+              "id": "medrx002",
+              "meta": {
+                "versionId": "1",
+                "lastUpdated": "2017-10-21T20:55:38.000+00:00"
+              },
+              "dateWritten": "2017-04-25",
+              "status": "active",
+              "patient": {
+                "reference": "Patient/Patient-12214"
+              },
+              "medicationCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "199789"
+                  }
+                ]
+              },
+              "dosageInstruction": [
+                {
+                  "text": "Take 50mg twice daily",
+                  "timing": {
+                    "repeat": {
+                      "frequency": 2,
+                      "period": 1,
+                      "periodUnits": "d"
+                    }
+                  },
+                  "asNeededBoolean": false,
+                  "doseQuantity": {
+                    "value": 55,
+                    "unit": "mg",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg"
+                  }
+                }
+              ],
+              "dispenseRequest": {
+                "quantity": {
+                  "value": 3000,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            },
+            "search": {
+              "mode": "match"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": "200 HTTP/1.1 200"
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "protocol-example",
+  "contained": [
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "procedure",
+      "status": "draft",
+      "description": "Extra information on activity ",
+      "category": "procedure",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "39156-5",
+            "display": "Body mass index (BMI) [Ratio]"
+          }
+        ]
+      },
+      "participantType": [
+        "practitioner"
+      ]
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://acme.org",
+      "value": "example-1"
+    }
+  ],
+  "title": "Obesity Assessment Protocol",
+  "type": {
+    "coding": [
+      {
+        "code": "protocol"
+      }
+    ]
+  },
+  "status": "draft",
+  "purpose": "Example of A medical algorithm for assessment and treatment of overweight and obesity",
+  "contributor": [
+    {
+      "type": "author",
+      "name": "National Heart, Lung, and Blood Institute http://www.nhlbi.nih.gov/health-pro/guidelines/current/obesity-guidelines/e_textbook/txgd/algorthm/algorthm.htm"
+    }
+  ],
+  "actionDefinition": [
+    {
+      "label": "Measure BMI",
+      "title": "Measure, Weight, Height, Waist, Circumference; Calculate BMI",
+      "description": "Weight must be measured so that the BMI can be calculated. Most charts are based on weights obtained with the patient wearing undergarments and no shoes. BMI can be manually calculated (kg/[height in meters]2), but is more easily obtained from a nomogram. Waist circumference is important because evidence suggests that abdominal fat is a particularly strong determinant of cardiovascular risk in those with a BMI of 25 to 34.9 kg/m2. Increased waist circumference can also be a marker of increased risk even in persons of normal weight. The technique for measuring waist circumference is described in the text. A nutrition assessment will also help to assess the diet and physical activity habits of overweight patients",
+      "condition": [
+        {
+          "kind": "applicability",
+          "description": "The practitioner must seek to determine whether the patient has ever been overweight. While a technical definition is provided, a simple question such as 'Have you ever been overweight?' will accomplish the same goal. Questions directed towards weight history, dietary habits, physical activities, and medications may provide useful information about the origins of obesity in particular patients.  For those who have not been overweight, a 2 year interval is appropriate for the reassessment of BMI. While this time span is not evidence-based, it is believed to be a reasonable compromise between the need to identify weight gain at an early stage and the need to limit the time, effort, and cost of repeated measurements.",
+          "expression": "Observation of Obesity or BMI Measured in Past 2 Years"
+        }
+      ],
+      "activityDefinition": {
+        "reference": "#procedure"
+      }
+    }
+  ]
+}

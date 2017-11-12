@@ -1,0 +1,101 @@
+{
+  "resourceType": "Measure",
+  "id": "measure-exclusive-breastfeeding",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "exclusive-breastfeeding-measure"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Exclusive Breastfeeding Measure",
+  "status": "active",
+  "date": "2015-03-08",
+  "description": "Exclusive breastfeeding measure of outcomes for exclusive breastmilk feeding of newborns.",
+  "purpose": "Exclusive breast milk feeding for the first 6 months of neonatal life can result in numerous long-term health benefits for both mother and newborn and is recommended by a number of national and international organizations. Evidence suggests that the prenatal and intrapartum period is critical for the success of exclusive (or any) breast feeding. Therefore, it is recommended that newborns are fed breast milk only from birth to discharge.",
+  "topic": [
+    {
+      "text": "Exclusive Breastfeeding"
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/library-exclusive-breastfeeding-cqm-logic"
+    }
+  ],
+  "type": [
+    "outcome"
+  ],
+  "group": [
+    {
+      "identifier": {
+        "value": "Population Group 1"
+      },
+      "population": [
+        {
+          "type": "initial-population",
+          "identifier": {
+            "value": "initial-population-1-identifier"
+          },
+          "criteria": "InitialPopulation1"
+        },
+        {
+          "type": "denominator",
+          "identifier": {
+            "value": "denominator-1-identifier"
+          },
+          "criteria": "Denominator1"
+        },
+        {
+          "type": "denominator-exclusion",
+          "identifier": {
+            "value": "denominator-exclusions-1-identifier"
+          },
+          "criteria": "DenominatorExclusions1"
+        },
+        {
+          "type": "numerator",
+          "identifier": {
+            "value": "numerator-1-identifier"
+          },
+          "criteria": "Numerator1"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "Population Group 2"
+      },
+      "population": [
+        {
+          "type": "initial-population",
+          "identifier": {
+            "value": "initial-population-2-identifier"
+          },
+          "criteria": "InitialPopulation2"
+        },
+        {
+          "type": "denominator",
+          "identifier": {
+            "value": "denominator-2-identifier"
+          },
+          "criteria": "Denominator2"
+        },
+        {
+          "type": "denominator-exclusion",
+          "identifier": {
+            "value": "denominator-exclusions-2-identifier"
+          },
+          "criteria": "DenominatorExclusions2"
+        },
+        {
+          "type": "numerator",
+          "identifier": {
+            "value": "numerator-2-identifier"
+          },
+          "criteria": "Numerator2"
+        }
+      ]
+    }
+  ]
+}

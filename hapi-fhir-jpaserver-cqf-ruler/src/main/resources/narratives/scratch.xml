@@ -1,0 +1,447 @@
+<Library xmlns="http://hl7.org/fhir">
+   <id value="mmi-suiciderisk-orderset-logic"/>
+   <text>
+      <status value="generated"/>
+      <div xmlns="http://www.w3.org/1999/xhtml">
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Id: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">Library/mmi-suiciderisk-orderset-logic</td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Identifier: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <b>value: </b>
+                  <span>SuicideRiskLogic</span>
+               </td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Version: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">1.0.0</td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Title: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">Suicide Risk Order Set Logic</td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Type: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-right: 25px;">
+                  <span>
+                     <span>
+                        <span style="padding-left: 25px;">
+                           <b>code: </b>
+                           <span>logic-library</span>
+                        </span>
+                     </span>
+                  </span>
+               </td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Status: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">draft</td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Description: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">Logic for Suicide Risk Order Sets</td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Topic: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-right: 25px;">
+                  <span style="padding-left: 25px;">
+                     <b>text: </b>
+                     <span>Suicide Risk Order Set Logic</span>
+                  </span>
+               </td>
+            </tr>
+         </table>
+         <p/>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Related: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <p style="margin-bottom: 5px;">
+                     <b>type: </b>
+                     <span>depends-on</span>
+                  </p>
+                  <p style="margin-bottom: 5px;">
+                     <b>Resource: </b>
+                     <br/>
+                     <span>
+                        <span style="padding-left: 25px;">
+                           <b>reference: </b>
+                           <span>Library/library-fhir-model-definition</span>
+                        </span>
+                     </span>
+                  </p>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Related: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <p style="margin-bottom: 5px;">
+                     <b>type: </b>
+                     <span>depends-on</span>
+                  </p>
+                  <p style="margin-bottom: 5px;">
+                     <b>Resource: </b>
+                     <br/>
+                     <span>
+                        <span style="padding-left: 25px;">
+                           <b>reference: </b>
+                           <span>Library/library-fhir-helpers</span>
+                           <br/>
+                        </span>
+                        <span style="padding-left: 25px;">
+                           <b>display: </b>
+                           <span>FHIRHelpers</span>
+                        </span>
+                     </span>
+                  </p>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Related: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <p style="margin-bottom: 5px;">
+                     <b>type: </b>
+                     <span>depends-on</span>
+                  </p>
+                  <p style="margin-bottom: 5px;">
+                     <b>Resource: </b>
+                     <br/>
+                     <span>
+                        <span style="padding-left: 25px;">
+                           <b>reference: </b>
+                           <span>CodeSystem/npi-taxonomy</span>
+                        </span>
+                     </span>
+                  </p>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Related: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <p style="margin-bottom: 5px;">
+                     <b>type: </b>
+                     <span>depends-on</span>
+                  </p>
+                  <p style="margin-bottom: 5px;">
+                     <b>Resource: </b>
+                     <br/>
+                     <span>
+                        <span style="padding-left: 25px;">
+                           <b>reference: </b>
+                           <span>ValueSet/1.2.3.4.5</span>
+                           <br/>
+                        </span>
+                        <span style="padding-left: 25px;">
+                           <b>display: </b>
+                           <span>Suicide Risk Assessment</span>
+                        </span>
+                     </span>
+                  </p>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Parameter: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <span>
+                     <b>name: </b>
+                     <span>Patient</span>
+                     <br/>
+                  </span>
+                  <b>use: </b>
+                  <span>in</span>
+                  <br/>
+                  <span>
+                     <b>minimum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <span>
+                     <b>maximum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <b>type: </b>
+                  <span>Patient</span>
+                  <br/>
+                  <p style="margin-bottom: 5px;"/>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Parameter: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <span>
+                     <b>name: </b>
+                     <span>Encounter</span>
+                     <br/>
+                  </span>
+                  <b>use: </b>
+                  <span>in</span>
+                  <br/>
+                  <span>
+                     <b>minimum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <span>
+                     <b>maximum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <b>type: </b>
+                  <span>Encounter</span>
+                  <br/>
+                  <p style="margin-bottom: 5px;"/>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Parameter: </b>
+               </td>
+            </tr>
+            <tr style="vertical-align: top;">
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <span>
+                     <b>name: </b>
+                     <span>Practitioner</span>
+                     <br/>
+                  </span>
+                  <b>use: </b>
+                  <span>in</span>
+                  <br/>
+                  <span>
+                     <b>minimum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <span>
+                     <b>maximum cardinality: </b>
+                     <span>1</span>
+                     <br/>
+                  </span>
+                  <b>type: </b>
+                  <span>Practitioner</span>
+                  <br/>
+                  <p style="margin-bottom: 5px;"/>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Data Requirements: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <div>
+                     <p style="margin-bottom: 5px;">
+                        <b>type: </b>
+                        <span>RiskAssessment</span>
+                     </p>
+                     <p style="margin-bottom: 5px;">
+                        <b>code filter:</b>
+                        <br/>
+                        <span style="padding-left: 25px;">
+                           <b>path: </b>
+                           <span>code</span>
+                        </span>
+                        <br/>
+                        <span style="padding-left: 25px;">
+                           <b>valueset: </b>
+                           <span>Suicide Risk Assessment</span>
+                        </span>
+                     </p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+         <table class="grid dict">
+            <tr>
+               <td>
+                  <b>Content: </b>
+               </td>
+            </tr>
+            <tr>
+               <td style="padding-left: 25px; padding-right: 25px;">
+                  <p style="margin-bottom: 5px;">
+                     <b>type: </b>
+                     <span>text/cql</span>
+                  </p>
+                  <p style="margin-bottom: 5px;">
+                     <b>url: </b>
+                     <span>library-mmi-suiciderisk-orderset-logic-content.cql</span>
+                  </p>
+               </td>
+            </tr>
+         </table>
+         <p/>
+      </div>
+   </text>
+   <identifier>
+      <use value="official"/>
+      <value value="SuicideRiskLogic"/>
+   </identifier>
+   <version value="1.0.0"/>
+   <title value="Suicide Risk Order Set Logic"/>
+   <type>
+      <coding>
+         <code value="logic-library"/>
+      </coding>
+   </type>
+   <status value="draft"/>
+   <date value="2015-07-22"/>
+   <description value="Logic for Suicide Risk Order Sets"/>
+   <topic>
+      <text value="Suicide Risk Order Set Logic"/>
+   </topic>
+   <relatedArtifact>
+      <type value="depends-on"/>
+      <resource>
+         <reference value="Library/library-fhir-model-definition"/>
+      </resource>
+   </relatedArtifact>
+   <relatedArtifact>
+      <type value="depends-on"/>
+      <resource>
+         <reference value="Library/library-fhir-helpers"/>
+         <display value="FHIRHelpers"/>
+      </resource>
+   </relatedArtifact>
+   <relatedArtifact>
+      <type value="depends-on"/>
+      <resource>
+         <reference value="CodeSystem/npi-taxonomy"/>
+      </resource>
+   </relatedArtifact>
+   <relatedArtifact>
+      <type value="depends-on"/>
+      <resource>
+         <reference value="ValueSet/1.2.3.4.5"/>
+         <display value="Suicide Risk Assessment"/>
+      </resource>
+   </relatedArtifact>
+   <parameter>
+      <name value="Patient"/>
+      <use value="in"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type value="Patient"/>
+   </parameter>
+   <parameter>
+      <name value="Encounter"/>
+      <use value="in"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type value="Encounter"/>
+   </parameter>
+   <parameter>
+      <name value="Practitioner"/>
+      <use value="in"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type value="Practitioner"/>
+   </parameter>
+   <dataRequirement>
+      <type value="RiskAssessment"/>
+      <codeFilter>
+         <path value="code"/>
+         <valueSetString value="Suicide Risk Assessment"/>
+      </codeFilter>
+   </dataRequirement>
+   <content>
+      <contentType value="text/cql"/>
+      <url value="library-mmi-suiciderisk-orderset-logic-content.cql"/>
+   </content>
+</Library>
+

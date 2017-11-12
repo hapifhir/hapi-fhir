@@ -1,0 +1,82 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "exclusive-breastfeeding-intervention-03",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "exclusive-breastfeeding-intervention-03"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Exclusive Breastfeeding Intervention-03",
+  "status": "active",
+  "date": "2015-03-08",
+  "description": "Exclusive breastfeeding intervention intended to improve outcomes for exclusive breastmilk feeding of newborns by notifying the charge and/or bedside nurse to perform the breastfeeding readiness assessment.",
+  "topic": [
+    {
+      "text": "Exclusive Breastfeeding"
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/library-exclusive-breastfeeding-cds-logic"
+    }
+  ],
+  "actionDefinition": [
+    {
+      "title": "Mother should be administered a breastfeeding readiness assessment.",
+      "triggerDefinition": [
+        {
+          "type": "named-event",
+          "eventName": "Admission"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Birth"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Infant Transfer to Recovery"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Transfer to Post-Partum"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": "Should Notify Nurse to Perform Assessment"
+        }
+      ],
+      "actionDefinition": [
+        {
+          "title": "Notify the charge nurse to perform the assessment.",
+          "textEquivalent": "A Breastfeeding Readiness Assessment is recommended, please administer the assessment.",
+          "type": {
+            "code": "create"
+          },
+          "dynamicValue": [
+            {
+              "path": "/",
+              "expression": "Communication Request to Charge Nurse"
+            }
+          ]
+        },
+        {
+          "title": "Notify the bedside nurse to perform the assessment.",
+          "textEquivalent": "A Breastfeeding Readiness Assessment is recommended, please administer the assessment.",
+          "type": {
+            "code": "create"
+          },
+          "dynamicValue": [
+            {
+              "path": "/",
+              "expression": "Communication Request to Bedside Nurse"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
