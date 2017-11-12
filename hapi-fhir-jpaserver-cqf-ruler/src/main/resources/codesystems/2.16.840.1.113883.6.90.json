@@ -1,0 +1,1179 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "2.16.840.1.113883.6.90",
+  "url": "http://hl7.org/fhir/sid/icd-10-cm",
+  "version": "2017",
+  "status": "draft",
+  "content": "example",
+  "concept": [
+    {
+      "code": "E10.8",
+      "display": "Type 1 diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E10.9",
+      "display": "Type 1 diabetes mellitus without complications"
+    },
+    {
+      "code": "E10.10",
+      "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+    },
+    {
+      "code": "E10.11",
+      "display": "Type 1 diabetes mellitus with ketoacidosis with coma"
+    },
+    {
+      "code": "E10.21",
+      "display": "Type 1 diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E10.22",
+      "display": "Type 1 diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E10.29",
+      "display": "Type 1 diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E10.36",
+      "display": "Type 1 diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E10.39",
+      "display": "Type 1 diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E10.40",
+      "display": "Type 1 diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E10.41",
+      "display": "Type 1 diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E10.42",
+      "display": "Type 1 diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E10.43",
+      "display": "Type 1 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E10.44",
+      "display": "Type 1 diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E10.49",
+      "display": "Type 1 diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E10.51",
+      "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E10.52",
+      "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E10.59",
+      "display": "Type 1 diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E10.65",
+      "display": "Type 1 diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E10.69",
+      "display": "Type 1 diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E10.311",
+      "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.319",
+      "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.321",
+      "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.329",
+      "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.331",
+      "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.339",
+      "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.341",
+      "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.349",
+      "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.351",
+      "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.359",
+      "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.610",
+      "display": "Type 1 diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E10.618",
+      "display": "Type 1 diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E10.620",
+      "display": "Type 1 diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E10.621",
+      "display": "Type 1 diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E10.622",
+      "display": "Type 1 diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E10.628",
+      "display": "Type 1 diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E10.630",
+      "display": "Type 1 diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E10.638",
+      "display": "Type 1 diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E10.641",
+      "display": "Type 1 diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E10.649",
+      "display": "Type 1 diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "E11.00",
+      "display": "Type 2 diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+    },
+    {
+      "code": "E11.01",
+      "display": "Type 2 diabetes mellitus with hyperosmolarity with coma"
+    },
+    {
+      "code": "E11.8",
+      "display": "Type 2 diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E11.9",
+      "display": "Type 2 diabetes mellitus without complications"
+    },
+    {
+      "code": "E11.21",
+      "display": "Type 2 diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E11.22",
+      "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E11.29",
+      "display": "Type 2 diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E11.36",
+      "display": "Type 2 diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E11.39",
+      "display": "Type 2 diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E11.40",
+      "display": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E11.41",
+      "display": "Type 2 diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E11.42",
+      "display": "Type 2 diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E11.43",
+      "display": "Type 2 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E11.44",
+      "display": "Type 2 diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E11.49",
+      "display": "Type 2 diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E11.51",
+      "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E11.52",
+      "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E11.59",
+      "display": "Type 2 diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E11.65",
+      "display": "Type 2 diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E11.69",
+      "display": "Type 2 diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E11.311",
+      "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.319",
+      "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.321",
+      "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.329",
+      "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.331",
+      "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.339",
+      "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.341",
+      "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.349",
+      "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.351",
+      "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.359",
+      "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.610",
+      "display": "Type 2 diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E11.618",
+      "display": "Type 2 diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E11.620",
+      "display": "Type 2 diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E11.621",
+      "display": "Type 2 diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E11.622",
+      "display": "Type 2 diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E11.628",
+      "display": "Type 2 diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E11.630",
+      "display": "Type 2 diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E11.638",
+      "display": "Type 2 diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E11.641",
+      "display": "Type 2 diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E11.649",
+      "display": "Type 2 diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "E13.00",
+      "display": "Other specified diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+    },
+    {
+      "code": "E13.01",
+      "display": "Other specified diabetes mellitus with hyperosmolarity with coma"
+    },
+    {
+      "code": "E13.8",
+      "display": "Other specified diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E13.9",
+      "display": "Other specified diabetes mellitus without complications"
+    },
+    {
+      "code": "E13.10",
+      "display": "Other specified diabetes mellitus with ketoacidosis without coma"
+    },
+    {
+      "code": "E13.11",
+      "display": "Other specified diabetes mellitus with ketoacidosis with coma"
+    },
+    {
+      "code": "E13.21",
+      "display": "Other specified diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E13.22",
+      "display": "Other specified diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E13.29",
+      "display": "Other specified diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E13.36",
+      "display": "Other specified diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E13.39",
+      "display": "Other specified diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E13.40",
+      "display": "Other specified diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E13.41",
+      "display": "Other specified diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E13.42",
+      "display": "Other specified diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E13.43",
+      "display": "Other specified diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E13.44",
+      "display": "Other specified diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E13.49",
+      "display": "Other specified diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E13.51",
+      "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E13.52",
+      "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E13.59",
+      "display": "Other specified diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E13.65",
+      "display": "Other specified diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E13.69",
+      "display": "Other specified diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E13.311",
+      "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.319",
+      "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.321",
+      "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.329",
+      "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.331",
+      "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.339",
+      "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.341",
+      "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.349",
+      "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.351",
+      "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.359",
+      "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.610",
+      "display": "Other specified diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E13.618",
+      "display": "Other specified diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E13.620",
+      "display": "Other specified diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E13.621",
+      "display": "Other specified diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E13.622",
+      "display": "Other specified diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E13.628",
+      "display": "Other specified diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E13.630",
+      "display": "Other specified diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E13.638",
+      "display": "Other specified diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E13.641",
+      "display": "Other specified diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E13.649",
+      "display": "Other specified diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "O24.019",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.02",
+      "display": "Pre-existing type 1 diabetes mellitus, in childbirth"
+    },
+    {
+      "code": "O24.03",
+      "display": "Pre-existing type 1 diabetes mellitus, in the puerperium"
+    },
+    {
+      "code": "O24.011",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.012",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.013",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.12",
+      "display": "Pre-existing type 2 diabetes mellitus, in childbirth"
+    },
+    {
+      "code": "O24.13",
+      "display": "Pre-existing type 2 diabetes mellitus, in the puerperium"
+    },
+    {
+      "code": "O24.32",
+      "display": "Unspecified pre-existing diabetes mellitus in childbirth"
+    },
+    {
+      "code": "O24.33",
+      "display": "Unspecified pre-existing diabetes mellitus in the puerperium"
+    },
+    {
+      "code": "O24.82",
+      "display": "Other pre-existing diabetes mellitus in childbirth"
+    },
+    {
+      "code": "O24.83",
+      "display": "Other pre-existing diabetes mellitus in the puerperium"
+    },
+    {
+      "code": "O24.111",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.112",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.113",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.119",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.311",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.312",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.313",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.319",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.811",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.812",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.813",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.819",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "E10.8",
+      "display": "Type 1 diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E10.9",
+      "display": "Type 1 diabetes mellitus without complications"
+    },
+    {
+      "code": "E10.10",
+      "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+    },
+    {
+      "code": "E10.11",
+      "display": "Type 1 diabetes mellitus with ketoacidosis with coma"
+    },
+    {
+      "code": "E10.21",
+      "display": "Type 1 diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E10.22",
+      "display": "Type 1 diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E10.29",
+      "display": "Type 1 diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E10.36",
+      "display": "Type 1 diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E10.39",
+      "display": "Type 1 diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E10.40",
+      "display": "Type 1 diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E10.41",
+      "display": "Type 1 diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E10.42",
+      "display": "Type 1 diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E10.43",
+      "display": "Type 1 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E10.44",
+      "display": "Type 1 diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E10.49",
+      "display": "Type 1 diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E10.51",
+      "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E10.52",
+      "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E10.59",
+      "display": "Type 1 diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E10.65",
+      "display": "Type 1 diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E10.69",
+      "display": "Type 1 diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E10.311",
+      "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.319",
+      "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.321",
+      "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.329",
+      "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.331",
+      "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.339",
+      "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.341",
+      "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.349",
+      "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.351",
+      "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E10.359",
+      "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E10.610",
+      "display": "Type 1 diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E10.618",
+      "display": "Type 1 diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E10.620",
+      "display": "Type 1 diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E10.621",
+      "display": "Type 1 diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E10.622",
+      "display": "Type 1 diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E10.628",
+      "display": "Type 1 diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E10.630",
+      "display": "Type 1 diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E10.638",
+      "display": "Type 1 diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E10.641",
+      "display": "Type 1 diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E10.649",
+      "display": "Type 1 diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "E11.00",
+      "display": "Type 2 diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+    },
+    {
+      "code": "E11.01",
+      "display": "Type 2 diabetes mellitus with hyperosmolarity with coma"
+    },
+    {
+      "code": "E11.8",
+      "display": "Type 2 diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E11.9",
+      "display": "Type 2 diabetes mellitus without complications"
+    },
+    {
+      "code": "E11.21",
+      "display": "Type 2 diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E11.22",
+      "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E11.29",
+      "display": "Type 2 diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E11.36",
+      "display": "Type 2 diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E11.39",
+      "display": "Type 2 diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E11.40",
+      "display": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E11.41",
+      "display": "Type 2 diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E11.42",
+      "display": "Type 2 diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E11.43",
+      "display": "Type 2 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E11.44",
+      "display": "Type 2 diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E11.49",
+      "display": "Type 2 diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E11.51",
+      "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E11.52",
+      "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E11.59",
+      "display": "Type 2 diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E11.65",
+      "display": "Type 2 diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E11.69",
+      "display": "Type 2 diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E11.311",
+      "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.319",
+      "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.321",
+      "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.329",
+      "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.331",
+      "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.339",
+      "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.341",
+      "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.349",
+      "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.351",
+      "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E11.359",
+      "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E11.610",
+      "display": "Type 2 diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E11.618",
+      "display": "Type 2 diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E11.620",
+      "display": "Type 2 diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E11.621",
+      "display": "Type 2 diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E11.622",
+      "display": "Type 2 diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E11.628",
+      "display": "Type 2 diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E11.630",
+      "display": "Type 2 diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E11.638",
+      "display": "Type 2 diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E11.641",
+      "display": "Type 2 diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E11.649",
+      "display": "Type 2 diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "E13.00",
+      "display": "Other specified diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+    },
+    {
+      "code": "E13.01",
+      "display": "Other specified diabetes mellitus with hyperosmolarity with coma"
+    },
+    {
+      "code": "E13.8",
+      "display": "Other specified diabetes mellitus with unspecified complications"
+    },
+    {
+      "code": "E13.9",
+      "display": "Other specified diabetes mellitus without complications"
+    },
+    {
+      "code": "E13.10",
+      "display": "Other specified diabetes mellitus with ketoacidosis without coma"
+    },
+    {
+      "code": "E13.11",
+      "display": "Other specified diabetes mellitus with ketoacidosis with coma"
+    },
+    {
+      "code": "E13.21",
+      "display": "Other specified diabetes mellitus with diabetic nephropathy"
+    },
+    {
+      "code": "E13.22",
+      "display": "Other specified diabetes mellitus with diabetic chronic kidney disease"
+    },
+    {
+      "code": "E13.29",
+      "display": "Other specified diabetes mellitus with other diabetic kidney complication"
+    },
+    {
+      "code": "E13.36",
+      "display": "Other specified diabetes mellitus with diabetic cataract"
+    },
+    {
+      "code": "E13.39",
+      "display": "Other specified diabetes mellitus with other diabetic ophthalmic complication"
+    },
+    {
+      "code": "E13.40",
+      "display": "Other specified diabetes mellitus with diabetic neuropathy, unspecified"
+    },
+    {
+      "code": "E13.41",
+      "display": "Other specified diabetes mellitus with diabetic mononeuropathy"
+    },
+    {
+      "code": "E13.42",
+      "display": "Other specified diabetes mellitus with diabetic polyneuropathy"
+    },
+    {
+      "code": "E13.43",
+      "display": "Other specified diabetes mellitus with diabetic autonomic (poly)neuropathy"
+    },
+    {
+      "code": "E13.44",
+      "display": "Other specified diabetes mellitus with diabetic amyotrophy"
+    },
+    {
+      "code": "E13.49",
+      "display": "Other specified diabetes mellitus with other diabetic neurological complication"
+    },
+    {
+      "code": "E13.51",
+      "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    },
+    {
+      "code": "E13.52",
+      "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    },
+    {
+      "code": "E13.59",
+      "display": "Other specified diabetes mellitus with other circulatory complications"
+    },
+    {
+      "code": "E13.65",
+      "display": "Other specified diabetes mellitus with hyperglycemia"
+    },
+    {
+      "code": "E13.69",
+      "display": "Other specified diabetes mellitus with other specified complication"
+    },
+    {
+      "code": "E13.311",
+      "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.319",
+      "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.321",
+      "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.329",
+      "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.331",
+      "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.339",
+      "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.341",
+      "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.349",
+      "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.351",
+      "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+    },
+    {
+      "code": "E13.359",
+      "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+    },
+    {
+      "code": "E13.610",
+      "display": "Other specified diabetes mellitus with diabetic neuropathic arthropathy"
+    },
+    {
+      "code": "E13.618",
+      "display": "Other specified diabetes mellitus with other diabetic arthropathy"
+    },
+    {
+      "code": "E13.620",
+      "display": "Other specified diabetes mellitus with diabetic dermatitis"
+    },
+    {
+      "code": "E13.621",
+      "display": "Other specified diabetes mellitus with foot ulcer"
+    },
+    {
+      "code": "E13.622",
+      "display": "Other specified diabetes mellitus with other skin ulcer"
+    },
+    {
+      "code": "E13.628",
+      "display": "Other specified diabetes mellitus with other skin complications"
+    },
+    {
+      "code": "E13.630",
+      "display": "Other specified diabetes mellitus with periodontal disease"
+    },
+    {
+      "code": "E13.638",
+      "display": "Other specified diabetes mellitus with other oral complications"
+    },
+    {
+      "code": "E13.641",
+      "display": "Other specified diabetes mellitus with hypoglycemia with coma"
+    },
+    {
+      "code": "E13.649",
+      "display": "Other specified diabetes mellitus with hypoglycemia without coma"
+    },
+    {
+      "code": "O24.019",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.02",
+      "display": "Pre-existing type 1 diabetes mellitus, in childbirth"
+    },
+    {
+      "code": "O24.03",
+      "display": "Pre-existing type 1 diabetes mellitus, in the puerperium"
+    },
+    {
+      "code": "O24.011",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.012",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.013",
+      "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.12",
+      "display": "Pre-existing type 2 diabetes mellitus, in childbirth"
+    },
+    {
+      "code": "O24.13",
+      "display": "Pre-existing type 2 diabetes mellitus, in the puerperium"
+    },
+    {
+      "code": "O24.32",
+      "display": "Unspecified pre-existing diabetes mellitus in childbirth"
+    },
+    {
+      "code": "O24.33",
+      "display": "Unspecified pre-existing diabetes mellitus in the puerperium"
+    },
+    {
+      "code": "O24.82",
+      "display": "Other pre-existing diabetes mellitus in childbirth"
+    },
+    {
+      "code": "O24.83",
+      "display": "Other pre-existing diabetes mellitus in the puerperium"
+    },
+    {
+      "code": "O24.111",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.112",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.113",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.119",
+      "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.311",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.312",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.313",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.319",
+      "display": "Unspecified pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+    },
+    {
+      "code": "O24.811",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, first trimester"
+    },
+    {
+      "code": "O24.812",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, second trimester"
+    },
+    {
+      "code": "O24.813",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, third trimester"
+    },
+    {
+      "code": "O24.819",
+      "display": "Other pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+    }
+  ]
+}
+

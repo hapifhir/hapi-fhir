@@ -1,0 +1,36 @@
+<th:block th:if="${not resource.empty}">
+    <!-- INVALID - NEEDS WORK -->
+    <div th:if="${resource.hasId()}">
+        <b>id: </b>
+        <span th:narrative="${resource.id}"></span>
+    </div>
+
+    <div th:if="${resource.hasCode()}">
+        <b>code:</b>
+        <div style="padding-left: 25px;" th:narrative="${resource.code}"></div>
+    </div>
+
+    <!-- TODO: There is an issue with HAPI here - it doesn't recognize form and ingredient tags -->
+    <div th:if="${resource.hasProduct()}">
+        <div th:if="${resource.getProduct().hasForm()}">
+            <b>form:</b>
+            <div style="padding-left: 25px;" th:narrative="${resource.getProduct().form}"></div>
+        </div>
+
+        <div th:if="${resource.getProduct().hasIngredient()}">
+            <b>ingredient:</b>
+            <div th:if="${resource.getProduct().ingredient.hasItemCodeableConcept()}">
+                <b>concept:</b>
+                <div style="padding-left: 25px;" th:narrative="${resource.getProduct().ingredient.itemCodeableConcept}"></div>
+            </div>
+            <div th:if="${resource.getProduct().ingredient.hasItemReference()}">
+                <b>reference:</b>
+                <div style="padding-left: 25px;" th:narrative="${resource.getProduct().ingredient.itemReference}"></div>
+            </div>
+            <div th:if="${resource.getProduct().ingredient.hasAmount()}">
+                <b>amount:</b>
+                <div style="padding-left: 25px;" th:narrative="${resource.getProduct().ingredient.amount}"></div>
+            </div>
+        </div>
+    </div>
+</th:block>

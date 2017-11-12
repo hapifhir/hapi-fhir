@@ -1,0 +1,8 @@
+{
+  "resourceType": "GuidanceResponse",
+  "id": "example",
+  "module": {
+    "reference": "ServiceDefinition/example"
+  },
+  "status": "success"
+}

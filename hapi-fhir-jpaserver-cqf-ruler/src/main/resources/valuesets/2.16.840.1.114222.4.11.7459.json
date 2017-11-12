@@ -1,0 +1,150 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7459",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "84387000",
+            "display": "No Symptoms"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271749004",
+            "display": "Acute rise of fever"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "47725002",
+            "display": "Maculopapular eruption"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57676002",
+            "display": "Joint pain"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9826008",
+            "display": "Inflammation of conjunctiva"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "68962001",
+            "display": "Muscle pain"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "25064002",
+            "display": "Pain in head"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "84387000",
+            "display": "No Symptoms"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271749004",
+            "display": "Acute rise of fever"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "47725002",
+            "display": "Maculopapular eruption"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57676002",
+            "display": "Joint pain"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9826008",
+            "display": "Inflammation of conjunctiva"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "68962001",
+            "display": "Muscle pain"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "25064002",
+            "display": "Pain in head"
+          }
+        ]
+      }
+    ]
+  }
+}
+

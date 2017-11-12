@@ -1,0 +1,4710 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.103.12.1001",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250",
+            "display": "Diabetes mellitus without mention of complication, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.01",
+            "display": "Diabetes mellitus without mention of complication, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.02",
+            "display": "Diabetes mellitus without mention of complication, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.03",
+            "display": "Diabetes mellitus without mention of complication, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.1",
+            "display": "Diabetes with ketoacidosis, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.11",
+            "display": "Diabetes with ketoacidosis, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.12",
+            "display": "Diabetes with ketoacidosis, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.13",
+            "display": "Diabetes with ketoacidosis, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.2",
+            "display": "Diabetes with hyperosmolarity, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.21",
+            "display": "Diabetes with hyperosmolarity, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.22",
+            "display": "Diabetes with hyperosmolarity, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.23",
+            "display": "Diabetes with hyperosmolarity, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.3",
+            "display": "Diabetes with other coma, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.31",
+            "display": "Diabetes with other coma, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.32",
+            "display": "Diabetes with other coma, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.33",
+            "display": "Diabetes with other coma, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.4",
+            "display": "Diabetes with renal manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.41",
+            "display": "Diabetes with renal manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.42",
+            "display": "Diabetes with renal manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.43",
+            "display": "Diabetes with renal manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.5",
+            "display": "Diabetes with ophthalmic manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.51",
+            "display": "Diabetes with ophthalmic manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.52",
+            "display": "Diabetes with ophthalmic manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.53",
+            "display": "Diabetes with ophthalmic manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.6",
+            "display": "Diabetes with neurological manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.61",
+            "display": "Diabetes with neurological manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.62",
+            "display": "Diabetes with neurological manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.63",
+            "display": "Diabetes with neurological manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.7",
+            "display": "Diabetes with peripheral circulatory disorders, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.71",
+            "display": "Diabetes with peripheral circulatory disorders, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.72",
+            "display": "Diabetes with peripheral circulatory disorders, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.73",
+            "display": "Diabetes with peripheral circulatory disorders, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.8",
+            "display": "Diabetes with other specified manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.81",
+            "display": "Diabetes with other specified manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.82",
+            "display": "Diabetes with other specified manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.83",
+            "display": "Diabetes with other specified manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.9",
+            "display": "Diabetes with unspecified complication, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.91",
+            "display": "Diabetes with unspecified complication, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.92",
+            "display": "Diabetes with unspecified complication, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.93",
+            "display": "Diabetes with unspecified complication, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "357.2",
+            "display": "Polyneuropathy in diabetes"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.01",
+            "display": "Background diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.02",
+            "display": "Proliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.03",
+            "display": "Nonproliferative diabetic retinopathy NOS"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.04",
+            "display": "Mild nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.05",
+            "display": "Moderate nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.06",
+            "display": "Severe nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.07",
+            "display": "Diabetic macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "366.41",
+            "display": "Diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, unspecified as to episode of care or not applicable"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.01",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, delivered, with or without mention of antepartum condition"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.02",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, delivered, with mention of postpartum complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.03",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, antepartum condition or complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.04",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, postpartum condition or complication"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "4783006",
+            "display": "Maternal diabetes mellitus with hypoglycemia affecting fetus OR newborn (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "9859006",
+            "display": "Type 2 diabetes mellitus with acanthosis nigricans (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "23045005",
+            "display": "Insulin dependent diabetes mellitus type IA (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "28032008",
+            "display": "Insulin dependent diabetes mellitus type IB (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "44054006",
+            "display": "Diabetes mellitus type 2 (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "46635009",
+            "display": "Diabetes mellitus type 1 (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "75682002",
+            "display": "Diabetes mellitus caused by insulin receptor antibodies (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "76751001",
+            "display": "Diabetes mellitus in mother complicating pregnancy, childbirth AND/OR puerperium (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "81531005",
+            "display": "Diabetes mellitus type 2 in obese (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190330002",
+            "display": "Type 1 diabetes mellitus with hyperosmolar coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190331003",
+            "display": "Type 2 diabetes mellitus with hyperosmolar coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190368000",
+            "display": "Type I diabetes mellitus with ulcer (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190369008",
+            "display": "Type I diabetes mellitus with gangrene (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190372001",
+            "display": "Type I diabetes mellitus maturity onset (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190389009",
+            "display": "Type II diabetes mellitus with ulcer (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190390000",
+            "display": "Type II diabetes mellitus with gangrene (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199223000",
+            "display": "Diabetes mellitus during pregnancy, childbirth and the puerperium (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199225007",
+            "display": "Diabetes mellitus during pregnancy - baby delivered (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199226008",
+            "display": "Diabetes mellitus in the puerperium - baby delivered during current episode of care (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199227004",
+            "display": "Diabetes mellitus during pregnancy - baby not yet delivered (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199228009",
+            "display": "Diabetes mellitus in the puerperium - baby delivered during previous episode of care (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199229001",
+            "display": "Pre-existing type 1 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199230006",
+            "display": "Pre-existing type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237599002",
+            "display": "Insulin treated type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237618001",
+            "display": "Insulin-dependent diabetes mellitus secretory diarrhea syndrome (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237627000",
+            "display": "Pregnancy and type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "313435000",
+            "display": "Type I diabetes mellitus without complication (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "313436004",
+            "display": "Type II diabetes mellitus without complication (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314771006",
+            "display": "Type I diabetes mellitus with hypoglycemic coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314772004",
+            "display": "Type II diabetes mellitus with hypoglycemic coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314893005",
+            "display": "Type I diabetes mellitus with arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314902007",
+            "display": "Type II diabetes mellitus with peripheral angiopathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314903002",
+            "display": "Type II diabetes mellitus with arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314904008",
+            "display": "Type II diabetes mellitus with neuropathic arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "359642000",
+            "display": "Diabetes mellitus type 2 in nonobese (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.8",
+            "display": "Type 1 diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.9",
+            "display": "Type 1 diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.10",
+            "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.11",
+            "display": "Type 1 diabetes mellitus with ketoacidosis with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.21",
+            "display": "Type 1 diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.22",
+            "display": "Type 1 diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.29",
+            "display": "Type 1 diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.36",
+            "display": "Type 1 diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.39",
+            "display": "Type 1 diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.40",
+            "display": "Type 1 diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.41",
+            "display": "Type 1 diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.42",
+            "display": "Type 1 diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.43",
+            "display": "Type 1 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.44",
+            "display": "Type 1 diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.49",
+            "display": "Type 1 diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.51",
+            "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.52",
+            "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.59",
+            "display": "Type 1 diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.65",
+            "display": "Type 1 diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.69",
+            "display": "Type 1 diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.311",
+            "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.319",
+            "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.321",
+            "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.329",
+            "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.331",
+            "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.339",
+            "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.341",
+            "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.349",
+            "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.351",
+            "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.359",
+            "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.610",
+            "display": "Type 1 diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.618",
+            "display": "Type 1 diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.620",
+            "display": "Type 1 diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.621",
+            "display": "Type 1 diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.622",
+            "display": "Type 1 diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.628",
+            "display": "Type 1 diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.630",
+            "display": "Type 1 diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.638",
+            "display": "Type 1 diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.641",
+            "display": "Type 1 diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.649",
+            "display": "Type 1 diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.00",
+            "display": "Type 2 diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.01",
+            "display": "Type 2 diabetes mellitus with hyperosmolarity with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.8",
+            "display": "Type 2 diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.9",
+            "display": "Type 2 diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.21",
+            "display": "Type 2 diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.22",
+            "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.29",
+            "display": "Type 2 diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.36",
+            "display": "Type 2 diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.39",
+            "display": "Type 2 diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.40",
+            "display": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.41",
+            "display": "Type 2 diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.42",
+            "display": "Type 2 diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.43",
+            "display": "Type 2 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.44",
+            "display": "Type 2 diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.49",
+            "display": "Type 2 diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.51",
+            "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.52",
+            "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.59",
+            "display": "Type 2 diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.65",
+            "display": "Type 2 diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.69",
+            "display": "Type 2 diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.311",
+            "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.319",
+            "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.321",
+            "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.329",
+            "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.331",
+            "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.339",
+            "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.341",
+            "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.349",
+            "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.351",
+            "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.359",
+            "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.610",
+            "display": "Type 2 diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.618",
+            "display": "Type 2 diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.620",
+            "display": "Type 2 diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.621",
+            "display": "Type 2 diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.622",
+            "display": "Type 2 diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.628",
+            "display": "Type 2 diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.630",
+            "display": "Type 2 diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.638",
+            "display": "Type 2 diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.641",
+            "display": "Type 2 diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.649",
+            "display": "Type 2 diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.00",
+            "display": "Other specified diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.01",
+            "display": "Other specified diabetes mellitus with hyperosmolarity with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.8",
+            "display": "Other specified diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.9",
+            "display": "Other specified diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.10",
+            "display": "Other specified diabetes mellitus with ketoacidosis without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.11",
+            "display": "Other specified diabetes mellitus with ketoacidosis with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.21",
+            "display": "Other specified diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.22",
+            "display": "Other specified diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.29",
+            "display": "Other specified diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.36",
+            "display": "Other specified diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.39",
+            "display": "Other specified diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.40",
+            "display": "Other specified diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.41",
+            "display": "Other specified diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.42",
+            "display": "Other specified diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.43",
+            "display": "Other specified diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.44",
+            "display": "Other specified diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.49",
+            "display": "Other specified diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.51",
+            "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.52",
+            "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.59",
+            "display": "Other specified diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.65",
+            "display": "Other specified diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.69",
+            "display": "Other specified diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.311",
+            "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.319",
+            "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.321",
+            "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.329",
+            "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.331",
+            "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.339",
+            "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.341",
+            "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.349",
+            "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.351",
+            "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.359",
+            "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.610",
+            "display": "Other specified diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.618",
+            "display": "Other specified diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.620",
+            "display": "Other specified diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.621",
+            "display": "Other specified diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.622",
+            "display": "Other specified diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.628",
+            "display": "Other specified diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.630",
+            "display": "Other specified diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.638",
+            "display": "Other specified diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.641",
+            "display": "Other specified diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.649",
+            "display": "Other specified diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.019",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.02",
+            "display": "Pre-existing type 1 diabetes mellitus, in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.03",
+            "display": "Pre-existing type 1 diabetes mellitus, in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.011",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.012",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.013",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.12",
+            "display": "Pre-existing type 2 diabetes mellitus, in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.13",
+            "display": "Pre-existing type 2 diabetes mellitus, in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.32",
+            "display": "Unspecified pre-existing diabetes mellitus in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.33",
+            "display": "Unspecified pre-existing diabetes mellitus in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.82",
+            "display": "Other pre-existing diabetes mellitus in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.83",
+            "display": "Other pre-existing diabetes mellitus in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.111",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.112",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.113",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.119",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.311",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.312",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.313",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.319",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.811",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.812",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.813",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.819",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250",
+            "display": "Diabetes mellitus without mention of complication, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.01",
+            "display": "Diabetes mellitus without mention of complication, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.02",
+            "display": "Diabetes mellitus without mention of complication, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.03",
+            "display": "Diabetes mellitus without mention of complication, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.1",
+            "display": "Diabetes with ketoacidosis, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.11",
+            "display": "Diabetes with ketoacidosis, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.12",
+            "display": "Diabetes with ketoacidosis, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.13",
+            "display": "Diabetes with ketoacidosis, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.2",
+            "display": "Diabetes with hyperosmolarity, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.21",
+            "display": "Diabetes with hyperosmolarity, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.22",
+            "display": "Diabetes with hyperosmolarity, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.23",
+            "display": "Diabetes with hyperosmolarity, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.3",
+            "display": "Diabetes with other coma, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.31",
+            "display": "Diabetes with other coma, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.32",
+            "display": "Diabetes with other coma, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.33",
+            "display": "Diabetes with other coma, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.4",
+            "display": "Diabetes with renal manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.41",
+            "display": "Diabetes with renal manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.42",
+            "display": "Diabetes with renal manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.43",
+            "display": "Diabetes with renal manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.5",
+            "display": "Diabetes with ophthalmic manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.51",
+            "display": "Diabetes with ophthalmic manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.52",
+            "display": "Diabetes with ophthalmic manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.53",
+            "display": "Diabetes with ophthalmic manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.6",
+            "display": "Diabetes with neurological manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.61",
+            "display": "Diabetes with neurological manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.62",
+            "display": "Diabetes with neurological manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.63",
+            "display": "Diabetes with neurological manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.7",
+            "display": "Diabetes with peripheral circulatory disorders, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.71",
+            "display": "Diabetes with peripheral circulatory disorders, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.72",
+            "display": "Diabetes with peripheral circulatory disorders, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.73",
+            "display": "Diabetes with peripheral circulatory disorders, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.8",
+            "display": "Diabetes with other specified manifestations, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.81",
+            "display": "Diabetes with other specified manifestations, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.82",
+            "display": "Diabetes with other specified manifestations, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.83",
+            "display": "Diabetes with other specified manifestations, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.9",
+            "display": "Diabetes with unspecified complication, type II or unspecified type, not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.91",
+            "display": "Diabetes with unspecified complication, type I [juvenile type], not stated as uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.92",
+            "display": "Diabetes with unspecified complication, type II or unspecified type, uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "250.93",
+            "display": "Diabetes with unspecified complication, type I [juvenile type], uncontrolled"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "357.2",
+            "display": "Polyneuropathy in diabetes"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.01",
+            "display": "Background diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.02",
+            "display": "Proliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.03",
+            "display": "Nonproliferative diabetic retinopathy NOS"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.04",
+            "display": "Mild nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.05",
+            "display": "Moderate nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.06",
+            "display": "Severe nonproliferative diabetic retinopathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "362.07",
+            "display": "Diabetic macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "366.41",
+            "display": "Diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, unspecified as to episode of care or not applicable"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.01",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, delivered, with or without mention of antepartum condition"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.02",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, delivered, with mention of postpartum complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.03",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, antepartum condition or complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD9CM",
+        "version": "2013",
+        "concept": [
+          {
+            "code": "648.04",
+            "display": "Diabetes mellitus of mother, complicating pregnancy, childbirth, or the puerperium, postpartum condition or complication"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "4783006",
+            "display": "Maternal diabetes mellitus with hypoglycemia affecting fetus OR newborn (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "9859006",
+            "display": "Type 2 diabetes mellitus with acanthosis nigricans (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "23045005",
+            "display": "Insulin dependent diabetes mellitus type IA (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "28032008",
+            "display": "Insulin dependent diabetes mellitus type IB (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "44054006",
+            "display": "Diabetes mellitus type 2 (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "46635009",
+            "display": "Diabetes mellitus type 1 (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "75682002",
+            "display": "Diabetes mellitus caused by insulin receptor antibodies (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "76751001",
+            "display": "Diabetes mellitus in mother complicating pregnancy, childbirth AND/OR puerperium (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "81531005",
+            "display": "Diabetes mellitus type 2 in obese (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190330002",
+            "display": "Type 1 diabetes mellitus with hyperosmolar coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190331003",
+            "display": "Type 2 diabetes mellitus with hyperosmolar coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190368000",
+            "display": "Type I diabetes mellitus with ulcer (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190369008",
+            "display": "Type I diabetes mellitus with gangrene (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190372001",
+            "display": "Type I diabetes mellitus maturity onset (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190389009",
+            "display": "Type II diabetes mellitus with ulcer (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "190390000",
+            "display": "Type II diabetes mellitus with gangrene (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199223000",
+            "display": "Diabetes mellitus during pregnancy, childbirth and the puerperium (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199225007",
+            "display": "Diabetes mellitus during pregnancy - baby delivered (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199226008",
+            "display": "Diabetes mellitus in the puerperium - baby delivered during current episode of care (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199227004",
+            "display": "Diabetes mellitus during pregnancy - baby not yet delivered (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199228009",
+            "display": "Diabetes mellitus in the puerperium - baby delivered during previous episode of care (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199229001",
+            "display": "Pre-existing type 1 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "199230006",
+            "display": "Pre-existing type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237599002",
+            "display": "Insulin treated type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237618001",
+            "display": "Insulin-dependent diabetes mellitus secretory diarrhea syndrome (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "237627000",
+            "display": "Pregnancy and type 2 diabetes mellitus (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "313435000",
+            "display": "Type I diabetes mellitus without complication (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "313436004",
+            "display": "Type II diabetes mellitus without complication (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314771006",
+            "display": "Type I diabetes mellitus with hypoglycemic coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314772004",
+            "display": "Type II diabetes mellitus with hypoglycemic coma (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314893005",
+            "display": "Type I diabetes mellitus with arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314902007",
+            "display": "Type II diabetes mellitus with peripheral angiopathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314903002",
+            "display": "Type II diabetes mellitus with arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "314904008",
+            "display": "Type II diabetes mellitus with neuropathic arthropathy (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "SNOMEDCT",
+        "version": "2016-09",
+        "concept": [
+          {
+            "code": "359642000",
+            "display": "Diabetes mellitus type 2 in nonobese (disorder)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.8",
+            "display": "Type 1 diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.9",
+            "display": "Type 1 diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.10",
+            "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.11",
+            "display": "Type 1 diabetes mellitus with ketoacidosis with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.21",
+            "display": "Type 1 diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.22",
+            "display": "Type 1 diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.29",
+            "display": "Type 1 diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.36",
+            "display": "Type 1 diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.39",
+            "display": "Type 1 diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.40",
+            "display": "Type 1 diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.41",
+            "display": "Type 1 diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.42",
+            "display": "Type 1 diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.43",
+            "display": "Type 1 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.44",
+            "display": "Type 1 diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.49",
+            "display": "Type 1 diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.51",
+            "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.52",
+            "display": "Type 1 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.59",
+            "display": "Type 1 diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.65",
+            "display": "Type 1 diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.69",
+            "display": "Type 1 diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.311",
+            "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.319",
+            "display": "Type 1 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.321",
+            "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.329",
+            "display": "Type 1 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.331",
+            "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.339",
+            "display": "Type 1 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.341",
+            "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.349",
+            "display": "Type 1 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.351",
+            "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.359",
+            "display": "Type 1 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.610",
+            "display": "Type 1 diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.618",
+            "display": "Type 1 diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.620",
+            "display": "Type 1 diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.621",
+            "display": "Type 1 diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.622",
+            "display": "Type 1 diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.628",
+            "display": "Type 1 diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.630",
+            "display": "Type 1 diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.638",
+            "display": "Type 1 diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.641",
+            "display": "Type 1 diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E10.649",
+            "display": "Type 1 diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.00",
+            "display": "Type 2 diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.01",
+            "display": "Type 2 diabetes mellitus with hyperosmolarity with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.8",
+            "display": "Type 2 diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.9",
+            "display": "Type 2 diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.21",
+            "display": "Type 2 diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.22",
+            "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.29",
+            "display": "Type 2 diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.36",
+            "display": "Type 2 diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.39",
+            "display": "Type 2 diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.40",
+            "display": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.41",
+            "display": "Type 2 diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.42",
+            "display": "Type 2 diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.43",
+            "display": "Type 2 diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.44",
+            "display": "Type 2 diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.49",
+            "display": "Type 2 diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.51",
+            "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.52",
+            "display": "Type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.59",
+            "display": "Type 2 diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.65",
+            "display": "Type 2 diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.69",
+            "display": "Type 2 diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.311",
+            "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.319",
+            "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.321",
+            "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.329",
+            "display": "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.331",
+            "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.339",
+            "display": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.341",
+            "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.349",
+            "display": "Type 2 diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.351",
+            "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.359",
+            "display": "Type 2 diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.610",
+            "display": "Type 2 diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.618",
+            "display": "Type 2 diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.620",
+            "display": "Type 2 diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.621",
+            "display": "Type 2 diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.622",
+            "display": "Type 2 diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.628",
+            "display": "Type 2 diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.630",
+            "display": "Type 2 diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.638",
+            "display": "Type 2 diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.641",
+            "display": "Type 2 diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E11.649",
+            "display": "Type 2 diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.00",
+            "display": "Other specified diabetes mellitus with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC)"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.01",
+            "display": "Other specified diabetes mellitus with hyperosmolarity with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.8",
+            "display": "Other specified diabetes mellitus with unspecified complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.9",
+            "display": "Other specified diabetes mellitus without complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.10",
+            "display": "Other specified diabetes mellitus with ketoacidosis without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.11",
+            "display": "Other specified diabetes mellitus with ketoacidosis with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.21",
+            "display": "Other specified diabetes mellitus with diabetic nephropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.22",
+            "display": "Other specified diabetes mellitus with diabetic chronic kidney disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.29",
+            "display": "Other specified diabetes mellitus with other diabetic kidney complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.36",
+            "display": "Other specified diabetes mellitus with diabetic cataract"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.39",
+            "display": "Other specified diabetes mellitus with other diabetic ophthalmic complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.40",
+            "display": "Other specified diabetes mellitus with diabetic neuropathy, unspecified"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.41",
+            "display": "Other specified diabetes mellitus with diabetic mononeuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.42",
+            "display": "Other specified diabetes mellitus with diabetic polyneuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.43",
+            "display": "Other specified diabetes mellitus with diabetic autonomic (poly)neuropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.44",
+            "display": "Other specified diabetes mellitus with diabetic amyotrophy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.49",
+            "display": "Other specified diabetes mellitus with other diabetic neurological complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.51",
+            "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.52",
+            "display": "Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.59",
+            "display": "Other specified diabetes mellitus with other circulatory complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.65",
+            "display": "Other specified diabetes mellitus with hyperglycemia"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.69",
+            "display": "Other specified diabetes mellitus with other specified complication"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.311",
+            "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.319",
+            "display": "Other specified diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.321",
+            "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.329",
+            "display": "Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.331",
+            "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.339",
+            "display": "Other specified diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.341",
+            "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.349",
+            "display": "Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.351",
+            "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy with macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.359",
+            "display": "Other specified diabetes mellitus with proliferative diabetic retinopathy without macular edema"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.610",
+            "display": "Other specified diabetes mellitus with diabetic neuropathic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.618",
+            "display": "Other specified diabetes mellitus with other diabetic arthropathy"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.620",
+            "display": "Other specified diabetes mellitus with diabetic dermatitis"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.621",
+            "display": "Other specified diabetes mellitus with foot ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.622",
+            "display": "Other specified diabetes mellitus with other skin ulcer"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.628",
+            "display": "Other specified diabetes mellitus with other skin complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.630",
+            "display": "Other specified diabetes mellitus with periodontal disease"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.638",
+            "display": "Other specified diabetes mellitus with other oral complications"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.641",
+            "display": "Other specified diabetes mellitus with hypoglycemia with coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "E13.649",
+            "display": "Other specified diabetes mellitus with hypoglycemia without coma"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.019",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.02",
+            "display": "Pre-existing type 1 diabetes mellitus, in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.03",
+            "display": "Pre-existing type 1 diabetes mellitus, in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.011",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.012",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.013",
+            "display": "Pre-existing type 1 diabetes mellitus, in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.12",
+            "display": "Pre-existing type 2 diabetes mellitus, in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.13",
+            "display": "Pre-existing type 2 diabetes mellitus, in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.32",
+            "display": "Unspecified pre-existing diabetes mellitus in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.33",
+            "display": "Unspecified pre-existing diabetes mellitus in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.82",
+            "display": "Other pre-existing diabetes mellitus in childbirth"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.83",
+            "display": "Other pre-existing diabetes mellitus in the puerperium"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.111",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.112",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.113",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.119",
+            "display": "Pre-existing type 2 diabetes mellitus, in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.311",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.312",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.313",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.319",
+            "display": "Unspecified pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.811",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, first trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.812",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, second trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.813",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, third trimester"
+          }
+        ]
+      },
+      {
+        "system": "ICD10CM",
+        "version": "2017",
+        "concept": [
+          {
+            "code": "O24.819",
+            "display": "Other pre-existing diabetes mellitus in pregnancy, unspecified trimester"
+          }
+        ]
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,82 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "exclusive-breastfeeding-intervention-01",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "exclusive-breastfeeding-intervention-01"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Exclusive Breastfeeding Intervention-01",
+  "status": "active",
+  "date": "2015-03-08",
+  "description": "Exclusive breastfeeding intervention intended to improve outcomes for exclusive breastmilk feeding of newborns by ensuring that an appropriate breastfeeding readiness assessment order is created if necessary.",
+  "topic": [
+    {
+      "text": "Exclusive Breastfeeding"
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/library-exclusive-breastfeeding-cds-logic"
+    }
+  ],
+  "actionDefinition": [
+    {
+      "title": "Mother should be administered a breastfeeding readiness assessment.",
+      "triggerDefinition": [
+        {
+          "type": "named-event",
+          "eventName": "Admission"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Birth"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Infant Transfer to Recovery"
+        },
+        {
+          "type": "named-event",
+          "eventName": "Transfer to Post-Partum"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": "Should Create Assessment Order"
+        }
+      ],
+      "actionDefinition": [
+        {
+          "title": "Create the breastfeeding readiness assessment order.",
+          "textEquivalent": "Administer a breastfeeding readiness assessment.",
+          "type": {
+            "code": "create"
+          },
+          "dynamicValue": [
+            {
+              "path": "/",
+              "expression": "Create Breastfeeding Risk Assessment"
+            }
+          ]
+        },
+        {
+          "title": "Notify the provider to sign the order.",
+          "textEquivalent": "A Breastfeeding Readiness Assessment is recommended, please authorize or reject the order.",
+          "type": {
+            "code": "create"
+          },
+          "dynamicValue": [
+            {
+              "path": "/",
+              "expression": "Communication Request to Provider"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

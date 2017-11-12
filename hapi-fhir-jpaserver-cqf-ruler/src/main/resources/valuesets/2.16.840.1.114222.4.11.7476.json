@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7476",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "42425007",
+            "display": "Equivocal"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "260385009",
+            "display": "Negative"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "10828004",
+            "display": "Positive"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "373121007",
+            "display": "Test not done"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "42425007",
+            "display": "Equivocal"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "260385009",
+            "display": "Negative"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "10828004",
+            "display": "Positive"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "373121007",
+            "display": "Test not done"
+          }
+        ]
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,147 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1011",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2017-07-25T09:54:33.579+00:00"
+  },
+  "url": "http://measure.eval.kanvix.com/cql-measure-processor/baseDstu3/Valueset/2.16.840.1.113883.3.464.1003.198.12.1011",
+  "name": "Fecal Occult Blood Test (FOBT) eMeasure",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "version": "2.44.13AA",
+        "concept": [
+          {
+            "code": "27396-1"
+          },
+          {
+            "code": "58453-2"
+          },
+          {
+            "code": "2335-8"
+          },
+          {
+            "code": "14563-1"
+          },
+          {
+            "code": "14564-9"
+          },
+          {
+            "code": "14565-6"
+          },
+          {
+            "code": "12503-9"
+          },
+          {
+            "code": "12504-7"
+          },
+          {
+            "code": "27401-9"
+          },
+          {
+            "code": "27925-7"
+          },
+          {
+            "code": "27926-5"
+          },
+          {
+            "code": "29771-3"
+          },
+          {
+            "code": "57905-2"
+          },
+          {
+            "code": "56490-6"
+          },
+          {
+            "code": "56491-4"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "timestamp": "2016-09-20T13:32:34.390-04:00",
+    "total": 15,
+    "offset": 0,
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "code": "27396-1",
+        "display": "Hemoglobin.gastrointestinal [Mass/mass] in Stool"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "58453-2",
+        "display": "Hemoglobin.gastrointestinal [Mass/volume] in Stool by Immunologic method"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "2335-8",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "14563-1",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --1st specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "14564-9",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --2nd specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "14565-6",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --3rd specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "12503-9",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --4th specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "12504-7",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --5th specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "27401-9",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --6th specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "27925-7",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --7th specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "27926-5",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool --8th specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "29771-3",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool by Immunologic method"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "57905-2",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool by Immunologic method --1st specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "56490-6",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool by Immunologic method --2nd specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "56491-4",
+        "display": "Hemoglobin.gastrointestinal [Presence] in Stool by Immunologic method --3rd specimen"
+      }
+    ]
+  }
+}

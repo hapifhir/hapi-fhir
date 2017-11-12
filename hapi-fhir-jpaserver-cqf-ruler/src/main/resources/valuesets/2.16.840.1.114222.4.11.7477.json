@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7477",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1446",
+            "display": ">= 4 fold rise"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "260385009",
+            "display": "Negative"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "10828004",
+            "display": "Positive"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "373121007",
+            "display": "Test not done"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1446",
+            "display": ">= 4 fold rise"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "260385009",
+            "display": "Negative"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "10828004",
+            "display": "Positive"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "373121007",
+            "display": "Test not done"
+          }
+        ]
+      }
+    ]
+  }
+}
+

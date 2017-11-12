@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7343",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "2423009",
+            "display": "Chikungunya virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "2423009",
+            "display": "Chikungunya virus"
+          }
+        ]
+      }
+    ]
+  }
+}
+

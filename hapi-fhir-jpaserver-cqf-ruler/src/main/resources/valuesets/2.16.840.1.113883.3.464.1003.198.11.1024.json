@@ -1,0 +1,64 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.11.1024",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "17856-6",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC"
+          }
+        ]
+      },
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "4548-4",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+          }
+        ]
+      },
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "4549-2",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood by Electrophoresis"
+          }
+        ]
+      },
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "17856-6",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC"
+          }
+        ]
+      },
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "4548-4",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+          }
+        ]
+      },
+      {
+        "system": "LOINC",
+        "concept": [
+          {
+            "code": "4549-2",
+            "display": "Hemoglobin A1c/Hemoglobin.total in Blood by Electrophoresis"
+          }
+        ]
+      }
+    ]
+  }
+}
+

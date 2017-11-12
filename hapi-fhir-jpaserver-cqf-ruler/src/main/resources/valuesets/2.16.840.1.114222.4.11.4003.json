@@ -1,0 +1,250 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.4003",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "243617008",
+            "display": "Bunyavirus serogroup California"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "64979004",
+            "display": "California encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "243601002",
+            "display": "Eastern equine encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9194001",
+            "display": "Jamestown Canyon virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "61399004",
+            "display": "Keystone virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "30434006",
+            "display": "La Crosse virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "45838003",
+            "display": "Powassan virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "58432001",
+            "display": "St. Louis encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "28732002",
+            "display": "Snowshoe hare virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "87919008",
+            "display": "Trivittatus virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57311007",
+            "display": "West Nile virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "11428003",
+            "display": "Western equine encephalomyelitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "243617008",
+            "display": "Bunyavirus serogroup California"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "64979004",
+            "display": "California encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "243601002",
+            "display": "Eastern equine encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9194001",
+            "display": "Jamestown Canyon virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "61399004",
+            "display": "Keystone virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "30434006",
+            "display": "La Crosse virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "45838003",
+            "display": "Powassan virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "58432001",
+            "display": "St. Louis encephalitis virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "28732002",
+            "display": "Snowshoe hare virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "87919008",
+            "display": "Trivittatus virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57311007",
+            "display": "West Nile virus"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "11428003",
+            "display": "Western equine encephalomyelitis virus"
+          }
+        ]
+      }
+    ]
+  }
+}
+

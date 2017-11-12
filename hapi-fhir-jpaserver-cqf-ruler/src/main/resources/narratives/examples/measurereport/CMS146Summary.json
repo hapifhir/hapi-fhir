@@ -1,0 +1,279 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "measurereport-cms146-cat3-example",
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "reporter",
+      "name": "Good Health Hospital"
+    }
+  ],
+  "measure": {
+    "reference": "Measure/CMS146"
+  },
+  "type": "summary",
+  "period": {
+    "start": "2014-01-01",
+    "end": "2014-03-31"
+  },
+  "status": "complete",
+  "reportingOrganization": {
+    "reference": "#reporter"
+  },
+  "group": [
+    {
+      "identifier": {
+        "value": "CMS146-group-1"
+      },
+      "population": [
+        {
+          "type": "initial-population",
+          "count": 500
+        },
+        {
+          "type": "numerator",
+          "count": 200
+        },
+        {
+          "type": "denominator",
+          "count": 500
+        },
+        {
+          "type": "denominator-exclusion",
+          "count": 100
+        }
+      ],
+      "stratifier": [
+        {
+          "identifier": {
+            "value": "stratifier-ages-up-to-9"
+          },
+          "group": [
+            {
+              "value": "true",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            },
+            {
+              "value": "false",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "identifier": {
+            "value": "stratifier-ages-10-plus"
+          },
+          "group": [
+            {
+              "value": "true",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            },
+            {
+              "value": "false",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "identifier": {
+            "value": "stratifier-gender"
+          },
+          "group": [
+            {
+              "value": "male",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            },
+            {
+              "value": "female",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 250
+                },
+                {
+                  "type": "numerator",
+                  "count": 100
+                },
+                {
+                  "type": "denominator",
+                  "count": 250
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 50
+                }
+              ]
+            },
+            {
+              "value": "other",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 0
+                },
+                {
+                  "type": "numerator",
+                  "count": 0
+                },
+                {
+                  "type": "denominator",
+                  "count": 0
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 0
+                }
+              ]
+            },
+            {
+              "value": "unknown",
+              "population": [
+                {
+                  "type": "initial-population",
+                  "count": 0
+                },
+                {
+                  "type": "numerator",
+                  "count": 0
+                },
+                {
+                  "type": "denominator",
+                  "count": 0
+                },
+                {
+                  "type": "denominator-exclusion",
+                  "count": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "supplementalData": [
+        {
+          "identifier": {
+            "value": "supplemental-data-gender"
+          },
+          "group": [
+            {
+              "value": "male",
+              "count": 250
+            },
+            {
+              "value": "female",
+              "count": 250
+            },
+            {
+              "value": "other",
+              "count": 0
+            },
+            {
+              "value": "unknown",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "identifier": {
+            "value": "supplemental-data-deceased"
+          },
+          "group": [
+            {
+              "value": "true",
+              "count": 0
+            },
+            {
+              "value": "false",
+              "count": 500
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1190 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7457",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VIR",
+            "display": "VIRGIN ISLANDS, U.S."
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ASM",
+            "display": "AMERICAN SAMOA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "AIA",
+            "display": "ANGUILLA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ATG",
+            "display": "ANTIGUA AND BARBUDA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ARG",
+            "display": "ARGENTINA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ABW",
+            "display": "ARUBA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BHS",
+            "display": "BAHAMAS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BRB",
+            "display": "BARBADOS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BLZ",
+            "display": "BELIZE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BOL",
+            "display": "BOLIVIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BES",
+            "display": "BONAIRE, SINT EUSTATIUS and SABA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BRA",
+            "display": "BRAZIL"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CPV",
+            "display": "CAPE VERDE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CYM",
+            "display": "CAYMAN ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "COL",
+            "display": "COLOMBIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CRI",
+            "display": "COSTA RICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CUB",
+            "display": "CUBA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CUW",
+            "display": "CURACAO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "DMA",
+            "display": "DOMINICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "DOM",
+            "display": "DOMINICAN REPUBLIC"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ECU",
+            "display": "ECUADOR"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SLV",
+            "display": "EL SALVADOR"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "FJI",
+            "display": "FIJI"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GUF",
+            "display": "FRENCH GUIANA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GRD",
+            "display": "GRENADA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GLP",
+            "display": "GUADELOUPE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GTM",
+            "display": "GUATEMALA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GUY",
+            "display": "GUYANA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "HTI",
+            "display": "HAITI"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "HND",
+            "display": "HONDURAS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "JAM",
+            "display": "JAMAICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "FSM",
+            "display": "KOSRAE, FEDERATED STATES OF MICRONESIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MHL",
+            "display": "MARSHALL ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MTQ",
+            "display": "MARTINIQUE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MEX",
+            "display": "MEXICO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MSR",
+            "display": "MONTSERRAT"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "NCL",
+            "display": "NEW CALEDONIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "NIC",
+            "display": "NICARAGUA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PLW",
+            "display": "PALAU"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PAN",
+            "display": "PANAMA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PNG",
+            "display": "PAPUA NEW GUINEA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PRY",
+            "display": "PARAGUAY"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PER",
+            "display": "PERU"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PRI",
+            "display": "PUERTO RICO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BLM",
+            "display": "SAINT BARTHÉLEMY"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "KNA",
+            "display": "SAINT KITTS AND NEVIS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "LCA",
+            "display": "SAINT LUCIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MAF",
+            "display": "SAINT MARTIN (FRENCH PART)"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VCT",
+            "display": "SAINT VINCENT AND THE GRENADINES"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "WSM",
+            "display": "SAMOA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SGP",
+            "display": "SINGAPORE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SXM",
+            "display": "SINT MAARTEN (DUTCH PART)"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SUR",
+            "display": "SURINAME"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TON",
+            "display": "TONGA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TTO",
+            "display": "TRINIDAD AND TOBAGO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TCA",
+            "display": "TURKS AND CAICOS ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "USA",
+            "display": "UNITED STATES"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VEN",
+            "display": "VENEZUELA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VGB",
+            "display": "VIRGIN ISLANDS, BRITISH"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VIR",
+            "display": "VIRGIN ISLANDS, U.S."
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ASM",
+            "display": "AMERICAN SAMOA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "AIA",
+            "display": "ANGUILLA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ATG",
+            "display": "ANTIGUA AND BARBUDA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ARG",
+            "display": "ARGENTINA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ABW",
+            "display": "ARUBA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BHS",
+            "display": "BAHAMAS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BRB",
+            "display": "BARBADOS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BLZ",
+            "display": "BELIZE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BOL",
+            "display": "BOLIVIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BES",
+            "display": "BONAIRE, SINT EUSTATIUS and SABA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BRA",
+            "display": "BRAZIL"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CPV",
+            "display": "CAPE VERDE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CYM",
+            "display": "CAYMAN ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "COL",
+            "display": "COLOMBIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CRI",
+            "display": "COSTA RICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CUB",
+            "display": "CUBA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "CUW",
+            "display": "CURACAO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "DMA",
+            "display": "DOMINICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "DOM",
+            "display": "DOMINICAN REPUBLIC"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "ECU",
+            "display": "ECUADOR"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SLV",
+            "display": "EL SALVADOR"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "FJI",
+            "display": "FIJI"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GUF",
+            "display": "FRENCH GUIANA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GRD",
+            "display": "GRENADA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GLP",
+            "display": "GUADELOUPE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GTM",
+            "display": "GUATEMALA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "GUY",
+            "display": "GUYANA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "HTI",
+            "display": "HAITI"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "HND",
+            "display": "HONDURAS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "JAM",
+            "display": "JAMAICA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "FSM",
+            "display": "KOSRAE, FEDERATED STATES OF MICRONESIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MHL",
+            "display": "MARSHALL ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MTQ",
+            "display": "MARTINIQUE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MEX",
+            "display": "MEXICO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MSR",
+            "display": "MONTSERRAT"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "NCL",
+            "display": "NEW CALEDONIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "NIC",
+            "display": "NICARAGUA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PLW",
+            "display": "PALAU"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PAN",
+            "display": "PANAMA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PNG",
+            "display": "PAPUA NEW GUINEA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PRY",
+            "display": "PARAGUAY"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PER",
+            "display": "PERU"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "PRI",
+            "display": "PUERTO RICO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "BLM",
+            "display": "SAINT BARTHÉLEMY"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "KNA",
+            "display": "SAINT KITTS AND NEVIS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "LCA",
+            "display": "SAINT LUCIA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "MAF",
+            "display": "SAINT MARTIN (FRENCH PART)"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VCT",
+            "display": "SAINT VINCENT AND THE GRENADINES"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "WSM",
+            "display": "SAMOA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SGP",
+            "display": "SINGAPORE"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SXM",
+            "display": "SINT MAARTEN (DUTCH PART)"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "SUR",
+            "display": "SURINAME"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TON",
+            "display": "TONGA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TTO",
+            "display": "TRINIDAD AND TOBAGO"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "TCA",
+            "display": "TURKS AND CAICOS ISLANDS"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "USA",
+            "display": "UNITED STATES"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VEN",
+            "display": "VENEZUELA"
+          }
+        ]
+      },
+      {
+        "system": "urn:iso:std:iso:3166",
+        "version": "1997",
+        "concept": [
+          {
+            "code": "VGB",
+            "display": "VIRGIN ISLANDS, BRITISH"
+          }
+        ]
+      }
+    ]
+  }
+}
+

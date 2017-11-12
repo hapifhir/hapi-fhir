@@ -1,0 +1,590 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7480",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81154-7",
+            "display": "Dengue and Chikungunya and Zika virus panel by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82465-6",
+            "display": "Mosquito identified [Type] in Environmental specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82464-9",
+            "display": "Mosquito count [#] in Environmental specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81149-7",
+            "display": "Zika virus envelope (E) gene [Presence] in Amniotic fluid by Probe and \ntarget amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80826-1",
+            "display": "Zika virus envelope (E) gene [Presence] in Cerebral spinal fluid by Probe \nand target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80825-3",
+            "display": "Zika virus envelope (E) gene [Presence] in Serum by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81148-9",
+            "display": "Zika virus envelope (E) gene [Presence] in Urine by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80618-2",
+            "display": "Zika virus IgM Ab [Units/volume] in Cerebral spinal fluid by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80823-8",
+            "display": "Zika virus IgM Ab [Presence] in Cerebral spinal fluid by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80619-0",
+            "display": "Zika virus IgM Ab [Units/volume] in Serum by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80824-6",
+            "display": "Zika virus IgM Ab [Presence] in Serum by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82731-1",
+            "display": "Zika virus IgM Ab [Presence] in Serum by Immunofluorescence"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80821-2",
+            "display": "Zika virus neutralizing antibody [Presence] in Cerebral spinal fluid by \nNeutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80822-0",
+            "display": "Zika virus neutralizing antibody [Presence] in Serum by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80624-0",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest --1st specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80622-4",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test \n--1st specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80625-7",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest --2nd specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80623-2",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test \n--2nd specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80621-6",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80620-8",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86321-7",
+            "display": "Zika virus neutralizing antibody [Titer] in Unspecified specimen by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86320-9",
+            "display": "Zika virus neutralizing antibody [Presence] in Unspecified specimen by \nNeutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "83069-5",
+            "display": "Zika virus non-structural protein 1 IgG Ab [Units/volume] in Serum or \nPlasma by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85621-1",
+            "display": "Zika virus RNA [Presence] in Amniotic fluid by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86594-9",
+            "display": "Zika virus RNA [Presence] in Cerebral spinal fluid by Probe and target \namplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86190-6",
+            "display": "Zika virus RNA [Presence] in Plasma from donor by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85622-9",
+            "display": "Zika virus RNA [Presence] in Serum by Probe and target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85623-7",
+            "display": "Zika virus RNA [Presence] in Urine by Probe and target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "79190-5",
+            "display": "Zika virus RNA [Presence] in Unspecified specimen by Probe and target \namplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81154-7",
+            "display": "Dengue and Chikungunya and Zika virus panel by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82465-6",
+            "display": "Mosquito identified [Type] in Environmental specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82464-9",
+            "display": "Mosquito count [#] in Environmental specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81149-7",
+            "display": "Zika virus envelope (E) gene [Presence] in Amniotic fluid by Probe and \ntarget amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80826-1",
+            "display": "Zika virus envelope (E) gene [Presence] in Cerebral spinal fluid by Probe \nand target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80825-3",
+            "display": "Zika virus envelope (E) gene [Presence] in Serum by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "81148-9",
+            "display": "Zika virus envelope (E) gene [Presence] in Urine by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80618-2",
+            "display": "Zika virus IgM Ab [Units/volume] in Cerebral spinal fluid by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80823-8",
+            "display": "Zika virus IgM Ab [Presence] in Cerebral spinal fluid by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80619-0",
+            "display": "Zika virus IgM Ab [Units/volume] in Serum by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80824-6",
+            "display": "Zika virus IgM Ab [Presence] in Serum by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "82731-1",
+            "display": "Zika virus IgM Ab [Presence] in Serum by Immunofluorescence"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80821-2",
+            "display": "Zika virus neutralizing antibody [Presence] in Cerebral spinal fluid by \nNeutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80822-0",
+            "display": "Zika virus neutralizing antibody [Presence] in Serum by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80624-0",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest --1st specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80622-4",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test \n--1st specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80625-7",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest --2nd specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80623-2",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test \n--2nd specimen"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80621-6",
+            "display": "Zika virus neutralizing antibody [Titer] in Cerebral spinal fluid by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "80620-8",
+            "display": "Zika virus neutralizing antibody [Titer] in Serum by Neutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86321-7",
+            "display": "Zika virus neutralizing antibody [Titer] in Unspecified specimen by Neutralization \ntest"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86320-9",
+            "display": "Zika virus neutralizing antibody [Presence] in Unspecified specimen by \nNeutralization test"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "83069-5",
+            "display": "Zika virus non-structural protein 1 IgG Ab [Units/volume] in Serum or \nPlasma by Immunoassay"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85621-1",
+            "display": "Zika virus RNA [Presence] in Amniotic fluid by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86594-9",
+            "display": "Zika virus RNA [Presence] in Cerebral spinal fluid by Probe and target \namplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "86190-6",
+            "display": "Zika virus RNA [Presence] in Plasma from donor by Probe and target amplification \nmethod"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85622-9",
+            "display": "Zika virus RNA [Presence] in Serum by Probe and target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "85623-7",
+            "display": "Zika virus RNA [Presence] in Urine by Probe and target amplification method"
+          }
+        ]
+      },
+      {
+        "system": "http://loinc.org",
+        "version": "2.61",
+        "concept": [
+          {
+            "code": "79190-5",
+            "display": "Zika virus RNA [Presence] in Unspecified specimen by Probe and target \namplification method"
+          }
+        ]
+      }
+    ]
+  }
+}
+

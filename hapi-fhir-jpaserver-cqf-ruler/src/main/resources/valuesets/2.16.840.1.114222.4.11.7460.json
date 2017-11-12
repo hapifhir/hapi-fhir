@@ -1,0 +1,550 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.7460",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "386661006",
+            "display": "Fever"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "43724002",
+            "display": "Chills/ Rigors"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271795006",
+            "display": "Fatigue and Malaise"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271807003",
+            "display": "Rash"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "68962001",
+            "display": "Myalgia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57676002",
+            "display": "Arthralgia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "3723001",
+            "display": "Arthritis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "25064002",
+            "display": "Headache"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "44695005",
+            "display": "Paralysis or Paresis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "161882006",
+            "display": "Stiff Neck"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "20262006",
+            "display": "Ataxia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "32798002",
+            "display": "Parkinsonism"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "419284004",
+            "display": "Altered Mental Status"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "91175000",
+            "display": "Seizures"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9826008",
+            "display": "Conjunctivitis"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1400",
+            "display": "Retro-orbital Pain (pain behind eye)"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "422587007",
+            "display": "Nausea"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "422400008",
+            "display": "Emesis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "62315008",
+            "display": "Diarrhea"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "21522001",
+            "display": "Abdominal pain / Tenderness"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "196746003",
+            "display": "Persistent vomiting"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "80515008",
+            "display": "Liver enlargement (Hepatomegaly)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1401",
+            "display": "Extravascular Fluid Accumulation (e.g. Pleural, Pericardial effusion, \nAscites)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1402",
+            "display": "Mucosal Bleeding (e.g. Epistaxis - nose bleeding, gastrointestinal bleeding)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1403",
+            "display": "Severe plasma leakage (shock, pleural effusion)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1404",
+            "display": "Severe bleeding"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1405",
+            "display": "Severe Organ Involvement (Liver, Heart, Neurologic  - central nervous \nsystem)"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "386661006",
+            "display": "Fever"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "43724002",
+            "display": "Chills/ Rigors"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271795006",
+            "display": "Fatigue and Malaise"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "271807003",
+            "display": "Rash"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "68962001",
+            "display": "Myalgia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "57676002",
+            "display": "Arthralgia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "3723001",
+            "display": "Arthritis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "25064002",
+            "display": "Headache"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "44695005",
+            "display": "Paralysis or Paresis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "161882006",
+            "display": "Stiff Neck"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "20262006",
+            "display": "Ataxia"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "32798002",
+            "display": "Parkinsonism"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "419284004",
+            "display": "Altered Mental Status"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "91175000",
+            "display": "Seizures"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "9826008",
+            "display": "Conjunctivitis"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1400",
+            "display": "Retro-orbital Pain (pain behind eye)"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "422587007",
+            "display": "Nausea"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "422400008",
+            "display": "Emesis"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "62315008",
+            "display": "Diarrhea"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "21522001",
+            "display": "Abdominal pain / Tenderness"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "196746003",
+            "display": "Persistent vomiting"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20160901",
+        "concept": [
+          {
+            "code": "80515008",
+            "display": "Liver enlargement (Hepatomegaly)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1401",
+            "display": "Extravascular Fluid Accumulation (e.g. Pleural, Pericardial effusion, \nAscites)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1402",
+            "display": "Mucosal Bleeding (e.g. Epistaxis - nose bleeding, gastrointestinal bleeding)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1403",
+            "display": "Severe plasma leakage (shock, pleural effusion)"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1404",
+            "display": "Severe bleeding"
+          }
+        ]
+      },
+      {
+        "system": "http://example.com",
+        "version": "02/23/2017",
+        "concept": [
+          {
+            "code": "PHC1405",
+            "display": "Severe Organ Involvement (Liver, Heart, Neurologic  - central nervous \nsystem)"
+          }
+        ]
+      }
+    ]
+  }
+}
+
