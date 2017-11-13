@@ -141,6 +141,8 @@ local.properties
 **/.target
 **/.project
 **/.classpath
+**/.factorypath
+**/.springBeans
 
 
 # PDT-specific

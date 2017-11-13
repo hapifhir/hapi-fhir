@@ -407,6 +407,7 @@
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.11</phloc_commons_version>
 		<spring_version>5.0.0.RELEASE</spring_version>
+		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<thymeleaf-version>3.0.7.RELEASE</thymeleaf-version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -973,6 +974,13 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-websocket</artifactId>
 				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
@@ -1884,6 +1892,7 @@
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>hapi-fhir-jacoco</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-spring-boot</module>
 				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>
 		</profile>
