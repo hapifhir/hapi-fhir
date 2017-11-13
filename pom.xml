@@ -374,6 +374,10 @@
 			<id>mouellet</id>
 			<name>Mathieu Ouellet</name>
 		</developer>
+		<developer>
+			<id>JiajingLiang</id>
+			<name>Jiajing Liang</name>
+		</developer>
 	</developers>
 
 	<licenses>

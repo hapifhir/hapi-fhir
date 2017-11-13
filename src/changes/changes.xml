@@ -200,6 +200,11 @@
 				as well as several examples.
 				Thanks to Mathieu Ouellet for the contribution!
 			</action>
+			<action type="add" issue="747">
+				JPA server now has lucene index support moved to separate classes from the entity
+				classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang
+				for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
