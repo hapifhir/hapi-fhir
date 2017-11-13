@@ -5,153 +5,153 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
- * by {@link UrlJavaParser}.
+ * by {@link UrlParser}.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
  *            operations with no return type.
  */
-public interface UrlJavaVisitor<T> extends ParseTreeVisitor<T> {
+public interface UrlVisitor<T> extends ParseTreeVisitor<T> {
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#fragmentaddress}.
+   * Visit a parse tree produced by {@link UrlParser#fragmentaddress}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitFragmentaddress(UrlJavaParser.FragmentaddressContext ctx);
+  T visitFragmentaddress(UrlParser.FragmentaddressContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#uri}.
+   * Visit a parse tree produced by {@link UrlParser#uri}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitUri(UrlJavaParser.UriContext ctx);
+  T visitUri(UrlParser.UriContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#url}.
+   * Visit a parse tree produced by {@link UrlParser#url}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitUrl(UrlJavaParser.UrlContext ctx);
+  T visitUrl(UrlParser.UrlContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#authority}.
+   * Visit a parse tree produced by {@link UrlParser#authority}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitAuthority(UrlJavaParser.AuthorityContext ctx);
+  T visitAuthority(UrlParser.AuthorityContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#host}.
+   * Visit a parse tree produced by {@link UrlParser#host}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitHost(UrlJavaParser.HostContext ctx);
+  T visitHost(UrlParser.HostContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#hostname}.
+   * Visit a parse tree produced by {@link UrlParser#hostname}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitHostname(UrlJavaParser.HostnameContext ctx);
+  T visitHostname(UrlParser.HostnameContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#hostnumber}.
+   * Visit a parse tree produced by {@link UrlParser#hostnumber}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitHostnumber(UrlJavaParser.HostnumberContext ctx);
+  T visitHostnumber(UrlParser.HostnumberContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#port}.
+   * Visit a parse tree produced by {@link UrlParser#port}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitPort(UrlJavaParser.PortContext ctx);
+  T visitPort(UrlParser.PortContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#path}.
+   * Visit a parse tree produced by {@link UrlParser#path}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitPath(UrlJavaParser.PathContext ctx);
+  T visitPath(UrlParser.PathContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#search}.
+   * Visit a parse tree produced by {@link UrlParser#search}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitSearch(UrlJavaParser.SearchContext ctx);
+  T visitSearch(UrlParser.SearchContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#searchParameter}.
+   * Visit a parse tree produced by {@link UrlParser#searchParameter}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitSearchParameter(UrlJavaParser.SearchParameterContext ctx);
+  T visitSearchParameter(UrlParser.SearchParameterContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#searchParameterName}.
+   * Visit a parse tree produced by {@link UrlParser#searchParameterName}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitSearchParameterName(UrlJavaParser.SearchParameterNameContext ctx);
+  T visitSearchParameterName(UrlParser.SearchParameterNameContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#searchParameterValue}.
+   * Visit a parse tree produced by {@link UrlParser#searchParameterValue}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitSearchParameterValue(UrlJavaParser.SearchParameterValueContext ctx);
+  T visitSearchParameterValue(UrlParser.SearchParameterValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#user}.
+   * Visit a parse tree produced by {@link UrlParser#user}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitUser(UrlJavaParser.UserContext ctx);
+  T visitUser(UrlParser.UserContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#login}.
+   * Visit a parse tree produced by {@link UrlParser#login}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitLogin(UrlJavaParser.LoginContext ctx);
+  T visitLogin(UrlParser.LoginContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#password}.
+   * Visit a parse tree produced by {@link UrlParser#password}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitPassword(UrlJavaParser.PasswordContext ctx);
+  T visitPassword(UrlParser.PasswordContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#fragmentid}.
+   * Visit a parse tree produced by {@link UrlParser#fragmentid}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitFragmentid(UrlJavaParser.FragmentidContext ctx);
+  T visitFragmentid(UrlParser.FragmentidContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link UrlJavaParser#stringVal}.
+   * Visit a parse tree produced by {@link UrlParser#stringVal}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitStringVal(UrlJavaParser.StringValContext ctx);
+  T visitStringVal(UrlParser.StringValContext ctx);
 }

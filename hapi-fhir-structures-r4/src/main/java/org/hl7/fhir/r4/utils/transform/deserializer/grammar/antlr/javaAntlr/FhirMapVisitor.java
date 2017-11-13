@@ -5,1105 +5,1105 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
- * by {@link FhirMapJavaParser}.
+ * by {@link FhirMapParser}.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
  *            operations with no return type.
  */
-public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
+public interface FhirMapVisitor<T> extends ParseTreeVisitor<T> {
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#mappingUnit}.
+   * Visit a parse tree produced by {@link FhirMapParser#mappingUnit}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitMappingUnit(FhirMapJavaParser.MappingUnitContext ctx);
+  T visitMappingUnit(FhirMapParser.MappingUnitContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyMap}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyMap}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyMap(FhirMapJavaParser.KeyMapContext ctx);
+  T visitKeyMap(FhirMapParser.KeyMapContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUses}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUses}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUses(FhirMapJavaParser.KeyUsesContext ctx);
+  T visitKeyUses(FhirMapParser.KeyUsesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesName}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUsesName}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext ctx);
+  T visitKeyUsesName(FhirMapParser.KeyUsesNameContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesNameSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUsesNameSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext ctx);
+  T visitKeyUsesNameSource(FhirMapParser.KeyUsesNameSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesNameTarget}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUsesNameTarget}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext ctx);
+  T visitKeyUsesNameTarget(FhirMapParser.KeyUsesNameTargetContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesNameQueried}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUsesNameQueried}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext ctx);
+  T visitKeyUsesNameQueried(FhirMapParser.KeyUsesNameQueriedContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesNameProduced}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyUsesNameProduced}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyUsesNameProduced(FhirMapJavaParser.KeyUsesNameProducedContext ctx);
+  T visitKeyUsesNameProduced(FhirMapParser.KeyUsesNameProducedContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#keyImports}.
+   * Visit a parse tree produced by {@link FhirMapParser#keyImports}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitKeyImports(FhirMapJavaParser.KeyImportsContext ctx);
+  T visitKeyImports(FhirMapParser.KeyImportsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#group}.
+   * Visit a parse tree produced by {@link FhirMapParser#group}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroup(FhirMapJavaParser.GroupContext ctx);
+  T visitGroup(FhirMapParser.GroupContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupStart}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupStart}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupStart(FhirMapJavaParser.GroupStartContext ctx);
+  T visitGroupStart(FhirMapParser.GroupStartContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupExtends}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupExtends}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupExtends(FhirMapJavaParser.GroupExtendsContext ctx);
+  T visitGroupExtends(FhirMapParser.GroupExtendsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupEnd}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupEnd}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupEnd(FhirMapJavaParser.GroupEndContext ctx);
+  T visitGroupEnd(FhirMapParser.GroupEndContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupType}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupType(FhirMapJavaParser.GroupTypeContext ctx);
+  T visitGroupType(FhirMapParser.GroupTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupTypeValue}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupTypeValue}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupTypeValue(FhirMapJavaParser.GroupTypeValueContext ctx);
+  T visitGroupTypeValue(FhirMapParser.GroupTypeValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupTypeType}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupTypeType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupTypeType(FhirMapJavaParser.GroupTypeTypeContext ctx);
+  T visitGroupTypeType(FhirMapParser.GroupTypeTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupTypeTypeTypes}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupTypeTypeTypes}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupTypeTypeTypes(FhirMapJavaParser.GroupTypeTypeTypesContext ctx);
+  T visitGroupTypeTypeTypes(FhirMapParser.GroupTypeTypeTypesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInput}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInput}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInput(FhirMapJavaParser.GroupInputContext ctx);
+  T visitGroupInput(FhirMapParser.GroupInputContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputName}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputName}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputName(FhirMapJavaParser.GroupInputNameContext ctx);
+  T visitGroupInputName(FhirMapParser.GroupInputNameContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputType}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputType(FhirMapJavaParser.GroupInputTypeContext ctx);
+  T visitGroupInputType(FhirMapParser.GroupInputTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputMode}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputMode}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputMode(FhirMapJavaParser.GroupInputModeContext ctx);
+  T visitGroupInputMode(FhirMapParser.GroupInputModeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputModes}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputModes}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputModes(FhirMapJavaParser.GroupInputModesContext ctx);
+  T visitGroupInputModes(FhirMapParser.GroupInputModesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputModesSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputModesSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputModesSource(FhirMapJavaParser.GroupInputModesSourceContext ctx);
+  T visitGroupInputModesSource(FhirMapParser.GroupInputModesSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupInputModesTarget}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupInputModesTarget}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupInputModesTarget(FhirMapJavaParser.GroupInputModesTargetContext ctx);
+  T visitGroupInputModesTarget(FhirMapParser.GroupInputModesTargetContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupItem}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupItem}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupItem(FhirMapJavaParser.GroupItemContext ctx);
+  T visitGroupItem(FhirMapParser.GroupItemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupCall}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupCall}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupCall(FhirMapJavaParser.GroupCallContext ctx);
+  T visitGroupCall(FhirMapParser.GroupCallContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#groupCallParameters}.
+   * Visit a parse tree produced by {@link FhirMapParser#groupCallParameters}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitGroupCallParameters(FhirMapJavaParser.GroupCallParametersContext ctx);
+  T visitGroupCallParameters(FhirMapParser.GroupCallParametersContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleInstance}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleInstance}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleInstance(FhirMapJavaParser.RuleInstanceContext ctx);
+  T visitRuleInstance(FhirMapParser.RuleInstanceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleName}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleName}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleName(FhirMapJavaParser.RuleNameContext ctx);
+  T visitRuleName(FhirMapParser.RuleNameContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleSources}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleSources}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleSources(FhirMapJavaParser.RuleSourcesContext ctx);
+  T visitRuleSources(FhirMapParser.RuleSourcesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleSource(FhirMapJavaParser.RuleSourceContext ctx);
+  T visitRuleSource(FhirMapParser.RuleSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleContext}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleContext}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleContext(FhirMapJavaParser.RuleContextContext ctx);
+  T visitRuleContext(FhirMapParser.RuleContextContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleContextElement}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleContextElement}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleContextElement(FhirMapJavaParser.RuleContextElementContext ctx);
+  T visitRuleContextElement(FhirMapParser.RuleContextElementContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleType}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleType(FhirMapJavaParser.RuleTypeContext ctx);
+  T visitRuleType(FhirMapParser.RuleTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleDefault}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleDefault}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleDefault(FhirMapJavaParser.RuleDefaultContext ctx);
+  T visitRuleDefault(FhirMapParser.RuleDefaultContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleListOption}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleListOption}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleListOption(FhirMapJavaParser.RuleListOptionContext ctx);
+  T visitRuleListOption(FhirMapParser.RuleListOptionContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleVariable(FhirMapJavaParser.RuleVariableContext ctx);
+  T visitRuleVariable(FhirMapParser.RuleVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleWherePath}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleWherePath}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleWherePath(FhirMapJavaParser.RuleWherePathContext ctx);
+  T visitRuleWherePath(FhirMapParser.RuleWherePathContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleCheckPath}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleCheckPath}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleCheckPath(FhirMapJavaParser.RuleCheckPathContext ctx);
+  T visitRuleCheckPath(FhirMapParser.RuleCheckPathContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleMake}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleMake}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleMake(FhirMapJavaParser.RuleMakeContext ctx);
+  T visitRuleMake(FhirMapParser.RuleMakeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleMakeTargets}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleMakeTargets}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleMakeTargets(FhirMapJavaParser.RuleMakeTargetsContext ctx);
+  T visitRuleMakeTargets(FhirMapParser.RuleMakeTargetsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleMakeDependents}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleMakeDependents}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleMakeDependents(FhirMapJavaParser.RuleMakeDependentsContext ctx);
+  T visitRuleMakeDependents(FhirMapParser.RuleMakeDependentsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleMakeDependentsGroupItems}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleMakeDependentsGroupItems}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleMakeDependentsGroupItems(FhirMapJavaParser.RuleMakeDependentsGroupItemsContext ctx);
+  T visitRuleMakeDependentsGroupItems(FhirMapParser.RuleMakeDependentsGroupItemsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTarget}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTarget}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTarget(FhirMapJavaParser.RuleTargetContext ctx);
+  T visitRuleTarget(FhirMapParser.RuleTargetContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetContext}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetContext}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext ctx);
+  T visitRuleTargetContext(FhirMapParser.RuleTargetContextContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAs}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAs}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext ctx);
+  T visitRuleTargetAs(FhirMapParser.RuleTargetAsContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAssign}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAssign}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext ctx);
+  T visitRuleTargetAssign(FhirMapParser.RuleTargetAssignContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAssignValue}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAssignValue}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAssignValue(FhirMapJavaParser.RuleTargetAssignValueContext ctx);
+  T visitRuleTargetAssignValue(FhirMapParser.RuleTargetAssignValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAppend}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAppend}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext ctx);
+  T visitRuleTargetAppend(FhirMapParser.RuleTargetAppendContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAppendSources}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAppendSources}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAppendSources(FhirMapJavaParser.RuleTargetAppendSourcesContext ctx);
+  T visitRuleTargetAppendSources(FhirMapParser.RuleTargetAppendSourcesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAppendSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetAppendSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetAppendSource(FhirMapJavaParser.RuleTargetAppendSourceContext ctx);
+  T visitRuleTargetAppendSource(FhirMapParser.RuleTargetAppendSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetC}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetC}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext ctx);
+  T visitRuleTargetC(FhirMapParser.RuleTargetCContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCSystem}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCSystem}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCSystem(FhirMapJavaParser.RuleTargetCSystemContext ctx);
+  T visitRuleTargetCSystem(FhirMapParser.RuleTargetCSystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCCode}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCCode}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCCode(FhirMapJavaParser.RuleTargetCCodeContext ctx);
+  T visitRuleTargetCCode(FhirMapParser.RuleTargetCCodeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCDisplay}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCDisplay}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCDisplay(FhirMapJavaParser.RuleTargetCDisplayContext ctx);
+  T visitRuleTargetCDisplay(FhirMapParser.RuleTargetCDisplayContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCast}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCast}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext ctx);
+  T visitRuleTargetCast(FhirMapParser.RuleTargetCastContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCastSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCastSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCastSource(FhirMapJavaParser.RuleTargetCastSourceContext ctx);
+  T visitRuleTargetCastSource(FhirMapParser.RuleTargetCastSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCastType}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCastType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCastType(FhirMapJavaParser.RuleTargetCastTypeContext ctx);
+  T visitRuleTargetCastType(FhirMapParser.RuleTargetCastTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC(FhirMapJavaParser.RuleTargetCCContext ctx);
+  T visitRuleTargetCC(FhirMapParser.RuleTargetCCContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC1}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC1}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context ctx);
+  T visitRuleTargetCC1(FhirMapParser.RuleTargetCC1Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC1Text}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC1Text}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC1Text(FhirMapJavaParser.RuleTargetCC1TextContext ctx);
+  T visitRuleTargetCC1Text(FhirMapParser.RuleTargetCC1TextContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context ctx);
+  T visitRuleTargetCC2(FhirMapParser.RuleTargetCC2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC2System}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC2System}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC2System(FhirMapJavaParser.RuleTargetCC2SystemContext ctx);
+  T visitRuleTargetCC2System(FhirMapParser.RuleTargetCC2SystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC2Code}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC2Code}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC2Code(FhirMapJavaParser.RuleTargetCC2CodeContext ctx);
+  T visitRuleTargetCC2Code(FhirMapParser.RuleTargetCC2CodeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC2Display}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCC2Display}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCC2Display(FhirMapJavaParser.RuleTargetCC2DisplayContext ctx);
+  T visitRuleTargetCC2Display(FhirMapParser.RuleTargetCC2DisplayContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCp}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCp}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext ctx);
+  T visitRuleTargetCp(FhirMapParser.RuleTargetCpContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCpSystem}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCpSystem}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCpSystem(FhirMapJavaParser.RuleTargetCpSystemContext ctx);
+  T visitRuleTargetCpSystem(FhirMapParser.RuleTargetCpSystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCpVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCpVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCpVariable(FhirMapJavaParser.RuleTargetCpVariableContext ctx);
+  T visitRuleTargetCpVariable(FhirMapParser.RuleTargetCpVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCopy}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCopy}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext ctx);
+  T visitRuleTargetCopy(FhirMapParser.RuleTargetCopyContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCopySource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCopySource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCopySource(FhirMapJavaParser.RuleTargetCopySourceContext ctx);
+  T visitRuleTargetCopySource(FhirMapParser.RuleTargetCopySourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCreate}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCreate}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext ctx);
+  T visitRuleTargetCreate(FhirMapParser.RuleTargetCreateContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCreateType}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetCreateType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetCreateType(FhirMapJavaParser.RuleTargetCreateTypeContext ctx);
+  T visitRuleTargetCreateType(FhirMapParser.RuleTargetCreateTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetDateOp}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetDateOp}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext ctx);
+  T visitRuleTargetDateOp(FhirMapParser.RuleTargetDateOpContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetDateOpVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetDateOpVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetDateOpVariable(FhirMapJavaParser.RuleTargetDateOpVariableContext ctx);
+  T visitRuleTargetDateOpVariable(FhirMapParser.RuleTargetDateOpVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetDateOpOperation}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetDateOpOperation}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetDateOpOperation(FhirMapJavaParser.RuleTargetDateOpOperationContext ctx);
+  T visitRuleTargetDateOpOperation(FhirMapParser.RuleTargetDateOpOperationContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetDateOpVariable2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetDateOpVariable2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetDateOpVariable2(FhirMapJavaParser.RuleTargetDateOpVariable2Context ctx);
+  T visitRuleTargetDateOpVariable2(FhirMapParser.RuleTargetDateOpVariable2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension(FhirMapJavaParser.RuleTargetExtensionContext ctx);
+  T visitRuleTargetExtension(FhirMapParser.RuleTargetExtensionContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension1}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension1}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension1(FhirMapJavaParser.RuleTargetExtension1Context ctx);
+  T visitRuleTargetExtension1(FhirMapParser.RuleTargetExtension1Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2(FhirMapJavaParser.RuleTargetExtension2Context ctx);
+  T visitRuleTargetExtension2(FhirMapParser.RuleTargetExtension2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Uri}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Uri}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Uri(FhirMapJavaParser.RuleTargetExtension2UriContext ctx);
+  T visitRuleTargetExtension2Uri(FhirMapParser.RuleTargetExtension2UriContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Title}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Title}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Title(FhirMapJavaParser.RuleTargetExtension2TitleContext ctx);
+  T visitRuleTargetExtension2Title(FhirMapParser.RuleTargetExtension2TitleContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Mode}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Mode}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Mode(FhirMapJavaParser.RuleTargetExtension2ModeContext ctx);
+  T visitRuleTargetExtension2Mode(FhirMapParser.RuleTargetExtension2ModeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Parent}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Parent}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Parent(FhirMapJavaParser.RuleTargetExtension2ParentContext ctx);
+  T visitRuleTargetExtension2Parent(FhirMapParser.RuleTargetExtension2ParentContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Text1}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Text1}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Text1(FhirMapJavaParser.RuleTargetExtension2Text1Context ctx);
+  T visitRuleTargetExtension2Text1(FhirMapParser.RuleTargetExtension2Text1Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Text2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Text2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Text2(FhirMapJavaParser.RuleTargetExtension2Text2Context ctx);
+  T visitRuleTargetExtension2Text2(FhirMapParser.RuleTargetExtension2Text2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Min}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Min}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Min(FhirMapJavaParser.RuleTargetExtension2MinContext ctx);
+  T visitRuleTargetExtension2Min(FhirMapParser.RuleTargetExtension2MinContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Max}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Max}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Max(FhirMapJavaParser.RuleTargetExtension2MaxContext ctx);
+  T visitRuleTargetExtension2Max(FhirMapParser.RuleTargetExtension2MaxContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetExtension2Type}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetExtension2Type}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetExtension2Type(FhirMapJavaParser.RuleTargetExtension2TypeContext ctx);
+  T visitRuleTargetExtension2Type(FhirMapParser.RuleTargetExtension2TypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEscape}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEscape}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEscape(FhirMapJavaParser.RuleTargetEscapeContext ctx);
+  T visitRuleTargetEscape(FhirMapParser.RuleTargetEscapeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEscapeVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEscapeVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEscapeVariable(FhirMapJavaParser.RuleTargetEscapeVariableContext ctx);
+  T visitRuleTargetEscapeVariable(FhirMapParser.RuleTargetEscapeVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEscapeString1}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEscapeString1}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEscapeString1(FhirMapJavaParser.RuleTargetEscapeString1Context ctx);
+  T visitRuleTargetEscapeString1(FhirMapParser.RuleTargetEscapeString1Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEscapeString2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEscapeString2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEscapeString2(FhirMapJavaParser.RuleTargetEscapeString2Context ctx);
+  T visitRuleTargetEscapeString2(FhirMapParser.RuleTargetEscapeString2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEvaluate}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEvaluate}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext ctx);
+  T visitRuleTargetEvaluate(FhirMapParser.RuleTargetEvaluateContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEvaluateObject}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEvaluateObject}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEvaluateObject(FhirMapJavaParser.RuleTargetEvaluateObjectContext ctx);
+  T visitRuleTargetEvaluateObject(FhirMapParser.RuleTargetEvaluateObjectContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEvaluateObjectElement}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetEvaluateObjectElement}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetEvaluateObjectElement(FhirMapJavaParser.RuleTargetEvaluateObjectElementContext ctx);
+  T visitRuleTargetEvaluateObjectElement(FhirMapParser.RuleTargetEvaluateObjectElementContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetId}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetId}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext ctx);
+  T visitRuleTargetId(FhirMapParser.RuleTargetIdContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetIdSystem}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetIdSystem}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetIdSystem(FhirMapJavaParser.RuleTargetIdSystemContext ctx);
+  T visitRuleTargetIdSystem(FhirMapParser.RuleTargetIdSystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetIdValue}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetIdValue}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetIdValue(FhirMapJavaParser.RuleTargetIdValueContext ctx);
+  T visitRuleTargetIdValue(FhirMapParser.RuleTargetIdValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetIdType}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetIdType}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetIdType(FhirMapJavaParser.RuleTargetIdTypeContext ctx);
+  T visitRuleTargetIdType(FhirMapParser.RuleTargetIdTypeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetPointer}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetPointer}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext ctx);
+  T visitRuleTargetPointer(FhirMapParser.RuleTargetPointerContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetPointerResource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetPointerResource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetPointerResource(FhirMapJavaParser.RuleTargetPointerResourceContext ctx);
+  T visitRuleTargetPointerResource(FhirMapParser.RuleTargetPointerResourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty(FhirMapJavaParser.RuleTargetQtyContext ctx);
+  T visitRuleTargetQty(FhirMapParser.RuleTargetQtyContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty1}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty1}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context ctx);
+  T visitRuleTargetQty1(FhirMapParser.RuleTargetQty1Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty1Text}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty1Text}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty1Text(FhirMapJavaParser.RuleTargetQty1TextContext ctx);
+  T visitRuleTargetQty1Text(FhirMapParser.RuleTargetQty1TextContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty2}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty2}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context ctx);
+  T visitRuleTargetQty2(FhirMapParser.RuleTargetQty2Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty2Value}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty2Value}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty2Value(FhirMapJavaParser.RuleTargetQty2ValueContext ctx);
+  T visitRuleTargetQty2Value(FhirMapParser.RuleTargetQty2ValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty2UnitString}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty2UnitString}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty2UnitString(FhirMapJavaParser.RuleTargetQty2UnitStringContext ctx);
+  T visitRuleTargetQty2UnitString(FhirMapParser.RuleTargetQty2UnitStringContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty2System}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty2System}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty2System(FhirMapJavaParser.RuleTargetQty2SystemContext ctx);
+  T visitRuleTargetQty2System(FhirMapParser.RuleTargetQty2SystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty3}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty3}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context ctx);
+  T visitRuleTargetQty3(FhirMapParser.RuleTargetQty3Context ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty3Value}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty3Value}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty3Value(FhirMapJavaParser.RuleTargetQty3ValueContext ctx);
+  T visitRuleTargetQty3Value(FhirMapParser.RuleTargetQty3ValueContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty3UnitString}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty3UnitString}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty3UnitString(FhirMapJavaParser.RuleTargetQty3UnitStringContext ctx);
+  T visitRuleTargetQty3UnitString(FhirMapParser.RuleTargetQty3UnitStringContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty3CodeVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetQty3CodeVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetQty3CodeVariable(FhirMapJavaParser.RuleTargetQty3CodeVariableContext ctx);
+  T visitRuleTargetQty3CodeVariable(FhirMapParser.RuleTargetQty3CodeVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetReference}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetReference}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext ctx);
+  T visitRuleTargetReference(FhirMapParser.RuleTargetReferenceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetReferenceSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetReferenceSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetReferenceSource(FhirMapJavaParser.RuleTargetReferenceSourceContext ctx);
+  T visitRuleTargetReferenceSource(FhirMapParser.RuleTargetReferenceSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslate}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslate}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext ctx);
+  T visitRuleTargetTranslate(FhirMapParser.RuleTargetTranslateContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateSource(FhirMapJavaParser.RuleTargetTranslateSourceContext ctx);
+  T visitRuleTargetTranslateSource(FhirMapParser.RuleTargetTranslateSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateMap}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateMap}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateMap(FhirMapJavaParser.RuleTargetTranslateMapContext ctx);
+  T visitRuleTargetTranslateMap(FhirMapParser.RuleTargetTranslateMapContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutput}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutput}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutput(FhirMapJavaParser.RuleTargetTranslateOutputContext ctx);
+  T visitRuleTargetTranslateOutput(FhirMapParser.RuleTargetTranslateOutputContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutputCode}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutputCode}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutputCode(FhirMapJavaParser.RuleTargetTranslateOutputCodeContext ctx);
+  T visitRuleTargetTranslateOutputCode(FhirMapParser.RuleTargetTranslateOutputCodeContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutputSystem}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutputSystem}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutputSystem(FhirMapJavaParser.RuleTargetTranslateOutputSystemContext ctx);
+  T visitRuleTargetTranslateOutputSystem(FhirMapParser.RuleTargetTranslateOutputSystemContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutputDisplay}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutputDisplay}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutputDisplay(FhirMapJavaParser.RuleTargetTranslateOutputDisplayContext ctx);
+  T visitRuleTargetTranslateOutputDisplay(FhirMapParser.RuleTargetTranslateOutputDisplayContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutputCoding}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutputCoding}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutputCoding(FhirMapJavaParser.RuleTargetTranslateOutputCodingContext ctx);
+  T visitRuleTargetTranslateOutputCoding(FhirMapParser.RuleTargetTranslateOutputCodingContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateOutputCodeableConcept}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTranslateOutputCodeableConcept}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTranslateOutputCodeableConcept(FhirMapJavaParser.RuleTargetTranslateOutputCodeableConceptContext ctx);
+  T visitRuleTargetTranslateOutputCodeableConcept(FhirMapParser.RuleTargetTranslateOutputCodeableConceptContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTruncate}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTruncate}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext ctx);
+  T visitRuleTargetTruncate(FhirMapParser.RuleTargetTruncateContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTruncateSource}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTruncateSource}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTruncateSource(FhirMapJavaParser.RuleTargetTruncateSourceContext ctx);
+  T visitRuleTargetTruncateSource(FhirMapParser.RuleTargetTruncateSourceContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTruncateLength}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetTruncateLength}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetTruncateLength(FhirMapJavaParser.RuleTargetTruncateLengthContext ctx);
+  T visitRuleTargetTruncateLength(FhirMapParser.RuleTargetTruncateLengthContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetUuid}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetUuid}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext ctx);
+  T visitRuleTargetUuid(FhirMapParser.RuleTargetUuidContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetVariable}.
+   * Visit a parse tree produced by {@link FhirMapParser#ruleTargetVariable}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext ctx);
+  T visitRuleTargetVariable(FhirMapParser.RuleTargetVariableContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#fhirPath}.
+   * Visit a parse tree produced by {@link FhirMapParser#fhirPath}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitFhirPath(FhirMapJavaParser.FhirPathContext ctx);
+  T visitFhirPath(FhirMapParser.FhirPathContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#identifier}.
+   * Visit a parse tree produced by {@link FhirMapParser#identifier}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitIdentifier(FhirMapJavaParser.IdentifierContext ctx);
+  T visitIdentifier(FhirMapParser.IdentifierContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#integer}.
+   * Visit a parse tree produced by {@link FhirMapParser#integer}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitInteger(FhirMapJavaParser.IntegerContext ctx);
+  T visitInteger(FhirMapParser.IntegerContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#quotedIdentifier}.
+   * Visit a parse tree produced by {@link FhirMapParser#quotedIdentifier}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitQuotedIdentifier(FhirMapJavaParser.QuotedIdentifierContext ctx);
+  T visitQuotedIdentifier(FhirMapParser.QuotedIdentifierContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#quotedStringWQuotes}.
+   * Visit a parse tree produced by {@link FhirMapParser#quotedStringWQuotes}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitQuotedStringWQuotes(FhirMapJavaParser.QuotedStringWQuotesContext ctx);
+  T visitQuotedStringWQuotes(FhirMapParser.QuotedStringWQuotesContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#quotedString}.
+   * Visit a parse tree produced by {@link FhirMapParser#quotedString}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitQuotedString(FhirMapJavaParser.QuotedStringContext ctx);
+  T visitQuotedString(FhirMapParser.QuotedStringContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#quotedUrl}.
+   * Visit a parse tree produced by {@link FhirMapParser#quotedUrl}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext ctx);
+  T visitQuotedUrl(FhirMapParser.QuotedUrlContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#structureDefinition}.
+   * Visit a parse tree produced by {@link FhirMapParser#structureDefinition}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext ctx);
+  T visitStructureDefinition(FhirMapParser.StructureDefinitionContext ctx);
 
   /**
-   * Visit a parse tree produced by {@link FhirMapJavaParser#structureMap}.
+   * Visit a parse tree produced by {@link FhirMapParser#structureMap}.
    *
    * @param ctx the parse tree
    * @return the visitor result
    */
-  T visitStructureMap(FhirMapJavaParser.StructureMapContext ctx);
+  T visitStructureMap(FhirMapParser.StructureMapContext ctx);
 }

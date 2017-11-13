@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class FhirMapJavaLexer extends Lexer {
+public class FhirMapLexer extends Lexer {
   static {
     RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION);
   }
@@ -102,7 +102,7 @@ public class FhirMapJavaLexer extends Lexer {
   }
 
 
-  public FhirMapJavaLexer(CharStream input) {
+  public FhirMapLexer(CharStream input) {
     super(input);
     _interp = new LexerATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
   }

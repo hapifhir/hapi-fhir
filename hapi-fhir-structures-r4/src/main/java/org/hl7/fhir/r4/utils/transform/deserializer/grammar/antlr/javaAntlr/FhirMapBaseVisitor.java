@@ -4,14 +4,14 @@ package org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
- * This class provides an empty implementation of {@link FhirMapJavaVisitor},
+ * This class provides an empty implementation of {@link FhirMapVisitor},
  * which can be extended to create a visitor which only needs to handle a subset
  * of the available methods.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
  *            operations with no return type.
  */
-public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements FhirMapJavaVisitor<T> {
+public class FhirMapBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements FhirMapVisitor<T> {
   /**
    * {@inheritDoc}
    * <p>
@@ -19,7 +19,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitMappingUnit(FhirMapJavaParser.MappingUnitContext ctx) {
+  public T visitMappingUnit(FhirMapParser.MappingUnitContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -30,7 +30,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyMap(FhirMapJavaParser.KeyMapContext ctx) {
+  public T visitKeyMap(FhirMapParser.KeyMapContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -41,7 +41,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUses(FhirMapJavaParser.KeyUsesContext ctx) {
+  public T visitKeyUses(FhirMapParser.KeyUsesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -52,7 +52,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext ctx) {
+  public T visitKeyUsesName(FhirMapParser.KeyUsesNameContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -63,7 +63,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext ctx) {
+  public T visitKeyUsesNameSource(FhirMapParser.KeyUsesNameSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -74,7 +74,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext ctx) {
+  public T visitKeyUsesNameTarget(FhirMapParser.KeyUsesNameTargetContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -85,7 +85,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext ctx) {
+  public T visitKeyUsesNameQueried(FhirMapParser.KeyUsesNameQueriedContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -96,7 +96,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyUsesNameProduced(FhirMapJavaParser.KeyUsesNameProducedContext ctx) {
+  public T visitKeyUsesNameProduced(FhirMapParser.KeyUsesNameProducedContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -107,7 +107,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitKeyImports(FhirMapJavaParser.KeyImportsContext ctx) {
+  public T visitKeyImports(FhirMapParser.KeyImportsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -118,7 +118,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroup(FhirMapJavaParser.GroupContext ctx) {
+  public T visitGroup(FhirMapParser.GroupContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -129,7 +129,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupStart(FhirMapJavaParser.GroupStartContext ctx) {
+  public T visitGroupStart(FhirMapParser.GroupStartContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -140,7 +140,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupExtends(FhirMapJavaParser.GroupExtendsContext ctx) {
+  public T visitGroupExtends(FhirMapParser.GroupExtendsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -151,7 +151,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupEnd(FhirMapJavaParser.GroupEndContext ctx) {
+  public T visitGroupEnd(FhirMapParser.GroupEndContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -162,7 +162,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupType(FhirMapJavaParser.GroupTypeContext ctx) {
+  public T visitGroupType(FhirMapParser.GroupTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -173,7 +173,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupTypeValue(FhirMapJavaParser.GroupTypeValueContext ctx) {
+  public T visitGroupTypeValue(FhirMapParser.GroupTypeValueContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -184,7 +184,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupTypeType(FhirMapJavaParser.GroupTypeTypeContext ctx) {
+  public T visitGroupTypeType(FhirMapParser.GroupTypeTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -195,7 +195,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupTypeTypeTypes(FhirMapJavaParser.GroupTypeTypeTypesContext ctx) {
+  public T visitGroupTypeTypeTypes(FhirMapParser.GroupTypeTypeTypesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -206,7 +206,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInput(FhirMapJavaParser.GroupInputContext ctx) {
+  public T visitGroupInput(FhirMapParser.GroupInputContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -217,7 +217,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputName(FhirMapJavaParser.GroupInputNameContext ctx) {
+  public T visitGroupInputName(FhirMapParser.GroupInputNameContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -228,7 +228,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputType(FhirMapJavaParser.GroupInputTypeContext ctx) {
+  public T visitGroupInputType(FhirMapParser.GroupInputTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -239,7 +239,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputMode(FhirMapJavaParser.GroupInputModeContext ctx) {
+  public T visitGroupInputMode(FhirMapParser.GroupInputModeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -250,7 +250,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputModes(FhirMapJavaParser.GroupInputModesContext ctx) {
+  public T visitGroupInputModes(FhirMapParser.GroupInputModesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -261,7 +261,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputModesSource(FhirMapJavaParser.GroupInputModesSourceContext ctx) {
+  public T visitGroupInputModesSource(FhirMapParser.GroupInputModesSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -272,7 +272,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupInputModesTarget(FhirMapJavaParser.GroupInputModesTargetContext ctx) {
+  public T visitGroupInputModesTarget(FhirMapParser.GroupInputModesTargetContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -283,7 +283,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupItem(FhirMapJavaParser.GroupItemContext ctx) {
+  public T visitGroupItem(FhirMapParser.GroupItemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -294,7 +294,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupCall(FhirMapJavaParser.GroupCallContext ctx) {
+  public T visitGroupCall(FhirMapParser.GroupCallContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -305,7 +305,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitGroupCallParameters(FhirMapJavaParser.GroupCallParametersContext ctx) {
+  public T visitGroupCallParameters(FhirMapParser.GroupCallParametersContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -316,7 +316,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleInstance(FhirMapJavaParser.RuleInstanceContext ctx) {
+  public T visitRuleInstance(FhirMapParser.RuleInstanceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -327,7 +327,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleName(FhirMapJavaParser.RuleNameContext ctx) {
+  public T visitRuleName(FhirMapParser.RuleNameContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -338,7 +338,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleSources(FhirMapJavaParser.RuleSourcesContext ctx) {
+  public T visitRuleSources(FhirMapParser.RuleSourcesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -349,7 +349,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleSource(FhirMapJavaParser.RuleSourceContext ctx) {
+  public T visitRuleSource(FhirMapParser.RuleSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -360,7 +360,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleContext(FhirMapJavaParser.RuleContextContext ctx) {
+  public T visitRuleContext(FhirMapParser.RuleContextContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -371,7 +371,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleContextElement(FhirMapJavaParser.RuleContextElementContext ctx) {
+  public T visitRuleContextElement(FhirMapParser.RuleContextElementContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -382,7 +382,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleType(FhirMapJavaParser.RuleTypeContext ctx) {
+  public T visitRuleType(FhirMapParser.RuleTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -393,7 +393,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleDefault(FhirMapJavaParser.RuleDefaultContext ctx) {
+  public T visitRuleDefault(FhirMapParser.RuleDefaultContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -404,7 +404,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleListOption(FhirMapJavaParser.RuleListOptionContext ctx) {
+  public T visitRuleListOption(FhirMapParser.RuleListOptionContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -415,7 +415,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleVariable(FhirMapJavaParser.RuleVariableContext ctx) {
+  public T visitRuleVariable(FhirMapParser.RuleVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -426,7 +426,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleWherePath(FhirMapJavaParser.RuleWherePathContext ctx) {
+  public T visitRuleWherePath(FhirMapParser.RuleWherePathContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -437,7 +437,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleCheckPath(FhirMapJavaParser.RuleCheckPathContext ctx) {
+  public T visitRuleCheckPath(FhirMapParser.RuleCheckPathContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -448,7 +448,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleMake(FhirMapJavaParser.RuleMakeContext ctx) {
+  public T visitRuleMake(FhirMapParser.RuleMakeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -459,7 +459,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleMakeTargets(FhirMapJavaParser.RuleMakeTargetsContext ctx) {
+  public T visitRuleMakeTargets(FhirMapParser.RuleMakeTargetsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -470,7 +470,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleMakeDependents(FhirMapJavaParser.RuleMakeDependentsContext ctx) {
+  public T visitRuleMakeDependents(FhirMapParser.RuleMakeDependentsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -481,7 +481,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleMakeDependentsGroupItems(FhirMapJavaParser.RuleMakeDependentsGroupItemsContext ctx) {
+  public T visitRuleMakeDependentsGroupItems(FhirMapParser.RuleMakeDependentsGroupItemsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -492,7 +492,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTarget(FhirMapJavaParser.RuleTargetContext ctx) {
+  public T visitRuleTarget(FhirMapParser.RuleTargetContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -503,7 +503,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext ctx) {
+  public T visitRuleTargetContext(FhirMapParser.RuleTargetContextContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -514,7 +514,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext ctx) {
+  public T visitRuleTargetAs(FhirMapParser.RuleTargetAsContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -525,7 +525,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext ctx) {
+  public T visitRuleTargetAssign(FhirMapParser.RuleTargetAssignContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -536,7 +536,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAssignValue(FhirMapJavaParser.RuleTargetAssignValueContext ctx) {
+  public T visitRuleTargetAssignValue(FhirMapParser.RuleTargetAssignValueContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -547,7 +547,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext ctx) {
+  public T visitRuleTargetAppend(FhirMapParser.RuleTargetAppendContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -558,7 +558,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAppendSources(FhirMapJavaParser.RuleTargetAppendSourcesContext ctx) {
+  public T visitRuleTargetAppendSources(FhirMapParser.RuleTargetAppendSourcesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -569,7 +569,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetAppendSource(FhirMapJavaParser.RuleTargetAppendSourceContext ctx) {
+  public T visitRuleTargetAppendSource(FhirMapParser.RuleTargetAppendSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -580,7 +580,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext ctx) {
+  public T visitRuleTargetC(FhirMapParser.RuleTargetCContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -591,7 +591,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCSystem(FhirMapJavaParser.RuleTargetCSystemContext ctx) {
+  public T visitRuleTargetCSystem(FhirMapParser.RuleTargetCSystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -602,7 +602,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCCode(FhirMapJavaParser.RuleTargetCCodeContext ctx) {
+  public T visitRuleTargetCCode(FhirMapParser.RuleTargetCCodeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -613,7 +613,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCDisplay(FhirMapJavaParser.RuleTargetCDisplayContext ctx) {
+  public T visitRuleTargetCDisplay(FhirMapParser.RuleTargetCDisplayContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -624,7 +624,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext ctx) {
+  public T visitRuleTargetCast(FhirMapParser.RuleTargetCastContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -635,7 +635,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCastSource(FhirMapJavaParser.RuleTargetCastSourceContext ctx) {
+  public T visitRuleTargetCastSource(FhirMapParser.RuleTargetCastSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -646,7 +646,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCastType(FhirMapJavaParser.RuleTargetCastTypeContext ctx) {
+  public T visitRuleTargetCastType(FhirMapParser.RuleTargetCastTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -657,7 +657,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC(FhirMapJavaParser.RuleTargetCCContext ctx) {
+  public T visitRuleTargetCC(FhirMapParser.RuleTargetCCContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -668,7 +668,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context ctx) {
+  public T visitRuleTargetCC1(FhirMapParser.RuleTargetCC1Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -679,7 +679,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC1Text(FhirMapJavaParser.RuleTargetCC1TextContext ctx) {
+  public T visitRuleTargetCC1Text(FhirMapParser.RuleTargetCC1TextContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -690,7 +690,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context ctx) {
+  public T visitRuleTargetCC2(FhirMapParser.RuleTargetCC2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -701,7 +701,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC2System(FhirMapJavaParser.RuleTargetCC2SystemContext ctx) {
+  public T visitRuleTargetCC2System(FhirMapParser.RuleTargetCC2SystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -712,7 +712,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC2Code(FhirMapJavaParser.RuleTargetCC2CodeContext ctx) {
+  public T visitRuleTargetCC2Code(FhirMapParser.RuleTargetCC2CodeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -723,7 +723,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCC2Display(FhirMapJavaParser.RuleTargetCC2DisplayContext ctx) {
+  public T visitRuleTargetCC2Display(FhirMapParser.RuleTargetCC2DisplayContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -734,7 +734,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext ctx) {
+  public T visitRuleTargetCp(FhirMapParser.RuleTargetCpContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -745,7 +745,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCpSystem(FhirMapJavaParser.RuleTargetCpSystemContext ctx) {
+  public T visitRuleTargetCpSystem(FhirMapParser.RuleTargetCpSystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -756,7 +756,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCpVariable(FhirMapJavaParser.RuleTargetCpVariableContext ctx) {
+  public T visitRuleTargetCpVariable(FhirMapParser.RuleTargetCpVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -767,7 +767,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext ctx) {
+  public T visitRuleTargetCopy(FhirMapParser.RuleTargetCopyContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -778,7 +778,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCopySource(FhirMapJavaParser.RuleTargetCopySourceContext ctx) {
+  public T visitRuleTargetCopySource(FhirMapParser.RuleTargetCopySourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -789,7 +789,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext ctx) {
+  public T visitRuleTargetCreate(FhirMapParser.RuleTargetCreateContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -800,7 +800,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetCreateType(FhirMapJavaParser.RuleTargetCreateTypeContext ctx) {
+  public T visitRuleTargetCreateType(FhirMapParser.RuleTargetCreateTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -811,7 +811,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext ctx) {
+  public T visitRuleTargetDateOp(FhirMapParser.RuleTargetDateOpContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -822,7 +822,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetDateOpVariable(FhirMapJavaParser.RuleTargetDateOpVariableContext ctx) {
+  public T visitRuleTargetDateOpVariable(FhirMapParser.RuleTargetDateOpVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -833,7 +833,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetDateOpOperation(FhirMapJavaParser.RuleTargetDateOpOperationContext ctx) {
+  public T visitRuleTargetDateOpOperation(FhirMapParser.RuleTargetDateOpOperationContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -844,7 +844,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetDateOpVariable2(FhirMapJavaParser.RuleTargetDateOpVariable2Context ctx) {
+  public T visitRuleTargetDateOpVariable2(FhirMapParser.RuleTargetDateOpVariable2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -855,7 +855,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension(FhirMapJavaParser.RuleTargetExtensionContext ctx) {
+  public T visitRuleTargetExtension(FhirMapParser.RuleTargetExtensionContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -866,7 +866,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension1(FhirMapJavaParser.RuleTargetExtension1Context ctx) {
+  public T visitRuleTargetExtension1(FhirMapParser.RuleTargetExtension1Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -877,7 +877,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2(FhirMapJavaParser.RuleTargetExtension2Context ctx) {
+  public T visitRuleTargetExtension2(FhirMapParser.RuleTargetExtension2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -888,7 +888,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Uri(FhirMapJavaParser.RuleTargetExtension2UriContext ctx) {
+  public T visitRuleTargetExtension2Uri(FhirMapParser.RuleTargetExtension2UriContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -899,7 +899,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Title(FhirMapJavaParser.RuleTargetExtension2TitleContext ctx) {
+  public T visitRuleTargetExtension2Title(FhirMapParser.RuleTargetExtension2TitleContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -910,7 +910,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Mode(FhirMapJavaParser.RuleTargetExtension2ModeContext ctx) {
+  public T visitRuleTargetExtension2Mode(FhirMapParser.RuleTargetExtension2ModeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -921,7 +921,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Parent(FhirMapJavaParser.RuleTargetExtension2ParentContext ctx) {
+  public T visitRuleTargetExtension2Parent(FhirMapParser.RuleTargetExtension2ParentContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -932,7 +932,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Text1(FhirMapJavaParser.RuleTargetExtension2Text1Context ctx) {
+  public T visitRuleTargetExtension2Text1(FhirMapParser.RuleTargetExtension2Text1Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -943,7 +943,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Text2(FhirMapJavaParser.RuleTargetExtension2Text2Context ctx) {
+  public T visitRuleTargetExtension2Text2(FhirMapParser.RuleTargetExtension2Text2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -954,7 +954,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Min(FhirMapJavaParser.RuleTargetExtension2MinContext ctx) {
+  public T visitRuleTargetExtension2Min(FhirMapParser.RuleTargetExtension2MinContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -965,7 +965,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Max(FhirMapJavaParser.RuleTargetExtension2MaxContext ctx) {
+  public T visitRuleTargetExtension2Max(FhirMapParser.RuleTargetExtension2MaxContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -976,7 +976,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetExtension2Type(FhirMapJavaParser.RuleTargetExtension2TypeContext ctx) {
+  public T visitRuleTargetExtension2Type(FhirMapParser.RuleTargetExtension2TypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -987,7 +987,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEscape(FhirMapJavaParser.RuleTargetEscapeContext ctx) {
+  public T visitRuleTargetEscape(FhirMapParser.RuleTargetEscapeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -998,7 +998,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEscapeVariable(FhirMapJavaParser.RuleTargetEscapeVariableContext ctx) {
+  public T visitRuleTargetEscapeVariable(FhirMapParser.RuleTargetEscapeVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1009,7 +1009,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEscapeString1(FhirMapJavaParser.RuleTargetEscapeString1Context ctx) {
+  public T visitRuleTargetEscapeString1(FhirMapParser.RuleTargetEscapeString1Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -1020,7 +1020,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEscapeString2(FhirMapJavaParser.RuleTargetEscapeString2Context ctx) {
+  public T visitRuleTargetEscapeString2(FhirMapParser.RuleTargetEscapeString2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -1031,7 +1031,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext ctx) {
+  public T visitRuleTargetEvaluate(FhirMapParser.RuleTargetEvaluateContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1042,7 +1042,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEvaluateObject(FhirMapJavaParser.RuleTargetEvaluateObjectContext ctx) {
+  public T visitRuleTargetEvaluateObject(FhirMapParser.RuleTargetEvaluateObjectContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1053,7 +1053,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetEvaluateObjectElement(FhirMapJavaParser.RuleTargetEvaluateObjectElementContext ctx) {
+  public T visitRuleTargetEvaluateObjectElement(FhirMapParser.RuleTargetEvaluateObjectElementContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1064,7 +1064,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext ctx) {
+  public T visitRuleTargetId(FhirMapParser.RuleTargetIdContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1075,7 +1075,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetIdSystem(FhirMapJavaParser.RuleTargetIdSystemContext ctx) {
+  public T visitRuleTargetIdSystem(FhirMapParser.RuleTargetIdSystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1086,7 +1086,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetIdValue(FhirMapJavaParser.RuleTargetIdValueContext ctx) {
+  public T visitRuleTargetIdValue(FhirMapParser.RuleTargetIdValueContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1097,7 +1097,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetIdType(FhirMapJavaParser.RuleTargetIdTypeContext ctx) {
+  public T visitRuleTargetIdType(FhirMapParser.RuleTargetIdTypeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1108,7 +1108,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext ctx) {
+  public T visitRuleTargetPointer(FhirMapParser.RuleTargetPointerContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1119,7 +1119,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetPointerResource(FhirMapJavaParser.RuleTargetPointerResourceContext ctx) {
+  public T visitRuleTargetPointerResource(FhirMapParser.RuleTargetPointerResourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1130,7 +1130,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty(FhirMapJavaParser.RuleTargetQtyContext ctx) {
+  public T visitRuleTargetQty(FhirMapParser.RuleTargetQtyContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1141,7 +1141,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context ctx) {
+  public T visitRuleTargetQty1(FhirMapParser.RuleTargetQty1Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -1152,7 +1152,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty1Text(FhirMapJavaParser.RuleTargetQty1TextContext ctx) {
+  public T visitRuleTargetQty1Text(FhirMapParser.RuleTargetQty1TextContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1163,7 +1163,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context ctx) {
+  public T visitRuleTargetQty2(FhirMapParser.RuleTargetQty2Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -1174,7 +1174,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty2Value(FhirMapJavaParser.RuleTargetQty2ValueContext ctx) {
+  public T visitRuleTargetQty2Value(FhirMapParser.RuleTargetQty2ValueContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1185,7 +1185,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty2UnitString(FhirMapJavaParser.RuleTargetQty2UnitStringContext ctx) {
+  public T visitRuleTargetQty2UnitString(FhirMapParser.RuleTargetQty2UnitStringContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1196,7 +1196,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty2System(FhirMapJavaParser.RuleTargetQty2SystemContext ctx) {
+  public T visitRuleTargetQty2System(FhirMapParser.RuleTargetQty2SystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1207,7 +1207,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context ctx) {
+  public T visitRuleTargetQty3(FhirMapParser.RuleTargetQty3Context ctx) {
     return visitChildren(ctx);
   }
 
@@ -1218,7 +1218,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty3Value(FhirMapJavaParser.RuleTargetQty3ValueContext ctx) {
+  public T visitRuleTargetQty3Value(FhirMapParser.RuleTargetQty3ValueContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1229,7 +1229,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty3UnitString(FhirMapJavaParser.RuleTargetQty3UnitStringContext ctx) {
+  public T visitRuleTargetQty3UnitString(FhirMapParser.RuleTargetQty3UnitStringContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1240,7 +1240,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetQty3CodeVariable(FhirMapJavaParser.RuleTargetQty3CodeVariableContext ctx) {
+  public T visitRuleTargetQty3CodeVariable(FhirMapParser.RuleTargetQty3CodeVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1251,7 +1251,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext ctx) {
+  public T visitRuleTargetReference(FhirMapParser.RuleTargetReferenceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1262,7 +1262,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetReferenceSource(FhirMapJavaParser.RuleTargetReferenceSourceContext ctx) {
+  public T visitRuleTargetReferenceSource(FhirMapParser.RuleTargetReferenceSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1273,7 +1273,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext ctx) {
+  public T visitRuleTargetTranslate(FhirMapParser.RuleTargetTranslateContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1284,7 +1284,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateSource(FhirMapJavaParser.RuleTargetTranslateSourceContext ctx) {
+  public T visitRuleTargetTranslateSource(FhirMapParser.RuleTargetTranslateSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1295,7 +1295,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateMap(FhirMapJavaParser.RuleTargetTranslateMapContext ctx) {
+  public T visitRuleTargetTranslateMap(FhirMapParser.RuleTargetTranslateMapContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1306,7 +1306,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutput(FhirMapJavaParser.RuleTargetTranslateOutputContext ctx) {
+  public T visitRuleTargetTranslateOutput(FhirMapParser.RuleTargetTranslateOutputContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1317,7 +1317,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutputCode(FhirMapJavaParser.RuleTargetTranslateOutputCodeContext ctx) {
+  public T visitRuleTargetTranslateOutputCode(FhirMapParser.RuleTargetTranslateOutputCodeContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1328,7 +1328,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutputSystem(FhirMapJavaParser.RuleTargetTranslateOutputSystemContext ctx) {
+  public T visitRuleTargetTranslateOutputSystem(FhirMapParser.RuleTargetTranslateOutputSystemContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1339,7 +1339,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutputDisplay(FhirMapJavaParser.RuleTargetTranslateOutputDisplayContext ctx) {
+  public T visitRuleTargetTranslateOutputDisplay(FhirMapParser.RuleTargetTranslateOutputDisplayContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1350,7 +1350,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutputCoding(FhirMapJavaParser.RuleTargetTranslateOutputCodingContext ctx) {
+  public T visitRuleTargetTranslateOutputCoding(FhirMapParser.RuleTargetTranslateOutputCodingContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1361,7 +1361,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTranslateOutputCodeableConcept(FhirMapJavaParser.RuleTargetTranslateOutputCodeableConceptContext ctx) {
+  public T visitRuleTargetTranslateOutputCodeableConcept(FhirMapParser.RuleTargetTranslateOutputCodeableConceptContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1372,7 +1372,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext ctx) {
+  public T visitRuleTargetTruncate(FhirMapParser.RuleTargetTruncateContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1383,7 +1383,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTruncateSource(FhirMapJavaParser.RuleTargetTruncateSourceContext ctx) {
+  public T visitRuleTargetTruncateSource(FhirMapParser.RuleTargetTruncateSourceContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1394,7 +1394,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetTruncateLength(FhirMapJavaParser.RuleTargetTruncateLengthContext ctx) {
+  public T visitRuleTargetTruncateLength(FhirMapParser.RuleTargetTruncateLengthContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1405,7 +1405,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext ctx) {
+  public T visitRuleTargetUuid(FhirMapParser.RuleTargetUuidContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1416,7 +1416,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext ctx) {
+  public T visitRuleTargetVariable(FhirMapParser.RuleTargetVariableContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1427,7 +1427,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitFhirPath(FhirMapJavaParser.FhirPathContext ctx) {
+  public T visitFhirPath(FhirMapParser.FhirPathContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1438,7 +1438,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitIdentifier(FhirMapJavaParser.IdentifierContext ctx) {
+  public T visitIdentifier(FhirMapParser.IdentifierContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1449,7 +1449,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitInteger(FhirMapJavaParser.IntegerContext ctx) {
+  public T visitInteger(FhirMapParser.IntegerContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1460,7 +1460,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitQuotedIdentifier(FhirMapJavaParser.QuotedIdentifierContext ctx) {
+  public T visitQuotedIdentifier(FhirMapParser.QuotedIdentifierContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1471,7 +1471,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitQuotedStringWQuotes(FhirMapJavaParser.QuotedStringWQuotesContext ctx) {
+  public T visitQuotedStringWQuotes(FhirMapParser.QuotedStringWQuotesContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1482,7 +1482,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitQuotedString(FhirMapJavaParser.QuotedStringContext ctx) {
+  public T visitQuotedString(FhirMapParser.QuotedStringContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1493,7 +1493,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext ctx) {
+  public T visitQuotedUrl(FhirMapParser.QuotedUrlContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1504,7 +1504,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext ctx) {
+  public T visitStructureDefinition(FhirMapParser.StructureDefinitionContext ctx) {
     return visitChildren(ctx);
   }
 
@@ -1515,7 +1515,7 @@ public class FhirMapJavaBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
    * {@link #visitChildren} on {@code ctx}.</p>
    */
   @Override
-  public T visitStructureMap(FhirMapJavaParser.StructureMapContext ctx) {
+  public T visitStructureMap(FhirMapParser.StructureMapContext ctx) {
     return visitChildren(ctx);
   }
 }

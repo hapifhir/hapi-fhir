@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class UrlJavaLexer extends Lexer {
+public class UrlLexer extends Lexer {
   static {
     RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION);
   }
@@ -75,7 +75,7 @@ public class UrlJavaLexer extends Lexer {
   }
 
 
-  public UrlJavaLexer(CharStream input) {
+  public UrlLexer(CharStream input) {
     super(input);
     _interp = new LexerATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
   }

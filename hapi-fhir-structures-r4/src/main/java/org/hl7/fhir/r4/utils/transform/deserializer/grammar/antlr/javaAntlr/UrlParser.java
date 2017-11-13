@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class UrlJavaParser extends Parser {
+public class UrlParser extends Parser {
   static {
     RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION);
   }
@@ -97,7 +97,7 @@ public class UrlJavaParser extends Parser {
     return _ATN;
   }
 
-  public UrlJavaParser(TokenStream input) {
+  public UrlParser(TokenStream input) {
     super(input);
     _interp = new ParserATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
   }
@@ -112,7 +112,7 @@ public class UrlJavaParser extends Parser {
     }
 
     public TerminalNode WS() {
-      return getToken(UrlJavaParser.WS, 0);
+      return getToken(UrlParser.WS, 0);
     }
 
     public FragmentaddressContext(ParserRuleContext parent, int invokingState) {
@@ -126,7 +126,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitFragmentaddress(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitFragmentaddress(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -189,7 +189,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitUri(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitUri(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -249,7 +249,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitUrl(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitUrl(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -325,7 +325,7 @@ public class UrlJavaParser extends Parser {
 
   public static class AuthorityContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public AuthorityContext(ParserRuleContext parent, int invokingState) {
@@ -339,7 +339,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitAuthority(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitAuthority(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -383,7 +383,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitHost(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitHost(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -442,7 +442,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitHostname(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitHostname(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -485,11 +485,11 @@ public class UrlJavaParser extends Parser {
 
   public static class HostnumberContext extends ParserRuleContext {
     public List<TerminalNode> DIGITS() {
-      return getTokens(UrlJavaParser.DIGITS);
+      return getTokens(UrlParser.DIGITS);
     }
 
     public TerminalNode DIGITS(int i) {
-      return getToken(UrlJavaParser.DIGITS, i);
+      return getToken(UrlParser.DIGITS, i);
     }
 
     public HostnumberContext(ParserRuleContext parent, int invokingState) {
@@ -503,7 +503,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitHostnumber(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitHostnumber(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -541,7 +541,7 @@ public class UrlJavaParser extends Parser {
 
   public static class PortContext extends ParserRuleContext {
     public TerminalNode DIGITS() {
-      return getToken(UrlJavaParser.DIGITS, 0);
+      return getToken(UrlParser.DIGITS, 0);
     }
 
     public PortContext(ParserRuleContext parent, int invokingState) {
@@ -555,7 +555,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitPort(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitPort(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -599,7 +599,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitPath(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitPath(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -660,7 +660,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitSearch(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitSearch(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -721,7 +721,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitSearchParameter(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitSearchParameter(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -760,7 +760,7 @@ public class UrlJavaParser extends Parser {
 
   public static class SearchParameterNameContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public SearchParameterNameContext(ParserRuleContext parent, int invokingState) {
@@ -774,8 +774,8 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor)
-        return ((UrlJavaVisitor<? extends T>) visitor).visitSearchParameterName(this);
+      if (visitor instanceof UrlVisitor)
+        return ((UrlVisitor<? extends T>) visitor).visitSearchParameterName(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -801,15 +801,15 @@ public class UrlJavaParser extends Parser {
 
   public static class SearchParameterValueContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public TerminalNode DIGITS() {
-      return getToken(UrlJavaParser.DIGITS, 0);
+      return getToken(UrlParser.DIGITS, 0);
     }
 
     public TerminalNode HEX() {
-      return getToken(UrlJavaParser.HEX, 0);
+      return getToken(UrlParser.HEX, 0);
     }
 
     public SearchParameterValueContext(ParserRuleContext parent, int invokingState) {
@@ -823,8 +823,8 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor)
-        return ((UrlJavaVisitor<? extends T>) visitor).visitSearchParameterValue(this);
+      if (visitor instanceof UrlVisitor)
+        return ((UrlVisitor<? extends T>) visitor).visitSearchParameterValue(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -858,7 +858,7 @@ public class UrlJavaParser extends Parser {
 
   public static class UserContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public UserContext(ParserRuleContext parent, int invokingState) {
@@ -872,7 +872,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitUser(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitUser(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -916,7 +916,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitLogin(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitLogin(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -948,7 +948,7 @@ public class UrlJavaParser extends Parser {
 
   public static class PasswordContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public PasswordContext(ParserRuleContext parent, int invokingState) {
@@ -962,7 +962,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitPassword(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitPassword(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1002,7 +1002,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitFragmentid(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitFragmentid(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1028,7 +1028,7 @@ public class UrlJavaParser extends Parser {
 
   public static class StringValContext extends ParserRuleContext {
     public TerminalNode STRING() {
-      return getToken(UrlJavaParser.STRING, 0);
+      return getToken(UrlParser.STRING, 0);
     }
 
     public StringValContext(ParserRuleContext parent, int invokingState) {
@@ -1042,7 +1042,7 @@ public class UrlJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof UrlJavaVisitor) return ((UrlJavaVisitor<? extends T>) visitor).visitStringVal(this);
+      if (visitor instanceof UrlVisitor) return ((UrlVisitor<? extends T>) visitor).visitStringVal(this);
       else return visitor.visitChildren(this);
     }
   }

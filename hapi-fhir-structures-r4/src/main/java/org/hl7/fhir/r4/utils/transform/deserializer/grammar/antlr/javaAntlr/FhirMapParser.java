@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class FhirMapJavaParser extends Parser {
+public class FhirMapParser extends Parser {
   static {
     RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION);
   }
@@ -194,7 +194,7 @@ public class FhirMapJavaParser extends Parser {
     return _ATN;
   }
 
-  public FhirMapJavaParser(TokenStream input) {
+  public FhirMapParser(TokenStream input) {
     super(input);
     _interp = new ParserATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
   }
@@ -235,8 +235,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitMappingUnit(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitMappingUnit(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -293,7 +293,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyMapContext extends ParserRuleContext {
     public TerminalNode MAP() {
-      return getToken(FhirMapJavaParser.MAP, 0);
+      return getToken(FhirMapParser.MAP, 0);
     }
 
     public StructureMapContext structureMap() {
@@ -315,7 +315,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyMap(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitKeyMap(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -347,7 +347,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyUsesContext extends ParserRuleContext {
     public TerminalNode USES() {
-      return getToken(FhirMapJavaParser.USES, 0);
+      return getToken(FhirMapParser.USES, 0);
     }
 
     public StructureDefinitionContext structureDefinition() {
@@ -355,7 +355,7 @@ public class FhirMapJavaParser extends Parser {
     }
 
     public TerminalNode AS() {
-      return getToken(FhirMapJavaParser.AS, 0);
+      return getToken(FhirMapParser.AS, 0);
     }
 
     public KeyUsesNameContext keyUsesName() {
@@ -373,7 +373,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUses(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitKeyUses(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -442,8 +442,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUsesName(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyUsesName(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -498,7 +498,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyUsesNameSourceContext extends ParserRuleContext {
     public TerminalNode SOURCE() {
-      return getToken(FhirMapJavaParser.SOURCE, 0);
+      return getToken(FhirMapParser.SOURCE, 0);
     }
 
     public KeyUsesNameSourceContext(ParserRuleContext parent, int invokingState) {
@@ -512,8 +512,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUsesNameSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyUsesNameSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -539,7 +539,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyUsesNameTargetContext extends ParserRuleContext {
     public TerminalNode TARGET() {
-      return getToken(FhirMapJavaParser.TARGET, 0);
+      return getToken(FhirMapParser.TARGET, 0);
     }
 
     public KeyUsesNameTargetContext(ParserRuleContext parent, int invokingState) {
@@ -553,8 +553,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUsesNameTarget(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyUsesNameTarget(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -580,7 +580,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyUsesNameQueriedContext extends ParserRuleContext {
     public TerminalNode QUERIED() {
-      return getToken(FhirMapJavaParser.QUERIED, 0);
+      return getToken(FhirMapParser.QUERIED, 0);
     }
 
     public KeyUsesNameQueriedContext(ParserRuleContext parent, int invokingState) {
@@ -594,8 +594,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUsesNameQueried(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyUsesNameQueried(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -621,7 +621,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyUsesNameProducedContext extends ParserRuleContext {
     public TerminalNode PRODUCED() {
-      return getToken(FhirMapJavaParser.PRODUCED, 0);
+      return getToken(FhirMapParser.PRODUCED, 0);
     }
 
     public KeyUsesNameProducedContext(ParserRuleContext parent, int invokingState) {
@@ -635,8 +635,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyUsesNameProduced(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyUsesNameProduced(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -662,7 +662,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class KeyImportsContext extends ParserRuleContext {
     public TerminalNode IMPORTS() {
-      return getToken(FhirMapJavaParser.IMPORTS, 0);
+      return getToken(FhirMapParser.IMPORTS, 0);
     }
 
     public StructureMapContext structureMap() {
@@ -680,8 +680,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitKeyImports(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitKeyImports(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -754,7 +754,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroup(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitGroup(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -811,7 +811,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupStartContext extends ParserRuleContext {
     public TerminalNode GROUP() {
-      return getToken(FhirMapJavaParser.GROUP, 0);
+      return getToken(FhirMapParser.GROUP, 0);
     }
 
     public IdentifierContext identifier() {
@@ -837,8 +837,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupStart(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupStart(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -887,7 +887,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupExtendsContext extends ParserRuleContext {
     public TerminalNode EXTENDS() {
-      return getToken(FhirMapJavaParser.EXTENDS, 0);
+      return getToken(FhirMapParser.EXTENDS, 0);
     }
 
     public IdentifierContext identifier() {
@@ -905,8 +905,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupExtends(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupExtends(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -934,7 +934,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupEndContext extends ParserRuleContext {
     public TerminalNode ENDGROUP() {
-      return getToken(FhirMapJavaParser.ENDGROUP, 0);
+      return getToken(FhirMapParser.ENDGROUP, 0);
     }
 
     public GroupEndContext(ParserRuleContext parent, int invokingState) {
@@ -948,7 +948,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupEnd(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitGroupEnd(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -974,7 +974,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupTypeContext extends ParserRuleContext {
     public TerminalNode FOR() {
-      return getToken(FhirMapJavaParser.FOR, 0);
+      return getToken(FhirMapParser.FOR, 0);
     }
 
     public GroupTypeValueContext groupTypeValue() {
@@ -992,8 +992,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1039,8 +1039,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupTypeValue(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupTypeValue(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1081,7 +1081,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupTypeTypeContext extends ParserRuleContext {
     public TerminalNode TYPES() {
-      return getToken(FhirMapJavaParser.TYPES, 0);
+      return getToken(FhirMapParser.TYPES, 0);
     }
 
     public GroupTypeTypeContext(ParserRuleContext parent, int invokingState) {
@@ -1095,8 +1095,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupTypeType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupTypeType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1122,7 +1122,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupTypeTypeTypesContext extends ParserRuleContext {
     public TerminalNode TYPE_TYPES() {
-      return getToken(FhirMapJavaParser.TYPE_TYPES, 0);
+      return getToken(FhirMapParser.TYPE_TYPES, 0);
     }
 
     public GroupTypeTypeTypesContext(ParserRuleContext parent, int invokingState) {
@@ -1136,8 +1136,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupTypeTypeTypes(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupTypeTypeTypes(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1163,7 +1163,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupInputContext extends ParserRuleContext {
     public TerminalNode INPUT() {
-      return getToken(FhirMapJavaParser.INPUT, 0);
+      return getToken(FhirMapParser.INPUT, 0);
     }
 
     public GroupInputNameContext groupInputName() {
@@ -1189,8 +1189,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInput(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInput(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1257,8 +1257,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputName(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputName(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1298,8 +1298,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1325,7 +1325,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupInputModeContext extends ParserRuleContext {
     public TerminalNode AS() {
-      return getToken(FhirMapJavaParser.AS, 0);
+      return getToken(FhirMapParser.AS, 0);
     }
 
     public GroupInputModesContext groupInputModes() {
@@ -1343,8 +1343,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputMode(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputMode(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1390,8 +1390,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputModes(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputModes(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1432,7 +1432,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupInputModesSourceContext extends ParserRuleContext {
     public TerminalNode SOURCE() {
-      return getToken(FhirMapJavaParser.SOURCE, 0);
+      return getToken(FhirMapParser.SOURCE, 0);
     }
 
     public GroupInputModesSourceContext(ParserRuleContext parent, int invokingState) {
@@ -1446,8 +1446,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputModesSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputModesSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1473,7 +1473,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class GroupInputModesTargetContext extends ParserRuleContext {
     public TerminalNode TARGET() {
-      return getToken(FhirMapJavaParser.TARGET, 0);
+      return getToken(FhirMapParser.TARGET, 0);
     }
 
     public GroupInputModesTargetContext(ParserRuleContext parent, int invokingState) {
@@ -1487,8 +1487,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupInputModesTarget(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupInputModesTarget(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1532,8 +1532,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupItem(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupItem(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1590,8 +1590,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupCall(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupCall(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1650,8 +1650,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitGroupCallParameters(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitGroupCallParameters(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1698,7 +1698,7 @@ public class FhirMapJavaParser extends Parser {
     }
 
     public TerminalNode FOR() {
-      return getToken(FhirMapJavaParser.FOR, 0);
+      return getToken(FhirMapParser.FOR, 0);
     }
 
     public RuleSourcesContext ruleSources() {
@@ -1720,8 +1720,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleInstance(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleInstance(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1782,7 +1782,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleName(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitRuleName(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1843,8 +1843,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleSources(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleSources(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -1925,8 +1925,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2030,8 +2030,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleContext(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleContext(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2092,8 +2092,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleContextElement(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleContextElement(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2187,7 +2187,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleType(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitRuleType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2230,7 +2230,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleDefaultContext extends ParserRuleContext {
     public TerminalNode DEFAULT() {
-      return getToken(FhirMapJavaParser.DEFAULT, 0);
+      return getToken(FhirMapParser.DEFAULT, 0);
     }
 
     public IdentifierContext identifier() {
@@ -2248,8 +2248,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleDefault(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleDefault(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2287,8 +2287,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleListOption(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleListOption(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2314,7 +2314,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleVariableContext extends ParserRuleContext {
     public TerminalNode AS() {
-      return getToken(FhirMapJavaParser.AS, 0);
+      return getToken(FhirMapParser.AS, 0);
     }
 
     public IdentifierContext identifier() {
@@ -2332,8 +2332,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2361,7 +2361,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleWherePathContext extends ParserRuleContext {
     public TerminalNode WHERE() {
-      return getToken(FhirMapJavaParser.WHERE, 0);
+      return getToken(FhirMapParser.WHERE, 0);
     }
 
     public FhirPathContext fhirPath() {
@@ -2379,8 +2379,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleWherePath(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleWherePath(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2408,7 +2408,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleCheckPathContext extends ParserRuleContext {
     public TerminalNode CHECK() {
-      return getToken(FhirMapJavaParser.CHECK, 0);
+      return getToken(FhirMapParser.CHECK, 0);
     }
 
     public FhirPathContext fhirPath() {
@@ -2426,8 +2426,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleCheckPath(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleCheckPath(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2455,7 +2455,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleMakeContext extends ParserRuleContext {
     public TerminalNode MAKE() {
-      return getToken(FhirMapJavaParser.MAKE, 0);
+      return getToken(FhirMapParser.MAKE, 0);
     }
 
     public RuleMakeTargetsContext ruleMakeTargets() {
@@ -2477,7 +2477,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleMake(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitRuleMake(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2534,8 +2534,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleMakeTargets(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleMakeTargets(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2578,7 +2578,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleMakeDependentsContext extends ParserRuleContext {
     public TerminalNode THEN() {
-      return getToken(FhirMapJavaParser.THEN, 0);
+      return getToken(FhirMapParser.THEN, 0);
     }
 
     public RuleMakeDependentsGroupItemsContext ruleMakeDependentsGroupItems() {
@@ -2596,8 +2596,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleMakeDependents(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleMakeDependents(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2647,8 +2647,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleMakeDependentsGroupItems(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleMakeDependentsGroupItems(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2777,8 +2777,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTarget(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTarget(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -2957,8 +2957,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetContext(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetContext(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3004,8 +3004,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAs(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAs(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3055,8 +3055,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAssign(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAssign(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3113,8 +3113,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAssignValue(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAssignValue(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3186,7 +3186,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetAppendContext extends ParserRuleContext {
     public TerminalNode APPEND() {
-      return getToken(FhirMapJavaParser.APPEND, 0);
+      return getToken(FhirMapParser.APPEND, 0);
     }
 
     public RuleTargetAppendSourcesContext ruleTargetAppendSources() {
@@ -3212,8 +3212,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAppend(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAppend(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3283,8 +3283,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAppendSources(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAppendSources(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3345,8 +3345,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetAppendSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetAppendSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3418,7 +3418,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCContext extends ParserRuleContext {
     public TerminalNode C() {
-      return getToken(FhirMapJavaParser.C, 0);
+      return getToken(FhirMapParser.C, 0);
     }
 
     public RuleTargetCSystemContext ruleTargetCSystem() {
@@ -3452,8 +3452,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetC(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetC(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3535,8 +3535,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCSystem(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCSystem(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3580,8 +3580,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCCode(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCCode(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3667,8 +3667,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCDisplay(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCDisplay(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3694,7 +3694,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCastContext extends ParserRuleContext {
     public TerminalNode CAST() {
-      return getToken(FhirMapJavaParser.CAST, 0);
+      return getToken(FhirMapParser.CAST, 0);
     }
 
     public RuleTargetCastSourceContext ruleTargetCastSource() {
@@ -3724,8 +3724,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCast(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCast(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3803,8 +3803,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCastSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCastSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3844,8 +3844,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCastType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCastType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3893,8 +3893,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -3943,7 +3943,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCC1Context extends ParserRuleContext {
     public TerminalNode CC() {
-      return getToken(FhirMapJavaParser.CC, 0);
+      return getToken(FhirMapParser.CC, 0);
     }
 
     public RuleTargetCC1TextContext ruleTargetCC1Text() {
@@ -3969,8 +3969,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC1(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC1(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4034,8 +4034,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC1Text(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC1Text(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4061,7 +4061,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCC2Context extends ParserRuleContext {
     public TerminalNode CC() {
-      return getToken(FhirMapJavaParser.CC, 0);
+      return getToken(FhirMapParser.CC, 0);
     }
 
     public RuleTargetCC2SystemContext ruleTargetCC2System() {
@@ -4095,8 +4095,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4177,8 +4177,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC2System(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC2System(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4222,8 +4222,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC2Code(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC2Code(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4309,8 +4309,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCC2Display(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCC2Display(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4336,7 +4336,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCpContext extends ParserRuleContext {
     public TerminalNode CP() {
-      return getToken(FhirMapJavaParser.CP, 0);
+      return getToken(FhirMapParser.CP, 0);
     }
 
     public RuleTargetCpVariableContext ruleTargetCpVariable() {
@@ -4366,8 +4366,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCp(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCp(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4445,8 +4445,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCpSystem(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCpSystem(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4486,8 +4486,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCpVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCpVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4517,7 +4517,7 @@ public class FhirMapJavaParser extends Parser {
     }
 
     public TerminalNode COPY() {
-      return getToken(FhirMapJavaParser.COPY, 0);
+      return getToken(FhirMapParser.COPY, 0);
     }
 
     public RuleTargetCopySourceContext ruleTargetCopySource() {
@@ -4539,8 +4539,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCopy(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCopy(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4599,8 +4599,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCopySource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCopySource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4626,7 +4626,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetCreateContext extends ParserRuleContext {
     public TerminalNode CREATE() {
-      return getToken(FhirMapJavaParser.CREATE, 0);
+      return getToken(FhirMapParser.CREATE, 0);
     }
 
     public RuleTargetCreateTypeContext ruleTargetCreateType() {
@@ -4652,8 +4652,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCreate(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCreate(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4719,8 +4719,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetCreateType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetCreateType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4746,7 +4746,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetDateOpContext extends ParserRuleContext {
     public TerminalNode DATEOP() {
-      return getToken(FhirMapJavaParser.DATEOP, 0);
+      return getToken(FhirMapParser.DATEOP, 0);
     }
 
     public RuleTargetDateOpVariableContext ruleTargetDateOpVariable() {
@@ -4780,8 +4780,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetDateOp(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetDateOp(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4863,8 +4863,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetDateOpVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetDateOpVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4904,8 +4904,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetDateOpOperation(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetDateOpOperation(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4945,8 +4945,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetDateOpVariable2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetDateOpVariable2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -4994,8 +4994,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5044,7 +5044,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetExtension1Context extends ParserRuleContext {
     public TerminalNode EXTENSION() {
-      return getToken(FhirMapJavaParser.EXTENSION, 0);
+      return getToken(FhirMapParser.EXTENSION, 0);
     }
 
     public RuleTargetContextContext ruleTargetContext() {
@@ -5066,8 +5066,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension1(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension1(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5115,7 +5115,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetExtension2Context extends ParserRuleContext {
     public TerminalNode EXTENSION() {
-      return getToken(FhirMapJavaParser.EXTENSION, 0);
+      return getToken(FhirMapParser.EXTENSION, 0);
     }
 
     public RuleTargetExtension2UriContext ruleTargetExtension2Uri() {
@@ -5173,8 +5173,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5270,8 +5270,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Uri(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Uri(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5311,8 +5311,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Title(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Title(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5352,8 +5352,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Mode(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Mode(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5393,8 +5393,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Parent(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Parent(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5434,8 +5434,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Text1(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Text1(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5475,8 +5475,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Text2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Text2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5516,8 +5516,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Min(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Min(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5557,8 +5557,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Max(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Max(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5598,8 +5598,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetExtension2Type(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetExtension2Type(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5625,7 +5625,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetEscapeContext extends ParserRuleContext {
     public TerminalNode ESCAPE() {
-      return getToken(FhirMapJavaParser.ESCAPE, 0);
+      return getToken(FhirMapParser.ESCAPE, 0);
     }
 
     public RuleTargetEscapeVariableContext ruleTargetEscapeVariable() {
@@ -5659,8 +5659,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEscape(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEscape(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5742,8 +5742,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEscapeVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEscapeVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5783,8 +5783,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEscapeString1(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEscapeString1(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5824,8 +5824,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEscapeString2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEscapeString2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5851,7 +5851,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetEvaluateContext extends ParserRuleContext {
     public TerminalNode EVALUATE() {
-      return getToken(FhirMapJavaParser.EVALUATE, 0);
+      return getToken(FhirMapParser.EVALUATE, 0);
     }
 
     public RuleTargetEvaluateObjectContext ruleTargetEvaluateObject() {
@@ -5881,8 +5881,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEvaluate(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEvaluate(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5952,8 +5952,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEvaluateObject(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEvaluateObject(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -5993,8 +5993,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetEvaluateObjectElement(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetEvaluateObjectElement(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6020,7 +6020,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetIdContext extends ParserRuleContext {
     public TerminalNode ID() {
-      return getToken(FhirMapJavaParser.ID, 0);
+      return getToken(FhirMapParser.ID, 0);
     }
 
     public RuleTargetIdSystemContext ruleTargetIdSystem() {
@@ -6054,8 +6054,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetId(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetId(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6137,8 +6137,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetIdSystem(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetIdSystem(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6178,8 +6178,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetIdValue(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetIdValue(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6219,8 +6219,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetIdType(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetIdType(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6246,7 +6246,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetPointerContext extends ParserRuleContext {
     public TerminalNode POINTER() {
-      return getToken(FhirMapJavaParser.POINTER, 0);
+      return getToken(FhirMapParser.POINTER, 0);
     }
 
     public RuleTargetPointerResourceContext ruleTargetPointerResource() {
@@ -6272,8 +6272,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetPointer(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetPointer(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6339,8 +6339,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetPointerResource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetPointerResource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6388,8 +6388,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6435,7 +6435,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetQty1Context extends ParserRuleContext {
     public TerminalNode QTY() {
-      return getToken(FhirMapJavaParser.QTY, 0);
+      return getToken(FhirMapParser.QTY, 0);
     }
 
     public RuleTargetQty1TextContext ruleTargetQty1Text() {
@@ -6461,8 +6461,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty1(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty1(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6528,8 +6528,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty1Text(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty1Text(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6555,7 +6555,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetQty2Context extends ParserRuleContext {
     public TerminalNode QTY() {
-      return getToken(FhirMapJavaParser.QTY, 0);
+      return getToken(FhirMapParser.QTY, 0);
     }
 
     public RuleTargetQty2ValueContext ruleTargetQty2Value() {
@@ -6589,8 +6589,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty2(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty2(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6664,8 +6664,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty2Value(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty2Value(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6705,8 +6705,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty2UnitString(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty2UnitString(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6746,8 +6746,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty2System(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty2System(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6773,7 +6773,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetQty3Context extends ParserRuleContext {
     public TerminalNode QTY() {
-      return getToken(FhirMapJavaParser.QTY, 0);
+      return getToken(FhirMapParser.QTY, 0);
     }
 
     public RuleTargetQty3ValueContext ruleTargetQty3Value() {
@@ -6807,8 +6807,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty3(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty3(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6882,8 +6882,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty3Value(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty3Value(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6923,8 +6923,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty3UnitString(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty3UnitString(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6964,8 +6964,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetQty3CodeVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetQty3CodeVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -6991,7 +6991,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetReferenceContext extends ParserRuleContext {
     public TerminalNode REFERENCE() {
-      return getToken(FhirMapJavaParser.REFERENCE, 0);
+      return getToken(FhirMapParser.REFERENCE, 0);
     }
 
     public RuleTargetReferenceSourceContext ruleTargetReferenceSource() {
@@ -7017,8 +7017,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetReference(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetReference(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7088,8 +7088,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetReferenceSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetReferenceSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7161,7 +7161,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateContext extends ParserRuleContext {
     public TerminalNode TRANSLATE() {
-      return getToken(FhirMapJavaParser.TRANSLATE, 0);
+      return getToken(FhirMapParser.TRANSLATE, 0);
     }
 
     public RuleTargetTranslateSourceContext ruleTargetTranslateSource() {
@@ -7195,8 +7195,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslate(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslate(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7270,8 +7270,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7311,8 +7311,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateMap(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateMap(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7368,8 +7368,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutput(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutput(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7431,7 +7431,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateOutputCodeContext extends ParserRuleContext {
     public TerminalNode CODE() {
-      return getToken(FhirMapJavaParser.CODE, 0);
+      return getToken(FhirMapParser.CODE, 0);
     }
 
     public RuleTargetTranslateOutputCodeContext(ParserRuleContext parent, int invokingState) {
@@ -7445,8 +7445,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCode(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCode(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7472,7 +7472,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateOutputSystemContext extends ParserRuleContext {
     public TerminalNode SYSTEM() {
-      return getToken(FhirMapJavaParser.SYSTEM, 0);
+      return getToken(FhirMapParser.SYSTEM, 0);
     }
 
     public RuleTargetTranslateOutputSystemContext(ParserRuleContext parent, int invokingState) {
@@ -7486,8 +7486,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputSystem(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputSystem(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7513,7 +7513,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateOutputDisplayContext extends ParserRuleContext {
     public TerminalNode DISPLAY() {
-      return getToken(FhirMapJavaParser.DISPLAY, 0);
+      return getToken(FhirMapParser.DISPLAY, 0);
     }
 
     public RuleTargetTranslateOutputDisplayContext(ParserRuleContext parent, int invokingState) {
@@ -7527,8 +7527,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputDisplay(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputDisplay(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7554,7 +7554,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateOutputCodingContext extends ParserRuleContext {
     public TerminalNode CODING() {
-      return getToken(FhirMapJavaParser.CODING, 0);
+      return getToken(FhirMapParser.CODING, 0);
     }
 
     public RuleTargetTranslateOutputCodingContext(ParserRuleContext parent, int invokingState) {
@@ -7568,8 +7568,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCoding(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCoding(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7595,7 +7595,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTranslateOutputCodeableConceptContext extends ParserRuleContext {
     public TerminalNode CODEABLECONCEPT() {
-      return getToken(FhirMapJavaParser.CODEABLECONCEPT, 0);
+      return getToken(FhirMapParser.CODEABLECONCEPT, 0);
     }
 
     public RuleTargetTranslateOutputCodeableConceptContext(ParserRuleContext parent, int invokingState) {
@@ -7609,8 +7609,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCodeableConcept(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTranslateOutputCodeableConcept(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7636,7 +7636,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetTruncateContext extends ParserRuleContext {
     public TerminalNode TRUNCATE() {
-      return getToken(FhirMapJavaParser.TRUNCATE, 0);
+      return getToken(FhirMapParser.TRUNCATE, 0);
     }
 
     public RuleTargetTruncateSourceContext ruleTargetTruncateSource() {
@@ -7666,8 +7666,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTruncate(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTruncate(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7741,8 +7741,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTruncateSource(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTruncateSource(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7828,8 +7828,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetTruncateLength(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetTruncateLength(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7855,7 +7855,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetUuidContext extends ParserRuleContext {
     public TerminalNode UUID() {
-      return getToken(FhirMapJavaParser.UUID, 0);
+      return getToken(FhirMapParser.UUID, 0);
     }
 
     public RuleTargetContextContext ruleTargetContext() {
@@ -7877,8 +7877,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetUuid(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetUuid(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7928,7 +7928,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class RuleTargetVariableContext extends ParserRuleContext {
     public TerminalNode AS() {
-      return getToken(FhirMapJavaParser.AS, 0);
+      return getToken(FhirMapParser.AS, 0);
     }
 
     public IdentifierContext identifier() {
@@ -7946,8 +7946,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitRuleTargetVariable(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitRuleTargetVariable(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -7989,7 +7989,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitFhirPath(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitFhirPath(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8015,127 +8015,127 @@ public class FhirMapJavaParser extends Parser {
 
   public static class IdentifierContext extends ParserRuleContext {
     public TerminalNode IDENTIFIER() {
-      return getToken(FhirMapJavaParser.IDENTIFIER, 0);
+      return getToken(FhirMapParser.IDENTIFIER, 0);
     }
 
     public TerminalNode SOURCE() {
-      return getToken(FhirMapJavaParser.SOURCE, 0);
+      return getToken(FhirMapParser.SOURCE, 0);
     }
 
     public TerminalNode TARGET() {
-      return getToken(FhirMapJavaParser.TARGET, 0);
+      return getToken(FhirMapParser.TARGET, 0);
     }
 
     public TerminalNode QUERIED() {
-      return getToken(FhirMapJavaParser.QUERIED, 0);
+      return getToken(FhirMapParser.QUERIED, 0);
     }
 
     public TerminalNode PRODUCED() {
-      return getToken(FhirMapJavaParser.PRODUCED, 0);
+      return getToken(FhirMapParser.PRODUCED, 0);
     }
 
     public TerminalNode APPEND() {
-      return getToken(FhirMapJavaParser.APPEND, 0);
+      return getToken(FhirMapParser.APPEND, 0);
     }
 
     public TerminalNode CAST() {
-      return getToken(FhirMapJavaParser.CAST, 0);
+      return getToken(FhirMapParser.CAST, 0);
     }
 
     public TerminalNode C() {
-      return getToken(FhirMapJavaParser.C, 0);
+      return getToken(FhirMapParser.C, 0);
     }
 
     public TerminalNode CC() {
-      return getToken(FhirMapJavaParser.CC, 0);
+      return getToken(FhirMapParser.CC, 0);
     }
 
     public TerminalNode CP() {
-      return getToken(FhirMapJavaParser.CP, 0);
+      return getToken(FhirMapParser.CP, 0);
     }
 
     public TerminalNode CODEABLECONCEPT() {
-      return getToken(FhirMapJavaParser.CODEABLECONCEPT, 0);
+      return getToken(FhirMapParser.CODEABLECONCEPT, 0);
     }
 
     public TerminalNode CODING() {
-      return getToken(FhirMapJavaParser.CODING, 0);
+      return getToken(FhirMapParser.CODING, 0);
     }
 
     public TerminalNode COPY() {
-      return getToken(FhirMapJavaParser.COPY, 0);
+      return getToken(FhirMapParser.COPY, 0);
     }
 
     public TerminalNode CODE() {
-      return getToken(FhirMapJavaParser.CODE, 0);
+      return getToken(FhirMapParser.CODE, 0);
     }
 
     public TerminalNode DISPLAY() {
-      return getToken(FhirMapJavaParser.DISPLAY, 0);
+      return getToken(FhirMapParser.DISPLAY, 0);
     }
 
     public TerminalNode CREATE() {
-      return getToken(FhirMapJavaParser.CREATE, 0);
+      return getToken(FhirMapParser.CREATE, 0);
     }
 
     public TerminalNode DATEOP() {
-      return getToken(FhirMapJavaParser.DATEOP, 0);
+      return getToken(FhirMapParser.DATEOP, 0);
     }
 
     public TerminalNode DEFAULT() {
-      return getToken(FhirMapJavaParser.DEFAULT, 0);
+      return getToken(FhirMapParser.DEFAULT, 0);
     }
 
     public TerminalNode ESCAPE() {
-      return getToken(FhirMapJavaParser.ESCAPE, 0);
+      return getToken(FhirMapParser.ESCAPE, 0);
     }
 
     public TerminalNode EXTENSION() {
-      return getToken(FhirMapJavaParser.EXTENSION, 0);
+      return getToken(FhirMapParser.EXTENSION, 0);
     }
 
     public TerminalNode EVALUATE() {
-      return getToken(FhirMapJavaParser.EVALUATE, 0);
+      return getToken(FhirMapParser.EVALUATE, 0);
     }
 
     public TerminalNode ID() {
-      return getToken(FhirMapJavaParser.ID, 0);
+      return getToken(FhirMapParser.ID, 0);
     }
 
     public TerminalNode MAP() {
-      return getToken(FhirMapJavaParser.MAP, 0);
+      return getToken(FhirMapParser.MAP, 0);
     }
 
     public TerminalNode POINTER() {
-      return getToken(FhirMapJavaParser.POINTER, 0);
+      return getToken(FhirMapParser.POINTER, 0);
     }
 
     public TerminalNode QTY() {
-      return getToken(FhirMapJavaParser.QTY, 0);
+      return getToken(FhirMapParser.QTY, 0);
     }
 
     public TerminalNode REFERENCE() {
-      return getToken(FhirMapJavaParser.REFERENCE, 0);
+      return getToken(FhirMapParser.REFERENCE, 0);
     }
 
     public TerminalNode SYSTEM() {
-      return getToken(FhirMapJavaParser.SYSTEM, 0);
+      return getToken(FhirMapParser.SYSTEM, 0);
     }
 
     public TerminalNode TRANSLATE() {
-      return getToken(FhirMapJavaParser.TRANSLATE, 0);
+      return getToken(FhirMapParser.TRANSLATE, 0);
     }
 
     public TerminalNode TRUNCATE() {
-      return getToken(FhirMapJavaParser.TRUNCATE, 0);
+      return getToken(FhirMapParser.TRUNCATE, 0);
     }
 
     public TerminalNode TYPES() {
-      return getToken(FhirMapJavaParser.TYPES, 0);
+      return getToken(FhirMapParser.TYPES, 0);
     }
 
     public TerminalNode UUID() {
-      return getToken(FhirMapJavaParser.UUID, 0);
+      return getToken(FhirMapParser.UUID, 0);
     }
 
     public IdentifierContext(ParserRuleContext parent, int invokingState) {
@@ -8149,8 +8149,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitIdentifier(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitIdentifier(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8184,7 +8184,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class IntegerContext extends ParserRuleContext {
     public TerminalNode DIGITS() {
-      return getToken(FhirMapJavaParser.DIGITS, 0);
+      return getToken(FhirMapParser.DIGITS, 0);
     }
 
     public IntegerContext(ParserRuleContext parent, int invokingState) {
@@ -8198,7 +8198,7 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor) return ((FhirMapJavaVisitor<? extends T>) visitor).visitInteger(this);
+      if (visitor instanceof FhirMapVisitor) return ((FhirMapVisitor<? extends T>) visitor).visitInteger(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8224,7 +8224,7 @@ public class FhirMapJavaParser extends Parser {
 
   public static class QuotedIdentifierContext extends ParserRuleContext {
     public TerminalNode QIDENTIFIER() {
-      return getToken(FhirMapJavaParser.QIDENTIFIER, 0);
+      return getToken(FhirMapParser.QIDENTIFIER, 0);
     }
 
     public QuotedIdentifierContext(ParserRuleContext parent, int invokingState) {
@@ -8238,8 +8238,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitQuotedIdentifier(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitQuotedIdentifier(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8265,11 +8265,11 @@ public class FhirMapJavaParser extends Parser {
 
   public static class QuotedStringWQuotesContext extends ParserRuleContext {
     public TerminalNode QSTRING() {
-      return getToken(FhirMapJavaParser.QSTRING, 0);
+      return getToken(FhirMapParser.QSTRING, 0);
     }
 
     public TerminalNode QIDENTIFIER() {
-      return getToken(FhirMapJavaParser.QIDENTIFIER, 0);
+      return getToken(FhirMapParser.QIDENTIFIER, 0);
     }
 
     public QuotedStringWQuotesContext(ParserRuleContext parent, int invokingState) {
@@ -8283,8 +8283,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitQuotedStringWQuotes(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitQuotedStringWQuotes(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8318,11 +8318,11 @@ public class FhirMapJavaParser extends Parser {
 
   public static class QuotedStringContext extends ParserRuleContext {
     public TerminalNode QSTRING() {
-      return getToken(FhirMapJavaParser.QSTRING, 0);
+      return getToken(FhirMapParser.QSTRING, 0);
     }
 
     public TerminalNode QIDENTIFIER() {
-      return getToken(FhirMapJavaParser.QIDENTIFIER, 0);
+      return getToken(FhirMapParser.QIDENTIFIER, 0);
     }
 
     public QuotedStringContext(ParserRuleContext parent, int invokingState) {
@@ -8336,8 +8336,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitQuotedString(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitQuotedString(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8385,8 +8385,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitQuotedUrl(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitQuotedUrl(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8426,8 +8426,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitStructureDefinition(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitStructureDefinition(this);
       else return visitor.visitChildren(this);
     }
   }
@@ -8467,8 +8467,8 @@ public class FhirMapJavaParser extends Parser {
 
     @Override
     public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-      if (visitor instanceof FhirMapJavaVisitor)
-        return ((FhirMapJavaVisitor<? extends T>) visitor).visitStructureMap(this);
+      if (visitor instanceof FhirMapVisitor)
+        return ((FhirMapVisitor<? extends T>) visitor).visitStructureMap(this);
       else return visitor.visitChildren(this);
     }
   }
