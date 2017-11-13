@@ -116,10 +116,10 @@
 							<artifactId>spring-jcl</artifactId>
 						</dependency>
 					</ignoredDependencies>
-					<ignoredResources>
-						<ignoredResource>changelog.txt</ignoredResource>
+					<ignoredResourcePatterns>
+						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
-					</ignoredResources>
+					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>
 		</plugins>
