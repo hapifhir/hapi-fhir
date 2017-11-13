@@ -156,13 +156,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				try {
 					from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 					subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-					bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
 				} catch (FHIRException theE) {
 					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 				}
 				retVal.getEmailDetails().setFrom(from);
 				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-				retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
 			}
 
 		} catch (FHIRException theE) {
@@ -191,13 +189,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			try {
 				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-				bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
 			retVal.getEmailDetails().setFrom(from);
 			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-			retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
 		}
 
 		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
@@ -459,7 +455,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager);
 		}
 
 		registerSubscriptionCheckingSubscriber();

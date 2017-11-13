@@ -40,7 +40,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOnExternalCode() {
 		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
 		
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -59,7 +59,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -82,7 +82,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -105,7 +105,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -122,7 +122,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
 		//@formatter:off
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -146,7 +146,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistantCode() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -163,7 +163,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByCoding() {
 		//@formatter:off
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -186,7 +186,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOperationByInvalidCombination() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -205,7 +205,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOperationByInvalidCombination2() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -223,7 +223,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOperationByInvalidCombination3() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -240,7 +240,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 //	@Ignore
 	public void testLookupOperationForBuiltInCode() {
 		//@formatter:off
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")

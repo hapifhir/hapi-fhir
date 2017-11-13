@@ -270,7 +270,7 @@ public class TestingUtilities {
 	  	JsonArray a1 = (JsonArray) n1;
 	  	JsonArray a2 = (JsonArray) n2;
 	  
-	    if (a1.size() != a1.size()) 
+	    if (a1.size() != a2.size()) 
 	      return "array properties differ at "+path+": count "+Integer.toString(a1.size())+"/"+Integer.toString(a2.size());
 	    for (int i = 0; i < a1.size(); i++) {
 	        String s = compareNodes(path+"["+Integer.toString(i)+"]", a1.get(i), a2.get(i));

@@ -589,20 +589,20 @@ public class QuestionnaireBuilder {
   private Type convertType(Base value, QuestionnaireItemType af, ValueSet vs, String path) throws FHIRException {
     switch (af) {
       // simple cases
-    case BOOLEAN: if (value instanceof BooleanType) return (Type) value;
-    case DECIMAL: if (value instanceof DecimalType) return (Type) value;
-    case INTEGER: if (value instanceof IntegerType) return (Type) value;
-    case DATE: if (value instanceof DateType) return (Type) value;
-    case DATETIME: if (value instanceof DateTimeType) return (Type) value;
-    case TIME: if (value instanceof TimeType) return (Type) value;
+    case BOOLEAN: if (value instanceof BooleanType) return (Type) value; break;
+    case DECIMAL: if (value instanceof DecimalType) return (Type) value; break;
+    case INTEGER: if (value instanceof IntegerType) return (Type) value; break;
+    case DATE: if (value instanceof DateType) return (Type) value; break;
+    case DATETIME: if (value instanceof DateTimeType) return (Type) value; break;
+    case TIME: if (value instanceof TimeType) return (Type) value; break;
     case STRING:
       if (value instanceof StringType) 
         return (Type) value;
       else if (value instanceof UriType) 
         return new StringType(((UriType) value).asStringValue());
-
-    case TEXT: if (value instanceof StringType) return (Type) value;
-    case QUANTITY: if (value instanceof  Quantity) return (Type) value;
+		break;
+    case TEXT: if (value instanceof StringType) return (Type) value; break;
+    case QUANTITY: if (value instanceof  Quantity) return (Type) value; break;
 
     // complex cases:
     // ? QuestionnaireItemTypeAttachment: ...?
@@ -621,6 +621,7 @@ public class QuestionnaireBuilder {
         cc.setSystem(getSystemForCode(vs, cc.getCode(), path));
         return cc;
       }
+		break;
 
     case REFERENCE:
       if (value instanceof Reference)
@@ -629,6 +630,9 @@ public class QuestionnaireBuilder {
         Reference r = new Reference();
         r.setReference(((StringType) value).asStringValue());
       }
+		break;
+	 default:
+		break;
     }
 
     throw new FHIRException("Unable to convert from '"+value.getClass().toString()+"' for Answer Format "+af.toCode()+", path = "+path);

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.util.XmlDetectionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -110,7 +111,7 @@ public abstract class BaseClient implements IRestfulClient {
 			setKeepResponses(true);
 		}
 
-		if (XmlUtil.isStaxPresent() == false) {
+		if (XmlDetectionUtil.isStaxPresent() == false) {
 			myEncoding = EncodingEnum.JSON;
 		}
 

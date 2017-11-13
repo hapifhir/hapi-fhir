@@ -19,7 +19,24 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BinaryUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,27 +47,8 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceParameter implements IParameter {
 
@@ -193,11 +191,22 @@ public class ResourceParameter implements IParameter {
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (EncodingEnum.forContentTypeStrict(ct) == null) {
 				FhirContext ctx = theRequest.getServer().getFhirContext();
-				IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
+				IBaseBinary binary = BinaryUtil.newBinary(ctx);
 				binary.setId(theRequest.getId());
 				binary.setContentType(ct);
 				binary.setContent(theRequest.loadRequestContents());
 				retVal = binary;
+
+				/*
+				 * Security context header, which is only in
+				 * DSTU3+
+				 */
+				if (ctx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+					String securityContext = theRequest.getHeader(Constants.HEADER_X_SECURITY_CONTEXT);
+					if (isNotBlank(securityContext)) {
+						BinaryUtil.setSecurityContext(ctx, binary, securityContext);
+					}
+				}
 			}
 		}
 		

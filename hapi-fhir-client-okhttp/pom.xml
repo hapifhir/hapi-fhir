@@ -59,6 +59,11 @@
 		</dependency>
 
 		<!-- Unit test dependencies -->
+      <dependency>
+         <groupId>org.codehaus.woodstox</groupId>
+         <artifactId>woodstox-core-asl</artifactId>
+         <scope>test</scope>
+      </dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>

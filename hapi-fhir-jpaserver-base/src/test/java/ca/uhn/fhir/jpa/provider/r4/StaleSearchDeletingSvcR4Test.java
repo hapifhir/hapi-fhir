@@ -56,7 +56,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		}
 
 		//@formatter:off
-		IClientExecutable<IQuery<Bundle>, Bundle> search = ourClient
+		IClientExecutable<IQuery<Bundle>, Bundle> search = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.NAME.matches().value("Everything"))
@@ -74,12 +74,12 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		String nextLinkUrl = nextLink.getUrl();
 		assertThat(nextLinkUrl, not(blankOrNullString()));
 
-		Bundle resp2 = ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
+		Bundle resp2 = myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
-		ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
+		myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 
 		Thread.sleep(20);
 		myDaoConfig.setExpireSearchResultsAfterMillis(10);
@@ -87,7 +87,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {
-			ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
+			myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			assertThat(e.getMessage(), containsString("does not exist and may have expired"));

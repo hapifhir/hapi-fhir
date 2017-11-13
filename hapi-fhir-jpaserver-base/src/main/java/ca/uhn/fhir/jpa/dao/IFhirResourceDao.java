@@ -33,6 +33,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletResponse;
 
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
@@ -178,6 +182,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	IBundleProvider search(SearchParameterMap theParams);
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
+
+	@Transactional(propagation = Propagation.SUPPORTS)
+	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
 	Set<Long> searchForIds(SearchParameterMap theParams);
 

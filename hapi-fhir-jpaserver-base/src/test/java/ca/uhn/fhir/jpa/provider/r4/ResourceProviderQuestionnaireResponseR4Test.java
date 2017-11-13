@@ -72,7 +72,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
-			ourClient.create().resource(qr1).execute();
+			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.toString(), containsString("Answer value must be of type string"));
@@ -95,7 +95,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
-			ourClient.create().resource(qr1).execute();
+			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.toString(), containsString("Answer value must be of type string"));

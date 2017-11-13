@@ -172,7 +172,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
+	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;

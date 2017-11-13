@@ -57,20 +57,38 @@ public class ReadDstu2Test {
 		CloseableHttpResponse status;
 		HttpGet httpGet;
 
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it has changed before the later time of 2012-01-01T13:00:00Z
+		// so we expect a 304
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(304, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
 		
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it has changed at the same time of 2012-01-01T12:12:12Z
+		// so we expect a 304
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(304, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
+		// so we expect a 200
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
-			assertEquals(304, status.getStatusLine().getStatusCode());
+			assertEquals(200, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

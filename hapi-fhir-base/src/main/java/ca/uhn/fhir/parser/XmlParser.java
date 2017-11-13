@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.*;
 
@@ -605,13 +606,16 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
+
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
 		if (theDt == null || theDt.getValue() == null) {
 			return;
 		}
 
+		List<XMLEvent> events = XmlUtil.parse(theDt.getValue());
 		boolean firstElement = true;
-		for (XMLEvent event : theDt.getValue()) {
+
+		for (XMLEvent event : events) {
 			switch (event.getEventType()) {
 			case XMLStreamConstants.ATTRIBUTE:
 				Attribute attr = (Attribute) event;

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -58,6 +59,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
+	protected static SubscriptionEmailInterceptor ourEmailSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
@@ -111,13 +113,9 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
-			// ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
-			// loaderListener.initWebApplicationContext(mock(ServletContext.class));
-			//
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
 
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
-			// dispatcherServlet.setApplicationContext(webApplicationContext);
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
@@ -150,6 +148,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourRestHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
+			ourEmailSubscriptionInterceptor = wac.getBean(SubscriptionEmailInterceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);

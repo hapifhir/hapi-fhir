@@ -20,8 +20,12 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import java.util.Date;
-
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.entity.Search;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -34,11 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.entity.Search;
+import java.util.Date;
 
 /**
  * Deletes old searches
@@ -46,35 +46,32 @@ import ca.uhn.fhir.jpa.entity.Search;
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
-
+	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
 	 * is being reused (because a new client request came in with the same params) right before
 	 * the result is to be deleted
 	 */
 	private long myCutoffSlack = DEFAULT_CUTOFF_SLACK;
-
 	@Autowired
 	private DaoConfig myDaoConfig;
-
 	@Autowired
 	private ISearchDao mySearchDao;
-
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
-
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
-
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
 	private void deleteSearch(final Long theSearchPid) {
 		Search searchToDelete = mySearchDao.findOne(theSearchPid);
-		ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
-		mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-		mySearchResultDao.deleteForSearch(searchToDelete.getId());
-		mySearchDao.delete(searchToDelete);
+		if (searchToDelete != null) {
+			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
+			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
+			mySearchResultDao.deleteForSearch(searchToDelete.getId());
+			mySearchDao.delete(searchToDelete);
+		}
 	}
 
 	@Override
@@ -85,7 +82,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
 			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
 		}
-		final Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - myCutoffSlack);
+		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
 
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
@@ -127,6 +124,21 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@VisibleForTesting
 	public void setCutoffSlackForUnitTest(long theCutoffSlack) {
 		myCutoffSlack = theCutoffSlack;
+	}
+
+	private static long now() {
+		if (ourNowForUnitTests != null) {
+			return ourNowForUnitTests;
+		}
+		return System.currentTimeMillis();
+	}
+
+	/**
+	 * This is for unit tests only, do not call otherwise
+	 */
+	@VisibleForTesting
+	public static void setNowForUnitTests(Long theNowForUnitTests) {
+		ourNowForUnitTests = theNowForUnitTests;
 	}
 
 }

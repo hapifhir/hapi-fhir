@@ -63,6 +63,65 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<inherited>true</inherited>
+					</execution>
+				</executions>
+				<configuration>
+					<printEqualFiles>false</printEqualFiles>
+					<failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+					<failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
+					<failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+					<checkCompileClasspath>true</checkCompileClasspath>
+					<checkRuntimeClasspath>false</checkRuntimeClasspath>
+					<checkTestClasspath>false</checkTestClasspath>
+					<skip>false</skip>
+					<quiet>false</quiet>
+					<preferLocal>true</preferLocal>
+					<useResultFile>true</useResultFile>
+					<resultFileMinClasspathCount>2</resultFileMinClasspathCount>
+					<resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
+					<ignoredDependencies>
+						<dependency>
+							<groupId>javax.el</groupId>
+							<artifactId>javax.el-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>javax.mail</groupId>
+							<artifactId>javax.mail-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.phloc</groupId>
+							<artifactId>phloc-commons</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>commons-logging</groupId>
+							<artifactId>commons-logging</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.jscience</groupId>
+							<artifactId>jscience</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-jcl</artifactId>
+						</dependency>
+					</ignoredDependencies>
+					<ignoredResources>
+						<ignoredResource>changelog.txt</ignoredResource>
+						<ignoredResource>javac.bat</ignoredResource>
+					</ignoredResources>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

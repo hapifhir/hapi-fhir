@@ -379,10 +379,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       switch (bpWarnings) {
       case Error:
         rule(errors, invalid, line, col, literalPath, test, message);
+        break;
       case Warning:
         warning(errors, invalid, line, col, literalPath, test, message);
+        break;
       case Hint:
         hint(errors, invalid, line, col, literalPath, test, message);
+        break;
       default: // do nothing
       }
     }
@@ -667,9 +670,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       try {
         if (context.fetchResourceWithException(ValueSet.class, system) != null) {
           rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Invalid System URI: "+system+" - cannot use a value set URI as a system");
-          return false;
-        } else
-          return true;
+          // Lloyd: This error used to prohibit checking for downstream issues, but there are some cases where that checking needs to occur.  Please talk to me before changing the code back. 
+        }
+        return true;
       }
       catch (Exception e) {
         return true;
@@ -871,9 +874,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                   try {
                     Coding c = ObjectConverter.readAsCoding(element);
                     long t = System.nanoTime();
-                    ValidationResult vr = context.validateCode(c, valueset);
+                    ValidationResult vr = null;
+                    if (binding.getStrength() != BindingStrength.EXAMPLE) {
+                      vr = context.validateCode(c, valueset);
+						  }
                     txTime = txTime + (System.nanoTime() - t);
-                    if (!vr.isOk()) {
+                    if (vr != null && !vr.isOk()) {
                       if (vr.IsNoService())
                         hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false,  "The value provided could not be validated in the absence of a terminology server");
                       else if (vr.getErrorClass() != null && !vr.getErrorClass().isInfrastructure()) {
@@ -1382,8 +1388,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       ValueSet vs = resolveBindingReference(profile, binding.getValueSet(), profile.getUrl());
       if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "ValueSet {0} not found", describeReference(binding.getValueSet()))) {
         long t = System.nanoTime();
-        ValidationResult vr = context.validateCode(null, value, null, vs);
-        txTime = txTime + (System.nanoTime() - t);
+        ValidationResult vr = null;
+        if (binding.getStrength() != BindingStrength.EXAMPLE) {
+			  vr = context.validateCode(null, value, null, vs);
+		  }
+		  txTime = txTime + (System.nanoTime() - t);
         if (vr != null && !vr.isOk()) {
           if (vr.IsNoService())
             hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false,  "The value provided ('"+value+"') could not be validated in the absence of a terminology server");
@@ -1445,7 +1454,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         refType = "bundle";
       }
     }
-    ReferenceValidationPolicy pol = refType.equals("contained") ? ReferenceValidationPolicy.CHECK_VALID : fetcher == null ? ReferenceValidationPolicy.IGNORE : fetcher.validationPolicy(hostContext.appContext, path, ref);
+    ReferenceValidationPolicy pol = refType.equals("contained") || refType.equals("bundle") ? ReferenceValidationPolicy.CHECK_VALID : fetcher == null ? ReferenceValidationPolicy.IGNORE : fetcher.validationPolicy(hostContext.appContext, path, ref);
 
     if (pol.checkExists()) {
       if (we == null) {
@@ -2012,7 +2021,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private String resolve(String uri, String ref) {
-    String[] up = uri.split("\\/");
+	  if (isBlank(uri)) {
+		  return ref;
+	  }
+	  String[] up = uri.split("\\/");
     String[] rp = ref.split("\\/");
     if (context.getResourceNames().contains(up[up.length-2]) && context.getResourceNames().contains(rp[0])) {
       StringBuilder b = new StringBuilder();
@@ -2419,6 +2431,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         else if (itemType.equals("integer")) checkOption(errors, answer, ns, qsrc, qItem, "integer");
         else if (itemType.equals("string")) checkOption(errors, answer, ns, qsrc, qItem, "string", true);
         break;
+      case QUESTION:
+        // TODO: how to validate this???
+        break;
+      case NULL:
+        // Should not happen
+        break;
       }
       validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress);
     }
@@ -2783,6 +2801,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     List<Element> entries = new ArrayList<Element>();
     bundle.getNamedChildren("entry", entries);
     String type = bundle.getNamedChildValue("type");
+    type = StringUtils.defaultString(type);
+
     if (entries.size() == 0) {
       rule(errors, IssueType.INVALID, stack.getLiteralPath(), !(type.equals("document") || type.equals("message")), "Documents or Messages must contain at least one entry");
     } else {
@@ -3017,11 +3037,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       if (ei.path.endsWith(".extension"))
         rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition != null, "Element is unknown or does not match any slice (url=\"" + ei.element.getNamedChildValue("url") + "\")" + (profile==null ? "" : " for profile " + profile.getUrl()));
       else if (!unsupportedSlicing)
-        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
           hint(errors, IssueType.INFORMATIONAL, ei.line(), ei.col(), ei.path, (ei.definition != null),
               "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
         else
-          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
             rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, (ei.definition != null),
                 "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
           else
@@ -3218,7 +3238,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                       goodProfiles.put(typeProfile, profileErrors);
                   }
                   if (goodProfiles.size()==1) {
-                    errors.addAll(goodProfiles.get(0));
+                    /* TODO: this was goodProfiless.get(0) which will always
+                     * return null - Is the first value what was wanted? */
+                    errors.addAll(goodProfiles.values().iterator().next());
                   } else if (goodProfiles.size()==0) {
                     rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Unable to find matching profile among choices: " + StringUtils.join("; ", profiles));
                     for (List<ValidationMessage> messages : badProfiles) {

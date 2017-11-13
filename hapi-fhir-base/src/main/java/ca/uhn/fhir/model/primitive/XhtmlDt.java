@@ -20,29 +20,29 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
-
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.XmlDetectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
 
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+/**
+ * Note that as of HAPI FHIR 3.1.0, this method no longer uses
+ * the StAX XMLEvent type as the XML representation, and uses a
+ * String instead. If you need to work with XML as StAX events, you
+ * can use the {@link XmlUtil#parse(String)} and {@link XmlUtil#encode(List)}
+ * methods to do so.
+ */
 @DatatypeDef(name = "xhtml")
-public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
+public class XhtmlDt extends BasePrimitive<String> {
 
 	private static final String DECL_XMLNS = " xmlns=\"http://www.w3.org/1999/xhtml\"";
-	private static final String DIV_OPEN_FIRST = "<div" + DECL_XMLNS + ">";
+	public static final String DIV_OPEN_FIRST = "<div" + DECL_XMLNS + ">";
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -54,7 +54,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
 	/**
 	 * Constructor which accepts a string code
-	 * 
+	 *
 	 * @see #setValueAsString(String) for a description of how this value is applied
 	 */
 	@SimpleSetter()
@@ -63,29 +63,12 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	}
 
 	@Override
-	protected String encode(List<XMLEvent> theValue) {
-		try {
-			StringWriter w = new StringWriter();
-			XMLEventWriter ew = XmlUtil.createXmlFragmentWriter(w);
-
-			for (XMLEvent next : getValue()) {
-				if (next.isCharacters()) {
-					ew.add(next);
-				} else {
-					ew.add(next);
-				}
-			}
-			ew.close();
-			return w.toString();
-		} catch (XMLStreamException e) {
-			throw new DataFormatException("Problem with the contained XML events", e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException(e);
-		}
+	protected String encode(String theValue) {
+		return theValue;
 	}
 
 	public boolean hasContent() {
-		return getValue() != null && getValue().size() > 0;
+		return isNotBlank(getValue());
 	}
 
 	@Override
@@ -94,40 +77,37 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	}
 
 	@Override
-	protected List<XMLEvent> parse(String theValue) {
-		String val = theValue.trim();
-		if (!val.startsWith("<")) {
-			val = DIV_OPEN_FIRST + val + "</div>";
+	protected String parse(String theValue) {
+		if (XmlDetectionUtil.isStaxPresent()) {
+			// for validation
+			XmlUtil.parse(theValue);
 		}
-		boolean hasProcessingInstruction = val.startsWith("<?");
-		if (hasProcessingInstruction && val.endsWith("?>")) {
-			return null;
-		}
+		return theValue;
+	}
 
-		
-		try {
-			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
-			StringReader reader = new StringReader(val);
-			XMLEventReader er = XmlUtil.createXmlReader(reader);
-			boolean first = true;
-			while (er.hasNext()) {
-				XMLEvent next = er.nextEvent();
-				if (first) {
-					first = false;
-					continue;
-				}
-				if (er.hasNext()) {
-					// don't add the last event
-					value.add(next);
-				}
-			}
-			return value;
 
-		} catch (XMLStreamException e) {
-			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException(e);
-		}
+	/**
+	 * Note that as of HAPI FHIR 3.1.0, this method no longer uses
+	 * the StAX XMLEvent type as the XML representation, and uses a
+	 * String instead. If you need to work with XML as StAX events, you
+	 * can use the {@link XmlUtil#parse(String)} and {@link XmlUtil#encode(List)}
+	 * methods to do so.
+	 */
+	@Override
+	public String getValue() {
+		return super.getValue();
+	}
+
+	/**
+	 * Note that as of HAPI FHIR 3.1.0, this method no longer uses
+	 * the StAX XMLEvent type as the XML representation, and uses a
+	 * String instead. If you need to work with XML as StAX events, you
+	 * can use the {@link XmlUtil#parse(String)} and {@link XmlUtil#encode(List)}
+	 * methods to do so.
+	 */
+	@Override
+	public BasePrimitive<String> setValue(String theValue) throws DataFormatException {
+		return super.setValue(theValue);
 	}
 
 	/**
@@ -157,7 +137,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		if (value.charAt(0) != '<') {
 			value = DIV_OPEN_FIRST + value + "</div>";
 		}
-		
+
 		boolean hasProcessingInstruction = value.startsWith("<?");
 		int firstTagIndex = value.indexOf("<", hasProcessingInstruction ? 1 : 0);
 		if (firstTagIndex != -1) {

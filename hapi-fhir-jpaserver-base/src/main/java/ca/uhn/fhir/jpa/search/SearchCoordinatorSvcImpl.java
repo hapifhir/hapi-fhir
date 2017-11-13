@@ -17,7 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
+ * #L%family
  */
 import java.util.*;
 import java.util.concurrent.*;
@@ -184,6 +184,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		StopWatch w = new StopWatch();
 		final String searchUuid = UUID.randomUUID().toString();
 
+		ourLog.debug("Registering new search {}", searchUuid);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
@@ -203,6 +205,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+
+			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -281,6 +285,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
 
 							retVal = new PersistedJpaBundleProvider(searchToUse.getUuid(), theCallingDao);
+							retVal.setCacheHit(true);
+
 							populateBundleProvider(retVal);
 						}
 
@@ -437,7 +443,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySearchUuid = theSearchUuid;
 		}
 
-		public void awaitInitialSync() {
+		public Integer awaitInitialSync() {
 			ourLog.trace("Awaiting initial sync");
 			do {
 				try {
@@ -449,6 +455,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			} while (mySearch.getStatus() == SearchStatusEnum.LOADING);
 			ourLog.trace("Initial sync completed");
+
+			return mySearch.getTotalCount();
 		}
 
 		@Override
@@ -507,6 +515,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			myIdToSearchTask.remove(mySearch.getUuid());
+			myInitialCollectionLatch.countDown();
 			myCompletionLatch.countDown();
 			return null;
 		}
@@ -552,27 +561,27 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
 			ourLog.info("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
-			CountDownLatch latch = null;
-			synchronized (mySyncedPids) {
-				if (mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING) {
-					int latchSize = theToIndex - mySyncedPids.size();
-					ourLog.trace("Registering latch to await {} results (want {} total)", latchSize, theToIndex);
-					latch = new CountDownLatch(latchSize);
-				}
-			}
-
-			if (latch != null) {
-				while (latch.getCount() > 0 && mySearch.getStatus() == SearchStatusEnum.LOADING) {
-					try {
-						ourLog.trace("Awaiting latch with {}", latch.getCount());
-						latch.await(500, TimeUnit.MILLISECONDS);
-					} catch (InterruptedException e) {
-						// ok
+			boolean keepWaiting;
+			do {
+				synchronized (mySyncedPids) {
+					keepWaiting = false;
+					if (mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING) {
+						keepWaiting = true;
 					}
 				}
-			}
+				if (keepWaiting) {
+					ourLog.info("Waiting, as we only have {} results", mySyncedPids.size());
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException theE) {
+						// ignore
+					}
+				}
+			} while (keepWaiting);
 
-			ArrayList<Long> retVal = new ArrayList<Long>();
+			ourLog.info("Proceeding, as we have {} results", mySyncedPids.size());
+
+			ArrayList<Long> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {
 				verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
@@ -584,6 +593,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					retVal.add(mySyncedPids.get(i));
 				}
 			}
+
+			ourLog.info("Done syncing results", mySyncedPids.size());
 
 			return retVal;
 		}
@@ -633,8 +644,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						myUnsyncedPids.clear();
 
 						if (theResultIter.hasNext() == false) {
-							mySearch.setStatus(SearchStatusEnum.FINISHED);
 							mySearch.setTotalCount(myCountSaved);
+							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 					}
 					mySearch.setNumFound(myCountSaved);
@@ -643,7 +654,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			});
 
-			myInitialCollectionLatch.countDown();
+			int numSynced;
+			synchronized (mySyncedPids) {
+				numSynced = mySyncedPids.size();
+			}
+
+			if (myDaoConfig.getCountSearchResultsUpTo() == null ||
+				myDaoConfig.getCountSearchResultsUpTo() <= 0 ||
+				myDaoConfig.getCountSearchResultsUpTo() <= numSynced) {
+				myInitialCollectionLatch.countDown();
+			}
 		}
 
 	}

@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -31,14 +31,14 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(resp, "{\n" +
+			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAM\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}");
+				"}"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -56,7 +56,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(resp, "{\n" +
+			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -69,7 +69,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}");
+				"}"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -85,13 +85,13 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
-		myPatientId0 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addName()
 			.addGiven("GivenOnlyB1")
 			.addGiven("GivenOnlyB2");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 	}
 
 

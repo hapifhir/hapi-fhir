@@ -152,7 +152,8 @@ public class RuntimeSearchParam {
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,
 		DRAFT,
-		RETIRED
+		RETIRED,
+		UNKNOWN
 	}
 	
 }

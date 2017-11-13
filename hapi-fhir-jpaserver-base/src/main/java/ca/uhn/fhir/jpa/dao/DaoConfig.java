@@ -108,6 +108,7 @@ public class DaoConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
+	private Integer myCountSearchResultsUpTo = null;
 
 	/**
 	 * Constructor
@@ -150,6 +151,56 @@ public class DaoConfig {
 	 */
 	public void setCacheControlNoStoreMaxResultsUpperLimit(Integer theCacheControlNoStoreMaxResults) {
 		myCacheControlNoStoreMaxResultsUpperLimit = theCacheControlNoStoreMaxResults;
+	}
+
+	/**
+	 * When searching, if set to a non-null value (default is <code>null</code>) the
+	 * search coordinator will attempt to find at least this many results
+	 * before returning a response to the client. This parameter mainly affects
+	 * whether a "total count" is included in the response bundle for searches that
+	 * return large amounts of data.
+	 * <p>
+	 *    For a search that returns 10000 results, if this value is set to
+	 *    10000 the search coordinator will find all 10000 results
+	 *    prior to returning, so the initial response bundle will have the
+	 *    total set to 10000. If this value is null (or less than 10000)
+	 *    the response bundle will likely return slightly faster, but will
+	 *    not include the total. Subsequent page requests will likely
+	 *    include the total however, if they are performed after the
+	 *    search coordinator has found all results.
+	 * </p>
+	 * <p>
+	 *    Set this value to <code>0</code> to always load all
+	 *    results before returning.
+	 * </p>
+	 */
+	public Integer getCountSearchResultsUpTo() {
+		return myCountSearchResultsUpTo;
+	}
+
+	/**
+	 * When searching, if set to a non-null value (default is <code>null</code>) the
+	 * search coordinator will attempt to find at least this many results
+	 * before returning a response to the client. This parameter mainly affects
+	 * whether a "total count" is included in the response bundle for searches that
+	 * return large amounts of data.
+	 * <p>
+	 *    For a search that returns 10000 results, if this value is set to
+	 *    10000 the search coordinator will find all 10000 results
+	 *    prior to returning, so the initial response bundle will have the
+	 *    total set to 10000. If this value is null (or less than 10000)
+	 *    the response bundle will likely return slightly faster, but will
+	 *    not include the total. Subsequent page requests will likely
+	 *    include the total however, if they are performed after the
+	 *    search coordinator has found all results.
+	 * </p>
+	 * <p>
+	 *    Set this value to <code>0</code> to always load all
+	 *    results before returning.
+	 * </p>
+	 */
+	public void setCountSearchResultsUpTo(Integer theCountSearchResultsUpTo) {
+		myCountSearchResultsUpTo = theCountSearchResultsUpTo;
 	}
 
 	/**
@@ -357,11 +408,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**
@@ -959,8 +1007,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**

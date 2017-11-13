@@ -207,6 +207,22 @@ public interface IParser {
 	void setEncodeElements(Set<String> theEncodeElements);
 
 	/**
+	 * If set to <code>true</code> (default is false), the values supplied
+	 * to {@link #setEncodeElements(Set)} will not be applied to the root
+	 * resource (typically a Bundle), but will be applied to any sub-resources
+	 * contained within it (i.e. search result resources in that bundle)
+	 */
+	void setEncodeElementsAppliesToChildResourcesOnly(boolean theEncodeElementsAppliesToChildResourcesOnly);
+
+	/**
+	 * If set to <code>true</code> (default is false), the values supplied
+	 * to {@link #setEncodeElements(Set)} will not be applied to the root
+	 * resource (typically a Bundle), but will be applied to any sub-resources
+	 * contained within it (i.e. search result resources in that bundle)
+	 */
+	boolean isEncodeElementsAppliesToChildResourcesOnly();
+
+	/**
 	 * If provided, tells the parse which resource types to apply {@link #setEncodeElements(Set) encode elements} to. Any
 	 * resource types not specified here will be encoded completely, with no elements excluded.
 	 * 

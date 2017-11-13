@@ -1,8 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the site. I don't know why this works... 
-		Need to investigate this. -->
+	<!--
+	The parent of this project is the deployable POM. This project isn't
+	deployable, but this keeps it before the root pom in the reactor
+	order when building the site. I don't know why this works...
+	Need to investigate this.
+	-->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
@@ -139,7 +144,7 @@
 			<artifactId>jetty-util</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
@@ -225,14 +230,14 @@
 			<artifactId>spring-web</artifactId>
 		</dependency>
 
-      <!--
+		<!--
       For some reason JavaDoc crashed during site generation unless we have this dependency
       -->
-      <dependency>
-          <groupId>javax.interceptor</groupId>
-          <artifactId>javax.interceptor-api</artifactId>
-          <scope>provided</scope>
-      </dependency>
+		<dependency>
+			<groupId>javax.interceptor</groupId>
+			<artifactId>javax.interceptor-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 
 	</dependencies>
@@ -253,6 +258,13 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -285,19 +297,17 @@
 							</fileSets>
 						</configuration>
 					</execution>
-<execution>
-            <id>post-integration-test</id>
-					<phase>install</phase>
-            <goals>
-					<goal>report</goal>
-            </goals>
-            <configuration>
-					<dataFile>${project.build.directory}/jacoco.exec</dataFile>
-               <outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
-            </configuration>
-        </execution>
-
-
+					<execution>
+						<id>post-integration-test</id>
+						<phase>install</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco.exec</dataFile>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

@@ -1346,7 +1346,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent tgt = new org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent();
     copyElement(src, tgt);
     for (org.hl7.fhir.dstu2016may.model.StringType t : src.getDiscriminator())
-      tgt.addDiscriminator(ProfileUtilities.interpretR2Discriminator(t.getValue()));
+      tgt.addDiscriminator(ProfileUtilities.interpretR2Discriminator(t.getValue(), true));
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
     if (src.hasOrdered())

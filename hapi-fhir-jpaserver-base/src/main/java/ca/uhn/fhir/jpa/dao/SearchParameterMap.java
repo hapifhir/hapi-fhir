@@ -274,14 +274,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return this;
 	}
 
-	/**
-	 * @deprecated As of HAPI FHIR 2.4 this method no longer does anything
-	 */
-	@Deprecated
-	public void setPersistResults(boolean thePersistResults) {
-		// does nothing as of HAPI FHIR 2.4
-	}
-
 	public void setRevIncludes(Set<Include> theRevIncludes) {
 		myRevIncludes = theRevIncludes;
 	}

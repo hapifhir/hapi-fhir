@@ -163,7 +163,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
+		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 1);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
