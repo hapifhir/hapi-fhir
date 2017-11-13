@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.util.BinaryUtil;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -85,10 +86,41 @@ public class RestfulServerUtils {
 			}
 		}
 		if (elements != null && elements.size() > 0) {
-			Set<String> newElements = new HashSet<String>();
+			Set<String> newElements = new HashSet<>();
 			for (String next : elements) {
 				newElements.add("*." + next);
 			}
+
+			/*
+			 * We try to be smart about what the user is asking for
+			 * when they include an _elements parameter. If we're responding
+			 * to something that returns a Bundle (e.g. a search) we assume
+			 * the elements don't apply to the Bundle itself, unless
+			 * the client has explicitly scoped the Bundle
+			 * (i.e. with Bundle.total or something like that)
+			 */
+			switch (theRequestDetails.getRestOperationType()) {
+				case SEARCH_SYSTEM:
+				case SEARCH_TYPE:
+				case HISTORY_SYSTEM:
+				case HISTORY_TYPE:
+				case HISTORY_INSTANCE:
+				case GET_PAGE:
+					boolean haveExplicitBundleElement = false;
+					for (String next : newElements) {
+						if (next.startsWith("Bundle.")) {
+							haveExplicitBundleElement = true;
+							break;
+						}
+					}
+					if (!haveExplicitBundleElement) {
+						parser.setEncodeElementsAppliesToChildResourcesOnly(true);
+					}
+					break;
+				default:
+					break;
+			}
+
 			parser.setEncodeElements(newElements);
 			parser.setEncodeElementsAppliesToResourceTypes(elementsAppliesTo);
 		}
@@ -144,6 +176,19 @@ public class RestfulServerUtils {
 				b.append(Constants.PARAM_BUNDLETYPE);
 				b.append('=');
 				b.append(theBundleType.getCode());
+			}
+
+			String paramName = Constants.PARAM_ELEMENTS;
+			String[] params = theRequestParameters.get(paramName);
+			if (params != null) {
+				for (String nextValue : params) {
+					if (isNotBlank(nextValue)) {
+						b.append('&');
+						b.append(paramName);
+						b.append('=');
+						b.append(UrlUtil.escape(nextValue));
+					}
+				}
 			}
 
 			return b.toString();
@@ -580,9 +625,18 @@ public class RestfulServerUtils {
 			} else {
 				contentType = Constants.CT_OCTET_STREAM;
 			}
+
 			// Force binary resources to download - This is a security measure to prevent
 			// malicious images or HTML blocks being served up as content.
 			response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+
+			IBaseReference securityContext = BinaryUtil.getSecurityContext(theServer.getFhirContext(), bin);
+			if (securityContext != null) {
+				String securityContextRef = securityContext.getReferenceElement().getValue();
+				if (isNotBlank(securityContextRef)) {
+					response.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, securityContextRef);
+				}
+			}
 
 			return response.sendAttachmentResponse(bin, theStausCode, contentType);
 		}

@@ -1259,7 +1259,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
 		 */
-		ourLog.info("Checking for unique index for query: {}", theParams.toNormalizedQueryString(myContext));
+		ourLog.debug("Checking for unique index for query: {}", theParams.toNormalizedQueryString(myContext));
 		if (myCallingDao.getConfig().isUniqueIndexesEnabled()) {
 			if (myParams.getIncludes().isEmpty()) {
 				if (myParams.getRevIncludes().isEmpty()) {

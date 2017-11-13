@@ -149,24 +149,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		return theRequest.getResponse().streamResponseAsResource(response, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(), isAddContentLocationHeader());
 
-		// DSTU1 Bundle
-		// // Is this request coming from a browser
-		// String uaHeader = theRequest.getHeader("user-agent");
-		// boolean requestIsBrowser = false;
-		// if (uaHeader != null && uaHeader.contains("Mozilla")) {
-		// requestIsBrowser = true;
-		// }
-		//
-		// for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-		// IServerInterceptor next = theServer.getInterceptors().get(i);
-		// boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
-		// if (!continueProcessing) {
-		// ourLog.debug("Interceptor {} returned false, not continuing processing");
-		// return null;
-		// }
-		// }
-		//
-		// return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
 	}
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
@@ -349,8 +331,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
-		bundleFactory.addRootPropertiesToBundle(null, serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
-		bundleFactory.addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
+		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;

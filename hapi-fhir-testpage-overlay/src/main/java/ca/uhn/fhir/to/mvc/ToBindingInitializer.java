@@ -7,8 +7,13 @@ import org.springframework.web.context.request.WebRequest;
 public class ToBindingInitializer implements WebBindingInitializer {
 
 	@Override
-	public void initBinder(WebDataBinder theBinder, WebRequest theRequest) {
+	public void initBinder(WebDataBinder theBinder) {
 		theBinder.setFieldMarkerPrefix("__");
+	}
+
+	@Override
+	public void initBinder(WebDataBinder theBinder, WebRequest theRequest) {
+		// nothing
 	}
 
 }

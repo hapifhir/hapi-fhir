@@ -23,6 +23,11 @@
 		<!--
 		Test dependencies on other optional parts of HAPI 
 		-->
+      <dependency>
+         <groupId>org.codehaus.woodstox</groupId>
+         <artifactId>woodstox-core-asl</artifactId>
+         <scope>test</scope>
+      </dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
@@ -318,8 +323,8 @@
 								<!--
 									Removed in HAPI 2.4 as this isn't a real resource
 									<baseResourceName>supportingdocumentation</baseResourceName>
+									<baseResourceName>test</baseResourceName>
 								-->
-								<baseResourceName>test</baseResourceName>
 								<baseResourceName>testscript</baseResourceName>
 								<baseResourceName>user</baseResourceName>
 								<baseResourceName>valueset</baseResourceName>

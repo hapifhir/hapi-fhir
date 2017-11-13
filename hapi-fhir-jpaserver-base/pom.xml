@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -32,6 +32,12 @@
 			<version>3.5</version>
 		</dependency>
 -->
+
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>woodstox-core-asl</artifactId>
+     </dependency>
+
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
@@ -105,10 +111,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -163,7 +171,7 @@
 			<artifactId>thymeleaf-spring4</artifactId>
 		</dependency>
 
-		<!-- For UCUM -->
+		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
 		<dependency>
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
@@ -233,10 +241,12 @@
 		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> <version>2.3.2</version> </dependency> -->
 
 		<!-- Spring -->
+		<!--
 		<dependency>
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
@@ -358,6 +368,7 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>javax.mail-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>

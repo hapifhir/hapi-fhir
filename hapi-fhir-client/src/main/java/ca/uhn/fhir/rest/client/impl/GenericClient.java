@@ -120,10 +120,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null);
 		}
 		try {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null);
 		} catch (NotModifiedException e) {
 			return theNotModifiedHandler.call();
 		}
@@ -373,12 +373,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private boolean myQueryLogRequestAndResponse;
 		private HashSet<String> mySubsetElements;
 		protected SummaryEnum mySummaryMode;
+		protected CacheControlDirective myCacheControlDirective;
 
 		@Deprecated // override deprecated method
 		@SuppressWarnings("unchecked")
 		@Override
 		public T andLogRequestAndResponse(boolean theLogRequestAndResponse) {
 			myQueryLogRequestAndResponse = theLogRequestAndResponse;
+			return (T) this;
+		}
+
+		@Override
+		public T cacheControl(CacheControlDirective theCacheControlDirective) {
+			myCacheControlDirective = theCacheControlDirective;
 			return (T) this;
 		}
 
@@ -434,19 +441,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
-			// if (myParamEncoding != null) {
-			// theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
-			// }
-			//
-			// if (myPrettyPrint != null) {
-			// theParams.put(Constants.PARAM_PRETTY, Collections.singletonList(myPrettyPrint.toString()));
-			// }
-
 			if (isKeepResponses()) {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective);
 			return resp;
 		}
 

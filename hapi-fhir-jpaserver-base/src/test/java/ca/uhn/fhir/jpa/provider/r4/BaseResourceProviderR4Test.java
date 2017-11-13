@@ -47,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	protected static JpaValidationSupportChainR4 myValidationSupport;
-	protected static IGenericClient ourClient;
+	protected IGenericClient myClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
@@ -150,10 +150,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
-			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
-			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor());
-			}
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -165,6 +161,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
+
+		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		if (shouldLogClient()) {
+			myClient.registerInterceptor(new LoggingInterceptor());
+		}
 	}
 
 	/**

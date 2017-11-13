@@ -118,8 +118,13 @@ public abstract class BaseJpaTest {
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
+		Integer size = theFound.size();
 		ourLog.info("Found {} results", size);
+
+		if (size == null) {
+			size = 99999;
+		}
+
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
@@ -298,7 +303,7 @@ public abstract class BaseJpaTest {
 
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
-		while (theList.size() != theTarget && sw.getMillis() < 10000) {
+		while (theList.size() != theTarget && sw.getMillis() <= 15000) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {

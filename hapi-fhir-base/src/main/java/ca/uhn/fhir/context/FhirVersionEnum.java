@@ -78,6 +78,10 @@ public enum FhirVersionEnum {
 		return myVersionImplementation;
 	}
 
+	public boolean isEqualOrNewerThan(FhirVersionEnum theVersion) {
+		return ordinal() >= theVersion.ordinal();
+	}
+
 	public boolean isEquivalentTo(FhirVersionEnum theVersion) {
 		if (this.equals(theVersion)) {
 			return true;

@@ -72,6 +72,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
+
+		ourRestHookSubscriptionInterceptor.initSubscriptions();
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

@@ -20,18 +20,19 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import java.util.List;
-
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+
+import java.util.List;
 
 public interface ISearchCoordinatorSvc {
 
+	void cancelAllActiveSearches();
+
 	List<Long> getResources(String theUuid, int theFrom, int theTo);
 
-	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType);
-
-	void cancelAllActiveSearches();
+	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective);
 
 }

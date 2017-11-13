@@ -216,6 +216,9 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry {
 			case RETIRED:
 				status = RuntimeSearchParamStatusEnum.RETIRED;
 				break;
+			case UNKNOWN:
+				status = RuntimeSearchParamStatusEnum.UNKNOWN;
+				break;
 			case NULL:
 				break;
 			}

@@ -606,7 +606,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
-				if (myInstance instanceof IAnyResource || myInstance instanceof IBaseBackboneElement) {
+				if (myInstance instanceof IAnyResource || myInstance instanceof IBaseBackboneElement || myInstance instanceof IBaseElement) {
 					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
@@ -1559,7 +1559,8 @@ class ParserState<T> {
 
 			if (theEvent.isEndElement()) {
 				if (myDepth == 0) {
-					myDt.setValue(myEvents);
+					String eventsAsString = XmlUtil.encode(myEvents);
+					myDt.setValue(eventsAsString);
 					doPop();
 				}
 			}

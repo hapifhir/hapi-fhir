@@ -24,10 +24,36 @@ public class GraphQLEngineTest {
 	private static FhirContext ourCtx;
 	private org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLEngineTest.class);
 
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forR4();
-		ourWorkerCtx = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
+	private Observation createObservation() {
+		Observation obs = new Observation();
+		obs.setId("http://foo.com/Patient/PATA");
+		obs.setValue(new Quantity().setValue(123).setUnit("cm"));
+		obs.setSubject(new Reference("Patient/123"));
+		return obs;
+	}
+
+	private IGraphQLStorageServices<Resource, Reference, Bundle> createStorageServices() throws FHIRException {
+		IGraphQLStorageServices<Resource, Reference, Bundle> retVal = mock(IGraphQLStorageServices.class);
+		when(retVal.lookup(any(Object.class), any(Resource.class), any(Reference.class))).thenAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Object appInfo = invocation.getArguments()[0];
+				Resource context = (Resource) invocation.getArguments()[1];
+				Reference reference = (Reference) invocation.getArguments()[2];
+				ourLog.info("AppInfo: {} / Context: {} / Reference: {}", appInfo, context.getId(), reference.getReference());
+
+				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
+					Patient p = new Patient();
+					p.getBirthDateElement().setValueAsString("2011-02-22");
+					return new ReferenceResolution<>(context, p);
+				}
+
+				ourLog.info("Not found!");
+				return null;
+			}
+		});
+
+		return retVal;
 	}
 
 	@Test
@@ -50,16 +76,8 @@ public class GraphQLEngineTest {
 			"    \"unit\":\"cm\"\n" +
 			"  }\n" +
 			"}";
-		assertEquals(expected, outputBuilder.toString());
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
-	}
-
-	private Observation createObservation() {
-		Observation obs = new Observation();
-		obs.setId("http://foo.com/Patient/PATA");
-		obs.setValue(new Quantity().setValue(123).setUnit("cm"));
-		obs.setSubject(new Reference("Patient/123"));
-		return obs;
 	}
 
 	@Test
@@ -95,32 +113,14 @@ public class GraphQLEngineTest {
 			"    }\n" +
 			"  }\n" +
 			"}";
-		assertEquals(expected, outputBuilder.toString());
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 
-	private IGraphQLStorageServices<Resource, Reference, Bundle> createStorageServices() throws FHIRException {
-		IGraphQLStorageServices<Resource, Reference, Bundle> retVal = mock(IGraphQLStorageServices.class);
-		when(retVal.lookup(any(Object.class), any(Resource.class), any(Reference.class))).thenAnswer(new Answer<Object>() {
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				Object appInfo = invocation.getArguments()[0];
-				Resource context = (Resource) invocation.getArguments()[1];
-				Reference reference = (Reference) invocation.getArguments()[2];
-				ourLog.info("AppInfo: {} / Context: {} / Reference: {}", appInfo, context.getId(), reference.getReference());
-
-				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
-					Patient p = new Patient();
-					p.getBirthDateElement().setValueAsString("2011-02-22");
-					return new ReferenceResolution<>(context, p);
-				}
-
-				ourLog.info("Not found!");
-				return null;
-			}
-		});
-
-		return retVal;
+	@BeforeClass
+	public static void beforeClass() {
+		ourCtx = FhirContext.forR4();
+		ourWorkerCtx = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
 	}
 
 }

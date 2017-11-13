@@ -54,7 +54,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		sp.setTitle("Foo Param");
 
 		try {
-			ourClient.create().resource(sp).execute();
+			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid: null", e.getMessage());
@@ -120,7 +120,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
-		ourClient
+		myClient
 				.create()
 				.resource(eyeColourSp)
 				.execute();
@@ -139,7 +139,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		Bundle bundle = ourClient
+		Bundle bundle = myClient
 				.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
@@ -168,7 +168,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void testConformanceOverrideAllowed() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
 
-		CapabilityStatement conformance = ourClient
+		CapabilityStatement conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -220,7 +220,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			}
 		});
 
-		conformance = ourClient
+		conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -238,7 +238,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void testConformanceOverrideNotAllowed() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
 
-		CapabilityStatement conformance = ourClient
+		CapabilityStatement conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -274,7 +274,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		mySearchParamRegsitry.forceRefresh();
 
-		conformance = ourClient
+		conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -332,7 +332,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 				.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("foo").exactly().code("male"))
@@ -409,7 +409,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 				.search()
 				.forResource(Observation.class)
 				.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))

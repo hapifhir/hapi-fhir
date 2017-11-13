@@ -131,10 +131,12 @@ public class CanonicalSubscription implements Serializable {
 		return myHeaders;
 	}
 
-	public void setHeaders(String theHeaders) {
+	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
 		myHeaders = new ArrayList<>();
-		if (isNotBlank(theHeaders)) {
-			myHeaders.add(theHeaders);
+		for (IPrimitiveType<String> next : theHeader) {
+			if (isNotBlank(next.getValueAsString())) {
+				myHeaders.add(next.getValueAsString());
+			}
 		}
 	}
 
@@ -189,12 +191,10 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
-	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
+	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
-		for (IPrimitiveType<String> next : theHeader) {
-			if (isNotBlank(next.getValueAsString())) {
-				myHeaders.add(next.getValueAsString());
-			}
+		if (isNotBlank(theHeaders)) {
+			myHeaders.add(theHeaders);
 		}
 	}
 
@@ -212,16 +212,6 @@ public class CanonicalSubscription implements Serializable {
 		private String myFrom;
 		@JsonProperty("subjectTemplate")
 		private String mySubjectTemplate;
-		@JsonProperty("bodyTemplate")
-		private String myBodyTemplate;
-
-		public String getBodyTemplate() {
-			return myBodyTemplate;
-		}
-
-		public void setBodyTemplate(String theBodyTemplate) {
-			myBodyTemplate = theBodyTemplate;
-		}
 
 		public String getFrom() {
 			return myFrom;

@@ -62,43 +62,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@Test
-	public void testTransactionWhichFailsPersistsNothing() {
-
-		// Run a transaction which points to that practitioner
-		// in a field that isn't allowed to refer to a practitioner
-		Bundle input = new Bundle();
-		input.setType(BundleType.TRANSACTION);
-
-		Patient pt = new Patient();
-		pt.setId("PT");
-		pt.setActive(true);
-		pt.addName().setFamily("FAMILY");
-		input.addEntry()
-			.setResource(pt)
-			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/PT");
-
-		Observation obs = new Observation();
-		obs.setId("OBS");
-		obs.getCode().addCoding().setSystem("foo").setCode("bar");
-		obs.addPerformer().setReference("Practicioner/AAAAA");
-		input.addEntry()
-			.setResource(obs)
-			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/OBS");
-
-		try {
-			mySystemDao.transaction(mySrd, input);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
-		}
-
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-
-	}
-
-
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
 
 		Patient pat = new Patient();
@@ -207,6 +170,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		}
 		fail();
 		return null;
+	}
+
+	private Bundle loadBundle(String theFileName) throws IOException {
+		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream(theFileName), StandardCharsets.UTF_8);
+		return myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
 	}
 
 	@Test
@@ -1222,8 +1190,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
-		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bundle-dstu3.xml"), StandardCharsets.UTF_8);
-		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+		Bundle request = loadBundle("/bundle-dstu3.xml");
 		mySystemDao.transaction(mySrd, request);
 	}
 
@@ -1702,13 +1669,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		//@formatter:off
 		/*
 		 * Transaction Order, per the spec:
-		 * 
+		 *
 		 * Process any DELETE interactions
 		 * Process any POST interactions
 		 * Process any PUT interactions
 		 * Process any GET interactions
-		 * 
-		 * This test creates a transaction bundle that includes 
+		 *
+		 * This test creates a transaction bundle that includes
 		 * these four operations in the reverse order and verifies
 		 * that they are invoked correctly.
 		 */
@@ -1911,6 +1878,91 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("304 Not Modified", nextEntry.getResponse().getStatus());
 		assertNull(nextEntry.getResource());
 	}
+
+	@Test
+	public void testTransactionWithIfMatch() {
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		p.setActive(false);
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient/P1")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/P1")
+			.setIfMatch("2");
+
+		try {
+			mySystemDao.transaction(mySrd, b);
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("Trying to update Patient/P1/_history/2 but this is not the current version", e.getMessage());
+		}
+
+		b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient/P1")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/P1")
+			.setIfMatch("1");
+
+		Bundle resp = mySystemDao.transaction(mySrd, b);
+		assertEquals("Patient/P1/_history/2", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
+
+
+	}
+
+	@Test
+	public void testTransactionWithIfNoneExist() {
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("AAA");
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/P1")
+			.setIfNoneExist("Patient?active=true");
+
+		Bundle resp = mySystemDao.transaction(mySrd, b);
+		assertEquals("Patient/P1/_history/1", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
+
+		p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("AAA");
+
+		b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/P1")
+			.setIfNoneExist("Patient?active=false");
+
+		resp = mySystemDao.transaction(mySrd, b);
+		assertThat( new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue(), matchesPattern("Patient/[0-9]+/_history/1"));
+
+
+	}
+
 
 	@Test
 	public void testTransactionSearchWithCount() {
@@ -2145,6 +2197,42 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid placeholder ID found: cid:observation1 - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testTransactionWhichFailsPersistsNothing() {
+
+		// Run a transaction which points to that practitioner
+		// in a field that isn't allowed to refer to a practitioner
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		pt.addName().setFamily("FAMILY");
+		input.addEntry()
+			.setResource(pt)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/PT");
+
+		Observation obs = new Observation();
+		obs.setId("OBS");
+		obs.getCode().addCoding().setSystem("foo").setCode("bar");
+		obs.addPerformer().setReference("Practicioner/AAAAA");
+		input.addEntry()
+			.setResource(obs)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/OBS");
+
+		try {
+			mySystemDao.transaction(mySrd, input);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
+		}
+
+		assertThat(myResourceTableDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+
 	}
 
 	/**
@@ -2492,7 +2580,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 
         /*
-         * Again!
+			* Again!
          */
 
 		bundle = new Bundle();
@@ -2814,6 +2902,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

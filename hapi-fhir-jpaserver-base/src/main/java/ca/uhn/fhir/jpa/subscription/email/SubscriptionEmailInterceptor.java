@@ -20,28 +20,51 @@ package ca.uhn.fhir.jpa.subscription.email;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 
 public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 	private SubscriptionDeliveringEmailSubscriber mySubscriptionDeliverySubscriber;
+
+	/**
+	 * This is set to autowired=false just so that implementors can supply this
+	 * with a mechanism other than autowiring if they want
+	 */
+	@Autowired(required = false)
 	private IEmailSender myEmailSender;
+	private String myDefaultFromAddress = "noreply@unknown.com";
 
 	@Override
 	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
 		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.EMAIL;
 	}
 
+	/**
+	 * The "from" address to use for any sent emails that to not explicitly specity a from address
+	 */
+	public String getDefaultFromAddress() {
+		return myDefaultFromAddress;
+	}
+
+	/**
+	 * The "from" address to use for any sent emails that to not explicitly specity a from address
+	 */
+	public void setDefaultFromAddress(String theDefaultFromAddress) {
+		Validate.notBlank(theDefaultFromAddress, "theDefaultFromAddress must not be null or blank");
+		myDefaultFromAddress = theDefaultFromAddress;
+	}
+
 	public IEmailSender getEmailSender() {
 		return myEmailSender;
 	}
 
-	@Required
+	/**
+	 * Set the email sender (this method does not need to be explicitly called if you
+	 * are using autowiring to supply the sender)
+	 */
 	public void setEmailSender(IEmailSender theEmailSender) {
 		myEmailSender = theEmailSender;
 	}
@@ -54,12 +77,12 @@ public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
 	}
 
-	@PostConstruct
-	public void start() {
-		Validate.notNull(myEmailSender, "emailSender has not been configured");
-
-		super.start();
-	}
+//	@PostConstruct
+//	public void start() {
+//		Validate.notNull(myEmailSender, "emailSender has not been configured");
+//
+//		super.start();
+//	}
 
 	@Override
 	protected void unregisterDeliverySubscriber() {

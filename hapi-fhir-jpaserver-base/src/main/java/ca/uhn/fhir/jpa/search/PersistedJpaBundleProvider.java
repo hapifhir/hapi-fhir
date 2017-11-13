@@ -19,23 +19,32 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import javax.persistence.*;
-import javax.persistence.criteria.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.*;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -47,6 +56,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private ISearchDao mySearchDao;
 	private Search mySearchEntity;
 	private String myUuid;
+	private boolean myCacheHit;
 
 	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao) {
 		myUuid = theSearchUuid;
@@ -179,22 +189,30 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		});
 
 		switch (mySearchEntity.getSearchType()) {
-		case HISTORY:
-			return template.execute(new TransactionCallback<List<IBaseResource>>() {
-				@Override
-				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-					return doHistoryInTransaction(theFromIndex, theToIndex);
-				}
-			});
-		case SEARCH:
-		case EVERYTHING:
-		default:
-			return doSearchOrEverything(theFromIndex, theToIndex);
+			case HISTORY:
+				return template.execute(new TransactionCallback<List<IBaseResource>>() {
+					@Override
+					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+						return doHistoryInTransaction(theFromIndex, theToIndex);
+					}
+				});
+			case SEARCH:
+			case EVERYTHING:
+			default:
+				return doSearchOrEverything(theFromIndex, theToIndex);
 		}
 	}
 
 	public String getUuid() {
 		return myUuid;
+	}
+
+	public boolean isCacheHit() {
+		return myCacheHit;
+	}
+
+	public void setCacheHit(boolean theCacheHit) {
+		myCacheHit = theCacheHit;
 	}
 
 	@Override

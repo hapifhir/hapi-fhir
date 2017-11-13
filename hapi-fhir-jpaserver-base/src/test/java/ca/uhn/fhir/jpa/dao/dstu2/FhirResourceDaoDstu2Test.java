@@ -56,6 +56,30 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 	}
 
+	/**
+	 * See #773
+	 */
+	@Test
+	public void testDeleteResourceWithOutboundDeletedResources() {
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+
+		Organization org = new Organization();
+		org.setId("ORG");
+		org.setName("ORG");
+		myOrganizationDao.update(org);
+
+		Patient pat = new Patient();
+		pat.setId("PAT");
+		pat.setActive(true);
+		pat.setManagingOrganization(new ResourceReferenceDt("Organization/ORG"));
+		myPatientDao.update(pat);
+
+		myOrganizationDao.delete(new IdDt("Organization/ORG"));
+
+		myPatientDao.delete(new IdDt("Patient/PAT"));
+	}
+
+
 	private void assertGone(IIdType theId) {
 		try {
 			assertNotGone(theId);

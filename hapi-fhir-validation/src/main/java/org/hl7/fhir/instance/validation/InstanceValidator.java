@@ -333,10 +333,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       switch (bpWarnings) {
       case Error:
         rule(errors, invalid, line, col, literalPath, test, message);
+		  break;
       case Warning:
         warning(errors, invalid, line, col, literalPath, test, message);
+		  break;
       case Hint:
         hint(errors, invalid, line, col, literalPath, test, message);
+		  break;
       default: // do nothing
       }
     }

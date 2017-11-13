@@ -24,6 +24,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -47,6 +48,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static GenericWebApplicationContext ourWebApplicationContext;
 	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
+	protected static PlatformTransactionManager ourTxManager;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
@@ -98,6 +100,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourWebApplicationContext.refresh();
 
 			ourRestHookSubscriptionInterceptor = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
+			ourTxManager = ourWebApplicationContext.getBean(PlatformTransactionManager.class);
 
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
 

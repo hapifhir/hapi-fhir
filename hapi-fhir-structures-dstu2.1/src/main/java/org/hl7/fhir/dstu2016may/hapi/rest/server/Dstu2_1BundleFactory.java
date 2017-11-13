@@ -226,12 +226,15 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType,
-			IPrimitiveType<Date> theLastUpdated) {
+	public void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType,
+													  IPrimitiveType<Date> theLastUpdated) {
 		ensureBundle();
 
 		myBase = theServerBase;
 
+		if (myBundle.getIdElement().isEmpty()) {
+			myBundle.setId(theId);
+		}
 		if (myBundle.getIdElement().isEmpty()) {
 			myBundle.setId(UUID.randomUUID().toString());
 		}

@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.email;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.List;
 
 public class EmailDetails {
@@ -27,6 +29,7 @@ public class EmailDetails {
 	private String myBodyTemplate;
 	private List<String> myTo;
 	private String myFrom;
+	private IIdType mySubscription;
 
 	public String getBodyTemplate() {
 		return myBodyTemplate;
@@ -50,6 +53,14 @@ public class EmailDetails {
 
 	public void setSubjectTemplate(String theSubjectTemplate) {
 		mySubjectTemplate = theSubjectTemplate;
+	}
+
+	public IIdType getSubscription() {
+		return mySubscription;
+	}
+
+	public void setSubscription(IIdType theSubscription) {
+		mySubscription = theSubscription;
 	}
 
 	public List<String> getTo() {

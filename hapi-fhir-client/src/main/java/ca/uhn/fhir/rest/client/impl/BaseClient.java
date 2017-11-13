@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.util.XmlDetectionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -109,7 +111,7 @@ public abstract class BaseClient implements IRestfulClient {
 			setKeepResponses(true);
 		}
 
-		if (XmlUtil.isStaxPresent() == false) {
+		if (XmlDetectionUtil.isStaxPresent() == false) {
 			myEncoding = EncodingEnum.JSON;
 		}
 
@@ -135,7 +137,7 @@ public abstract class BaseClient implements IRestfulClient {
 	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
 		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType);
-		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null);
+		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null);
 	}
 
 	void forceConformanceCheck() {
@@ -198,11 +200,11 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null);
+		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null, null);
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
+							 boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -243,6 +245,18 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
+
+			if (theCacheControlDirective != null) {
+				StringBuilder b = new StringBuilder();
+				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_CACHE, theCacheControlDirective.isNoCache());
+				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_STORE, theCacheControlDirective.isNoStore());
+				if (theCacheControlDirective.getMaxResults() != null) {
+					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS+"="+ Integer.toString(theCacheControlDirective.getMaxResults().intValue()), true);
+				}
+				if (b.length() > 0) {
+					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
+				}
+			}
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
@@ -363,6 +377,15 @@ public abstract class BaseClient implements IRestfulClient {
 			if (response != null) {
 				response.close();
 			}
+		}
+	}
+
+	private void addToCacheControlHeader(StringBuilder theBuilder, String theDirective, boolean theActive) {
+		if (theActive) {
+			if (theBuilder.length() > 0) {
+				theBuilder.append(", ");
+			}
+			theBuilder.append(theDirective);
 		}
 	}
 

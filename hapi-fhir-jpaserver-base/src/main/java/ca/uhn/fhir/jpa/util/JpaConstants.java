@@ -24,8 +24,20 @@ public class JpaConstants {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
+	/**
+	 * <p>
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Subscription.channel</code> element
+	 * </p>
+	 */
 	public static final String EXT_SUBSCRIPTION_EMAIL_FROM = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
+
+	/**
+	 * <p>
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Subscription.channel</code> element
+	 * </p>
+	 */
 	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
-	public static final String EXT_SUBSCRIPTION_BODY_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-body-template";
 
 }

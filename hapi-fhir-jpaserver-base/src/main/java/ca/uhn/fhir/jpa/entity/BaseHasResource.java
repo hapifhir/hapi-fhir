@@ -20,19 +20,17 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.Date;
-
-import javax.persistence.*;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import org.hibernate.annotations.OptimisticLock;
+
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.Date;
 
 @MappedSuperclass
 public abstract class BaseHasResource {
-
-	public static final int MAX_TITLE_LENGTH = 100;
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -40,32 +38,36 @@ public abstract class BaseHasResource {
 
 	@Column(name = "RES_ENCODING", nullable = false, length = 5)
 	@Enumerated(EnumType.STRING)
+	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
+	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
 
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
 	@JoinColumn(name = "FORCED_ID_PID")
+	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
 
 	@Column(name = "HAS_TAGS", nullable = false)
+	@OptimisticLock(excluded = true)
 	private boolean myHasTags;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED", nullable = false)
+	@OptimisticLock(excluded = true)
 	private Date myPublished;
 
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = false)
 	@Lob()
+	@OptimisticLock(excluded = true)
 	private byte[] myResource;
-
-	@Column(name = "RES_TITLE", nullable = true, length = MAX_TITLE_LENGTH)
-	private String myTitle;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED", nullable = false)
+	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
 	public abstract BaseTag addTag(TagDefinition theDef);
@@ -74,17 +76,35 @@ public abstract class BaseHasResource {
 		return myDeleted;
 	}
 
+	public void setDeleted(Date theDate) {
+		myDeleted = theDate;
+	}
+
 	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
+	}
+
+	public void setEncoding(ResourceEncodingEnum theEncoding) {
+		myEncoding = theEncoding;
 	}
 
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
 	}
 
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
+	}
+
 	public ForcedId getForcedId() {
 		return myForcedId;
 	}
+
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	public abstract Long getId();
 
 	public abstract IdDt getIdDt();
 
@@ -96,20 +116,28 @@ public abstract class BaseHasResource {
 		}
 	}
 
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished.getValue();
+	}
+
 	public byte[] getResource() {
 		return myResource;
+	}
+
+	public void setResource(byte[] theResource) {
+		myResource = theResource;
 	}
 
 	public abstract String getResourceType();
 
 	public abstract Collection<? extends BaseTag> getTags();
 
-	public String getTitle() {
-		return myTitle;
-	}
-
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
+	}
+
+	public void setUpdated(InstantDt theUpdated) {
+		myUpdated = theUpdated.getValue();
 	}
 
 	public Date getUpdatedDate() {
@@ -122,24 +150,6 @@ public abstract class BaseHasResource {
 		return myHasTags;
 	}
 
-	public void setDeleted(Date theDate) {
-		myDeleted = theDate;
-	}
-
-	public abstract Long getId();
-	
-	public void setEncoding(ResourceEncodingEnum theEncoding) {
-		myEncoding = theEncoding;
-	}
-
-	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
-		myFhirVersion = theFhirVersion;
-	}
-
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
-
 	public void setHasTags(boolean theHasTags) {
 		myHasTags = theHasTags;
 	}
@@ -148,24 +158,8 @@ public abstract class BaseHasResource {
 		myPublished = thePublished;
 	}
 
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished.getValue();
-	}
-
-	public void setResource(byte[] theResource) {
-		myResource = theResource;
-	}
-
-	public void setTitle(String theTitle) {
-		myTitle = theTitle;
-	}
-
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
-	}
-
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,6 +38,12 @@ public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 	 */
 	@Deprecated
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
+
+	/**
+	 * Sets the <code>Cache-Control</code> header value, which advises the server (or any cache in front of it)
+	 * how to behave in terms of cached requests
+	 */
+	T cacheControl(CacheControlDirective theCacheControlDirective);
 
 	/**
 	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters. 

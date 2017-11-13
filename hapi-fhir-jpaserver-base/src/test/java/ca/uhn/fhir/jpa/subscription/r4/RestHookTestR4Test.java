@@ -51,14 +51,16 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	@After
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			IIdType nextId = next.toUnqualifiedVersionless();
+			ourLog.info("Deleting: {}", nextId);
+			myClient.delete().resourceById(nextId).execute();
 		}
 		mySubscriptionIds.clear();
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -89,7 +91,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -107,7 +109,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);
@@ -154,11 +156,11 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -168,7 +170,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
@@ -178,27 +180,27 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -229,10 +231,10 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -242,7 +244,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -251,27 +253,27 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -331,7 +333,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		subscription.getChannel().addHeader("X-Foo: FOO");
 		subscription.getChannel().addHeader("X-Bar: BAR");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		ourClient.update().resource(subscription).execute();
+		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
 		sendObservation(code, "SNOMED-CT");
@@ -362,7 +364,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		// Disable
 		subscription.setStatus(Subscription.SubscriptionStatus.OFF);
-		ourClient.update().resource(subscription).execute();
+		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
 		// Send another object

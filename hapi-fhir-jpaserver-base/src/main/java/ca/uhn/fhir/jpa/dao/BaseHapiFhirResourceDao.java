@@ -30,16 +30,14 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -64,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -897,6 +896,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		return search(theParams, theRequestDetails, null);
+	}
+
+	@Transactional(propagation = Propagation.SUPPORTS)
+	@Override
+	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			for (List<List<? extends IQueryParameterType>> nextAnds : theParams.values()) {
@@ -928,7 +933,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
+		CacheControlDirective cacheControlDirective = new CacheControlDirective();
+		if (theRequestDetails != null) {
+			cacheControlDirective.parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		}
+
+		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective);
+
+		if (retVal instanceof PersistedJpaBundleProvider) {
+			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
+			if (provider.isCacheHit()) {
+				if (theServletResponse != null && theRequestDetails != null) {
+					String value = "HIT from " + theRequestDetails.getFhirServerBase();
+					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
+				}
+			}
+		}
+
+		return retVal;
 	}
 
 	@Override

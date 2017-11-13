@@ -34,6 +34,9 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 
 	@Override
 	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
+		if (theRequest == null) {
+			return null;
+		}
 		String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 
 		String servletPath;

@@ -25,9 +25,22 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
+	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
+	public static final String CACHE_CONTROL_NO_STORE = "no-store";
 	public static final String CHARSET_NAME_UTF8 = "UTF-8";
 	public static final Charset CHARSET_UTF8;
 	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
+	/**
+	 * Contains a standard set of headers which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedHeader declarations
+	 */
+	public static final Set<String> CORS_ALLOWED_HEADERS;
+	/**
+	 * Contains a standard set of HTTP Methods which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedMethod declarations
+	 */
+	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
@@ -67,6 +80,7 @@ public class Constants {
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
+	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
@@ -172,12 +186,13 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String OO_INFOSTATUS_PROCESSING = "processing";
 	public static final String PARAM_GRAPHQL_QUERY = "query";
+	public static final String HEADER_X_CACHE = "X-Cache";
+	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
 
-		HashMap<Integer, String> statusNames = new HashMap<Integer, String>();
-
+		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");
 		statusNames.put(201, "Created");
 		statusNames.put(202, "Accepted");
@@ -242,11 +257,31 @@ public class Constants {
 		statusNames.put(511, "Network Authentication Required");
 		HTTP_STATUS_NAMES = Collections.unmodifiableMap(statusNames);
 		
-		Set<String> formatsHtml = new HashSet<String>();
+		Set<String> formatsHtml = new HashSet<>();
 		formatsHtml.add(CT_HTML);
 		formatsHtml.add(FORMAT_HTML);
 		FORMATS_HTML = Collections.unmodifiableSet(formatsHtml);
-		
+
+		// *********************************************************
+		// Update CorsInterceptor's constructor documentation if you change these:
+		// *********************************************************
+		HashSet<String> corsAllowedHeaders = new HashSet<>();
+		corsAllowedHeaders.add("Accept");
+		corsAllowedHeaders.add("Access-Control-Request-Headers");
+		corsAllowedHeaders.add("Access-Control-Request-Method");
+		corsAllowedHeaders.add("Cache-Control");
+		corsAllowedHeaders.add("Content-Type");
+		corsAllowedHeaders.add("Origin");
+		corsAllowedHeaders.add("Prefer");
+		corsAllowedHeaders.add("X-Requested-With");
+		CORS_ALLOWED_HEADERS = Collections.unmodifiableSet(corsAllowedHeaders);
+
+		// *********************************************************
+		// Update CorsInterceptor's constructor documentation if you change these:
+		// *********************************************************
+		HashSet<String> corsAllowedMethods = new HashSet<>();
+		corsAllowedMethods.addAll(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
 }

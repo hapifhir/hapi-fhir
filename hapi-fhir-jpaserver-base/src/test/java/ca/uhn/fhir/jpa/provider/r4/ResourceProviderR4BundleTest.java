@@ -34,9 +34,9 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		composition.setTitle("Visit Summary");
 		bundle.addEntry().setFullUrl("http://foo").setResource(composition);
 		
-		IIdType id = ourClient.create().resource(bundle).execute().getId();
+		IIdType id = myClient.create().resource(bundle).execute().getId();
 		
-		Bundle retBundle = ourClient.read().resource(Bundle.class).withId(id).execute();
+		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 		
 		assertEquals("http://foo", bundle.getEntry().get(0).getFullUrl());

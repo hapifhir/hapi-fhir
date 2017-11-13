@@ -921,7 +921,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		List<Patient> patients = toList(myPatientDao.search(params));
 		assertEquals(1, patients.size());
 		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
-		assertEquals("P1TITLE", ResourceMetadataKeyEnum.TITLE.get(patients.get(0)));
 
 		// Given name shouldn't return for family param
 		params = new SearchParameterMap();

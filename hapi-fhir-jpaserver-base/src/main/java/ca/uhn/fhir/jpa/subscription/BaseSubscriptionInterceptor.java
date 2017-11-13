@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -51,8 +52,12 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -87,6 +92,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired(required = false)
 	@Qualifier("myEventDefinitionDaoR4")
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
+
 	/**
 	 * Constructor
 	 */
@@ -148,13 +156,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				try {
 					from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 					subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-					bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
 				} catch (FHIRException theE) {
 					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 				}
 				retVal.getEmailDetails().setFrom(from);
 				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-				retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
 			}
 
 		} catch (FHIRException theE) {
@@ -183,13 +189,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			try {
 				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-				bodyTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_BODY_TEMPLATE);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
 			retVal.getEmailDetails().setFrom(from);
 			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-			retVal.getEmailDetails().setBodyTemplate(bodyTemplate);
 		}
 
 		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
@@ -368,6 +372,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myResourceDaos = theResourceDaos;
 	}
 
+	@VisibleForTesting
+	public void setTxManager(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
+	}
+
 	@PostConstruct
 	public void start() {
 		for (IFhirResourceDao<?> next : myResourceDaos) {
@@ -446,13 +455,19 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager);
 		}
 
 		registerSubscriptionCheckingSubscriber();
 		registerDeliverySubscriber();
 
-		initSubscriptions();
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				initSubscriptions();
+			}
+		});
 	}
 
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {

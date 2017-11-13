@@ -97,7 +97,7 @@ public class ConnectionWrapper implements Connection {
 
 	@Override
 	public String getClientInfo(String theName) throws SQLException {
-		return getClientInfo(theName);
+		return myWrap.getClientInfo(theName);
 	}
 
 	@Override

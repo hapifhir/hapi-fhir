@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -51,10 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
@@ -1011,14 +1007,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			changed = true;
 		}
 
-		if (theResource instanceof IResource) {
-			String title = ResourceMetadataKeyEnum.TITLE.get((IResource) theResource);
-			if (title != null && title.length() > BaseHasResource.MAX_TITLE_LENGTH) {
-				title = title.substring(0, BaseHasResource.MAX_TITLE_LENGTH);
-			}
-			theEntity.setTitle(title);
-		}
-
 		return changed;
 	}
 
@@ -1051,10 +1039,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
-
-		if (theEntity.getTitle() != null) {
-			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
-		}
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
 		if (theEntity.isHasTags()) {
@@ -2056,7 +2040,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		StringBuilder b = new StringBuilder();
 		if (theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-			List<XMLEvent> xmlEvents = resource.getText().getDiv().getValue();
+			List<XMLEvent> xmlEvents = XmlUtil.parse(resource.getText().getDiv().getValue());
 			if (xmlEvents != null) {
 				for (XMLEvent next : xmlEvents) {
 					if (next.isCharacters()) {
@@ -2069,8 +2053,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			IDomainResource resource = (IDomainResource) theResource;
 			try {
 				String divAsString = resource.getText().getDivAsString();
-				XhtmlDt xhtml = new XhtmlDt(divAsString);
-				List<XMLEvent> xmlEvents = xhtml.getValue();
+				List<XMLEvent> xmlEvents = XmlUtil.parse(divAsString);
 				if (xmlEvents != null) {
 					for (XMLEvent next : xmlEvents) {
 						if (next.isCharacters()) {

@@ -1,26 +1,29 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.context.annotation.*;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Configuration
 @EnableTransactionManagement()
@@ -30,12 +33,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	private Exception myLastStackTrace;
 
 	@Bean()
-	public DaoConfig daoConfig() {
-		return new DaoConfig();
-	}
-	
-	@Bean()
-	public DataSource dataSource() {
+	public BasicDataSource basicDataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
 
@@ -48,36 +46,36 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
 //					if ("true".equals(System.getProperty("ci"))) {
-						fail("Exceeded maximum wait for connection: "+ e.toString());
+					fail("Exceeded maximum wait for connection: " + e.toString());
 //					}
 //					System.exit(1);
 					retVal = null;
 				}
-				
+
 				try {
 					throw new Exception();
 				} catch (Exception e) {
 					myLastStackTrace = e;
 				}
-				
+
 				return retVal;
 			}
 
 			private void logGetConnectionStackTrace() {
-					StringBuilder b = new StringBuilder();
-					b.append("Last connection request stack trace:");
-					for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
-							b.append("\n   ");
-							b.append(next.getClassName());
-							b.append(".");
-							b.append(next.getMethodName());
-							b.append("(");
-							b.append(next.getFileName());
-							b.append(":");
-							b.append(next.getLineNumber());
-							b.append(")");
-					}
-					ourLog.info(b.toString());
+				StringBuilder b = new StringBuilder();
+				b.append("Last connection request stack trace:");
+				for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
+					b.append("\n   ");
+					b.append(next.getClassName());
+					b.append(".");
+					b.append(next.getMethodName());
+					b.append("(");
+					b.append(next.getFileName());
+					b.append(":");
+					b.append(next.getLineNumber());
+					b.append(")");
+				}
+				ourLog.info(b.toString());
 			}
 
 		};
@@ -92,17 +90,37 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		int maxThreads = (int) (Math.random() * 6) + 1;
+		int maxThreads = (int) (Math.random() * 6.0) + 1;
 		retVal.setMaxTotal(maxThreads);
 
+		return retVal;
+	}
+
+	@Bean()
+	public DaoConfig daoConfig() {
+		return new DaoConfig();
+	}
+
+	@Bean()
+	@Primary()
+	public DataSource dataSource() {
+
 		DataSource dataSource = ProxyDataSourceBuilder
-				.create(retVal)
-				// .logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				.logSlowQueryBySlf4j(100, TimeUnit.MILLISECONDS)
-				.countQuery()
-				.build();
+			.create(basicDataSource())
+//				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
+			.countQuery()
+			.build();
 
 		return dataSource;
+	}
+
+	@Bean
+	public IEmailSender emailSender() {
+		JavaMailEmailSender retVal = new JavaMailEmailSender();
+		retVal.setSmtpServerHostname("localhost");
+		retVal.setSmtpServerPort(3025);
+		return retVal;
 	}
 
 	@Bean()
