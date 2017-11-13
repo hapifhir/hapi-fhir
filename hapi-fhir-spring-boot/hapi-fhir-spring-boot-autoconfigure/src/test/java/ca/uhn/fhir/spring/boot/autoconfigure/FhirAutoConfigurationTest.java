@@ -76,7 +76,8 @@ public class FhirAutoConfigurationTest {
                         PropertyPlaceholderAutoConfiguration.class,
                         FhirAutoConfiguration.class),
                 "hapi.fhir.version:DSTU3",
-                "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles");
+                "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
+			  		 "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
         assertThat(this.context.getBeansOfType(DaoConfig.class)).hasSize(1);
         assertThat(this.context.getBeansOfType(Dstu3.class)).hasSize(1);
     }

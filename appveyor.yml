@@ -1,0 +1,5 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+cache: C:\Users\appveyor\.m2\repository
+build_script:
+- cmd: mvn install

@@ -11,6 +11,8 @@ spring:
       hibernate.search.default.directory_provider: filesystem
       hibernate.search.default.indexBase: target/lucenefiles
       hibernate.search.lucene_version: LUCENE_CURRENT
+      hibernate.search.model_mapping: ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory
+
   h2:
     console:
       enabled: true
