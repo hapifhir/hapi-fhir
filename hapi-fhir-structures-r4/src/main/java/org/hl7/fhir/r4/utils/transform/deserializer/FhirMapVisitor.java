@@ -2,8 +2,8 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaBaseVisitor;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapBaseVisitor;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import java.util.List;
  * (c) Applicadia LLC.
  */
 @SuppressWarnings("unchecked")
-public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
+public class FhirMapVisitor extends FhirMapBaseVisitor<Object> {
   /**
    * Maximum length of a name.
    */
@@ -75,7 +75,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitKeyMap(FhirMapJavaParser.KeyMapContext context) {
+  public Object visitKeyMap(FhirMapParser.KeyMapContext context) {
     UrlData urlData;
     try {
       urlData = (UrlData) this.visit(context.structureMap());
@@ -94,7 +94,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UrlData instance
    */
   @Override
-  public Object visitStructureMap(FhirMapJavaParser.StructureMapContext context) {
+  public Object visitStructureMap(FhirMapParser.StructureMapContext context) {
     return this.visit(context.quotedUrl());
   }
 
@@ -106,7 +106,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitKeyImports(FhirMapJavaParser.KeyImportsContext context) {
+  public Object visitKeyImports(FhirMapParser.KeyImportsContext context) {
     UrlData urlData;
     urlData = (UrlData) this.visit(context.structureMap());
     try {
@@ -124,7 +124,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UrlData instance
    */
   @Override
-  public Object visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext context) {
+  public Object visitStructureDefinition(FhirMapParser.StructureDefinitionContext context) {
     return this.visit(context.quotedUrl());
   }
 
@@ -136,7 +136,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String identifier
    */
   @Override
-  public Object visitIdentifier(FhirMapJavaParser.IdentifierContext context) {
+  public Object visitIdentifier(FhirMapParser.IdentifierContext context) {
     String retVal = context.getText(); // get string characters
     if (retVal.length() > MaxNameLength) {
       throw new RuntimeException("Identifier must be less than {MaxNameLength} characters.  '{retVal}'");
@@ -151,7 +151,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String without the surrounding quotes
    */
   @Override
-  public Object visitQuotedIdentifier(FhirMapJavaParser.QuotedIdentifierContext context) {
+  public Object visitQuotedIdentifier(FhirMapParser.QuotedIdentifierContext context) {
     String retVal = context.getText(); // get string characters
     retVal = retVal.substring(1, 1 + retVal.length() - 2); // remove surrounding double quotes.
     return retVal;
@@ -164,7 +164,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String without the surrounding quotes
    */
   @Override
-  public Object visitQuotedString(FhirMapJavaParser.QuotedStringContext context) {
+  public Object visitQuotedString(FhirMapParser.QuotedStringContext context) {
     String retVal = context.getText(); // get string characters
     retVal = retVal.substring(1, 1 + retVal.length() - 2); // remove surrounding double quotes.
     return retVal;
@@ -177,7 +177,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String without the surrounding quotes
    */
   @Override
-  public Object visitQuotedStringWQuotes(FhirMapJavaParser.QuotedStringWQuotesContext context) {
+  public Object visitQuotedStringWQuotes(FhirMapParser.QuotedStringWQuotesContext context) {
     return context.getText();
   }
 
@@ -189,7 +189,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return Int32 value
    */
   @Override
-  public Object visitInteger(FhirMapJavaParser.IntegerContext context) {
+  public Object visitInteger(FhirMapParser.IntegerContext context) {
     return Integer.parseInt(context.getText());
   }
 
@@ -203,7 +203,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UrlData instance
    */
   @Override
-  public Object visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext context) {
+  public Object visitQuotedUrl(FhirMapParser.QuotedUrlContext context) {
     String urlStr = null;
     urlStr = (String) this.visit(context.quotedString());
     try {
@@ -223,7 +223,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitKeyUses(FhirMapJavaParser.KeyUsesContext context) {
+  public Object visitKeyUses(FhirMapParser.KeyUsesContext context) {
     UrlData urlData = null;
     urlData = (UrlData) this.visit(context.structureDefinition());
     FhirMapUseNames name = (FhirMapUseNames) this.visit(context.keyUsesName());
@@ -242,7 +242,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext context) {
+  public Object visitKeyUsesName(FhirMapParser.KeyUsesNameContext context) {
     return this.visitChildren(context);
   }
 
@@ -253,7 +253,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UseNames.Source
    */
   @Override
-  public Object visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext context) {
+  public Object visitKeyUsesNameSource(FhirMapParser.KeyUsesNameSourceContext context) {
     return FhirMapUseNames.Source;
   }
 
@@ -264,7 +264,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UseNames.Target
    */
   @Override
-  public Object visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext context) {
+  public Object visitKeyUsesNameTarget(FhirMapParser.KeyUsesNameTargetContext context) {
     return FhirMapUseNames.Target;
   }
 
@@ -275,7 +275,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UseNames.Queried
    */
   @Override
-  public Object visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext context) {
+  public Object visitKeyUsesNameQueried(FhirMapParser.KeyUsesNameQueriedContext context) {
     return FhirMapUseNames.Queried;
   }
 
@@ -286,7 +286,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return UseNames.Produced
    */
   @Override
-  public Object visitKeyUsesNameProduced(FhirMapJavaParser.KeyUsesNameProducedContext context) {
+  public Object visitKeyUsesNameProduced(FhirMapParser.KeyUsesNameProducedContext context) {
     return FhirMapUseNames.Produced;
   }
 
@@ -297,7 +297,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return GroupTypes
    */
   @Override
-  public Object visitGroupStart(FhirMapJavaParser.GroupStartContext context) {
+  public Object visitGroupStart(FhirMapParser.GroupStartContext context) {
     try {
       String identifier = null;
       if (context.identifier() != null) {
@@ -325,7 +325,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return GroupTypes
    */
   @Override
-  public Object visitGroupEnd(FhirMapJavaParser.GroupEndContext context) {
+  public Object visitGroupEnd(FhirMapParser.GroupEndContext context) {
     try {
       this.executor.groupEnd();
     } catch (Exception e) {
@@ -341,7 +341,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String> of group
    */
   @Override
-  public Object visitGroupExtends(FhirMapJavaParser.GroupExtendsContext context) {
+  public Object visitGroupExtends(FhirMapParser.GroupExtendsContext context) {
     return this.visit(context.identifier());
   }
 
@@ -352,7 +352,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return GroupTypes
    */
   @Override
-  public Object visitGroupType(FhirMapJavaParser.GroupTypeContext context) {
+  public Object visitGroupType(FhirMapParser.GroupTypeContext context) {
     return this.visitChildren(context);
   }
 
@@ -363,7 +363,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return GroupTypes.Type
    */
   @Override
-  public Object visitGroupTypeType(FhirMapJavaParser.GroupTypeTypeContext context) {
+  public Object visitGroupTypeType(FhirMapParser.GroupTypeTypeContext context) {
     return FhirMapGroupTypes.Types;
   }
 
@@ -374,7 +374,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return GroupTypes.TypeTypes
    */
   @Override
-  public Object visitGroupTypeTypeTypes(FhirMapJavaParser.GroupTypeTypeTypesContext context) {
+  public Object visitGroupTypeTypeTypes(FhirMapParser.GroupTypeTypeTypesContext context) {
     return FhirMapGroupTypes.TypeTypes;
   }
 
@@ -385,7 +385,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapGroupInput
    */
   @Override
-  public Object visitGroupInput(FhirMapJavaParser.GroupInputContext context) {
+  public Object visitGroupInput(FhirMapParser.GroupInputContext context) {
     try {
       this.executor.groupInput((String) this.visit(context.groupInputName()), (String) this.visit(context.groupInputType()), (FhirMapInputModes) this.visit(context.groupInputMode()));
     } catch (Exception e) {
@@ -401,7 +401,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapInputModes
    */
   @Override
-  public Object visitGroupInputMode(FhirMapJavaParser.GroupInputModeContext context) {
+  public Object visitGroupInputMode(FhirMapParser.GroupInputModeContext context) {
     return this.visit(context.groupInputModes());
   }
 
@@ -412,7 +412,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapInputModes.Source
    */
   @Override
-  public Object visitGroupInputModesSource(FhirMapJavaParser.GroupInputModesSourceContext context) {
+  public Object visitGroupInputModesSource(FhirMapParser.GroupInputModesSourceContext context) {
     return FhirMapInputModes.Source;
   }
 
@@ -423,12 +423,12 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapInputModes.Target
    */
   @Override
-  public Object visitGroupInputModesTarget(FhirMapJavaParser.GroupInputModesTargetContext context) {
+  public Object visitGroupInputModesTarget(FhirMapParser.GroupInputModesTargetContext context) {
     return FhirMapInputModes.Target;
   }
 
   @Override
-  public Object visitGroupCall(FhirMapJavaParser.GroupCallContext context) {
+  public Object visitGroupCall(FhirMapParser.GroupCallContext context) {
     String id = null;
     List<String> params = null;
     this.executor.groupCall((String) this.visit(context.identifier()), (List<String>) this.visit(context.groupCallParameters()));
@@ -436,7 +436,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
   }
 
   @Override
-  public Object visitGroupCallParameters(FhirMapJavaParser.GroupCallParametersContext context) {
+  public Object visitGroupCallParameters(FhirMapParser.GroupCallParametersContext context) {
     return null;
     //TODO:not implemented
   }
@@ -448,7 +448,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitRuleInstance(FhirMapJavaParser.RuleInstanceContext context) {
+  public Object visitRuleInstance(FhirMapParser.RuleInstanceContext context) {
     try {
       this.executor.ruleStart((List<String>) this.visit(context.ruleName()));
     } catch (Exception e) {
@@ -470,7 +470,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext context) {
+  public Object visitRuleTargetReference(FhirMapParser.RuleTargetReferenceContext context) {
     try {
       List<String> ctx = null;
       String refSource = null;
@@ -501,7 +501,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext context) {
+  public Object visitRuleTargetTruncate(FhirMapParser.RuleTargetTruncateContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String truncateSource = (String) this.visit(context.ruleTargetTruncateSource());
     Integer truncateLength = (Integer) this.visit(context.ruleTargetTruncateLength());
@@ -525,7 +525,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext context) {
+  public Object visitRuleTargetCast(FhirMapParser.RuleTargetCastContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String castSource = (String) this.visit(context.ruleTargetCastSource());
     String castType = (String) this.visit(context.ruleTargetCastType());
@@ -548,7 +548,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext context) {
+  public Object visitRuleTargetAs(FhirMapParser.RuleTargetAsContext context) {
     try {
       this.executor.transformAs((List<String>) this.visit(context.ruleContext()), (String) this.visit(context.ruleTargetVariable()));
     } catch (Exception e) {
@@ -564,7 +564,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext context) {
+  public Object visitRuleTargetAssign(FhirMapParser.RuleTargetAssignContext context) {
     try {
       List<String> ctx = null;
       String assignVal = null;
@@ -592,7 +592,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext context) {
+  public Object visitRuleTargetCopy(FhirMapParser.RuleTargetCopyContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String sourceVar = (String) this.visit(context.ruleTargetCopySource());
     String targetVar = null;
@@ -614,7 +614,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext context) {
+  public Object visitRuleTargetCreate(FhirMapParser.RuleTargetCreateContext context) {
     try {
       List<String> ctx = null;
       String createType = null;
@@ -642,7 +642,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext context) {
+  public Object visitRuleTargetTranslate(FhirMapParser.RuleTargetTranslateContext context) {
     try {
       List<String> ctx = null;
       String source = null;
@@ -681,7 +681,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslateOutputCode(FhirMapJavaParser.RuleTargetTranslateOutputCodeContext context) {
+  public Object visitRuleTargetTranslateOutputCode(FhirMapParser.RuleTargetTranslateOutputCodeContext context) {
     return FhirMapTranslateOutputTypes.Code;
   }
 
@@ -692,7 +692,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslateOutputSystem(FhirMapJavaParser.RuleTargetTranslateOutputSystemContext context) {
+  public Object visitRuleTargetTranslateOutputSystem(FhirMapParser.RuleTargetTranslateOutputSystemContext context) {
     return FhirMapTranslateOutputTypes.System;
   }
 
@@ -703,7 +703,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslateOutputDisplay(FhirMapJavaParser.RuleTargetTranslateOutputDisplayContext context) {
+  public Object visitRuleTargetTranslateOutputDisplay(FhirMapParser.RuleTargetTranslateOutputDisplayContext context) {
     return FhirMapTranslateOutputTypes.Display;
   }
 
@@ -714,7 +714,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslateOutputCoding(FhirMapJavaParser.RuleTargetTranslateOutputCodingContext context) {
+  public Object visitRuleTargetTranslateOutputCoding(FhirMapParser.RuleTargetTranslateOutputCodingContext context) {
     return FhirMapTranslateOutputTypes.Coding;
   }
 
@@ -725,7 +725,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetTranslateOutputCodeableConcept(FhirMapJavaParser.RuleTargetTranslateOutputCodeableConceptContext context) {
+  public Object visitRuleTargetTranslateOutputCodeableConcept(FhirMapParser.RuleTargetTranslateOutputCodeableConceptContext context) {
     return FhirMapTranslateOutputTypes.CodeableConcept;
   }
 
@@ -736,7 +736,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext context) {
+  public Object visitRuleTargetCp(FhirMapParser.RuleTargetCpContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     UrlData cpSystem = null;
     if (context.ruleTargetCpSystem() != null) {
@@ -762,7 +762,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext context) {
+  public Object visitRuleTargetAppend(FhirMapParser.RuleTargetAppendContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     List<String> appendSource = (List<String>) this.visit(context.ruleTargetAppendSources());
     String targetVar = null;
@@ -784,7 +784,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetAppendSources(FhirMapJavaParser.RuleTargetAppendSourcesContext context) {
+  public Object visitRuleTargetAppendSources(FhirMapParser.RuleTargetAppendSourcesContext context) {
     ArrayList<String> values = new ArrayList<String>();
     if (context.ruleTargetAppendSource() != null) {
       for (ParseTree treeItem : context.ruleTargetAppendSource()) {
@@ -802,7 +802,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext context) {
+  public Object visitRuleTargetC(FhirMapParser.RuleTargetCContext context) {
     try {
       List<String> ctx = null;
       UrlData system = null;
@@ -839,7 +839,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context context) {
+  public Object visitRuleTargetCC1(FhirMapParser.RuleTargetCC1Context context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String ccText = (String) this.visit(context.ruleTargetCC1Text());
     String targetVar = null;
@@ -861,7 +861,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context context) {
+  public Object visitRuleTargetCC2(FhirMapParser.RuleTargetCC2Context context) {
     try {
       List<String> ctx = null;
       UrlData system = null;
@@ -897,7 +897,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext context) {
+  public Object visitRuleTargetContext(FhirMapParser.RuleTargetContextContext context) {
     return this.visit(context.ruleContext());
   }
 
@@ -908,7 +908,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext context) {
+  public Object visitRuleTargetVariable(FhirMapParser.RuleTargetVariableContext context) {
     return this.visit(context.identifier());
   }
 
@@ -919,7 +919,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetEscape(FhirMapJavaParser.RuleTargetEscapeContext context) {
+  public Object visitRuleTargetEscape(FhirMapParser.RuleTargetEscapeContext context) {
     try {
       List<String> ctx = null;
       String var = null;
@@ -955,7 +955,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitRuleTargetExtension1(FhirMapJavaParser.RuleTargetExtension1Context context) {
+  public Object visitRuleTargetExtension1(FhirMapParser.RuleTargetExtension1Context context) {
     try {
       String variable = null;
       if (context.ruleTargetVariable() != null) {
@@ -974,7 +974,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return null
    */
   @Override
-  public Object visitRuleTargetExtension2(FhirMapJavaParser.RuleTargetExtension2Context context) {
+  public Object visitRuleTargetExtension2(FhirMapParser.RuleTargetExtension2Context context) {
     try {
       String variable = null;
       if (context.ruleTargetVariable() != null) {
@@ -1004,7 +1004,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext context) {
+  public Object visitRuleTargetEvaluate(FhirMapParser.RuleTargetEvaluateContext context) {
     try {
       List<String> ctx = null;
       String obj = null;
@@ -1036,7 +1036,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext context) {
+  public Object visitRuleTargetId(FhirMapParser.RuleTargetIdContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     UrlData idSystem = (UrlData) this.visit(context.ruleTargetIdSystem());
     String idValue = (String) this.visit(context.ruleTargetIdValue());
@@ -1063,7 +1063,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext context) {
+  public Object visitRuleTargetPointer(FhirMapParser.RuleTargetPointerContext context) {
     List<String> ctx = null;
     String pointerResource = null;
     String tgtVar = null;
@@ -1088,7 +1088,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context context) {
+  public Object visitRuleTargetQty1(FhirMapParser.RuleTargetQty1Context context) {
     try {
       List<String> ctx = null;
       String text = null;
@@ -1116,7 +1116,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context context) {
+  public Object visitRuleTargetQty2(FhirMapParser.RuleTargetQty2Context context) {
     try {
       List<String> ctx = null;
       String value = null;
@@ -1152,7 +1152,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context context) {
+  public Object visitRuleTargetQty3(FhirMapParser.RuleTargetQty3Context context) {
     try {
       List<String> ctx = null;
       ctx = (List<String>) this.visit(context.ruleTargetContext());
@@ -1178,7 +1178,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext context) {
+  public Object visitRuleTargetUuid(FhirMapParser.RuleTargetUuidContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String targetVar = null;
     if (context.ruleTargetVariable() != null) {
@@ -1200,7 +1200,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext context) {
+  public Object visitRuleTargetDateOp(FhirMapParser.RuleTargetDateOpContext context) {
     List<String> ctx = (List<String>) this.visit(context.ruleTargetContext());
     String dateOpVar = (String) this.visit(context.ruleTargetDateOpVariable());
     String operation = (String) this.visit(context.ruleTargetDateOpOperation());
@@ -1227,7 +1227,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleName(FhirMapJavaParser.RuleNameContext context) {
+  public Object visitRuleName(FhirMapParser.RuleNameContext context) {
     ArrayList<String> values = new ArrayList<String>();
     if (context.identifier() != null) {
       for (ParseTree treeItem : context.identifier()) {
@@ -1245,20 +1245,20 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapRuleType instance
    */
   @Override
-  public Object visitRuleSource(FhirMapJavaParser.RuleSourceContext context) {
+  public Object visitRuleSource(FhirMapParser.RuleSourceContext context) {
     try {
       List<String> ctx;
-      FhirMapJavaParser.RuleTypeContext typeContext = context.ruleType();
+      FhirMapParser.RuleTypeContext typeContext = context.ruleType();
       FhirMapRuleType type = null;
-      FhirMapJavaParser.RuleDefaultContext defaultContext = context.ruleDefault();
+      FhirMapParser.RuleDefaultContext defaultContext = context.ruleDefault();
       String defaultVal = null;
-      FhirMapJavaParser.RuleListOptionContext listOptionContext = context.ruleListOption();
+      FhirMapParser.RuleListOptionContext listOptionContext = context.ruleListOption();
       FhirMapListOptions listOptions = null;
-      FhirMapJavaParser.RuleVariableContext variableContext = context.ruleVariable();
+      FhirMapParser.RuleVariableContext variableContext = context.ruleVariable();
       String var = null;
-      FhirMapJavaParser.RuleWherePathContext wherePathContext = context.ruleWherePath();
+      FhirMapParser.RuleWherePathContext wherePathContext = context.ruleWherePath();
       String where = null;
-      FhirMapJavaParser.RuleCheckPathContext checkPathContext = context.ruleCheckPath();
+      FhirMapParser.RuleCheckPathContext checkPathContext = context.ruleCheckPath();
       String check = null;
       ctx = (List<String>) this.visit(context.ruleContext());
       if (typeContext != null) {
@@ -1300,7 +1300,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return FhirMapRuleType instance
    */
   @Override
-  public Object visitRuleType(FhirMapJavaParser.RuleTypeContext context) {
+  public Object visitRuleType(FhirMapParser.RuleTypeContext context) {
     FhirMapRuleType tempVar = new FhirMapRuleType();
     tempVar.TypeName = (String) this.visit(context.identifier());
     for (ParseTree treeItem : context.integer()) {
@@ -1328,7 +1328,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String
    */
   @Override
-  public Object visitRuleDefault(FhirMapJavaParser.RuleDefaultContext context) {
+  public Object visitRuleDefault(FhirMapParser.RuleDefaultContext context) {
     String identifier = null;
 
     try {
@@ -1349,7 +1349,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String
    */
   @Override
-  public Object visitRuleVariable(FhirMapJavaParser.RuleVariableContext context) {
+  public Object visitRuleVariable(FhirMapParser.RuleVariableContext context) {
     return this.visit(context.identifier());
   }
 
@@ -1360,7 +1360,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return List<String>
    */
   @Override
-  public Object visitRuleContext(FhirMapJavaParser.RuleContextContext context) {
+  public Object visitRuleContext(FhirMapParser.RuleContextContext context) {
     ArrayList<String> values = new ArrayList<String>();
     if (context.ruleContextElement() != null) {
       for (ParseTree treeItem : context.ruleContextElement()) {
@@ -1377,7 +1377,7 @@ public class FhirMapVisitor extends FhirMapJavaBaseVisitor<Object> {
    * @return String
    */
   @Override
-  public Object visitRuleContextElement(FhirMapJavaParser.RuleContextElementContext context) {
+  public Object visitRuleContextElement(FhirMapParser.RuleContextElementContext context) {
     return this.visitChildren(context);
   }
 }

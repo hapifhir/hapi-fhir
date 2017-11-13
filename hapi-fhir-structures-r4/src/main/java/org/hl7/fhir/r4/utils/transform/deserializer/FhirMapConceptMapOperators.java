@@ -54,11 +54,6 @@ public enum FhirMapConceptMapOperators {
    */
   Tilde(8);
 
-  /**
-   * Constant int value of the size of the Integer object
-   */
-  public static final int SIZE = java.lang.Integer.SIZE;
-
   private int intValue;
   private static HashMap<Integer, FhirMapConceptMapOperators> mappings;
 

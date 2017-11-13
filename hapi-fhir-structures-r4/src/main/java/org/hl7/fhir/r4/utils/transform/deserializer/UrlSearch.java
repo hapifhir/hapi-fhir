@@ -2,7 +2,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 /**
- * Stored Antls Search rule parsed data
+ * Stored ANTLR Search rule parsed data
  *
  * @author Travis Lukach
  * (c) Applicadia LLC.

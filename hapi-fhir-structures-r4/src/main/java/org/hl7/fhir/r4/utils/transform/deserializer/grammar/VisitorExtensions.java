@@ -1,23 +1,10 @@
 package org.hl7.fhir.r4.utils.transform.deserializer.grammar;
 
-import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.lang.reflect.Array;
-import java.util.*;
-
 /**
 Extension methods for visitor classes.
 */
 public final class VisitorExtensions
 {
-  /**
-  Call visit if tree non null, otherwise return null.
-
-  @param visitor Visitor derived class
-  @param tree parse tree (may be null)
-  @return null or value of Visit method
-  */
 
 /*  public static <Result> Result VisitOrDefault(AbstractParseTreeVisitor<Object> visitor, ParseTree tree, Class<?> resultClass) throws IllegalAccessException, InstantiationException {
     Result result = (Result) resultClass.newInstance();
@@ -34,13 +21,7 @@ public final class VisitorExtensions
     return (Result)visitor.visit(tree);
   }*/
 
-/*  *//**
-  Call visit if tree non null, otherwise return null.
-
-  @param visitor Visitor derived class
-  @param tree parse tree (may be null)
-  @return null or value of Visit method
-  *//*
+/*  *//*
   public static <Result> Result VisitSingleOrDefault(AbstractParseTreeVisitor<Object> visitor, List<? extends ParseTree> tree)
   {
     if (tree == null)
@@ -58,13 +39,7 @@ public final class VisitorExtensions
     }
   }*/
 
- /* *//**
-  Call visit if tree non null, otherwise return null.
-
-  @param visitor Visitor derived class
-  @param tree parse tree (may be null)
-  @return null or value of Visit method
-  *//*
+ /* *//*
   @SuppressWarnings("Unchecked")
   public static <Result> Result[] VisitMultiple(AbstractParseTreeVisitor<Object> visitor, List<? extends ParseTree> tree, ArrayList<Result> results)
   {

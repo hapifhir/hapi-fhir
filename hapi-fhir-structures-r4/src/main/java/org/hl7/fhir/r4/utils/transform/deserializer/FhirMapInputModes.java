@@ -8,8 +8,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
  */
 public enum FhirMapInputModes {
   /**
-   * Fhir mapper .
-   * <p>
+   * Fhir mapper
    * Unset value
    */
   NotSet,

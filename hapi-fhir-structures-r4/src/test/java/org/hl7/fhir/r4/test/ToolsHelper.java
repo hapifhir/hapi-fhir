@@ -72,24 +72,34 @@ public class ToolsHelper {
 			ToolsHelper self = new ToolsHelper();
 			if (args.length == 0) 
 				throw new FHIRException("Missing Command Parameter. Valid Commands: round, json, version, fragments, snapshot-maker");
-			if (args[0].equals("round")) 
-				self.executeRoundTrip(args);
-			else if (args[0].equals("test")) 
-				self.executeTest(args);
-			else if (args[0].equals("examples")) 
-				self.executeExamples(args);
-			else if (args[0].equals("json")) 
-				self.executeJson(args);
-			else if (args[0].equals("cxml")) 
-				self.executeCanonicalXml(args);
-			else if (args[0].equals("version")) 
-				self.executeVersion(args);
-			else if (args[0].equals("fragments")) 
-				self.executeFragments(args);
-			else if (args[0].equals("snapshot-maker")) 
-				self.generateSnapshots(args);
-			else 
-				throw new FHIRException("Unknown command '"+args[0]+"'. Valid Commands: round, test, examples, json, cxml, version, fragments, snapshot-maker");
+			switch (args[0]) {
+				case "round":
+					self.executeRoundTrip(args);
+					break;
+				case "test":
+					self.executeTest(args);
+					break;
+				case "examples":
+					self.executeExamples(args);
+					break;
+				case "json":
+					self.executeJson(args);
+					break;
+				case "cxml":
+					self.executeCanonicalXml(args);
+					break;
+				case "version":
+					self.executeVersion(args);
+					break;
+				case "fragments":
+					self.executeFragments(args);
+					break;
+				case "snapshot-maker":
+					self.generateSnapshots(args);
+					break;
+				default:
+					throw new FHIRException("Unknown command '" + args[0] + "'. Valid Commands: round, test, examples, json, cxml, version, fragments, snapshot-maker");
+			}
 		} catch (Throwable e) {
 			try {
 				e.printStackTrace();
@@ -123,9 +133,7 @@ public class ToolsHelper {
 			System.out.println("definitions - filename for local copy of the validation.zip file");			
 		}
 		String address = args[1];
-		String definitions = args[3];
-
-		SimpleWorkerContext context = SimpleWorkerContext.fromDefinitions(getDefinitions(definitions));
+		@SuppressWarnings("unused") String definitions = args[3];
 
 		//    if (address.startsWith("http:") || address.startsWith("http:")) {
 		//    	// this is on a restful interface
@@ -144,12 +152,14 @@ public class ToolsHelper {
 		//    }
 	}
 
+	@SuppressWarnings("unused")
 	private Map<String, byte[]> getDefinitions(String definitions) throws IOException, FHIRException {
-		Map<String, byte[]> results = new HashMap<String, byte[]>();
+		Map<String, byte[]> results = new HashMap<>();
 		readDefinitions(results, loadDefinitions(definitions));
 		return results;
 	}
 
+	@SuppressWarnings("UnnecessaryLocalVariable")
 	private void readDefinitions(Map<String, byte[]> map, byte[] defn) throws IOException {
 		ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(defn));
 		ZipEntry ze;
@@ -186,10 +196,10 @@ public class ToolsHelper {
 
 	private byte[] loadFromUrl(String src) throws IOException {
 		URL url = new URL(src);
-		byte[] str = IOUtils.toByteArray(url.openStream());
-		return str;
+		return IOUtils.toByteArray(url.openStream());
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private byte[] loadFromFile(String src) throws IOException {
 		FileInputStream in = new FileInputStream(src);
 		byte[] b = new byte[in.available()];
@@ -199,7 +209,7 @@ public class ToolsHelper {
 	}
 
 
-	protected XmlPullParser loadXml(InputStream stream) throws XmlPullParserException, IOException {
+	private XmlPullParser loadXml(InputStream stream) throws XmlPullParserException, IOException {
 		BufferedInputStream input = new BufferedInputStream(stream);
 		XmlPullParserFactory factory = XmlPullParserFactory.newInstance(System.getProperty(XmlPullParserFactory.PROPERTY_NAME), null);
 		factory.setNamespaceAware(true);
@@ -209,14 +219,15 @@ public class ToolsHelper {
 		return xpp;
 	}
 
-	protected int nextNoWhitespace(XmlPullParser xpp) throws XmlPullParserException, IOException {
+	@SuppressWarnings("UnusedReturnValue")
+	private int nextNoWhitespace(XmlPullParser xpp) throws XmlPullParserException, IOException {
 		int eventType = xpp.getEventType();
 		while (eventType == XmlPullParser.TEXT && xpp.isWhitespace())
 			eventType = xpp.next();
 		return eventType;
 	}
 
-	public void executeFragments(String[] args) throws IOException {
+	private void executeFragments(String[] args) throws IOException {
 		try {
 			File source = new CSFile(args[1]);
 			if (!source.exists())        
@@ -229,7 +240,6 @@ public class ToolsHelper {
 			nextNoWhitespace(xpp);
 			StringBuilder s = new StringBuilder();
 			s.append("<results>\r\n");
-			int fail = 0;
 			while (xpp.getEventType() == XmlPullParser.START_TAG && xpp.getName().equals("test")) {
 				String id = xpp.getAttributeValue(null, "id");
 				String type = xpp.getAttributeValue(null, "type");
@@ -242,11 +252,10 @@ public class ToolsHelper {
 				XmlParser p = new XmlParser();
 				try {
 					p.parseFragment(xpp, type);
-					s.append("<result id=\""+id+"\" outcome=\"ok\"/>\r\n");
+					s.append("<result id=\"").append(id).append("\" outcome=\"ok\"/>\r\n");
 					nextNoWhitespace(xpp);
 				} catch (Exception e) {
-					s.append("<result id=\""+id+"\" outcome=\"error\" msg=\""+Utilities.escapeXml(e.getMessage())+"\"/>\r\n");
-					fail++;
+					s.append("<result id=\"").append(id).append("\" outcome=\"error\" msg=\"").append(Utilities.escapeXml(e.getMessage())).append("\"/>\r\n");
 				}
 				while (xpp.getEventType() != XmlPullParser.END_TAG || !xpp.getName().equals("pre")) 
 					xpp.next();
@@ -264,7 +273,7 @@ public class ToolsHelper {
 		}
 	}
 
-	public void executeRoundTrip(String[] args) throws IOException, FHIRException {
+	private void executeRoundTrip(String[] args) throws IOException, FHIRException {
 		FileInputStream in;
 		File source = new CSFile(args[1]);
 		File dest = new CSFile(args[2]);
@@ -277,20 +286,20 @@ public class ToolsHelper {
 		in = new CSFileInputStream(source);
 		XmlParser p = new XmlParser();
 		JsonParser parser = new JsonParser();
-		JsonParser pj = parser;
 		Resource rf = p.parse(in);
 		ByteArrayOutputStream json = new ByteArrayOutputStream();
 		parser.setOutputStyle(OutputStyle.PRETTY);
 		parser.compose(json, rf);
 		json.close();
 		TextFile.stringToFile(new String(json.toByteArray()), Utilities.changeFileExt(dest.getAbsolutePath(), ".json"));
-		rf = pj.parse(new ByteArrayInputStream(json.toByteArray()));
+		rf = parser.parse(new ByteArrayInputStream(json.toByteArray()));
 		FileOutputStream s = new FileOutputStream(dest);
 		new XmlParser().compose(s, rf, true);
 		s.close();
 	}
 
-	public String executeJson(String[] args) throws IOException, FHIRException {
+	@SuppressWarnings("UnusedReturnValue")
+	private String executeJson(String[] args) throws IOException, FHIRException {
 		FileInputStream in;
 		File source = new CSFile(args[1]);
 		File dest = new CSFile(args[2]);
@@ -322,11 +331,11 @@ public class ToolsHelper {
 		s = new FileOutputStream(destr);
 		rdf.compose(s, rf);
 		s.close();
-		
+
 		return TextFile.fileToString(destt.getAbsolutePath());
 	}
 
-	public void executeCanonicalXml(String[] args) throws FHIRException, IOException {
+	private void executeCanonicalXml(String[] args) throws FHIRException, IOException {
 		FileInputStream in;
 		File source = new CSFile(args[1]);
 		File dest = new CSFile(args[2]);
@@ -345,7 +354,7 @@ public class ToolsHelper {
 		TextFile.stringToFile(org.hl7.fhir.r4.utils.Version.VERSION+":"+Constants.VERSION, args[1]);
 	}
 
-	public void processExamples(String rootDir, Collection<String> list) throws FHIRException  {
+	private void processExamples(String rootDir, Collection<String> list) throws FHIRException  {
 		for (String n : list) {
 			try {
 				String filename = rootDir + n + ".xml";
@@ -381,7 +390,8 @@ public class ToolsHelper {
 		}
 	}
 
-	public void testRoundTrip(String rootDir, String tmpDir, Collection<String> names) throws Throwable {
+	@SuppressWarnings("UnusedAssignment")
+	private void testRoundTrip(String rootDir, String tmpDir, Collection<String> names) throws Throwable {
 		try {
 			System.err.println("Round trip from "+rootDir+" to "+tmpDir+":"+Integer.toString(names.size())+" files");
 			for (String n : names) {

@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.DebugParseListener;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowExceptionErrorListener;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaLexer;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlLexer;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlParser;
 
 import java.nio.CharBuffer;
 
@@ -42,15 +42,15 @@ public class UrlProcessor {
    * @return ANTLR parser
    * @throws Exception if grammar is invalid
    */
-  private UrlJavaParser loadGrammar(String text) throws Exception {
+  private UrlParser loadGrammar(String text) throws Exception {
     CharBuffer buffer = CharBuffer.allocate(text.length());
     buffer.append(text);
     buffer.position(0);
 
-    UrlJavaLexer lexer = new UrlJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
+    UrlLexer lexer = new UrlLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
     lexer.addErrorListener(new ThrowExceptionErrorListener(text));
     CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-    UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
+    UrlParser grammar = new UrlParser(commonTokenStream);
     if (this.getDebugFlag()) {
       DebugParseListener parseListener = new DebugParseListener(grammar, System.err::println);
       grammar.addParseListener(parseListener);
@@ -69,7 +69,7 @@ public class UrlProcessor {
    * @throws Exception if UrlText is invalid
    */
   public UrlData parseUrl(String UrlText) throws Exception {
-    UrlJavaParser grammar = this.loadGrammar(UrlText);
+    UrlParser grammar = this.loadGrammar(UrlText);
     ParseTree parseTree = grammar.url();
     UrlVisitor visitor = new UrlVisitor();
     return (UrlData) visitor.visit(parseTree);

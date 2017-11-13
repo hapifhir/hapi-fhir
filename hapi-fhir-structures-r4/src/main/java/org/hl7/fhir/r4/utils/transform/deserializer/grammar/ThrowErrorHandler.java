@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.*;
 
 /**
  * Handles how errors are processed by gracefully shutting down the program.
+ * @author Travis Lukach
  */
 public class ThrowErrorHandler extends DefaultErrorStrategy implements ANTLRErrorStrategy {
 

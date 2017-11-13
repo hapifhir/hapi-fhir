@@ -7,14 +7,11 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-// <copyright company="Applicadia LLC">
-// Copyright (c) 2017
-// by Applicadia LLC
-// </copyright>
-
-
 /**
  * ANTLR parse listener for debugging.
+ * Copyright (c) 2017
+ * by Applicadia LLC
+ * @author Travis Lukach
  */
 public class DebugParseListener implements ParseTreeListener {
   /**

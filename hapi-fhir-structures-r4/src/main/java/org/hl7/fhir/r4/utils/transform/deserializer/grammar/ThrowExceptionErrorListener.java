@@ -67,9 +67,9 @@ public class ThrowExceptionErrorListener extends BaseErrorListener implements AN
    *
    * @param output             Output writer
    * @param recognizer         Parser/lexer being used
-   * @param offendingSymbol    Symbol where error occured
-   * @param line               Line where error occured
-   * @param charPositionInLine Character position in line where error occured.
+   * @param offendingSymbol    Symbol where error occurred
+   * @param line               Line where error occurred
+   * @param charPositionInLine Character position in line where error occurred.
    * @param msg                Error message
    * @param e                  Recognition exception for error
    */
@@ -87,9 +87,9 @@ public class ThrowExceptionErrorListener extends BaseErrorListener implements AN
    *
    * @param output             Output writer
    * @param recognizer         Parser/lexer being used
-   * @param offendingSymbol    Symbol where error occured
-   * @param line               Line where error occured
-   * @param charPositionInLine Character position in line where error occured.
+   * @param offendingSymbol    Symbol where error occurred
+   * @param line               Line where error occurred
+   * @param charPositionInLine Character position in line where error occurred.
    * @param msg                Error message
    * @param e                  Recognition exception for error
    */

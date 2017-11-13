@@ -14,12 +14,12 @@ public enum FhirMapGroupTypes {
   NotSet,
 
   /**
-   * Group type types
+   * Group type, types
    */
   Types,
 
   /**
-   * Group type type types
+   * Group type, type types
    */
   TypeTypes;
 

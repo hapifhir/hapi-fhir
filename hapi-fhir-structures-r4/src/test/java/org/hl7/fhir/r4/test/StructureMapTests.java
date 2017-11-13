@@ -1,40 +1,27 @@
 package org.hl7.fhir.r4.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.context.SimpleWorkerContext;
-import org.hl7.fhir.r4.elementmodel.Element;
-import org.hl7.fhir.r4.elementmodel.Manager;
-import org.hl7.fhir.r4.elementmodel.Manager.FhirFormat;
-import org.hl7.fhir.r4.formats.IParser.OutputStyle;
-import org.hl7.fhir.r4.formats.XmlParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureMap;
 import org.hl7.fhir.r4.test.support.TestingUtilities;
 import org.hl7.fhir.r4.utils.StructureMapUtilities;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.junit.Test;
+
+import java.io.IOException;
 
 
+@SuppressWarnings("unused")
 public class StructureMapTests {
 
-  private void testParse(String path) throws FileNotFoundException, IOException, FHIRException {
+  @SuppressWarnings("unused")
+  private void testParse(String path) throws IOException, FHIRException {
     if (TestingUtilities.context == null)
     	TestingUtilities.context = SimpleWorkerContext.fromPack(Utilities.path(TestingUtilities.home(), "publish", "definitions.xml.zip"));
     
     StructureMapUtilities scm = new StructureMapUtilities(TestingUtilities.context, null, null);
     StructureMap map = scm.parse(TextFile.fileToString(Utilities.path(TestingUtilities.home(), path)));
-    TextFile.stringToFile(scm.render(map), Utilities.path(TestingUtilities.home(), path+".out"));
+    TextFile.stringToFile(StructureMapUtilities.render(map), Utilities.path(TestingUtilities.home(), path+".out"));
   }
   
 //  @Test

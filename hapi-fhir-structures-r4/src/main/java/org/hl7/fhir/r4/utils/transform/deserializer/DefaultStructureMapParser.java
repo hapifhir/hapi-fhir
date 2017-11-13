@@ -24,6 +24,7 @@ public class DefaultStructureMapParser {
   public DefaultStructureMapParser() {
   }
 
+  @SuppressWarnings("unused")
   public DefaultStructureMapParser(FHIRPathEngine fhirPathEngine) {
     this.fhirPathEngine = fhirPathEngine;
   }
@@ -32,6 +33,7 @@ public class DefaultStructureMapParser {
     return fhirPathEngine;
   }
 
+  @SuppressWarnings("unused")
   public void setFhirPathEngine(FHIRPathEngine fhirPathEngine) {
     this.fhirPathEngine = fhirPathEngine;
   }
@@ -70,6 +72,7 @@ public class DefaultStructureMapParser {
     ConceptMap map = new ConceptMap();
     String id = lexer.readConstant("map id");
     if (!id.startsWith("#"))
+      //noinspection ThrowableNotThrown
       lexer.error("Concept Map identifier must start with #");
     map.setId(id);
     map.setStatus(Enumerations.PublicationStatus.DRAFT); // todo: how to add this to the text format
@@ -80,7 +83,7 @@ public class DefaultStructureMapParser {
     //	  map.setSource(new UriType(lexer.readConstant("source")));
     //	  lexer.token("target");
     //	  map.setSource(new UriType(lexer.readConstant("target")));
-    Map<String, String> prefixes = new HashMap<String, String>();
+    Map<String, String> prefixes = new HashMap<>();
     while (lexer.hasToken("prefix")) {
       lexer.token("prefix");
       String n = lexer.take();
@@ -98,6 +101,7 @@ public class DefaultStructureMapParser {
       if (v.equals("provided")) {
         g.getUnmapped().setMode(ConceptMap.ConceptMapGroupUnmappedMode.PROVIDED);
       } else
+        //noinspection ThrowableNotThrown
         lexer.error("Only unmapped mode PROVIDED is supported at this time");
     }
     while (!lexer.hasToken("}")) {
@@ -251,6 +255,7 @@ public class DefaultStructureMapParser {
     lexer.skipComments();
   }
 
+  @SuppressWarnings("unused")
   private void parseRule(StructureMap map, List<StructureMap.StructureMapGroupRuleComponent> list, FHIRLexer lexer) throws FHIRException {
     StructureMap.StructureMapGroupRuleComponent rule = new StructureMap.StructureMapGroupRuleComponent();
     list.add(rule);

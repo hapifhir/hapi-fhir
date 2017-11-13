@@ -31,6 +31,7 @@ package org.hl7.fhir.r4.test;
 import java.io.File;
 
 
+@SuppressWarnings("JavaDoc")
 public class SingleTest {
 
   /**

@@ -34,11 +34,6 @@ public enum FhirMapTranslateOutputTypes {
   CodeableConcept;
 
   /**
-   * Constant size of the Integer object
-   */
-  public static final int SIZE = java.lang.Integer.SIZE;
-
-  /**
    * Returns a string representation of the enumerated value
    *
    * @return the desired string value based on the enumeration

@@ -28,12 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.r4.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.r4.context.SimpleWorkerContext;
 import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.elementmodel.Manager;
@@ -44,7 +39,11 @@ import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.formats.XmlParser;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.test.support.TestingUtilities;
-import org.hl7.fhir.exceptions.FHIRFormatError;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ResourceTest {
 
@@ -59,7 +58,7 @@ public class ResourceTest {
     this.source = source;
   }
   
-  public Resource test() throws FHIRFormatError, FileNotFoundException, IOException {
+  public Resource test() throws FHIRFormatError, IOException {
     
     IParser p;
     if (isJson())
@@ -86,6 +85,7 @@ public class ResourceTest {
     
   }
 
+  @SuppressWarnings("unused")
   public Element testEM() throws Exception {
     if (TestingUtilities.context == null)
       TestingUtilities.context = SimpleWorkerContext.fromPack("C:\\work\\org.hl7.fhir\\build\\publish\\definitions.xml.zip");

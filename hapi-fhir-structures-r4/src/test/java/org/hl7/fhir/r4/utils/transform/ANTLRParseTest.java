@@ -2,32 +2,31 @@ package org.hl7.fhir.r4.utils.transform;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.hl7.fhir.r4.utils.transform.deserializer.*;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.*;
 
-import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
 * For testing the ANTLR parser, uses a Mock object in most cases before
 * asserting which pieces of the mapping language is correct. Errors will be
-* thrown if the value recieved is incorrect.
+* thrown if the value received is incorrect.
 */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings("SpellCheckingInspection")
 public class ANTLRParseTest {
 
-	FhirMapProcessor createProcessor() throws Exception {
+	private FhirMapProcessor createProcessor() throws Exception {
 		return new FhirMapProcessor();
 	}
 
-	public void testRuleInput(String fhirMapText, String name, String type, FhirMapInputModes inputMode) throws Exception{
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleInput(String fhirMapText, String name, String type, FhirMapInputModes inputMode) throws Exception{
 		MapHandler mock = Mockito.mock(MapHandler.class);
 
 		doAnswer(invocation ->
@@ -41,7 +40,7 @@ public class ANTLRParseTest {
 
 		FhirMapProcessor p = createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.groupInput();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -55,7 +54,8 @@ public class ANTLRParseTest {
 		testRuleInput("input nameX : typeX as target;", "nameX", "typeX", FhirMapInputModes.Target);
 	}
 
-	public void testRuleSource(String fhirMapText, List<String> context, FhirMapRuleType type, String defaultValue, FhirMapListOptions listOptions, String variable, String wherePath, String checkPath) throws Exception {
+	@SuppressWarnings({"SameParameterValue", "unused"})
+	private void testRuleSource(String fhirMapText, List<String> context, FhirMapRuleType type, String defaultValue, FhirMapListOptions listOptions, String variable, String wherePath, String checkPath) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 
 		doAnswer(invocation -> {
@@ -75,7 +75,7 @@ public class ANTLRParseTest {
 		}).when(mock).ruleSource(anyList(), any(FhirMapRuleType.class), anyString(), any(FhirMapListOptions.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleSource();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -85,11 +85,11 @@ public class ANTLRParseTest {
 	@Test
 	public void parseRuleSource() throws Exception {
 		testRuleSource("a.b.c", Arrays.asList("a","b","c"), null, null, FhirMapListOptions.NotSet, null, null, null);
-		testRuleSource("a.b.c : typeName 1..3 as variableValue", new ArrayList<String>(Arrays.asList("a", "b", "c")), new FhirMapRuleType("typeName", Arrays.asList(1,3)) , null, null, "variableValue", null, null);
+		testRuleSource("a.b.c : typeName 1..3 as variableValue", new ArrayList<>(Arrays.asList("a", "b", "c")), new FhirMapRuleType("typeName", Arrays.asList(1,3)) , null, null, "variableValue", null, null);
 	}
 
 
-	public void testRuleAssign(String fhirMapText, List<String> context, String assignValue, String targetValue) throws Exception {
+	private void testRuleAssign(String fhirMapText, List<String> context, String assignValue, String targetValue) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -101,7 +101,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -116,7 +116,8 @@ public class ANTLRParseTest {
 
 	}
 
-	public void testRuleEvaluate(String fhirMapText, List<String> context, String obj, String objElement, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleEvaluate(String fhirMapText, List<String> context, String obj, String objElement, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -129,7 +130,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformEvaluate(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -142,7 +143,8 @@ public class ANTLRParseTest {
 		testRuleEvaluate("cdr.subject = evaluate(v, wwww) as xyzzy", Arrays.asList("cdr", "subject"), "v", "wwww", "xyzzy");
 	}
 
-	public void testRulePointer(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRulePointer(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -154,7 +156,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformPointer(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -167,7 +169,8 @@ public class ANTLRParseTest {
 		testRulePointer("cdr.subject = pointer(v) as xyzzy", Arrays.asList("cdr", "subject"), "v", "xyzzy");
 	}
 
-	public void testRuleQty1(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleQty1(String fhirMapText, List<String> context, String resource, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -179,7 +182,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformQty(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -193,7 +196,8 @@ public class ANTLRParseTest {
 	}
 
 
-	public void testRuleQty2(String fhirMapText, List<String> context, String value, String unitString, String system, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleQty2(String fhirMapText, List<String> context, String value, String unitString, String system, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData urlData = new UrlData();
 		urlData.CompleteUrl = system;
@@ -210,7 +214,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformQty(anyList(), anyString(), anyString(), any(UrlData.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -223,7 +227,8 @@ public class ANTLRParseTest {
 		testRuleQty2("cdr.subject = qty(xxxx, \"yyyy\", \"http://www.xyz.com\") as xyzzy", Arrays.asList("cdr", "subject"), "xxxx", "yyyy", "http://www.xyz.com", "xyzzy");
 	}
 
-	public void testRuleQty3(String fhirMapText, List<String> context, String value, String unitString, String type, String targetVariable) throws  Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleQty3(String fhirMapText, List<String> context, String value, String unitString, String type, String targetVariable) throws  Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -237,7 +242,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformQty(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -250,7 +255,8 @@ public class ANTLRParseTest {
 		testRuleQty3("cdr.subject = qty(xxxx, \"yyyy\", zzz) as xyzzy", Arrays.asList("cdr", "subject"), "xxxx", "yyyy", "zzz", "xyzzy");
 	}
 
-	public void testRuleId(String fhirMapText, List<String> context, String system, String value, String type, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleId(String fhirMapText, List<String> context, String system, String value, String type, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData systemUrl = new UrlData();
 		systemUrl.CompleteUrl = system;
@@ -267,7 +273,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformId(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -283,7 +289,8 @@ public class ANTLRParseTest {
 		testRuleId("cdr.subject = id(\"http://www.xyz.com\", xxxx, yyyy) as xyzzy", Arrays.asList("cdr", "subject"), "http://www.xyz.com", "xxxx", "yyyy", "xyzzy");
 	}
 
-	public void testRuleCopy(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCopy(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -295,7 +302,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCopy(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -308,7 +315,8 @@ public class ANTLRParseTest {
 		testRuleCopy("cdr.subject = copy(v) as xyzzy", Arrays.asList("cdr", "subject"), "v", "xyzzy");
 	}
 
-	public void testRuleCreate(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception{
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCreate(String fhirMapText, List<String> context, String copyValue, String targetVariable) throws Exception{
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -320,7 +328,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCreate(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -333,7 +341,7 @@ public class ANTLRParseTest {
 		testRuleCreate("cdr.subject = create(\"quoted\") as xyzzy", Arrays.asList("cdr", "subject"), "quoted", "xyzzy");
 	}
 
-	public void testRuleAppend(String fhirMapText, List<String> context, List<String> appendValues, String targetVariable) throws Exception{
+	private void testRuleAppend(String fhirMapText, List<String> context, List<String> appendValues, String targetVariable) throws Exception{
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -345,7 +353,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformAppend(anyList(), anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -358,7 +366,9 @@ public class ANTLRParseTest {
 		testRuleAppend("cdr.subject = append(a, \"b\n\", \"d e f\") as xyzzy", Arrays.asList("cdr", "subject"), Arrays.asList("a", "\"b\n\"", "\"d e f\""), "xyzzy");
 	}
 
-	public void testGroupCall(String fhirMapText, String groupName, List<String> parameters) throws Exception {
+
+	@SuppressWarnings("SameParameterValue")
+	private void testGroupCall(String fhirMapText, String groupName, List<String> parameters) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -368,7 +378,7 @@ public class ANTLRParseTest {
 		}).when(mock).groupCall(anyString(), anyList());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.groupCall();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -380,7 +390,8 @@ public class ANTLRParseTest {
 		testGroupCall("XXYYZ(a, b)", "XXYYZ", Arrays.asList("a", "b"));
 	}
 
-	void testRuleTruncate(String fhirMapText, List<String> context, String truncateVariable, int length, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleTruncate(String fhirMapText, List<String> context, String truncateVariable, int length, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -394,7 +405,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformTruncate(anyList(), anyString(), anyInt(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -407,7 +418,8 @@ public class ANTLRParseTest {
 		testRuleTruncate("cdr.subject = truncate(\"quoted\", 32) as xyzzy", Arrays.asList("cdr", "subject"), "\"quoted\"", 32, "xyzzy");
 	}
 
-	public void testRuleCast(String fhirMapText, List<String> context, String source, String type, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCast(String fhirMapText, List<String> context, String source, String type, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -420,7 +432,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCast(anyList(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -433,7 +445,8 @@ public class ANTLRParseTest {
 		testRuleCast("cdr.subject = cast(source, xxYYz) as xyzzy", Arrays.asList("cdr", "subject"), "source", "xxYYz", "xyzzy");
 	}
 
-	public void testRuleCoding(String fhirMapText, List<String> context, String completeUrl, String system, String code, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCoding(String fhirMapText, List<String> context, String completeUrl, String system, String code, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData _completeUrl = new UrlData();
 		_completeUrl.CompleteUrl = completeUrl;
@@ -450,7 +463,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCoding(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -464,7 +477,8 @@ public class ANTLRParseTest {
 		testRuleCoding("a.b = c(\"http://fhir.hl7.org.au\", system, \"display\") as xyzzy", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "display", "xyzzy");
 	}
 
-	public void testRuleCodeableConcept1(String fhirMapText, List<String> context, String textValue, String targetValue) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCodeableConcept1(String fhirMapText, List<String> context, String textValue, String targetValue) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -476,7 +490,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCodeableConcept(context, textValue, targetValue);
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -489,7 +503,8 @@ public class ANTLRParseTest {
 		testRuleCodeableConcept1("a.b = cc(\"abcdef\") as xyzzy", Arrays.asList("a", "b"), "abcdef", "xyzzy");
 	}
 
-	public void testRuleCodeableConcept2(String fhirMapText, List<String> context, String completeUrl, String code, String display, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCodeableConcept2(String fhirMapText, List<String> context, String completeUrl, String code, String display, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData _completeUrl = new UrlData();
 		_completeUrl.CompleteUrl = completeUrl;
@@ -506,7 +521,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCodeableConcept(anyList(), any(UrlData.class), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -525,7 +540,7 @@ public class ANTLRParseTest {
 	public void parseQuotedString() throws Exception {
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("\"Hello, this is a test string for the quotedString ANTLR Rule\"");
+			FhirMapParser grammar = p.loadGrammar("\"Hello, this is a test string for the quotedString ANTLR Rule\"");
 			ParseTree parseTree = grammar.quotedString();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			String parsedData = (String)visitor.visit(parseTree);
@@ -533,7 +548,8 @@ public class ANTLRParseTest {
 		}
 	}
 
-	public void testRuleCp(String fhirMapText, List<String> context, String completeUrl, String variable, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleCp(String fhirMapText, List<String> context, String completeUrl, String variable, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData data = new UrlData();
 		data.CompleteUrl = completeUrl;
@@ -549,7 +565,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformCp(anyList(), any(UrlData.class), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -563,7 +579,8 @@ public class ANTLRParseTest {
 		testRuleCp("a.b = cp(\"http://fhir.hl7.org.au\", system) as xyzzy", Arrays.asList("a", "b"), "http://fhir.hl7.org.au", "system", "xyzzy");
 	}
 
-	public void testRuleTranslate(String fhirMapText, List<String> context, String variable, String mapUrl, FhirMapTranslateOutputTypes outputType, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleTranslate(String fhirMapText, List<String> context, String variable, String mapUrl, FhirMapTranslateOutputTypes outputType, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData data = new UrlData();
 		data.CompleteUrl = mapUrl;
@@ -580,7 +597,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformTranslate(anyList(), anyString(), any(UrlData.class), any(FhirMapTranslateOutputTypes.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -601,14 +618,14 @@ public class ANTLRParseTest {
 	public void parseRuleType() throws Exception {
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(": code");
+			FhirMapParser grammar = p.loadGrammar(": code");
 			ParseTree parseTree = grammar.ruleType();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			FhirMapRuleType parsed = (FhirMapRuleType)visitor.visit(parseTree);
 			Assert.assertTrue(parsed.TypeName.equals("code"));
 		}
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(": code 0..1");
+			FhirMapParser grammar = p.loadGrammar(": code 0..1");
 			ParseTree parseTree = grammar.ruleType();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			FhirMapRuleType parsed = (FhirMapRuleType)visitor.visit(parseTree);
@@ -635,10 +652,10 @@ public class ANTLRParseTest {
 		FhirMapProcessor p = this.createProcessor();
 		{
 
-			FhirMapJavaParser grammar = p.loadGrammar("map \"http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap\" = \"Colorectal --> DiagnosticReport Map\"");
+			FhirMapParser grammar = p.loadGrammar("map \"http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap\" = \"Colorectal --> DiagnosticReport Map\"");
 			ParseTree parseTree = grammar.keyMap();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
-			String parsedData = (String)visitor.visit(parseTree);
+			visitor.visit(parseTree);
 		}
 
 	}
@@ -647,7 +664,7 @@ public class ANTLRParseTest {
 	public void parseQuotedIdentifier() throws Exception {
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("\"Lorem.ipsum.dolor\"");
+			FhirMapParser grammar = p.loadGrammar("\"Lorem.ipsum.dolor\"");
 			ParseTree parseTree = grammar.quotedIdentifier();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			String parsedValue = (String) visitor.visit(parseTree);
@@ -659,7 +676,7 @@ public class ANTLRParseTest {
 	public void parseIdentifier() throws Exception {
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("xyzzy");
+			FhirMapParser grammar = p.loadGrammar("xyzzy");
 			ParseTree parseTree = grammar.identifier();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			String parsedValue = (String) visitor.visit(parseTree);
@@ -680,14 +697,14 @@ public class ANTLRParseTest {
 		}).when(mock).transformAs(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("do.requester as prr");
+			FhirMapParser grammar = p.loadGrammar("do.requester as prr");
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
 		}
 	}
 
-	public void testRuleExtension1(String fhirMapText, List<String> context, String targetVariable) throws Exception {
+	private void testRuleExtension1(String fhirMapText, List<String> context, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -698,7 +715,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformExtension(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -712,7 +729,8 @@ public class ANTLRParseTest {
 	}
 
 
-	public void testRuleExtension2(String fhirMapText, List<String> context, String extUri, String title, String mode, String parent, String text1, String text2, Integer min, String max, String type, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleExtension2(String fhirMapText, List<String> context, String extUri, String title, String mode, String parent, String text1, String text2, Integer min, String max, String type, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		UrlData urlData = new UrlData();
 		urlData.CompleteUrl = extUri;
@@ -735,7 +753,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformExtension(anyList(), any(UrlData.class), anyString(), anyString(), anyString(), anyString(), anyString(), anyInt(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -753,7 +771,9 @@ public class ANTLRParseTest {
 		testRuleExtension2("a.b = extension(\"http://opencimi.org/fhir/extension/coding/coded_text_uri.html\", \"coded_text_uri\", \"Resource\", \"Coding\", \"URI representing the specific concept\", \"URI representing the specific concept\", 0, \"1\", \"uri\") as xyzzy", Arrays.asList("a","b"),
 			"http://opencimi.org/fhir/extension/coding/coded_text_uri.html", "coded_text_uri", "Resource", "Coding", "URI representing the specific concept", "URI representing the specific concept", 0, "1", "uri", "xyzzy");
 	}
-	public void testRuleEscape(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
+
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleEscape(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -768,7 +788,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformEscape(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -783,7 +803,8 @@ public class ANTLRParseTest {
 	}
 
 
-	public void testRuleDateOp(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleDateOp(String fhirMapText, List<String> context, String variable, String string1, String string2, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -797,7 +818,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformDateOp(anyList(), anyString(), anyString(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -811,7 +832,8 @@ public class ANTLRParseTest {
 		//testRuleDateOp("a.b = dateOp(abcdef, \"aaa\", \"bbb\") as xyzzy", Arrays.asList("a", "b"), "abcdef", "aaa", "bbb", "xyzzy");
 	}
 
-	public void testRuleReference(String fhirMapText, List<String> context, String variable, String targetVariable) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testRuleReference(String fhirMapText, List<String> context, String variable, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -823,7 +845,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformReference(anyList(), anyString(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -837,7 +859,7 @@ public class ANTLRParseTest {
 	}
 
 
-	public void testRuleUuid(String fhirMapText, List<String> context, String targetVariable) throws Exception {
+	private void testRuleUuid(String fhirMapText, List<String> context, String targetVariable) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -848,7 +870,7 @@ public class ANTLRParseTest {
 		}).when(mock).transformUuid(anyList(), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleTarget();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -861,14 +883,15 @@ public class ANTLRParseTest {
 		testRuleUuid("a.b = uuid() as xyzzy", Arrays.asList("a","b"), "xyzzy");
 	}
 
-	public void testRuleName(String fhirMapText, List<String> excpectedValue) throws Exception {
+	@SuppressWarnings("unchecked")
+	private void testRuleName(String fhirMapText, List<String> expectedValue) throws Exception {
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.ruleContext();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			List<String> parsedValue = (List<String>) visitor.visit(parseTree);
-			Assert.assertTrue(excpectedValue.containsAll(parsedValue));
+			Assert.assertTrue(expectedValue.containsAll(parsedValue));
 		}
 	}
 
@@ -887,7 +910,7 @@ public class ANTLRParseTest {
 
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("imports \"http://fhir.hl7.org.au\"");
+			FhirMapParser grammar = p.loadGrammar("imports \"http://fhir.hl7.org.au\"");
 			ParseTree parseTree = grammar.keyImports();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -895,7 +918,8 @@ public class ANTLRParseTest {
 		}
 	}
 
-	public void testKeyUses(String fhirMapText, String url, FhirMapUseNames useNames) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testKeyUses(String fhirMapText, String url, FhirMapUseNames useNames) throws Exception {
 		UrlData urlData = new UrlData();
 		urlData.CompleteUrl = url;
 		MapHandler mock = Mockito.mock(MapHandler.class);
@@ -908,7 +932,7 @@ public class ANTLRParseTest {
 		}).when(mock).uses(any(UrlData.class), any(FhirMapUseNames.class));
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.keyUses();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -923,10 +947,10 @@ public class ANTLRParseTest {
 		testKeyUses("uses \"http://www.xyz.com\" as queried", "http://www.xyz.com", FhirMapUseNames.Queried);
 	}
 
-	public void testKeyUsesName(String fhirMapText, FhirMapUseNames useName) throws Exception{
+	private void testKeyUsesName(String fhirMapText, FhirMapUseNames useName) throws Exception{
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.keyUsesName();
 			FhirMapVisitor visitor = new FhirMapVisitor(null);
 			FhirMapUseNames parsedData = (FhirMapUseNames)visitor.visit(parseTree);
@@ -942,7 +966,8 @@ public class ANTLRParseTest {
 		testKeyUsesName("produced", FhirMapUseNames.Produced);
 	}
 
-	public void testGroupStart(String fhirMapText, String groupName, FhirMapGroupTypes groupTypes, String extendsName) throws Exception {
+	@SuppressWarnings("SameParameterValue")
+	private void testGroupStart(String fhirMapText, String groupName, FhirMapGroupTypes groupTypes, String extendsName) throws Exception {
 		MapHandler mock = Mockito.mock(MapHandler.class);
 		doAnswer(invocation -> {
 			Object[] args = invocation.getArguments();
@@ -954,7 +979,7 @@ public class ANTLRParseTest {
 		}).when(mock).groupStart(anyString(), any(FhirMapGroupTypes.class), anyString());
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar(fhirMapText);
+			FhirMapParser grammar = p.loadGrammar(fhirMapText);
 			ParseTree parseTree = grammar.groupStart();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);
@@ -974,7 +999,7 @@ public class ANTLRParseTest {
 		doAnswer(invocation -> null).when(mock).groupEnd();
 		FhirMapProcessor p = this.createProcessor();
 		{
-			FhirMapJavaParser grammar = p.loadGrammar("endgroup");
+			FhirMapParser grammar = p.loadGrammar("endgroup");
 			ParseTree parseTree = grammar.groupEnd();
 			FhirMapVisitor visitor = new FhirMapVisitor(mock);
 			visitor.visit(parseTree);

@@ -37,11 +37,6 @@ public enum FhirMapUseNames {
   Produced;
 
   /**
-   * constant size of the Integer object
-   */
-  public static final int SIZE = java.lang.Integer.SIZE;
-
-  /**
    * For procuring a string value of one of the enumerated values.
    *
    * @return lowercase string representation of the enumerated value.

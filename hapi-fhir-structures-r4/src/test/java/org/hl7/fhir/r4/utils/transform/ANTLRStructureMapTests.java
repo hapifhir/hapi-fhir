@@ -51,13 +51,11 @@ public class ANTLRStructureMapTests {
    @Test
    public void testTransform() throws Exception {
       final boolean _Analyse = true;
-      FhirTransformationEngine scu = null;
-      StructureDefinition sd1 = null;
+      StructureDefinition sd1;
       BatchContext bc = new BatchContext();
       PrePopulatedValidationSupport validation = new PrePopulatedValidationSupport();
-      Map<String, StructureMap> maps = new HashMap<String, StructureMap>();
 
-      FhirContext context = FhirContext.forR4();
+		FhirContext context = FhirContext.forR4();
       context.setValidationSupport(validation);
       sd1 = this.createTestStructure();
 
@@ -73,11 +71,10 @@ public class ANTLRStructureMapTests {
       }
       StructureMap map = null;
       HapiWorkerContext hapiContext = new HapiWorkerContext(context, validation);
-      scu = new FhirTransformationEngine(hapiContext);
       map = MappingIO.readStructureMap("simpleMapTest.map");
       //mapping.setMappingFile(new File("colorectal3.map"));
       //mapping.setMappingFile(new File("simpleMapTest.map"));
-      if (_Analyse) {
+/*      if (_Analyse) {
          List<StructureDefinition> result = scu.analyse(bc, null, map).getProfiles();
 
          for (StructureDefinition sd : result) {
@@ -85,7 +82,7 @@ public class ANTLRStructureMapTests {
             System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd));
          }
       }
-      else System.out.println(map);
+      else*/ System.out.println(map);
    }
 
    /*@Test
@@ -128,7 +125,7 @@ public class ANTLRStructureMapTests {
    */
 
 
-   public StructureDefinition createTestStructure(){
+   private StructureDefinition createTestStructure(){
       StructureDefinition sd = new StructureDefinition();
       sd.setId("TestStructure");
       sd.setUrl("http://opencimi.org/structuredefinition/TestStructure");
@@ -141,7 +138,7 @@ public class ANTLRStructureMapTests {
 
       return sd;
    }
-   public StructureDefinition.StructureDefinitionSnapshotComponent createTestSnapshot(){
+   private StructureDefinition.StructureDefinitionSnapshotComponent createTestSnapshot(){
       StructureDefinition.StructureDefinitionSnapshotComponent retVal = new StructureDefinition.StructureDefinitionSnapshotComponent();
       List<ElementDefinition> eList = new ArrayList<>();
       ElementDefinition ed0 = new ElementDefinition();
@@ -176,7 +173,7 @@ public class ANTLRStructureMapTests {
       return retVal;
    }
 
-   public StructureDefinition.StructureDefinitionDifferentialComponent createTestDiff(){
+   private StructureDefinition.StructureDefinitionDifferentialComponent createTestDiff(){
       StructureDefinition.StructureDefinitionDifferentialComponent retVal = new StructureDefinition.StructureDefinitionDifferentialComponent();
       List<ElementDefinition> eList = new ArrayList<>();
       ElementDefinition ed0 = new ElementDefinition();

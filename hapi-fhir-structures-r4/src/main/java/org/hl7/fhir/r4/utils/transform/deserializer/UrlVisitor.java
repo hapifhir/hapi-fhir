@@ -1,8 +1,8 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaBaseVisitor;
-import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlBaseVisitor;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * (c) Applicadia LLC.
  */
 @SuppressWarnings("unchecked")
-public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
+public class UrlVisitor extends UrlBaseVisitor<Object> {
   /**
    * Delegate for optional dumping of info.
    */
@@ -40,7 +40,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return url
    */
   @Override
-  public Object visitUrl(UrlJavaParser.UrlContext context) {
+  public Object visitUrl(UrlParser.UrlContext context) {
 
     UrlData retVal = new UrlData();
     retVal.CompleteUrl = context.getText();
@@ -72,7 +72,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return authority name (i.e. http)
    */
   @Override
-  public Object visitAuthority(UrlJavaParser.AuthorityContext context) {
+  public Object visitAuthority(UrlParser.AuthorityContext context) {
     return context.getText();
   }
 
@@ -84,7 +84,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return host name
    */
   @Override
-  public Object visitHost(UrlJavaParser.HostContext context) {
+  public Object visitHost(UrlParser.HostContext context) {
     return context.getText();
   }
 
@@ -95,7 +95,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return Port number
    */
   @Override
-  public Object visitPort(UrlJavaParser.PortContext context) {
+  public Object visitPort(UrlParser.PortContext context) {
     return Integer.parseInt(context.getText());
   }
 
@@ -106,7 +106,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return SearchData array of search components
    */
   @Override
-  public Object visitSearch(UrlJavaParser.SearchContext context) {
+  public Object visitSearch(UrlParser.SearchContext context) {
     ArrayList<UrlSearch> retVal = new ArrayList<UrlSearch>();
     if (context.searchParameter() != null) {
       for (ParseTree treeItem : context.searchParameter()) {
@@ -123,7 +123,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return Path component
    */
   @Override
-  public Object visitSearchParameter(UrlJavaParser.SearchParameterContext context) {
+  public Object visitSearchParameter(UrlParser.SearchParameterContext context) {
     try {
       UrlSearch tempVar = new UrlSearch();
       tempVar.Name = (String) this.visit(context.searchParameterName());
@@ -142,7 +142,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String search parameter name
    */
   @Override
-  public Object visitSearchParameterName(UrlJavaParser.SearchParameterNameContext context) {
+  public Object visitSearchParameterName(UrlParser.SearchParameterNameContext context) {
     return context.getText();
   }
 
@@ -153,7 +153,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String search parameter value
    */
   @Override
-  public Object visitSearchParameterValue(UrlJavaParser.SearchParameterValueContext context) {
+  public Object visitSearchParameterValue(UrlParser.SearchParameterValueContext context) {
     return context.getText();
   }
 
@@ -164,7 +164,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String array of components
    */
   @Override
-  public Object visitPath(UrlJavaParser.PathContext context) {
+  public Object visitPath(UrlParser.PathContext context) {
     ArrayList<String> values = new ArrayList<String>();
     if (context.stringVal() != null) {
       for (ParseTree treeItem : context.stringVal()) {
@@ -182,7 +182,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return LoginData instance
    */
   @Override
-  public Object visitLogin(UrlJavaParser.LoginContext context) {
+  public Object visitLogin(UrlParser.LoginContext context) {
     UrlLogin retVal = new UrlLogin();
     retVal.Name = (String) this.visit(context.user());
     retVal.Password = (String) this.visit(context.password());
@@ -197,7 +197,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String user name
    */
   @Override
-  public Object visitStringVal(UrlJavaParser.StringValContext context) {
+  public Object visitStringVal(UrlParser.StringValContext context) {
     return context.getText();
   }
 
@@ -208,7 +208,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String user name
    */
   @Override
-  public Object visitUser(UrlJavaParser.UserContext context) {
+  public Object visitUser(UrlParser.UserContext context) {
     return context.getText();
   }
 
@@ -219,7 +219,7 @@ public class UrlVisitor extends UrlJavaBaseVisitor<Object> {
    * @return String user name
    */
   @Override
-  public Object visitPassword(UrlJavaParser.PasswordContext context) {
+  public Object visitPassword(UrlParser.PasswordContext context) {
     return context.getText();
   }
 }
