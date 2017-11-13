@@ -1,5 +1,15 @@
 package ca.uhn.fhir.jpa.config;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
@@ -141,6 +151,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
