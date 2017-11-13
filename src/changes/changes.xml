@@ -196,7 +196,8 @@
 				Thanks to @parisni for reporting!
 			</action>
 			<action type="add" issue="743">
-				Add an example which uses Spring Boot to stand up a complete JPA server implementation.
+				Add support for Spring Boot for initializing a number of parts of the library,
+				as well as several examples.
 				Thanks to Mathieu Ouellet for the contribution!
 			</action>
 		</release>
