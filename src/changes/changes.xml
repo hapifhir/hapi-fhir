@@ -195,6 +195,10 @@
 				explicitly listed, e.g. <![CDATA[<code>_include=Bundle.total</code>]]>.
 				Thanks to @parisni for reporting!
 			</action>
+			<action type="add" issue="743">
+				Add an example which uses Spring Boot to stand up a complete JPA server implementation.
+				Thanks to Mathieu Ouellet for the contribution!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

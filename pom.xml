@@ -370,6 +370,10 @@
 			<id>malcolmm83</id>
 			<name>Malcolm McRoberts</name>
 		</developer>
+		<developer>
+			<id>mouellet</id>
+			<name>Mathieu Ouellet</name>
+		</developer>
 	</developers>
 
 	<licenses>
