@@ -662,6 +662,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (myDaoConfig.getCountSearchResultsUpTo() == null ||
 				myDaoConfig.getCountSearchResultsUpTo() <= 0 ||
 				myDaoConfig.getCountSearchResultsUpTo() <= numSynced) {
+				
+				ourLog.trace("Have synced {} and want count <= {}", numSynced, myDaoConfig.getCountSearchResultsUpTo());
+
 				myInitialCollectionLatch.countDown();
 			}
 		}
