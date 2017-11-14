@@ -1,5 +1,7 @@
-version: 1.0.{build}
+version: {build}
 image: Visual Studio 2017
-cache: C:\Users\appveyor\.m2\repository
+cache:
+  - C:\maven\
+  - C:\Users\appveyor\.m2
 build_script:
-- cmd: mvn install
+   - cmd: mvn -P MINPARALLEL install
