@@ -1064,7 +1064,7 @@
 
 						<fork>true</fork>
 						<meminitial>128m</meminitial>
-						<maxmem>1024m</maxmem>
+						<maxmem>1600m</maxmem>
 					</configuration>
 					<dependencies>
 						<dependency>
