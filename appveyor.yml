@@ -4,4 +4,4 @@ cache:
   - C:\maven\
   - C:\Users\appveyor\.m2
 build_script:
-   - cmd: mvn -P MINPARALLEL install
+   - cmd: mvn -P MINPARALLEL,ALLMODULES install
