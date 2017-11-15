@@ -66,6 +66,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu2");
+		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		return retVal;
 	}
 
