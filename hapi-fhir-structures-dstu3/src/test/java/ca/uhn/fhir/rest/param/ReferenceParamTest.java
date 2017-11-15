@@ -23,6 +23,57 @@ public class ReferenceParamTest {
 		assertEquals(null, rp.getQueryParameterQualifier());
 		
 	}
+
+	@Test
+	public void testWithResourceType_AbsoluteUrl() {
+		
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "http://a.b/c/d/e");
+		assertEquals("d", rp.getResourceType());
+		assertEquals("e", rp.getIdPart());
+		assertEquals("http://a.b/c/d/e", rp.getValue());
+		assertEquals(null, rp.getQueryParameterQualifier());
+		
+	}
+
+	@Test
+	public void testWithNoResourceTypeAsQualifierAndChain() {
+
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ".name", "FOO");
+		assertEquals(null, rp.getResourceType());
+		assertEquals("FOO", rp.getIdPart());
+		assertEquals("FOO", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
+
+	}
+
+	@Test
+	public void testWithNoResourceTypeAsQualifierAndChain_RelativeUrl() {
+
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ".name", "Patient/1233");
+		assertEquals(null, rp.getResourceType());
+		assertEquals("Patient/1233", rp.getIdPart());
+		assertEquals("Patient/1233", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
+
+	}
+
+	@Test
+	public void testWithNoResourceTypeAsQualifierAndChain_AbsoluteUrl() {
+
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ".name", "http://something.strange/a/b/c");
+		assertEquals(null, rp.getResourceType());
+		assertEquals("http://something.strange/a/b/c", rp.getIdPart());
+		assertEquals("http://something.strange/a/b/c", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
+
+	}
 	
 	@Test
 	public void testWithResourceTypeAsQualifier() {
@@ -32,6 +83,33 @@ public class ReferenceParamTest {
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Location/123", rp.getValue());
+		assertEquals(null, rp.getQueryParameterQualifier());
+
+	}
+
+	// TODO: verify this behavior is correct. If type is explicitly specified (i.e. :Location), should it be
+	// an error if it gets overriden by the resourceType in the url?
+	@Test
+	public void testWithResourceTypeAsQualifier_RelativeUrl() {
+		
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Location", "Patient/123");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient/123", rp.getValue());
+		assertEquals(null, rp.getQueryParameterQualifier());
+
+	}
+
+	// TODO: verify this behavior is correct. Same case as testWithResourceTypeAsQualifier_RelativeUrl()
+	@Test
+	public void testWithResourceTypeAsQualifier_AbsoluteUrl() {
+		
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Location", "http://a.b/c/d/e");
+		assertEquals("d", rp.getResourceType());
+		assertEquals("e", rp.getIdPart());
+		assertEquals("http://a.b/c/d/e", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
 
 	}

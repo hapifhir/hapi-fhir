@@ -119,6 +119,9 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 				}
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
+				// type not defined but this is a chain, so treat value as opaque
+				myId.setParts(null, null, theValue, null);
+				skipSetValue = true;
 			}
 		}
 
