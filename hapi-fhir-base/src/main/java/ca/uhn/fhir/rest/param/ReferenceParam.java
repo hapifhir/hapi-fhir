@@ -104,12 +104,16 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		String q = theQualifier;
 		String resourceType = null;
+		boolean skipSetValue = false;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
 				if (nextIdx != -1) {
 					resourceType = q.substring(1, nextIdx);
 					myChain = q.substring(nextIdx + 1);
+					// type is explicitly defined so use it
+					myId.setParts(null, resourceType, theValue, null);
+					skipSetValue = true;
 				} else {
 					resourceType = q.substring(1);
 				}
@@ -118,10 +122,12 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			}
 		}
 
-		setValue(theValue);
+		if (!skipSetValue) {
+			setValue(theValue);
 
-		if (isNotBlank(resourceType) && isBlank(getResourceType())) {
-			setValue(resourceType + '/' + theValue);
+			if (isNotBlank(resourceType) && isBlank(getResourceType())) {
+				setValue(resourceType + '/' + theValue);
+			}
 		}
 	}
 
