@@ -1,0 +1,37 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "mammogram-service-request",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Create ServiceRequest for Mammogrm Procedure</div>"
+  },
+  "status": "draft",
+  "description": "Create ServiceRequest for Mammogram Procedure",
+  "kind": "ProcedureRequest",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "77056",
+        "display": "Mammography; bilateral"
+      }
+    ]
+  },
+  "timingTiming": {
+    "_event": [
+      {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-basic-cqlExpression",
+            "valueString": "Now()"
+          }
+        ]
+      }
+    ]
+  },
+  "participant": [
+    {
+      "type": "practitioner"
+    }
+  ]
+}
