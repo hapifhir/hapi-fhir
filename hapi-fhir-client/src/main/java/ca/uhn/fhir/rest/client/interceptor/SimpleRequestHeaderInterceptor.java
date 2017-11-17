@@ -32,6 +32,8 @@ import org.apache.commons.lang3.Validate;
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the
  * header name and the header value are specified by the calling code.
+ *
+ * @see AdditionalRequestHeadersInterceptor for a more advanced version of this interceptor which can add multiple headers
  */
 public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 
