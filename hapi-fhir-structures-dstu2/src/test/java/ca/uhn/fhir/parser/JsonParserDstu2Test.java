@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -1719,6 +1721,12 @@ public class JsonParserDstu2Test {
 		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier", "SomeValue");
 		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier2", "SomeValue2");
 
+		Organization organization = new Organization();
+		organization.setId(new IdDt("Someorganization"));
+		ExtensionDt extensionDt = new ExtensionDt(false, "http://someurl3.com", new ResourceReferenceDt(organization.getId()));
+		procedureRequest.getResourceMetadata()
+			.put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(extensionDt.getUrl()), extensionDt);
+
 		String json = ourCtx.newJsonParser().encodeResourceToString(procedureRequest);
 
 		// @formatter:off
@@ -1739,6 +1747,33 @@ public class JsonParserDstu2Test {
 			"\"valueString\":\"SomeValue2\"",
 			"}]"));
 		// @formatter:on
+	}
+
+	@Test
+	public void testParseResourceWithReferenceExtensionMetadata() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/procedure-request.json"));
+		IParser parser = ourCtx.newJsonParser();
+		IParserErrorHandler peh = mock(IParserErrorHandler.class);
+		parser.setParserErrorHandler(peh);
+
+		ProcedureRequest p = parser.parseResource(ProcedureRequest.class, input);
+
+		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
+		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		assertReferenceExtensionMetadata(p, "http://someurl3.com", false, ResourceReferenceDt.class, "dc0b549a-f852-11e6-bc64-92361f002671");
+	}
+
+	private void assertReferenceExtensionMetadata(
+		BaseResource resource,
+		String url,
+		boolean isModifier,
+		Class<?> expectedType,
+		String expectedValue) {
+		ExtensionDt extension = (ExtensionDt) resource.getResourceMetadata().get(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(url));
+		assertThat(extension.getValue(), CoreMatchers.instanceOf(expectedType));
+		assertThat(extension.isModifier(), equalTo(isModifier));
+		assertThat(extension.getValue(), CoreMatchers.instanceOf(BaseResourceReferenceDt.class));
+		assertThat(((BaseResourceReferenceDt)extension.getValue()).getReference().getIdPart(), equalTo(expectedValue));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

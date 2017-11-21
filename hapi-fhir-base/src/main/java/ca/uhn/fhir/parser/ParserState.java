@@ -489,6 +489,8 @@ class ParserState<T> {
 				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
+			} else if ("value".equals(theName) && myInstance instanceof BaseResourceReferenceDt) {
+				((BaseResourceReferenceDt) myInstance).setReference(new IdDt(theValue));
 			} else {
 				if (myJsonMode) {
 					myErrorHandler.incorrectJsonType(null, myElementName, ValueType.OBJECT, null, ValueType.SCALAR, ScalarType.STRING);

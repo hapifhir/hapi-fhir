@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -736,8 +737,18 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			theEventWriter.beginObject();
 			writeOptionalTagWithTextNode(theEventWriter, "url", extension.getUrl());
-			String extensionDatatype = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildNameByDatatype(extension.getValue().getClass());
-			writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, extension.getValueAsPrimitive());
+			RuntimeChildUndeclaredExtensionDefinition runtimeDefinitions = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+
+			String extensionDatatype = runtimeDefinitions.getChildNameByDatatype(extension.getValue().getClass());
+			if (extension.getValue() instanceof IPrimitiveDatatype) {
+				writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, extension.getValueAsPrimitive());
+			} else {
+				if (extension.getValue() instanceof BaseResourceReferenceDt) {
+					writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, ((BaseResourceReferenceDt) extension.getValue()).getReference());
+				} else {
+					throw new IllegalArgumentException("Cannot parse meta extension with type: " + extension.getValue().getClass().getSimpleName());
+				}
+			}
 			theEventWriter.endObject();
 		}
 		theEventWriter.endArray();

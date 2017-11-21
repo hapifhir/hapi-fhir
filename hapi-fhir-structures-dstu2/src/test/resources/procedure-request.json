@@ -1,0 +1,12 @@
+{
+	"resourceType": "ProcedureRequest",
+	"meta": {
+		"extension": [
+			{
+				"url": "http://someurl3.com",
+				"valueReference": "Organization/dc0b549a-f852-11e6-bc64-92361f002671"
+			}
+		]
+	},
+	"status": "accepted"
+}
