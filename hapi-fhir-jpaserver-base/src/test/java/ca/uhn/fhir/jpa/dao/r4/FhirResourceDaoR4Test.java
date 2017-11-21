@@ -55,6 +55,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -97,6 +98,29 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
+
+	/**
+	 * See #773
+	 */
+	@Test
+	public void testDeleteResourceWithOutboundDeletedResources() {
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+
+		Organization org = new Organization();
+		org.setId("ORG");
+		org.setName("ORG");
+		myOrganizationDao.update(org);
+
+		Patient pat = new Patient();
+		pat.setId("PAT");
+		pat.setActive(true);
+		pat.setManagingOrganization(new Reference("Organization/ORG"));
+		myPatientDao.update(pat);
+
+		myOrganizationDao.delete(new IdType("Organization/ORG"));
+
+		myPatientDao.delete(new IdType("Patient/PAT"));
+	}
 
 
 	@Before

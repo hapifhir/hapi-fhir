@@ -154,7 +154,7 @@
 				JAX-RS client framework now supports the ability to
 				register your own JAX-RS Component Classes against the client,
 				as well as better documentation about thread safety. Thanks
-				to Sébastien Rivière for the pull request!
+				to SÃ©bastien RiviÃ¨re for the pull request!
 			</action>
 			<action type="fix" issue="717">
 				Processing of the If-Modified-Since header on FHIR read operations was reversed,
@@ -176,9 +176,41 @@
 				request with fix and test case!
 			</action>
 			<action type="add">
+				Bundle resources did not have their version encoded when serializing
+				in FHIR resource (XML/JSON) format.
+			</action>
+			<action type="add">
 				The Binary resource endpoint now supports the `X-Security-Context` header when
 				reading or writing Binary contents using their native Content-Type (i.e exchanging
 				the raw binary with the server, as opposed to exchanging a FHIR resource).
+			</action>
+			<action type="fix">
+				When paging through multiple pages of search results, if the 
+				client had requested a subset of resources to be returned using the
+				<![CDATA[<code>_elements</code>]]> parameter, the elements list
+				was lost after the first page of results.
+				In addition, elements will not remove elements from
+				search/history Bundles (i.e. elements from the Bundle itself, as opposed
+				to elements in the entry resources) unless the Bundle elements are
+				explicitly listed, e.g. <![CDATA[<code>_include=Bundle.total</code>]]>.
+				Thanks to @parisni for reporting!
+			</action>
+			<action type="add" issue="743">
+				Add support for Spring Boot for initializing a number of parts of the library,
+				as well as several examples.
+				Thanks to Mathieu Ouellet for the contribution!
+			</action>
+			<action type="add" issue="747">
+				JPA server now has lucene index support moved to separate classes from the entity
+				classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang
+				for the pull request!
+			</action>
+			<action type="add" issue="755">
+				A new client interceptor has been added called
+				AdditionalRequestHeadersInterceptor, which allows 
+				a developer to add additional custom headers to a 
+				client requests.
+				Thanks to Clayton Bodendein for the pull request!
 			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
@@ -545,7 +577,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			<action type="fix" issue="686">
 				Correct an issue in the validator (DSTU3/R4) where elements were not always
 				correctly validated if the element contained only a profiled extension. Thanks
-				to Sébastien Rivière for the pull request!
+				to SÃ©bastien RiviÃ¨re for the pull request!
 			</action>
 			<action type="add" issue="701">
 				Testing UI now has a dropdown for modifiers on token search. Thanks 
@@ -559,7 +591,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			</action>
 			<action type="fix" issue="695">
 				Extensions on ID datatypes were not parsed or serialized correctly. Thanks to
-				Stephen Rivière for the pull request!
+				Stephen RiviÃ¨re for the pull request!
 			</action>
 			<action type="fix" issue="710">
 				Fix a bug in REST Hook Subscription interceptors which prevented subscriptions
@@ -880,7 +912,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			<action type="add">
 				DaoConfig#setAllowInlineMatchUrlReferences() now defaults to
 				<![CDATA[<code>true</code>]]> since inline conditional references
-				are now a part of the FHIR specification. Thanks to Jan Dědek for
+				are now a part of the FHIR specification. Thanks to Jan DÄdek for
 				pointing this out!
 			</action>
 			<action type="add" issue="609">
@@ -1860,7 +1892,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			</action>
 			<action type="fix" issue="426">
 				Parser failed to parse resources containing an extension with a value type of
-				"id". Thanks to Raphael Mäder for reporting!  
+				"id". Thanks to Raphael MÃ¤der for reporting!  
 			</action>
 			<action type="fix">
 				When committing a transaction in JPA server
@@ -2122,7 +2154,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				array instead of a string. Thanks to David Hay for reporting! 
 			</action>
 			<action type="add" issue="367">
-				Sébastien Rivière contributed an excellent pull request which adds a 
+				SÃ©bastien RiviÃ¨re contributed an excellent pull request which adds a 
 				number of enhancements to JAX-RS module:
 				<![CDATA[
 				<ul>

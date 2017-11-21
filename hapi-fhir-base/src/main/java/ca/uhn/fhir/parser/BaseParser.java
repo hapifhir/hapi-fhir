@@ -43,7 +43,7 @@ public abstract class BaseParser implements IParser {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
 	private ContainedResources myContainedResources;
-
+	private boolean myEncodeElementsAppliesToChildResourcesOnly;
 	private FhirContext myContext;
 	private Set<String> myDontEncodeElements;
 	private boolean myDontEncodeElementsIncludesStars;
@@ -557,6 +557,16 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public boolean isEncodeElementsAppliesToChildResourcesOnly() {
+		return myEncodeElementsAppliesToChildResourcesOnly;
+	}
+
+	@Override
+	public void setEncodeElementsAppliesToChildResourcesOnly(boolean theEncodeElementsAppliesToChildResourcesOnly) {
+		myEncodeElementsAppliesToChildResourcesOnly = theEncodeElementsAppliesToChildResourcesOnly;
+	}
+
+	@Override
 	public boolean isOmitResourceId() {
 		return myOmitResourceId;
 	}
@@ -1051,7 +1061,13 @@ public abstract class BaseParser implements IParser {
 		}
 
 		private boolean checkIfParentShouldBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
-			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, myEncodeElements, true);
+			Set<String> encodeElements = myEncodeElements;
+			if (encodeElements != null && encodeElements.isEmpty() == false) {
+				if (isEncodeElementsAppliesToChildResourcesOnly() && !mySubResource) {
+					encodeElements = null;
+				}
+			}
+			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, encodeElements, true);
 		}
 
 		private boolean checkIfParentShouldNotBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
@@ -1069,6 +1085,9 @@ public abstract class BaseParser implements IParser {
 					thePathBuilder.append('*');
 				} else {
 					thePathBuilder.append(myResDef.getName());
+				}
+				if (theElements == null) {
+					return true;
 				}
 				if (theElements.contains(thePathBuilder.toString())) {
 					return true;

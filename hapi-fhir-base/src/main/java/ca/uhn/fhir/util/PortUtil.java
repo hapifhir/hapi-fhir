@@ -21,12 +21,14 @@ package ca.uhn.fhir.util;
  */
 
 import java.net.ServerSocket;
+import java.util.LinkedHashSet;
 
 /**
  * Provides server ports
  */
 @CoverageIgnore
 public class PortUtil {
+	private static LinkedHashSet<Integer> ourPorts = new LinkedHashSet<>();
 
 	/*
 	 * Non instantiable
@@ -41,9 +43,13 @@ public class PortUtil {
 	public static int findFreePort() {
 		ServerSocket server;
 		try {
-			server = new ServerSocket(0);
-			int port = server.getLocalPort();
-			server.close();
+			int port;
+			do {
+				server = new ServerSocket(0);
+				port = server.getLocalPort();
+				server.close();
+			} while (!ourPorts.add(port));
+
 			Thread.sleep(500);
 			return port;
 		} catch (Exception e) {

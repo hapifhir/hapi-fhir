@@ -3149,17 +3149,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(1)
 			.execute();
 
-		ourLog.info("** Done searching with count of 1");
+		ourLog.info("** Done searching in {}ms with count of 1", sw.getMillis());
 
 		ourLog.info(myCapturingInterceptor.getLastResponse().getAllHeaders().toString());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
 
-		assertThat(sw.getMillis(), lessThan(1000L));
+		String msg = "Total is " + found.getTotalElement().getValue() + " and took " + sw.getMillis() + " millis";
 
 		// If this fails under load, try increasing the throttle above
-		assertEquals(null, found.getTotalElement().getValue());
-		assertEquals(1, found.getEntry().size());
+		assertEquals(msg,null, found.getTotalElement().getValue());
+		assertEquals(msg, 1, found.getEntry().size());
+		assertThat(msg, sw.getMillis(), lessThan(1000L));
+
 	}
 
 	@Test
@@ -3214,11 +3216,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), Matchers.<String>empty());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase()),Matchers.<String>empty());
 
-		assertThat(sw.getMillis(), lessThan(1000L));
-
 		// If this fails under load, try increasing the throttle above
 		assertEquals(null, found.getTotalElement().getValue());
 		assertEquals(1, found.getEntry().size());
+		assertThat(sw.getMillis(), lessThan(1000L));
 	}
 
 	@Test
