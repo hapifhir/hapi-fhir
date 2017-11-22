@@ -3219,7 +3219,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// If this fails under load, try increasing the throttle above
 		assertEquals(null, found.getTotalElement().getValue());
 		assertEquals(1, found.getEntry().size());
-		assertThat(sw.getMillis(), lessThan(1000L));
+		assertThat(sw.getMillis(), lessThan(1500L));
 	}
 
 	@Test
