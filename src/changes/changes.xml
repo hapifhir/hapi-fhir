@@ -212,6 +212,10 @@
 				client requests.
 				Thanks to Clayton Bodendein for the pull request!
 			</action>
+			<action type="fix">
+				An issue was fixed in JPA server where extensions on primitives which
+				are nestedt several layers deep are lost when resources are retrieved
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

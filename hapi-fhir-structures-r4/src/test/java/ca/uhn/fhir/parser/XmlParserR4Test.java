@@ -110,6 +110,36 @@ public class XmlParserR4Test {
 		return b;
 	}
 
+	@Test
+	public void testParseAndEncodeExtensionWithValueWithExtension() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <extension url=\"https://purl.org/elab/fhir/network/StructureDefinition/1/BirthWeight\">\n" +
+			"       <valueDecimal>\n" +
+			"          <extension url=\"http://www.hl7.org/fhir/extension-data-absent-reason.html\">\n" +
+			"            <valueCoding>\n" +
+			"                <system value=\"http://hl7.org/fhir/ValueSet/birthweight\"/>\n" +
+			"                <code value=\"Underweight\"/>\n" +
+			"                <userSelected value=\"false\"/>\n" +
+			"            </valueCoding>\n" +
+			"          </extension>\n" +
+			"       </valueDecimal>\n" +
+			"    </extension>\n" +
+			"    <identifier>\n" +
+			"       <system value=\"https://purl.org/elab/fhir/network/StructureDefinition/1/EuroPrevallStudySubjects\"/>\n" +
+			"       <value value=\"1\"/>\n" +
+			"    </identifier>\n" +
+			"    <gender value=\"female\"/>\n" +
+			"</Patient>";
+
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		assertThat(ourCtx.newXmlParser().encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(parsed), containsString("Underweight"));
+
+	}
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

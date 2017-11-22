@@ -1115,7 +1115,7 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 
-			return true;
+			return false;
 		}
 
 		public BaseRuntimeChildDefinition getDef() {
