@@ -84,7 +84,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 	
 
 	/**
-	 * See #503
+	 * See #503 #751
 	 */
 	@Test
 	public void testDeleteIsAllowedForCompartment() {
@@ -98,6 +98,9 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		obsInCompartment.setStatus(ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
 		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		
+		// create a 2nd observation to be deleted by url Observation?patient=id
+        ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
 		
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
@@ -115,6 +118,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		});
 		
 		ourClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
+		ourClient.delete().resourceConditionalByUrl("Observation?patient=" + id.toUnqualifiedVersionless()).execute();
 
 		try {
 			ourClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
