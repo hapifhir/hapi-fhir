@@ -231,6 +231,11 @@
 				trace will now be returned to the client for JAX-RS server if configured to
 				do so). Thanks to Clayton Bodendein for the pull request!
 			</action>
+			<action type="fix" issue="770">
+				JAX-RS server conformance provider in the example module passed in the
+				server description, server name, and server version in the incorrect order.
+				Thanks to Clayton Bodendein for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
