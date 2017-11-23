@@ -225,7 +225,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					return null;
 				}
 			}
-			if (appliesToResourceId != null) {
+			if (appliesToResourceId != null && appliesToResourceId.hasResourceType()) {
 				Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
 				if (myAppliesToTypes.contains(type) == false) {
 					return null;
