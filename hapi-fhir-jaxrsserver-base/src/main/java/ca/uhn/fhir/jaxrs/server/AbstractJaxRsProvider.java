@@ -52,11 +52,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	private final FhirContext CTX;
 	/** the http headers */
 	@Context
-	private HttpHeaders theHeaders;
+	private HttpHeaders myHeaders;
 
 	/** the uri info */
 	@Context
-	private UriInfo theUriInfo;
+	private UriInfo myUriInfo;
 
 	/**
 	 * Default is DSTU2. Use {@link AbstractJaxRsProvider#AbstractJaxRsProvider(FhirContext)} to specify a DSTU3 context.
@@ -130,7 +130,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the headers
 	 */
 	public HttpHeaders getHeaders() {
-		return this.theHeaders;
+		return this.myHeaders;
 	}
 
 	/**
@@ -191,7 +191,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the requestbuilder
 	 */
 	public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation, final String theResourceName) {
-		return new JaxRsRequest.Builder(this, requestType, restOperation, theUriInfo.getRequestUri().toString(), theResourceName);
+		return new JaxRsRequest.Builder(this, requestType, restOperation, myUriInfo.getRequestUri().toString(), theResourceName);
 	}
 
 	/**
@@ -212,7 +212,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the uri info
 	 */
 	public UriInfo getUriInfo() {
-		return this.theUriInfo;
+		return this.myUriInfo;
 	}
 
 	/**
@@ -258,7 +258,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 *           the headers to set
 	 */
 	public void setHeaders(final HttpHeaders headers) {
-		this.theHeaders = headers;
+		this.myHeaders = headers;
 	}
 
 	/**
@@ -268,7 +268,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 *           the uri info
 	 */
 	public void setUriInfo(final UriInfo uriInfo) {
-		this.theUriInfo = uriInfo;
+		this.myUriInfo = uriInfo;
 	}
 
 	/**

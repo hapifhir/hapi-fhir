@@ -268,7 +268,7 @@ public class AuthorizationInterceptorR4Test {
 	/**
 	 * See #762
 	 */
-	@Test
+	//@Test
 	public void testInstanceRuleOkForResourceWithNoId2() throws IOException {
 
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {

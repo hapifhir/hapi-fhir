@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import javax.ws.rs.core.*;
 
@@ -41,8 +42,16 @@ public class AbstractJaxRsProviderTest {
     }
 
     @Test
-    public void testWithStackTrace() {
-        assertFalse(provider.withStackTrace());
+    public void testHandleExceptionDataFormatException() throws IOException, URISyntaxException {
+        final DataFormatException theException = new DataFormatException();
+		 UriInfo uriInfo = mock(UriInfo.class);
+		 when(uriInfo.getRequestUri()).thenReturn(new URI("http://example.com"));
+		 when(uriInfo.getBaseUri()).thenReturn(new URI("http://example.com"));
+		 when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<String, String>());
+		 provider.setUriInfo(uriInfo);
+        final Response result = provider.handleException(theRequest, theException);
+        assertNotNull(result);
+        assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
     }
 
     @Test
@@ -52,14 +61,6 @@ public class AbstractJaxRsProviderTest {
         final Response result = provider.handleException(theRequest, theException);
         assertNotNull(result);
         assertEquals(base.getStatusCode(), result.getStatus());
-    }
-
-    @Test
-    public void testHandleExceptionDataFormatException() throws IOException {
-        final DataFormatException theException = new DataFormatException();
-        final Response result = provider.handleException(theRequest, theException);
-        assertNotNull(result);
-        assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
     }
 
     @Test
@@ -75,5 +76,10 @@ public class AbstractJaxRsProviderTest {
         final Response result = provider.handleException(theRequest, theException);
         assertNotNull(result);
         assertEquals(Constants.STATUS_HTTP_500_INTERNAL_ERROR, result.getStatus());
+    }
+
+    @Test
+    public void testWithStackTrace() {
+        assertFalse(provider.withStackTrace());
     }
 }
