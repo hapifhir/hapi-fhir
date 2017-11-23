@@ -2015,7 +2015,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		/*
 		 * The following block of code is used to strip out diacritical marks from latin script
-		 * and also convert to upper case. E.g. "jåmes" becomes "JAMES".
+		 * and also convert to upper case. E.g. "j?mes" becomes "JAMES".
 		 * 
 		 * See http://www.unicode.org/charts/PDF/U0300.pdf for the logic
 		 * behind stripping 0300-036F
