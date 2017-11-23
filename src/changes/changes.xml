@@ -240,6 +240,12 @@
 				The learn more links on the website home page had broken links. Thanks to
 				James Daily for the pull request to fix this!
 			</action>
+			<action type="add" issue="762">
+				Prevent a crash in AuthorizationInterceptor when processing transactions
+				if the interceptor has rules declared which allow resources to be read/written
+				by "any ID of a given type". Thanks to GitHub user @dconlan for the pull
+				request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">

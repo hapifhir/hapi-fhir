@@ -41,6 +41,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use
  * {@link InterceptorAdapter} in order to not need to implement every method.
@@ -329,9 +331,9 @@ public interface IServerInterceptor {
 	public static class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
+		private final String myResourceType;
 		private RequestDetails myRequestDetails;
 		private IBaseResource myResource;
-		private final String myResourceType;
 
 		public ActionRequestDetails(RequestDetails theRequestDetails) {
 			myId = theRequestDetails.getId();
@@ -346,7 +348,11 @@ public interface IServerInterceptor {
 		}
 
 		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, String theResourceType, IIdType theId) {
-			myId = theId;
+			if (theId != null && isBlank(theId.getValue())) {
+				myId = null;
+			} else {
+				myId = theId;
+			}
 			myResourceType = theResourceType;
 			myContext = theContext;
 			myRequestDetails = theRequestDetails;
@@ -410,6 +416,13 @@ public interface IServerInterceptor {
 		}
 
 		/**
+		 * This method should not be called by client code
+		 */
+		public void setResource(IBaseResource theObject) {
+			myResource = theObject;
+		}
+
+		/**
 		 * Returns the resource type this request pertains to, or <code>null</code> if this request is not type specific
 		 * (e.g. server-history)
 		 */
@@ -448,13 +461,6 @@ public interface IServerInterceptor {
 			for (IServerInterceptor next : interceptors) {
 				next.incomingRequestPreHandled(theOperationType, this);
 			}
-		}
-
-		/**
-		 * This method should not be called by client code
-		 */
-		public void setResource(IBaseResource theObject) {
-			myResource = theObject;
 		}
 
 	}

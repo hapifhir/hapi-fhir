@@ -376,6 +376,93 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+	/**
+	 * See #762
+	 */
+	@Test
+	public void testInstanceRuleOkForResourceWithNoId2() {
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("write patient").write().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("write encounter").write().resourcesOfType(Encounter.class).withAnyId().andThen()
+					.allow("write condition").write().resourcesOfType(Condition.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+
+
+		// Create a bundle that will be used as a transaction
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+
+
+
+		String encounterId = "123-123";
+		String encounterSystem = "http://our.internal.code.system/encounter";
+		Encounter encounter = new Encounter();
+
+		encounter.addIdentifier(new Identifier().setValue(encounterId)
+			.setSystem(encounterSystem));
+
+		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+
+		Patient p = new Patient()
+			.addIdentifier(new Identifier().setValue("321-321").setSystem("http://our.internal.code.system/patient"));
+		p.setId(IdDt.newRandomUuid());
+
+		// add patient to bundle so its created
+		bundle.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setUrl("Patient")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		Reference patientRef = new Reference(p.getId());
+
+		encounter.setSubject(patientRef);
+		Condition condition = new Condition()
+			.setCode(new CodeableConcept().addCoding(
+				new Coding("http://hl7.org/fhir/icd-10", "S53.40", "FOREARM SPRAIN / STRAIN")))
+			.setSubject(patientRef);
+
+		condition.setId(IdDt.newRandomUuid());
+
+		// add condition to bundle so its created
+		bundle.addEntry()
+			.setFullUrl(condition.getId())
+			.setResource(condition)
+			.getRequest()
+			.setUrl("Condition")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		Encounter.DiagnosisComponent dc = new Encounter.DiagnosisComponent();
+
+		dc.setCondition(new Reference(condition.getId()));
+		encounter.addDiagnosis(dc);
+		CodeableConcept reason = new CodeableConcept();
+		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
+		encounter.addReason(reason);
+
+		// add encounter to bundle so its created
+		bundle.addEntry()
+			.setResource(encounter)
+			.getRequest()
+			.setUrl("Encounter")
+			.setIfNoneExist("identifier=" + encounterSystem + "|" + encounterId)
+			.setMethod(Bundle.HTTPVerb.POST);
+
+
+		Bundle resp = myClient.transaction().withBundle(bundle).execute();
+		assertEquals(3, resp.getEntry().size());
+
+	}
 
 	private void unregisterInterceptors() {
 		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourRestServer.getInterceptors())) {
