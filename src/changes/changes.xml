@@ -221,6 +221,10 @@
 				if the delete was permitted via a compartment rule. Thanks to Alvin Leonard for the
 				pull request!
 			</action>
+			<action type="add" issue="767">
+				JAX-RS server module was not able to generate server CapabilityStatement for
+				some versions of FHIR (DSTU2_HL7ORG, DSTU2_1, or R4). Thanks to Clayton Bodendein for the Pull Request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
