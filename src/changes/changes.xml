@@ -225,6 +225,12 @@
 				JAX-RS server module was not able to generate server CapabilityStatement for
 				some versions of FHIR (DSTU2_HL7ORG, DSTU2_1, or R4). Thanks to Clayton Bodendein for the Pull Request!
 			</action>
+			<action type="add" issue="769">
+				When a server method throws a DataFormatException, the error will now be converted into
+				an HTTP 400 instead of an HTTP 500 when returned to the client (and a stack 
+				trace will now be returned to the client for JAX-RS server if configured to
+				do so). Thanks to Clayton Bodendein for the pull request!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
