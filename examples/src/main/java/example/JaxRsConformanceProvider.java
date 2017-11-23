@@ -27,7 +27,7 @@ public class JaxRsConformanceProvider extends AbstractJaxRsConformanceProvider {
   private JaxRsPatientRestProvider provider;
 
   public JaxRsConformanceProvider() {
-    super("My Server Version", "My Server Description", "My Server Name");
+    super("My Server Description", "My Server Name", "My Server Version");
   }
 
   @Override
