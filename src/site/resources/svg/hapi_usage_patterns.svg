@@ -163,7 +163,7 @@
 					Use the HAPI FHIR client in an application to fetch from or store
 					resources to an external server.
 					<br />
-					<a href="/hapi-fhir/doc_rest_client.html">Learn Mode</a>
+					<a href="/doc_rest_client.html">Learn Mode</a>
 				</div></div></foreignObject>
 				<text x="73" y="45" fill="#4D4D4D" text-anchor="middle"
 					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
@@ -266,7 +266,7 @@
 					Use the HAPI FHIR server in an application to allow external
 					applications to access or modify your application's data.
 					<br />
-					<a href="/hapi-fhir/doc_rest_server.html">Learn More</a>
+					<a href="/doc_rest_server.html">Learn More</a>
 					<br />
 				</div></div></foreignObject>
 				<text x="73" y="53" fill="#4D4D4D" text-anchor="middle"
@@ -382,7 +382,7 @@
 					Use the HAPI JPA/Database Server to deploy a fully functional FHIR
 					server you can develop applications against.
 					<br />
-					<a href="/hapi-fhir/doc_jpa.html">Learn More</a>
+					<a href="/doc_jpa.html">Learn More</a>
 				</div></div></foreignObject>
 				<text x="73" y="59" fill="#4D4D4D" text-anchor="middle"
 					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
@@ -572,7 +572,7 @@
 					Use the HAPI FHIR parser and encoder to convert between FHIR and
 					your application's data model.
 					<br />
-					<a href="/hapi-fhir/doc_fhirobjects.html">Learn More</a>
+					<a href="/doc_fhirobjects.html">Learn More</a>
 				</div></div></foreignObject>
 				<text x="73" y="45" fill="#4D4D4D" text-anchor="middle"
 					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
