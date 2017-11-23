@@ -18,11 +18,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -337,6 +334,45 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		} finally {
 			response.close();
 		}
+
+	}
+
+	/**
+	 * See #762
+	 */
+	@Test
+	public void testInstanceRuleOkForResourceWithNoId() {
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny().write().instance("Patient/123").andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		/*
+		 * Create a transaction using linked IDs
+		 */
+
+		Bundle request = new Bundle();
+		request.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(p.getId());
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setResource(p);
+		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
+
+		Bundle resp = myClient.transaction().withBundle(request).execute();
+		assertEquals(2, resp.getEntry().size());
+
 
 	}
 
