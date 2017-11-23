@@ -165,13 +165,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 				return verdict;
 			} else if (theOutputResource != null) {
-				List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
+
+				List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(theOutputResource, theRequestDetails.getFhirContext());
+
 				Verdict verdict = null;
-				for (BundleEntryParts nextPart : inputResources) {
-					if (nextPart.getResource() == null) {
+				for (IBaseResource nextResource : outputResources) {
+					if (nextResource == null) {
 						continue;
 					}
-					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextPart.getResource());
+					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource);
 					if (newVerdict == null) {
 						continue;
 					} else if (verdict == null) {
