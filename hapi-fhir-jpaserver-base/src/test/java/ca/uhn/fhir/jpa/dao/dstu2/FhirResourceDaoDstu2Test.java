@@ -461,7 +461,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
+		assertNull(details.getId());
 		assertEquals("Patient", details.getResourceType());
 		assertEquals(Patient.class, details.getResource().getClass());
 

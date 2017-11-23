@@ -573,7 +573,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 		details = detailsCapt.getValue();
-		assertNotNull(details.getId());
+		assertNull(details.getId());
 		assertEquals("Patient", details.getResourceType());
 		assertEquals(Patient.class, details.getResource().getClass());
 
