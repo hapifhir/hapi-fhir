@@ -26,8 +26,6 @@ import java.util.Map.Entry;
 import javax.ws.rs.core.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -35,12 +33,9 @@ import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -77,13 +72,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	protected AbstractJaxRsProvider(final FhirContext ctx) {
 		CTX = ctx;
-	}
-
-	private IBaseOperationOutcome createOutcome(final DataFormatException theException) {
-		final IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getFhirContext());
-		final String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
-		OperationOutcomeUtil.addIssue(getFhirContext(), oo, ERROR, detailsValue, null, PROCESSING);
-		return oo;
 	}
 
 	/**
@@ -241,9 +229,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 			throws IOException {
 		if (theException instanceof JaxRsResponseException) {
 			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
-		} else if (theException instanceof DataFormatException) {
-			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
-					new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
 		} else {
 			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
 					new JaxRsExceptionInterceptor().convertException(this, theException));
