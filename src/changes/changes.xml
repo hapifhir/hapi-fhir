@@ -236,6 +236,10 @@
 				server description, server name, and server version in the incorrect order.
 				Thanks to Clayton Bodendein for the pull request!
 			</action>
+			<action type="fix" issue="774">
+				The learn more links on the website home page had broken links. Thanks to
+				James Daily for the pull request to fix this!
+			</action>
 		</release>
 		<release version="3.0.0" date="2017-09-27">
 			<action type="add">
