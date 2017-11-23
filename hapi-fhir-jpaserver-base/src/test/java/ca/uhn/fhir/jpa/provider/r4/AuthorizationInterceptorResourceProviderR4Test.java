@@ -1,40 +1,39 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.auth.*;
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
 
 public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Override
 	public void before() throws Exception {
@@ -43,45 +42,112 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		unregisterInterceptors();
 	}
 
-
-	private void unregisterInterceptors() {
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourRestServer.getInterceptors())) {
-			if (next instanceof AuthorizationInterceptor) {
-				ourRestServer.unregisterInterceptor(next);
-			}
-		}
-	}
-
 	/**
-	 * See #503
+	 * See #667
 	 */
 	@Test
-	public void testDeleteIsBlocked() {
-		
+	public void testBlockUpdatingPatientUserDoesnNotHaveAccessTo() throws IOException {
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
+
+		Patient pt2 = new Patient();
+		pt2.setActive(false);
+		final IIdType pid2 = myClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
+
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.deny().delete().allResources().withAnyId().andThen()
-						.allowAll()
-						.build();
+					.allow().write().allResources().inCompartment("Patient", pid1).andThen()
+					.build();
 			}
 		});
-		
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = myClient.create().resource(patient).execute().getId();
+
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference(pid1));
+		IIdType oid = myClient.create().resource(obs).execute().getId().toUnqualified();
+
+
+		unregisterInterceptors();
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().write().allResources().inCompartment("Patient", pid2).andThen()
+					.build();
+			}
+		});
+
+		/*
+		 * Try to update to a new patient. The user has access to write to things in
+		 * pid2's compartment, so this would normally be ok, but in this case they are overwriting
+		 * a resource that is already in pid1's compartment, which shouldn't be allowed.
+		 */
+		obs = new Observation();
+		obs.setId(oid);
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference(pid2));
 
 		try {
-			myClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+			myClient.update().resource(obs).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
-		
-		patient = myClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
-		assertEquals(id.getValue(), patient.getId());
+
+	}
+
+	@Test
+	public void testCreateConditional() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		final MethodOutcome output1 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
+					.allow().updateConditional().allResources()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		patient = new Patient();
+		patient.setId(output1.getId().toUnqualifiedVersionless());
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+
+		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		try {
+			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+		}
+
+		patient = new Patient();
+		patient.setId("999");
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		try {
+			myClient.update().resource(patient).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+		}
+
 	}
 
 	/**
@@ -139,32 +205,32 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	 */
 	@Test
 	public void testDeleteIsAllowedForCompartment() {
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final IIdType id = myClient.create().resource(patient).execute().getId();
-		
+
 		Observation obsInCompartment = new Observation();
 		obsInCompartment.setStatus(ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
 		IIdType obsInCompartmentId = myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
-		
+
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
 		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
-		
+
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
-						.deny().delete().allResources().withAnyId().andThen()
-						.allowAll()
-						.build();
+					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
+					.deny().delete().allResources().withAnyId().andThen()
+					.allowAll()
+					.build();
 			}
 		});
-		
+
 		myClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
 
 		try {
@@ -175,114 +241,38 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 	}
 
+	/**
+	 * See #503
+	 */
 	@Test
-	public void testCreateConditional() {
-		
+	public void testDeleteIsBlocked() {
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny().delete().allResources().withAnyId().andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		final MethodOutcome output1 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+		IIdType id = myClient.create().resource(patient).execute().getId();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
-					.allow().updateConditional().allResources()
-					.build();
-				//@formatter:on
-			}
-		});
-		
-		patient = new Patient();
-		patient.setId(output1.getId().toUnqualifiedVersionless());
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
-
-		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
-		
-		patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
-			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
-		}
-
-		patient = new Patient();
-		patient.setId("999");
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		try {
-			myClient.update().resource(patient).execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
-		}
-
-	}
-
-	/**
-	 * See #667
-	 */
-	@Test
-	public void testBlockUpdatingPatientUserDoesnNotHaveAccessTo() throws IOException {
-		Patient pt1 = new Patient();
-		pt1.setActive(true);
-		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
-
-		Patient pt2 = new Patient();
-		pt2.setActive(false);
-		final IIdType pid2 = myClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().write().allResources().inCompartment("Patient", pid1).andThen()
-					.build();
-			}
-		});
-		
-		Observation obs = new Observation();
-		obs.setStatus(ObservationStatus.FINAL);
-		obs.setSubject(new Reference(pid1));
-		IIdType oid = myClient.create().resource(obs).execute().getId().toUnqualified();
-
-		
-		unregisterInterceptors();
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-						.allow().write().allResources().inCompartment("Patient", pid2).andThen()
-						.build();
-			}
-		});
-		
-		/*
-		 * Try to update to a new patient. The user has access to write to things in 
-		 * pid2's compartment, so this would normally be ok, but in this case they are overwriting
-		 * a resource that is already in pid1's compartment, which shouldn't be allowed.
-		 */
-		obs = new Observation();
-		obs.setId(oid);
-		obs.setStatus(ObservationStatus.FINAL);
-		obs.setSubject(new Reference(pid2));
-		
-		try {
-			myClient.update().resource(obs).execute();
+			myClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
-		
+
+		patient = myClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
+		assertEquals(id.getValue(), patient.getId());
 	}
-	
+
 	@Test
 	public void testDeleteResourceConditional() throws IOException {
 		String methodName = "testDeleteResourceConditional";
@@ -331,7 +321,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 				//@formatter:on
 			}
 		});
-		
+
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
@@ -348,6 +338,20 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			response.close();
 		}
 
+	}
+
+
+	private void unregisterInterceptors() {
+		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourRestServer.getInterceptors())) {
+			if (next instanceof AuthorizationInterceptor) {
+				ourRestServer.unregisterInterceptor(next);
+			}
+		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
