@@ -6,6 +6,7 @@ org.hl7.fhir.dstu3.hapi.ctx
 org.hl7.fhir.dstu3.hapi.fluentpath
 org.hl7.fhir.dstu3.hapi.rest.server
 org.hl7.fhir.dstu3.model
+org.hl7.fhir.dstu3.model.codesystems
 org.hl7.fhir.dstu3.terminologies
 org.hl7.fhir.dstu3.utils
 org.hl7.fhir.dstu3.utils.formats

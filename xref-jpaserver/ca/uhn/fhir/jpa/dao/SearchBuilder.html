@@ -1267,7 +1267,7 @@
 <a class="jxr_linenumber" name="L1259" href="#L1259">1259</a> <em class="jxr_comment">		 * Check if there is a unique key associated with the set</em>
 <a class="jxr_linenumber" name="L1260" href="#L1260">1260</a> <em class="jxr_comment">		 * of parameters passed in</em>
 <a class="jxr_linenumber" name="L1261" href="#L1261">1261</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a> 		ourLog.info(<span class="jxr_string">"Checking for unique index for query: {}"</span>, theParams.toNormalizedQueryString(myContext));
+<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a> 		ourLog.debug(<span class="jxr_string">"Checking for unique index for query: {}"</span>, theParams.toNormalizedQueryString(myContext));
 <a class="jxr_linenumber" name="L1263" href="#L1263">1263</a> 		<strong class="jxr_keyword">if</strong> (myCallingDao.getConfig().isUniqueIndexesEnabled()) {
 <a class="jxr_linenumber" name="L1264" href="#L1264">1264</a> 			<strong class="jxr_keyword">if</strong> (myParams.getIncludes().isEmpty()) {
 <a class="jxr_linenumber" name="L1265" href="#L1265">1265</a> 				<strong class="jxr_keyword">if</strong> (myParams.getRevIncludes().isEmpty()) {

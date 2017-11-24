@@ -614,7 +614,7 @@
 <a class="jxr_linenumber" name="L606" href="#L606">606</a> 				<strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L607" href="#L607">607</a> 			}
 <a class="jxr_linenumber" name="L608" href="#L608">608</a> 			<strong class="jxr_keyword">case</strong> RESOURCE: {
-<a class="jxr_linenumber" name="L609" href="#L609">609</a> 				<strong class="jxr_keyword">if</strong> (myInstance instanceof IAnyResource || myInstance instanceof IBaseBackboneElement) {
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> 				<strong class="jxr_keyword">if</strong> (myInstance instanceof IAnyResource || myInstance instanceof IBaseBackboneElement || myInstance instanceof IBaseElement) {
 <a class="jxr_linenumber" name="L610" href="#L610">610</a> 					ParserState&lt;T&gt;.PreResourceStateHl7Org state = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a>(myInstance, child.getMutator(), <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L611" href="#L611">611</a> 					push(state);
 <a class="jxr_linenumber" name="L612" href="#L612">612</a> 				} <strong class="jxr_keyword">else</strong> {
@@ -1567,34 +1567,35 @@
 <a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> 
 <a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isEndElement()) {
 <a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 				<strong class="jxr_keyword">if</strong> (myDepth == 0) {
-<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 					myDt.setValue(myEvents);
-<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 					doPop();
-<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 				}
-<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 			}
-<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> 		}
-<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 
-<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 	}
-<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 
-<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> {
-<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> myHl7OrgDatatype;
-<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 
-<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> theHl7OrgDatatype) {
-<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a>(), <strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 			myHl7OrgDatatype = theHl7OrgDatatype;
-<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 		}
-<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 
-<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> 		@Override
-<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doPop() {
-<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 			<em class="jxr_comment">// TODO: this is not very efficient</em>
-<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> 			String value = getDt().getValueAsString();
-<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> 			myHl7OrgDatatype.setValueAsString(value);
-<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 
-<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 			<strong class="jxr_keyword">super</strong>.doPop();
-<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> 		}
-<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> 
-<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a> 	}
-<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a> 
-<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a> }
+<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 					String eventsAsString = XmlUtil.encode(myEvents);
+<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 					myDt.setValue(eventsAsString);
+<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 					doPop();
+<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 				}
+<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> 			}
+<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 		}
+<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 
+<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 	}
+<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a> 
+<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> {
+<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> myHl7OrgDatatype;
+<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> 
+<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> theHl7OrgDatatype) {
+<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a>(), <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 			myHl7OrgDatatype = theHl7OrgDatatype;
+<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 		}
+<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> 
+<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 		@Override
+<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doPop() {
+<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> 			<em class="jxr_comment">// TODO: this is not very efficient</em>
+<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> 			String value = getDt().getValueAsString();
+<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 			myHl7OrgDatatype.setValueAsString(value);
+<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 
+<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> 			<strong class="jxr_keyword">super</strong>.doPop();
+<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> 		}
+<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a> 
+<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a> 	}
+<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a> 
+<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

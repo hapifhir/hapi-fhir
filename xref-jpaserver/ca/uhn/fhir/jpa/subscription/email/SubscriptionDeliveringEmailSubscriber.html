@@ -62,37 +62,34 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  		List&lt;String&gt; destinationAddresses = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  		String[] destinationAddressStrings = StringUtils.split(endpointUrl, <span class="jxr_string">","</span>);
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		<strong class="jxr_keyword">for</strong> (String next : destinationAddressStrings) {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  			<strong class="jxr_keyword">if</strong> (isNotBlank(next)) {
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  				destinationAddresses.add(trim(next));
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  			}
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		}
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		String from = defaultString(subscription.getEmailDetails().getFrom(), provideDefaultFrom());
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		String bodyTemplate = defaultString(subscription.getEmailDetails().getBodyTemplate(), provideDefaultBodyTemplate());
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  			next = trim(defaultString(next));
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  			<strong class="jxr_keyword">if</strong> (next.startsWith(<span class="jxr_string">"mailto:"</span>)) {
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				next = next.substring(<span class="jxr_string">"mailto:"</span>.length());
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  			}
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">if</strong> (isNotBlank(next)) {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  				destinationAddresses.add(next);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			}
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		}
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		EmailDetails details = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/subscription/CanonicalSubscription.html">EmailDetails</a>();
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		details.setTo(destinationAddresses);
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		details.setFrom(from);
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		details.setBodyTemplate(bodyTemplate);
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		details.setSubjectTemplate(subjectTemplate);
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		IEmailSender emailSender = mySubscriptionEmailInterceptor.getEmailSender();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		emailSender.send(details);
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	}
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		String from = defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionEmailInterceptor.getDefaultFromAddress());
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		EmailDetails details = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/subscription/CanonicalSubscription.html">EmailDetails</a>();
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		details.setTo(destinationAddresses);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		details.setFrom(from);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		details.setBodyTemplate(subscription.getPayloadString());
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		details.setSubjectTemplate(subjectTemplate);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		details.setSubscription(subscription.getIdElement(getContext()));
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">private</strong> String provideDefaultBodyTemplate() {
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"A subscription update has been received"</span>;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		IEmailSender emailSender = mySubscriptionEmailInterceptor.getEmailSender();
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		emailSender.send(details);
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	<strong class="jxr_keyword">private</strong> String provideDefaultFrom() {
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"unknown@sender.com"</span>;
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	}
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">private</strong> String provideDefaultSubjectTemplate() {
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"HAPI FHIR Subscriptions"</span>;
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	}
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">private</strong> String provideDefaultSubjectTemplate() {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"HAPI FHIR Subscriptions"</span>;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	}
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

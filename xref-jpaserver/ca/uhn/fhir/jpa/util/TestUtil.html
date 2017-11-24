@@ -138,7 +138,22 @@
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 		}
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 	}
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> }
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> sleepAtLeast(<strong class="jxr_keyword">int</strong> theMillis) {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		<strong class="jxr_keyword">long</strong> start = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		<strong class="jxr_keyword">while</strong> (System.currentTimeMillis() &lt;= start + theMillis) {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				<strong class="jxr_keyword">long</strong> timeSinceStarted = System.currentTimeMillis() - start;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 				<strong class="jxr_keyword">long</strong> timeToSleep = Math.max(0, theMillis - timeSinceStarted);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 				ourLog.info(<span class="jxr_string">"Sleeping for {}ms"</span>, timeToSleep);
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 				Thread.sleep(timeToSleep);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			} <strong class="jxr_keyword">catch</strong> (InterruptedException theE) {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 				theE.printStackTrace();
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			}
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		}
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 	}
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -27,5 +27,4 @@ ca.uhn.fhir.util
 ca.uhn.fhir.util.jar
 ca.uhn.fhir.validation
 ca.uhn.fhir.validation.schematron
-org.hl7.fhir.exceptions
 org.hl7.fhir.instance.model.api
