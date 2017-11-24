@@ -6,6 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.2.0" date="TBD">
+			<action type="fix">
+				Fix a crash in JPA server when performing a recursive
+				<![CDATA[<code>_include</code>]]> which doesn't actually find any matches.
+			</action>
+		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">
 				The version of a few dependencies have been bumped to the

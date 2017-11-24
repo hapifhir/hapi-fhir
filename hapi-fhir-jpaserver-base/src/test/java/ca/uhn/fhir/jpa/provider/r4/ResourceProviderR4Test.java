@@ -2558,6 +2558,59 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Internal.20error.2C.20when.20executing.20the.20following.20query.20on.20HAPI
+	 */
+	@Test
+	public void testSearchByLastUpdatedGe() throws Exception {
+		Patient p2 = new Patient();
+		p2.setId("P2");
+		p2.addName().setFamily("P2");
+		myClient.update().resource(p2).execute().getId().toUnqualifiedVersionless();
+
+		Practitioner pract = new Practitioner();
+		pract.setId("PRAC");
+		pract.addName().setFamily("PRACT");
+		myClient.update().resource(pract).execute().getId().toUnqualifiedVersionless();
+
+		Encounter enc = new Encounter();
+		enc.setId("E2");
+		enc.setStatus(EncounterStatus.ARRIVED);
+		enc.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+		enc.getSubject().setReference("Patient/P2");
+		enc.addParticipant().getIndividual().setReference("Practitioner/PRAC");
+		myClient.update().resource(enc).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2017-11-10");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder("Practitioner/PRAC", "Encounter/E2"));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2099-11-10");
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, empty());
+		} finally {
+			response.close();
+		}
+
+	}
+
 	@Test
 	public void testSearchByReferenceIds() {
 		Organization o1 = new Organization();

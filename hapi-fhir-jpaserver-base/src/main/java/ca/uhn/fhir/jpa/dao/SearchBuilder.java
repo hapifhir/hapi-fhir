@@ -2000,6 +2000,9 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
 		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
