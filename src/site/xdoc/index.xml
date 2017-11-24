@@ -79,10 +79,12 @@
 			</p>
 
 			<ul>
-				<li>Support for Android has been restored, and improved while we're at it! The use of a special "uberjar" with its own classifier is no longer required, <code>hapi-fhir-android</code> works as a normal Gradle dependency in your Android build. See the <a href="https://github.com/hapifhir/hapi-fhir-android-integration-test">HAPI FHIR  Android Integration Test</a> for an example.
-				<li>Support for the <code>Cache-Control</code> header has been added for JPA server searches, allowing a client to request that cached results not be used.
-				<li>A number of bugs were fixed (see the <a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list)
-				<li>Spring has been upgrade to the 5.0 series.
+				<li>Support for Android has been restored, and improved while we're at it! The use of a special "uberjar" with its own classifier is no longer required, <code>hapi-fhir-android</code> works as a normal Gradle dependency in your Android build. See the <a href="https://github.com/hapifhir/hapi-fhir-android-integration-test">HAPI FHIR  Android Integration Test</a> for an example.</li>
+				<li>Support for the <code>Cache-Control</code> header has been added for JPA server searches, allowing a client to request that cached results not be used.</li>
+				<li>A number of bugs were fixed and performance improvements were made (see the <a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list)</li>
+				<li>Spring has been upgraded to the 5.0 series.</li>
+				<li>Some initial refactoring has occurred towards enabling ElasticSearch support in JPA server. Note that any existing JPA projects will need to add an additional property in their Spring config called <code>hibernate.search.model_mapping</code>. See <a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L84">this line</a> in the example project.</li>
+				<li>Support for Spring Boot has been added to many of the modules of the libaray. See the <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples">Spring Boot Samples</a> for examples of how to use this.</li>
 			</ul>
 
 			<p>

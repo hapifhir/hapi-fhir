@@ -207,6 +207,9 @@
 				JPA server now has lucene index support moved to separate classes from the entity
 				classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang
 				for the pull request!
+				<![CDATA[
+				Note that any existing JPA projects will need to add an additional property in their Spring config called <code>hibernate.search.model_mapping</code>. See <a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L84">this line</a> in the example project.
+				]]>
 			</action>
 			<action type="add" issue="755">
 				A new client interceptor has been added called
