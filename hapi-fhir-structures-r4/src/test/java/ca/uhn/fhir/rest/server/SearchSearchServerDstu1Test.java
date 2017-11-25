@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static ca.uhn.fhir.util.UrlUtil.escape;
+import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -110,10 +110,10 @@ public class SearchSearchServerDstu1Test {
     b.append("http://localhost:");
     b.append(ourPort);
     b.append("/Patient?");
-    b.append(escape("findPatientWithAndList")).append('=').append(escape("NE\\,NE,NE\\,NE")).append('&');
-    b.append(escape("findPatientWithAndList")).append('=').append(escape("NE\\\\NE")).append('&');
-    b.append(escape("findPatientWithAndList:exact")).append('=').append(escape("E\\$E")).append('&');
-    b.append(escape("findPatientWithAndList:exact")).append('=').append(escape("E\\|E")).append('&');
+    b.append(escapeUrlParam("findPatientWithAndList")).append('=').append(escapeUrlParam("NE\\,NE,NE\\,NE")).append('&');
+    b.append(escapeUrlParam("findPatientWithAndList")).append('=').append(escapeUrlParam("NE\\\\NE")).append('&');
+    b.append(escapeUrlParam("findPatientWithAndList:exact")).append('=').append(escapeUrlParam("E\\$E")).append('&');
+    b.append(escapeUrlParam("findPatientWithAndList:exact")).append('=').append(escapeUrlParam("E\\|E")).append('&');
 
     HttpGet httpGet = new HttpGet(b.toString());
 
@@ -416,7 +416,7 @@ public class SearchSearchServerDstu1Test {
 
   @Test
   public void testSearchWithTokenParameter() throws Exception {
-    String token = UrlUtil.escape("http://www.dmix.gov/vista/2957|301");
+    String token = UrlUtil.escapeUrlParam("http://www.dmix.gov/vista/2957|301");
     HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?tokenParam=" + token);
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());

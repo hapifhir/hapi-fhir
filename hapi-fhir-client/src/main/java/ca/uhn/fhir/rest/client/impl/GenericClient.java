@@ -354,7 +354,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				case '?':
 				case '$':
 				case ':':
-					b.append(UrlUtil.escape(Character.toString(nextChar)));
+					b.append(UrlUtil.escapeUrlParam(Character.toString(nextChar)));
 					break;
 				default:
 					b.append(nextChar);

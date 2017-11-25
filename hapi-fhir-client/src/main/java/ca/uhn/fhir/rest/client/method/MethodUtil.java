@@ -209,9 +209,9 @@ public class MethodUtil {
 			for (String nextValue : nextEntry.getValue()) {
 				b.append(haveQuestionMark ? '&' : '?');
 				haveQuestionMark = true;
-				b.append(UrlUtil.escape(nextEntry.getKey()));
+				b.append(UrlUtil.escapeUrlParam(nextEntry.getKey()));
 				b.append('=');
-				b.append(UrlUtil.escape(nextValue));
+				b.append(UrlUtil.escapeUrlParam(nextValue));
 			}
 		}
 		return b;

@@ -1,16 +1,20 @@
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.util.*;
-import java.util.Map.Entry;
-
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.escape.Escaper;
+import com.google.common.net.PercentEscaper;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -34,6 +38,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
+
+	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
+	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
+
 
 	/**
 	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is invalid.
@@ -88,18 +96,23 @@ public class UrlUtil {
 	}
 
 	/**
-	 * URL encode a value
+	 * URL encode a value according to RFC 3986
+	 * <p>
+	 * This method is intended to be applied to an individual parameter
+	 * name or value. For example, if you are creating the URL
+	 * <code>http://example.com/fhir/Patient?key=føø</code>
+	 * it would be appropriate to pass the string "føø" to this method,
+	 * but not appropriate to pass the entire URL since characters
+	 * such as "/" and "?" would also be escaped.
+	 * </P>
 	 */
-	public static String escape(String theValue) {
-		if (theValue == null) {
+	public static String escapeUrlParam(String theUnescaped) {
+		if (theUnescaped == null) {
 			return null;
 		}
-		try {
-			return URLEncoder.encode(theValue, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("UTF-8 not supported on this platform");
-		}
+		return PARAMETER_ESCAPER.escape(theUnescaped);
 	}
+
 
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();
@@ -147,7 +160,7 @@ public class UrlUtil {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(escape("http://snomed.info/sct?fhir_vs=isa/126851005"));
+		System.out.println(escapeUrlParam("http://snomed.info/sct?fhir_vs=isa/126851005"));
 	}
 
 	public static Map<String, String[]> parseQueryString(String theQueryString) {
@@ -156,36 +169,20 @@ public class UrlUtil {
 		return toQueryStringMap(map);
 	}
 
-	public static Map<String, String[]> parseQueryStrings(String... theQueryString) {
-		HashMap<String, List<String>> map = new HashMap<String, List<String>>();
-		for (String next : theQueryString) {
-			parseQueryString(next, map);
-		}
-		return toQueryStringMap(map);
-	}
-
-	private static Map<String, String[]> toQueryStringMap(HashMap<String, List<String>> map) {
-		HashMap<String, String[]> retVal = new HashMap<String, String[]>();
-		for (Entry<String, List<String>> nextEntry : map.entrySet()) {
-			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(new String[nextEntry.getValue().size()]));
-		}
-		return retVal;
-	}
-
 	private static void parseQueryString(String theQueryString, HashMap<String, List<String>> map) {
 		String query = theQueryString;
 		if (query.startsWith("?")) {
 			query = query.substring(1);
 		}
-		
-		
+
+
 		StringTokenizer tok = new StringTokenizer(query, "&");
 		while (tok.hasMoreTokens()) {
 			String nextToken = tok.nextToken();
 			if (isBlank(nextToken)) {
 				continue;
 			}
-			
+
 			int equalsIndex = nextToken.indexOf('=');
 			String nextValue;
 			String nextKey;
@@ -196,21 +193,28 @@ public class UrlUtil {
 				nextKey = nextToken.substring(0, equalsIndex);
 				nextValue = nextToken.substring(equalsIndex + 1);
 			}
-	
+
 			nextKey = unescape(nextKey);
 			nextValue = unescape(nextValue);
-			
+
 			List<String> list = map.get(nextKey);
 			if (list == null) {
-				list = new ArrayList<String>();
+				list = new ArrayList<>();
 				map.put(nextKey, list);
 			}
 			list.add(nextValue);
 		}
 	}
 
-	//@formatter:off
-	/** 
+	public static Map<String, String[]> parseQueryStrings(String... theQueryString) {
+		HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+		for (String next : theQueryString) {
+			parseQueryString(next, map);
+		}
+		return toQueryStringMap(map);
+	}
+
+	/**
 	 * Parse a URL in one of the following forms:
 	 * <ul>
 	 * <li>[Resource Type]?[Search Params]
@@ -278,6 +282,16 @@ public class UrlUtil {
 
 	}
 
+	//@formatter:off
+
+	private static Map<String, String[]> toQueryStringMap(HashMap<String, List<String>> map) {
+		HashMap<String, String[]> retVal = new HashMap<String, String[]>();
+		for (Entry<String, List<String>> nextEntry : map.entrySet()) {
+			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(new String[nextEntry.getValue().size()]));
+		}
+		return retVal;
+	}
+
 	public static String unescape(String theString) {
 		if (theString == null) {
 			return null;
@@ -305,28 +319,28 @@ public class UrlUtil {
 			return myParams;
 		}
 
-		public String getResourceId() {
-			return myResourceId;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
-		}
-
 		public void setParams(String theParams) {
 			myParams = theParams;
+		}
+
+		public String getResourceId() {
+			return myResourceId;
 		}
 
 		public void setResourceId(String theResourceId) {
 			myResourceId = theResourceId;
 		}
 
+		public String getResourceType() {
+			return myResourceType;
+		}
+
 		public void setResourceType(String theResourceType) {
 			myResourceType = theResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
 		}
 
 		public void setVersionId(String theVersionId) {

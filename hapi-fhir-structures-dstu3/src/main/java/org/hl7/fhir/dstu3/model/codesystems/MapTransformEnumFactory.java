@@ -45,7 +45,7 @@ public class MapTransformEnumFactory implements EnumFactory<MapTransform> {
       return MapTransform.COPY;
     if ("truncate".equals(codeString))
       return MapTransform.TRUNCATE;
-    if ("escape".equals(codeString))
+    if ("escapeUrlParam".equals(codeString))
       return MapTransform.ESCAPE;
     if ("cast".equals(codeString))
       return MapTransform.CAST;
@@ -84,7 +84,7 @@ public class MapTransformEnumFactory implements EnumFactory<MapTransform> {
     if (code == MapTransform.TRUNCATE)
       return "truncate";
     if (code == MapTransform.ESCAPE)
-      return "escape";
+      return "escapeUrlParam";
     if (code == MapTransform.CAST)
       return "cast";
     if (code == MapTransform.APPEND)

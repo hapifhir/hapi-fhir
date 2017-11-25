@@ -35,7 +35,6 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -229,14 +228,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				ArrayList<String> nextChoicesList = new ArrayList<>();
 				partsChoices.add(nextChoicesList);
 
-				String key = UrlUtil.escape(nextCompositeOf.getName());
+				String key = UrlUtil.escapeUrlParam(nextCompositeOf.getName());
 				if (paramsListForCompositePart != null) {
 					for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 						if (nextParam.getParamName().equals(nextCompositeOf.getName())) {
 							IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 							String value = nextParamAsClientParam.getValueAsQueryToken(getContext());
 							if (isNotBlank(value)) {
-								value = UrlUtil.escape(value);
+								value = UrlUtil.escapeUrlParam(value);
 								nextChoicesList.add(key + "=" + value);
 							}
 						}
@@ -246,7 +245,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					for (ResourceLink nextLink : linksForCompositePart) {
 						String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
 						if (isNotBlank(value)) {
-							value = UrlUtil.escape(value);
+							value = UrlUtil.escapeUrlParam(value);
 							nextChoicesList.add(key + "=" + value);
 						}
 					}

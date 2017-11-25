@@ -1,12 +1,34 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class UrlUtilTest {
+
+	@Test
+	public void testConstructAbsoluteUrl() {
+		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl(null, "http://foo/bar/baz"));
+		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz"));
+		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz/"));
+		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "./baz/"));
+
+		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "../baz/"));
+		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "/baz/"));
+	}
+
+	@Test
+	public void testConstructRelativeUrl() {
+		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://boo/far/faz", "http://foo/bar/baz"));
+		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://foo/far/faz", "http://foo/bar/baz"));
+		assertEquals("baz", UrlUtil.constructRelativeUrl("http://foo/bar/boo", "http://foo/bar/baz"));
+	}
+
+	@Test
+	public void testEscape() {
+		assertEquals("A%20B", UrlUtil.escapeUrlParam("A B"));
+		assertEquals("A%2BB", UrlUtil.escapeUrlParam("A+B"));
+	}
 
 	@Test
 	public void testIsValid() {
@@ -14,7 +36,7 @@ public class UrlUtilTest {
 		assertTrue(UrlUtil.isValid("https://foo"));
 		assertTrue(UrlUtil.isValid("HTTP://Foo"));
 		assertTrue(UrlUtil.isValid("HTTPS://Foo"));
-		
+
 		assertFalse(UrlUtil.isValid("file://foo"));
 		assertFalse(UrlUtil.isValid("://foo"));
 		assertFalse(UrlUtil.isValid("http:/ss"));
@@ -24,7 +46,7 @@ public class UrlUtilTest {
 		assertFalse(UrlUtil.isValid(""));
 		assertFalse(UrlUtil.isValid(null));
 	}
-	
+
 	@Test
 	public void testParseUrl() {
 		assertEquals("ConceptMap", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType());
@@ -36,25 +58,5 @@ public class UrlUtilTest {
 		assertEquals("a=b", UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams());
 
 	}
-	
-	@Test
-	public void testConstructAbsoluteUrl() {
-		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl(null, "http://foo/bar/baz"));
-		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl("http://foo/bar/","baz"));
-		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/","baz/"));
-		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/","./baz/"));
 
-		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/","../baz/"));
-		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/","/baz/"));
-	}
-
-	
-	
-	@Test
-	public void testConstructRelativeUrl() {
-		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://boo/far/faz", "http://foo/bar/baz"));
-		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://foo/far/faz", "http://foo/bar/baz"));
-		assertEquals("baz", UrlUtil.constructRelativeUrl("http://foo/bar/boo", "http://foo/bar/baz"));
-	}
-	
 }

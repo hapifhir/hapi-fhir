@@ -60,7 +60,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -175,7 +174,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (valueBuilder.length() > 0) {
 					valueBuilder.append(',');
 				}
-				valueBuilder.append(UrlUtil.escape(next.getValueAsQueryToken(myContext)));
+				valueBuilder.append(UrlUtil.escapeUrlParam(next.getValueAsQueryToken(myContext)));
 				targetResourceType = next.getTargetResourceType();
 				owningParameter = next.getOwningFieldName();
 				parameterName = next.getParameterName();
@@ -185,7 +184,7 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 
-			String matchUrl = targetResourceType + '?' + UrlUtil.escape(parameterName) + '=' + valueBuilder.toString();
+			String matchUrl = targetResourceType + '?' + UrlUtil.escapeUrlParam(parameterName) + '=' + valueBuilder.toString();
 			RuntimeResourceDefinition targetResourceDefinition;
 			try {
 				targetResourceDefinition = myContext.getResourceDefinition(targetResourceType);
@@ -1272,13 +1271,13 @@ public class SearchBuilder implements ISearchBuilder {
 									List<List<String>> params = new ArrayList<>();
 									for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamNameToValues : theParams.entrySet()) {
 										String nextParamName = nextParamNameToValues.getKey();
-										nextParamName = UrlUtil.escape(nextParamName);
+										nextParamName = UrlUtil.escapeUrlParam(nextParamName);
 										for (List<? extends IQueryParameterType> nextAnd : nextParamNameToValues.getValue()) {
 											ArrayList<String> nextValueList = new ArrayList<>();
 											params.add(nextValueList);
 											for (IQueryParameterType nextOr : nextAnd) {
 												String nextOrValue = nextOr.getValueAsQueryToken(myContext);
-												nextOrValue = UrlUtil.escape(nextOrValue);
+												nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
 												nextValueList.add(nextParamName + "=" + nextOrValue);
 											}
 										}

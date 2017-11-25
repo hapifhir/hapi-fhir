@@ -20,13 +20,6 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -34,6 +27,12 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.util.UrlUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public abstract class BaseHttpClientInvocation {
 
@@ -115,13 +114,9 @@ public abstract class BaseHttpClientInvocation {
 					} else {
 						theUrlBuilder.append('&');
 					}
-					try {
-						theUrlBuilder.append(URLEncoder.encode(next.getKey(), "UTF-8"));
-						theUrlBuilder.append('=');
-						theUrlBuilder.append(URLEncoder.encode(nextValue, "UTF-8"));
-					} catch (UnsupportedEncodingException e) {
-						throw new Error("UTF-8 not supported - This should not happen");
-					}
+					theUrlBuilder.append(UrlUtil.escapeUrlParam(next.getKey()));
+					theUrlBuilder.append('=');
+					theUrlBuilder.append(UrlUtil.escapeUrlParam(nextValue));
 				}
 			}
 		}

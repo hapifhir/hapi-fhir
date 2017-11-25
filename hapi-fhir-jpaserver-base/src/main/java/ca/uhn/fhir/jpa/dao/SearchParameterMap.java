@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -24,7 +23,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 import java.util.*;
 
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -138,9 +136,9 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			addUrlParamSeparator(b);
 			b.append(paramName);
 			b.append('=');
-			b.append(UrlUtil.escape(nextInclude.getParamType()));
+			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 			b.append(':');
-			b.append(UrlUtil.escape(nextInclude.getParamName()));
+			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamName()));
 			if (isNotBlank(nextInclude.getParamTargetType())) {
 				b.append(':');
 				b.append(nextInclude.getParamTargetType());
@@ -314,7 +312,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			for (List<IQueryParameterType> nextValuesAnd : nextValuesAndsOut) {
 				addUrlParamSeparator(b);
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
-				b.append(UrlUtil.escape(nextKey));
+				b.append(UrlUtil.escapeUrlParam(nextKey));
 
 				if (firstValue.getMissing() != null) {
 					b.append(Constants.PARAMQUALIFIER_MISSING);
@@ -340,7 +338,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 					}
 					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
 //					b.append(ParameterUtil.escapeAndUrlEncode(valueAsQueryToken));
-					b.append(UrlUtil.escape(valueAsQueryToken));
+					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}
 			
