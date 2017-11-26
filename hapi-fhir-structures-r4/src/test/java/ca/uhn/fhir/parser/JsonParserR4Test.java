@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
@@ -109,6 +110,51 @@ public class JsonParserR4Test {
 		b.addEntry().setResource(p);
 		return b;
 	}
+
+
+	@Test
+	public void testParseAndEncodeExtensionWithValueWithExtension() {
+		String input = "{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"extension\": [\n" +
+			"    {\n" +
+			"      \"url\": \"https://purl.org/elab/fhir/network/StructureDefinition/1/BirthWeight\",\n" +
+			"      \"_valueDecimal\": {\n" +
+			"        \"extension\": [\n" +
+			"          {\n" +
+			"            \"url\": \"http://www.hl7.org/fhir/extension-data-absent-reason.html\",\n" +
+			"            \"valueCoding\": {\n" +
+			"              \"system\": \"http://hl7.org/fhir/ValueSet/birthweight\",\n" +
+			"              \"code\": \"Underweight\",\n" +
+			"              \"userSelected\": false\n" +
+			"            }\n" +
+			"          }\n" +
+			"        ]\n" +
+			"      }\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"identifier\": [\n" +
+			"    {\n" +
+			"      \"system\": \"https://purl.org/elab/fhir/network/StructureDefinition/1/EuroPrevallStudySubjects\",\n" +
+			"      \"value\": \"1\"\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"gender\": \"female\"\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		IParser xmlParser = ourCtx.newXmlParser();
+		jsonParser.setDontEncodeElements(Sets.newHashSet("id", "meta"));
+		xmlParser.setDontEncodeElements(Sets.newHashSet("id", "meta"));
+
+		Patient parsed = jsonParser.parseResource(Patient.class, input);
+
+		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
+		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

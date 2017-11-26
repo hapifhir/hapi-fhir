@@ -25,7 +25,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
 		try {
@@ -50,7 +50,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
 		try {

@@ -92,9 +92,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				} else {
 					rawB.append('&');
 				}
-				rawB.append(UrlUtil.escape(next));
+				rawB.append(UrlUtil.escapeUrlParam(next));
 				rawB.append('=');
-				rawB.append(UrlUtil.escape(nextValue));
+				rawB.append(UrlUtil.escapeUrlParam(nextValue));
 			}
 		}
 		if (rawB.length() == 0) {

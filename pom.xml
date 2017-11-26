@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.2.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>https://hapifhir.io</url>
 
@@ -219,7 +219,7 @@
 		</developer>
 		<developer>
 			<id>SRiviere</id>
-			<name>Sébastien Rivière</name>
+			<name>SÃ©bastien RiviÃ¨re</name>
 		</developer>
 		<developer>
 			<id>karlmdavis</id>
@@ -377,6 +377,10 @@
 		<developer>
 			<id>JiajingLiang</id>
 			<name>Jiajing Liang</name>
+		</developer>
+		<developer>
+			<id>jamesdaily</id>
+			<name>James Daily</name>
 		</developer>
 	</developers>
 
@@ -1170,7 +1174,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.15</version>
+					<version>1.16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

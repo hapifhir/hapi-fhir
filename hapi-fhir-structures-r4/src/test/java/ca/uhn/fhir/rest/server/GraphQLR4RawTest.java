@@ -91,7 +91,7 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape("{name{family,given}}"));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -114,7 +114,7 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Condition/123/$graphql?query=" + UrlUtil.escape("{name{family,given}}"));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -132,7 +132,7 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape("{name{family,given}}"));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);

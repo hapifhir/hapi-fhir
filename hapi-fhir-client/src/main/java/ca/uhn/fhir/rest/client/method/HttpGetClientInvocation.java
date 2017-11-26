@@ -20,21 +20,18 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author James Agnew
@@ -51,51 +48,40 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
-	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, List<String> theUrlFragments) {
-		super(theContext);
-		myParameters = theParameters;
-		myUrlPath = StringUtils.join(theUrlFragments, '/');
-	}
-
 	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
 		super(theContext);
-		myParameters = new HashMap<String, List<String>>();
+		myParameters = new HashMap<>();
 		myUrlPath = theUrlPath;
 	}
 
-	public HttpGetClientInvocation(FhirContext theContext, String... theUrlFragments) {
-		super(theContext);
-		myParameters = new HashMap<String, List<String>>();
-		myUrlPath = StringUtils.join(theUrlFragments, '/');
-	}
 
+	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
+		boolean retVal = first;
+		if (retVal) {
+			b.append('?');
+			retVal = false;
+		} else {
+			b.append('&');
+		}
+		b.append(UrlUtil.escapeUrlParam(nextKey));
+		b.append('=');
+		b.append(UrlUtil.escapeUrlParam(nextValue));
 
-	public HttpGetClientInvocation(FhirContext theContext, List<String> theUrlFragments) {
-		super(theContext);
-		myParameters = new HashMap<String, List<String>>();
-		myUrlPath = StringUtils.join(theUrlFragments, '/');
-	}
-
-	public Map<String, List<String>> getParameters() {
-		return myParameters;
-	}
-
-	public String getUrlPath() {
-		return myUrlPath;
+		return retVal;
 	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
-		
+
 		if (!myUrlPath.contains("://")) {
-            b.append(theUrlBase);
-            if (!theUrlBase.endsWith("/") && !myUrlPath.startsWith("/")) {
-                b.append('/');
-            }
-        }
-        b.append(myUrlPath);
-		
+			b.append(theUrlBase);
+			if (!theUrlBase.endsWith("/") && !myUrlPath.startsWith("/")) {
+				b.append('/');
+			}
+		}
+		b.append(myUrlPath);
+
 		boolean first = b.indexOf("?") == -1;
 		for (Entry<String, List<String>> next : myParameters.entrySet()) {
 			if (next.getValue() == null || next.getValue().isEmpty()) {
@@ -112,22 +98,12 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		return super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
 	}
 
-	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
-		boolean retVal = first;
-		if (retVal) {
-			b.append('?');
-			retVal = false;
-		} else {
-			b.append('&');
-		}
-		try {
-			b.append(URLEncoder.encode(nextKey, "UTF-8"));
-			b.append('=');
-			b.append(URLEncoder.encode(nextValue, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new ConfigurationException("Could not find UTF-8 encoding. This shouldn't happen.", e);
-		}
-		return retVal;
+	public Map<String, List<String>> getParameters() {
+		return myParameters;
+	}
+
+	public String getUrlPath() {
+		return myUrlPath;
 	}
 
 }

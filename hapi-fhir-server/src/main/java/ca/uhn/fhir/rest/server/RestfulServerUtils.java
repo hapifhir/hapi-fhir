@@ -19,34 +19,38 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
-
-import java.io.*;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-
-import ca.uhn.fhir.util.BinaryUtil;
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
 import ca.uhn.fhir.rest.server.method.SummaryEnumParameter;
+import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class RestfulServerUtils {
 	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
@@ -127,74 +131,70 @@ public class RestfulServerUtils {
 	}
 
 	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
-			BundleTypeEnum theBundleType) {
-		try {
-			StringBuilder b = new StringBuilder();
-			b.append(theServerBase);
-			b.append('?');
-			b.append(Constants.PARAM_PAGINGACTION);
-			b.append('=');
-			b.append(URLEncoder.encode(theSearchId, "UTF-8"));
+													  BundleTypeEnum theBundleType) {
+		StringBuilder b = new StringBuilder();
+		b.append(theServerBase);
+		b.append('?');
+		b.append(Constants.PARAM_PAGINGACTION);
+		b.append('=');
+		b.append(UrlUtil.escapeUrlParam(theSearchId));
 
+		b.append('&');
+		b.append(Constants.PARAM_PAGINGOFFSET);
+		b.append('=');
+		b.append(theOffset);
+		b.append('&');
+		b.append(Constants.PARAM_COUNT);
+		b.append('=');
+		b.append(theCount);
+		String[] strings = theRequestParameters.get(Constants.PARAM_FORMAT);
+		if (strings != null && strings.length > 0) {
 			b.append('&');
-			b.append(Constants.PARAM_PAGINGOFFSET);
+			b.append(Constants.PARAM_FORMAT);
 			b.append('=');
-			b.append(theOffset);
-			b.append('&');
-			b.append(Constants.PARAM_COUNT);
-			b.append('=');
-			b.append(theCount);
-			String[] strings = theRequestParameters.get(Constants.PARAM_FORMAT);
-			if (strings != null && strings.length > 0) {
-				b.append('&');
-				b.append(Constants.PARAM_FORMAT);
-				b.append('=');
-				String format = strings[0];
-				format = replace(format, " ", "+");
-				b.append(UrlUtil.escape(format));
-			}
-			if (thePrettyPrint) {
-				b.append('&');
-				b.append(Constants.PARAM_PRETTY);
-				b.append('=');
-				b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
-			}
-
-			if (theIncludes != null) {
-				for (Include nextInclude : theIncludes) {
-					if (isNotBlank(nextInclude.getValue())) {
-						b.append('&');
-						b.append(Constants.PARAM_INCLUDE);
-						b.append('=');
-						b.append(URLEncoder.encode(nextInclude.getValue(), "UTF-8"));
-					}
-				}
-			}
-
-			if (theBundleType != null) {
-				b.append('&');
-				b.append(Constants.PARAM_BUNDLETYPE);
-				b.append('=');
-				b.append(theBundleType.getCode());
-			}
-
-			String paramName = Constants.PARAM_ELEMENTS;
-			String[] params = theRequestParameters.get(paramName);
-			if (params != null) {
-				for (String nextValue : params) {
-					if (isNotBlank(nextValue)) {
-						b.append('&');
-						b.append(paramName);
-						b.append('=');
-						b.append(UrlUtil.escape(nextValue));
-					}
-				}
-			}
-
-			return b.toString();
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("UTF-8 not supported", e);// should not happen
+			String format = strings[0];
+			format = replace(format, " ", "+");
+			b.append(UrlUtil.escapeUrlParam(format));
 		}
+		if (thePrettyPrint) {
+			b.append('&');
+			b.append(Constants.PARAM_PRETTY);
+			b.append('=');
+			b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
+		}
+
+		if (theIncludes != null) {
+			for (Include nextInclude : theIncludes) {
+				if (isNotBlank(nextInclude.getValue())) {
+					b.append('&');
+					b.append(Constants.PARAM_INCLUDE);
+					b.append('=');
+					b.append(UrlUtil.escapeUrlParam(nextInclude.getValue()));
+				}
+			}
+		}
+
+		if (theBundleType != null) {
+			b.append('&');
+			b.append(Constants.PARAM_BUNDLETYPE);
+			b.append('=');
+			b.append(theBundleType.getCode());
+		}
+
+		String paramName = Constants.PARAM_ELEMENTS;
+		String[] params = theRequestParameters.get(paramName);
+		if (params != null) {
+			for (String nextValue : params) {
+				if (isNotBlank(nextValue)) {
+					b.append('&');
+					b.append(paramName);
+					b.append('=');
+					b.append(UrlUtil.escapeUrlParam(nextValue));
+				}
+			}
+		}
+
+		return b.toString();
 	}
 
 	/**
@@ -392,15 +392,15 @@ public class RestfulServerUtils {
 				try {
 					NarrativeModeEnum narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
 					switch (narrativeMode) {
-					case NORMAL:
-						retVal = Collections.singleton(SummaryEnum.FALSE);
-						break;
-					case ONLY:
-						retVal = Collections.singleton(SummaryEnum.TEXT);
-						break;
-					case SUPPRESS:
-						retVal = Collections.singleton(SummaryEnum.DATA);
-						break;
+						case NORMAL:
+							retVal = Collections.singleton(SummaryEnum.FALSE);
+							break;
+						case ONLY:
+							retVal = Collections.singleton(SummaryEnum.TEXT);
+							break;
+						case SUPPRESS:
+							retVal = Collections.singleton(SummaryEnum.DATA);
+							break;
 					}
 				} catch (IllegalArgumentException e) {
 					ourLog.debug("Invalid {} parameter: {}", Constants.PARAM_NARRATIVE, narrative[0]);
@@ -461,13 +461,13 @@ public class RestfulServerUtils {
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 		IParser parser;
 		switch (responseEncoding) {
-		case JSON:
-			parser = theContext.newJsonParser();
-			break;
-		case XML:
-		default:
-			parser = theContext.newXmlParser();
-			break;
+			case JSON:
+				parser = theContext.newJsonParser();
+				break;
+			case XML:
+			default:
+				parser = theContext.newXmlParser();
+				break;
 		}
 
 		configureResponseParser(theRequestDetails, parser);
@@ -581,13 +581,13 @@ public class RestfulServerUtils {
 	}
 
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader,
-			boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
+																 boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
 		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage,
-			boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
-			throws IOException {
+																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
+		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
@@ -706,7 +706,7 @@ public class RestfulServerUtils {
 		try {
 			return Integer.parseInt(retVal[0]);
 		} catch (NumberFormatException e) {
-			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] { theParamName, retVal[0], e });
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[]{theParamName, retVal[0], e});
 			return null;
 		}
 	}
@@ -752,7 +752,7 @@ public class RestfulServerUtils {
 				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
 					FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
 					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU3)
-							|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()));
+						|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()));
 				} else {
 					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
 				}

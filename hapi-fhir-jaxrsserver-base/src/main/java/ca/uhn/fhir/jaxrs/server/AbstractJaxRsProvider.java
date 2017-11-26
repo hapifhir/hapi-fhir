@@ -26,8 +26,6 @@ import java.util.Map.Entry;
 import javax.ws.rs.core.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -35,12 +33,9 @@ import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -57,11 +52,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	private final FhirContext CTX;
 	/** the http headers */
 	@Context
-	private HttpHeaders theHeaders;
+	private HttpHeaders myHeaders;
 
 	/** the uri info */
 	@Context
-	private UriInfo theUriInfo;
+	private UriInfo myUriInfo;
 
 	/**
 	 * Default is DSTU2. Use {@link AbstractJaxRsProvider#AbstractJaxRsProvider(FhirContext)} to specify a DSTU3 context.
@@ -77,13 +72,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	protected AbstractJaxRsProvider(final FhirContext ctx) {
 		CTX = ctx;
-	}
-
-	private IBaseOperationOutcome createOutcome(final DataFormatException theException) {
-		final IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getFhirContext());
-		final String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
-		OperationOutcomeUtil.addIssue(getFhirContext(), oo, ERROR, detailsValue, null, PROCESSING);
-		return oo;
 	}
 
 	/**
@@ -142,7 +130,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the headers
 	 */
 	public HttpHeaders getHeaders() {
-		return this.theHeaders;
+		return this.myHeaders;
 	}
 
 	/**
@@ -203,7 +191,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the requestbuilder
 	 */
 	public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation, final String theResourceName) {
-		return new JaxRsRequest.Builder(this, requestType, restOperation, theUriInfo.getRequestUri().toString(), theResourceName);
+		return new JaxRsRequest.Builder(this, requestType, restOperation, myUriInfo.getRequestUri().toString(), theResourceName);
 	}
 
 	/**
@@ -224,7 +212,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return the uri info
 	 */
 	public UriInfo getUriInfo() {
-		return this.theUriInfo;
+		return this.myUriInfo;
 	}
 
 	/**
@@ -241,9 +229,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 			throws IOException {
 		if (theException instanceof JaxRsResponseException) {
 			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
-		} else if (theException instanceof DataFormatException) {
-			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
-					new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
 		} else {
 			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
 					new JaxRsExceptionInterceptor().convertException(this, theException));
@@ -273,7 +258,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 *           the headers to set
 	 */
 	public void setHeaders(final HttpHeaders headers) {
-		this.theHeaders = headers;
+		this.myHeaders = headers;
 	}
 
 	/**
@@ -283,7 +268,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 *           the uri info
 	 */
 	public void setUriInfo(final UriInfo uriInfo) {
-		this.theUriInfo = uriInfo;
+		this.myUriInfo = uriInfo;
 	}
 
 	/**

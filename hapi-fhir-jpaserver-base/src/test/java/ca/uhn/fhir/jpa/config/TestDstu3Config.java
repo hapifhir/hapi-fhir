@@ -90,7 +90,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 		};
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
+		retVal.setUrl("jdbc:derby:memory:myUnitTestDBDstu3;create=true");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

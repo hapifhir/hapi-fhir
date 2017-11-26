@@ -25,7 +25,6 @@ import java.io.IOException;
  */
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map.Entry;
 
@@ -33,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
@@ -277,13 +277,9 @@ public class LoggingInterceptor extends InterceptorAdapter {
 						} else {
 							b.append('&');
 						}
-						try {
-							b.append(URLEncoder.encode(next.getKey(), "UTF-8"));
-							b.append('=');
-							b.append(URLEncoder.encode(nextValue, "UTF-8"));
-						} catch (UnsupportedEncodingException e) {
-							throw new ca.uhn.fhir.context.ConfigurationException("UTF-8 not supported", e);
-						}
+						b.append(UrlUtil.escapeUrlParam(next.getKey()));
+						b.append('=');
+						b.append(UrlUtil.escapeUrlParam(nextValue));
 					}
 				}
 				return b.toString();
