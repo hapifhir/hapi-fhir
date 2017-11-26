@@ -2346,7 +2346,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testSortByLastUpdated() {
+	public void testSortByLastUpdated() throws InterruptedException {
 		String methodName = "testSortByLastUpdated";
 
 		Patient p = new Patient();
@@ -2354,20 +2354,28 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		p.addName().addFamily(methodName);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		sleepUntilTimeChanges();
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
 		p.addName().addFamily(methodName);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		sleepUntilTimeChanges();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
 		p.addName().addFamily(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		sleepUntilTimeChanges();
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system4").setValue(methodName);
 		p.addName().addFamily(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		sleepUntilTimeChanges();
 
 		SearchParameterMap pm;
 		List<IIdType> actual;

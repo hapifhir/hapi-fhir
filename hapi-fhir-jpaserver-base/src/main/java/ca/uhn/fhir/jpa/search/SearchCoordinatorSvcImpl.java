@@ -593,6 +593,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					shouldSync = true;
 				}
 
+				// If no abort was requested, bail out
+				Validate.isTrue(myAbortRequested == false, "Abort has been requested");
+
 				if (shouldSync) {
 					saveUnsynced(theResultIterator);
 				}
@@ -605,10 +608,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				}
 
-				// Check if an abort got requested
-				Validate.isTrue(myAbortRequested == false, "Abort has been requested");
-
 			}
+
+			// If no abort was requested, bail out
+			Validate.isTrue(myAbortRequested == false, "Abort has been requested");
+
 			saveUnsynced(theResultIterator);
 		}
 

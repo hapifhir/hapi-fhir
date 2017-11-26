@@ -30,7 +30,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
+		retVal.setUrl("jdbc:derby:memory:myUnitTestDBDstu2;create=true");
 		retVal.setUsername("");
 		retVal.setPassword("");
 		return retVal;

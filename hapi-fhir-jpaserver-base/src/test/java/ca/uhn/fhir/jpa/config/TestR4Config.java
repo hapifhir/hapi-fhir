@@ -85,7 +85,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		};
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
+		retVal.setUrl("jdbc:derby:memory:myUnitTestDBR4;create=true");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
