@@ -15,16 +15,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.CoreMatchers;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -37,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -1716,41 +1713,67 @@ public class JsonParserDstu2Test {
 	public void testEncodeResourceWithExtensionMetadata() throws Exception {
 		ProcedureRequest procedureRequest = new ProcedureRequest();
 		procedureRequest.setStatus(ProcedureRequestStatusEnum.ACCEPTED);
-		addExtensionResourceMetadataKeyToResource(procedureRequest, false, "http://someurl.com", "SomeValue");
-		addExtensionResourceMetadataKeyToResource(procedureRequest, false, "http://someurl2.com", "SomeValue2");
-		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier", "SomeValue");
-		addExtensionResourceMetadataKeyToResource(procedureRequest, true, "http://someurl.com/modifier2", "SomeValue2");
-
-		Organization organization = new Organization();
-		organization.setId(new IdDt("Someorganization"));
-		ExtensionDt extensionDt = new ExtensionDt(false, "http://someurl3.com", new ResourceReferenceDt(organization.getId()));
-		procedureRequest.getResourceMetadata()
-			.put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(extensionDt.getUrl()), extensionDt);
+		ExtensionDt timestamp = new ExtensionDt(false, "http://fhir.sjanic.com/timestamp");
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/user", new ResourceReferenceDt("sjanic"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/instance", new InstantDt("2012-01-01T13:00:00Z"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/organization", new ResourceReferenceDt("sjanic_org"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/role", new CodeableConceptDt().addCoding(new CodingDt("sjanic", "Doctor").setDisplay("Doctorin")));
+		ExtensionDt payment = new ExtensionDt(true, "http://fhir.sjanic.com/procedureRequest/requiresPatientPayment", new BooleanDt(true));
+		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(timestamp.getUrl()), timestamp);
+		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(payment.getUrl()), payment);
 
 		String json = ourCtx.newJsonParser().encodeResourceToString(procedureRequest);
 
 		// @formatter:off
 		assertThat(json, stringContainsInOrder(
-			"\"meta\":{",
-			"\"extension\":[{",
-			"\"url\":\"http://someurl.com\",",
-			"\"valueString\":\"SomeValue\"",
-			"},{",
-			"\"url\":\"http://someurl2.com\",",
-			"\"valueString\":\"SomeValue2\"",
-			"}],",
-			"\"modifierExtension\":[{",
-			"\"url\":\"http://someurl.com/modifier\",",
-			"\"valueString\":\"SomeValue\"",
-			"},{",
-			"\"url\":\"http://someurl.com/modifier2\",",
-			"\"valueString\":\"SomeValue2\"",
-			"}]"));
+			"\"meta\":{"+
+				"\"extension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp\","+
+				"\"extension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/user\","+
+				"\"valueReference\":{"+
+				"\"reference\":\"sjanic\""+
+				"}"+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/instance\","+
+				"\"valueInstant\":\"2012-01-01T13:00:00Z\""+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/organization\","+
+				"\"valueReference\":{"+
+				"\"reference\":\"sjanic_org\""+
+				"}"+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/role\","+
+				"\"valueCodeableConcept\":{"+
+				"\"coding\":["+
+				"{"+
+				"\"system\":\"sjanic\","+
+				"\"code\":\"Doctor\","+
+				"\"display\":\"Doctorin\""+
+				"}"+
+				"]"+
+				"}"+
+				"}"+
+				"]"+
+				"}"+
+				"],"+
+				"\"modifierExtension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/procedureRequest/requiresPatientPayment\","+
+				"\"valueBoolean\":true"+
+				"}"+
+				"]"+
+				"},"));
 		// @formatter:on
 	}
 
 	@Test
-	public void testParseResourceWithReferenceExtensionMetadata() throws Exception {
+	public void testParseResourceWithExtensionMetadata() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/procedure-request.json"));
 		IParser parser = ourCtx.newJsonParser();
 		IParserErrorHandler peh = mock(IParserErrorHandler.class);
@@ -1760,37 +1783,21 @@ public class JsonParserDstu2Test {
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
 		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
-		assertReferenceExtensionMetadata(p, "http://someurl3.com", false, ResourceReferenceDt.class, "dc0b549a-f852-11e6-bc64-92361f002671");
+		assertParsedResourcesExtensionMetadata(p);
 	}
 
-	private void assertReferenceExtensionMetadata(
-		BaseResource resource,
-		String url,
-		boolean isModifier,
-		Class<?> expectedType,
-		String expectedValue) {
-		ExtensionDt extension = (ExtensionDt) resource.getResourceMetadata().get(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(url));
-		assertThat(extension.getValue(), CoreMatchers.instanceOf(expectedType));
-		assertThat(extension.isModifier(), equalTo(isModifier));
-		assertThat(extension.getValue(), CoreMatchers.instanceOf(BaseResourceReferenceDt.class));
-		assertThat(((BaseResourceReferenceDt)extension.getValue()).getReference().getIdPart(), equalTo(expectedValue));
-	}
+	private void assertParsedResourcesExtensionMetadata(ProcedureRequest resource) throws Exception {
+		ExtensionDt payment = (ExtensionDt) resource.getResourceMetadata().get(
+			new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://fhir.sjanic.com/procedureRequest/requiresPatientPayment"));
+		assertThat(payment.isModifier(), equalTo(true));
+		assertThat(((BooleanDt)payment.getValue()).getValue(), equalTo(true));
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCannotEncodeSubextensionsOnMeta() {
-		ProcedureRequest procedureRequest = new ProcedureRequest();
-		procedureRequest.setStatus(ProcedureRequestStatusEnum.ACCEPTED);
-		ExtensionDt parent = new ExtensionDt(false, "#parent");
-		parent.addUndeclaredExtension(new ExtensionDt(false, "#child", new DurationDt().setValue(123)));
-		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(parent.getUrl()), parent);
-
-		String json = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedureRequest);
-	}
-
-	private void addExtensionResourceMetadataKeyToResource(BaseResource resource, boolean isModifier, String url, String value) {
-		ExtensionDt extensionDt = new ExtensionDt(isModifier, url, new StringDt(value));
-		resource.getResourceMetadata()
-			.put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(extensionDt.getUrl()), extensionDt);
+		TimestampFields timestampFields = new TimestampFields(resource);
+		assertThat(timestampFields.user.getReference().getIdPart(), equalTo("sjanic"));
+		assertThat(timestampFields.instance.getValue(), equalTo(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		assertThat(timestampFields.organization.getReference().getIdPart(), equalTo("sjanic_org"));
+		assertThat(timestampFields.role.getCodingFirstRep().getSystem(), equalTo("sjanic"));
+		assertThat(timestampFields.role.getCodingFirstRep().getCode(), equalTo("Doctor"));
 	}
 
 	@Test
@@ -2057,5 +2064,26 @@ public class JsonParserDstu2Test {
 		List<ExtensionDt> extlst = fhirPat.getUndeclaredExtensionsByUrl("x1");
 		Assert.assertEquals(1, extlst.size());
 		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
+	}
+
+	private static final class TimestampFields {
+		ResourceReferenceDt user;
+		InstantDt instance;
+		ResourceReferenceDt organization;
+		CodeableConceptDt role;
+
+		TimestampFields(BaseResource resource) {
+			ExtensionDt timestamp = (ExtensionDt) resource.getResourceMetadata().get(
+				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://fhir.sjanic.com/timestamp"));
+
+			Map<String, ExtensionDt> timestampFields = new HashMap<>(timestamp.getExtension().size());
+			for (ExtensionDt extensionDt : timestamp.getExtension()) {
+				timestampFields.put(extensionDt.getUrl(), extensionDt);
+			}
+			user = ((ResourceReferenceDt)timestampFields.get("http://fhir.sjanic.com/timestamp/user").getValue());
+			instance = (InstantDt) timestampFields.get("http://fhir.sjanic.com/timestamp/instance").getValue();
+			organization = (ResourceReferenceDt) timestampFields.get("http://fhir.sjanic.com/timestamp/organization").getValue();
+			role = (CodeableConceptDt) timestampFields.get("http://fhir.sjanic.com/timestamp/role").getValue();
+		}
 	}
 }

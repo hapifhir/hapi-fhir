@@ -26,7 +26,6 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.parser.json.*;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -695,7 +693,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					theEventWriter.endArray();
 				}
 
-				addExtensionMetadata(extensionMetadataKeys, theEventWriter);
+				addExtensionMetadata(theResDef, theResource, theContainedResource, theSubResource, extensionMetadataKeys, resDef, theEventWriter);
 
 				theEventWriter.endObject(); // end meta
 			}
@@ -706,52 +704,21 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		theEventWriter.endObject();
 	}
 
-	private void addExtensionMetadata(List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys, JsonLikeWriter theEventWriter) throws IOException {
+
+	private void addExtensionMetadata(RuntimeResourceDefinition theResDef, IBaseResource theResource,
+												 boolean theContainedResource, boolean theSubResource,
+												 List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys,
+												 RuntimeResourceDefinition resDef,
+												 JsonLikeWriter theEventWriter) throws IOException {
 		if (extensionMetadataKeys.isEmpty()) {
 			return;
 		}
 
-		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionKeys = new ArrayList<>(extensionMetadataKeys.size());
-		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> modifierExtensionKeys = new ArrayList<>(extensionKeys.size());
+		ExtensionDt metaResource = new ExtensionDt();
 		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : extensionMetadataKeys) {
-			if (!((ExtensionDt) entry.getValue()).isModifier()) {
-				extensionKeys.add(entry);
-			} else {
-				modifierExtensionKeys.add(entry);
-			}
+			metaResource.addUndeclaredExtension((ExtensionDt) entry.getValue());
 		}
-
-		writeMetadataExtensions(extensionKeys, "extension", theEventWriter);
-		writeMetadataExtensions(modifierExtensionKeys, "modifierExtension", theEventWriter);
-	}
-
-	private void writeMetadataExtensions(List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensions, String arrayName, JsonLikeWriter theEventWriter) throws IOException {
-		if (extensions.isEmpty()) {
-			return;
-		}
-		beginArray(theEventWriter, arrayName);
-		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> key : extensions) {
-			ExtensionDt extension = (ExtensionDt) key.getValue();
-			if (!extension.getAllUndeclaredExtensions().isEmpty()) {
-				throw new IllegalArgumentException("Sub-extensions on metadata isn't supported");
-			}
-			theEventWriter.beginObject();
-			writeOptionalTagWithTextNode(theEventWriter, "url", extension.getUrl());
-			RuntimeChildUndeclaredExtensionDefinition runtimeDefinitions = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-
-			String extensionDatatype = runtimeDefinitions.getChildNameByDatatype(extension.getValue().getClass());
-			if (extension.getValue() instanceof IPrimitiveDatatype) {
-				writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, extension.getValueAsPrimitive());
-			} else {
-				if (extension.getValue() instanceof BaseResourceReferenceDt) {
-					writeOptionalTagWithTextNode(theEventWriter, extensionDatatype, ((BaseResourceReferenceDt) extension.getValue()).getReference());
-				} else {
-					throw new IllegalArgumentException("Cannot parse meta extension with type: " + extension.getValue().getClass().getSimpleName());
-				}
-			}
-			theEventWriter.endObject();
-		}
-		theEventWriter.endArray();
+		encodeCompositeElementToStreamWriter(theResDef, theResource, metaResource, theEventWriter, theContainedResource, theSubResource, new CompositeChildElement(resDef, theSubResource));
 	}
 
 	/**
