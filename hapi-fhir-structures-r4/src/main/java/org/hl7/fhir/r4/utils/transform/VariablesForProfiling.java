@@ -28,6 +28,7 @@ public class VariablesForProfiling {
    * @param optional  initial optimal value
    * @param repeating initial repeating value
    */
+  @SuppressWarnings("WeakerAccess")
   public VariablesForProfiling(boolean optional, boolean repeating) {
     this.optional = optional;
     this.repeating = repeating;

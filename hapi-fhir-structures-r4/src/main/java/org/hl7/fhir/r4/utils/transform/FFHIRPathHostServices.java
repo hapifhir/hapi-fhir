@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * @author Claude Nanjo
  */
+@SuppressWarnings("JavaDoc")
 class FFHIRPathHostServices implements FHIRPathEngine.IEvaluationContext {
 
   /**
@@ -20,6 +21,7 @@ class FFHIRPathHostServices implements FHIRPathEngine.IEvaluationContext {
   /**
    * @param transformationEngine
    */
+  @SuppressWarnings("WeakerAccess")
   public FFHIRPathHostServices(FhirTransformationEngine transformationEngine) {
     this.transformationEngine = transformationEngine;
   }

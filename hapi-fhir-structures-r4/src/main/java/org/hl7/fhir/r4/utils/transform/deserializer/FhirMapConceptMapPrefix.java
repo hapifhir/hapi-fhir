@@ -10,7 +10,8 @@ public class FhirMapConceptMapPrefix {
   /**
    * name of variable to map
    */
-  public String VariableName;
+  @SuppressWarnings("unused")
+  public String variableName;
 
   /**
    * Url of concept prefix

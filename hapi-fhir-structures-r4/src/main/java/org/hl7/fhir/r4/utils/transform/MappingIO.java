@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Built to handle the overhead for parseing a structure map.
+ * Built to handle the overhead for parsing a structure map.
  *
  * @author Travis Lukach
  */
@@ -40,6 +40,7 @@ public class MappingIO {
   private MapHandler mapHandler;
 
 
+  @SuppressWarnings("WeakerAccess")
   public static StructureMap readStructureMap(String path) throws Exception {
     MappingIO myself = new MappingIO(path);
     StructureMap retVal = myself.getStructureMap();
@@ -52,6 +53,7 @@ public class MappingIO {
    *
    * @throws Exception if anything goes wrong on creation of processor or map handler
    */
+  @SuppressWarnings("unused")
   public MappingIO() throws Exception {
     this.mappingText = "";
     this.processor = new FhirMapProcessor();
@@ -64,6 +66,7 @@ public class MappingIO {
    * @param mappingFile file object to set the mapping file
    * @throws Exception if file is invalid
    */
+  @SuppressWarnings("unused")
   public MappingIO(File mappingFile) throws Exception {
     this.setMappingFile(mappingFile);
     this.mappingText = "";
@@ -77,6 +80,7 @@ public class MappingIO {
    * @param filePath string representation of the file
    * @throws Exception if anything goes wrong on creation of processor or map handler
    */
+  @SuppressWarnings("WeakerAccess")
   public MappingIO(String filePath) throws Exception {
     this.setMappingFile(new File(filePath));
     this.mappingText = "";
@@ -89,6 +93,7 @@ public class MappingIO {
    *
    * @return the file value
    */
+  @SuppressWarnings("unused")
   public File getMappingFile() {
     return this.mappingFile;
   }
@@ -99,6 +104,7 @@ public class MappingIO {
    * @param mappingFile the mappingFile
    * @throws IOException if file isn't found
    */
+  @SuppressWarnings("WeakerAccess")
   public void setMappingFile(File mappingFile) throws IOException {
     if (!mappingFile.getAbsolutePath().endsWith(".map") && mappingFile.exists()) {
       System.err.println("Invalid File");
@@ -113,6 +119,7 @@ public class MappingIO {
    *
    * @return file text
    */
+  @SuppressWarnings("unused")
   public String getMappingText() {
     return this.mappingText;
   }
@@ -137,6 +144,7 @@ public class MappingIO {
    *
    * @return the FhirMapProcessor
    */
+  @SuppressWarnings("unused")
   public FhirMapProcessor getProcessor() {
     return this.processor;
   }
@@ -146,6 +154,7 @@ public class MappingIO {
    *
    * @param processor a FhirMapProcessor
    */
+  @SuppressWarnings("unused")
   public void setProcessor(FhirMapProcessor processor) {
     this.processor = processor;
   }
@@ -155,6 +164,7 @@ public class MappingIO {
    *
    * @return the structure map handler
    */
+  @SuppressWarnings("unused")
   public MapHandler getMapHandler() {
     return this.mapHandler;
   }
@@ -177,6 +187,7 @@ public class MappingIO {
    * @return a Parsed StructureMap
    * @throws Exception if the map handler fails to safely be processed
    */
+  @SuppressWarnings("unused")
   public StructureMap getStructureMapFromFile(File file) throws Exception {
     this.setMappingFile(file);
     this.processor.parseFhirMap(this.readFile(), this.mapHandler);

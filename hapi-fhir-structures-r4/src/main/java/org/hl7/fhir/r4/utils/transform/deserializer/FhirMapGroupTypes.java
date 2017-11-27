@@ -23,8 +23,6 @@ public enum FhirMapGroupTypes {
    */
   TypeTypes;
 
-  public static final int SIZE = java.lang.Integer.SIZE;
-
   /**
    * Returns a lowercase string of the relevant values of FhirMapGroupTypes
    *
@@ -48,6 +46,7 @@ public enum FhirMapGroupTypes {
    * @return the enumeration based on position
    * @throws Exception if value is invalid or out of bounds
    */
+  @SuppressWarnings("unused")
   public static FhirMapGroupTypes forValue(int value) throws Exception {
     return values()[value];
   }

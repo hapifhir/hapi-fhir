@@ -21,6 +21,7 @@ public class VariableForProfiling {
    * @param name     initial name
    * @param property initial property
    */
+  @SuppressWarnings("WeakerAccess")
   public VariableForProfiling(VariableMode mode, String name, PropertyWithType property) {
     super();
     this.mode = mode;

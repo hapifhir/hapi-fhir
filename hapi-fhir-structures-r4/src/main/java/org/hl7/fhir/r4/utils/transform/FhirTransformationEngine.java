@@ -38,10 +38,11 @@ import java.util.*;
  * getTargetType(map) - return the definition for the type to create to hand in
  * transform(appInfo, source, map, target) - transform from source to target following the map
  * analyse(appInfo, map) - generate profiles and other analysis artifacts for the targets of the transform
- * map generateMapFromMappings(StructureDefinition) - build a mapping from a structure definition with loigcal mappings
+ * map generateMapFromMappings(StructureDefinition) - build a mapping from a structure definition with logical mappings
  *
  * @author Grahame Grieve, modified by Claude Nanjo
  */
+@SuppressWarnings("JavaDoc")
 public class FhirTransformationEngine extends BaseRunner {
 
   /**
@@ -69,6 +70,7 @@ public class FhirTransformationEngine extends BaseRunner {
   /**
    * @param worker
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine(IWorkerContext worker) {
     super();
     setWorker(worker);
@@ -80,6 +82,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @param worker
    * @param services
    */
+  @SuppressWarnings("unused")
   public FhirTransformationEngine(IWorkerContext worker, ITransformerServices services) {
     this(worker);
     this.initializeLibrary();
@@ -94,6 +97,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @param worker
    * @param library
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library) {
     this(worker);
     setLibrary(library);
@@ -104,6 +108,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @param library
    * @param services
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services) {
     this(worker, library);
     setServices(services);
@@ -115,6 +120,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @param services
    * @param pkp
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services, ProfileKnowledgeProvider pkp) {
     this(worker, library, services);
     this.pkp = pkp;
@@ -125,6 +131,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @return
    * @throws FHIRException
    */
+  @SuppressWarnings("unused")
   public StructureDefinition getTargetType(StructureMap map) throws FHIRException {
     boolean found = false;
     StructureDefinition res = null;
@@ -209,6 +216,7 @@ public class FhirTransformationEngine extends BaseRunner {
      * @param group
      * @param comp
      */
+    @SuppressWarnings("WeakerAccess")
     public SourceElementComponentWrapper(ConceptMapGroupComponent group, SourceElementComponent comp) {
       super();
       this.group = group;
@@ -230,6 +238,7 @@ public class FhirTransformationEngine extends BaseRunner {
     if (source.isPrimitive()) {
       src.setCode(source.primitiveValue());
     } else if ("Coding".equals(source.fhirType())) {
+
       Base[] b = source.getProperty("system".hashCode(), "system", true);
       if (b.length == 1)
         src.setSystem(b[0].primitiveValue());
@@ -256,22 +265,22 @@ public class FhirTransformationEngine extends BaseRunner {
       else
         throw new FHIRException("Error in return code");
     } else {
-      ConceptMap cmap = null;
+      ConceptMap cMap = null;
       if (conceptMapUrl.startsWith("#")) {
         for (Resource r : map.getContained()) {
-          if (r instanceof ConceptMap && ((ConceptMap) r).getId().equals(conceptMapUrl.substring(1))) {
-            cmap = (ConceptMap) r;
+          if (r instanceof ConceptMap && r.getId().equals(conceptMapUrl.substring(1))) {
+            cMap = (ConceptMap) r;
             su = map.getUrl() + conceptMapUrl;
           }
         }
-        if (cmap == null)
+        if (cMap == null)
           throw new FHIRException("Unable to translate - cannot find map " + conceptMapUrl);
       } else
-        cmap = getWorker().fetchResource(ConceptMap.class, conceptMapUrl);
+        cMap = getWorker().fetchResource(ConceptMap.class, conceptMapUrl);
       Coding outcome = null;
       boolean done = false;
       String message = null;
-      if (cmap == null) {
+      if (cMap == null) {
         if (getServices() == null)
           message = "No map found for " + conceptMapUrl;
         else {
@@ -279,8 +288,8 @@ public class FhirTransformationEngine extends BaseRunner {
           done = true;
         }
       } else {
-        List<SourceElementComponentWrapper> list = new ArrayList<SourceElementComponentWrapper>();
-        for (ConceptMapGroupComponent g : cmap.getGroup()) {
+        List<SourceElementComponentWrapper> list = new ArrayList<>();
+        for (ConceptMapGroupComponent g : cMap.getGroup()) {
           for (SourceElementComponent e : g.getElement()) {
             if (!src.hasSystem() && src.getCode().equals(e.getCode()))
               list.add(new SourceElementComponentWrapper(g, e));
@@ -330,7 +339,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * <p>
    * Returned:
    * - a list or profiles for what it will create. First profile is the target
-   * - a table with a summary (in xhtml) for easy human undertanding of the mapping
+   * - a table with a summary (in xhtml) for easy human understanding of the mapping
    *
    * @param batchContext
    * @param appInfo
@@ -338,6 +347,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @return
    * @throws Exception
    */
+  @SuppressWarnings({"WeakerAccess", "unused"})
   public StructureMapAnalysis analyse(BatchContext batchContext, Object appInfo, StructureMap map) throws Exception {
     setStructureMap(map);
     getIds().clear();
@@ -367,6 +377,7 @@ public class FhirTransformationEngine extends BaseRunner {
     return result;
   }
 
+  @SuppressWarnings("unused")
   public StructureMap generateMapFromMappings(StructureDefinition sd) throws IOException, FHIRException {
     String id = getLogicalMappingId(sd);
     if (id == null)
@@ -416,6 +427,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * @param inner
    * @throws DefinitionException
    */
+  @SuppressWarnings("ConstantConditions")
   private void addChildMappings(StringBuilder b, String id, String indent, StructureDefinition sd, ElementDefinition ed, boolean inner) throws DefinitionException {
     boolean first = true;
     List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);

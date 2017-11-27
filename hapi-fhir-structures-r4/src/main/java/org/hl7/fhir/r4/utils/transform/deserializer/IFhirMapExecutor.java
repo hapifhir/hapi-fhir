@@ -73,7 +73,7 @@ public interface IFhirMapExecutor {
    * @param context      source context
    * @param type         optional type name and cardinality. Null if unset
    * @param defaultValue optional default value.
-   * @param listOptions  Optional list options. FhirMappingListOpeions.NotSet if unset
+   * @param listOptions  Optional list options. FhirMappingListOptions.NotSet if unset
    * @param variable     Optional assignment variable. Null if unset
    * @param wherePath    Optional where fhir path. Null if unset
    * @param checkPath    Optional check fhir path. Null if unset
@@ -154,7 +154,7 @@ public interface IFhirMapExecutor {
    * Populates a target for a Copy transform, adds it to the top rule on the stack
    *
    * @param context        Target context
-   * @param copyVariable   Varaible or value copied
+   * @param copyVariable   Variable or value copied
    * @param targetVariable Variable that will hold the result of the transform
    * @throws Exception if it fails to populate correctly
    * @throws Exception if any argument is invalid

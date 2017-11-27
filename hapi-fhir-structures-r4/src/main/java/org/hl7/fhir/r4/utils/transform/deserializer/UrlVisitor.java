@@ -19,13 +19,15 @@ public class UrlVisitor extends UrlBaseVisitor<Object> {
    * Delegate for optional dumping of info.
    */
   public interface DumpDelegate {
+    @SuppressWarnings("unused")
     void invoke(String msg);
   }
 
   /**
    * Set this to callback function to dump parsing messages.
    */
-  public DumpDelegate DumpFcn = null;
+  @SuppressWarnings("unused")
+  public DumpDelegate dumpFcn = null;
 
   /**
    * Constructor.
@@ -107,7 +109,7 @@ public class UrlVisitor extends UrlBaseVisitor<Object> {
    */
   @Override
   public Object visitSearch(UrlParser.SearchContext context) {
-    ArrayList<UrlSearch> retVal = new ArrayList<UrlSearch>();
+    ArrayList<UrlSearch> retVal = new ArrayList<>();
     if (context.searchParameter() != null) {
       for (ParseTree treeItem : context.searchParameter()) {
         retVal.add((UrlSearch) this.visit(treeItem));
@@ -165,7 +167,7 @@ public class UrlVisitor extends UrlBaseVisitor<Object> {
    */
   @Override
   public Object visitPath(UrlParser.PathContext context) {
-    ArrayList<String> values = new ArrayList<String>();
+    ArrayList<String> values = new ArrayList<>();
     if (context.stringVal() != null) {
       for (ParseTree treeItem : context.stringVal()) {
         values.add((String) this.visit(treeItem));

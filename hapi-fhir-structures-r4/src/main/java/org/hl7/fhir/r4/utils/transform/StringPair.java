@@ -19,6 +19,7 @@ public class StringPair {
    * @param var  initial variable value
    * @param desc initial descriptor value
    */
+  @SuppressWarnings("WeakerAccess")
   public StringPair(String var, String desc) {
     super();
     this.var = var;

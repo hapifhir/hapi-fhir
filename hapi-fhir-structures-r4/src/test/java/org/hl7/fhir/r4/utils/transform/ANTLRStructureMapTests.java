@@ -1,26 +1,16 @@
 package org.hl7.fhir.r4.utils.transform;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.StructureMapUtilities;
-import org.hl7.fhir.r4.utils.transform.BatchContext;
-import org.hl7.fhir.r4.utils.transform.FhirTransformationEngine;
-import org.hl7.fhir.r4.utils.transform.MapHandler;
-import org.hl7.fhir.r4.utils.transform.MappingIO;
 import org.hl7.fhir.r4.utils.transform.deserializer.UrlProcessor;
-import org.hl7.fhir.utilities.TextFile;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ANTLRStructureMapTests {
    @Test
@@ -173,27 +163,27 @@ public class ANTLRStructureMapTests {
       return retVal;
    }
 
-   private StructureDefinition.StructureDefinitionDifferentialComponent createTestDiff(){
-      StructureDefinition.StructureDefinitionDifferentialComponent retVal = new StructureDefinition.StructureDefinitionDifferentialComponent();
-      List<ElementDefinition> eList = new ArrayList<>();
-      ElementDefinition ed0 = new ElementDefinition();
-      ed0.setId("TestStructure");
-      ed0.setSliceName("TestStructure");
-      ed0.setPath("TestStructure");
-      ed0.setMin(1);
-      ed0.setMax("1");
-      eList.add(ed0);
+   private StructureDefinition.StructureDefinitionDifferentialComponent createTestDiff() {
+		StructureDefinition.StructureDefinitionDifferentialComponent retVal = new StructureDefinition.StructureDefinitionDifferentialComponent();
+		List<ElementDefinition> eList = new ArrayList<>();
+		ElementDefinition ed0 = new ElementDefinition();
+		ed0.setId("TestStructure");
+		ed0.setSliceName("TestStructure");
+		ed0.setPath("TestStructure");
+		ed0.setMin(1);
+		ed0.setMax("1");
+		eList.add(ed0);
 
-      ElementDefinition ed = new ElementDefinition();
+		ElementDefinition ed;
 
-      ed = new ElementDefinition();
-      ed.setId("someValue");
-      ed.setSliceName("someValue");
-      ed.setPath("TestStructure.someValue");
-      ed.addType(new ElementDefinition.TypeRefComponent().setCode("string"));
-      eList.add(ed);
+		ed = new ElementDefinition();
+		ed.setId("someValue");
+		ed.setSliceName("someValue");
+		ed.setPath("TestStructure.someValue");
+		ed.addType(new ElementDefinition.TypeRefComponent().setCode("string"));
+		eList.add(ed);
 
-      retVal.setElement(eList);
-      return retVal;
-   }
+		retVal.setElement(eList);
+		return retVal;
+	}
 }

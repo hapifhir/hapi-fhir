@@ -23,6 +23,7 @@ public class FhirMapRuleType {
   /**
    * constructor, empty
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirMapRuleType() {
   }
 

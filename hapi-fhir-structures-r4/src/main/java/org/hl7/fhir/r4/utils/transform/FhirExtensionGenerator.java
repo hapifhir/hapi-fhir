@@ -11,6 +11,7 @@ import java.util.List;
  *
  * @author Claude Nanjo
  */
+@SuppressWarnings({"JavaDoc", "WeakerAccess"})
 public class FhirExtensionGenerator {
 
   /**
@@ -23,6 +24,7 @@ public class FhirExtensionGenerator {
    * @param type
    * @return
    */
+  @SuppressWarnings("WeakerAccess")
   public StructureDefinition generateExtensionStructureDefinition(String name, List<StringType> contexts, String shortDescription, String definition, int min, String max, String type) {
     StructureDefinition extensionStructureDefinition = new StructureDefinition();
     extensionStructureDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -51,6 +53,7 @@ public class FhirExtensionGenerator {
    * @param extensionUrl
    * @return
    */
+  @SuppressWarnings("WeakerAccess")
   public List<ElementDefinition> generateExtensionElementDefinitions(boolean addExtensionSlicingDefinition, String rootPath, String extensionId, String shortDescription, String definition, int min, String max, String extensionUrl) {
     List<ElementDefinition> extensionElementDefinitions = new ArrayList<>();
     if (addExtensionSlicingDefinition) {
@@ -81,6 +84,7 @@ public class FhirExtensionGenerator {
    * @param max
    * @param type
    */
+  @SuppressWarnings("WeakerAccess")
   protected void populateDifferential(StructureDefinition extensionElementDefinition, String extensionName, String shortDescription, String definition, int min, String max, String type) {
     populateExtensionElement(extensionElementDefinition, shortDescription, definition, min, max);
     populateExtensionUrlElement(extensionElementDefinition, extensionName);

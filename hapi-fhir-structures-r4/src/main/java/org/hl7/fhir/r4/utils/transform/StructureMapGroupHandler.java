@@ -17,12 +17,14 @@ public class StructureMapGroupHandler extends BaseRunner {
   private VariablesForProfiling vars;
   private FhirTransformationEngine transformationEngine;
 
+  @SuppressWarnings("WeakerAccess")
   public StructureMapGroupHandler(StructureMap map, FhirTransformationEngine transformationEngine, StructureMap.StructureMapGroupComponent ruleGroup) {
     setTransformationEngine(transformationEngine);
     setStructureMap(map);
     this.ruleGroup = ruleGroup;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public StructureMapGroupHandler(StructureMap map, IWorkerContext worker, FhirTransformationEngine transformationEngine, StructureMap.StructureMapGroupComponent ruleGroup) {
     this(map, transformationEngine, ruleGroup);
     setWorker(worker);
@@ -47,6 +49,7 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void analyzeGroup(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
     initialize(context, result);
     log(indent + "Analyse Group : " + getRuleGroup().getName());
@@ -67,6 +70,7 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
   }
 
+  @SuppressWarnings({"WeakerAccess", "unused"})
   protected void executeGroup(String indent, TransformContext context, Variables vars) throws FHIRException {
     log(indent + "Group : " + getRuleGroup().getName());
     // TODO: check inputs
@@ -82,26 +86,32 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public StructureMap.StructureMapGroupComponent getRuleGroup() {
     return ruleGroup;
   }
 
+  @SuppressWarnings("unused")
   public void setRuleGroup(StructureMap.StructureMapGroupComponent ruleGroup) {
     this.ruleGroup = ruleGroup;
   }
 
+  @SuppressWarnings("unused")
   public VariablesForProfiling getVars() {
     return vars;
   }
 
+  @SuppressWarnings("unused")
   public void setVars(VariablesForProfiling vars) {
     this.vars = vars;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine getTransformationEngine() {
     return transformationEngine;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void setTransformationEngine(FhirTransformationEngine transformationEngine) {
     this.transformationEngine = transformationEngine;
   }

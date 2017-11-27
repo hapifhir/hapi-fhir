@@ -8,6 +8,7 @@ import java.util.HashMap;
  * @author Travis Lukach
  * (c) Applicadia LLC.
  */
+@SuppressWarnings("unused")
 public enum FhirMapConceptMapOperators {
   /**
    * Unset value

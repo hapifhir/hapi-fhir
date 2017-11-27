@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.utils.transform;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -9,9 +10,10 @@ import org.hl7.fhir.r4.utils.NarrativeGenerator;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.UUID;
 
 import static org.hl7.fhir.r4.utils.transform.FhirTransformationEngine.*;
 
@@ -41,6 +43,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param parentGroupRunner    StructureMapGroupRunner
    * @param rule                 RuleComponent
    */
+  @SuppressWarnings("WeakerAccess")
   public StructureMapRuleRunner(StructureMap map, FhirTransformationEngine transformationEngine, StructureMapGroupHandler parentGroupRunner, StructureMap.StructureMapGroupRuleComponent rule) {
     setStructureMap(map);
     setRule(rule);
@@ -58,6 +61,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param rule                 Rule Component
    * @param worker               Worker Context
    */
+  @SuppressWarnings("WeakerAccess")
   public StructureMapRuleRunner(StructureMap map, FhirTransformationEngine transformationEngine, StructureMapGroupHandler parentGroupRunner, StructureMap.StructureMapGroupRuleComponent rule, IWorkerContext worker) {
     this(map, transformationEngine, parentGroupRunner, rule);
     setWorker(worker);
@@ -86,6 +90,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @return parentGroup StructureMapGroupComponent value
    */
+  @SuppressWarnings("unused")
   public StructureMap.StructureMapGroupComponent getParentGroup() {
     return parentGroup;
   }
@@ -95,6 +100,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @param parentGroup parentGroup StructureMapGroupComponent value
    */
+  @SuppressWarnings("WeakerAccess")
   public void setParentGroup(StructureMap.StructureMapGroupComponent parentGroup) {
     this.parentGroup = parentGroup;
   }
@@ -104,6 +110,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @return parentGroupRunner StructureMapGroupHandler value
    */
+  @SuppressWarnings("unused")
   public StructureMapGroupHandler getParentGroupRunner() {
     return parentGroupRunner;
   }
@@ -113,6 +120,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @param parentGroupRunner parentGroupRunner StructureMapGroupHandler value
    */
+  @SuppressWarnings("WeakerAccess")
   public void setParentGroupRunner(StructureMapGroupHandler parentGroupRunner) {
     this.parentGroupRunner = parentGroupRunner;
   }
@@ -122,6 +130,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @return transformationEngine FhirTransformationEngine value
    */
+  @SuppressWarnings("WeakerAccess")
   public FhirTransformationEngine getTransformationEngine() {
     return transformationEngine;
   }
@@ -131,6 +140,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @param transformationEngine transform Engine value
    */
+  @SuppressWarnings("WeakerAccess")
   public void setTransformationEngine(FhirTransformationEngine transformationEngine) {
     this.transformationEngine = transformationEngine;
   }
@@ -159,6 +169,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param vars    Variables for Profiling
    * @throws Exception if arguments are invalid or other runtime exception occurs
    */
+  @SuppressWarnings("WeakerAccess")
   protected void analyseRule(BatchContext context, String indent, StructureMapAnalysis result, VariablesForProfiling vars) throws Exception {
     log(indent + "Analyse rule : " + rule.getName());
     XhtmlNode tr = result.getSummary().addTag("tr");
@@ -177,12 +188,12 @@ public class StructureMapRuleRunner extends BaseRunner {
     }
     tw.commit(xt);
 
-    for (StructureMap.StructureMapGroupRuleComponent childrule : rule.getRule()) {
+    for (StructureMap.StructureMapGroupRuleComponent childRule : rule.getRule()) {
       if (ruleStack == null) {
         ruleStack = new Stack<>();
       }
       ruleStack.push(rule);
-      rule = childrule;
+      rule = childRule;
       analyseRule(context, indent + "  ", result, source);
       rule = ruleStack.pop();
     }
@@ -201,6 +212,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param rule    Rule Component
    * @throws FHIRException if exception occurs within Fhir objects
    */
+  @SuppressWarnings({"WeakerAccess", "SpellCheckingInspection"})
   protected void executeRule(String indent, TransformContext context, Variables vars, StructureMap.StructureMapGroupComponent group, StructureMap.StructureMapGroupRuleComponent rule) throws FHIRException {
     log(indent + "rule : " + rule.getName());
     if (rule.getName().contains("CarePlan.participant-unlink"))
@@ -215,8 +227,8 @@ public class StructureMapRuleRunner extends BaseRunner {
           processTarget(rule.getName(), context, v, getStructureMap(), group, t, rule.getSource().size() == 1 ? rule.getSourceFirstRep().getVariable() : null);
         }
         if (rule.hasRule()) {
-          for (StructureMap.StructureMapGroupRuleComponent childrule : rule.getRule()) {
-            executeRule(indent + "  ", context, v, group, childrule);
+          for (StructureMap.StructureMapGroupRuleComponent childRule : rule.getRule()) {
+            executeRule(indent + "  ", context, v, group, childRule);
           }
         } else if (rule.hasDependent()) {
           for (StructureMap.StructureMapGroupRuleDependentComponent dependent : rule.getDependent()) {
@@ -339,6 +351,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @return resulting Variables
    * @throws Exception if error occurs from one of the arguments
    */
+  @SuppressWarnings({"WeakerAccess", "ConstantConditions", "unused"})
   protected VariablesForProfiling analyseSource(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap.StructureMapGroupRuleSourceComponent src, XhtmlNode td) throws Exception {
     VariableForProfiling var = vars.get(VariableMode.INPUT, src.getContext());
     if (var == null)
@@ -392,6 +405,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @return List of Variables
    * @throws FHIRException Error occurs in Fhir objects
    */
+  @SuppressWarnings("unused")
   private List<Variables> processSource(String ruleId, TransformContext context, Variables vars, StructureMap.StructureMapGroupRuleSourceComponent src) throws FHIRException {
     List<Base> items;
     if (src.getContext().equals("@search")) {
@@ -403,7 +417,7 @@ public class StructureMapRuleRunner extends BaseRunner {
       String search = getFhirPathEngine().evaluateToString(vars, null, new StringType(), expr); // string is a holder of nothing to ensure that variables are processed correctly
       items = getServices().performSearch(context.getAppInfo(), search);
     } else {
-      items = new ArrayList<Base>();
+      items = new ArrayList<>();
       Base b = vars.get(VariableMode.INPUT, src.getContext());
       if (b == null)
         throw new FHIRException("Unknown input variable " + src.getContext());
@@ -418,7 +432,7 @@ public class StructureMapRuleRunner extends BaseRunner {
     }
 
     if (src.hasType()) {
-      List<Base> remove = new ArrayList<Base>();
+      List<Base> remove = new ArrayList<>();
       for (Base item : items) {
         if (item != null && !isType(item, src.getType())) {
           remove.add(item);
@@ -434,7 +448,7 @@ public class StructureMapRuleRunner extends BaseRunner {
         //        fpe.check(context.appInfo, ??, ??, expr)
         src.setUserData(MAP_WHERE_EXPRESSION, expr);
       }
-      List<Base> remove = new ArrayList<Base>();
+      List<Base> remove = new ArrayList<>();
       for (Base item : items) {
         if (!getFhirPathEngine().evaluateToBoolean(vars, null, item, expr))
           remove.add(item);
@@ -449,7 +463,7 @@ public class StructureMapRuleRunner extends BaseRunner {
         //        fpe.check(context.appInfo, ??, ??, expr)
         src.setUserData(MAP_WHERE_CHECK, expr);
       }
-      List<Base> remove = new ArrayList<Base>();
+      List<Base> remove = new ArrayList<>();
       for (Base item : items) {
         if (!getFhirPathEngine().evaluateToBoolean(vars, null, item, expr))
           throw new FHIRException("Rule \"" + ruleId + "\": Check condition failed");
@@ -484,7 +498,7 @@ public class StructureMapRuleRunner extends BaseRunner {
         case NULL:
       }
     }
-    List<Variables> result = new ArrayList<Variables>();
+    List<Variables> result = new ArrayList<>();
     for (Base r : items) {
       Variables v = vars.copy();
       if (src.hasVariable())
@@ -509,6 +523,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param sliceName      String value
    * @throws Exception if error occurs with invalid argument
    */
+  @SuppressWarnings("WeakerAccess")
   protected void analyseTarget(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent ruleTarget, String targetVariable, TargetWriter tw, List<StructureDefinition> profiles, String sliceName) throws Exception {
     VariableForProfiling targetContextVariable = null;
     boolean isExtensionTransform = false;
@@ -522,11 +537,12 @@ public class StructureMapRuleRunner extends BaseRunner {
     }
 
 
-    TypeDetails type = null;
+    TypeDetails type;
     if (ruleTarget.hasTransform()) {
       type = analyseTransform(context, map, ruleTarget, vars);
       // profiling: dest.setProperty(ruleTarget.getElement().hashCode(), ruleTarget.getElement(), v);
     } else {
+      assert targetContextVariable != null;
       Property vp = targetContextVariable.getProperty().getBaseProperty().getChild(ruleTarget.getElement(), ruleTarget.getElement());
       if (vp == null)
         throw new Exception("Unknown Property " + ruleTarget.getElement() + " on " + targetContextVariable.getProperty().getPath());
@@ -540,6 +556,7 @@ public class StructureMapRuleRunner extends BaseRunner {
         tw.newResource(ruleTarget.getVariable(), s);
       }
       if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())) {
+        assert type != null;
         String finalURL = context.getBaseGeneratedProfileUrl() + "/" + type.getType().substring(type.getType().lastIndexOf("/") + 1);
         ruleTarget.setUserData("profile-url", finalURL);
       }
@@ -549,6 +566,7 @@ public class StructureMapRuleRunner extends BaseRunner {
       ElementDefinition srcElementDefinition = inputElementVariable.getProperty().getBaseProperty().getDefinition();
       String extensionName = ruleTarget.getElement();
       String extensionUri = context.getBaseGeneratedProfileUrl() + extensionName + "-extension";
+      assert targetContextVariable != null;
       String extContext = targetContextVariable.getProperty().getPath();
       String shortDescription = srcElementDefinition.getShort();
       String longDescription = srcElementDefinition.getDefinition();
@@ -577,6 +595,7 @@ public class StructureMapRuleRunner extends BaseRunner {
           throw new Error("Rule \"" + ruleId + "\": Attempt to assign with no context");
         tw.valueAssignment(ruleTarget.getContext(), targetContextVariable.getProperty().getPath() + "." + ruleTarget.getElement() + getTransformSuffix(ruleTarget.getTransform()));
       } else if (ruleTarget.hasContext()) {
+        assert targetContextVariable != null;
         if (isSignificantElement(targetContextVariable.getProperty(), ruleTarget.getElement())) {
           String td = describeTransform(ruleTarget);
           if (td != null)
@@ -648,6 +667,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param parameter Parameter Component
    * @return String form of a parameter
    */
+  @SuppressWarnings("unused")
   private String getParamString(VariablesForProfiling vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) {
     Type p = parameter.getValue();
     if (p == null || p instanceof IdType)
@@ -667,6 +687,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @return Type Details object
    * @throws FHIRException if error occurs within Fhir code
    */
+  @SuppressWarnings("unused")
   private TypeDetails analyseTransform(BatchContext context, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, VariablesForProfiling vars) throws FHIRException {
     switch (tgt.getTransform()) {
       case CREATE:
@@ -839,8 +860,7 @@ public class StructureMapRuleRunner extends BaseRunner {
           cc.addCoding(buildCoding(getParamStringNoNull(vars, tgt.getParameter().get(0), tgt.toString()), getParamStringNoNull(vars, tgt.getParameter().get(1), tgt.toString())));
           return cc;
         case C:
-          Coding c = buildCoding(getParamStringNoNull(vars, tgt.getParameter().get(0), tgt.toString()), getParamStringNoNull(vars, tgt.getParameter().get(1), tgt.toString()));
-          return c;
+          return buildCoding(getParamStringNoNull(vars, tgt.getParameter().get(0), tgt.toString()), getParamStringNoNull(vars, tgt.getParameter().get(1), tgt.toString()));
         default:
           throw new Error("Rule \"" + ruleId + "\": Transform Unknown: " + tgt.getTransform().toCode());
       }
@@ -857,6 +877,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param parameter Parameter Component
    * @return String value of a primitive type
    */
+  @SuppressWarnings("unused")
   private String getParamId(VariablesForProfiling vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) {
     Type p = parameter.getValue();
     if (p == null || !(p instanceof IdType))
@@ -881,7 +902,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    *
    * @param vars      Variables for Profiling
    * @param parameter Parameter Component
-   * @return
+   * @return types of the parameter
    * @throws DefinitionException if Variable is not present in vars
    */
   private TypeDetails getParam(VariablesForProfiling vars, StructureMap.StructureMapGroupRuleTargetParameterComponent parameter) throws DefinitionException {
@@ -943,10 +964,8 @@ public class StructureMapRuleRunner extends BaseRunner {
   private boolean isSignificantElement(PropertyWithType property, String element) {
     if ("Observation".equals(property.getPath()))
       return "code".equals(element);
-    else if ("Bundle".equals(property.getPath()))
-      return "type".equals(element);
     else
-      return false;
+      return "Bundle".equals(property.getPath()) && "type".equals(element);
   }
 
   /**
@@ -1021,9 +1040,10 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @return Property with Type instantiated when validated
    * @throws FHIRException if definitions has too many or too little entries
    */
+  @SuppressWarnings("unused")
   private PropertyWithType addExtensionToProfile(VariableForProfiling var, List<ElementDefinition> definitions, String sliceName, Type fixed) throws FHIRException {
     StructureDefinition sd = var.getProperty().getProfileProperty().getStructure();
-    ElementDefinition extensionReference = null;
+    ElementDefinition extensionReference;
     if (definitions.size() == 0 || definitions.size() > 2) {
       throw new FHIRException("Error handling extensions to the type");
     } else if (definitions.size() == 1) {
@@ -1104,6 +1124,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @return Property with Type
    * @throws FHIRException if the base property in var doesn't have a corresponding child with element and the types within the property in var
    */
+  @SuppressWarnings({"UnnecessaryLocalVariable", "unused"})
   private PropertyWithType updateProfile(VariableForProfiling var, String element, TypeDetails type, StructureMap map, List<StructureDefinition> profiles, String sliceName, Type fixed, StructureMap.StructureMapGroupRuleTargetComponent tgt) throws FHIRException {
     if (var == null) {
       assert (Utilities.noString(element));
@@ -1140,13 +1161,13 @@ public class StructureMapRuleRunner extends BaseRunner {
 
       // the profile structure definition (derived)
       StructureDefinition sd = var.getProperty().getProfileProperty().getStructure();
-      ElementDefinition ednew = sd.getDifferential().addElement();
-      ednew.setPath(var.getProperty().getProfileProperty().getDefinition().getPath() + "." + pc.getName());
-      ednew.setUserData("slice-name", sliceName);
-      ednew.setFixed(fixed);
+      ElementDefinition edNew = sd.getDifferential().addElement();
+      edNew.setPath(var.getProperty().getProfileProperty().getDefinition().getPath() + "." + pc.getName());
+      edNew.setUserData("slice-name", sliceName);
+      edNew.setFixed(fixed);
       for (TypeDetails.ProfiledType pt : type.getProfiledTypes()) {
         if (pt.hasBindings())
-          ednew.setBinding(pt.getBindings().get(0));
+          edNew.setBinding(pt.getBindings().get(0));
         if (pt.getUri().startsWith("http://hl7.org/fhir/StructureDefinition/")) {
           String t = pt.getUri().substring(40);
           t = checkType(t, pc, pt.getProfiles());
@@ -1154,16 +1175,16 @@ public class StructureMapRuleRunner extends BaseRunner {
             if (pt.hasProfiles()) {
               for (String p : pt.getProfiles())
                 if (t.equals("Reference"))
-                  ednew.addType().setCode(t).setTargetProfile(p);
+                  edNew.addType().setCode(t).setTargetProfile(p);
                 else
-                  ednew.addType().setCode(t).setProfile(p);
+                  edNew.addType().setCode(t).setProfile(p);
             } else
-              ednew.addType().setCode(t);
+              edNew.addType().setCode(t);
           }
         }
       }
 
-      return new PropertyWithType(var.getProperty().getPath() + "." + element, pc, new Property(getWorker(), ednew, sd), type);
+      return new PropertyWithType(var.getProperty().getPath() + "." + element, pc, new Property(getWorker(), edNew, sd), type);
     }
   }
 
@@ -1189,9 +1210,9 @@ public class StructureMapRuleRunner extends BaseRunner {
   /**
    * tests to see if the types are compatible
    *
-   * @param t
-   * @param code
-   * @return
+   * @param t String
+   * @param code Sting
+   * @return true if compatible
    */
   private boolean isCompatibleType(String t, String code) {
     if (t.equals(code))
@@ -1277,7 +1298,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param map        Structure Map
    * @param statedType string value
    * @return statedType if valid
-   * @throws FHIRException
+   * @throws FHIRException if worker doesn't have a Structure Definition based on the url
    */
   private String getActualType(StructureMap map, String statedType) throws FHIRException {
     // check the aliases
@@ -1293,7 +1314,7 @@ public class StructureMapRuleRunner extends BaseRunner {
   }
 
   /**
-   * checks if the type is matched to the grp's actual type
+   * checks if the type is matched to the group's actual type
    *
    * @param map  Structure Map
    * @param grp  Group Component
@@ -1302,31 +1323,29 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @throws FHIRException if error occurs within Fhir object calls
    */
   private boolean matchesByType(StructureMap map, StructureMap.StructureMapGroupComponent grp, String type) throws FHIRException {
-    if (grp.getTypeMode() != StructureMap.StructureMapGroupTypeMode.TYPEANDTYPES)
-      return false;
-    if (grp.getInput().size() != 2 || grp.getInput().get(0).getMode() != StructureMap.StructureMapInputMode.SOURCE || grp.getInput().get(1).getMode() != StructureMap.StructureMapInputMode.TARGET)
-      return false;
-    return matchesType(map, type, grp.getInput().get(0).getType());
+    return grp.getTypeMode() == StructureMap.StructureMapGroupTypeMode.TYPEANDTYPES &&
+      grp.getInput().size() == 2 && grp.getInput().get(0).getMode() == StructureMap.StructureMapInputMode.SOURCE &&
+      grp.getInput().get(1).getMode() == StructureMap.StructureMapInputMode.TARGET &&
+      matchesType(map, type, grp.getInput().get(0).getType());
   }
 
   /**
-   * checks if the source and target type are matched to the grp's actual type
+   * checks if the source and target type are matched to the group's actual type
    *
-   * @param map
-   * @param grp
-   * @param srcType
-   * @param tgtType
-   * @return
+   * @param map Structure map
+   * @param grp Structure Group
+   * @param srcType Source type
+   * @param tgtType Target type
+   * @return true if type matches
    * @throws FHIRException if error occurs within Fhir object calls
    */
   private boolean matchesByType(StructureMap map, StructureMap.StructureMapGroupComponent grp, String srcType, String tgtType) throws FHIRException {
-    if (grp.getTypeMode() == StructureMap.StructureMapGroupTypeMode.NONE)
-      return false;
-    if (grp.getInput().size() != 2 || grp.getInput().get(0).getMode() != StructureMap.StructureMapInputMode.SOURCE || grp.getInput().get(1).getMode() != StructureMap.StructureMapInputMode.TARGET)
-      return false;
-    if (!grp.getInput().get(0).hasType() || !grp.getInput().get(1).hasType())
-      return false;
-    return matchesType(map, srcType, grp.getInput().get(0).getType()) && matchesType(map, tgtType, grp.getInput().get(1).getType());
+    return grp.getTypeMode() != StructureMap.StructureMapGroupTypeMode.NONE && grp.getInput().size() == 2 &&
+      grp.getInput().get(0).getMode() == StructureMap.StructureMapInputMode.SOURCE &&
+      grp.getInput().get(1).getMode() == StructureMap.StructureMapInputMode.TARGET &&
+      grp.getInput().get(0).hasType() && grp.getInput().get(1).hasType() &&
+      matchesType(map, srcType, grp.getInput().get(0).getType()) &&
+      matchesType(map, tgtType, grp.getInput().get(1).getType());
   }
 
   /**
@@ -1366,7 +1385,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param result List of Fhir Model Bases
    * @throws FHIRException If Fhir Object errors occur
    */
-  protected void getChildrenByName(Base item, String name, List<Base> result) throws FHIRException {
+  private void getChildrenByName(Base item, String name, List<Base> result) throws FHIRException {
     for (Base v : item.listChildrenByName(name, true))
       if (v != null)
         result.add(v);

@@ -92,7 +92,7 @@ public class MapHandler implements IFhirMapExecutor {
    *
    * @param groupName       name of group
    * @param groupType       Group type. In grammar this is optional in which case this will be set to GroupTypesUnset)
-   * @param groupExtendName extends value fo rthe group
+   * @param groupExtendName extends value for the group
    * @throws Exception if it fails to populate correctly
    */
   @Override
@@ -160,7 +160,7 @@ public class MapHandler implements IFhirMapExecutor {
    * @param context      source context
    * @param type         optional type name and cardinality. Null if unset
    * @param defaultValue optional default value.
-   * @param listOptions  Optional list options. FhirMappingListOpeions.NotSet if unset
+   * @param listOptions  Optional list options. FhirMappingListOptions.NotSet if unset
    * @param variable     Optional assignment variable. Null if unset
    * @param wherePath    Optional where fhir path. Null if unset
    * @param checkPath    Optional check fhir path. Null if unset
@@ -274,7 +274,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Not soundly implemented, and not implemented .
    *
    * @param id     Group name
-   * @param params parameters to go into the gorup
+   * @param params parameters to go into the group
    */
   @Override
   public void groupCall(String id, List<String> params) {
@@ -314,7 +314,7 @@ public class MapHandler implements IFhirMapExecutor {
    * Populates a target for a Codeable Concept Transform, adds it to the top rule on the stack
    *
    * @param context        Target context
-   * @param system         System used in the Codeable COncept
+   * @param system         System used in the Codeable Concept
    * @param code           Code in the Codeable Concept
    * @param display        Display value for the Codeable Concept, may be left null
    * @param targetVariable Variable to hold the Codeable Concept object

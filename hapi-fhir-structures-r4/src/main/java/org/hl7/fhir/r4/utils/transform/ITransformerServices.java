@@ -7,10 +7,10 @@ import org.hl7.fhir.r4.model.Coding;
 import java.util.List;
 
 /**
- * Transf
+ * Transform
  */
 public interface ITransformerServices {
-  //    public boolean validateByValueSet(Coding code, String valuesetId);
+  //    public boolean validateByValueSet(Coding code, String valueSetId);
 
   /**
    * Interface method for log

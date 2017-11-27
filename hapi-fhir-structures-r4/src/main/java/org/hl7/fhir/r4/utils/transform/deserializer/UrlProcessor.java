@@ -24,6 +24,7 @@ public class UrlProcessor {
     return __DebugFlag;
   }
 
+  @SuppressWarnings("SameParameterValue")
   private void setDebugFlag(boolean value) {
     __DebugFlag = value;
   }

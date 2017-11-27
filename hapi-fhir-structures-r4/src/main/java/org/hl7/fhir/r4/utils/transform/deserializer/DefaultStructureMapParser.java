@@ -50,6 +50,7 @@ public class DefaultStructureMapParser {
     result.setName(lexer.readConstant("name"));
     lexer.skipComments();
 
+    //noinspection SpellCheckingInspection
     while (lexer.hasToken("conceptmap"))
       parseConceptMap(result, lexer);
 
@@ -67,6 +68,7 @@ public class DefaultStructureMapParser {
     return result;
   }
 
+  @SuppressWarnings("SpellCheckingInspection")
   private void parseConceptMap(StructureMap result, FHIRLexer lexer) throws FHIRLexer.FHIRLexerException {
     lexer.token("conceptmap");
     ConceptMap map = new ConceptMap();
@@ -131,6 +133,7 @@ public class DefaultStructureMapParser {
   }
 
 
+  @SuppressWarnings("SpellCheckingInspection")
   private ConceptMap.ConceptMapGroupComponent getGroup(ConceptMap map, String srcs, String tgts) {
     for (ConceptMap.ConceptMapGroupComponent grp : map.getGroup()) {
       if (grp.getSource().equals(srcs))
@@ -384,6 +387,7 @@ public class DefaultStructureMapParser {
     }
   }
 
+  @SuppressWarnings("SpellCheckingInspection")
   private void parseTarget(StructureMap.StructureMapGroupRuleComponent rule, FHIRLexer lexer) throws FHIRException {
     StructureMap.StructureMapGroupRuleTargetComponent target = rule.addTarget();
     String start = lexer.take();

@@ -33,6 +33,7 @@ public class PropertyWithType {
    * @param profileProperty profile property
    * @param types           types
    */
+  @SuppressWarnings("WeakerAccess")
   public PropertyWithType(String path, Property baseProperty, Property profileProperty, TypeDetails types) {
     super();
     this.baseProperty = baseProperty;
@@ -64,6 +65,7 @@ public class PropertyWithType {
    *
    * @return Property value of baseProperty
    */
+  @SuppressWarnings("WeakerAccess")
   public Property getBaseProperty() {
     return baseProperty;
   }
@@ -73,6 +75,7 @@ public class PropertyWithType {
    *
    * @param baseProperty Property value for baseProperty
    */
+  @SuppressWarnings("unused")
   public void setBaseProperty(Property baseProperty) {
     this.baseProperty = baseProperty;
   }
@@ -82,6 +85,7 @@ public class PropertyWithType {
    *
    * @return Property value for profileProperty
    */
+  @SuppressWarnings("WeakerAccess")
   public Property getProfileProperty() {
     return profileProperty;
   }
@@ -91,6 +95,7 @@ public class PropertyWithType {
    *
    * @param profileProperty Property value for profileProperty
    */
+  @SuppressWarnings("WeakerAccess")
   public void setProfileProperty(Property profileProperty) {
     this.profileProperty = profileProperty;
   }

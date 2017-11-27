@@ -27,9 +27,10 @@ public class UrlSearch {
    * Default constructor
    *
    * @param name  name desired to be given when UrlSearch is initialized
-   * @param value vlaue desired to be given when UrlSearch is initialzied
+   * @param value Value desired to be given when UrlSearch is initialized
    * @throws Exception on bad value //TODO: Do we even the throws method in this?
    */
+  @SuppressWarnings("unused")
   public UrlSearch(String name, String value) throws Exception {
     this.Name = name;
     this.Value = value;

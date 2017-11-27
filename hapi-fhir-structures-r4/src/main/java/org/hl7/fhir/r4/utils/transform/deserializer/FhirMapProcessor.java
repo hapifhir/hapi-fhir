@@ -38,6 +38,7 @@ public class FhirMapProcessor {
    *
    * @param value value to set __DebugFlag
    */
+  @SuppressWarnings("SameParameterValue")
   private void setDebugFlag(boolean value) {
     __DebugFlag = value;
   }

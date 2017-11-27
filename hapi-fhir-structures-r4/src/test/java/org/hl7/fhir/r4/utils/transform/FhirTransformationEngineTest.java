@@ -315,9 +315,7 @@ public class FhirTransformationEngineTest {
 
 		retVal.add(userSelected);
 
-		/**
-		 * Add URI Extension
-		 */
+
 //		extension.setName("Coding.extension");
 //		source = new StructureMap.StructureMapGroupRuleSourceComponent();
 //		source.setContext("source");

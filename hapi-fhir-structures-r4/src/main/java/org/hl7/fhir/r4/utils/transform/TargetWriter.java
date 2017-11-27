@@ -69,7 +69,7 @@ public class TargetWriter {
   }
 
   /**
-   * Commit the Lists and Map to a wirter
+   * Commit the Lists and Map to a winter
    *
    * @param xt XHTML Node
    */

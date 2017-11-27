@@ -11,6 +11,7 @@ public class TransformContext {
    *
    * @param appInfo
    */
+  @SuppressWarnings({"JavaDoc", "WeakerAccess"})
   public TransformContext(Object appInfo) {
     super();
     this.appInfo = appInfo;
@@ -21,6 +22,7 @@ public class TransformContext {
    *
    * @return appInfo value
    */
+  @SuppressWarnings("WeakerAccess")
   public Object getAppInfo() {
     return appInfo;
   }

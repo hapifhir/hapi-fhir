@@ -13,5 +13,6 @@ public class ResolvedGroup {
   /**
    * Target structure map
    */
+  @SuppressWarnings("WeakerAccess")
   public StructureMap targetMap;
 }

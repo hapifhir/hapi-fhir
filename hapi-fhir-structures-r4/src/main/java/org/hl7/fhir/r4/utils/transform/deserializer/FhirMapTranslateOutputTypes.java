@@ -55,6 +55,7 @@ public enum FhirMapTranslateOutputTypes {
     }
   }
 
+  @SuppressWarnings("unused")
   public static FhirMapTranslateOutputTypes forValue(int value) {
     return values()[value];
   }

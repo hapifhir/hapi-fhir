@@ -1,63 +1,19 @@
 package org.hl7.fhir.r4.conformance;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider.BindingResolution;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
 import org.hl7.fhir.r4.elementmodel.ObjectConverter;
 import org.hl7.fhir.r4.elementmodel.Property;
 import org.hl7.fhir.r4.formats.IParser;
-import org.hl7.fhir.r4.formats.IParser.OutputStyle;
-import org.hl7.fhir.r4.formats.XmlParser;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.ElementDefinition.AggregationMode;
-import org.hl7.fhir.r4.model.ElementDefinition.DiscriminatorType;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBaseComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionExampleComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionMappingComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent;
-import org.hl7.fhir.r4.model.ElementDefinition.SlicingRules;
-import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ElementDefinition.*;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionDifferentialComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionMappingComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionSnapshotComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.StructureDefinition.*;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
@@ -65,8 +21,6 @@ import org.hl7.fhir.r4.utils.NarrativeGenerator;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.r4.utils.TranslatingUtilities;
 import org.hl7.fhir.r4.utils.formats.CSVWriter;
-import org.hl7.fhir.exceptions.DefinitionException;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -81,6 +35,10 @@ import org.hl7.fhir.utilities.xml.SchematronWriter;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Rule;
 import org.hl7.fhir.utilities.xml.SchematronWriter.SchematronType;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Section;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 /**
  * This class provides a set of utility operations for working with Profiles.
@@ -3400,7 +3358,7 @@ public class ProfileUtilities extends TranslatingUtilities {
               slicer = new ElementDefinition();
               slicer.setPath(edi.getPath());
               slicer.getSlicing().setRules(SlicingRules.OPEN);
-              sd.getDifferential().getElement().add(c, slicer);
+              sd.getDifferential().getElement().set(c, slicer); //sd.getDifferential().getElement().set(c, slicer);  //Had to change, add will only insert, the set function is the proven method of actually setting the value of
               c++;
               ic++;
             }

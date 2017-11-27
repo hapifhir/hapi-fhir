@@ -4,7 +4,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 import java.util.Objects;
 
 /**
- * Defines the Useage types when declaring the strcture definitions in the mapping language
+ * Defines the Usage types when declaring the structure definitions in the mapping language
  *
  * @author Travis Lukach
  * (c) Applicadia LLC.
@@ -63,6 +63,7 @@ public enum FhirMapUseNames {
    * @return the enumerated value
    * @throws Exception if the value is out of bounds or invalid.
    */
+  @SuppressWarnings("unused")
   public static FhirMapUseNames forValue(int value) throws Exception {
     return values()[value];
   }
@@ -73,6 +74,7 @@ public enum FhirMapUseNames {
    * @param value string representation
    * @return the corresponding enumerated value
    */
+  @SuppressWarnings("unused")
   public static FhirMapUseNames forValue(String value) {
     if (Objects.equals(value.toLowerCase(), "source")) {
       return FhirMapUseNames.Source;
