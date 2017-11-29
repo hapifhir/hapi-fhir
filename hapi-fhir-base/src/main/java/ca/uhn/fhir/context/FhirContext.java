@@ -149,8 +149,12 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU2_1.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU2_1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU3.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU3.getVersionImplementation();
+		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.R4.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
