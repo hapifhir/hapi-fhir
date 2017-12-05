@@ -1378,7 +1378,13 @@ public class SearchBuilder implements ISearchBuilder {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			}
-			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, myParams);
+
+			List<Long> pids;
+			if (myParams.getEverythingMode() != null) {
+				pids = myFulltextSearchSvc.everything(myResourceName, myParams);
+			} else {
+				pids = myFulltextSearchSvc.search(myResourceName, myParams);
+			}
 			if (pids.isEmpty()) {
 				// Will never match
 				pids = Collections.singletonList(-1L);
@@ -1576,7 +1582,9 @@ public class SearchBuilder implements ISearchBuilder {
 		cq.where(from.get("myId").in(pids));
 		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
-		for (ResourceTable next : q.getResultList()) {
+		List<ResourceTable> resultList = q.getResultList();
+
+		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
 			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
@@ -1615,7 +1623,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// when running asserts
 		assert new HashSet<>(theIncludePids).size() == theIncludePids.size() : "PID list contains duplicates: " + theIncludePids;
 
-		Map<Long, Integer> position = new HashMap<Long, Integer>();
+		Map<Long, Integer> position = new HashMap<>();
 		for (Long next : theIncludePids) {
 			position.put(next, theResourceListToPopulate.size());
 			theResourceListToPopulate.add(null);

@@ -263,7 +263,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		// Execute the query and make sure we return distinct results
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		List<IBaseResource> resources = new ArrayList<>();
 		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao);
 
 		return resources;

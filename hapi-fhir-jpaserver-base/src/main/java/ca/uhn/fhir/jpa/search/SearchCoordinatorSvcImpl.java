@@ -117,8 +117,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (myNeverUseLocalSearchForUnitTests == false) {
 			SearchTask task = myIdToSearchTask.get(theUuid);
 			if (task != null) {
+				ourLog.trace("Local search found");
 				return task.getResourcePids(theFrom, theTo);
+			} else {
+				ourLog.trace("No local search found");
 			}
+		} else {
+			ourLog.trace("Forced not using local search");
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);

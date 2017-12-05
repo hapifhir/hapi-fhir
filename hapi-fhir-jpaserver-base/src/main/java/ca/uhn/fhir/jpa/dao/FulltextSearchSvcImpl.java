@@ -20,18 +20,21 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import javax.persistence.*;
-
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.search.highlight.Formatter;
+import org.apache.lucene.search.highlight.*;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
@@ -40,15 +43,12 @@ import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import java.util.*;
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
@@ -62,7 +62,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 	public FulltextSearchSvcImpl() {
 		super();
 	}
-	
+
 	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 		if (theTerms == null) {
 			return;
@@ -87,11 +87,12 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 //						.andField(theFieldNameNGram).boostedTo(1.0f)
 						.sentence(terms.iterator().next().toLowerCase()).createQuery();
 					//@formatter:on
-					
+
 					theBoolean.must(textQuery);
 				} else {
 					String joinedTerms = StringUtils.join(terms, ' ');
-					theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());				}
+					theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());
+				}
 			}
 		}
 	}
@@ -145,7 +146,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			return pids;
 		}
 		*/
-		
+
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 		BooleanJunction<?> bool = qb.bool();
 
@@ -183,7 +184,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		List<?> result = jpaQuery.getResultList();
 
 		HashSet<Long> pidsSet = pids != null ? new HashSet<Long>(pids) : null;
-		
+
 		ArrayList<Long> retVal = new ArrayList<Long>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
@@ -201,8 +202,16 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 
 		Long pid = null;
 		if (theParams.get(BaseResource.SP_RES_ID) != null) {
-			StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
-			pid = BaseHapiFhirDao.translateForcedIdToPid(theResourceName, idParm.getValue(), myForcedIdDao);
+			String idParamValue;
+			IQueryParameterType idParam = theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
+				idParamValue = idParm.getValue();
+			} else {
+				StringParam idParm = (StringParam) idParam;
+				idParamValue = idParm.getValue();
+			}
+			pid = BaseHapiFhirDao.translateForcedIdToPid(theResourceName, idParamValue, myForcedIdDao);
 		}
 
 		Long referencingPid = pid;
@@ -211,6 +220,19 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			retVal.add(referencingPid);
 		}
 		return retVal;
+	}
+
+	@Override
+	public boolean isDisabled() {
+		try {
+			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+			em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		} catch (Exception e) {
+			ourLog.trace("FullText test failed", e);
+			ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
+			return true;
+		}
+		return false;
 	}
 
 	@Transactional()
@@ -238,18 +260,18 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 
 		Query textQuery = qb
-				.phrase()
-				.withSlop(2)
-				.onField("myContentText").boostedTo(4.0f)
-				.andField("myContentTextEdgeNGram").boostedTo(2.0f)
-				.andField("myContentTextNGram").boostedTo(1.0f)
-				.andField("myContentTextPhonetic").boostedTo(0.5f)
-				.sentence(theText.toLowerCase()).createQuery();
-		
+			.phrase()
+			.withSlop(2)
+			.onField("myContentText").boostedTo(4.0f)
+			.andField("myContentTextEdgeNGram").boostedTo(2.0f)
+			.andField("myContentTextNGram").boostedTo(1.0f)
+			.andField("myContentTextPhonetic").boostedTo(0.5f)
+			.sentence(theText.toLowerCase()).createQuery();
+
 		Query query = qb.bool()
-				.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
-				.must(textQuery)
-				.createQuery();
+			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
+			.must(textQuery)
+			.createQuery();
 
 		FullTextQuery ftq = em.createFullTextQuery(query, ResourceTable.class);
 		ftq.setProjection("myContentText");
@@ -286,7 +308,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		Collections.sort(suggestions);
 
 		Set<String> terms = Sets.newHashSet();
-		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext();) {
+		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext(); ) {
 			String nextTerm = iter.next().getTerm().toLowerCase();
 			if (!terms.add(nextTerm)) {
 				iter.remove();
@@ -294,37 +316,9 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[] { terms.size(), theText, delay });
+		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[]{terms.size(), theText, delay});
 
 		return suggestions;
-	}
-
-	public static class Suggestion implements Comparable<Suggestion> {
-		public Suggestion(String theTerm, float theScore) {
-			myTerm = theTerm;
-			myScore = theScore;
-		}
-
-		public String getTerm() {
-			return myTerm;
-		}
-
-		public float getScore() {
-			return myScore;
-		}
-
-		private String myTerm;
-		private float myScore;
-
-		@Override
-		public int compareTo(Suggestion theO) {
-			return Float.compare(theO.myScore, myScore);
-		}
-
-		@Override
-		public String toString() {
-			return "Suggestion[myTerm=" + myTerm + ", myScore=" + myScore + "]";
-		}
 	}
 
 	public class MySuggestionFormatter implements Formatter {
@@ -340,26 +334,9 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			mySuggestions = theSuggestions;
 		}
 
-		public void setFindPhrasesWith() {
-			myPartialMatchPhrases = new ArrayList<String>();
-			myPartialMatchScores = new ArrayList<Float>();
-
-			for (Suggestion next : mySuggestions) {
-				myPartialMatchPhrases.add(' ' + next.myTerm);
-				myPartialMatchScores.add(next.myScore);
-			}
-
-			myPartialMatchPhrases.add(myOriginalSearch);
-			myPartialMatchScores.add(1.0f);
-		}
-
-		public void setAnalyzer(String theString) { 
-			myAnalyzer = theString;
-		}
-
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
-			ourLog.debug("{} Found {} with score {}", new Object[] { myAnalyzer, theOriginalText, theTokenGroup.getTotalScore() });
+			ourLog.debug("{} Found {} with score {}", new Object[]{myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
 			if (theTokenGroup.getTotalScore() > 0) {
 				float score = theTokenGroup.getTotalScore();
 				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
@@ -379,19 +356,51 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			return null;
 		}
 
+		public void setAnalyzer(String theString) {
+			myAnalyzer = theString;
+		}
+
+		public void setFindPhrasesWith() {
+			myPartialMatchPhrases = new ArrayList<String>();
+			myPartialMatchScores = new ArrayList<Float>();
+
+			for (Suggestion next : mySuggestions) {
+				myPartialMatchPhrases.add(' ' + next.myTerm);
+				myPartialMatchScores.add(next.myScore);
+			}
+
+			myPartialMatchPhrases.add(myOriginalSearch);
+			myPartialMatchScores.add(1.0f);
+		}
+
 	}
 
-	@Override
-	public boolean isDisabled() {
-		try {
-			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-			em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
-		} catch (Exception e) {
-			ourLog.trace("FullText test failed", e);
-			ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
-			return true;
+	public static class Suggestion implements Comparable<Suggestion> {
+		private String myTerm;
+		private float myScore;
+
+		public Suggestion(String theTerm, float theScore) {
+			myTerm = theTerm;
+			myScore = theScore;
 		}
-		return false;
+
+		@Override
+		public int compareTo(Suggestion theO) {
+			return Float.compare(theO.myScore, myScore);
+		}
+
+		public float getScore() {
+			return myScore;
+		}
+
+		public String getTerm() {
+			return myTerm;
+		}
+
+		@Override
+		public String toString() {
+			return "Suggestion[myTerm=" + myTerm + ", myScore=" + myScore + "]";
+		}
 	}
 
 }

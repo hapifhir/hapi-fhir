@@ -178,7 +178,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				boolean first = true;
 				Map<String, String[]> parameters = theRequest.getParameters();
-				for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
+				for (String nextParamName : new TreeSet<>(parameters.keySet())) {
 					for (String nextParamValue : parameters.get(nextParamName)) {
 						if (first) {
 							b.append('?');

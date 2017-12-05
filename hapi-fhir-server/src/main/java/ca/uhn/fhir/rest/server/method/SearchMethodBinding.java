@@ -77,7 +77,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 * Check for parameter combinations and names that are invalid
 		 */
 		List<IParameter> parameters = getParameters();
-		// List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 		for (int i = 0; i < parameters.size(); i++) {
 			IParameter next = parameters.get(i);
 			if (!(next instanceof SearchParameter)) {
@@ -93,12 +92,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				}
 			}
 
-			// searchParameters.add(sp);
 		}
-		// for (int i = 0; i < searchParameters.size(); i++) {
-		// SearchParameter next = searchParameters.get(i);
-		// // next.
-		// }
 
 		/*
 		 * Only compartment searching methods may have an ID parameter

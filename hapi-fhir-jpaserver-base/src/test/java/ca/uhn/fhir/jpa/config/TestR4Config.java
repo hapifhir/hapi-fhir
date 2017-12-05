@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -30,6 +28,17 @@ import static org.junit.Assert.*;
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+	private static int ourMaxThreads;
+
+	static {
+		/*
+		 * We use a randomized number of maximum threads in order to try
+		 * and catch any potential deadlocks caused by database connection
+		 * starvation
+		 */
+		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+	}
+
 	private Exception myLastStackTrace;
 
 	@Bean()
@@ -90,13 +99,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setUsername("");
 		retVal.setPassword("");
 
-		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation
-		 */
-		int maxThreads = (int) (Math.random() * 6.0) + 1;
-		retVal.setMaxTotal(maxThreads);
+		retVal.setMaxTotal(ourMaxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
@@ -153,6 +156,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
+	}
+
+	public static int getMaxThreads() {
+		return ourMaxThreads;
 	}
 
 }
