@@ -203,7 +203,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		@Override
 		public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
 			String schedulingDisabled = myEnvironment.getProperty("scheduling_disabled");
-			if (schedulingDisabled.equals("true")) {
+			if ("true".equals(schedulingDisabled)) {
 				for (String beanName : beanFactory.getBeanNamesForType(ScheduledAnnotationBeanPostProcessor.class)) {
 					((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);
 				}
