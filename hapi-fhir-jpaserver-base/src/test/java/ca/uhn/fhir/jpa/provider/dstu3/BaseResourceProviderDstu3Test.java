@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	protected static JpaValidationSupportChainDstu3 myValidationSupport;

@@ -149,6 +149,13 @@ public class ParameterUtil {
 		return escape(theValue.toString());
 	}
 
+	/**
+	 * Applies {@link #escapeWithDefault(Object)} followed by {@link UrlUtil#escapeUrlParam(String)}
+	 */
+	public static String escapeAndUrlEncode(String theInput) {
+		return UrlUtil.escapeUrlParam(escapeWithDefault(theInput));
+	}
+
 	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
 		Integer index = findParamAnnotationIndex(theMethod, IdParam.class);
 		if (index != null) {
