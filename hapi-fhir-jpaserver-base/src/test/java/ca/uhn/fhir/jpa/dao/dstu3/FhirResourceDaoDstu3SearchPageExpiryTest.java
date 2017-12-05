@@ -147,7 +147,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 1600);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
