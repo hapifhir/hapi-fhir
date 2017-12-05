@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -67,7 +68,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private void deleteSearch(final Long theSearchPid) {
 		Search searchToDelete = mySearchDao.findOne(theSearchPid);
 		if (searchToDelete != null) {
-			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
+			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
 			mySearchResultDao.deleteForSearch(searchToDelete.getId());
 			mySearchDao.delete(searchToDelete);
@@ -83,6 +84,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
 		}
 		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
+
+		if (ourNowForUnitTests != null) {
+			ourLog.info("Searching for searches which are before {} - now is {}", new InstantType(cutoff), new InstantType(new Date(now())));
+		}
 
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 

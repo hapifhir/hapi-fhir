@@ -125,7 +125,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 			.addEntry()
 			.getRequest()
 			.setMethod(HTTPVerbEnum.GET)
-			.setUrl("Patient?_count=5");
+			.setUrl("Patient?_count=5&_sort=name");
 		
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 		
