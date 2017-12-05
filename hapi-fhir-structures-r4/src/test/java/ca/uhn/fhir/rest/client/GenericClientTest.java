@@ -1,45 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -49,7 +10,43 @@ import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicStatusLine;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.junit.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class GenericClientTest {
 
@@ -782,7 +779,7 @@ public class GenericClientTest {
         .returnBundle(Bundle.class)
         .execute();
 
-    assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + URLEncoder.encode("FOO\\$BAR$2001-01-01", "UTF-8"), capt.getValue().getURI().toString());
+    assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
 
   }
 
@@ -1025,7 +1022,7 @@ public class GenericClientTest {
         .returnBundle(Bundle.class)
         .execute();
 
-    assertEquals("http://example.com/fhir/Patient?name=" + URLEncoder.encode("AAA,BBB,C\\,C", "UTF-8"), capt.getAllValues().get(1).getURI().toString());
+    assertEquals("http://example.com/fhir/Patient?name=" + UrlUtil.escapeUrlParam("AAA,BBB,C\\,C"), capt.getAllValues().get(1).getURI().toString());
 
   }
 
@@ -1116,7 +1113,7 @@ public class GenericClientTest {
         .returnBundle(Bundle.class)
         .execute();
 
-    assertEquals("http://example.com/fhir/Patient?identifier=" + URLEncoder.encode("A|B,C|D", "UTF-8"), capt.getAllValues().get(2).getURI().toString());
+    assertEquals("http://example.com/fhir/Patient?identifier=" + UrlUtil.escapeUrlParam("A|B,C|D"), capt.getAllValues().get(2).getURI().toString());
 
   }
 
@@ -1152,7 +1149,7 @@ public class GenericClientTest {
     String url = capt.getAllValues().get(index).getURI().toString();
     assertThat(url, Matchers.startsWith(wantPrefix));
     assertEquals(wantValue, UrlUtil.unescape(url.substring(wantPrefix.length())));
-    assertEquals(UrlUtil.escape(wantValue), url.substring(wantPrefix.length()));
+    assertEquals(UrlUtil.escapeUrlParam(wantValue), url.substring(wantPrefix.length()));
     index++;
 
     response = client.search()
@@ -1164,7 +1161,7 @@ public class GenericClientTest {
     url = capt.getAllValues().get(index).getURI().toString();
     assertThat(url, Matchers.startsWith(wantPrefix));
     assertEquals(wantValue, UrlUtil.unescape(url.substring(wantPrefix.length())));
-    assertEquals(UrlUtil.escape(wantValue), url.substring(wantPrefix.length()));
+    assertEquals(UrlUtil.escapeUrlParam(wantValue), url.substring(wantPrefix.length()));
     index++;
   }
 
@@ -1234,8 +1231,8 @@ public class GenericClientTest {
         .execute();
 
     assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient?"));
-    assertThat(capt.getValue().getURI().toString(), containsString("_include=" + UrlUtil.escape(Patient.INCLUDE_ORGANIZATION.getValue())));
-    assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + UrlUtil.escape(Patient.INCLUDE_LINK.getValue())));
+    assertThat(capt.getValue().getURI().toString(), containsString("_include=" + UrlUtil.escapeUrlParam(Patient.INCLUDE_ORGANIZATION.getValue())));
+    assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + UrlUtil.escapeUrlParam(Patient.INCLUDE_LINK.getValue())));
     assertThat(capt.getValue().getURI().toString(), containsString("_include=*"));
 
   }

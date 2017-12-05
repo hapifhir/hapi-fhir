@@ -1,14 +1,17 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
-
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.AopTestUtils;
@@ -16,10 +19,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.StringParam;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchPageExpiryTest.class);
@@ -104,14 +108,17 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		// Search just got used so it shouldn't be deleted
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		final AtomicLong search3timestamp = new AtomicLong();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(searchUuid3));
+				Search search3 = mySearchEntityDao.findByUuid(searchUuid3);
+				assertNotNull(search3);
+				search3timestamp.set(search3.getCreated().getTime());
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 1400);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 1400);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
@@ -127,14 +134,14 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 2200);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 2200);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull(mySearchEntityDao.findByUuid(searchUuid1));
-				assertNull(mySearchEntityDao.findByUuid(searchUuid3));
+				assertNull("Search 1 still exists", mySearchEntityDao.findByUuid(searchUuid1));
+				assertNull("Search 3 still exists", mySearchEntityDao.findByUuid(searchUuid3));
 			}
 		});
 

@@ -54,13 +54,13 @@ public class VerticalBarParser extends ParserBase {
     public final static char  DEFAULT_DELIMITER_REPETITION = '~';
 
     /**
-     * Hl7 defined default delimiter for an escape
+     * Hl7 defined default delimiter for an escapeUrlParam
      */
     public final static char  DEFAULT_CHARACTER_ESCAPE = '\\';
 
 
     /**
-     * defined escape character for this message
+     * defined escapeUrlParam character for this message
      */
     private char escapeCharacter;
 
@@ -118,7 +118,7 @@ public class VerticalBarParser extends ParserBase {
     }
 
     /**
-     * get defined escape character for this message
+     * get defined escapeUrlParam character for this message
      * @return
      */
     public char getEscapeCharacter() {
@@ -126,7 +126,7 @@ public class VerticalBarParser extends ParserBase {
     }
 
     /**
-     * set defined escape character for this message
+     * set defined escapeUrlParam character for this message
      * @param escapeCharacter
      */
     public void setEscapeCharacter(char escapeCharacter) {
@@ -230,7 +230,7 @@ public class VerticalBarParser extends ParserBase {
     }
 
     /**
-     * get the escape for a character
+     * get the escapeUrlParam for a character
      * @param ch
      * @return
      */ 
@@ -258,7 +258,7 @@ public class VerticalBarParser extends ParserBase {
     }
 
     /** 
-     * check to see whether ch represents a delimiter escape
+     * check to see whether ch represents a delimiter escapeUrlParam
      * @param ch
      * @return
      */
@@ -267,7 +267,7 @@ public class VerticalBarParser extends ParserBase {
     }
 
     /** 
-     * get escape for ch in an escape
+     * get escapeUrlParam for ch in an escapeUrlParam
      * @param ch
      * @return
      * @throws DefinitionException 

@@ -325,7 +325,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		cs.setUrl(theSystem);
 		cs.setContent(CodeSystemContentMode.NOTPRESENT);
 
-		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escape(theSystem), theRequestDetails);
+		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escapeUrlParam(theSystem), theRequestDetails);
 		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
 		if (createOutcome.getCreated() != Boolean.TRUE) {
 			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);

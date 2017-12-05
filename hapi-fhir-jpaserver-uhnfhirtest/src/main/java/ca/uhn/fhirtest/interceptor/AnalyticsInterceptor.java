@@ -80,13 +80,13 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 			b.append("&tid=").append(myAnalyticsTid);
 
 			b.append("&t=event");
-			b.append("&an=").append(UrlUtil.escape(myHostname)).append('+').append(UrlUtil.escape(next.getApplicationName()));
+			b.append("&an=").append(UrlUtil.escapeUrlParam(myHostname)).append('+').append(UrlUtil.escapeUrlParam(next.getApplicationName()));
 			b.append("&ec=").append(next.getResourceName());
 			b.append("&ea=").append(next.getRestOperation());
 			
 			b.append("&cid=").append(next.getClientId());
-			b.append("&uip=").append(UrlUtil.escape(next.getSourceIp()));
-			b.append("&ua=").append(UrlUtil.escape(next.getUserAgent()));
+			b.append("&uip=").append(UrlUtil.escapeUrlParam(next.getSourceIp()));
+			b.append("&ua=").append(UrlUtil.escapeUrlParam(next.getUserAgent()));
 			b.append("\n");
 		}
 		

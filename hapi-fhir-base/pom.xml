@@ -59,6 +59,13 @@
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-commons</artifactId>
 			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<!-- Guava brings in a newer replacement for this dependency called com.google.code.findbugs:jsr305 -->
+					<groupId>com.google.code.findbugs</groupId>
+					<artifactId>annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
@@ -76,6 +83,10 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 
 		<!-- Logging -->

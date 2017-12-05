@@ -186,9 +186,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 						} else {
 							b.append('&');
 						}
-						b.append(UrlUtil.escape(nextParamName));
+						b.append(UrlUtil.escapeUrlParam(nextParamName));
 						b.append('=');
-						b.append(UrlUtil.escape(nextParamValue));
+						b.append(UrlUtil.escapeUrlParam(nextParamValue));
 					}
 				}
 			}
