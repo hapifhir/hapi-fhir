@@ -21,6 +21,10 @@
 				Searching in JPA server using a combination of _content and _id parameters
 				failed. Thanks to Jeff Weyer for reporting!
 			</action>
+			<action type="add">
+				A new configuration option has been added to DaoConfig which allows newly created
+				resources to be assigned a UUID by the server instead of a sequential ID
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">

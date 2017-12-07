@@ -109,6 +109,7 @@ public class DaoConfig {
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
+	private IdStrategyEnum myResourceIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 
 	/**
 	 * Constructor
@@ -160,18 +161,18 @@ public class DaoConfig {
 	 * whether a "total count" is included in the response bundle for searches that
 	 * return large amounts of data.
 	 * <p>
-	 *    For a search that returns 10000 results, if this value is set to
-	 *    10000 the search coordinator will find all 10000 results
-	 *    prior to returning, so the initial response bundle will have the
-	 *    total set to 10000. If this value is null (or less than 10000)
-	 *    the response bundle will likely return slightly faster, but will
-	 *    not include the total. Subsequent page requests will likely
-	 *    include the total however, if they are performed after the
-	 *    search coordinator has found all results.
+	 * For a search that returns 10000 results, if this value is set to
+	 * 10000 the search coordinator will find all 10000 results
+	 * prior to returning, so the initial response bundle will have the
+	 * total set to 10000. If this value is null (or less than 10000)
+	 * the response bundle will likely return slightly faster, but will
+	 * not include the total. Subsequent page requests will likely
+	 * include the total however, if they are performed after the
+	 * search coordinator has found all results.
 	 * </p>
 	 * <p>
-	 *    Set this value to <code>0</code> to always load all
-	 *    results before returning.
+	 * Set this value to <code>0</code> to always load all
+	 * results before returning.
 	 * </p>
 	 */
 	public Integer getCountSearchResultsUpTo() {
@@ -185,18 +186,18 @@ public class DaoConfig {
 	 * whether a "total count" is included in the response bundle for searches that
 	 * return large amounts of data.
 	 * <p>
-	 *    For a search that returns 10000 results, if this value is set to
-	 *    10000 the search coordinator will find all 10000 results
-	 *    prior to returning, so the initial response bundle will have the
-	 *    total set to 10000. If this value is null (or less than 10000)
-	 *    the response bundle will likely return slightly faster, but will
-	 *    not include the total. Subsequent page requests will likely
-	 *    include the total however, if they are performed after the
-	 *    search coordinator has found all results.
+	 * For a search that returns 10000 results, if this value is set to
+	 * 10000 the search coordinator will find all 10000 results
+	 * prior to returning, so the initial response bundle will have the
+	 * total set to 10000. If this value is null (or less than 10000)
+	 * the response bundle will likely return slightly faster, but will
+	 * not include the total. Subsequent page requests will likely
+	 * include the total however, if they are performed after the
+	 * search coordinator has found all results.
 	 * </p>
 	 * <p>
-	 *    Set this value to <code>0</code> to always load all
-	 *    results before returning.
+	 * Set this value to <code>0</code> to always load all
+	 * results before returning.
 	 * </p>
 	 */
 	public void setCountSearchResultsUpTo(Integer theCountSearchResultsUpTo) {
@@ -408,8 +409,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
@@ -464,6 +468,25 @@ public class DaoConfig {
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 */
+	public IdStrategyEnum getResourceIdStrategy() {
+		return myResourceIdStrategy;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 *
+	 * @param theResourceIdStrategy The strategy. Must not be null.
+	 */
+	public void setResourceIdStrategy(IdStrategyEnum theResourceIdStrategy) {
+		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
+		myResourceIdStrategy = theResourceIdStrategy;
 	}
 
 	/**
@@ -1007,11 +1030,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**
@@ -1060,6 +1080,18 @@ public class DaoConfig {
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
+	}
+
+	public enum IdStrategyEnum {
+		/**
+		 * This strategy is the default strategy, and it simply uses a sequential
+		 * numeric ID for each newly created resource.
+		 */
+		SEQUENTIAL_NUMERIC,
+		/**
+		 * Each resource will receive a randomly generated UUID
+		 */
+		UUID
 	}
 
 }
