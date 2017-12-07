@@ -88,7 +88,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		sleepAtLeast(750);
+		sleepAtLeast(501);
 
 		// We're now past 500ms so we shouldn't reuse the search
 
@@ -105,7 +105,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 
 		// Search just got used so it shouldn't be deleted
 
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 500);
 		final AtomicLong search3timestamp = new AtomicLong();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -119,7 +119,6 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		});
 
 		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
-
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
