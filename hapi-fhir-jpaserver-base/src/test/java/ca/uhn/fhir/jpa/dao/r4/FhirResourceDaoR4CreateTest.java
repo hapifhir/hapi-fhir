@@ -21,12 +21,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@After
 	public void afterResetDao() {
-		myDaoConfig.setResourceIdStrategy(new DaoConfig().getResourceIdStrategy());
+		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 	}
 
 	@Test
 	public void testCreateWithUuidResourceStrategy() throws Exception {
-		myDaoConfig.setResourceIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
@@ -41,7 +41,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreateWithUuidResourceStrategy() throws Exception {
-		myDaoConfig.setResourceIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());

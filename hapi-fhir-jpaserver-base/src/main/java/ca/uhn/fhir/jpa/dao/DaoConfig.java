@@ -109,7 +109,7 @@ public class DaoConfig {
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
-	private IdStrategyEnum myResourceIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
+	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 
 	/**
 	 * Constructor
@@ -474,8 +474,8 @@ public class DaoConfig {
 	 * This setting configures the strategy to use in generating IDs for newly
 	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
 	 */
-	public IdStrategyEnum getResourceIdStrategy() {
-		return myResourceIdStrategy;
+	public IdStrategyEnum getResourceServerIdStrategy() {
+		return myResourceServerIdStrategy;
 	}
 
 	/**
@@ -484,9 +484,9 @@ public class DaoConfig {
 	 *
 	 * @param theResourceIdStrategy The strategy. Must not be null.
 	 */
-	public void setResourceIdStrategy(IdStrategyEnum theResourceIdStrategy) {
+	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
 		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
-		myResourceIdStrategy = theResourceIdStrategy;
+		myResourceServerIdStrategy = theResourceIdStrategy;
 	}
 
 	/**

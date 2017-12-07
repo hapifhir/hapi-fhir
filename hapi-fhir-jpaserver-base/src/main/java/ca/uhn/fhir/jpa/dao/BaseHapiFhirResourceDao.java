@@ -149,7 +149,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (myDaoConfig.getResourceIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
+		if (myDaoConfig.getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
 			theResource.setId(UUID.randomUUID().toString());
 		}
 
