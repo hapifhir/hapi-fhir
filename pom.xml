@@ -219,7 +219,7 @@
 		</developer>
 		<developer>
 			<id>SRiviere</id>
-			<name>SÃ©bastien RiviÃ¨re</name>
+			<name>Sebastien Riviere</name>
 		</developer>
 		<developer>
 			<id>karlmdavis</id>
@@ -1187,10 +1187,11 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.12</version>
+					<version>1.14</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
+						<encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
 				<plugin>
