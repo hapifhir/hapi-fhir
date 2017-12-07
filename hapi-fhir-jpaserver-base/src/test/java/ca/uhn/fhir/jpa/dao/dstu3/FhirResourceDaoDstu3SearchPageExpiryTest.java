@@ -77,8 +77,6 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			Validate.notBlank(searchUuid1);
 		}
 
-		sleepAtLeast(250);
-
 		final String searchUuid2;
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -90,7 +88,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		sleepAtLeast(500);
+		sleepAtLeast(750);
 
 		// We're now past 500ms so we shouldn't reuse the search
 
