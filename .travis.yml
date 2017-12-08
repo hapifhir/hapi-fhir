@@ -1,13 +1,15 @@
 # Use docker-based build environment (instead of openvz)
-#sudo: false
-sudo: required
+sudo: false
+dist: trusty
+
+#sudo: required
 
 language: java
 jdk:
   - oraclejdk8
 env:
   global:
-    - MAVEN_OPTS="-Xmx1024m"
+    - MAVEN_OPTS="-Xmx512m"
 
 cache:
   directories:
