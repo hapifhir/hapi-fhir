@@ -2347,6 +2347,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * See #801
 	 */
 	@Test
+	@Ignore
 	public void testTransactionWithMatchUrlToReferenceInSameBundle() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug801.json"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);

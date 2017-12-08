@@ -120,7 +120,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 		
@@ -134,13 +133,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
 		// Should see two subscription notifications
-		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 		
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+		waitForQueueToDrain();
 
-		Thread.sleep(500);
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
@@ -156,7 +154,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
-		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
@@ -170,7 +167,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
-		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
