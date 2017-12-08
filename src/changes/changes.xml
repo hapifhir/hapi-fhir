@@ -25,6 +25,10 @@
 				A new configuration option has been added to DaoConfig which allows newly created
 				resources to be assigned a UUID by the server instead of a sequential ID
 			</action>
+			<action type="fix">
+				An unneccesary column called "MYHASHCODE" was added to the
+				HFJ_TAG_DEF table in the JPA server schema
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">
