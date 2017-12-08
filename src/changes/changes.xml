@@ -29,6 +29,10 @@
 				An unneccesary column called "MYHASHCODE" was added to the
 				HFJ_TAG_DEF table in the JPA server schema
 			</action>
+			<action type="fix">
+				A few log entries emitted by the JPA server suring every search have been reduced
+				from INFO to DEBUG in order to reduce log noise
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">

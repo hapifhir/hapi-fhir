@@ -1528,7 +1528,7 @@ public class SearchBuilder implements ISearchBuilder {
 				thePredicates.add(joinParam1);
 			}
 		} else {
-			ourLog.info("Reusing join for {}", theSort.getParamName());
+			ourLog.debug("Reusing join for {}", theSort.getParamName());
 		}
 
 		for (String next : sortAttrName) {
@@ -1981,7 +1981,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.info("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
 				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}
@@ -2203,12 +2203,12 @@ public class SearchBuilder implements ISearchBuilder {
 			} // if we need to fetch the next result
 
 			if (myFirst) {
-				ourLog.info("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
+				ourLog.debug("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
 				myFirst = false;
 			}
 
 			if (myNext == NO_MORE) {
-				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
+				ourLog.debug("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
 			}
 
 		}
@@ -2280,10 +2280,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void ensureHaveQuery() {
 			if (myWrap == null) {
-				ourLog.info("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
+				ourLog.debug("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
 				StopWatch sw = new StopWatch();
 				Collection<Long> resourcePids = myCallingDao.getResourceIndexedCompositeStringUniqueDao().findResourcePidsByQueryStrings(myUniqueQueryStrings);
-				ourLog.info("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
+				ourLog.debug("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
 				myWrap = resourcePids.iterator();
 			}
 		}
