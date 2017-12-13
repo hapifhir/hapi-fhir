@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchPageExpiryTest;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -81,6 +83,8 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
+
+		waitForSearchToSave(searchUuid1);
 
 		final String searchUuid2;
 		{
@@ -376,5 +380,11 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			}
 		});
 
+	}
+
+	private void waitForSearchToSave(final String theUuid) {
+		final ISearchDao searchEntityDao = mySearchEntityDao;
+		TransactionTemplate txTemplate = newTxTemplate();
+		FhirResourceDaoR4SearchPageExpiryTest.waitForSearchToSave(theUuid, searchEntityDao, txTemplate);
 	}
 }

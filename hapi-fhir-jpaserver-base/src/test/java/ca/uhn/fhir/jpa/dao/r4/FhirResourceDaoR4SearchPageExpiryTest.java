@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -174,19 +175,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		params.setCount(1);
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
 
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = null;
-				for (int i = 0; i < 20 && search == null; i++) {
-					search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
-					if (search == null) {
-						sleepAtLeast(100);
-					}
-				}
-				assertNotNull(search);
-			}
-		});
+		waitForSearchToSave(bundleProvider.getUuid());
 
 		myDaoConfig.setExpireSearchResults(false);
 		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
@@ -211,6 +200,28 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
+	}
+
+	private void waitForSearchToSave(final String theUuid) {
+		final ISearchDao searchEntityDao = mySearchEntityDao;
+		TransactionTemplate txTemplate = newTxTemplate();
+		FhirResourceDaoR4SearchPageExpiryTest.waitForSearchToSave(theUuid, searchEntityDao, txTemplate);
+	}
+
+	public static void waitForSearchToSave(final String theUuid, final ISearchDao theSearchEntityDao, TransactionTemplate theTxTemplate) {
+		theTxTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				Search search = null;
+				for (int i = 0; i < 20 && search == null; i++) {
+					search = theSearchEntityDao.findByUuid(theUuid);
+					if (search == null) {
+						sleepAtLeast(100);
+					}
+				}
+				assertNotNull(search);
+			}
+		});
 	}
 
 	@Test
@@ -243,6 +254,8 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
+
+		waitForSearchToSave(searchUuid1);
 
 		String searchUuid2;
 		{
