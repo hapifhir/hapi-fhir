@@ -132,7 +132,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("SearchParameter.status is missing or invalid: null", e.getMessage());
+			assertEquals("SearchParameter.status is missing or invalid", e.getMessage());
 		}
 
 	}
@@ -810,6 +810,50 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testSearchForStringOnIdentifier() {
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.identifier.value");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		IIdType spId = mySearchParameterDao.create(fooSp, mySrd).getId().toUnqualifiedVersionless();
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("FOO123").setValue("BAR678");
+		pat.setGender(AdministrativeGender.MALE);
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pat2 = new Patient();
+		pat.setGender(AdministrativeGender.FEMALE);
+		myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Partial match
+		map = new SearchParameterMap();
+		map.add("foo", new StringParam("bar"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(patId.getValue()));
+
+		// Non match
+		map = new SearchParameterMap();
+		map.add("foo", new StringParam("zzz"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
 	}
 
 	@Test

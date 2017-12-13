@@ -7,6 +7,11 @@
 	</properties>
 	<body>
 		<release version="3.2.0" date="TBD">
+			<action type="add">
+				Support for custom search parameters has been backported in the JPA server
+				from DSTU3 back to DSTU2. As of this release of HAPI, full support for custom
+				search parameters exists in all supported versions of FHIR.
+			</action>
 			<action type="fix">
 				Fix a crash in JPA server when performing a recursive
 				<![CDATA[<code>_include</code>]]> which doesn't actually find any matches.
@@ -32,6 +37,13 @@
 			<action type="fix">
 				A few log entries emitted by the JPA server suring every search have been reduced
 				from INFO to DEBUG in order to reduce log noise
+			</action>
+			<action type="remove">
+				A few redundant and no longer useful methods have been marked as
+				deprecated in
+				<![CDATA[<code>IServerInterceptor</code>]]>. If you have implemented
+				custom interceptors you are recommended to migrate to the recommended
+				methods.
 			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">

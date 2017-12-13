@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,7 +82,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String nextPath : nextPathsSplit) {
 			String nextPathTrimmed = nextPath.trim();
 			try {
-				values.addAll(t.getValues(theResource, nextPathTrimmed));
+				List<Object> allValues = t.getValues(theResource, nextPathTrimmed);
+				for (Object next : allValues) {
+					if (next instanceof IBaseExtension) {
+						IBaseDatatype value = ((IBaseExtension) next).getValue();
+						if (value != null) {
+							values.add(value);
+						}
+					} else {
+						values.add(next);
+					}
+				}
 			} catch (Exception e) {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: {}", new Object[] { nextPathTrimmed, def.getName(), e.toString(), e } );
