@@ -1621,6 +1621,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(ids, empty());
 	}
 
+	@Test
+	public void testGetResourceCountsOperation() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().setFamily(methodName);
+		myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
+		} finally {
+			response.close();
+		}
+	}
+
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {
@@ -1645,27 +1666,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	// myClient.delete().resource(next).execute();
 	// }
 	// }
-
-	@Test
-	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
-
-		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
-		myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
-
-		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
-		} finally {
-			response.close();
-		}
-	}
 
 	@Test
 	public void testHasParameter() throws Exception {
@@ -3643,6 +3643,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@Test
+	public void testSmallResultIncludes() {
+		Patient p = new Patient();
+		p.setId("p");
+		p.setActive(true);
+		myClient.update().resource(p).execute();
+
+		CarePlan cp = new CarePlan();
+		cp.setId("cp");
+		cp.getSubject().setResource(p);
+		cp.addActivity().getDetail().getCode().addCoding().setSystem("FOO").setCode("BAR");
+		myClient.update().resource(cp).execute();
+
+		Bundle b = myClient
+			.search()
+			.forResource(CarePlan.class)
+			.where(CarePlan.ACTIVITY_CODE.exactly().systemAndCode("FOO", "BAR"))
+			.sort().ascending(CarePlan.SP_ACTIVITY_DATE)
+			.include(CarePlan.INCLUDE_SUBJECT)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, b.getEntry().size());
+
 	}
 
 	/**
