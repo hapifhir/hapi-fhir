@@ -130,7 +130,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("SearchParameter.status is missing or invalid: null", e.getMessage());
+			assertEquals("SearchParameter.status is missing or invalid", e.getMessage());
 		}
 
 	}

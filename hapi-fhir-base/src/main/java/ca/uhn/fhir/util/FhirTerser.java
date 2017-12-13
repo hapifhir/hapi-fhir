@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #L%
  */
 import java.util.*;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -212,10 +213,43 @@ public class FhirTerser {
 	@SuppressWarnings("unchecked")
 	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		String name = theSubList.get(0);
-				
+		List<T> retVal = new ArrayList<>();
+
+		if (name.startsWith("extension('")) {
+			String extensionUrl = name.substring("extension('".length());
+			int endIndex = extensionUrl.indexOf('\'');
+			if (endIndex != -1) {
+				extensionUrl = extensionUrl.substring(0, endIndex);
+			}
+
+			List<ExtensionDt> extensions= Collections.emptyList();
+			if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
+				extensions = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensionsByUrl(extensionUrl);
+			} else if (theCurrentObj instanceof IBaseExtension) {
+				extensions = ((IBaseExtension)theCurrentObj).getExtension();
+			}
+
+			for (ExtensionDt next : extensions) {
+				if (theWantedClass.isAssignableFrom(next.getClass())) {
+					retVal.add((T) next);
+				}
+			}
+
+			if (theSubList.size() > 1) {
+				List<T> values = retVal;
+				retVal = new ArrayList<>();
+				for (T nextElement : values) {
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+					retVal.addAll(foundValues);
+				}
+			}
+
+			return retVal;
+		}
+
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
-		List<T> retVal = new ArrayList<T>();
 
 		if (theSubList.size() == 1) {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
@@ -268,7 +302,25 @@ public class FhirTerser {
 	}
 
 	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
-		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> parts = new ArrayList<>();
+
+		int currentStart = 0;
+		boolean inSingleQuote = false;
+		for (int i = 0; i < thePath.length(); i++) {
+			switch (thePath.charAt(i)) {
+				case '\'':
+					inSingleQuote = !inSingleQuote;
+					break;
+				case '.':
+					if (!inSingleQuote) {
+						parts.add(thePath.substring(currentStart, i));
+						currentStart = i + 1;
+					}
+					break;
+			}
+		}
+
+		parts.add(thePath.substring(currentStart));
 
 		if (theElementDef instanceof RuntimeResourceDefinition) {
 			if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {

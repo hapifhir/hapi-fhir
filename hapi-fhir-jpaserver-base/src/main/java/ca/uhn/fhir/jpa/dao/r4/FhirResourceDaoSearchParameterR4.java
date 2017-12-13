@@ -1,7 +1,22 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ElementUtil;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.util.List;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -12,9 +27,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,59 +38,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ElementUtil;
-
 public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4.class);
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	protected void markAffectedResources(SearchParameter theResource) {
-		if (theResource != null) {
-			String expression = theResource.getExpression();
-			if (isNotBlank(expression)) {
-				final String resourceType = expression.substring(0, expression.indexOf('.'));
-				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, expression);
-
-				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
-					@Override
-					public Integer doInTransaction(TransactionStatus theStatus) {
-						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
-					}
-				});
-
-				ourLog.info("Marked {} resources for reindexing", updatedCount);
-			}
-		}
-
-		mySearchParamRegistry.forceRefresh();
+		markResourcesMatchingExpressionAsNeedingReindexing(theResource != null ? theResource.getExpression() : null);
 	}
 
 	/**
@@ -125,29 +97,37 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
+		Enum<?> status = theResource.getStatus();
+		List<CodeType> base = theResource.getBase();
+		String expression = theResource.getExpression();
+		FhirContext context = getContext();
+		Enum<?> type = theResource.getType();
+		
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
+	}
+
+	public static void validateSearchParam(Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext) {
+		if (theStatus == null) {
+			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
 
-		if (ElementUtil.isEmpty(theResource.getBase())) {
+		if (ElementUtil.isEmpty(theBase)) {
 			throw new UnprocessableEntityException("SearchParameter.base is missing");
 		}
 
-		String expression = theResource.getExpression();
-		if (theResource.getType() == Enumerations.SearchParamType.COMPOSITE && isBlank(expression)) {
+		if (theType != null && theType.name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(theExpression)) {
 
 			// this is ok
 
-		} else if (isBlank(expression)) {
+		} else if (isBlank(theExpression)) {
 
 			throw new UnprocessableEntityException("SearchParameter.expression is missing");
 
 		} else {
 
-			expression = expression.trim();
-			theResource.setExpression(expression);
+			theExpression = theExpression.trim();
 
-			String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(expression);
+			String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
 			String allResourceName = null;
 			for (String nextPath : expressionSplit) {
 				nextPath = nextPath.trim();
@@ -159,7 +139,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 
 				String resourceName = nextPath.substring(0, dotIdx);
 				try {
-					getContext().getResourceDefinition(resourceName);
+					theContext.getResourceDefinition(resourceName);
 				} catch (DataFormatException e) {
 					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
 				}
@@ -175,7 +155,6 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 			}
 
 		} // if have expression
-
 	}
 
 }
