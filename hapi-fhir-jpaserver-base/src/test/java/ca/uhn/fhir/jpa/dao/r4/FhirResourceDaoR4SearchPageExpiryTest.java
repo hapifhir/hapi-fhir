@@ -10,15 +10,19 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -26,6 +30,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchPageExpiryTest.class);
 
 	@After()
 	public void after() {
@@ -157,69 +162,62 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchPagesExpiryDisabled() throws Exception {
+	public void testExpirePagesAfterSingleUse() throws Exception {
+		IIdType pid1;
+		IIdType pid2;
 		{
 			Patient patient = new Patient();
 			patient.addName().setFamily("EXPIRE");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		Thread.sleep(10);
 		{
 			Patient patient = new Patient();
 			patient.addName().setFamily("EXPIRE");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		Thread.sleep(10);
+
+		final StopWatch sw = new StopWatch();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
-		params.setCount(1);
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
 		waitForSearchToSave(bundleProvider.getUuid());
+		final AtomicLong start = new AtomicLong();
 
-		myDaoConfig.setExpireSearchResults(false);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
-				assertNotNull(search);
+				assertNotNull("Failed after " + sw.toString(), search);
+				start.set(search.getCreated().getTime());
+				ourLog.info("Search was created: {}", new InstantType(new Date(start.get())));
 			}
 		});
 
-		myDaoConfig.setExpireSearchResults(true);
+		myDaoConfig.setExpireSearchResultsAfterMillis(500);
+		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 499);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
-				assertNull(search);
+				assertNotNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
 			}
 		});
 
-	}
-
-	private void waitForSearchToSave(final String theUuid) {
-		final ISearchDao searchEntityDao = mySearchEntityDao;
-		TransactionTemplate txTemplate = newTxTemplate();
-		FhirResourceDaoR4SearchPageExpiryTest.waitForSearchToSave(theUuid, searchEntityDao, txTemplate);
-	}
-
-	public static void waitForSearchToSave(final String theUuid, final ISearchDao theSearchEntityDao, TransactionTemplate theTxTemplate) {
-		theTxTemplate.execute(new TransactionCallbackWithoutResult() {
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 600);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = null;
-				for (int i = 0; i < 20 && search == null; i++) {
-					search = theSearchEntityDao.findByUuid(theUuid);
-					if (search == null) {
-						sleepAtLeast(100);
-					}
-				}
-				assertNotNull(search);
+				assertNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
 			}
 		});
 	}
@@ -326,60 +324,69 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testExpirePagesAfterSingleUse() throws Exception {
-		IIdType pid1;
-		IIdType pid2;
+	public void testSearchPagesExpiryDisabled() throws Exception {
 		{
 			Patient patient = new Patient();
 			patient.addName().setFamily("EXPIRE");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		Thread.sleep(10);
 		{
 			Patient patient = new Patient();
 			patient.addName().setFamily("EXPIRE");
-			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		Thread.sleep(10);
-
-		final StopWatch sw = new StopWatch();
-
-		long start = System.currentTimeMillis();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
+		params.setCount(1);
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(500);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start);
+		waitForSearchToSave(bundleProvider.getUuid());
 
+		myDaoConfig.setExpireSearchResults(false);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
+
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull("Failed after " + sw.toString(), mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				assertNotNull(search);
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 499);
+		myDaoConfig.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
+
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				assertNull(search);
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 600);
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
+	}
+
+	private void waitForSearchToSave(final String theUuid) {
+		final ISearchDao searchEntityDao = mySearchEntityDao;
+		TransactionTemplate txTemplate = newTxTemplate();
+		FhirResourceDaoR4SearchPageExpiryTest.waitForSearchToSave(theUuid, searchEntityDao, txTemplate);
+	}
+
+	public static void waitForSearchToSave(final String theUuid, final ISearchDao theSearchEntityDao, TransactionTemplate theTxTemplate) {
+		theTxTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				Search search = null;
+				for (int i = 0; i < 20 && search == null; i++) {
+					search = theSearchEntityDao.findByUuid(theUuid);
+					if (search == null) {
+						sleepAtLeast(100);
+					}
+				}
+				assertNotNull(search);
 			}
 		});
 	}

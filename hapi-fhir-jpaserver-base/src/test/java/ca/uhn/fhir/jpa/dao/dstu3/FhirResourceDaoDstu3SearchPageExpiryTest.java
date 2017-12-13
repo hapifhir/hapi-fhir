@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
@@ -23,6 +24,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -189,8 +191,6 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 
 		final StopWatch sw = new StopWatch();
 
-		long start = System.currentTimeMillis();
-
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
@@ -198,19 +198,23 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(500);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start);
+		waitForSearchToSave(bundleProvider.getUuid());
+		final AtomicLong start = new AtomicLong();
 
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull("Failed after " + sw.toString(), mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				assertNotNull("Failed after " + sw.toString(), search);
+				start.set(search.getCreated().getTime());
+				ourLog.info("Search was created: {}", new InstantType(new Date(start.get())));
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 499);
+		myDaoConfig.setExpireSearchResultsAfterMillis(500);
+		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 499);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -219,7 +223,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 600);
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 600);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
