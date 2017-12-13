@@ -44,6 +44,10 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 
 	@Before
 	public void before() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setCountSearchResultsUpTo(null);
+
 		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
 	}
@@ -347,13 +351,13 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search = null;
-				for (int i = 0; i < 20 && search == null; i++) {
+				for (int i = 0; i < 100 && search == null; i++) {
 					search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
 					if (search == null) {
 						sleepAtLeast(100);
 					}
 				}
-				assertNotNull(search);
+				assertNotNull("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds", search);
 			}
 		});
 
