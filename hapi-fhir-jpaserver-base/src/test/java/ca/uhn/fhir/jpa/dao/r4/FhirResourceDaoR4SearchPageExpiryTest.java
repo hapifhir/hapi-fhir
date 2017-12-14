@@ -19,9 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -342,7 +344,21 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		params.setCount(1);
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
 
-		waitForSearchToSave(bundleProvider.getUuid());
+		Search search = null;
+		for (int i = 0; i < 100 && search == null; i++) {
+			search = newTxTemplate().execute(new TransactionCallback<Search>() {
+				@Nullable
+				@Override
+				public Search doInTransaction(TransactionStatus status) {
+					return mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				}
+			});
+			if (search == null) {
+				sleepAtLeast(100);
+			}
+		}
+		assertNotNull("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds", search);
+
 
 		myDaoConfig.setExpireSearchResults(false);
 		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);

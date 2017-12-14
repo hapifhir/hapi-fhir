@@ -19,8 +19,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -351,19 +353,21 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		params.setCount(1);
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
 
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = null;
-				for (int i = 0; i < 100 && search == null; i++) {
-					search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
-					if (search == null) {
-						sleepAtLeast(100);
-					}
+		Search search = null;
+		for (int i = 0; i < 100 && search == null; i++) {
+			search = newTxTemplate().execute(new TransactionCallback<Search>() {
+				@Nullable
+				@Override
+				public Search doInTransaction(TransactionStatus status) {
+					return mySearchEntityDao.findByUuid(bundleProvider.getUuid());
 				}
-				assertNotNull("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds", search);
+			});
+			if (search == null) {
+				sleepAtLeast(100);
 			}
-		});
+		}
+		assertNotNull("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds", search);
+
 
 		myDaoConfig.setExpireSearchResults(false);
 		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
