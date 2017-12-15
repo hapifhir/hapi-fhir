@@ -727,7 +727,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>MINPARALLEL</id>
+			<id>REDUCED_JPA_TESTS</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -737,6 +737,7 @@
 							<forkCount>2</forkCount>
 							<reuseForks>true</reuseForks>
 							<excludes>
+								<exclude>**/*Dstu2*</exclude>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
 						</configuration>

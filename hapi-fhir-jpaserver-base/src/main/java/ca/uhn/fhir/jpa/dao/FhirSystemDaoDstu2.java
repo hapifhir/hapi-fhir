@@ -233,8 +233,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
-		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
+			notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+		}
 
 		String actionName = "Transaction";
 		return transaction((ServletRequestDetails) theRequestDetails, theRequest, actionName);
