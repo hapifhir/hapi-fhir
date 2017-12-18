@@ -727,6 +727,15 @@
 			</build>
 		</profile>
 		<profile>
+			<!--
+			This profile is used on the Travis CI server because the full test suite
+			runs for over 45 minutes on Travis, and Travis kills it.. So we don't execute
+			all of the tests there.
+
+			This seems like it must be an issue with Travis's environment, since AppVeyor
+			can run the full build in much less time, but I don't know how to fix it
+			yet..
+			-->
 			<id>REDUCED_JPA_TESTS</id>
 			<build>
 				<plugins>
