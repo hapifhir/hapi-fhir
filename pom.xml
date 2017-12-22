@@ -382,6 +382,11 @@
 			<id>jamesdaily</id>
 			<name>James Daily</name>
 		</developer>
+		<developer>
+			<id>darktyko</id>
+			<name>Kyle Meadows</name>
+		</developer>
+		
 	</developers>
 
 	<licenses>

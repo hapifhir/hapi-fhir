@@ -45,6 +45,10 @@
 				custom interceptors you are recommended to migrate to the recommended
 				methods.
 			</action>
+			<action type="fix" issue="810">
+				Fix an issue in JPA server where updating a resource sometimes caused date search indexes to 
+				be incorrectly deleted. Thanks to Kyle Meadows for the pull request!
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">
