@@ -10,12 +10,18 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -165,6 +171,43 @@ public class ResourceValidatorDstu3Test {
 		assertEquals(0, all.size());
 		assertEquals(0, output.getMessages().size());
 	}
+
+	@Test
+	@Ignore
+	public void testValidateProfileWithExtension() throws IOException, FHIRException {
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		ValidationSupportChain support = new ValidationSupportChain(valSupport, defaultSupport);
+
+		// Prepopulate SDs
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(support));
+
+		Consent input = ourCtx.newJsonParser().parseResource(Consent.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream("/dstu3/myconsent-resource.json")));
+
+		ValidationResult output = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, all.size());
+		assertEquals(0, output.getMessages().size());
+
+	}
+
+	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
+		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
+		StructureDefinition base = theDefaultValSupport.fetchStructureDefinition(ourCtx, derived.getBaseDefinition());
+		Validate.notNull(base);
+
+		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
+		List<ValidationMessage> issues = new ArrayList<>();
+		ProfileUtilities profileUtilities = new ProfileUtilities(worker, issues, null);
+		profileUtilities.generateSnapshot(base, derived, "", "");
+
+		return derived;
+	}
+
 
 	@Test
 	@Ignore

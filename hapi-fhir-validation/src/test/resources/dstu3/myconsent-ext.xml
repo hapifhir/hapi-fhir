@@ -1,0 +1,32 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<id value="PruebaExtension" />
+	<meta>
+		<lastUpdated value="2017-12-19T16:53:11.296+01:00" />
+	</meta>
+	<url value="http://hl7.org/fhir/StructureDefinition/PruebaExtension" />
+	<name value="PruebaExtension" />
+	<status value="draft" />
+	<date value="2017-12-19T16:51:07.089+01:00" />
+	<fhirVersion value="3.0.1" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<contextType value="resource" />
+	<context value="Consent" />
+	<type value="Extension" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Extension.url">
+			<path value="Extension.url" />
+			<fixedUri value="http://hl7.org/fhir/StructureDefinition/PruebaExtension" />
+		</element>
+		<element id="Extension.value[x]:valueString">
+			<path value="Extension.valueString" />
+			<sliceName value="valueString" />
+			<min value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+	</differential>
+</StructureDefinition>
