@@ -1833,8 +1833,8 @@ public class ProfileUtilities extends TranslatingUtilities {
     case BUNDLED : return "b";
     case CONTAINED : return "c";
     case REFERENCED: return "r";
+    default: return "?";
     }
-    return "?";
   }
 
 
@@ -2271,7 +2271,7 @@ public class ProfileUtilities extends TranslatingUtilities {
         if (definition != null && definition.hasShort()) {
           if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
           c.addPiece(checkForNoChange(definition.getShortElement(), gen.new Piece(null, gt(definition.getShortElement()), null)));
-        } else if (fallback != null && fallback != null && fallback.hasShort()) {
+        } else if (fallback != null && fallback.hasShort()) {
           if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
           c.addPiece(checkForNoChange(fallback.getShortElement(), gen.new Piece(null, gt(fallback.getShortElement()), null)));
         }

@@ -747,6 +747,7 @@
 							<reuseForks>true</reuseForks>
 							<excludes>
 								<exclude>**/*Dstu2*</exclude>
+								<exclude>**/*Dstu3*</exclude>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
 						</configuration>
