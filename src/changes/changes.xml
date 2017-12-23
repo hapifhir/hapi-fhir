@@ -49,6 +49,19 @@
 				Fix an issue in JPA server where updating a resource sometimes caused date search indexes to 
 				be incorrectly deleted. Thanks to Kyle Meadows for the pull request!
 			</action>
+			<action type="add">
+				A new set of methods have been added to
+				<![CDATA[<code>IServerOperationInterceptor</code>]]>
+				called
+				<![CDATA[<code>resourcePreCreate</code>]]>,
+				<![CDATA[<code>resourcePreUpdate</code>]]>, and
+				<![CDATA[<code>resourcePreDelete</code>]]>. These
+				methods are called within the database transaction
+				(just as the existing methods were) but are invoked
+				prior to the contents being saved to the database. This
+				can be useful in order to allow interceptors to
+				change payload contents being saved.
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">

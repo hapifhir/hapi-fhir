@@ -196,6 +196,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T resourceToDelete = toResource(myResourceType, entity, false);
 
+		// Notify IServerOperationInterceptors about pre-action call
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreDelete(resourceToDelete);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreDelete(theRequestDetails, resourceToDelete);
+			}
+		}
+
 		validateOkToDelete(theDeleteConflicts, entity);
 
 		preDelete(resourceToDelete, entity);
@@ -267,6 +277,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, false);
+
+			// Notify IServerOperationInterceptors about pre-action call
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourcePreDelete(resourceToDelete);
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourcePreDelete(theRequestDetails, resourceToDelete);
+				}
+			}
+
 			validateOkToDelete(deleteConflicts, entity);
 
 			// Notify interceptors
@@ -376,6 +397,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequestDetails != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), theResource);
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
+		}
+
+		// Notify JPA interceptors
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreCreate(theResource);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreCreate(theRequestDetails, theResource);
+			}
 		}
 
 		// Perform actual DB update
@@ -558,10 +589,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
 			return false;
 		}
-		if (theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider) {
-			return true;
-		}
-		return false;
+		return theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider;
 	}
 
 	protected void markResourcesMatchingExpressionAsNeedingReindexing(String theExpression) {
@@ -816,9 +844,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId) {
-		boolean checkForForcedId = true;
-
-		BaseHasResource entity = readEntity(theId, checkForForcedId);
+		BaseHasResource entity = readEntity(theId, true);
 
 		return entity;
 	}
@@ -1048,7 +1074,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theResource instanceof IResource) {
 				ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
 			} else {
-				IBaseMetaType meta = ((IAnyResource) theResource).getMeta();
+				IBaseMetaType meta = theResource.getMeta();
 				meta.setLastUpdated(theEntity.getUpdatedDate());
 			}
 		}
@@ -1183,8 +1209,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBaseResource oldResource = toResource(entity, false);
 
+		// Notify IServerOperationInterceptors about pre-action call
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(oldResource, theResource);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, oldResource, theResource);
+			}
+		}
+
 		// Perform update
-		StopWatch sw = new StopWatch();
 		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/* 

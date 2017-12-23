@@ -35,6 +35,21 @@ public class ServerOperationInterceptorAdapter extends InterceptorAdapter implem
 	}
 
 	@Override
+	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		// nothing
+	}
+
+	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
 		// nothing
 	}
