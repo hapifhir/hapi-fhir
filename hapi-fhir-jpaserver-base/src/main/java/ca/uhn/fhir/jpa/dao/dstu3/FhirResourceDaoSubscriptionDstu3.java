@@ -98,11 +98,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	protected void validateChannelPayload(Subscription theResource) {
-		if (isBlank(theResource.getChannel().getPayload())) {
-			throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
-		}
-
-		if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
+		if (!isBlank(theResource.getChannel().getPayload()) && EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
 			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
 		}
 	}

@@ -20,24 +20,26 @@ package ca.uhn.fhir.jpa.subscription.resthook;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.*;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -54,10 +56,38 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				operation = theClient.update().resource(payloadResource);
+				if (payloadResource == null || payloadResource.isEmpty()) {
+					if (thePayloadType != null ) {
+						operation = theClient.create().resource(payloadResource);
+					} else {
+						sendNotification(theMsg);
+						return;
+					}
+				} else {
+					if (thePayloadType != null ) {
+						operation = theClient.update().resource(payloadResource);
+					} else {
+						sendNotification(theMsg);
+						return;
+					}
+				}
 				break;
 			case UPDATE:
-				operation = theClient.update().resource(payloadResource);
+				if (payloadResource == null || payloadResource.isEmpty()) {
+					if (thePayloadType != null ) {
+						operation = theClient.create().resource(payloadResource);
+					} else {
+						sendNotification(theMsg);
+						return;
+					}
+				} else {
+					if (thePayloadType != null ) {
+						operation = theClient.update().resource(payloadResource);
+					} else {
+						sendNotification(theMsg);
+						return;
+					}
+				}
 				break;
 			case DELETE:
 				operation = theClient.delete().resourceById(theMsg.getPayloadId(getContext()));
@@ -67,11 +97,19 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				return;
 		}
 
-		operation.encoded(thePayloadType);
+		if (thePayloadType != null) {
+			operation.encoded(thePayloadType);
+		}
 
 		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
 
-		operation.execute();
+		try {
+			operation.execute();
+		} catch (ResourceNotFoundException e) {
+			ourLog.error("Cannot reach "+ theMsg.getSubscription().getEndpointUrl());
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
@@ -83,13 +121,14 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 			// Grab the payload type (encoding mimetype) from the subscription
 			String payloadString = subscription.getPayloadString();
-			payloadString = StringUtils.defaultString(payloadString, Constants.CT_FHIR_XML_NEW);
-			if (payloadString.contains(";")) {
-				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
+			EncodingEnum payloadType = null;
+			if(payloadString != null) {
+				if (payloadString.contains(";")) {
+					payloadString = payloadString.substring(0, payloadString.indexOf(';'));
+				}
+				payloadString = payloadString.trim();
+				payloadType = EncodingEnum.forContentType(payloadString);
 			}
-			payloadString = payloadString.trim();
-			EncodingEnum payloadType = EncodingEnum.forContentType(payloadString);
-			payloadType = ObjectUtils.defaultIfNull(payloadType, EncodingEnum.XML);
 
 			// Create the client request
 			getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -109,4 +148,23 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			deliverPayload(theMessage, subscription, payloadType, client);
 	}
 
+	/**
+	 * Sends a POST notification without a payload
+	 * @param theMsg
+	 */
+	protected void sendNotification(ResourceDeliveryMessage theMsg) {
+		FhirContext context= getContext();
+		Map<String, List<String>> params = new HashMap();
+		List<Header> headers = new ArrayList<>();
+		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
+		IHttpClient client = context.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
+		IHttpRequest request = client.createParamRequest(context, params, null);
+		try {
+			IHttpResponse response = request.execute();
+		} catch (IOException e) {
+			ourLog.error("Error trying to reach "+ theMsg.getSubscription().getEndpointUrl());
+			e.printStackTrace();
+			throw new ResourceNotFoundException(e.getMessage());
+		}
+	}
 }
