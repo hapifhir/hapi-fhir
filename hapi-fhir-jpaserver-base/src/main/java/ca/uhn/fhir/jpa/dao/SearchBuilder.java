@@ -1223,7 +1223,11 @@ public class SearchBuilder implements ISearchBuilder {
 			 */
 
 			if (StringUtils.isNotBlank(system)) {
-				singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
+				if (modifier != null && modifier == TokenParamModifier.NOT) {
+					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
+				} else {
+					singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
+				}
 			} else if (system == null) {
 				// don't check the system
 			} else {
@@ -1232,7 +1236,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			if (StringUtils.isNotBlank(code)) {
-				singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+				if (modifier != null && modifier == TokenParamModifier.NOT) {
+					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
+				} else {
+					singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+				}
 			} else {
 				/*
 				 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
