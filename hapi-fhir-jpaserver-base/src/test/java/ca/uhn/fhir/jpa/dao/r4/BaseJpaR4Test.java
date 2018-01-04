@@ -178,6 +178,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;

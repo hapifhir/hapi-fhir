@@ -2508,36 +2508,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	/**
-	 * Can we handle content that was previously saved containing vocabulary that
-	 * is no longer valid
-	 */
-	@Test
-	public void testResourceInDatabaseContainsInvalidVocabulary() {
-		final Patient p = new Patient();
-		p.setGender(AdministrativeGender.MALE);
-		final IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-		
-		TransactionTemplate tx = new TransactionTemplate(myTxManager);
-		tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		tx.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
-				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
-				newContent = newContent.replace("male", "foo");
-				table.setResource(newContent.getBytes(Charsets.UTF_8));
-				table.setEncoding(ResourceEncodingEnum.JSON);
-				myResourceTableDao.save(table);
-			}
-		});
-		
-		Patient read = myPatientDao.read(id);
-		String string = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(read);
-		ourLog.info(string);
-		assertThat(string, containsString("value=\"foo\""));
-	}
-
 	@Test
 	public void testResourceInstanceMetaOperation() {
 

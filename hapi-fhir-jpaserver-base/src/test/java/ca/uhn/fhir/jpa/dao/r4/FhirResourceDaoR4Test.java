@@ -2565,12 +2565,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResource(newContent.getBytes(Charsets.UTF_8));
 				table.setEncoding(ResourceEncodingEnum.JSON);
-				myResourceTableDao.save(table);
+				myResourceHistoryTableDao.save(table);
 			}
 		});
 		

@@ -25,11 +25,22 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum ResourceEncodingEnum {
 
+	/*
+	 * NB: Constants in this enum must be 5 chars long or less!!!
+	 *
+	 * See ResourceHistoryTable RES_ENCODING column
+	 */
+
 	/** Json */
 	JSON,
 	
 	/** Json Compressed */
-	JSONC;
+	JSONC,
+
+	/**
+	 * Resource was deleted - No contents expected
+	 */
+	DEL;
 
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();

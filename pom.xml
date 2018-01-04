@@ -1027,6 +1027,14 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.gemnasium</groupId>
+					<artifactId>gemnasium-maven-plugin</artifactId>
+					<version>0.2.0</version>
+					<configuration>
+						<projectSlug>github.com/jamesagnew/hapi-fhir</projectSlug>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
 					<version>1.2.1</version>
