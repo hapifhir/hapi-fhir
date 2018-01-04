@@ -1008,11 +1008,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		if (changed == false) {
-			ResourceHistoryTable currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
-			if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
+			if (theEntity.getId() == null) {
 				changed = true;
 			} else {
-				changed = !Arrays.equals(currentHistoryVersion.getResource(), bytes);
+				ResourceHistoryTable currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+				if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
+					changed = true;
+				} else {
+					changed = !Arrays.equals(currentHistoryVersion.getResource(), bytes);
+				}
 			}
 		}
 

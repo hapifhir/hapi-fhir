@@ -1109,6 +1109,35 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteTwicePerformsNoOp() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		assertNotNull(id.getIdPartAsLong());
+		assertEquals("1", id.getVersionIdPart());
+
+		IIdType id2 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("2", id2.getVersionIdPart());
+
+		IIdType id3 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id3.getIdPart());
+		assertEquals("2", id3.getVersionIdPart());
+
+		IIdType id4 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id4.getIdPart());
+		assertEquals("2", id4.getVersionIdPart());
+
+		patient = new Patient();
+		patient.setId(id.getIdPart());
+		patient.addName().setFamily(methodName);
+		IIdType id5 = myPatientDao.update(patient).getId();
+
+		aaaa
+	}
+
+	@Test
 	public void testDeleteResource() {
 		int initialHistory = myPatientDao.history((Date) null, null, mySrd).size();
 
