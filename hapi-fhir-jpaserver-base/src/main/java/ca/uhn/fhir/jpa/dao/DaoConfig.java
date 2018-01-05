@@ -85,7 +85,6 @@ public class DaoConfig {
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
 	private int myHardTagListLimit = 1000;
-	private int myIncludeLimit = 2000;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -104,8 +103,8 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
-	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
+	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
+	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
@@ -129,7 +128,7 @@ public class DaoConfig {
 		validateTreatBaseUrlsAsLocal(theTreatReferencesAsLogical);
 
 		if (myTreatReferencesAsLogical == null) {
-			myTreatReferencesAsLogical = new HashSet<String>();
+			myTreatReferencesAsLogical = new HashSet<>();
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
@@ -271,7 +270,6 @@ public class DaoConfig {
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
-	 * <p>
 	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
 	 *
@@ -290,8 +288,6 @@ public class DaoConfig {
 	 * number of milliseconds, they will be deleted from the database, and any paging links
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
-	 * <p>
-	 * <p>
 	 * <p>
 	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
@@ -344,17 +340,16 @@ public class DaoConfig {
 		myHardTagListLimit = theHardTagListLimit;
 	}
 
-	public int getIncludeLimit() {
-		return myIncludeLimit;
-	}
-
 	/**
 	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
 	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
 	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
+	 *
+	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
 	 */
-	public void setIncludeLimit(int theIncludeLimit) {
-		myIncludeLimit = theIncludeLimit;
+	@Deprecated
+	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
+		// nothing
 	}
 
 	/**

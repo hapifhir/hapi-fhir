@@ -942,6 +942,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				break;
 		}
 
+		ourLog.info("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
+
 		boolean changed = false;
 
 		if (theUpdateHash) {
@@ -963,7 +965,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		theEntity.setResource(bytes);
 
-		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
+		Set<TagDefinition> allDefs = new HashSet<>();
 
 		theEntity.setHasTags(false);
 
@@ -988,7 +990,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 
-		ArrayList<ResourceTag> existingTags = new ArrayList<ResourceTag>();
+		ArrayList<ResourceTag> existingTags = new ArrayList<>();
 		if (theEntity.isHasTags()) {
 			existingTags.addAll(theEntity.getTags());
 		}
@@ -1042,8 +1044,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Collection<? extends BaseTag> tags = theEntity.getTags();
 		if (theEntity.isHasTags()) {
 			TagList tagList = new TagList();
-			List<IBaseCoding> securityLabels = new ArrayList<IBaseCoding>();
-			List<IdDt> profiles = new ArrayList<IdDt>();
+			List<IBaseCoding> securityLabels = new ArrayList<>();
+			List<IdDt> profiles = new ArrayList<>();
 			for (BaseTag next : tags) {
 				switch (next.getTag().getTagType()) {
 					case PROFILE:
@@ -1171,22 +1173,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<Long> ids = dao.searchForIds(paramMap);
-
-		return ids;
+		return dao.searchForIds(paramMap);
 	}
 
 	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId) {
 		throw new NotImplementedException("");
-	}
-
-	public void setEntityManager(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
-	}
-
-	public void setPlatformTransactionManager(PlatformTransactionManager thePlatformTransactionManager) {
-		myPlatformTransactionManager = thePlatformTransactionManager;
 	}
 
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
@@ -1206,7 +1198,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 *
 	 * @param theEntity The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag    The tag
-	 * @return Retturns <code>true</code> if the tag should be removed
+	 * @return Returns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
 		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
@@ -1221,14 +1213,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
 		return toResource(resourceType, theEntity, theForHistoryOperation);
 	}
-
-	// protected ResourceTable toEntity(IResource theResource) {
-	// ResourceTable retVal = new ResourceTable();
-	//
-	// populateResourceIntoEntity(theResource, retVal, true);
-	//
-	// return retVal;
-	// }
 
 	@SuppressWarnings("unchecked")
 	@Override

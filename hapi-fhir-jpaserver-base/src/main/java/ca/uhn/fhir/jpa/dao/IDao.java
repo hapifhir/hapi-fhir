@@ -35,7 +35,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
 
 public interface IDao {
 
-	public static final ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
+	ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
 
 	FhirContext getContext();
 

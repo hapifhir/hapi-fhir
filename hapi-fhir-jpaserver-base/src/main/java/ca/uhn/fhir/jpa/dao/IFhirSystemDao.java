@@ -20,14 +20,12 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.Date;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @param <T>
@@ -37,17 +35,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  */
 public interface IFhirSystemDao<T, MT> extends IDao {
 
-	/**
-	 * Use with caution! This deletes everything!!
-	 * 
-	 * @param theRequestDetails
-	 *           TODO
-	 */
-	void deleteAllTagsOnServer(RequestDetails theRequestDetails);
-
-	TagList getAllTags(RequestDetails theRequestDetails);
-
-	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
+	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
 
 	Map<String, Long> getResourceCounts();
 

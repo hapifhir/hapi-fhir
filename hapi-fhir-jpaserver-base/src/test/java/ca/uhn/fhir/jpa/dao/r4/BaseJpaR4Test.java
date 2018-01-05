@@ -57,6 +57,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
 	protected ISearchParamDao mySearchParamDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
