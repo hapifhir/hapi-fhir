@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -346,6 +348,21 @@ public abstract class RequestDetails {
 			myRequestContents = getByteStreamRequestContents();
 		}
 		return myRequestContents;
+	}
+
+	/**
+	 * This method may be used to modify the contents of the incoming
+	 * request by hardcoding a value which will be used instead of the
+	 * value received by the client.
+	 * <p>
+	 * This method is useful for modifying the request body prior
+	 * to parsing within interceptors. It generally only has an
+	 * impact when called in the {@link IServerInterceptor#incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
+	 * method
+	 * </p>
+	 */
+	public void setRequestContents(byte[] theRequestContents) {
+		myRequestContents = theRequestContents;
 	}
 
 	private class RequestOperationCallback implements IRequestOperationCallback {
