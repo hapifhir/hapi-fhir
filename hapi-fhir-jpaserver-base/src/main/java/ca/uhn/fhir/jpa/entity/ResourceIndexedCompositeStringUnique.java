@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.entity;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.*;
-import org.hl7.fhir.r4.model.Resource;
 
 import javax.persistence.*;
 
@@ -44,20 +43,10 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	private Long myId;
 
 	@ManyToOne
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name="FK_IDXCMPSTRUNIQ_RES_ID"))
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resourceId", myResourceId)
-			.append("indexString", myIndexString)
-			.toString();
-	}
-
-	@Column(name="RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
-
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
 
@@ -88,12 +77,13 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!(theO instanceof ResourceIndexedCompositeStringUnique)) {
+			return false;
+		}
 
 		ResourceIndexedCompositeStringUnique that = (ResourceIndexedCompositeStringUnique) theO;
 
 		return new EqualsBuilder()
-			.append(getResource(), that.getResource())
 			.append(myIndexString, that.myIndexString)
 			.isEquals();
 	}
@@ -118,8 +108,16 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getResource())
 			.append(myIndexString)
 			.toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("id", myId)
+			.append("resourceId", myResourceId)
+			.append("indexString", myIndexString)
+			.toString();
 	}
 }

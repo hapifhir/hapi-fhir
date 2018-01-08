@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
@@ -19,6 +20,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +46,32 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+	}
+
+	@Test
+	public void testNonTransaction() {
+		createUniqueBirthdateAndGenderSps();
+
+		Patient p = new Patient();
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		p.setBirthDateElement(new DateType("2001-01-01"));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(p)
+			.setFullUrl("Patient")
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&birthdate=2001-01-01");
+
+		Bundle output0 = mySystemDao.transaction(mySrd, input);
+		Bundle output1 = mySystemDao.transaction(mySrd, input);
+		assertEquals(output1.getEntry().get(0).getFullUrl(), output0.getEntry().get(0).getFullUrl());
+		Bundle output2 = mySystemDao.transaction(mySrd, input);
+		assertEquals(output2.getEntry().get(0).getFullUrl(), output0.getEntry().get(0).getFullUrl());
+
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -387,6 +417,90 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		mySearchParamRegsitry.forceRefresh();
 	}
 
+	private void createUniqueIndexPatientIdentifier() {
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-identifier");
+		sp.setCode("identifier");
+		sp.setExpression("Patient.identifier");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-uniq-identifier");
+		sp.setCode("patient-uniq-identifier");
+		sp.setExpression("Patient.identifier");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition(new Reference("/SearchParameter/patient-identifier"));
+		sp.addExtension()
+			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp);
+		mySearchParamRegsitry.forceRefresh();
+	}
+
+	private void createUniqueIndexPatientIdentifierCount1() {
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-identifier");
+		sp.setCode("first-identifier");
+		sp.setExpression("Patient.identifier.first()");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-uniq-identifier");
+		sp.setCode("patient-uniq-identifier");
+		sp.setExpression("Patient.identifier");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition(new Reference("/SearchParameter/patient-identifier"));
+		sp.addExtension()
+			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp);
+		mySearchParamRegsitry.forceRefresh();
+	}
+
+	private void createUniqueIndexObservationSubject() {
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-subject");
+		sp.setCode("observation-subject");
+		sp.setExpression("Observation.subject");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Observation");
+		mySearchParameterDao.update(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-uniq-subject");
+		sp.setCode("observation-uniq-subject");
+		sp.setExpression("Observation.subject");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Observation");
+		sp.addComponent()
+			.setExpression("Observation")
+			.setDefinition(new Reference("/SearchParameter/observation-subject"));
+		sp.addExtension()
+			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp);
+		mySearchParamRegsitry.forceRefresh();
+	}
+
 	@Test
 	public void testIndexTransactionWithMatchUrl() {
 		Patient pt2 = new Patient();
@@ -409,6 +523,161 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
 
+
+	}
+
+	@Test
+	public void testDoubleMatching() {
+		createUniqueIndexPatientIdentifier();
+
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(pt)
+			.setFullUrl("Patient")
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("/Patient?identifier=urn|111,urn|222");
+		mySystemDao.transaction(mySrd, input);
+
+		myEntityManager.clear();
+
+		pt = new Patient();
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+
+		input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(pt)
+			.setFullUrl("Patient")
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("/Patient?identifier=urn|111,urn|222");
+		mySystemDao.transaction(mySrd, input);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				List<ResourceIndexedCompositeStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(2, all.size());
+			}
+		});
+
+	}
+
+	@Test
+	public void testObservationSubject() {
+		createUniqueIndexObservationSubject();
+
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+		IIdType ptid = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+
+		Encounter enc = new Encounter();
+		enc.setSubject(new Reference(ptid));
+		IIdType encid = myEncounterDao.create(enc).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference(ptid));
+		obs.setContext(new Reference(encid));
+		myObservationDao.create(obs);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				List<ResourceIndexedCompositeStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(all.toString(), 1, all.size());
+			}
+		});
+
+	}er
+
+	@Test
+	public void testIndexFirstMatchOnly() {
+		createUniqueIndexPatientIdentifierCount1();
+
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+		myPatientDao.create(pt);
+
+		pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+		try {
+			myPatientDao.create(pt);
+			fail();
+		} catch (PreconditionFailedException e) {
+			// good
+		}
+
+		pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("333");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+		myPatientDao.create(pt);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				List<ResourceIndexedCompositeStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(2, all.size());
+			}
+		});
+
+	}
+
+
+	@Test
+	public void testDoubleMatchingPut() {
+		createUniqueIndexPatientIdentifier();
+
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(pt)
+			.setFullUrl("Patient")
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=urn|111,urn|222");
+		mySystemDao.transaction(mySrd, input);
+
+		myEntityManager.clear();
+
+		pt = new Patient();
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+
+		input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(pt)
+			.setFullUrl("Patient")
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=urn|111,urn|222");
+		mySystemDao.transaction(mySrd, input);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				List<ResourceIndexedCompositeStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(2, all.size());
+			}
+		});
 
 	}
 

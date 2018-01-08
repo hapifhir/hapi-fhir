@@ -181,12 +181,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	InstantDt createHistoryToTimestamp() {
-		// final InstantDt end = new InstantDt(DateUtils.addSeconds(DateUtils.truncate(new Date(), Calendar.SECOND),
-		// -1));
-		return InstantDt.withCurrentTime();
-	}
-
 	private Set<ResourceIndexedCompositeStringUnique> extractCompositeStringUniques(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> theStringParams, Set<ResourceIndexedSearchParamToken> theTokenParams, Set<ResourceIndexedSearchParamNumber> theNumberParams, Set<ResourceIndexedSearchParamQuantity> theQuantityParams, Set<ResourceIndexedSearchParamDate> theDateParams, Set<ResourceIndexedSearchParamUri> theUriParams, Set<ResourceLink> theLinks) {
 		Set<ResourceIndexedCompositeStringUnique> compositeStringUniques;
 		compositeStringUniques = new HashSet<>();
@@ -198,6 +192,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (RuntimeSearchParam nextCompositeOf : next.getCompositeOf()) {
 				Set<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = null;
 				Set<ResourceLink> linksForCompositePart = null;
+				Set<String> linksForCompositePartWantPaths = null;
 				switch (nextCompositeOf.getParamType()) {
 					case NUMBER:
 						paramsListForCompositePart = theNumberParams;
@@ -213,6 +208,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						break;
 					case REFERENCE:
 						linksForCompositePart = theLinks;
+						linksForCompositePartWantPaths = new HashSet<>();
+						linksForCompositePartWantPaths.addAll(nextCompositeOf.getPathsSplit());
 						break;
 					case QUANTITY:
 						paramsListForCompositePart = theQuantityParams;
@@ -243,10 +240,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 				if (linksForCompositePart != null) {
 					for (ResourceLink nextLink : linksForCompositePart) {
-						String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
-						if (isNotBlank(value)) {
-							value = UrlUtil.escapeUrlParam(value);
-							nextChoicesList.add(key + "=" + value);
+						if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
+							String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
+							if (isNotBlank(value)) {
+								value = UrlUtil.escapeUrlParam(value);
+								nextChoicesList.add(key + "=" + value);
+							}
 						}
 					}
 				}
@@ -942,7 +941,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				break;
 		}
 
-		ourLog.info("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
+		ourLog.debug("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
 
 		boolean changed = false;
 
@@ -1615,7 +1614,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 * Create history entry
 		 */
 		if (theCreateNewHistoryEntry) {
-			final ResourceHistoryTable historyEntry = theEntity.toHistory(null);
+
+			ResourceHistoryTable existing = null;
+//			if (theEntity.getVersion() > 1) {
+//				existing = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+//				ourLog.warn("Reusing existing history entry entity {}", theEntity.getIdDt().getValue());
+//			}
+			final ResourceHistoryTable historyEntry = theEntity.toHistory(existing);
 
 			ourLog.info("Saving history entry {}", historyEntry.getIdDt());
 			myResourceHistoryTableDao.save(historyEntry);
@@ -1692,6 +1697,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (getConfig().isUniqueIndexesEnabled()) {
 				for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
 					if (!compositeStringUniques.contains(next)) {
+						ourLog.info("Removing unique index: {}", next);
 						myEntityManager.remove(next);
 					}
 				}
@@ -1703,7 +1709,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 								throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
 							}
 						}
-						ourLog.debug("Persisting unique index: {}", next);
+						ourLog.info("Persisting unique index: {}", next);
 						myEntityManager.persist(next);
 					}
 				}

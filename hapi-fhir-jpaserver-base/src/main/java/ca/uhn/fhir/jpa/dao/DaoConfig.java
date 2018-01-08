@@ -17,9 +17,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -109,6 +109,7 @@ public class DaoConfig {
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
+	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 
 	/**
 	 * Constructor
@@ -117,6 +118,7 @@ public class DaoConfig {
 		setSubscriptionEnabled(true);
 		setSubscriptionPollDelay(0);
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
+		setMarkResourcesForReindexingUponSearchParameterChange(true);
 	}
 
 	/**
@@ -341,18 +343,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
-	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
-	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
-	 *
-	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
-	 */
-	@Deprecated
-	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
-		// nothing
-	}
-
-	/**
 	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
@@ -404,11 +394,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**
@@ -466,25 +453,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting configures the strategy to use in generating IDs for newly
-	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
-	 */
-	public IdStrategyEnum getResourceServerIdStrategy() {
-		return myResourceServerIdStrategy;
-	}
-
-	/**
-	 * This setting configures the strategy to use in generating IDs for newly
-	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
-	 *
-	 * @param theResourceIdStrategy The strategy. Must not be null.
-	 */
-	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
-		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
-		myResourceServerIdStrategy = theResourceIdStrategy;
-	}
-
-	/**
 	 * If set, an individual resource will not be allowed to have more than the
 	 * given number of tags, profiles, and security labels (the limit is for the combined
 	 * total for all of these things on an individual resource).
@@ -512,6 +480,25 @@ public class DaoConfig {
 	 */
 	public void setResourceMetaCountHardLimit(Integer theResourceMetaCountHardLimit) {
 		myResourceMetaCountHardLimit = theResourceMetaCountHardLimit;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 */
+	public IdStrategyEnum getResourceServerIdStrategy() {
+		return myResourceServerIdStrategy;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 *
+	 * @param theResourceIdStrategy The strategy. Must not be null.
+	 */
+	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
+		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
+		myResourceServerIdStrategy = theResourceIdStrategy;
 	}
 
 	/**
@@ -922,6 +909,24 @@ public class DaoConfig {
 		myIndexContainedResources = theIndexContainedResources;
 	}
 
+	/**
+	 * Should resources be marked as needing reindexing when a
+	 * SearchParameter resource is added or changed. This should generally
+	 * be true (which is the default)
+	 */
+	public boolean isMarkResourcesForReindexingUponSearchParameterChange() {
+		return myMarkResourcesForReindexingUponSearchParameterChange;
+	}
+
+	/**
+	 * Should resources be marked as needing reindexing when a
+	 * SearchParameter resource is added or changed. This should generally
+	 * be true (which is the default)
+	 */
+	public void setMarkResourcesForReindexingUponSearchParameterChange(boolean theMarkResourcesForReindexingUponSearchParameterChange) {
+		myMarkResourcesForReindexingUponSearchParameterChange = theMarkResourcesForReindexingUponSearchParameterChange;
+	}
+
 	public boolean isSchedulingDisabled() {
 		return mySchedulingDisabled;
 	}
@@ -979,7 +984,7 @@ public class DaoConfig {
 	 * a new one.
 	 * <p>
 	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for eavh save so it can cause
+	 * extra round-trip to the database for each save so it can cause
 	 * a small performance hit.
 	 * </p>
 	 */
@@ -1023,10 +1028,25 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
+	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
+	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
+	 *
+	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
+	 */
+	@Deprecated
+	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
+		// nothing
+	}
+
+	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
