@@ -1,16 +1,22 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.PortUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -19,45 +25,33 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
 
-import com.google.common.base.Charsets;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.util.PortUtil;
+import static org.junit.Assert.*;
 
-public class ETagServerHl7OrgTest {
+public class ETagServerR4Test {
 
   private static CloseableHttpClient ourClient;
-  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  private static FhirContext ourCtx = FhirContext.forR4();
   private static Date ourLastModifiedDate;
   private static int ourPort;
   private static Server ourServer;
   private static PoolingHttpClientConnectionManager ourConnectionManager;
+  private static IdType ourLastId;
+  private static boolean ourPutVersionInPatientId;
+  private static boolean ourPutVersionInPatientMeta;
 
-  @Test
-  public void testETagHeader() throws Exception {
-    ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
-
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    assertEquals("2", dt.getSystemElement().getValueAsString());
-    assertEquals("3", dt.getValue());
-
-    Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
-    assertNotNull(cl);
-    assertEquals("W/\"222\"", cl.getValue());
+  @Before
+  public void before() {
+    ourLastId = null;
+    ourPutVersionInPatientId = true;
+    ourPutVersionInPatientMeta = false;
   }
 
   @Test
@@ -71,6 +65,42 @@ public class ETagServerHl7OrgTest {
   }
 
   @Test
+  public void testETagHeader() throws Exception {
+    ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
+
+    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
+    HttpResponse status = ourClient.execute(httpGet);
+    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+    IOUtils.closeQuietly(status.getEntity().getContent());
+
+    assertEquals(200, status.getStatusLine().getStatusCode());
+    Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
+    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
+    Assert.assertEquals("3", dt.getValue());
+
+    Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
+    assertNotNull(cl);
+    assertEquals("W/\"222\"", cl.getValue());
+  }
+
+  @Test
+  public void testETagHeaderFromVersionInMeta() throws Exception {
+    ourPutVersionInPatientMeta = true;
+    ourPutVersionInPatientId = false;
+    ourLastModifiedDate = null;
+
+    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
+    HttpResponse status = ourClient.execute(httpGet);
+    IOUtils.closeQuietly(status.getEntity().getContent());
+
+    assertEquals(200, status.getStatusLine().getStatusCode());
+
+    Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
+    assertNotNull(cl);
+    assertEquals("W/\"333\"", cl.getValue());
+  }
+
+  @Test
   public void testLastModifiedHeader() throws Exception {
     ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
@@ -81,33 +111,12 @@ public class ETagServerHl7OrgTest {
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    assertEquals("2", dt.getSystemElement().getValueAsString());
-    assertEquals("3", dt.getValue());
+    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
+    Assert.assertEquals("3", dt.getValue());
 
     Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
     assertNotNull(cl);
     assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
-  }
-
-  @Before
-  public void before() throws IOException {
-    ourLastId = null;
-  }
-
-  @Test
-  public void testUpdateWithNoVersion() throws Exception {
-    Patient p = new Patient();
-    p.setId("2");
-    p.addIdentifier().setSystem("urn:system").setValue("001");
-    String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
-
-    HttpPut http;
-    http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
-    http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-    HttpResponse status = ourClient.execute(http);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-
   }
 
   @Test
@@ -124,7 +133,7 @@ public class ETagServerHl7OrgTest {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
+    Assert.assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
 
@@ -142,7 +151,23 @@ public class ETagServerHl7OrgTest {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());
-    assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
+    Assert.assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
+  }
+
+  @Test
+  public void testUpdateWithNoVersion() throws Exception {
+    Patient p = new Patient();
+    p.setId("2");
+    p.addIdentifier().setSystem("urn:system").setValue("001");
+    String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
+
+    HttpPut http;
+    http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+    http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+    HttpResponse status = ourClient.execute(http);
+    IOUtils.closeQuietly(status.getEntity().getContent());
+    assertEquals(200, status.getStatusLine().getStatusCode());
+
   }
 
   @AfterClass
@@ -172,16 +197,24 @@ public class ETagServerHl7OrgTest {
 
   }
 
-  private static IdType ourLastId;
-
   public static class PatientProvider implements IResourceProvider {
 
+    @Override
+    public Class<Patient> getResourceType() {
+      return Patient.class;
+    }
+
     @Read(version = true)
-    public Patient findPatient(@IdParam IdType theId) {
+    public Patient read(@IdParam IdType theId) {
       Patient patient = new Patient();
       patient.getMeta().setLastUpdated(ourLastModifiedDate);
       patient.addIdentifier().setSystem(theId.getIdPart()).setValue(theId.getVersionIdPart());
-      patient.setId(theId.withVersion("222"));
+      if (ourPutVersionInPatientId) {
+        patient.setId(theId.withVersion("222"));
+      }
+      if (ourPutVersionInPatientMeta) {
+        patient.getMeta().setVersionId("333");
+      }
       return patient;
     }
 
@@ -194,11 +227,6 @@ public class ETagServerHl7OrgTest {
       }
 
       return new MethodOutcome(theId.withVersion(theId.getVersionIdPart() + "0"));
-    }
-
-    @Override
-    public Class<Patient> getResourceType() {
-      return Patient.class;
     }
 
   }

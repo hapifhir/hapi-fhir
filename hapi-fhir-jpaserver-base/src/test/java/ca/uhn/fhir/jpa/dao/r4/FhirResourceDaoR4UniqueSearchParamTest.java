@@ -599,7 +599,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			}
 		});
 
-	}er
+	}
 
 	@Test
 	public void testIndexFirstMatchOnly() {
