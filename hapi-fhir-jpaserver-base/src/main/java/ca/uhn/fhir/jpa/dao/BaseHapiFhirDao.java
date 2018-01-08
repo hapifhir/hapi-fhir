@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1534,7 +1534,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setParamsUriPopulated(uriParams.isEmpty() == false);
 				theEntity.setParamsCoords(coordsParams);
 				theEntity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
-//				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
 				theEntity.setParamsCompositeStringUniquePresent(compositeStringUniques.isEmpty() == false);
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
@@ -1697,7 +1696,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (getConfig().isUniqueIndexesEnabled()) {
 				for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
 					if (!compositeStringUniques.contains(next)) {
-						ourLog.info("Removing unique index: {}", next);
+						ourLog.debug("Removing unique index: {}", next);
 						myEntityManager.remove(next);
 					}
 				}
@@ -1709,7 +1708,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 								throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
 							}
 						}
-						ourLog.info("Persisting unique index: {}", next);
+						ourLog.debug("Persisting unique index: {}", next);
 						myEntityManager.persist(next);
 					}
 				}
