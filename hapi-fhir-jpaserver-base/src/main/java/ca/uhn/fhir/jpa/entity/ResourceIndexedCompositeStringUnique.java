@@ -68,7 +68,6 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	@Override
 	public int compareTo(ResourceIndexedCompositeStringUnique theO) {
 		CompareToBuilder b = new CompareToBuilder();
-		b.append(myResource, theO.getResource());
 		b.append(myIndexString, theO.getIndexString());
 		return b.toComparison();
 	}
