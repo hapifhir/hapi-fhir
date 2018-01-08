@@ -43,7 +43,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() {
 		myJpaInterceptor = mock(IServerOperationInterceptor.class);
-		
+
 		myServerOperationInterceptor = mock(IServerOperationInterceptor.class, new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock theInvocation) throws Throwable {
@@ -53,7 +53,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 				return null;
 			}
 		});
-		
+
 		myDaoConfig.getInterceptors().add(myJpaInterceptor);
 		myDaoConfig.getInterceptors().add(myJpaInterceptorAdapter);
 		myDaoConfig.getInterceptors().add(myServerOperationInterceptor);
@@ -191,7 +191,8 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, mySrd).getId();
 		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
-		
+
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -204,7 +205,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
 		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
-		
+
 		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 	}
 
@@ -219,10 +220,10 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
 		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
-		
+
 		p.addName().setFamily("2");
 		myPatientDao.update(p);
-		
+
 		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 		verify(myServerOperationInterceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 		verify(myServerOperationInterceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class), any(IBaseResource.class));
@@ -237,10 +238,10 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
 		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
-		
+
 		p.addName().setFamily("2");
 		myPatientDao.delete(p.getIdElement().toUnqualifiedVersionless());
-		
+
 		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 		verify(myServerOperationInterceptor, times(1)).resourceDeleted(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 	}
@@ -263,7 +264,9 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		IIdType newId = myPatientDao.delete(new IdType("Patient/" + id), mySrd).getId();
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
+		verify(myRequestOperationCallback, times(1)).resourcePreDelete(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceDeleted(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -271,7 +274,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Test
 	public void testRequestOperationDeleteMulti() {
 		myDaoConfig.setAllowMultipleDelete(true);
-		
+
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
@@ -293,8 +296,10 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
-		
+
+		verify(myRequestOperationCallback, times(2)).resourcePreDelete(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourceDeleted(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(2)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -316,16 +321,17 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient")
-				.setMethod(HTTPVerb.POST);
+			.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setUrl("Patient")
+			.setMethod(HTTPVerb.POST);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(1L, newId.getVersionIdPartAsLong().longValue());
-		
+
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -348,16 +354,18 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.getRequest()
-				.setUrl("Patient/" + id)
-				.setMethod(HTTPVerb.DELETE);
+			.addEntry()
+			.getRequest()
+			.setUrl("Patient/" + id)
+			.setMethod(HTTPVerb.DELETE);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
+		verify(myRequestOperationCallback, times(1)).resourcePreDelete(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceDeleted(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -365,7 +373,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Test
 	public void testRequestOperationTransactionDeleteMulti() {
 		myDaoConfig.setAllowMultipleDelete(true);
-		
+
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
@@ -386,17 +394,19 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.getRequest()
-				.setUrl("Patient?name=PATIENT")
-				.setMethod(HTTPVerb.DELETE);
+			.addEntry()
+			.getRequest()
+			.setUrl("Patient?name=PATIENT")
+			.setMethod(HTTPVerb.DELETE);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
-		
+
+		verify(myRequestOperationCallback, times(2)).resourcePreDelete(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourceDeleted(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(2)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -422,18 +432,20 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient/" + id)
-				.setMethod(HTTPVerb.PUT);
+			.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setUrl("Patient/" + id)
+			.setMethod(HTTPVerb.PUT);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreUpdate(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -461,11 +473,13 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreUpdate(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
