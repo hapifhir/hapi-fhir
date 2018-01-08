@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -55,6 +56,11 @@ public abstract class BaseJpaTest {
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+	}
+
+	@After
+	public final void afterPerformCleanup() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
 	}
 
 	protected abstract FhirContext getContext();

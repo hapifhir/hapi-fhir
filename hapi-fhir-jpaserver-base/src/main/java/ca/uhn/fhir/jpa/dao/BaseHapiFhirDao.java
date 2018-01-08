@@ -1264,6 +1264,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 		}
 
+		if (history == null) {
+			return null;
+		}
+
 		byte[] resourceBytes = history.getResource();
 		ResourceEncodingEnum resourceEncoding = history.getEncoding();
 
@@ -1596,6 +1600,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setParamsUriPopulated(uriParams.isEmpty() == false);
 				theEntity.setParamsCoords(coordsParams);
 				theEntity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
+				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
 				theEntity.setParamsCompositeStringUniquePresent(compositeStringUniques.isEmpty() == false);
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
@@ -1646,6 +1651,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		/*
+		 * Create history entry
+		 */
+		if (theCreateNewHistoryEntry) {
+			final ResourceHistoryTable historyEntry = theEntity.toHistory();
+			historyEntry.setEncoding(changed.getEncoding());
+			historyEntry.setResource(changed.getResource());
+
+			ourLog.info("Saving history entry {}", historyEntry.getIdDt());
+			myResourceHistoryTableDao.save(historyEntry);
+		}
+
+		/*
 		 * Update the "search param present" table which is used for the
 		 * ?foo:missing=true queries
 		 *
@@ -1669,18 +1686,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 			}
 			mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
-		}
-
-		/*
-		 * Create history entry
-		 */
-		if (theCreateNewHistoryEntry) {
-			final ResourceHistoryTable historyEntry = theEntity.toHistory();
-			historyEntry.setEncoding(changed.getEncoding());
-			historyEntry.setResource(changed.getResource());
-
-			ourLog.info("Saving history entry {}", historyEntry.getIdDt());
-			myResourceHistoryTableDao.save(historyEntry);
 		}
 
 		/*

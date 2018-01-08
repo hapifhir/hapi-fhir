@@ -234,6 +234,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@After()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());

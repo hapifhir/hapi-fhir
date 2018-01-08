@@ -270,6 +270,46 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testValidateForDeleteWithReferentialIntegrityDisabled() {
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		String methodName = "testValidateForDelete";
+
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pat = new Patient();
+		pat.addName().setFamily(methodName);
+		pat.getManagingOrganization().setReference(orgId.getValue());
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
+
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(true);
+		try {
+			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+
+
+		myOrganizationDao.read(orgId);
+
+		myOrganizationDao.delete(orgId);
+
+		try {
+			myOrganizationDao.read(orgId);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+	}
+
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;
 		for (BundleEntryComponent next : vss.getEntry()) {

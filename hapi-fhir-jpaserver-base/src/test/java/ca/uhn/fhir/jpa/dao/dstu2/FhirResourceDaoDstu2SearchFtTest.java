@@ -8,10 +8,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -24,6 +27,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
@@ -392,13 +396,14 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testSearchDontReindexForUpdateWithIndexDisabled() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(true);
 		Patient patient;
 		SearchParameterMap map;
 
 		patient = new Patient();
 		patient.getText().setDiv("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
-		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));

@@ -33,11 +33,11 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchR4Test.class);
 	private static RestfulServer myRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchR4Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
@@ -116,17 +116,19 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		List<String> ids = new ArrayList<String>();
 		for (int i = 0; i < 20; i++) {
 			Patient patient = new Patient();
+			char letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(i);
+			patient.setId("" + letter);
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
 			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i+1));
-			String id = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+			String id = myPatientDao.update(patient).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;
 	}
 
 	@Test
-	public void testBatchWithGetHardLimitLargeSynchronous() throws Exception {
+	public void testBatchWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
 		
 		Bundle input = new Bundle();
@@ -135,7 +137,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.addEntry()
 			.getRequest()
 			.setMethod(HTTPVerb.GET)
-			.setUrl("Patient?_count=5");
+			.setUrl("Patient?_count=5&_sort=_id");
 		
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 		
@@ -151,7 +153,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testBatchWithGetNormalSearch() throws Exception {
+	public void testBatchWithGetNormalSearch() {
 		List<String> ids = create20Patients();
 		
 		Bundle input = new Bundle();
@@ -183,7 +185,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	 * 30 searches in one batch! Whoa!
 	 */
 	@Test
-	public void testBatchWithManyGets() throws Exception {
+	public void testBatchWithManyGets() {
 		List<String> ids = create20Patients();
 
 		
@@ -211,7 +213,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionWithGetHardLimitLargeSynchronous() throws Exception {
+	public void testTransactionWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
 		
 		Bundle input = new Bundle();
@@ -220,7 +222,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.addEntry()
 			.getRequest()
 			.setMethod(HTTPVerb.GET)
-			.setUrl("Patient?_count=5");
+			.setUrl("Patient?_count=5&_sort=_id");
 		
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 		
@@ -236,7 +238,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testTransactionWithGetNormalSearch() throws Exception {
+	public void testTransactionWithGetNormalSearch() {
 		List<String> ids = create20Patients();
 		
 		Bundle input = new Bundle();
@@ -268,7 +270,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	 * 30 searches in one Transaction! Whoa!
 	 */
 	@Test
-	public void testTransactionWithManyGets() throws Exception {
+	public void testTransactionWithManyGets() {
 		List<String> ids = create20Patients();
 
 		

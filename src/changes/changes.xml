@@ -62,6 +62,12 @@
 				can be useful in order to allow interceptors to
 				change payload contents being saved.
 			</action>
+			<action type="fix">
+				A bug was fixed in the JPA server when performing a validate operation with a mode
+				of DELETE on a server with referential integrity disabled, the validate operation would delete
+				resource reference indexes as though the delete was actually happening, which negatively
+				affected searching for the resource being validated.
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">

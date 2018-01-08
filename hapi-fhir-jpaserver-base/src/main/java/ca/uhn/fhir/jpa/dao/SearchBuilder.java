@@ -1587,6 +1587,10 @@ public class SearchBuilder implements ISearchBuilder {
 		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
 			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
+			if (resource == null) {
+				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
+				continue;
+			}
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
