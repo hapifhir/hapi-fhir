@@ -68,6 +68,12 @@
 				resource reference indexes as though the delete was actually happening, which negatively
 				affected searching for the resource being validated.
 			</action>
+			<action type="add">
+				A new method has been added to RequestDetails called
+				<![CDATA[<code>setRequestContents()]]> which can be used
+				by interceptors to modify the request body before it
+				is parsed by the server.
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">

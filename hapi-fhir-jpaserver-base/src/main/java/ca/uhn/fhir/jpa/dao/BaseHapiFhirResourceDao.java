@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -613,22 +613,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected void markResourcesMatchingExpressionAsNeedingReindexing(String theExpression) {
-		if (isNotBlank(theExpression)) {
-			final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
-			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
+		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
+			if (isNotBlank(theExpression)) {
+				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
+				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
-				@Override
-				public Integer doInTransaction(TransactionStatus theStatus) {
-					return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
-				}
-			});
+				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+				int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
+					@Override
+					public Integer doInTransaction(TransactionStatus theStatus) {
+						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+					}
+				});
 
-			ourLog.info("Marked {} resources for reindexing", updatedCount);
+				ourLog.info("Marked {} resources for reindexing", updatedCount);
+			}
 		}
-
 		mySearchParamRegistry.forceRefresh();
 	}
 

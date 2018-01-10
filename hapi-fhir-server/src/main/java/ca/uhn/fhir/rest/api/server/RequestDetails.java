@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -23,14 +25,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -346,6 +348,21 @@ public abstract class RequestDetails {
 			myRequestContents = getByteStreamRequestContents();
 		}
 		return myRequestContents;
+	}
+
+	/**
+	 * This method may be used to modify the contents of the incoming
+	 * request by hardcoding a value which will be used instead of the
+	 * value received by the client.
+	 * <p>
+	 * This method is useful for modifying the request body prior
+	 * to parsing within interceptors. It generally only has an
+	 * impact when called in the {@link IServerInterceptor#incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
+	 * method
+	 * </p>
+	 */
+	public void setRequestContents(byte[] theRequestContents) {
+		myRequestContents = theRequestContents;
 	}
 
 	private class RequestOperationCallback implements IRequestOperationCallback {

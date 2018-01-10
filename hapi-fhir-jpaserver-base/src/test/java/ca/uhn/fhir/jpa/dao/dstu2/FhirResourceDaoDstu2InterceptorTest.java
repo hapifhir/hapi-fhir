@@ -51,20 +51,20 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
-		
+
 		ArgumentCaptor<RequestDetails> detailsCapt;
 		ArgumentCaptor<IBaseResource> tableCapt;
-		
+
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(myJpaInterceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
-		
+
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(myJpaInterceptor, times(0)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
-		
+
 		/*
 		 * Not do a conditional create
 		 */
@@ -77,9 +77,9 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(myJpaInterceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		verify(myJpaInterceptor, times(0)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
-		
+
 	}
-	
+
 	@Test
 	public void testJpaDelete() {
 		Patient p = new Patient();
@@ -87,25 +87,25 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
 		myPatientDao.delete(new IdDt("Patient", id), mySrd);
-		
+
 		ArgumentCaptor<RequestDetails> detailsCapt;
 		ArgumentCaptor<IBaseResource> tableCapt;
-		
+
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(myJpaInterceptor, times(1)).resourceDeleted(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
-		
+
 	}
-	
+
 	/*
 	 * *****************************************************
 	 * Note that non JPA specific operations get tested in individual
 	 * operation test methods too
 	 * *****************************************************
 	 */
-	
+
 	@Test
 	public void testJpaUpdate() {
 		Patient p = new Patient();
@@ -120,13 +120,13 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 
 		ArgumentCaptor<RequestDetails> detailsCapt;
 		ArgumentCaptor<IBaseResource> tableCapt;
-		
+
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(myJpaInterceptor, times(1)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
-		
+
 		/*
 		 * Now do a conditional update
 		 */
@@ -158,7 +158,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		verify(myJpaInterceptor, times(2)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		assertEquals(id2, tableCapt.getAllValues().get(3).getIdElement().getIdPartAsLong());
 
-		
+
 	}
 
 	@Test
@@ -184,8 +184,8 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
-	
-	
+
+
 	@Test
 	public void testRequestOperationDelete() {
 		Patient p = new Patient();
@@ -211,12 +211,12 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
 
-	
-	
+
+
 	@Test
 	public void testRequestOperationDeleteMulti() {
 		myDaoConfig.setAllowMultipleDelete(true);
-		
+
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
@@ -238,7 +238,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
-		
+
 		verify(myRequestOperationCallback, times(2)).resourcePreDelete(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourceDeleted(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(2)).resourcePreCreate(any(IBaseResource.class));
@@ -263,16 +263,16 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleTypeEnum.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient")
-				.setMethod(HTTPVerbEnum.POST);
+			.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setUrl("Patient")
+			.setMethod(HTTPVerbEnum.POST);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdDt newId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(1L, newId.getVersionIdPartAsLong().longValue());
-		
+
 		verify(myRequestOperationCallback, times(1)).resourcePreCreate(any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
@@ -296,10 +296,10 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleTypeEnum.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.getRequest()
-				.setUrl("Patient/" + id)
-				.setMethod(HTTPVerbEnum.DELETE);
+			.addEntry()
+			.getRequest()
+			.setUrl("Patient/" + id)
+			.setMethod(HTTPVerbEnum.DELETE);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdDt newId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
@@ -315,7 +315,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 	@Test
 	public void testRequestOperationTransactionDeleteMulti() {
 		myDaoConfig.setAllowMultipleDelete(true);
-		
+
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
@@ -336,10 +336,10 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleTypeEnum.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.getRequest()
-				.setUrl("Patient?name=PATIENT")
-				.setMethod(HTTPVerbEnum.DELETE);
+			.addEntry()
+			.getRequest()
+			.setUrl("Patient?name=PATIENT")
+			.setMethod(HTTPVerbEnum.DELETE);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 		assertNotNull(resp);
 
@@ -371,11 +371,11 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleTypeEnum.TRANSACTION);
 		xactBundle
-				.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient/" + id)
-				.setMethod(HTTPVerbEnum.PUT);
+			.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setUrl("Patient/" + id)
+			.setMethod(HTTPVerbEnum.PUT);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdDt newId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());

@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -112,6 +114,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
+	@Qualifier("myGroupDaoDstu2")
+	protected IFhirResourceDao<Group> myGroupDao;
+	@Autowired
 	@Qualifier("myPractitionerDaoDstu2")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
@@ -140,6 +145,10 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
