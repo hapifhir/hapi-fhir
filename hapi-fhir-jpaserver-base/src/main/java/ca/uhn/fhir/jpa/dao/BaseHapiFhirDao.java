@@ -1199,6 +1199,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		throw new NotImplementedException("");
 	}
 
+	private <T> Collection<T> removeCommon(Collection<T> theInput, Collection<T> theToRemove) {
+		assert theInput != theToRemove;
+
+		if (theInput.isEmpty()) {
+			return theInput;
+		}
+
+		ArrayList<T> retVal = new ArrayList<>(theInput);
+		retVal.removeAll(theToRemove);
+		return retVal;
+	}
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
 		for (BaseResourceIndexedSearchParam nextSearchParam : theParams) {
 			nextSearchParam.setUpdated(theUpdateTime);
