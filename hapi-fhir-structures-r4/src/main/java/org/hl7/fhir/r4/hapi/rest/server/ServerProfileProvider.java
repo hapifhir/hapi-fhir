@@ -23,6 +23,8 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -49,7 +51,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 	
 	@Read()
-	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdType theId) {
+	public StructureDefinition getProfileById(ServletRequestDetails theRequest, @IdParam IdType theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;
@@ -59,7 +61,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 
 	@Search()
-	public List<StructureDefinition> getAllProfiles(HttpServletRequest theRequest) {
+	public List<StructureDefinition> getAllProfiles(ServletRequestDetails theRequest) {
 		final String serverBase = getServerBase(theRequest);
 		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitionsWithExplicitId());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
@@ -78,7 +80,7 @@ public class ServerProfileProvider implements IResourceProvider {
 		return retVal;
 	}
 
-	private String getServerBase(HttpServletRequest theHttpRequest) {
+	private String getServerBase(ServletRequestDetails theHttpRequest) {
 		return myRestfulServer.getServerBaseForRequest(theHttpRequest);
 	}
 }

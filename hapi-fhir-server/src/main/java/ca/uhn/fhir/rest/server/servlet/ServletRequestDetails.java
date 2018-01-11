@@ -122,7 +122,7 @@ public class ServletRequestDetails extends RequestDetails {
 
 	@Override
 	public String getServerBaseForRequest() {
-		return getServer().getServerBaseForRequest(getServletRequest());
+		return getServer().getServerBaseForRequest(this);
 	}
 
 	public HttpServletRequest getServletRequest() {

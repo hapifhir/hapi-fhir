@@ -73,6 +73,15 @@
 				DSTU3/R4 structure in the getMeta() version field instead of in the
 				getIdElement() ID. Thanks to GitHub user @Chrisjobling for reporting!
 			</action>
+			<action type="add">
+				The HAPI FHIR Server framework now has initial support for
+				multitenancy. At this time the support is limited to the server
+				framework (not the client, JPA, or JAX-RS frameworks). See
+				<![CDATA[
+				<a href="http://hapifhir.io/doc_rest_server.html">Server Documentation</a>
+				]]>
+				for more information.
+			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
 			<action type="add">
