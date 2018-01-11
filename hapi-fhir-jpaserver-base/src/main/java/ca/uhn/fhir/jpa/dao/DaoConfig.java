@@ -373,6 +373,11 @@ public class DaoConfig {
 	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
 	 * of higher importance than raw write performance
 	 * </p>
+	 * <p>
+	 *    Note that this setting also has an impact on sorting (i.e. using the
+	 *    <code>_sort</code> parameter on searches): If the server is configured
+	 *    to not index missing field.
+	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");

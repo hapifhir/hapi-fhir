@@ -56,6 +56,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
+		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		return retVal;
 	}
 
