@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -721,24 +721,24 @@ public class RiskAssessment extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RiskAssessmentPredictionComponent))
+        if (!(other_ instanceof RiskAssessmentPredictionComponent))
           return false;
-        RiskAssessmentPredictionComponent o = (RiskAssessmentPredictionComponent) other;
+        RiskAssessmentPredictionComponent o = (RiskAssessmentPredictionComponent) other_;
         return compareDeep(outcome, o.outcome, true) && compareDeep(probability, o.probability, true) && compareDeep(qualitativeRisk, o.qualitativeRisk, true)
            && compareDeep(relativeRisk, o.relativeRisk, true) && compareDeep(when, o.when, true) && compareDeep(rationale, o.rationale, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RiskAssessmentPredictionComponent))
+        if (!(other_ instanceof RiskAssessmentPredictionComponent))
           return false;
-        RiskAssessmentPredictionComponent o = (RiskAssessmentPredictionComponent) other;
+        RiskAssessmentPredictionComponent o = (RiskAssessmentPredictionComponent) other_;
         return compareValues(relativeRisk, o.relativeRisk, true) && compareValues(rationale, o.rationale, true)
           ;
       }
@@ -789,7 +789,7 @@ public class RiskAssessment extends DomainResource {
     /**
      * The status of the RiskAssessment, using the same statuses as an Observation.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="registered | preliminary | final | amended +", formalDefinition="The status of the RiskAssessment, using the same statuses as an Observation." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-status")
     protected Enumeration<RiskAssessmentStatus> status;
@@ -1914,12 +1914,12 @@ public class RiskAssessment extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RiskAssessment))
+        if (!(other_ instanceof RiskAssessment))
           return false;
-        RiskAssessment o = (RiskAssessment) other;
+        RiskAssessment o = (RiskAssessment) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
            && compareDeep(status, o.status, true) && compareDeep(method, o.method, true) && compareDeep(code, o.code, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
@@ -1929,12 +1929,12 @@ public class RiskAssessment extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RiskAssessment))
+        if (!(other_ instanceof RiskAssessment))
           return false;
-        RiskAssessment o = (RiskAssessment) other;
+        RiskAssessment o = (RiskAssessment) other_;
         return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true) && compareValues(comment, o.comment, true)
           ;
       }
@@ -1958,7 +1958,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.occurrenceDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="RiskAssessment.occurrence.as(DateTime)", description="When was assessment made?", type="date" )
+  @SearchParamDefinition(name="date", path="RiskAssessment.occurrence.as(dateTime)", description="When was assessment made?", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>

@@ -75,9 +75,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		return myResource;
 	}
 
-	public void setResource(ResourceTable theResource) {
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourceType = theResource.getResourceType();
+		return this;
 	}
 
 	public Long getResourcePid() {
@@ -100,8 +101,9 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		return Boolean.TRUE.equals(myMissing);
 	}
 
-	public void setMissing(boolean theMissing) {
+	public BaseResourceIndexedSearchParam setMissing(boolean theMissing) {
 		myMissing = theMissing;
+		return this;
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -52,6 +52,10 @@ public enum TestscriptOperationCodes {
          * Update an existing resource by its id (or create it if it is new).
          */
         UPDATECREATE, 
+        /**
+         * Patch an existing resource by its id.
+         */
+        PATCH, 
         /**
          * Delete a resource.
          */
@@ -89,13 +93,9 @@ public enum TestscriptOperationCodes {
          */
         CAPABILITIES, 
         /**
-         * Realize a definition in a specific context
+         * Realizes an ActivityDefinition in a specific context
          */
         APPLY, 
-        /**
-         * Cancel Task
-         */
-        CANCEL, 
         /**
          * Closure Table Maintenance
          */
@@ -105,11 +105,11 @@ public enum TestscriptOperationCodes {
          */
         COMPOSE, 
         /**
-         * Test if a server implements a client's required operations
+         * Compare two systems CapabilityStatements
          */
         CONFORMS, 
         /**
-         * Aggregates and return the parameters and data requirements as a single module definition library
+         * Aggregates and returns the parameters and data requirements for a resource and all its dependencies as a single module definition
          */
         DATAREQUIREMENTS, 
         /**
@@ -117,15 +117,15 @@ public enum TestscriptOperationCodes {
          */
         DOCUMENT, 
         /**
-         * Evaluate DecisionSupportRule / DecisionSupportServiceModule
+         * Request clinical decision support guidance based on a specific decision support module
          */
         EVALUATE, 
         /**
-         * Evaluate Measure
+         * Invoke an eMeasure and obtain the results
          */
         EVALUATEMEASURE, 
         /**
-         * Fetch Encounter/Patient Record
+         * Return all the related information as described in the Encounter or Patient
          */
         EVERYTHING, 
         /**
@@ -133,23 +133,23 @@ public enum TestscriptOperationCodes {
          */
         EXPAND, 
         /**
-         * Fail Task
-         */
-        FAIL, 
-        /**
          * Find a functional list
          */
         FIND, 
         /**
-         * Finish Task
+         * Invoke a GraphQL query
          */
-        FINISH, 
+        GRAPHQL, 
         /**
          * Test if a server implements a client's required operations
          */
         IMPLEMENTS, 
         /**
-         * Concept Look Up
+         * Last N Observations Query
+         */
+        LASTN, 
+        /**
+         * Concept Look Up and Decomposition
          */
         LOOKUP, 
         /**
@@ -181,7 +181,7 @@ public enum TestscriptOperationCodes {
          */
         POPULATELINK, 
         /**
-         * Process Message
+         * Process a message according to the defined event
          */
         PROCESSMESSAGE, 
         /**
@@ -189,49 +189,17 @@ public enum TestscriptOperationCodes {
          */
         QUESTIONNAIRE, 
         /**
-         * Release Task
-         */
-        RELEASE, 
-        /**
-         * Reserve Task
-         */
-        RESERVE, 
-        /**
-         * Resume Task
-         */
-        RESUME, 
-        /**
-         * Set Task Input
-         */
-        SETINPUT, 
-        /**
-         * Set Task Output
-         */
-        SETOUTPUT, 
-        /**
-         * Start Task
-         */
-        START, 
-        /**
          * Observation Statistics
          */
         STATS, 
-        /**
-         * Stop Task
-         */
-        STOP, 
         /**
          * Fetch a subset of the CapabilityStatement resource
          */
         SUBSET, 
         /**
-         * Determine if code A is subsumed by code B
+         * CodeSystem Subsumption Testing
          */
         SUBSUMES, 
-        /**
-         * Suspend Task
-         */
-        SUSPEND, 
         /**
          * Model Instance Transformation
          */
@@ -245,7 +213,7 @@ public enum TestscriptOperationCodes {
          */
         VALIDATE, 
         /**
-         * Value Set based Validation
+         * ValueSet based Validation
          */
         VALIDATECODE, 
         /**
@@ -263,6 +231,8 @@ public enum TestscriptOperationCodes {
           return UPDATE;
         if ("updateCreate".equals(codeString))
           return UPDATECREATE;
+        if ("patch".equals(codeString))
+          return PATCH;
         if ("delete".equals(codeString))
           return DELETE;
         if ("deleteCondSingle".equals(codeString))
@@ -283,8 +253,6 @@ public enum TestscriptOperationCodes {
           return CAPABILITIES;
         if ("apply".equals(codeString))
           return APPLY;
-        if ("cancel".equals(codeString))
-          return CANCEL;
         if ("closure".equals(codeString))
           return CLOSURE;
         if ("compose".equals(codeString))
@@ -303,14 +271,14 @@ public enum TestscriptOperationCodes {
           return EVERYTHING;
         if ("expand".equals(codeString))
           return EXPAND;
-        if ("fail".equals(codeString))
-          return FAIL;
         if ("find".equals(codeString))
           return FIND;
-        if ("finish".equals(codeString))
-          return FINISH;
+        if ("graphql".equals(codeString))
+          return GRAPHQL;
         if ("implements".equals(codeString))
           return IMPLEMENTS;
+        if ("lastn".equals(codeString))
+          return LASTN;
         if ("lookup".equals(codeString))
           return LOOKUP;
         if ("match".equals(codeString))
@@ -331,28 +299,12 @@ public enum TestscriptOperationCodes {
           return PROCESSMESSAGE;
         if ("questionnaire".equals(codeString))
           return QUESTIONNAIRE;
-        if ("release".equals(codeString))
-          return RELEASE;
-        if ("reserve".equals(codeString))
-          return RESERVE;
-        if ("resume".equals(codeString))
-          return RESUME;
-        if ("set-input".equals(codeString))
-          return SETINPUT;
-        if ("set-output".equals(codeString))
-          return SETOUTPUT;
-        if ("start".equals(codeString))
-          return START;
         if ("stats".equals(codeString))
           return STATS;
-        if ("stop".equals(codeString))
-          return STOP;
         if ("subset".equals(codeString))
           return SUBSET;
         if ("subsumes".equals(codeString))
           return SUBSUMES;
-        if ("suspend".equals(codeString))
-          return SUSPEND;
         if ("transform".equals(codeString))
           return TRANSFORM;
         if ("translate".equals(codeString))
@@ -369,6 +321,7 @@ public enum TestscriptOperationCodes {
             case VREAD: return "vread";
             case UPDATE: return "update";
             case UPDATECREATE: return "updateCreate";
+            case PATCH: return "patch";
             case DELETE: return "delete";
             case DELETECONDSINGLE: return "deleteCondSingle";
             case DELETECONDMULTIPLE: return "deleteCondMultiple";
@@ -379,7 +332,6 @@ public enum TestscriptOperationCodes {
             case TRANSACTION: return "transaction";
             case CAPABILITIES: return "capabilities";
             case APPLY: return "apply";
-            case CANCEL: return "cancel";
             case CLOSURE: return "closure";
             case COMPOSE: return "compose";
             case CONFORMS: return "conforms";
@@ -389,10 +341,10 @@ public enum TestscriptOperationCodes {
             case EVALUATEMEASURE: return "evaluate-measure";
             case EVERYTHING: return "everything";
             case EXPAND: return "expand";
-            case FAIL: return "fail";
             case FIND: return "find";
-            case FINISH: return "finish";
+            case GRAPHQL: return "graphql";
             case IMPLEMENTS: return "implements";
+            case LASTN: return "lastn";
             case LOOKUP: return "lookup";
             case MATCH: return "match";
             case META: return "meta";
@@ -403,17 +355,9 @@ public enum TestscriptOperationCodes {
             case POPULATELINK: return "populatelink";
             case PROCESSMESSAGE: return "process-message";
             case QUESTIONNAIRE: return "questionnaire";
-            case RELEASE: return "release";
-            case RESERVE: return "reserve";
-            case RESUME: return "resume";
-            case SETINPUT: return "set-input";
-            case SETOUTPUT: return "set-output";
-            case START: return "start";
             case STATS: return "stats";
-            case STOP: return "stop";
             case SUBSET: return "subset";
             case SUBSUMES: return "subsumes";
-            case SUSPEND: return "suspend";
             case TRANSFORM: return "transform";
             case TRANSLATE: return "translate";
             case VALIDATE: return "validate";
@@ -430,6 +374,7 @@ public enum TestscriptOperationCodes {
             case VREAD: return "Read the state of a specific version of the resource.";
             case UPDATE: return "Update an existing resource by its id.";
             case UPDATECREATE: return "Update an existing resource by its id (or create it if it is new).";
+            case PATCH: return "Patch an existing resource by its id.";
             case DELETE: return "Delete a resource.";
             case DELETECONDSINGLE: return "Conditionally delete a single resource based on search parameters.";
             case DELETECONDMULTIPLE: return "Conditionally delete one or more resources based on search parameters.";
@@ -439,22 +384,21 @@ public enum TestscriptOperationCodes {
             case BATCH: return "Update, create or delete a set of resources as independent actions.";
             case TRANSACTION: return "Update, create or delete a set of resources as a single transaction.";
             case CAPABILITIES: return "Get a capability statement for the system.";
-            case APPLY: return "Realize a definition in a specific context";
-            case CANCEL: return "Cancel Task";
+            case APPLY: return "Realizes an ActivityDefinition in a specific context";
             case CLOSURE: return "Closure Table Maintenance";
             case COMPOSE: return "Code Composition based on supplied properties";
-            case CONFORMS: return "Test if a server implements a client's required operations";
-            case DATAREQUIREMENTS: return "Aggregates and return the parameters and data requirements as a single module definition library";
+            case CONFORMS: return "Compare two systems CapabilityStatements";
+            case DATAREQUIREMENTS: return "Aggregates and returns the parameters and data requirements for a resource and all its dependencies as a single module definition";
             case DOCUMENT: return "Generate a Document";
-            case EVALUATE: return "Evaluate DecisionSupportRule / DecisionSupportServiceModule";
-            case EVALUATEMEASURE: return "Evaluate Measure";
-            case EVERYTHING: return "Fetch Encounter/Patient Record";
+            case EVALUATE: return "Request clinical decision support guidance based on a specific decision support module";
+            case EVALUATEMEASURE: return "Invoke an eMeasure and obtain the results";
+            case EVERYTHING: return "Return all the related information as described in the Encounter or Patient";
             case EXPAND: return "Value Set Expansion";
-            case FAIL: return "Fail Task";
             case FIND: return "Find a functional list";
-            case FINISH: return "Finish Task";
+            case GRAPHQL: return "Invoke a GraphQL query";
             case IMPLEMENTS: return "Test if a server implements a client's required operations";
-            case LOOKUP: return "Concept Look Up";
+            case LASTN: return "Last N Observations Query";
+            case LOOKUP: return "Concept Look Up and Decomposition";
             case MATCH: return "Find patient matches using MPI based logic";
             case META: return "Access a list of profiles, tags, and security labels";
             case METAADD: return "Add profiles, tags, and security labels to a resource";
@@ -462,23 +406,15 @@ public enum TestscriptOperationCodes {
             case POPULATE: return "Populate Questionnaire";
             case POPULATEHTML: return "Generate HTML for Questionnaire";
             case POPULATELINK: return "Generate a link to a Questionnaire completion webpage";
-            case PROCESSMESSAGE: return "Process Message";
+            case PROCESSMESSAGE: return "Process a message according to the defined event";
             case QUESTIONNAIRE: return "Build Questionnaire";
-            case RELEASE: return "Release Task";
-            case RESERVE: return "Reserve Task";
-            case RESUME: return "Resume Task";
-            case SETINPUT: return "Set Task Input";
-            case SETOUTPUT: return "Set Task Output";
-            case START: return "Start Task";
             case STATS: return "Observation Statistics";
-            case STOP: return "Stop Task";
             case SUBSET: return "Fetch a subset of the CapabilityStatement resource";
-            case SUBSUMES: return "Determine if code A is subsumed by code B";
-            case SUSPEND: return "Suspend Task";
+            case SUBSUMES: return "CodeSystem Subsumption Testing";
             case TRANSFORM: return "Model Instance Transformation";
             case TRANSLATE: return "Concept Translation";
             case VALIDATE: return "Validate a resource";
-            case VALIDATECODE: return "Value Set based Validation";
+            case VALIDATECODE: return "ValueSet based Validation";
             default: return "?";
           }
         }
@@ -488,6 +424,7 @@ public enum TestscriptOperationCodes {
             case VREAD: return "Version Read";
             case UPDATE: return "Update";
             case UPDATECREATE: return "Create using Update";
+            case PATCH: return "Patch";
             case DELETE: return "Delete";
             case DELETECONDSINGLE: return "Conditional Delete Single";
             case DELETECONDMULTIPLE: return "Conditional Delete Multiple";
@@ -498,7 +435,6 @@ public enum TestscriptOperationCodes {
             case TRANSACTION: return "Transaction";
             case CAPABILITIES: return "Capabilities";
             case APPLY: return "$apply";
-            case CANCEL: return "$cancel";
             case CLOSURE: return "$closure";
             case COMPOSE: return "$compose";
             case CONFORMS: return "$conforms";
@@ -508,10 +444,10 @@ public enum TestscriptOperationCodes {
             case EVALUATEMEASURE: return "$evaluate-measure";
             case EVERYTHING: return "$everything";
             case EXPAND: return "$expand";
-            case FAIL: return "$fail";
             case FIND: return "$find";
-            case FINISH: return "$finish";
+            case GRAPHQL: return "$graphql";
             case IMPLEMENTS: return "$implements";
+            case LASTN: return "$lastn";
             case LOOKUP: return "$lookup";
             case MATCH: return "$match";
             case META: return "$meta";
@@ -522,17 +458,9 @@ public enum TestscriptOperationCodes {
             case POPULATELINK: return "$populatelink";
             case PROCESSMESSAGE: return "$process-message";
             case QUESTIONNAIRE: return "$questionnaire";
-            case RELEASE: return "$release";
-            case RESERVE: return "$reserve";
-            case RESUME: return "$resume";
-            case SETINPUT: return "$set-input";
-            case SETOUTPUT: return "$set-output";
-            case START: return "$start";
             case STATS: return "$stats";
-            case STOP: return "$stop";
             case SUBSET: return "$subset";
             case SUBSUMES: return "$subsumes";
-            case SUSPEND: return "$suspend";
             case TRANSFORM: return "$transform";
             case TRANSLATE: return "$translate";
             case VALIDATE: return "$validate";

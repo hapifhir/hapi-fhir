@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -220,22 +220,22 @@ public class Range extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Range))
+        if (!(other_ instanceof Range))
           return false;
-        Range o = (Range) other;
+        Range o = (Range) other_;
         return compareDeep(low, o.low, true) && compareDeep(high, o.high, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Range))
+        if (!(other_ instanceof Range))
           return false;
-        Range o = (Range) other;
+        Range o = (Range) other_;
         return true;
       }
 

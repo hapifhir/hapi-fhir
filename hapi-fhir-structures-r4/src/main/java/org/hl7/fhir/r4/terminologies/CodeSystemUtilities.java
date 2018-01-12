@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.terminologies;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 
 public class CodeSystemUtilities {
@@ -23,6 +25,8 @@ public class CodeSystemUtilities {
     for (ConceptPropertyComponent p : def.getProperty()) {
       if (p.getCode().equals("deprecated") && p.hasValue() && p.getValue() instanceof BooleanType) 
         return ((BooleanType) p.getValue()).getValue();
+      if (p.getCode().equals("deprecationDate") && p.hasValue() && p.getValue() instanceof DateTimeType) 
+        return ((DateTimeType) p.getValue()).before(new DateTimeType(Calendar.getInstance()));
     }
     return false;
   }
@@ -47,7 +51,7 @@ public class CodeSystemUtilities {
 
   public static void setDeprecated(CodeSystem cs, ConceptDefinitionComponent concept, DateTimeType date) {
     defineDeprecatedProperty(cs);
-    concept.addProperty().setCode("deprecated").setValue(date);    
+    concept.addProperty().setCode("deprecationDate").setValue(date);    
   }
 
   public static void defineNotSelectableProperty(CodeSystem cs) {
@@ -59,7 +63,7 @@ public class CodeSystemUtilities {
   }
 
   public static void defineDeprecatedProperty(CodeSystem cs) {
-    defineCodeSystemProperty(cs, "deprecated", "The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged", PropertyType.DATETIME);
+    defineCodeSystemProperty(cs, "deprecationDate", "The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged", PropertyType.DATETIME);
   }
 
   public static void defineCodeSystemProperty(CodeSystem cs, String code, String description, PropertyType type) {
@@ -143,7 +147,7 @@ public class CodeSystemUtilities {
     return null;
   }
 
-  public static void markStatus(CodeSystem cs, String wg, String status, String fmm) {
+  public static void markStatus(CodeSystem cs, String wg, StandardsStatus status, String pckage, String fmm) throws FHIRException {
     if (wg != null) {
       if (!ToolingExtensions.hasExtension(cs, ToolingExtensions.EXT_WORKGROUP) || 
           (Utilities.existsInList(ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && !Utilities.existsInList(wg, "fhir", "vocab"))) {
@@ -151,9 +155,15 @@ public class CodeSystemUtilities {
       }
     }
     if (status != null) {
-      String ss = ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_BALLOT_STATUS);
-      if (Utilities.noString(ss) || ssval(ss) < ssval(status)) 
-        ToolingExtensions.setStringExtension(cs, ToolingExtensions.EXT_BALLOT_STATUS, status);
+      StandardsStatus ss = StandardsStatus.fromCode(ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_BALLOT_STATUS));
+      if (ss == null || ss.isLowerThan(status)) 
+        ToolingExtensions.setStringExtension(cs, ToolingExtensions.EXT_BALLOT_STATUS, status.toDisplay());
+      if (pckage != null) {
+        if (!cs.hasUserData("ballot.package"))
+          cs.setUserData("ballot.package", pckage);
+        else if (!pckage.equals(cs.getUserString("ballot.package")))
+          System.out.println("Code System "+cs.getUrl()+": ownership clash "+pckage+" vs "+cs.getUserString("ballot.package"));
+      }
     }
     if (fmm != null) {
       String sfmm = ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_FMM_LEVEL);
@@ -162,20 +172,7 @@ public class CodeSystemUtilities {
     }
   }
 
-  private static int ssval(String status) {
-    if ("Draft".equals("status")) 
-      return 1;
-    if ("Informative".equals("status")) 
-      return 2;
-    if ("External".equals("status")) 
-      return 3;
-    if ("Trial Use".equals("status")) 
-      return 3;
-    if ("Normative".equals("status")) 
-      return 4;
-    return -1;
-  }
-
+ 
   public static Type readProperty(ConceptDefinitionComponent concept, String code) {
     for (ConceptPropertyComponent p : concept.getProperty())
       if (p.getCode().equals(code))

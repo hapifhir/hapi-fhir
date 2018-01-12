@@ -1745,7 +1745,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Systems are not required to list all the chain names they support, but if they don't list them, clients may not know to use them</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Systems are not required to list all the chain names they support, but if they don't list them, clients might not know to use them</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>

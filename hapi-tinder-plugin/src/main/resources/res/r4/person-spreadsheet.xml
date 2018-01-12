@@ -1141,7 +1141,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Needed for identification of the person, in combination with (at least) name and birth date. Gender of person drives many clinical processes.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The gender may not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The gender might not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender</Data><NamedCell
@@ -4206,7 +4206,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">Person.address</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</Data></Cell>
+    <Cell ss:StyleID="s120"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s118"><Data ss:Type="String">address-city</Data></Cell>

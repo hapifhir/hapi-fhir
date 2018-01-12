@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -64,7 +64,7 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * The text of the annotation.
      */
-    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The annotation  - text content", formalDefinition="The text of the annotation." )
     protected StringType text;
 
@@ -348,23 +348,23 @@ public class Annotation extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Annotation))
+        if (!(other_ instanceof Annotation))
           return false;
-        Annotation o = (Annotation) other;
+        Annotation o = (Annotation) other_;
         return compareDeep(author, o.author, true) && compareDeep(time, o.time, true) && compareDeep(text, o.text, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Annotation))
+        if (!(other_ instanceof Annotation))
           return false;
-        Annotation o = (Annotation) other;
+        Annotation o = (Annotation) other_;
         return compareValues(time, o.time, true) && compareValues(text, o.text, true);
       }
 

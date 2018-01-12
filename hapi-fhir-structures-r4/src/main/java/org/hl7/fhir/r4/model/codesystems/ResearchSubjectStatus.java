@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,29 +37,59 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ResearchSubjectStatus {
 
         /**
-         * The subject has been identified as a potential participant in the study but has not yet agreed to participate
+         * An identified person that can be considered for inclusion in a study.
          */
         CANDIDATE, 
         /**
-         * The subject has agreed to participate in the study but has not yet begun performing any action within the study
+         * A person that has met the eligibility criteria for inclusion in a study.
          */
-        ENROLLED, 
+        ELIGIBLE, 
         /**
-         * The subject is currently being monitored and/or subject to treatment as part of the study
+         * A person is no longer receiving study intervention and/or being evaluated with tests and procedures according to the protocol, but they are being monitored on a protocol-prescribed schedule.
          */
-        ACTIVE, 
+        FOLLOWUP, 
         /**
-         * The subject has temporarily discontinued monitoring/treatment as part of the study
+         * A person who did not meet one or more criteria required for participation in a study is considered to have failed screening or
+is ineligible for the study.
          */
-        SUSPENDED, 
+        INELIGIBLE, 
         /**
-         * The subject has permanently ended participation in the study prior to completion of the intended monitoring/treatment
+         * A person for whom registration was not completed
+         */
+        NOTREGISTERED, 
+        /**
+         * A person that has ended their participation on a study either because their treatment/observation is complete or through not
+responding, withdrawal, non-compliance and/or adverse event.
+         */
+        OFFSTUDY, 
+        /**
+         * A person that is enrolled or registered on a study.
+         */
+        ONSTUDY, 
+        /**
+         * The person is receiving the treatment or participating in an activity (e.g. yoga, diet, etc.) that the study is evaluating.
+         */
+        ONSTUDYINTERVENTION, 
+        /**
+         * The subject is being evaluated via tests and assessments according to the study calendar, but is not receiving any intervention. Note that this state is study-dependent and might not exist in all studies.  A synonym for this is "short-term follow-up".
+         */
+        ONSTUDYOBSERVATION, 
+        /**
+         * A person is pre-registered for a study.
+         */
+        PENDINGONSTUDY, 
+        /**
+         * A person that is potentially eligible for participation in the study.
+         */
+        POTENTIALCANDIDATE, 
+        /**
+         * A person who is being evaluated for eligibility for a study.
+         */
+        SCREENING, 
+        /**
+         * The person has withdrawn their participation in the study before registration.
          */
         WITHDRAWN, 
-        /**
-         * All intended monitoring/treatment of the subject has been completed and their engagement with the study is now ended
-         */
-        COMPLETED, 
         /**
          * added to help the parsers
          */
@@ -69,26 +99,47 @@ public enum ResearchSubjectStatus {
                 return null;
         if ("candidate".equals(codeString))
           return CANDIDATE;
-        if ("enrolled".equals(codeString))
-          return ENROLLED;
-        if ("active".equals(codeString))
-          return ACTIVE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
+        if ("eligible".equals(codeString))
+          return ELIGIBLE;
+        if ("follow-up".equals(codeString))
+          return FOLLOWUP;
+        if ("ineligible".equals(codeString))
+          return INELIGIBLE;
+        if ("not-registered".equals(codeString))
+          return NOTREGISTERED;
+        if ("off-study".equals(codeString))
+          return OFFSTUDY;
+        if ("on-study".equals(codeString))
+          return ONSTUDY;
+        if ("on-study-intervention".equals(codeString))
+          return ONSTUDYINTERVENTION;
+        if ("on-study-observation".equals(codeString))
+          return ONSTUDYOBSERVATION;
+        if ("pending-on-study".equals(codeString))
+          return PENDINGONSTUDY;
+        if ("potential-candidate".equals(codeString))
+          return POTENTIALCANDIDATE;
+        if ("screening".equals(codeString))
+          return SCREENING;
         if ("withdrawn".equals(codeString))
           return WITHDRAWN;
-        if ("completed".equals(codeString))
-          return COMPLETED;
         throw new FHIRException("Unknown ResearchSubjectStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case CANDIDATE: return "candidate";
-            case ENROLLED: return "enrolled";
-            case ACTIVE: return "active";
-            case SUSPENDED: return "suspended";
+            case ELIGIBLE: return "eligible";
+            case FOLLOWUP: return "follow-up";
+            case INELIGIBLE: return "ineligible";
+            case NOTREGISTERED: return "not-registered";
+            case OFFSTUDY: return "off-study";
+            case ONSTUDY: return "on-study";
+            case ONSTUDYINTERVENTION: return "on-study-intervention";
+            case ONSTUDYOBSERVATION: return "on-study-observation";
+            case PENDINGONSTUDY: return "pending-on-study";
+            case POTENTIALCANDIDATE: return "potential-candidate";
+            case SCREENING: return "screening";
             case WITHDRAWN: return "withdrawn";
-            case COMPLETED: return "completed";
             default: return "?";
           }
         }
@@ -97,23 +148,37 @@ public enum ResearchSubjectStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case CANDIDATE: return "The subject has been identified as a potential participant in the study but has not yet agreed to participate";
-            case ENROLLED: return "The subject has agreed to participate in the study but has not yet begun performing any action within the study";
-            case ACTIVE: return "The subject is currently being monitored and/or subject to treatment as part of the study";
-            case SUSPENDED: return "The subject has temporarily discontinued monitoring/treatment as part of the study";
-            case WITHDRAWN: return "The subject has permanently ended participation in the study prior to completion of the intended monitoring/treatment";
-            case COMPLETED: return "All intended monitoring/treatment of the subject has been completed and their engagement with the study is now ended";
+            case CANDIDATE: return "An identified person that can be considered for inclusion in a study.";
+            case ELIGIBLE: return "A person that has met the eligibility criteria for inclusion in a study.";
+            case FOLLOWUP: return "A person is no longer receiving study intervention and/or being evaluated with tests and procedures according to the protocol, but they are being monitored on a protocol-prescribed schedule.";
+            case INELIGIBLE: return "A person who did not meet one or more criteria required for participation in a study is considered to have failed screening or\nis ineligible for the study.";
+            case NOTREGISTERED: return "A person for whom registration was not completed";
+            case OFFSTUDY: return "A person that has ended their participation on a study either because their treatment/observation is complete or through not\nresponding, withdrawal, non-compliance and/or adverse event.";
+            case ONSTUDY: return "A person that is enrolled or registered on a study.";
+            case ONSTUDYINTERVENTION: return "The person is receiving the treatment or participating in an activity (e.g. yoga, diet, etc.) that the study is evaluating.";
+            case ONSTUDYOBSERVATION: return "The subject is being evaluated via tests and assessments according to the study calendar, but is not receiving any intervention. Note that this state is study-dependent and might not exist in all studies.  A synonym for this is \"short-term follow-up\".";
+            case PENDINGONSTUDY: return "A person is pre-registered for a study.";
+            case POTENTIALCANDIDATE: return "A person that is potentially eligible for participation in the study.";
+            case SCREENING: return "A person who is being evaluated for eligibility for a study.";
+            case WITHDRAWN: return "The person has withdrawn their participation in the study before registration.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case CANDIDATE: return "Candidate";
-            case ENROLLED: return "Enrolled";
-            case ACTIVE: return "Active";
-            case SUSPENDED: return "Suspended";
+            case ELIGIBLE: return "Eligible";
+            case FOLLOWUP: return "Follow-up";
+            case INELIGIBLE: return "Ineligible";
+            case NOTREGISTERED: return "Not Registered";
+            case OFFSTUDY: return "Off-study";
+            case ONSTUDY: return "On-study";
+            case ONSTUDYINTERVENTION: return "On-study-intervention";
+            case ONSTUDYOBSERVATION: return "On-study-observation";
+            case PENDINGONSTUDY: return "Pending on-study";
+            case POTENTIALCANDIDATE: return "Potential Candidate";
+            case SCREENING: return "Screening";
             case WITHDRAWN: return "Withdrawn";
-            case COMPLETED: return "Completed";
             default: return "?";
           }
     }

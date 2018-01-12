@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import org.hl7.fhir.dstu2016may.model.CodeType;
 import org.hl7.fhir.dstu2016may.model.CodeableConcept;
 import org.hl7.fhir.dstu2016may.model.Coding;
 import org.hl7.fhir.dstu2016may.model.ConceptMap;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.Resource;
 import org.hl7.fhir.dstu2016may.model.ResourceType;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;

@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.model.PrimitiveType;
 
 public class TranslatingUtilities extends org.hl7.fhir.utilities.TranslatingUtilities {
 
-  public interface TranslationServices extends org.hl7.fhir.utilities.TranslatingUtilities.TranslationServices {
+  public interface TranslationServices extends org.hl7.fhir.utilities.TranslationServices {
     String gt(@SuppressWarnings("rawtypes") PrimitiveType value);
     String egt(@SuppressWarnings("rawtypes") Enumeration<? extends Enum> value);
   }

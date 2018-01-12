@@ -1,11 +1,13 @@
 package org.hl7.fhir.r4.terminologies;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ValueSetUtilities {
@@ -54,7 +56,7 @@ public class ValueSetUtilities {
     vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue(oid);
   }
 
-  public static void markStatus(ValueSet vs, String wg, String status, String fmm) {
+  public static void markStatus(ValueSet vs, String wg, StandardsStatus status, String pckage, String fmm) throws FHIRException {
     if (wg != null) {
       if (!ToolingExtensions.hasExtension(vs, ToolingExtensions.EXT_WORKGROUP) || 
           (Utilities.existsInList(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && !Utilities.existsInList(wg, "fhir", "vocab"))) {
@@ -62,9 +64,15 @@ public class ValueSetUtilities {
       }
     }
     if (status != null) {
-      String ss = ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS);
-      if (Utilities.noString(ss) || ssval(ss) < ssval(status)) 
-        ToolingExtensions.setStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS, status);
+      StandardsStatus ss = StandardsStatus.fromCode(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS));
+      if (ss == null || ss.isLowerThan(status)) 
+        ToolingExtensions.setStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS, status.toDisplay());
+      if (pckage != null) {
+        if (!vs.hasUserData("ballot.package"))        
+          vs.setUserData("ballot.package", pckage);
+        else if (!pckage.equals(vs.getUserString("ballot.package")))
+          System.out.println("Code System "+vs.getUrl()+": ownership clash "+pckage+" vs "+vs.getUserString("ballot.package"));
+      }
     }
     if (fmm != null) {
       String sfmm = ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_FMM_LEVEL);
@@ -72,7 +80,7 @@ public class ValueSetUtilities {
         ToolingExtensions.setIntegerExtension(vs, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(fmm));
     }
     if (vs.hasUserData("cs"))
-      CodeSystemUtilities.markStatus((CodeSystem) vs.getUserData("cs"), wg, status, fmm);
+      CodeSystemUtilities.markStatus((CodeSystem) vs.getUserData("cs"), wg, status, pckage, fmm);
   }
 
   private static int ssval(String status) {

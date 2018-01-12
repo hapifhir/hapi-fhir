@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -239,7 +239,7 @@ public class Endpoint extends DomainResource {
      * The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).
      */
     @Child(name = "managingOrganization", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Organization that manages this endpoint (may not be the organization that exposes the endpoint)", formalDefinition="The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)." )
+    @Description(shortDefinition="Organization that manages this endpoint (might not be the organization that exposes the endpoint)", formalDefinition="The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)." )
     protected Reference managingOrganization;
 
     /**
@@ -1073,12 +1073,12 @@ public class Endpoint extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Endpoint))
+        if (!(other_ instanceof Endpoint))
           return false;
-        Endpoint o = (Endpoint) other;
+        Endpoint o = (Endpoint) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(connectionType, o.connectionType, true)
            && compareDeep(name, o.name, true) && compareDeep(managingOrganization, o.managingOrganization, true)
            && compareDeep(contact, o.contact, true) && compareDeep(period, o.period, true) && compareDeep(payloadType, o.payloadType, true)
@@ -1087,12 +1087,12 @@ public class Endpoint extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Endpoint))
+        if (!(other_ instanceof Endpoint))
           return false;
-        Endpoint o = (Endpoint) other;
+        Endpoint o = (Endpoint) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(payloadMimeType, o.payloadMimeType, true)
            && compareValues(address, o.address, true) && compareValues(header, o.header, true);
       }

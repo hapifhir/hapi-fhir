@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -43,6 +43,8 @@ public class MedicationDispenseStatusEnumFactory implements EnumFactory<Medicati
       return MedicationDispenseStatus.PREPARATION;
     if ("in-progress".equals(codeString))
       return MedicationDispenseStatus.INPROGRESS;
+    if ("not-done".equals(codeString))
+      return MedicationDispenseStatus.NOTDONE;
     if ("on-hold".equals(codeString))
       return MedicationDispenseStatus.ONHOLD;
     if ("completed".equals(codeString))
@@ -59,6 +61,8 @@ public class MedicationDispenseStatusEnumFactory implements EnumFactory<Medicati
       return "preparation";
     if (code == MedicationDispenseStatus.INPROGRESS)
       return "in-progress";
+    if (code == MedicationDispenseStatus.NOTDONE)
+      return "not-done";
     if (code == MedicationDispenseStatus.ONHOLD)
       return "on-hold";
     if (code == MedicationDispenseStatus.COMPLETED)

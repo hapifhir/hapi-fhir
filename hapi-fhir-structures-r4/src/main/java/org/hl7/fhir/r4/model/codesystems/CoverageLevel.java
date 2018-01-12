@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,6 +61,10 @@ public enum CoverageLevel {
          */
         SUBCLASS, 
         /**
+         * A sequence number associated with repeating short-term continuence of the converage.
+         */
+        SEQUENCE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -79,6 +83,8 @@ public enum CoverageLevel {
           return CLASS;
         if ("subclass".equals(codeString))
           return SUBCLASS;
+        if ("sequence".equals(codeString))
+          return SEQUENCE;
         throw new FHIRException("Unknown CoverageLevel code '"+codeString+"'");
         }
         public String toCode() {
@@ -89,6 +95,7 @@ public enum CoverageLevel {
             case SUBPLAN: return "subplan";
             case CLASS: return "class";
             case SUBCLASS: return "subclass";
+            case SEQUENCE: return "sequence";
             default: return "?";
           }
         }
@@ -103,6 +110,7 @@ public enum CoverageLevel {
             case SUBPLAN: return "A subset of a specific suite of benefits.";
             case CLASS: return "A class of benefits.";
             case SUBCLASS: return "A subset of a class of benefits.";
+            case SEQUENCE: return "A sequence number associated with repeating short-term continuence of the converage.";
             default: return "?";
           }
         }
@@ -114,6 +122,7 @@ public enum CoverageLevel {
             case SUBPLAN: return "SubPlan";
             case CLASS: return "Class";
             case SUBCLASS: return "SubClass";
+            case SEQUENCE: return "Sequence";
             default: return "?";
           }
     }

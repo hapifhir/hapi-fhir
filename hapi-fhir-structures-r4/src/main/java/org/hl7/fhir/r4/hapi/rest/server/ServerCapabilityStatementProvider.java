@@ -485,7 +485,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		OperationDefinition op = new OperationDefinition();
 		op.setStatus(PublicationStatus.ACTIVE);
 		op.setKind(OperationKind.OPERATION);
-		op.setIdempotent(true);
+		op.setAffectsState(false);
 		
 		// We reset these to true below if we find a binding that can handle the level
 		op.setSystem(false);
@@ -509,7 +509,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				op.setType(true);
 			}
 			if (!sharedDescription.isIdempotent()) {
-				op.setIdempotent(sharedDescription.isIdempotent());
+				op.setAffectsState(!sharedDescription.isIdempotent());
 			}
 			op.setCode(sharedDescription.getName().substring(1));
 			if (sharedDescription.isCanOperateAtInstanceLevel()) {

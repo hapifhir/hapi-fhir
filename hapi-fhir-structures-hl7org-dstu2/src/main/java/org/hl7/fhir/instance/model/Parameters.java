@@ -227,7 +227,7 @@ public class Parameters extends Resource implements IBaseParameters {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.value = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("resource"))
           this.resource = castToResource(value); // Resource
         else if (name.equals("part"))

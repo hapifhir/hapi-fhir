@@ -1189,8 +1189,7 @@ public class JsonParserHl7OrgDstu2Test {
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-    // The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-    String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+    String exp = expected.toString();
 
     // This shows up when we parse XML
     String act = actual.toString().replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"", "");

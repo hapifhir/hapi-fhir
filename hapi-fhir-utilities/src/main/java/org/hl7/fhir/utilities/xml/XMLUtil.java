@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -251,12 +252,12 @@ public class XMLUtil {
 
 	
 	/**
-	 * Converts the raw characters to XML escapeUrlParam characters.
+	 * Converts the raw characters to XML escape characters.
 	 * 
 	 * @param rawContent
 	 * @param charset Null when charset is not known, so we assume it's unicode
 	 * @param isNoLines
-	 * @return escapeUrlParam string
+	 * @return escape string
 	 */
 	public static String escapeXML(String rawContent, String charset, boolean isNoLines) {
 		if (rawContent == null)
@@ -309,6 +310,13 @@ public class XMLUtil {
     return c;
   }
 
+  public static Element getNamedChildByAttribute(Element e, String name, String nname, String nvalue) {
+    Element c = getFirstChild(e);
+    while (c != null && !((name.equals(c.getLocalName()) || name.equals(c.getNodeName())) && nvalue.equals(c.getAttribute(nname))))
+      c = getNextSibling(c);
+    return c;
+  }
+
   public static Element getNextSibling(Element e) {
     Node n = e.getNextSibling();
     while (n != null && n.getNodeType() != Node.ELEMENT_NODE)
@@ -323,6 +331,17 @@ public class XMLUtil {
         set.add(c);
       c = getNextSibling(c);
     }
+  }
+
+  public static List<Element> getNamedChildren(Element e, String name) {
+    List<Element> res = new ArrayList<Element>();
+    Element c = getFirstChild(e);
+    while (c != null) {
+      if (name.equals(c.getLocalName()) || name.equals(c.getNodeName()) )
+        res.add(c);
+      c = getNextSibling(c);
+    }
+    return res;
   }
 
   public static String htmlToXmlEscapedPlainText(Element r) {

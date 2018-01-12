@@ -5,8 +5,10 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.r4.utils.GraphQLEngine.IGraphQLStorageServices.ReferenceResolution;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.graphql.*;
+import org.hl7.fhir.utilities.graphql.Argument.ArgumentListStatus;
 import org.hl7.fhir.utilities.graphql.Operation.OperationType;
 import org.hl7.fhir.utilities.graphql.Package;
 
@@ -148,7 +150,32 @@ public class GraphQLEngine {
 
   }
 
+  public interface IGraphQLStorageServices {
+    public class ReferenceResolution {
+      private Resource targetContext;
+      private Resource target;
+      public ReferenceResolution(Resource targetContext, Resource target) {
+        super();
+        this.targetContext = targetContext;
+        this.target = target;
+      }
+      
+      
+    }
+    // given a reference inside a context, return what it references (including resolving internal references (e.g. start with #)
+    public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException;
+    
+    // just get the identified resource
+    public Resource lookup(Object appInfo, String type, String id) throws FHIRException;
 
+    // list the matching resources. searchParams are the standard search params. 
+    // this instanceof different to search because the server returns all matching resources, or an error. There instanceof no paging on this search   
+    public void listResources(Object appInfo, String type, List<Argument> searchParams, List<Resource> matches) throws FHIRException;
+
+    // just perform a standard search, and return the bundle as you return to the client  
+    public Bundle search(Object appInfo, String type, List<Argument> searchParams) throws FHIRException;
+  }
+  
   private IWorkerContext context;
   
   public GraphQLEngine(IWorkerContext context) {
@@ -179,14 +206,20 @@ public class GraphQLEngine {
   /** 
    * Application provided reference resolution services 
    */
-  private IGraphQLStorageServices<Resource, Reference, Bundle> services;
+  private IGraphQLStorageServices services;
 
   // internal stuff 
   private Map<String, Argument> workingVariables = new HashMap<String, Argument>();
+
+  private FHIRPathEngine fpe;
+
+  private ExpressionNode magicExpression;
   
   public void execute() throws EGraphEngine, EGraphQLException, FHIRException {
     if (graphQL == null)
       throw new EGraphEngine("Unable to process graphql - graphql document missing");
+    fpe = new FHIRPathEngine(this.context);
+    magicExpression = new ExpressionNode(0);
 
     output = new ObjectValue();
 
@@ -207,9 +240,9 @@ public class GraphQLEngine {
     checkNoDirectives(op.getDirectives());
     processVariables(op);
     if (focus == null)
-      processSearch(output, op.getSelectionSet());
+      processSearch(output, op.getSelectionSet(), false, "");
     else
-      processObject(focus, focus, output, op.getSelectionSet());
+      processObject(focus, focus, output, op.getSelectionSet(), false, "");
   }
 
   private boolean checkBooleanDirective(Directive dir) throws EGraphQLException {
@@ -236,7 +269,7 @@ public class GraphQLEngine {
         else
           throw new EGraphQLException("Duplicate @include directives");
       }
-      else
+      else if (!Utilities.existsInList(dir.getName(), "flatten", "first", "singleton", "slice"))
         throw new EGraphQLException("Directive \""+dir.getName()+"\" instanceof not recognised");
     }
     if ((skip != null && include != null))
@@ -312,7 +345,6 @@ public class GraphQLEngine {
           if (passesExtensionMode(v, extensionMode))
             result.add(v);
         } else {
-          FHIRPathEngine fpe = new FHIRPathEngine(this.context);
           ExpressionNode node = fpe.parse(fp.toString().substring(5));
           for (Base v : values)
             if (passesExtensionMode(v, extensionMode) && fpe.evaluateToBoolean(null, context, v, node))
@@ -363,9 +395,40 @@ public class GraphQLEngine {
     return false;
   }
 
-  private void processValues(Resource context, Selection sel, Property prop, ObjectValue target, List<Base> values, boolean extensionMode) throws EGraphQLException, FHIRException {
-    Argument arg = target.addField(sel.getField().getAlias(), prop.isList());
+  private void processValues(Resource context, Selection sel, Property prop, ObjectValue target, List<Base> values, boolean extensionMode, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
+    boolean il = false;
+    Argument arg = null;
+    ExpressionNode expression = null;
+    if (sel.getField().hasDirective("slice")) {
+      Directive dir = sel.getField().directive("slice");
+      String s = ((StringValue) dir.getArguments().get(0).getValues().get(0)).getValue();
+      if (s.equals("$index"))
+        expression = magicExpression;
+      else
+        expression = fpe.parse(s);
+    }
+    if (sel.getField().hasDirective("flatten")) // special: instruction to drop this node...
+      il = prop.isList() && !sel.getField().hasDirective("first");
+    else if (sel.getField().hasDirective("first")) {
+      if (expression != null) 
+        throw new FHIRException("You cannot mix @slice and @first");
+      arg = target.addField(sel.getField().getAlias()+suffix, listStatus(sel.getField(), inheritedList));
+    } else if (expression == null)
+      arg = target.addField(sel.getField().getAlias()+suffix, listStatus(sel.getField(), prop.isList() || inheritedList));
+
+    
+    int index = 0;
     for (Base value : values) {
+      String ss = "";
+      if (expression != null) {
+        if (expression == magicExpression)
+          ss = suffix+'.'+Integer.toString(index);
+        else
+          ss = suffix+'.'+fpe.evaluateToString(null, null, value, expression);
+        if (!sel.getField().hasDirective("flatten"))
+          arg = target.addField(sel.getField().getAlias()+suffix, listStatus(sel.getField(), prop.isList() || inheritedList));
+      }
+
       if (value.isPrimitive() && !extensionMode) {
         if (!sel.getField().getSelectionSet().isEmpty())
           throw new EGraphQLException("Encountered a selection set on a scalar field type");
@@ -373,10 +436,17 @@ public class GraphQLEngine {
       } else {
         if (sel.getField().getSelectionSet().isEmpty())
           throw new EGraphQLException("No Fields selected on a complex object");
-        ObjectValue n = new ObjectValue();
-        arg.addValue(n);
-        processObject(context, value, n, sel.getField().getSelectionSet());
+        if (arg == null)
+          processObject(context, value, target, sel.getField().getSelectionSet(), il, ss);
+        else {
+          ObjectValue n = new ObjectValue();
+          arg.addValue(n);
+          processObject(context, value, n, sel.getField().getSelectionSet(), il, ss);
+        }
       }
+      if (sel.getField().hasDirective("first"))
+        return;
+      index++;
     }
   }
 
@@ -406,7 +476,7 @@ public class GraphQLEngine {
     return context.getResourceNamesAsSet().contains(name);
   }
 
-  private void processObject(Resource context, Base source, ObjectValue target, List<Selection> selection) throws EGraphQLException, FHIRException {
+  private void processObject(Resource context, Base source, ObjectValue target, List<Selection> selection, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     for (Selection sel : selection) {
       if (sel.getField() != null) {
         if (checkDirectives(sel.getField().getDirectives())) {
@@ -415,13 +485,13 @@ public class GraphQLEngine {
             prop = source.getNamedProperty(sel.getField().getName().substring(1));
           if (prop == null) {
             if ((sel.getField().getName().equals("resourceType") && source instanceof Resource))
-              target.addField("resourceType", false).addValue(new StringValue(source.fhirType()));
+              target.addField("resourceType", listStatus(sel.getField(), false)).addValue(new StringValue(source.fhirType()));
             else if ((sel.getField().getName().equals("resource") && source.fhirType().equals("Reference")))
-              processReference(context, source, sel.getField(), target);
+              processReference(context, source, sel.getField(), target, inheritedList, suffix);
             else if (isResourceName(sel.getField().getName(), "List") && (source instanceof Resource))
-              processReverseReferenceList((Resource) source, sel.getField(), target);
+              processReverseReferenceList((Resource) source, sel.getField(), target, inheritedList, suffix);
             else if (isResourceName(sel.getField().getName(), "Connection") && (source instanceof Resource))
-              processReverseReferenceSearch((Resource) source, sel.getField(), target);
+              processReverseReferenceSearch((Resource) source, sel.getField(), target, inheritedList, suffix);
             else
               throw new EGraphQLException("Unknown property "+sel.getField().getName()+" on "+source.fhirType());
           } else {
@@ -430,7 +500,7 @@ public class GraphQLEngine {
 
             List<Base> vl = filter(context, prop, sel.getField().getArguments(), prop.getValues(), sel.getField().getName().startsWith("_"));
             if (!vl.isEmpty())
-              processValues(context, sel, prop, target, vl, sel.getField().getName().startsWith("_"));
+              processValues(context, sel, prop, target, vl, sel.getField().getName().startsWith("_"), inheritedList, suffix);
           }
         }
       } else if (sel.getInlineFragment() != null) {
@@ -438,7 +508,7 @@ public class GraphQLEngine {
           if (Utilities.noString(sel.getInlineFragment().getTypeCondition()))
             throw new EGraphQLException("Not done yet - inline fragment with no type condition"); // cause why? why instanceof it even valid?
           if (source.fhirType().equals(sel.getInlineFragment().getTypeCondition())) 
-            processObject(context, source, target, sel.getInlineFragment().getSelectionSet());
+            processObject(context, source, target, sel.getInlineFragment().getSelectionSet(), inheritedList, suffix);
         }
       } else if (checkDirectives(sel.getFragmentSpread().getDirectives())) {
         Fragment fragment = graphQL.getDocument().fragment(sel.getFragmentSpread().getName());
@@ -448,7 +518,7 @@ public class GraphQLEngine {
         if (Utilities.noString(fragment.getTypeCondition()))
           throw new EGraphQLException("Not done yet - inline fragment with no type condition"); // cause why? why instanceof it even valid?
         if (source.fhirType().equals(fragment.getTypeCondition()))
-          processObject(context, source, target, fragment.getSelectionSet());
+          processObject(context, source, target, fragment.getSelectionSet(), inheritedList, suffix);
       }
     }
   }
@@ -463,27 +533,36 @@ public class GraphQLEngine {
       arg.addValue(new StringValue(value.primitiveValue()));
   }
 
-  private void processReference(Resource context, Base source, Field field, ObjectValue target) throws EGraphQLException, FHIRException {
+  private void processReference(Resource context, Base source, Field field, ObjectValue target, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (!(source instanceof Reference))
       throw new EGraphQLException("Not done yet");
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
 
     Reference ref = (Reference) source;
-    ReferenceResolution<Resource> res = services.lookup(appInfo, context, ref);
+    ReferenceResolution res = services.lookup(appInfo, context, ref);
     if (res != null) {
-      if (targetTypeOk(field.getArguments(), res.getTarget())) {
-        Argument arg = target.addField(field.getAlias(), false);
+      if (targetTypeOk(field.getArguments(), res.target)) {
+        Argument arg = target.addField(field.getAlias() + suffix, listStatus(field, inheritedList));
         ObjectValue obj = new ObjectValue();
         arg.addValue(obj);
-        processObject(res.getTargetContext(), res.getTarget(), obj, field.getSelectionSet());
+        processObject(res.targetContext, res.target, obj, field.getSelectionSet(), inheritedList, suffix);
       }
     }
     else if (!hasArgument(field.getArguments(), "optional", "true"))
       throw new EGraphQLException("Unable to resolve reference to "+ref.getReference());
   }
 
-  private void processReverseReferenceList(Resource source, Field field, ObjectValue target) throws EGraphQLException, FHIRException {
+  private ArgumentListStatus listStatus(Field field, boolean isList) {
+    if (field.hasDirective("singleton"))
+      return ArgumentListStatus.SINGLETON;
+    else if (isList)
+      return ArgumentListStatus.REPEATING;
+    else
+      return ArgumentListStatus.NOT_SPECIFIED;
+  }
+
+  private void processReverseReferenceList(Resource source, Field field, ObjectValue target, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
     List<Resource> list = new ArrayList<Resource>();
@@ -508,16 +587,16 @@ public class GraphQLEngine {
 
     List<Resource> vl = filterResources(field.argument("fhirpath"), list);
     if (!vl.isEmpty()) {
-      arg = target.addField(field.getAlias(), true);
+      arg = target.addField(field.getAlias()+suffix, listStatus(field, true));
       for (Resource v : vl) {
         obj = new ObjectValue();
         arg.addValue(obj);
-        processObject(v, v, obj, field.getSelectionSet());
+        processObject(v, v, obj, field.getSelectionSet(), inheritedList, suffix);
       }
     }
   }
   
-  private void processReverseReferenceSearch(Resource source, Field field, ObjectValue target) throws EGraphQLException, FHIRException {
+  private void processReverseReferenceSearch(Resource source, Field field, ObjectValue target, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
     List<Argument> params = new ArrayList<Argument>();
@@ -537,28 +616,28 @@ public class GraphQLEngine {
     arg.addValue(new StringValue(source.fhirType()+"/"+source.getId()));
     Bundle bnd = services.search(appInfo, field.getName().substring(0, field.getName().length()-10), params);
     Base bndWrapper = new SearchWrapper(field.getName(), bnd);
-    arg = target.addField(field.getAlias(), false);
+    arg = target.addField(field.getAlias()+suffix, listStatus(field, false));
     ObjectValue obj = new ObjectValue();
     arg.addValue(obj);
-    processObject(null, bndWrapper, obj, field.getSelectionSet());
+    processObject(null, bndWrapper, obj, field.getSelectionSet(), inheritedList, suffix);
   }
 
-  private void processSearch(ObjectValue target, List<Selection> selection) throws EGraphQLException, FHIRException {
+  private void processSearch(ObjectValue target, List<Selection> selection, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     for (Selection sel : selection) {
       if ((sel.getField() == null))
         throw new EGraphQLException("Only field selections are allowed in this context");
       checkNoDirectives(sel.getField().getDirectives());
 
       if ((isResourceName(sel.getField().getName(), "")))
-        processSearchSingle(target, sel.getField());
+        processSearchSingle(target, sel.getField(), inheritedList, suffix);
       else if ((isResourceName(sel.getField().getName(), "List")))
-        processSearchSimple(target, sel.getField());
+        processSearchSimple(target, sel.getField(), inheritedList, suffix);
       else if ((isResourceName(sel.getField().getName(), "Connection")))
-        processSearchFull(target, sel.getField());
+        processSearchFull(target, sel.getField(), inheritedList, suffix);
     }
   }
 
-  private void processSearchSingle(ObjectValue target, Field field) throws EGraphQLException, FHIRException {
+  private void processSearchSingle(ObjectValue target, Field field, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
     String id = "";
@@ -572,13 +651,13 @@ public class GraphQLEngine {
     Resource res = services.lookup(appInfo, field.getName(), id);
     if (res == null)
       throw new EGraphQLException("Resource "+field.getName()+"/"+id+" not found");
-    Argument arg = target.addField(field.getAlias(), false);
+    Argument arg = target.addField(field.getAlias()+suffix, listStatus(field, false));
     ObjectValue obj = new ObjectValue();
     arg.addValue(obj);
-    processObject(res, res, obj, field.getSelectionSet());
+    processObject(res, res, obj, field.getSelectionSet(), inheritedList, suffix);
   }
 
-  private void processSearchSimple(ObjectValue target, Field field) throws EGraphQLException, FHIRException {
+  private void processSearchSimple(ObjectValue target, Field field, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
     List<Resource> list = new ArrayList<Resource>();
@@ -588,16 +667,16 @@ public class GraphQLEngine {
 
     List<Resource> vl = filterResources(field.argument("fhirpath"), list);
     if (!vl.isEmpty()) {
-      arg = target.addField(field.getAlias(), true);
+      arg = target.addField(field.getAlias()+suffix, listStatus(field, true));
       for (Resource v : vl) {
         obj = new ObjectValue();
         arg.addValue(obj);
-        processObject(v, v, obj, field.getSelectionSet());
+        processObject(v, v, obj, field.getSelectionSet(), inheritedList, suffix);
       }
     }
   }
   
-  private void processSearchFull(ObjectValue target, Field field) throws EGraphQLException, FHIRException {
+  private void processSearchFull(ObjectValue target, Field field, boolean inheritedList, String suffix) throws EGraphQLException, FHIRException {
     if (services == null)
       throw new EGraphQLException("Resource Referencing services not provided");
     List<Argument> params = new ArrayList<Argument>();
@@ -616,10 +695,10 @@ public class GraphQLEngine {
 
     Bundle bnd = services.search(appInfo, field.getName().substring(0, field.getName().length()-10), params);
     SearchWrapper bndWrapper = new SearchWrapper(field.getName(), bnd);
-    Argument arg = target.addField(field.getAlias(), false);
+    Argument arg = target.addField(field.getAlias()+suffix, listStatus(field, false));
     ObjectValue obj = new ObjectValue();
     arg.addValue(obj);
-    processObject(null, bndWrapper, obj, field.getSelectionSet());
+    processObject(null, bndWrapper, obj, field.getSelectionSet(), inheritedList, suffix);
   }
 
   private String getSingleValue(Argument arg) throws EGraphQLException {
@@ -754,7 +833,7 @@ public class GraphQLEngine {
 //  result = "*Connection";
 //}
 //
-//  // http://test.fhir.org/r3/Patient?_format==text/xhtml&search-id==77c97e03-8a6c-415f-a63d-11c80cf73f&&active==true&_sort==_id&search-offset==50&_count==50
+//  // http://test.fhir.org/r4/Patient?_format==text/xhtml&search-id==77c97e03-8a6c-415f-a63d-11c80cf73f&&active==true&_sort==_id&search-offset==50&_count==50
 //
 //function GraphQLSearchWrapper.getPropertyValue(propName: string): Property;
 //var

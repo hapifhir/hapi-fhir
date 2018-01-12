@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum MedicationRequestStatus {
          */
         ONHOLD, 
         /**
-         * The prescription has been withdrawn.
+         * The prescription has been withdrawn before any administrations have occurred
          */
         CANCELLED, 
         /**
@@ -57,7 +57,7 @@ public enum MedicationRequestStatus {
          */
         ENTEREDINERROR, 
         /**
-         * Actions implied by the prescription are to be permanently halted, before all of them occurred.
+         * Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.
          */
         STOPPED, 
         /**
@@ -113,10 +113,10 @@ public enum MedicationRequestStatus {
           switch (this) {
             case ACTIVE: return "The prescription is 'actionable', but not all actions that are implied by it have occurred yet.";
             case ONHOLD: return "Actions implied by the prescription are to be temporarily halted, but are expected to continue later.  May also be called \"suspended\".";
-            case CANCELLED: return "The prescription has been withdrawn.";
+            case CANCELLED: return "The prescription has been withdrawn before any administrations have occurred";
             case COMPLETED: return "All actions that are implied by the prescription have occurred.";
             case ENTEREDINERROR: return "The prescription was entered in error.";
-            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of them occurred.";
+            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.";
             case DRAFT: return "The prescription is not yet 'actionable', i.e. it is a work in progress, requires sign-off or verification, and needs to be run through decision support process.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request";
             default: return "?";

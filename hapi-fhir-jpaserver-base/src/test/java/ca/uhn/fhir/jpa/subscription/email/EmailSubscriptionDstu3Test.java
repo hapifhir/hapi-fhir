@@ -93,6 +93,8 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourListenerPort = RandomServerPortProvider.findFreePort();
 		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
+		smtp.setReadTimeout(2000);
+		smtp.setConnectionTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
 	}
@@ -150,7 +152,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 20000, new Callable<Number>() {
+		waitForSize(1, 60000, new Callable<Number>() {
 			@Override
 			public Number call() throws Exception {
 				return ourTestSmtp.getReceivedMessages().length;
@@ -196,7 +198,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 20000, new Callable<Number>() {
+		waitForSize(1, 60000, new Callable<Number>() {
 			@Override
 			public Number call() throws Exception {
 				return ourTestSmtp.getReceivedMessages().length;
@@ -244,7 +246,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 20000, new Callable<Number>() {
+		waitForSize(1, 60000, new Callable<Number>() {
 			@Override
 			public Number call() throws Exception {
 				return ourTestSmtp.getReceivedMessages().length;

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -369,22 +369,22 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SupplyDeliverySuppliedItemComponent))
+        if (!(other_ instanceof SupplyDeliverySuppliedItemComponent))
           return false;
-        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other;
+        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other_;
         return compareDeep(quantity, o.quantity, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SupplyDeliverySuppliedItemComponent))
+        if (!(other_ instanceof SupplyDeliverySuppliedItemComponent))
           return false;
-        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other;
+        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other_;
         return true;
       }
 
@@ -475,7 +475,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * The individual responsible for dispensing the medication, supplier or device.
      */
-    @Child(name = "supplier", type = {Practitioner.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "supplier", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Dispenser", formalDefinition="The individual responsible for dispensing the medication, supplier or device." )
     protected Reference supplier;
 
@@ -1046,7 +1046,7 @@ public class SupplyDelivery extends DomainResource {
         children.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type));
         children.add(new Property("suppliedItem", "", "The item that is being delivered or has been supplied.", 0, 1, suppliedItem));
         children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence));
-        children.add(new Property("supplier", "Reference(Practitioner|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier));
+        children.add(new Property("supplier", "Reference(Practitioner|PractitionerRole|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier));
         children.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the Supply was shipped to, as part of the dispense event.", 0, 1, destination));
         children.add(new Property("receiver", "Reference(Practitioner)", "Identifies the person who picked up the Supply.", 0, java.lang.Integer.MAX_VALUE, receiver));
       }
@@ -1066,7 +1066,7 @@ public class SupplyDelivery extends DomainResource {
         case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
         case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
         case 1515218299: /*occurrenceTiming*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
-        case -1663305268: /*supplier*/  return new Property("supplier", "Reference(Practitioner|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier);
+        case -1663305268: /*supplier*/  return new Property("supplier", "Reference(Practitioner|PractitionerRole|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier);
         case -1429847026: /*destination*/  return new Property("destination", "Reference(Location)", "Identification of the facility/location where the Supply was shipped to, as part of the dispense event.", 0, 1, destination);
         case -808719889: /*receiver*/  return new Property("receiver", "Reference(Practitioner)", "Identifies the person who picked up the Supply.", 0, java.lang.Integer.MAX_VALUE, receiver);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1297,12 +1297,12 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SupplyDelivery))
+        if (!(other_ instanceof SupplyDelivery))
           return false;
-        SupplyDelivery o = (SupplyDelivery) other;
+        SupplyDelivery o = (SupplyDelivery) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(partOf, o.partOf, true)
            && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true) && compareDeep(type, o.type, true)
            && compareDeep(suppliedItem, o.suppliedItem, true) && compareDeep(occurrence, o.occurrence, true)
@@ -1311,12 +1311,12 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SupplyDelivery))
+        if (!(other_ instanceof SupplyDelivery))
           return false;
-        SupplyDelivery o = (SupplyDelivery) other;
+        SupplyDelivery o = (SupplyDelivery) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -1411,7 +1411,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>

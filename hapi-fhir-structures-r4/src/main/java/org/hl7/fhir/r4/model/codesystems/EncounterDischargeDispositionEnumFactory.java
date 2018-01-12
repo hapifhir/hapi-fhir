@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,6 +41,8 @@ public class EncounterDischargeDispositionEnumFactory implements EnumFactory<Enc
       return null;
     if ("home".equals(codeString))
       return EncounterDischargeDisposition.HOME;
+    if ("alt-home".equals(codeString))
+      return EncounterDischargeDisposition.ALTHOME;
     if ("other-hcf".equals(codeString))
       return EncounterDischargeDisposition.OTHERHCF;
     if ("hosp".equals(codeString))
@@ -65,6 +67,8 @@ public class EncounterDischargeDispositionEnumFactory implements EnumFactory<Enc
   public String toCode(EncounterDischargeDisposition code) {
     if (code == EncounterDischargeDisposition.HOME)
       return "home";
+    if (code == EncounterDischargeDisposition.ALTHOME)
+      return "alt-home";
     if (code == EncounterDischargeDisposition.OTHERHCF)
       return "other-hcf";
     if (code == EncounterDischargeDisposition.HOSP)

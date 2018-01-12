@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,24 +41,32 @@ public class HttpVerbEnumFactory implements EnumFactory<HttpVerb> {
       return null;
     if ("GET".equals(codeString))
       return HttpVerb.GET;
+    if ("HEAD".equals(codeString))
+      return HttpVerb.HEAD;
     if ("POST".equals(codeString))
       return HttpVerb.POST;
     if ("PUT".equals(codeString))
       return HttpVerb.PUT;
     if ("DELETE".equals(codeString))
       return HttpVerb.DELETE;
+    if ("PATCH".equals(codeString))
+      return HttpVerb.PATCH;
     throw new IllegalArgumentException("Unknown HttpVerb code '"+codeString+"'");
   }
 
   public String toCode(HttpVerb code) {
     if (code == HttpVerb.GET)
       return "GET";
+    if (code == HttpVerb.HEAD)
+      return "HEAD";
     if (code == HttpVerb.POST)
       return "POST";
     if (code == HttpVerb.PUT)
       return "PUT";
     if (code == HttpVerb.DELETE)
       return "DELETE";
+    if (code == HttpVerb.PATCH)
+      return "PATCH";
     return "?";
   }
 

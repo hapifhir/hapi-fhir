@@ -1190,7 +1190,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Organization that manages this endpoint (may not be the organization that exposes the endpoint)</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Organization that manages this endpoint (might not be the organization that exposes the endpoint)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1361,8 +1361,8 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="27"><Data ss:Type="String">CarePlan</Data></Cell>
     <Cell><Data ss:Type="String">QuestionnaireResponse</Data></Cell>
-    <Cell><Data ss:Type="String">ProcedureRequest,QuestionnaireResponse</Data></Cell>
-    <Cell><Data ss:Type="String">ProcedureRequest</Data></Cell>
+    <Cell><Data ss:Type="String">ServiceRequest,QuestionnaireResponse</Data></Cell>
+    <Cell><Data ss:Type="String">ServiceRequest</Data></Cell>
     <Cell ss:Index="32"><Data ss:Type="String">CDA - Event Summary</Data></Cell>
     <Cell><Data ss:Type="String">CDA - Event Summary</Data></Cell>
     <Cell><Data ss:Type="String">Discharge summary</Data></Cell>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -47,47 +47,40 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The Measure resource provides the definition of a quality measure.
  */
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "subject", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
 public class Measure extends MetadataResource {
 
     @Block()
     public static class MeasureGroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A unique identifier for the group. This identifier will used to report data for the group in the measure report.
+         * Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Unique identifier", formalDefinition="A unique identifier for the group. This identifier will used to report data for the group in the measure report." )
-        protected Identifier identifier;
-
-        /**
-         * Optional name or short description of this group.
-         */
-        @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Short name", formalDefinition="Optional name or short description of this group." )
-        protected StringType name;
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Meaning of the group", formalDefinition="Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures." )
+        protected CodeableConcept code;
 
         /**
          * The human readable description of this population group.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Summary description", formalDefinition="The human readable description of this population group." )
         protected StringType description;
 
         /**
          * A population criteria for the measure.
          */
-        @Child(name = "population", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "population", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Population criteria", formalDefinition="A population criteria for the measure." )
         protected List<MeasureGroupPopulationComponent> population;
 
         /**
          * The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.
          */
-        @Child(name = "stratifier", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "stratifier", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Stratifier criteria for the measure", formalDefinition="The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path." )
         protected List<MeasureGroupStratifierComponent> stratifier;
 
-        private static final long serialVersionUID = 1287622059L;
+        private static final long serialVersionUID = -1797567579L;
 
     /**
      * Constructor
@@ -96,84 +89,27 @@ public class Measure extends MetadataResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public MeasureGroupComponent(Identifier identifier) {
-        super();
-        this.identifier = identifier;
-      }
-
         /**
-         * @return {@link #identifier} (A unique identifier for the group. This identifier will used to report data for the group in the measure report.)
+         * @return {@link #code} (Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.)
          */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupComponent.identifier");
+              throw new Error("Attempt to auto-create MeasureGroupComponent.code");
             else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #identifier} (A unique identifier for the group. This identifier will used to report data for the group in the measure report.)
-         */
-        public MeasureGroupComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
-          return this;
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @return {@link #name} (Optional name or short description of this group.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #code} (Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.)
          */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Optional name or short description of this group.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public MeasureGroupComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Optional name or short description of this group.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Optional name or short description of this group.
-         */
-        public MeasureGroupComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
+        public MeasureGroupComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -334,8 +270,7 @@ public class Measure extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "A unique identifier for the group. This identifier will used to report data for the group in the measure report.", 0, 1, identifier));
-          children.add(new Property("name", "string", "Optional name or short description of this group.", 0, 1, name));
+          children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.", 0, 1, code));
           children.add(new Property("description", "string", "The human readable description of this population group.", 0, 1, description));
           children.add(new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
           children.add(new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier));
@@ -344,8 +279,7 @@ public class Measure extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier for the group. This identifier will used to report data for the group in the measure report.", 0, 1, identifier);
-          case 3373707: /*name*/  return new Property("name", "string", "Optional name or short description of this group.", 0, 1, name);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.", 0, 1, code);
           case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this population group.", 0, 1, description);
           case -2023558323: /*population*/  return new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population);
           case 90983669: /*stratifier*/  return new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier);
@@ -357,8 +291,7 @@ public class Measure extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -2023558323: /*population*/ return this.population == null ? new Base[0] : this.population.toArray(new Base[this.population.size()]); // MeasureGroupPopulationComponent
         case 90983669: /*stratifier*/ return this.stratifier == null ? new Base[0] : this.stratifier.toArray(new Base[this.stratifier.size()]); // MeasureGroupStratifierComponent
@@ -370,11 +303,8 @@ public class Measure extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
-          return value;
-        case 3373707: // name
-          this.name = castToString(value); // StringType
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -392,10 +322,8 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
-        } else if (name.equals("name")) {
-          this.name = castToString(value); // StringType
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else if (name.equals("population")) {
@@ -410,8 +338,7 @@ public class Measure extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
-        case 3373707:  return getNameElement();
+        case 3059181:  return getCode(); 
         case -1724546052:  return getDescriptionElement();
         case -2023558323:  return addPopulation(); 
         case 90983669:  return addStratifier(); 
@@ -423,8 +350,7 @@ public class Measure extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case 3373707: /*name*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -2023558323: /*population*/ return new String[] {};
         case 90983669: /*stratifier*/ return new String[] {};
@@ -435,12 +361,9 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
-        }
-        else if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.name");
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
@@ -458,8 +381,7 @@ public class Measure extends MetadataResource {
       public MeasureGroupComponent copy() {
         MeasureGroupComponent dst = new MeasureGroupComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
-        dst.name = name == null ? null : name.copy();
+        dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
         if (population != null) {
           dst.population = new ArrayList<MeasureGroupPopulationComponent>();
@@ -475,29 +397,29 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupComponent))
+        if (!(other_ instanceof MeasureGroupComponent))
           return false;
-        MeasureGroupComponent o = (MeasureGroupComponent) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
-           && compareDeep(population, o.population, true) && compareDeep(stratifier, o.stratifier, true);
+        MeasureGroupComponent o = (MeasureGroupComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(population, o.population, true)
+           && compareDeep(stratifier, o.stratifier, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupComponent))
+        if (!(other_ instanceof MeasureGroupComponent))
           return false;
-        MeasureGroupComponent o = (MeasureGroupComponent) other;
-        return compareValues(name, o.name, true) && compareValues(description, o.description, true);
+        MeasureGroupComponent o = (MeasureGroupComponent) other_;
+        return compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, description
-          , population, stratifier);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, description, population
+          , stratifier);
       }
 
   public String fhirType() {
@@ -510,42 +432,28 @@ public class Measure extends MetadataResource {
     @Block()
     public static class MeasureGroupPopulationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.
-         */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Unique identifier", formalDefinition="A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report." )
-        protected Identifier identifier;
-
-        /**
          * The type of population criteria.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-observation", formalDefinition="The type of population criteria." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
         protected CodeableConcept code;
 
         /**
-         * Optional name or short description of this population.
-         */
-        @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Short name", formalDefinition="Optional name or short description of this population." )
-        protected StringType name;
-
-        /**
          * The human readable description of this population criteria.
          */
-        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The human readable description of this population criteria", formalDefinition="The human readable description of this population criteria." )
         protected StringType description;
 
         /**
          * The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.
          */
-        @Child(name = "criteria", type = {StringType.class}, order=5, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "criteria", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria", formalDefinition="The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria." )
         protected StringType criteria;
 
-        private static final long serialVersionUID = -561575429L;
+        private static final long serialVersionUID = 675977371L;
 
     /**
      * Constructor
@@ -561,30 +469,6 @@ public class Measure extends MetadataResource {
         super();
         this.criteria = criteria;
       }
-
-        /**
-         * @return {@link #identifier} (A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.)
-         */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupPopulationComponent.identifier");
-            else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
-        }
-
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #identifier} (A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.)
-         */
-        public MeasureGroupPopulationComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
-          return this;
-        }
 
         /**
          * @return {@link #code} (The type of population criteria.)
@@ -607,55 +491,6 @@ public class Measure extends MetadataResource {
          */
         public MeasureGroupPopulationComponent setCode(CodeableConcept value) { 
           this.code = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #name} (Optional name or short description of this population.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupPopulationComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Optional name or short description of this population.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public MeasureGroupPopulationComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Optional name or short description of this population.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Optional name or short description of this population.
-         */
-        public MeasureGroupPopulationComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
           return this;
         }
 
@@ -755,9 +590,7 @@ public class Measure extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, 1, identifier));
           children.add(new Property("code", "CodeableConcept", "The type of population criteria.", 0, 1, code));
-          children.add(new Property("name", "string", "Optional name or short description of this population.", 0, 1, name));
           children.add(new Property("description", "string", "The human readable description of this population criteria.", 0, 1, description));
           children.add(new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, 1, criteria));
         }
@@ -765,9 +598,7 @@ public class Measure extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, 1, identifier);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of population criteria.", 0, 1, code);
-          case 3373707: /*name*/  return new Property("name", "string", "Optional name or short description of this population.", 0, 1, name);
           case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this population criteria.", 0, 1, description);
           case 1952046943: /*criteria*/  return new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, 1, criteria);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -778,9 +609,7 @@ public class Measure extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -791,14 +620,8 @@ public class Measure extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
-          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 3373707: // name
-          this.name = castToString(value); // StringType
           return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -813,12 +636,8 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
-        } else if (name.equals("code")) {
+        if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("name")) {
-          this.name = castToString(value); // StringType
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else if (name.equals("criteria")) {
@@ -831,9 +650,7 @@ public class Measure extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
         case 3059181:  return getCode(); 
-        case 3373707:  return getNameElement();
         case -1724546052:  return getDescriptionElement();
         case 1952046943:  return getCriteriaElement();
         default: return super.makeProperty(hash, name);
@@ -844,9 +661,7 @@ public class Measure extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
-        case 3373707: /*name*/ return new String[] {"string"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case 1952046943: /*criteria*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
@@ -856,16 +671,9 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
-        }
-        else if (name.equals("code")) {
+        if (name.equals("code")) {
           this.code = new CodeableConcept();
           return this.code;
-        }
-        else if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.name");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
@@ -880,39 +688,37 @@ public class Measure extends MetadataResource {
       public MeasureGroupPopulationComponent copy() {
         MeasureGroupPopulationComponent dst = new MeasureGroupPopulationComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
         dst.code = code == null ? null : code.copy();
-        dst.name = name == null ? null : name.copy();
         dst.description = description == null ? null : description.copy();
         dst.criteria = criteria == null ? null : criteria.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupPopulationComponent))
+        if (!(other_ instanceof MeasureGroupPopulationComponent))
           return false;
-        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
-           && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true);
+        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true)
+          ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupPopulationComponent))
+        if (!(other_ instanceof MeasureGroupPopulationComponent))
           return false;
-        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
-        return compareValues(name, o.name, true) && compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
+        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other_;
+        return compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, name, description
-          , criteria);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, description, criteria
+          );
       }
 
   public String fhirType() {
@@ -925,27 +731,34 @@ public class Measure extends MetadataResource {
     @Block()
     public static class MeasureGroupStratifierComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The identifier for the stratifier used to coordinate the reported data back to this stratifier.
+         * Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The identifier for the stratifier used to coordinate the reported data back to this stratifier", formalDefinition="The identifier for the stratifier used to coordinate the reported data back to this stratifier." )
-        protected Identifier identifier;
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Meaning of the stratifier", formalDefinition="Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures." )
+        protected CodeableConcept code;
+
+        /**
+         * The human readable description of this stratifier criteria.
+         */
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The human readable description of this stratifier", formalDefinition="The human readable description of this stratifier criteria." )
+        protected StringType description;
 
         /**
          * The criteria for the stratifier. This must be the name of an expression defined within a referenced library.
          */
-        @Child(name = "criteria", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "criteria", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="How the measure should be stratified", formalDefinition="The criteria for the stratifier. This must be the name of an expression defined within a referenced library." )
         protected StringType criteria;
 
         /**
          * The path to an element that defines the stratifier, specified as a valid FHIR resource path.
          */
-        @Child(name = "path", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "path", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Path to the stratifier", formalDefinition="The path to an element that defines the stratifier, specified as a valid FHIR resource path." )
         protected StringType path;
 
-        private static final long serialVersionUID = -196134448L;
+        private static final long serialVersionUID = -121481845L;
 
     /**
      * Constructor
@@ -955,26 +768,75 @@ public class Measure extends MetadataResource {
       }
 
         /**
-         * @return {@link #identifier} (The identifier for the stratifier used to coordinate the reported data back to this stratifier.)
+         * @return {@link #code} (Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.)
          */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupStratifierComponent.identifier");
+              throw new Error("Attempt to auto-create MeasureGroupStratifierComponent.code");
             else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #identifier} (The identifier for the stratifier used to coordinate the reported data back to this stratifier.)
+         * @param value {@link #code} (Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.)
          */
-        public MeasureGroupStratifierComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
+        public MeasureGroupStratifierComponent setCode(CodeableConcept value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #description} (The human readable description of this stratifier criteria.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureGroupStratifierComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (The human readable description of this stratifier criteria.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public MeasureGroupStratifierComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return The human readable description of this stratifier criteria.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value The human readable description of this stratifier criteria.
+         */
+        public MeasureGroupStratifierComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
           return this;
         }
 
@@ -1078,7 +940,8 @@ public class Measure extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "The identifier for the stratifier used to coordinate the reported data back to this stratifier.", 0, 1, identifier));
+          children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code));
+          children.add(new Property("description", "string", "The human readable description of this stratifier criteria.", 0, 1, description));
           children.add(new Property("criteria", "string", "The criteria for the stratifier. This must be the name of an expression defined within a referenced library.", 0, 1, criteria));
           children.add(new Property("path", "string", "The path to an element that defines the stratifier, specified as a valid FHIR resource path.", 0, 1, path));
         }
@@ -1086,7 +949,8 @@ public class Measure extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier for the stratifier used to coordinate the reported data back to this stratifier.", 0, 1, identifier);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code);
+          case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this stratifier criteria.", 0, 1, description);
           case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the stratifier. This must be the name of an expression defined within a referenced library.", 0, 1, criteria);
           case 3433509: /*path*/  return new Property("path", "string", "The path to an element that defines the stratifier, specified as a valid FHIR resource path.", 0, 1, path);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1097,7 +961,8 @@ public class Measure extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -1108,8 +973,11 @@ public class Measure extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
           return value;
         case 1952046943: // criteria
           this.criteria = castToString(value); // StringType
@@ -1124,8 +992,10 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
         } else if (name.equals("criteria")) {
           this.criteria = castToString(value); // StringType
         } else if (name.equals("path")) {
@@ -1138,7 +1008,8 @@ public class Measure extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case 3059181:  return getCode(); 
+        case -1724546052:  return getDescriptionElement();
         case 1952046943:  return getCriteriaElement();
         case 3433509:  return getPathElement();
         default: return super.makeProperty(hash, name);
@@ -1149,7 +1020,8 @@ public class Measure extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
         case 1952046943: /*criteria*/ return new String[] {"string"};
         case 3433509: /*path*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
@@ -1159,9 +1031,12 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
         }
         else if (name.equals("criteria")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.criteria");
@@ -1176,36 +1051,38 @@ public class Measure extends MetadataResource {
       public MeasureGroupStratifierComponent copy() {
         MeasureGroupStratifierComponent dst = new MeasureGroupStratifierComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.code = code == null ? null : code.copy();
+        dst.description = description == null ? null : description.copy();
         dst.criteria = criteria == null ? null : criteria.copy();
         dst.path = path == null ? null : path.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(criteria, o.criteria, true) && compareDeep(path, o.path, true)
-          ;
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true)
+           && compareDeep(path, o.path, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other;
-        return compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true);
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        return compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
+           && compareValues(path, o.path, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, criteria, path
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, description, criteria
+          , path);
       }
 
   public String fhirType() {
@@ -1218,11 +1095,11 @@ public class Measure extends MetadataResource {
     @Block()
     public static class MeasureSupplementalDataComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An identifier for the supplemental data.
+         * Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Identifier, unique within the measure", formalDefinition="An identifier for the supplemental data." )
-        protected Identifier identifier;
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Meaning of the supplemental data", formalDefinition="Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures." )
+        protected CodeableConcept code;
 
         /**
          * An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.
@@ -1233,20 +1110,27 @@ public class Measure extends MetadataResource {
         protected List<CodeableConcept> usage;
 
         /**
+         * The human readable description of this supplemental data.
+         */
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The human readable description of this supplemental data", formalDefinition="The human readable description of this supplemental data." )
+        protected StringType description;
+
+        /**
          * The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
          */
-        @Child(name = "criteria", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "criteria", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Expression describing additional data to be reported", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
         protected StringType criteria;
 
         /**
          * The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.
          */
-        @Child(name = "path", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "path", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Path to the supplemental data element", formalDefinition="The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path." )
         protected StringType path;
 
-        private static final long serialVersionUID = -101576770L;
+        private static final long serialVersionUID = 1311422173L;
 
     /**
      * Constructor
@@ -1256,26 +1140,26 @@ public class Measure extends MetadataResource {
       }
 
         /**
-         * @return {@link #identifier} (An identifier for the supplemental data.)
+         * @return {@link #code} (Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.)
          */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureSupplementalDataComponent.identifier");
+              throw new Error("Attempt to auto-create MeasureSupplementalDataComponent.code");
             else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #identifier} (An identifier for the supplemental data.)
+         * @param value {@link #code} (Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.)
          */
-        public MeasureSupplementalDataComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
+        public MeasureSupplementalDataComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -1330,6 +1214,55 @@ public class Measure extends MetadataResource {
             addUsage();
           }
           return getUsage().get(0);
+        }
+
+        /**
+         * @return {@link #description} (The human readable description of this supplemental data.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureSupplementalDataComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (The human readable description of this supplemental data.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public MeasureSupplementalDataComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return The human readable description of this supplemental data.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value The human readable description of this supplemental data.
+         */
+        public MeasureSupplementalDataComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
         }
 
         /**
@@ -1432,8 +1365,9 @@ public class Measure extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, 1, identifier));
+          children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.", 0, 1, code));
           children.add(new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
+          children.add(new Property("description", "string", "The human readable description of this supplemental data.", 0, 1, description));
           children.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria));
           children.add(new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path));
         }
@@ -1441,8 +1375,9 @@ public class Measure extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, 1, identifier);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.", 0, 1, code);
           case 111574433: /*usage*/  return new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage);
+          case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this supplemental data.", 0, 1, description);
           case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria);
           case 3433509: /*path*/  return new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1453,8 +1388,9 @@ public class Measure extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : this.usage.toArray(new Base[this.usage.size()]); // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -1465,11 +1401,14 @@ public class Measure extends MetadataResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 111574433: // usage
           this.getUsage().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
           return value;
         case 1952046943: // criteria
           this.criteria = castToString(value); // StringType
@@ -1484,10 +1423,12 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("usage")) {
           this.getUsage().add(castToCodeableConcept(value));
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
         } else if (name.equals("criteria")) {
           this.criteria = castToString(value); // StringType
         } else if (name.equals("path")) {
@@ -1500,8 +1441,9 @@ public class Measure extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case 3059181:  return getCode(); 
         case 111574433:  return addUsage(); 
+        case -1724546052:  return getDescriptionElement();
         case 1952046943:  return getCriteriaElement();
         case 3433509:  return getPathElement();
         default: return super.makeProperty(hash, name);
@@ -1512,8 +1454,9 @@ public class Measure extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 111574433: /*usage*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
         case 1952046943: /*criteria*/ return new String[] {"string"};
         case 3433509: /*path*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
@@ -1523,12 +1466,15 @@ public class Measure extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
         }
         else if (name.equals("usage")) {
           return addUsage();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
         }
         else if (name.equals("criteria")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.criteria");
@@ -1543,41 +1489,43 @@ public class Measure extends MetadataResource {
       public MeasureSupplementalDataComponent copy() {
         MeasureSupplementalDataComponent dst = new MeasureSupplementalDataComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.code = code == null ? null : code.copy();
         if (usage != null) {
           dst.usage = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : usage)
             dst.usage.add(i.copy());
         };
+        dst.description = description == null ? null : description.copy();
         dst.criteria = criteria == null ? null : criteria.copy();
         dst.path = path == null ? null : path.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureSupplementalDataComponent))
+        if (!(other_ instanceof MeasureSupplementalDataComponent))
           return false;
-        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(usage, o.usage, true) && compareDeep(criteria, o.criteria, true)
-           && compareDeep(path, o.path, true);
+        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(usage, o.usage, true) && compareDeep(description, o.description, true)
+           && compareDeep(criteria, o.criteria, true) && compareDeep(path, o.path, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureSupplementalDataComponent))
+        if (!(other_ instanceof MeasureSupplementalDataComponent))
           return false;
-        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other;
-        return compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true);
+        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other_;
+        return compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
+           && compareValues(path, o.path, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, usage, criteria
-          , path);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, usage, description
+          , criteria, path);
       }
 
   public String fhirType() {
@@ -1630,9 +1578,17 @@ public class Measure extends MetadataResource {
     protected Period effectivePeriod;
 
     /**
+     * The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.
+     */
+    @Child(name = "subject", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="E.g. Patient, Practitioner, RelatedPerson, Organization, Location, Device", formalDefinition="The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+    protected CodeableConcept subject;
+
+    /**
      * Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.
      */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "topic", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc", formalDefinition="Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/definition-topic")
     protected List<CodeableConcept> topic;
@@ -1640,28 +1596,28 @@ public class Measure extends MetadataResource {
     /**
      * A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the measure, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
      * A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
      */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure." )
     protected MarkdownType copyright;
 
     /**
      * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * A reference to a Library resource containing the formal logic used by the measure.
      */
-    @Child(name = "library", type = {Library.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "library", type = {Library.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Logic used by the measure", formalDefinition="A reference to a Library resource containing the formal logic used by the measure." )
     protected List<Reference> library;
     /**
@@ -1673,14 +1629,14 @@ public class Measure extends MetadataResource {
     /**
      * Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
      */
-    @Child(name = "disclaimer", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "disclaimer", type = {MarkdownType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Disclaimer for use of the measure or its referenced content", formalDefinition="Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure." )
     protected MarkdownType disclaimer;
 
     /**
      * Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.
      */
-    @Child(name = "scoring", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "scoring", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
     protected CodeableConcept scoring;
@@ -1688,7 +1644,7 @@ public class Measure extends MetadataResource {
     /**
      * If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
      */
-    @Child(name = "compositeScoring", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "compositeScoring", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="opportunity | all-or-nothing | linear | weighted", formalDefinition="If this is a composite measure, the scoring method used to combine the component measures to determine the composite score." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composite-measure-scoring")
     protected CodeableConcept compositeScoring;
@@ -1696,7 +1652,7 @@ public class Measure extends MetadataResource {
     /**
      * Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="process | outcome | structure | patient-reported-outcome | composite", formalDefinition="Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
     protected List<CodeableConcept> type;
@@ -1704,74 +1660,74 @@ public class Measure extends MetadataResource {
     /**
      * A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.
      */
-    @Child(name = "riskAdjustment", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "riskAdjustment", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How is risk adjustment applied for this measure", formalDefinition="A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results." )
     protected StringType riskAdjustment;
 
     /**
      * Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.
      */
-    @Child(name = "rateAggregation", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "rateAggregation", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result." )
     protected StringType rateAggregation;
 
     /**
      * Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
-    @Child(name = "rationale", type = {MarkdownType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "rationale", type = {MarkdownType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why does this measure exist", formalDefinition="Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence." )
     protected MarkdownType rationale;
 
     /**
      * Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.
      */
-    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=19, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Summary of clinical guidelines", formalDefinition="Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure." )
     protected MarkdownType clinicalRecommendationStatement;
 
     /**
      * Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
      */
-    @Child(name = "improvementNotation", type = {StringType.class}, order=19, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "improvementNotation", type = {StringType.class}, order=20, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range)." )
     protected StringType improvementNotation;
 
     /**
      * Provides a description of an individual term used within the measure.
      */
-    @Child(name = "definition", type = {MarkdownType.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "definition", type = {MarkdownType.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Defined terms used in the measure documentation", formalDefinition="Provides a description of an individual term used within the measure." )
     protected List<MarkdownType> definition;
 
     /**
      * Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.
      */
-    @Child(name = "guidance", type = {MarkdownType.class}, order=21, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "guidance", type = {MarkdownType.class}, order=22, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional guidance for implementers", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
     protected MarkdownType guidance;
 
     /**
      * The measure set, e.g. Preventive Care and Screening.
      */
-    @Child(name = "set", type = {StringType.class}, order=22, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "set", type = {StringType.class}, order=23, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The measure set, e.g. Preventive Care and Screening", formalDefinition="The measure set, e.g. Preventive Care and Screening." )
     protected StringType set;
 
     /**
      * A group of population criteria for the measure.
      */
-    @Child(name = "group", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Population criteria group", formalDefinition="A group of population criteria for the measure." )
     protected List<MeasureGroupComponent> group;
 
     /**
      * The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.
      */
-    @Child(name = "supplementalData", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supplementalData", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What other data should be reported with the measure", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = -875918689L;
+    private static final long serialVersionUID = 1051521084L;
 
   /**
    * Constructor
@@ -1789,7 +1745,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1809,7 +1765,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Measure setUrlElement(UriType value) { 
       this.url = value;
@@ -1817,14 +1773,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.
      */
     public Measure setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2598,6 +2554,30 @@ public class Measure extends MetadataResource {
         addJurisdiction();
       }
       return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public CodeableConcept getSubject() { 
+      if (this.subject == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.subject");
+        else if (Configuration.doAutoCreate())
+          this.subject = new CodeableConcept(); // cc
+      return this.subject;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public Measure setSubject(CodeableConcept value) { 
+      this.subject = value;
+      return this;
     }
 
     /**
@@ -3598,7 +3578,7 @@ public class Measure extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -3615,6 +3595,7 @@ public class Measure extends MetadataResource {
         children.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("subject", "CodeableConcept", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject));
         children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         children.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
@@ -3640,7 +3621,7 @@ public class Measure extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
@@ -3657,6 +3638,7 @@ public class Measure extends MetadataResource {
         case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -1867885268: /*subject*/  return new Property("subject", "CodeableConcept", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
         case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
         case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
@@ -3702,6 +3684,7 @@ public class Measure extends MetadataResource {
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
@@ -3781,6 +3764,9 @@ public class Measure extends MetadataResource {
           return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1867885268: // subject
+          this.subject = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
@@ -3884,6 +3870,8 @@ public class Measure extends MetadataResource {
           this.getUseContext().add(castToUsageContext(value));
         } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
+        } else if (name.equals("subject")) {
+          this.subject = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("topic")) {
           this.getTopic().add(castToCodeableConcept(value));
         } else if (name.equals("contributor")) {
@@ -3949,6 +3937,7 @@ public class Measure extends MetadataResource {
         case -403934648:  return getEffectivePeriod(); 
         case -669707736:  return addUseContext(); 
         case -507075711:  return addJurisdiction(); 
+        case -1867885268:  return getSubject(); 
         case 110546223:  return addTopic(); 
         case -1895276325:  return addContributor(); 
         case 951526432:  return addContact(); 
@@ -3994,6 +3983,7 @@ public class Measure extends MetadataResource {
         case -403934648: /*effectivePeriod*/ return new String[] {"Period"};
         case -669707736: /*useContext*/ return new String[] {"UsageContext"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept"};
         case 110546223: /*topic*/ return new String[] {"CodeableConcept"};
         case -1895276325: /*contributor*/ return new String[] {"Contributor"};
         case 951526432: /*contact*/ return new String[] {"ContactDetail"};
@@ -4072,6 +4062,10 @@ public class Measure extends MetadataResource {
         }
         else if (name.equals("jurisdiction")) {
           return addJurisdiction();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
         }
         else if (name.equals("topic")) {
           return addTopic();
@@ -4176,6 +4170,7 @@ public class Measure extends MetadataResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
+        dst.subject = subject == null ? null : subject.copy();
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
@@ -4240,32 +4235,32 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Measure))
+        if (!(other_ instanceof Measure))
           return false;
-        Measure o = (Measure) other;
+        Measure o = (Measure) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
            && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
-           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
-           && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
-           && compareDeep(library, o.library, true) && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true)
-           && compareDeep(compositeScoring, o.compositeScoring, true) && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true)
-           && compareDeep(rateAggregation, o.rateAggregation, true) && compareDeep(rationale, o.rationale, true)
-           && compareDeep(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true) && compareDeep(improvementNotation, o.improvementNotation, true)
-           && compareDeep(definition, o.definition, true) && compareDeep(guidance, o.guidance, true) && compareDeep(set, o.set, true)
-           && compareDeep(group, o.group, true) && compareDeep(supplementalData, o.supplementalData, true)
-          ;
+           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true) && compareDeep(copyright, o.copyright, true)
+           && compareDeep(relatedArtifact, o.relatedArtifact, true) && compareDeep(library, o.library, true)
+           && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true) && compareDeep(compositeScoring, o.compositeScoring, true)
+           && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true) && compareDeep(rateAggregation, o.rateAggregation, true)
+           && compareDeep(rationale, o.rationale, true) && compareDeep(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
+           && compareDeep(improvementNotation, o.improvementNotation, true) && compareDeep(definition, o.definition, true)
+           && compareDeep(guidance, o.guidance, true) && compareDeep(set, o.set, true) && compareDeep(group, o.group, true)
+           && compareDeep(supplementalData, o.supplementalData, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Measure))
+        if (!(other_ instanceof Measure))
           return false;
-        Measure o = (Measure) other;
+        Measure o = (Measure) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
            && compareValues(disclaimer, o.disclaimer, true) && compareValues(riskAdjustment, o.riskAdjustment, true)
@@ -4277,10 +4272,10 @@ public class Measure extends MetadataResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
-          , approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright, relatedArtifact
-          , library, disclaimer, scoring, compositeScoring, type, riskAdjustment, rateAggregation
-          , rationale, clinicalRecommendationStatement, improvementNotation, definition, guidance
-          , set, group, supplementalData);
+          , approvalDate, lastReviewDate, effectivePeriod, subject, topic, contributor, copyright
+          , relatedArtifact, library, disclaimer, scoring, compositeScoring, type, riskAdjustment
+          , rateAggregation, rationale, clinicalRecommendationStatement, improvementNotation, definition
+          , guidance, set, group, supplementalData);
       }
 
   @Override

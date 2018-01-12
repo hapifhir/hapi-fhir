@@ -1,4 +1,4 @@
-package org.hl7.fhir.dstu3.model;
+package org.hl7.fhir.r4.model;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;

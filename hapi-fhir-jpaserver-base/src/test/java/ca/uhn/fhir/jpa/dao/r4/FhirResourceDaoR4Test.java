@@ -2981,6 +2981,41 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void testSortByNumber() {
 		String methodName = "testSortByNumber";
 
+		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
+		e1.addIdentifier().setSystem("foo").setValue(methodName);
+		e1.addRecommendation().setDoseNumber(1);
+		IIdType id1 = myImmunizationRecommendationDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
+
+		ImmunizationRecommendation e3 = new ImmunizationRecommendation();
+		e3.addIdentifier().setSystem("foo").setValue(methodName);
+		e3.addRecommendation().setDoseNumber(3);
+		IIdType id3 = myImmunizationRecommendationDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
+
+		ImmunizationRecommendation e2 = new ImmunizationRecommendation();
+		e2.addIdentifier().setSystem("foo").setValue(methodName);
+		e2.addRecommendation().setDoseNumber(2);
+		IIdType id2 = myImmunizationRecommendationDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<String> actual;
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER));
+		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		assertThat(actual, contains(toValues(id1, id2, id3)));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		assertThat(actual, contains(toValues(id3, id2, id1)));
+	}
+
+
+	@Test
+	@Ignore
+	public void testSortByEncounterLength() {
+		String methodName = "testSortByNumber";
+
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
 		e1.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,10 +61,6 @@ public enum ConditionVerStatus {
          */
         ENTEREDINERROR, 
         /**
-         * The condition status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
-         */
-        UNKNOWN, 
-        /**
          * added to help the parsers
          */
         NULL;
@@ -83,8 +79,6 @@ public enum ConditionVerStatus {
           return REFUTED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        if ("unknown".equals(codeString))
-          return UNKNOWN;
         throw new FHIRException("Unknown ConditionVerStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -95,7 +89,6 @@ public enum ConditionVerStatus {
             case CONFIRMED: return "confirmed";
             case REFUTED: return "refuted";
             case ENTEREDINERROR: return "entered-in-error";
-            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -110,7 +103,6 @@ public enum ConditionVerStatus {
             case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.";
             case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence.";
             case ENTEREDINERROR: return "The statement was entered in error and is not valid.";
-            case UNKNOWN: return "The condition status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\".";
             default: return "?";
           }
         }
@@ -122,7 +114,6 @@ public enum ConditionVerStatus {
             case CONFIRMED: return "Confirmed";
             case REFUTED: return "Refuted";
             case ENTEREDINERROR: return "Entered In Error";
-            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

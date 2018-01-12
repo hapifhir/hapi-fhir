@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1603,12 +1603,12 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof VisionPrescriptionDispenseComponent))
+        if (!(other_ instanceof VisionPrescriptionDispenseComponent))
           return false;
-        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other;
+        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareDeep(product, o.product, true) && compareDeep(eye, o.eye, true) && compareDeep(sphere, o.sphere, true)
            && compareDeep(cylinder, o.cylinder, true) && compareDeep(axis, o.axis, true) && compareDeep(prism, o.prism, true)
            && compareDeep(base, o.base, true) && compareDeep(add, o.add, true) && compareDeep(power, o.power, true)
@@ -1618,12 +1618,12 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof VisionPrescriptionDispenseComponent))
+        if (!(other_ instanceof VisionPrescriptionDispenseComponent))
           return false;
-        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other;
+        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareValues(eye, o.eye, true) && compareValues(sphere, o.sphere, true) && compareValues(cylinder, o.cylinder, true)
            && compareValues(axis, o.axis, true) && compareValues(prism, o.prism, true) && compareValues(base, o.base, true)
            && compareValues(add, o.add, true) && compareValues(power, o.power, true) && compareValues(backCurve, o.backCurve, true)
@@ -2313,24 +2313,24 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof VisionPrescription))
+        if (!(other_ instanceof VisionPrescription))
           return false;
-        VisionPrescription o = (VisionPrescription) other;
+        VisionPrescription o = (VisionPrescription) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(dateWritten, o.dateWritten, true) && compareDeep(prescriber, o.prescriber, true)
            && compareDeep(reason, o.reason, true) && compareDeep(dispense, o.dispense, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof VisionPrescription))
+        if (!(other_ instanceof VisionPrescription))
           return false;
-        VisionPrescription o = (VisionPrescription) other;
+        VisionPrescription o = (VisionPrescription) other_;
         return compareValues(status, o.status, true) && compareValues(dateWritten, o.dateWritten, true);
       }
 

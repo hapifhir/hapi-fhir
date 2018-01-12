@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -693,24 +693,24 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetailsComponent))
+        if (!(other_ instanceof DetailsComponent))
           return false;
-        DetailsComponent o = (DetailsComponent) other;
+        DetailsComponent o = (DetailsComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(response, o.response, true)
            && compareDeep(submitter, o.submitter, true) && compareDeep(payee, o.payee, true) && compareDeep(date, o.date, true)
            && compareDeep(amount, o.amount, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetailsComponent))
+        if (!(other_ instanceof DetailsComponent))
           return false;
-        DetailsComponent o = (DetailsComponent) other;
+        DetailsComponent o = (DetailsComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -944,22 +944,22 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NotesComponent))
+        if (!(other_ instanceof NotesComponent))
           return false;
-        NotesComponent o = (NotesComponent) other;
+        NotesComponent o = (NotesComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(text, o.text, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NotesComponent))
+        if (!(other_ instanceof NotesComponent))
           return false;
-        NotesComponent o = (NotesComponent) other;
+        NotesComponent o = (NotesComponent) other_;
         return compareValues(type, o.type, true) && compareValues(text, o.text, true);
       }
 
@@ -1999,12 +1999,12 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PaymentReconciliation))
+        if (!(other_ instanceof PaymentReconciliation))
           return false;
-        PaymentReconciliation o = (PaymentReconciliation) other;
+        PaymentReconciliation o = (PaymentReconciliation) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
            && compareDeep(created, o.created, true) && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true)
            && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
@@ -2014,12 +2014,12 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PaymentReconciliation))
+        if (!(other_ instanceof PaymentReconciliation))
           return false;
-        PaymentReconciliation o = (PaymentReconciliation) other;
+        PaymentReconciliation o = (PaymentReconciliation) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
            && compareValues(disposition, o.disposition, true);
       }

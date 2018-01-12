@@ -130,6 +130,17 @@ public class XLSXmlParser {
        throw new FHIRException("The colummn "+column+" cannot be empty");
      return value;
     }
+
+    public boolean hasColumnContent(String col) {
+      int i = columns.indexOf(col);
+      if (i == -1)
+        return false;
+      for (Row r : rows) {
+        if (r.size() > i && !Utilities.noString(r.get(i)))
+          return true;
+      }
+      return false;
+    }
     
     
   }

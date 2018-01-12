@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -789,24 +789,24 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietComponent))
+        if (!(other_ instanceof NutritionOrderOralDietComponent))
           return false;
-        NutritionOrderOralDietComponent o = (NutritionOrderOralDietComponent) other;
+        NutritionOrderOralDietComponent o = (NutritionOrderOralDietComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(schedule, o.schedule, true) && compareDeep(nutrient, o.nutrient, true)
            && compareDeep(texture, o.texture, true) && compareDeep(fluidConsistencyType, o.fluidConsistencyType, true)
            && compareDeep(instruction, o.instruction, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietComponent))
+        if (!(other_ instanceof NutritionOrderOralDietComponent))
           return false;
-        NutritionOrderOralDietComponent o = (NutritionOrderOralDietComponent) other;
+        NutritionOrderOralDietComponent o = (NutritionOrderOralDietComponent) other_;
         return compareValues(instruction, o.instruction, true);
       }
 
@@ -990,22 +990,22 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietNutrientComponent))
+        if (!(other_ instanceof NutritionOrderOralDietNutrientComponent))
           return false;
-        NutritionOrderOralDietNutrientComponent o = (NutritionOrderOralDietNutrientComponent) other;
+        NutritionOrderOralDietNutrientComponent o = (NutritionOrderOralDietNutrientComponent) other_;
         return compareDeep(modifier, o.modifier, true) && compareDeep(amount, o.amount, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietNutrientComponent))
+        if (!(other_ instanceof NutritionOrderOralDietNutrientComponent))
           return false;
-        NutritionOrderOralDietNutrientComponent o = (NutritionOrderOralDietNutrientComponent) other;
+        NutritionOrderOralDietNutrientComponent o = (NutritionOrderOralDietNutrientComponent) other_;
         return true;
       }
 
@@ -1189,22 +1189,22 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietTextureComponent))
+        if (!(other_ instanceof NutritionOrderOralDietTextureComponent))
           return false;
-        NutritionOrderOralDietTextureComponent o = (NutritionOrderOralDietTextureComponent) other;
+        NutritionOrderOralDietTextureComponent o = (NutritionOrderOralDietTextureComponent) other_;
         return compareDeep(modifier, o.modifier, true) && compareDeep(foodType, o.foodType, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderOralDietTextureComponent))
+        if (!(other_ instanceof NutritionOrderOralDietTextureComponent))
           return false;
-        NutritionOrderOralDietTextureComponent o = (NutritionOrderOralDietTextureComponent) other;
+        NutritionOrderOralDietTextureComponent o = (NutritionOrderOralDietTextureComponent) other_;
         return true;
       }
 
@@ -1605,23 +1605,23 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderSupplementComponent))
+        if (!(other_ instanceof NutritionOrderSupplementComponent))
           return false;
-        NutritionOrderSupplementComponent o = (NutritionOrderSupplementComponent) other;
+        NutritionOrderSupplementComponent o = (NutritionOrderSupplementComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(productName, o.productName, true) && compareDeep(schedule, o.schedule, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(instruction, o.instruction, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderSupplementComponent))
+        if (!(other_ instanceof NutritionOrderSupplementComponent))
           return false;
-        NutritionOrderSupplementComponent o = (NutritionOrderSupplementComponent) other;
+        NutritionOrderSupplementComponent o = (NutritionOrderSupplementComponent) other_;
         return compareValues(productName, o.productName, true) && compareValues(instruction, o.instruction, true)
           ;
       }
@@ -2234,12 +2234,12 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderEnteralFormulaComponent))
+        if (!(other_ instanceof NutritionOrderEnteralFormulaComponent))
           return false;
-        NutritionOrderEnteralFormulaComponent o = (NutritionOrderEnteralFormulaComponent) other;
+        NutritionOrderEnteralFormulaComponent o = (NutritionOrderEnteralFormulaComponent) other_;
         return compareDeep(baseFormulaType, o.baseFormulaType, true) && compareDeep(baseFormulaProductName, o.baseFormulaProductName, true)
            && compareDeep(additiveType, o.additiveType, true) && compareDeep(additiveProductName, o.additiveProductName, true)
            && compareDeep(caloricDensity, o.caloricDensity, true) && compareDeep(routeofAdministration, o.routeofAdministration, true)
@@ -2248,12 +2248,12 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderEnteralFormulaComponent))
+        if (!(other_ instanceof NutritionOrderEnteralFormulaComponent))
           return false;
-        NutritionOrderEnteralFormulaComponent o = (NutritionOrderEnteralFormulaComponent) other;
+        NutritionOrderEnteralFormulaComponent o = (NutritionOrderEnteralFormulaComponent) other_;
         return compareValues(baseFormulaProductName, o.baseFormulaProductName, true) && compareValues(additiveProductName, o.additiveProductName, true)
            && compareValues(administrationInstruction, o.administrationInstruction, true);
       }
@@ -2513,23 +2513,23 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrderEnteralFormulaAdministrationComponent))
+        if (!(other_ instanceof NutritionOrderEnteralFormulaAdministrationComponent))
           return false;
-        NutritionOrderEnteralFormulaAdministrationComponent o = (NutritionOrderEnteralFormulaAdministrationComponent) other;
+        NutritionOrderEnteralFormulaAdministrationComponent o = (NutritionOrderEnteralFormulaAdministrationComponent) other_;
         return compareDeep(schedule, o.schedule, true) && compareDeep(quantity, o.quantity, true) && compareDeep(rate, o.rate, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrderEnteralFormulaAdministrationComponent))
+        if (!(other_ instanceof NutritionOrderEnteralFormulaAdministrationComponent))
           return false;
-        NutritionOrderEnteralFormulaAdministrationComponent o = (NutritionOrderEnteralFormulaAdministrationComponent) other;
+        NutritionOrderEnteralFormulaAdministrationComponent o = (NutritionOrderEnteralFormulaAdministrationComponent) other_;
         return true;
       }
 
@@ -2594,14 +2594,14 @@ public class NutritionOrder extends DomainResource {
     /**
      * The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.
      */
-    @Child(name = "orderer", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "orderer", type = {Practitioner.class, PractitionerRole.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who ordered the diet, formula or nutritional supplement", formalDefinition="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings." )
     protected Reference orderer;
 
     /**
      * The actual object that is the target of the reference (The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.)
      */
-    protected Practitioner ordererTarget;
+    protected Resource ordererTarget;
 
     /**
      * A link to a record of allergies or intolerances  which should be included in the nutrition order.
@@ -2624,10 +2624,10 @@ public class NutritionOrder extends DomainResource {
     protected List<CodeableConcept> foodPreferenceModifier;
 
     /**
-     * This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.
+     * This modifier is used to convey Order-specific modifier about the type of oral food or oral fluids that should not be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.
      */
     @Child(name = "excludeFoodModifier", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Order-specific modifier about the type of food that should not be given", formalDefinition="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings." )
+    @Description(shortDefinition="Order-specific modifier about the type of food that should not be given", formalDefinition="This modifier is used to convey Order-specific modifier about the type of oral food or oral fluids that should not be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/food-type")
     protected List<CodeableConcept> excludeFoodModifier;
 
@@ -2652,7 +2652,14 @@ public class NutritionOrder extends DomainResource {
     @Description(shortDefinition="Enteral formula components", formalDefinition="Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity." )
     protected NutritionOrderEnteralFormulaComponent enteralFormula;
 
-    private static final long serialVersionUID = 1429947433L;
+    /**
+     * Comments made about the {{title}} by the requester, performer, subject or other participants.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Comments", formalDefinition="Comments made about the {{title}} by the requester, performer, subject or other participants." )
+    protected List<Annotation> note;
+
+    private static final long serialVersionUID = -1565124186L;
 
   /**
    * Constructor
@@ -2932,19 +2939,14 @@ public class NutritionOrder extends DomainResource {
     /**
      * @return {@link #orderer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.)
      */
-    public Practitioner getOrdererTarget() { 
-      if (this.ordererTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NutritionOrder.orderer");
-        else if (Configuration.doAutoCreate())
-          this.ordererTarget = new Practitioner(); // aa
+    public Resource getOrdererTarget() { 
       return this.ordererTarget;
     }
 
     /**
      * @param value {@link #orderer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.)
      */
-    public NutritionOrder setOrdererTarget(Practitioner value) { 
+    public NutritionOrder setOrdererTarget(Resource value) { 
       this.ordererTarget = value;
       return this;
     }
@@ -3078,7 +3080,7 @@ public class NutritionOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #excludeFoodModifier} (This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.)
+     * @return {@link #excludeFoodModifier} (This modifier is used to convey Order-specific modifier about the type of oral food or oral fluids that should not be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.)
      */
     public List<CodeableConcept> getExcludeFoodModifier() { 
       if (this.excludeFoodModifier == null)
@@ -3231,6 +3233,59 @@ public class NutritionOrder extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #note} (Comments made about the {{title}} by the requester, performer, subject or other participants.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public NutritionOrder addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the order sender or by the order receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -3238,13 +3293,14 @@ public class NutritionOrder extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.", 0, 1, patient));
         children.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter));
         children.add(new Property("dateTime", "dateTime", "The date and time that this nutrition order was requested.", 0, 1, dateTime));
-        children.add(new Property("orderer", "Reference(Practitioner)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer));
+        children.add(new Property("orderer", "Reference(Practitioner|PractitionerRole)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer));
         children.add(new Property("allergyIntolerance", "Reference(AllergyIntolerance)", "A link to a record of allergies or intolerances  which should be included in the nutrition order.", 0, java.lang.Integer.MAX_VALUE, allergyIntolerance));
         children.add(new Property("foodPreferenceModifier", "CodeableConcept", "This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, foodPreferenceModifier));
-        children.add(new Property("excludeFoodModifier", "CodeableConcept", "This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, excludeFoodModifier));
+        children.add(new Property("excludeFoodModifier", "CodeableConcept", "This modifier is used to convey Order-specific modifier about the type of oral food or oral fluids that should not be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, excludeFoodModifier));
         children.add(new Property("oralDiet", "", "Diet given orally in contrast to enteral (tube) feeding.", 0, 1, oralDiet));
         children.add(new Property("supplement", "", "Oral nutritional products given in order to add further nutritional value to the patient's diet.", 0, java.lang.Integer.MAX_VALUE, supplement));
         children.add(new Property("enteralFormula", "", "Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity.", 0, 1, enteralFormula));
+        children.add(new Property("note", "Annotation", "Comments made about the {{title}} by the requester, performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       @Override
@@ -3255,13 +3311,14 @@ public class NutritionOrder extends DomainResource {
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.", 0, 1, patient);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter);
         case 1792749467: /*dateTime*/  return new Property("dateTime", "dateTime", "The date and time that this nutrition order was requested.", 0, 1, dateTime);
-        case -1207109509: /*orderer*/  return new Property("orderer", "Reference(Practitioner)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer);
+        case -1207109509: /*orderer*/  return new Property("orderer", "Reference(Practitioner|PractitionerRole)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer);
         case -120164120: /*allergyIntolerance*/  return new Property("allergyIntolerance", "Reference(AllergyIntolerance)", "A link to a record of allergies or intolerances  which should be included in the nutrition order.", 0, java.lang.Integer.MAX_VALUE, allergyIntolerance);
         case 659473872: /*foodPreferenceModifier*/  return new Property("foodPreferenceModifier", "CodeableConcept", "This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, foodPreferenceModifier);
-        case 1760260175: /*excludeFoodModifier*/  return new Property("excludeFoodModifier", "CodeableConcept", "This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, excludeFoodModifier);
+        case 1760260175: /*excludeFoodModifier*/  return new Property("excludeFoodModifier", "CodeableConcept", "This modifier is used to convey Order-specific modifier about the type of oral food or oral fluids that should not be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.", 0, java.lang.Integer.MAX_VALUE, excludeFoodModifier);
         case 1153521250: /*oralDiet*/  return new Property("oralDiet", "", "Diet given orally in contrast to enteral (tube) feeding.", 0, 1, oralDiet);
         case -711993159: /*supplement*/  return new Property("supplement", "", "Oral nutritional products given in order to add further nutritional value to the patient's diet.", 0, java.lang.Integer.MAX_VALUE, supplement);
         case -671083805: /*enteralFormula*/  return new Property("enteralFormula", "", "Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity.", 0, 1, enteralFormula);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the {{title}} by the requester, performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -3282,6 +3339,7 @@ public class NutritionOrder extends DomainResource {
         case 1153521250: /*oralDiet*/ return this.oralDiet == null ? new Base[0] : new Base[] {this.oralDiet}; // NutritionOrderOralDietComponent
         case -711993159: /*supplement*/ return this.supplement == null ? new Base[0] : this.supplement.toArray(new Base[this.supplement.size()]); // NutritionOrderSupplementComponent
         case -671083805: /*enteralFormula*/ return this.enteralFormula == null ? new Base[0] : new Base[] {this.enteralFormula}; // NutritionOrderEnteralFormulaComponent
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3327,6 +3385,9 @@ public class NutritionOrder extends DomainResource {
         case -671083805: // enteralFormula
           this.enteralFormula = (NutritionOrderEnteralFormulaComponent) value; // NutritionOrderEnteralFormulaComponent
           return value;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -3359,6 +3420,8 @@ public class NutritionOrder extends DomainResource {
           this.getSupplement().add((NutritionOrderSupplementComponent) value);
         } else if (name.equals("enteralFormula")) {
           this.enteralFormula = (NutritionOrderEnteralFormulaComponent) value; // NutritionOrderEnteralFormulaComponent
+        } else if (name.equals("note")) {
+          this.getNote().add(castToAnnotation(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -3379,6 +3442,7 @@ public class NutritionOrder extends DomainResource {
         case 1153521250:  return getOralDiet(); 
         case -711993159:  return addSupplement(); 
         case -671083805:  return getEnteralFormula(); 
+        case 3387378:  return addNote(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -3399,6 +3463,7 @@ public class NutritionOrder extends DomainResource {
         case 1153521250: /*oralDiet*/ return new String[] {};
         case -711993159: /*supplement*/ return new String[] {};
         case -671083805: /*enteralFormula*/ return new String[] {};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -3447,6 +3512,9 @@ public class NutritionOrder extends DomainResource {
           this.enteralFormula = new NutritionOrderEnteralFormulaComponent();
           return this.enteralFormula;
         }
+        else if (name.equals("note")) {
+          return addNote();
+        }
         else
           return super.addChild(name);
       }
@@ -3491,6 +3559,11 @@ public class NutritionOrder extends DomainResource {
             dst.supplement.add(i.copy());
         };
         dst.enteralFormula = enteralFormula == null ? null : enteralFormula.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         return dst;
       }
 
@@ -3499,34 +3572,34 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NutritionOrder))
+        if (!(other_ instanceof NutritionOrder))
           return false;
-        NutritionOrder o = (NutritionOrder) other;
+        NutritionOrder o = (NutritionOrder) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(dateTime, o.dateTime, true) && compareDeep(orderer, o.orderer, true)
            && compareDeep(allergyIntolerance, o.allergyIntolerance, true) && compareDeep(foodPreferenceModifier, o.foodPreferenceModifier, true)
            && compareDeep(excludeFoodModifier, o.excludeFoodModifier, true) && compareDeep(oralDiet, o.oralDiet, true)
            && compareDeep(supplement, o.supplement, true) && compareDeep(enteralFormula, o.enteralFormula, true)
-          ;
+           && compareDeep(note, o.note, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NutritionOrder))
+        if (!(other_ instanceof NutritionOrder))
           return false;
-        NutritionOrder o = (NutritionOrder) other;
+        NutritionOrder o = (NutritionOrder) other_;
         return compareValues(status, o.status, true) && compareValues(dateTime, o.dateTime, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, patient
           , encounter, dateTime, orderer, allergyIntolerance, foodPreferenceModifier, excludeFoodModifier
-          , oralDiet, supplement, enteralFormula);
+          , oralDiet, supplement, enteralFormula, note);
       }
 
   @Override
@@ -3582,7 +3655,7 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_PROVIDER = "provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provider</b>

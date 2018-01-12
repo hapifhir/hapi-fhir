@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -549,22 +549,22 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuideDependencyComponent))
+        if (!(other_ instanceof ImplementationGuideDependencyComponent))
           return false;
-        ImplementationGuideDependencyComponent o = (ImplementationGuideDependencyComponent) other;
+        ImplementationGuideDependencyComponent o = (ImplementationGuideDependencyComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(uri, o.uri, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuideDependencyComponent))
+        if (!(other_ instanceof ImplementationGuideDependencyComponent))
           return false;
-        ImplementationGuideDependencyComponent o = (ImplementationGuideDependencyComponent) other;
+        ImplementationGuideDependencyComponent o = (ImplementationGuideDependencyComponent) other_;
         return compareValues(type, o.type, true) && compareValues(uri, o.uri, true);
       }
 
@@ -876,23 +876,23 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePackageComponent))
+        if (!(other_ instanceof ImplementationGuidePackageComponent))
           return false;
-        ImplementationGuidePackageComponent o = (ImplementationGuidePackageComponent) other;
+        ImplementationGuidePackageComponent o = (ImplementationGuidePackageComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(resource, o.resource, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePackageComponent))
+        if (!(other_ instanceof ImplementationGuidePackageComponent))
           return false;
-        ImplementationGuidePackageComponent o = (ImplementationGuidePackageComponent) other;
+        ImplementationGuidePackageComponent o = (ImplementationGuidePackageComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -913,7 +913,7 @@ public class ImplementationGuide extends MetadataResource {
         /**
          * Whether a resource is included in the guide as part of the rules defined by the guide, or just as an example of a resource that conforms to the rules and/or help implementers understand the intent of the guide.
          */
-        @Child(name = "example", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "example", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="If not an example, has its normal meaning", formalDefinition="Whether a resource is included in the guide as part of the rules defined by the guide, or just as an example of a resource that conforms to the rules and/or help implementers understand the intent of the guide." )
         protected BooleanType example;
 
@@ -969,9 +969,8 @@ public class ImplementationGuide extends MetadataResource {
     /**
      * Constructor
      */
-      public ImplementationGuidePackageResourceComponent(BooleanType example, Type source) {
+      public ImplementationGuidePackageResourceComponent(Type source) {
         super();
-        this.example = example;
         this.source = source;
       }
 
@@ -1414,24 +1413,24 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePackageResourceComponent))
+        if (!(other_ instanceof ImplementationGuidePackageResourceComponent))
           return false;
-        ImplementationGuidePackageResourceComponent o = (ImplementationGuidePackageResourceComponent) other;
+        ImplementationGuidePackageResourceComponent o = (ImplementationGuidePackageResourceComponent) other_;
         return compareDeep(example, o.example, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
            && compareDeep(acronym, o.acronym, true) && compareDeep(source, o.source, true) && compareDeep(exampleFor, o.exampleFor, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePackageResourceComponent))
+        if (!(other_ instanceof ImplementationGuidePackageResourceComponent))
           return false;
-        ImplementationGuidePackageResourceComponent o = (ImplementationGuidePackageResourceComponent) other;
+        ImplementationGuidePackageResourceComponent o = (ImplementationGuidePackageResourceComponent) other_;
         return compareValues(example, o.example, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
            && compareValues(acronym, o.acronym, true);
       }
@@ -1670,22 +1669,22 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuideGlobalComponent))
+        if (!(other_ instanceof ImplementationGuideGlobalComponent))
           return false;
-        ImplementationGuideGlobalComponent o = (ImplementationGuideGlobalComponent) other;
+        ImplementationGuideGlobalComponent o = (ImplementationGuideGlobalComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuideGlobalComponent))
+        if (!(other_ instanceof ImplementationGuideGlobalComponent))
           return false;
-        ImplementationGuideGlobalComponent o = (ImplementationGuideGlobalComponent) other;
+        ImplementationGuideGlobalComponent o = (ImplementationGuideGlobalComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -2307,24 +2306,24 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePageComponent))
+        if (!(other_ instanceof ImplementationGuidePageComponent))
           return false;
-        ImplementationGuidePageComponent o = (ImplementationGuidePageComponent) other;
+        ImplementationGuidePageComponent o = (ImplementationGuidePageComponent) other_;
         return compareDeep(source, o.source, true) && compareDeep(title, o.title, true) && compareDeep(kind, o.kind, true)
            && compareDeep(type, o.type, true) && compareDeep(package_, o.package_, true) && compareDeep(format, o.format, true)
            && compareDeep(page, o.page, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuidePageComponent))
+        if (!(other_ instanceof ImplementationGuidePageComponent))
           return false;
-        ImplementationGuidePageComponent o = (ImplementationGuidePageComponent) other;
+        ImplementationGuidePageComponent o = (ImplementationGuidePageComponent) other_;
         return compareValues(source, o.source, true) && compareValues(title, o.title, true) && compareValues(kind, o.kind, true)
            && compareValues(type, o.type, true) && compareValues(package_, o.package_, true) && compareValues(format, o.format, true)
           ;
@@ -2350,10 +2349,10 @@ public class ImplementationGuide extends MetadataResource {
     protected MarkdownType copyright;
 
     /**
-     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.
+     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version." )
+    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version." )
     protected IdType fhirVersion;
 
     /**
@@ -2411,7 +2410,7 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2431,7 +2430,7 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ImplementationGuide setUrlElement(UriType value) { 
       this.url = value;
@@ -2439,14 +2438,14 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.
      */
     public ImplementationGuide setUrl(String value) { 
         if (this.url == null)
@@ -2995,7 +2994,7 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -3015,7 +3014,7 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public ImplementationGuide setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -3023,14 +3022,14 @@ public class ImplementationGuide extends MetadataResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.
+     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.
+     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
      */
     public ImplementationGuide setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -3289,7 +3288,7 @@ public class ImplementationGuide extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the implementation guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the implementation guide author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the implementation guide. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this implementation guide. Enables tracking the life-cycle of the content.", 0, 1, status));
@@ -3301,7 +3300,7 @@ public class ImplementationGuide extends MetadataResource {
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate implementation guide instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the implementation guide is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the implementation guide.", 0, 1, copyright));
-        children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.", 0, 1, fhirVersion));
+        children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion));
         children.add(new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency));
         children.add(new Property("package", "", "A logical group of resources. Logical groups can be used when building pages.", 0, java.lang.Integer.MAX_VALUE, package_));
         children.add(new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global));
@@ -3312,7 +3311,7 @@ public class ImplementationGuide extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published. The URL SHOULD include the major version of the implementation guide. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this implementation guide is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the implementation guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the implementation guide author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the implementation guide. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this implementation guide. Enables tracking the life-cycle of the content.", 0, 1, status);
@@ -3324,7 +3323,7 @@ public class ImplementationGuide extends MetadataResource {
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate implementation guide instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the implementation guide is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the implementation guide.", 0, 1, copyright);
-        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.1.0 for this version.", 0, 1, fhirVersion);
+        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion);
         case -26291381: /*dependency*/  return new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency);
         case -807062458: /*package*/  return new Property("package", "", "A logical group of resources. Logical groups can be used when building pages.", 0, java.lang.Integer.MAX_VALUE, package_);
         case -1243020381: /*global*/  return new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global);
@@ -3643,24 +3642,24 @@ public class ImplementationGuide extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImplementationGuide))
+        if (!(other_ instanceof ImplementationGuide))
           return false;
-        ImplementationGuide o = (ImplementationGuide) other;
+        ImplementationGuide o = (ImplementationGuide) other_;
         return compareDeep(copyright, o.copyright, true) && compareDeep(fhirVersion, o.fhirVersion, true)
            && compareDeep(dependency, o.dependency, true) && compareDeep(package_, o.package_, true) && compareDeep(global, o.global, true)
            && compareDeep(binary, o.binary, true) && compareDeep(page, o.page, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImplementationGuide))
+        if (!(other_ instanceof ImplementationGuide))
           return false;
-        ImplementationGuide o = (ImplementationGuide) other;
+        ImplementationGuide o = (ImplementationGuide) other_;
         return compareValues(copyright, o.copyright, true) && compareValues(fhirVersion, o.fhirVersion, true)
            && compareValues(binary, o.binary, true);
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -590,23 +590,23 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PractitionerRoleAvailableTimeComponent))
+        if (!(other_ instanceof PractitionerRoleAvailableTimeComponent))
           return false;
-        PractitionerRoleAvailableTimeComponent o = (PractitionerRoleAvailableTimeComponent) other;
+        PractitionerRoleAvailableTimeComponent o = (PractitionerRoleAvailableTimeComponent) other_;
         return compareDeep(daysOfWeek, o.daysOfWeek, true) && compareDeep(allDay, o.allDay, true) && compareDeep(availableStartTime, o.availableStartTime, true)
            && compareDeep(availableEndTime, o.availableEndTime, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PractitionerRoleAvailableTimeComponent))
+        if (!(other_ instanceof PractitionerRoleAvailableTimeComponent))
           return false;
-        PractitionerRoleAvailableTimeComponent o = (PractitionerRoleAvailableTimeComponent) other;
+        PractitionerRoleAvailableTimeComponent o = (PractitionerRoleAvailableTimeComponent) other_;
         return compareValues(daysOfWeek, o.daysOfWeek, true) && compareValues(allDay, o.allDay, true) && compareValues(availableStartTime, o.availableStartTime, true)
            && compareValues(availableEndTime, o.availableEndTime, true);
       }
@@ -636,7 +636,7 @@ public class PractitionerRole extends DomainResource {
          * Service is not available (seasonally or for a public holiday) from this date.
          */
         @Child(name = "during", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Service not availablefrom this date", formalDefinition="Service is not available (seasonally or for a public holiday) from this date." )
+        @Description(shortDefinition="Service not available from this date", formalDefinition="Service is not available (seasonally or for a public holiday) from this date." )
         protected Period during;
 
         private static final long serialVersionUID = 310849929L;
@@ -818,22 +818,22 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PractitionerRoleNotAvailableComponent))
+        if (!(other_ instanceof PractitionerRoleNotAvailableComponent))
           return false;
-        PractitionerRoleNotAvailableComponent o = (PractitionerRoleNotAvailableComponent) other;
+        PractitionerRoleNotAvailableComponent o = (PractitionerRoleNotAvailableComponent) other_;
         return compareDeep(description, o.description, true) && compareDeep(during, o.during, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PractitionerRoleNotAvailableComponent))
+        if (!(other_ instanceof PractitionerRoleNotAvailableComponent))
           return false;
-        PractitionerRoleNotAvailableComponent o = (PractitionerRoleNotAvailableComponent) other;
+        PractitionerRoleNotAvailableComponent o = (PractitionerRoleNotAvailableComponent) other_;
         return compareValues(description, o.description, true);
       }
 
@@ -856,10 +856,10 @@ public class PractitionerRole extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Whether this practitioner's record is in active use.
+     * Whether this practitioner role record is in active use.
      */
     @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Whether this practitioner's record is in active use", formalDefinition="Whether this practitioner's record is in active use." )
+    @Description(shortDefinition="Whether this practitioner role record is in active use", formalDefinition="Whether this practitioner role record is in active use." )
     protected BooleanType active;
 
     /**
@@ -870,14 +870,14 @@ public class PractitionerRole extends DomainResource {
     protected Period period;
 
     /**
-     * Practitioner that is able to provide the defined services for the organation.
+     * Practitioner that is able to provide the defined services for the organization.
      */
     @Child(name = "practitioner", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Practitioner that is able to provide the defined services for the organation", formalDefinition="Practitioner that is able to provide the defined services for the organation." )
+    @Description(shortDefinition="Practitioner that is able to provide the defined services for the organization", formalDefinition="Practitioner that is able to provide the defined services for the organization." )
     protected Reference practitioner;
 
     /**
-     * The actual object that is the target of the reference (Practitioner that is able to provide the defined services for the organation.)
+     * The actual object that is the target of the reference (Practitioner that is able to provide the defined services for the organization.)
      */
     protected Practitioner practitionerTarget;
 
@@ -1036,7 +1036,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #active} (Whether this practitioner's record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @return {@link #active} (Whether this practitioner role record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public BooleanType getActiveElement() { 
       if (this.active == null)
@@ -1056,7 +1056,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @param value {@link #active} (Whether this practitioner's record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @param value {@link #active} (Whether this practitioner role record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public PractitionerRole setActiveElement(BooleanType value) { 
       this.active = value;
@@ -1064,14 +1064,14 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return Whether this practitioner's record is in active use.
+     * @return Whether this practitioner role record is in active use.
      */
     public boolean getActive() { 
       return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
     }
 
     /**
-     * @param value Whether this practitioner's record is in active use.
+     * @param value Whether this practitioner role record is in active use.
      */
     public PractitionerRole setActive(boolean value) { 
         if (this.active == null)
@@ -1105,7 +1105,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #practitioner} (Practitioner that is able to provide the defined services for the organation.)
+     * @return {@link #practitioner} (Practitioner that is able to provide the defined services for the organization.)
      */
     public Reference getPractitioner() { 
       if (this.practitioner == null)
@@ -1121,7 +1121,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @param value {@link #practitioner} (Practitioner that is able to provide the defined services for the organation.)
+     * @param value {@link #practitioner} (Practitioner that is able to provide the defined services for the organization.)
      */
     public PractitionerRole setPractitioner(Reference value) { 
       this.practitioner = value;
@@ -1129,7 +1129,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Practitioner that is able to provide the defined services for the organation.)
+     * @return {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Practitioner that is able to provide the defined services for the organization.)
      */
     public Practitioner getPractitionerTarget() { 
       if (this.practitionerTarget == null)
@@ -1141,7 +1141,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @param value {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Practitioner that is able to provide the defined services for the organation.)
+     * @param value {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Practitioner that is able to provide the defined services for the organization.)
      */
     public PractitionerRole setPractitionerTarget(Practitioner value) { 
       this.practitionerTarget = value;
@@ -1734,9 +1734,9 @@ public class PractitionerRole extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Business Identifiers that are specific to a role/location.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("active", "boolean", "Whether this practitioner's record is in active use.", 0, 1, active));
+        children.add(new Property("active", "boolean", "Whether this practitioner role record is in active use.", 0, 1, active));
         children.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, 1, period));
-        children.add(new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organation.", 0, 1, practitioner));
+        children.add(new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organization.", 0, 1, practitioner));
         children.add(new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, 1, organization));
         children.add(new Property("code", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, code));
         children.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
@@ -1753,9 +1753,9 @@ public class PractitionerRole extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business Identifiers that are specific to a role/location.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this practitioner's record is in active use.", 0, 1, active);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this practitioner role record is in active use.", 0, 1, active);
         case -991726143: /*period*/  return new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, 1, period);
-        case 574573338: /*practitioner*/  return new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organation.", 0, 1, practitioner);
+        case 574573338: /*practitioner*/  return new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organization.", 0, 1, practitioner);
         case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, 1, organization);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, code);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty);
@@ -2039,12 +2039,12 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PractitionerRole))
+        if (!(other_ instanceof PractitionerRole))
           return false;
-        PractitionerRole o = (PractitionerRole) other;
+        PractitionerRole o = (PractitionerRole) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(period, o.period, true)
            && compareDeep(practitioner, o.practitioner, true) && compareDeep(organization, o.organization, true)
            && compareDeep(code, o.code, true) && compareDeep(specialty, o.specialty, true) && compareDeep(location, o.location, true)
@@ -2055,12 +2055,12 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PractitionerRole))
+        if (!(other_ instanceof PractitionerRole))
           return false;
-        PractitionerRole o = (PractitionerRole) other;
+        PractitionerRole o = (PractitionerRole) other_;
         return compareValues(active, o.active, true) && compareValues(availabilityExceptions, o.availabilityExceptions, true)
           ;
       }
@@ -2159,17 +2159,17 @@ public class PractitionerRole extends DomainResource {
  /**
    * Search parameter: <b>practitioner</b>
    * <p>
-   * Description: <b>Practitioner that is able to provide the defined services for the organation</b><br>
+   * Description: <b>Practitioner that is able to provide the defined services for the organization</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PractitionerRole.practitioner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organization", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
    * <p>
-   * Description: <b>Practitioner that is able to provide the defined services for the organation</b><br>
+   * Description: <b>Practitioner that is able to provide the defined services for the organization</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PractitionerRole.practitioner</b><br>
    * </p>
@@ -2185,17 +2185,17 @@ public class PractitionerRole extends DomainResource {
  /**
    * Search parameter: <b>active</b>
    * <p>
-   * Description: <b>Whether this practitioner's record is in active use</b><br>
+   * Description: <b>Whether this practitioner role record is in active use</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PractitionerRole.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="PractitionerRole.active", description="Whether this practitioner's record is in active use", type="token" )
+  @SearchParamDefinition(name="active", path="PractitionerRole.active", description="Whether this practitioner role record is in active use", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
    * <p>
-   * Description: <b>Whether this practitioner's record is in active use</b><br>
+   * Description: <b>Whether this practitioner role record is in active use</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PractitionerRole.active</b><br>
    * </p>

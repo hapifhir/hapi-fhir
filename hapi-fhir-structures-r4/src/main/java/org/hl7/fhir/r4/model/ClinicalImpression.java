@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -379,22 +379,22 @@ public class ClinicalImpression extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClinicalImpressionInvestigationComponent))
+        if (!(other_ instanceof ClinicalImpressionInvestigationComponent))
           return false;
-        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other;
+        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClinicalImpressionInvestigationComponent))
+        if (!(other_ instanceof ClinicalImpressionInvestigationComponent))
           return false;
-        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other;
+        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other_;
         return true;
       }
 
@@ -638,22 +638,22 @@ public class ClinicalImpression extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClinicalImpressionFindingComponent))
+        if (!(other_ instanceof ClinicalImpressionFindingComponent))
           return false;
-        ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other;
+        ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other_;
         return compareDeep(item, o.item, true) && compareDeep(basis, o.basis, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClinicalImpressionFindingComponent))
+        if (!(other_ instanceof ClinicalImpressionFindingComponent))
           return false;
-        ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other;
+        ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other_;
         return compareValues(basis, o.basis, true);
       }
 
@@ -822,7 +822,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * Action taken as part of assessment procedure.
      */
-    @Child(name = "action", type = {ProcedureRequest.class, Procedure.class, MedicationRequest.class, Appointment.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {ServiceRequest.class, Procedure.class, MedicationRequest.class, Appointment.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Action taken as part of assessment procedure", formalDefinition="Action taken as part of assessment procedure." )
     protected List<Reference> action;
     /**
@@ -1829,7 +1829,7 @@ public class ClinicalImpression extends DomainResource {
         children.add(new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding));
         children.add(new Property("prognosisCodeableConcept", "CodeableConcept", "Estimate of likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisCodeableConcept));
         children.add(new Property("prognosisReference", "Reference(RiskAssessment)", "RiskAssessment expressing likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisReference));
-        children.add(new Property("action", "Reference(ProcedureRequest|Procedure|MedicationRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action));
+        children.add(new Property("action", "Reference(ServiceRequest|Procedure|MedicationRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action));
         children.add(new Property("note", "Annotation", "Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
@@ -1856,7 +1856,7 @@ public class ClinicalImpression extends DomainResource {
         case -853173367: /*finding*/  return new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding);
         case -676337953: /*prognosisCodeableConcept*/  return new Property("prognosisCodeableConcept", "CodeableConcept", "Estimate of likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisCodeableConcept);
         case -587137783: /*prognosisReference*/  return new Property("prognosisReference", "Reference(RiskAssessment)", "RiskAssessment expressing likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisReference);
-        case -1422950858: /*action*/  return new Property("action", "Reference(ProcedureRequest|Procedure|MedicationRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action);
+        case -1422950858: /*action*/  return new Property("action", "Reference(ServiceRequest|Procedure|MedicationRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.", 0, java.lang.Integer.MAX_VALUE, note);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2201,12 +2201,12 @@ public class ClinicalImpression extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClinicalImpression))
+        if (!(other_ instanceof ClinicalImpression))
           return false;
-        ClinicalImpression o = (ClinicalImpression) other;
+        ClinicalImpression o = (ClinicalImpression) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(code, o.code, true)
            && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(effective, o.effective, true) && compareDeep(date, o.date, true) && compareDeep(assessor, o.assessor, true)
@@ -2217,12 +2217,12 @@ public class ClinicalImpression extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClinicalImpression))
+        if (!(other_ instanceof ClinicalImpression))
           return false;
-        ClinicalImpression o = (ClinicalImpression) other;
+        ClinicalImpression o = (ClinicalImpression) other_;
         return compareValues(status, o.status, true) && compareValues(description, o.description, true) && compareValues(date, o.date, true)
            && compareValues(protocol, o.protocol, true) && compareValues(summary, o.summary, true);
       }
@@ -2515,7 +2515,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Action taken as part of assessment procedure", type="reference", target={Appointment.class, MedicationRequest.class, Procedure.class, ProcedureRequest.class } )
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Action taken as part of assessment procedure", type="reference", target={Appointment.class, MedicationRequest.class, Procedure.class, ServiceRequest.class } )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>

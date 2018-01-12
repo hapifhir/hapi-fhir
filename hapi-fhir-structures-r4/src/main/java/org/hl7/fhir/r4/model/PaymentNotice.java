@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -937,12 +937,12 @@ public class PaymentNotice extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PaymentNotice))
+        if (!(other_ instanceof PaymentNotice))
           return false;
-        PaymentNotice o = (PaymentNotice) other;
+        PaymentNotice o = (PaymentNotice) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
            && compareDeep(response, o.response, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(created, o.created, true)
            && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
@@ -950,12 +950,12 @@ public class PaymentNotice extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PaymentNotice))
+        if (!(other_ instanceof PaymentNotice))
           return false;
-        PaymentNotice o = (PaymentNotice) other;
+        PaymentNotice o = (PaymentNotice) other_;
         return compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(created, o.created, true)
           ;
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -586,7 +586,7 @@ public class Composition extends DomainResource {
          */
         SNAPSHOT, 
         /**
-         * A list that indicates where changes have been made or recommended
+         * A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter
          */
         CHANGES, 
         /**
@@ -627,7 +627,7 @@ public class Composition extends DomainResource {
           switch (this) {
             case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes";
             case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current";
-            case CHANGES: return "A list that indicates where changes have been made or recommended";
+            case CHANGES: return "A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter";
             default: return "?";
           }
         }
@@ -984,23 +984,23 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CompositionAttesterComponent))
+        if (!(other_ instanceof CompositionAttesterComponent))
           return false;
-        CompositionAttesterComponent o = (CompositionAttesterComponent) other;
+        CompositionAttesterComponent o = (CompositionAttesterComponent) other_;
         return compareDeep(mode, o.mode, true) && compareDeep(time, o.time, true) && compareDeep(party, o.party, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CompositionAttesterComponent))
+        if (!(other_ instanceof CompositionAttesterComponent))
           return false;
-        CompositionAttesterComponent o = (CompositionAttesterComponent) other;
+        CompositionAttesterComponent o = (CompositionAttesterComponent) other_;
         return compareValues(mode, o.mode, true) && compareValues(time, o.time, true);
       }
 
@@ -1243,22 +1243,22 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CompositionRelatesToComponent))
+        if (!(other_ instanceof CompositionRelatesToComponent))
           return false;
-        CompositionRelatesToComponent o = (CompositionRelatesToComponent) other;
+        CompositionRelatesToComponent o = (CompositionRelatesToComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(target, o.target, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CompositionRelatesToComponent))
+        if (!(other_ instanceof CompositionRelatesToComponent))
           return false;
-        CompositionRelatesToComponent o = (CompositionRelatesToComponent) other;
+        CompositionRelatesToComponent o = (CompositionRelatesToComponent) other_;
         return compareValues(code, o.code, true);
       }
 
@@ -1566,23 +1566,23 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CompositionEventComponent))
+        if (!(other_ instanceof CompositionEventComponent))
           return false;
-        CompositionEventComponent o = (CompositionEventComponent) other;
+        CompositionEventComponent o = (CompositionEventComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(period, o.period, true) && compareDeep(detail, o.detail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CompositionEventComponent))
+        if (!(other_ instanceof CompositionEventComponent))
           return false;
-        CompositionEventComponent o = (CompositionEventComponent) other;
+        CompositionEventComponent o = (CompositionEventComponent) other_;
         return true;
       }
 
@@ -2173,24 +2173,24 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SectionComponent))
+        if (!(other_ instanceof SectionComponent))
           return false;
-        SectionComponent o = (SectionComponent) other;
+        SectionComponent o = (SectionComponent) other_;
         return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(text, o.text, true)
            && compareDeep(mode, o.mode, true) && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(entry, o.entry, true)
            && compareDeep(emptyReason, o.emptyReason, true) && compareDeep(section, o.section, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SectionComponent))
+        if (!(other_ instanceof SectionComponent))
           return false;
-        SectionComponent o = (SectionComponent) other;
+        SectionComponent o = (SectionComponent) other_;
         return compareValues(title, o.title, true) && compareValues(mode, o.mode, true);
       }
 
@@ -2240,7 +2240,7 @@ public class Composition extends DomainResource {
     /**
      * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
      */
-    @Child(name = "subject", type = {Reference.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what the composition is about", formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)." )
     protected Reference subject;
 
@@ -2271,7 +2271,7 @@ public class Composition extends DomainResource {
     /**
      * Identifies who is responsible for the information in the composition, not necessarily who typed it in.
      */
-    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class, Device.class, Patient.class, RelatedPerson.class}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class, Device.class, Patient.class, RelatedPerson.class, Organization.class}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what authored the composition", formalDefinition="Identifies who is responsible for the information in the composition, not necessarily who typed it in." )
     protected List<Reference> author;
     /**
@@ -2347,11 +2347,10 @@ public class Composition extends DomainResource {
   /**
    * Constructor
    */
-    public Composition(Enumeration<CompositionStatus> status, CodeableConcept type, Reference subject, DateTimeType date, StringType title) {
+    public Composition(Enumeration<CompositionStatus> status, CodeableConcept type, DateTimeType date, StringType title) {
       super();
       this.status = status;
       this.type = type;
-      this.subject = subject;
       this.date = date;
       this.title = title;
     }
@@ -3023,7 +3022,7 @@ public class Composition extends DomainResource {
         children.add(new Property("subject", "Reference(Any)", "Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).", 0, 1, subject));
         children.add(new Property("encounter", "Reference(Encounter)", "Describes the clinical encounter or type of care this documentation is associated with.", 0, 1, encounter));
         children.add(new Property("date", "dateTime", "The composition editing time, when the composition was last logically changed by the author.", 0, 1, date));
-        children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson)", "Identifies who is responsible for the information in the composition, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author));
+        children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson|Organization)", "Identifies who is responsible for the information in the composition, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author));
         children.add(new Property("title", "string", "Official human-readable label for the composition.", 0, 1, title));
         children.add(new Property("confidentiality", "code", "The code specifying the level of confidentiality of the Composition.", 0, 1, confidentiality));
         children.add(new Property("attester", "", "A participant who has attested to the accuracy of the composition/document.", 0, java.lang.Integer.MAX_VALUE, attester));
@@ -3043,7 +3042,7 @@ public class Composition extends DomainResource {
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).", 0, 1, subject);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "Describes the clinical encounter or type of care this documentation is associated with.", 0, 1, encounter);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The composition editing time, when the composition was last logically changed by the author.", 0, 1, date);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson)", "Identifies who is responsible for the information in the composition, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson|Organization)", "Identifies who is responsible for the information in the composition, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author);
         case 110371416: /*title*/  return new Property("title", "string", "Official human-readable label for the composition.", 0, 1, title);
         case -1923018202: /*confidentiality*/  return new Property("confidentiality", "code", "The code specifying the level of confidentiality of the Composition.", 0, 1, confidentiality);
         case 542920370: /*attester*/  return new Property("attester", "", "A participant who has attested to the accuracy of the composition/document.", 0, java.lang.Integer.MAX_VALUE, attester);
@@ -3327,12 +3326,12 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Composition))
+        if (!(other_ instanceof Composition))
           return false;
-        Composition o = (Composition) other;
+        Composition o = (Composition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(class_, o.class_, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(date, o.date, true) && compareDeep(author, o.author, true) && compareDeep(title, o.title, true)
@@ -3342,12 +3341,12 @@ public class Composition extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Composition))
+        if (!(other_ instanceof Composition))
           return false;
-        Composition o = (Composition) other;
+        Composition o = (Composition) other_;
         return compareValues(status, o.status, true) && compareValues(date, o.date, true) && compareValues(title, o.title, true)
            && compareValues(confidentiality, o.confidentiality, true);
       }
@@ -3477,7 +3476,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -245,6 +245,178 @@ public class Location extends DomainResource {
       return "?";
       }
     public String toSystem(LocationMode code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum DaysOfWeek {
+        /**
+         * Monday
+         */
+        MON, 
+        /**
+         * Tuesday
+         */
+        TUE, 
+        /**
+         * Wednesday
+         */
+        WED, 
+        /**
+         * Thursday
+         */
+        THU, 
+        /**
+         * Friday
+         */
+        FRI, 
+        /**
+         * Saturday
+         */
+        SAT, 
+        /**
+         * Sunday
+         */
+        SUN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DaysOfWeek fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return MON;
+        if ("tue".equals(codeString))
+          return TUE;
+        if ("wed".equals(codeString))
+          return WED;
+        if ("thu".equals(codeString))
+          return THU;
+        if ("fri".equals(codeString))
+          return FRI;
+        if ("sat".equals(codeString))
+          return SAT;
+        if ("sun".equals(codeString))
+          return SUN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MON: return "mon";
+            case TUE: return "tue";
+            case WED: return "wed";
+            case THU: return "thu";
+            case FRI: return "fri";
+            case SAT: return "sat";
+            case SUN: return "sun";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MON: return "http://hl7.org/fhir/days-of-week";
+            case TUE: return "http://hl7.org/fhir/days-of-week";
+            case WED: return "http://hl7.org/fhir/days-of-week";
+            case THU: return "http://hl7.org/fhir/days-of-week";
+            case FRI: return "http://hl7.org/fhir/days-of-week";
+            case SAT: return "http://hl7.org/fhir/days-of-week";
+            case SUN: return "http://hl7.org/fhir/days-of-week";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DaysOfWeekEnumFactory implements EnumFactory<DaysOfWeek> {
+    public DaysOfWeek fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return DaysOfWeek.MON;
+        if ("tue".equals(codeString))
+          return DaysOfWeek.TUE;
+        if ("wed".equals(codeString))
+          return DaysOfWeek.WED;
+        if ("thu".equals(codeString))
+          return DaysOfWeek.THU;
+        if ("fri".equals(codeString))
+          return DaysOfWeek.FRI;
+        if ("sat".equals(codeString))
+          return DaysOfWeek.SAT;
+        if ("sun".equals(codeString))
+          return DaysOfWeek.SUN;
+        throw new IllegalArgumentException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+        public Enumeration<DaysOfWeek> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<DaysOfWeek>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("mon".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.MON);
+        if ("tue".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.TUE);
+        if ("wed".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.WED);
+        if ("thu".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.THU);
+        if ("fri".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.FRI);
+        if ("sat".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.SAT);
+        if ("sun".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.SUN);
+        throw new FHIRException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+    public String toCode(DaysOfWeek code) {
+      if (code == DaysOfWeek.MON)
+        return "mon";
+      if (code == DaysOfWeek.TUE)
+        return "tue";
+      if (code == DaysOfWeek.WED)
+        return "wed";
+      if (code == DaysOfWeek.THU)
+        return "thu";
+      if (code == DaysOfWeek.FRI)
+        return "fri";
+      if (code == DaysOfWeek.SAT)
+        return "sat";
+      if (code == DaysOfWeek.SUN)
+        return "sun";
+      return "?";
+      }
+    public String toSystem(DaysOfWeek code) {
       return code.getSystem();
       }
     }
@@ -589,23 +761,23 @@ public class Location extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof LocationPositionComponent))
+        if (!(other_ instanceof LocationPositionComponent))
           return false;
-        LocationPositionComponent o = (LocationPositionComponent) other;
+        LocationPositionComponent o = (LocationPositionComponent) other_;
         return compareDeep(longitude, o.longitude, true) && compareDeep(latitude, o.latitude, true) && compareDeep(altitude, o.altitude, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof LocationPositionComponent))
+        if (!(other_ instanceof LocationPositionComponent))
           return false;
-        LocationPositionComponent o = (LocationPositionComponent) other;
+        LocationPositionComponent o = (LocationPositionComponent) other_;
         return compareValues(longitude, o.longitude, true) && compareValues(latitude, o.latitude, true) && compareValues(altitude, o.altitude, true)
           ;
       }
@@ -617,6 +789,409 @@ public class Location extends DomainResource {
 
   public String fhirType() {
     return "Location.position";
+
+  }
+
+  }
+
+    @Block()
+    public static class LocationHoursOfOperationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Indicates which days of the week are available between the start and end Times.
+         */
+        @Child(name = "daysOfWeek", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="Indicates which days of the week are available between the start and end Times." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/days-of-week")
+        protected List<Enumeration<DaysOfWeek>> daysOfWeek;
+
+        /**
+         * The Location is open all day.
+         */
+        @Child(name = "allDay", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The Location is open all day", formalDefinition="The Location is open all day." )
+        protected BooleanType allDay;
+
+        /**
+         * Time that the Location opens.
+         */
+        @Child(name = "openingTime", type = {TimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Time that the Location opens", formalDefinition="Time that the Location opens." )
+        protected TimeType openingTime;
+
+        /**
+         * Time that the Location closes.
+         */
+        @Child(name = "closingTime", type = {TimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Time that the Location closes", formalDefinition="Time that the Location closes." )
+        protected TimeType closingTime;
+
+        private static final long serialVersionUID = -932551849L;
+
+    /**
+     * Constructor
+     */
+      public LocationHoursOfOperationComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
+         */
+        public List<Enumeration<DaysOfWeek>> getDaysOfWeek() { 
+          if (this.daysOfWeek == null)
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
+          return this.daysOfWeek;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public LocationHoursOfOperationComponent setDaysOfWeek(List<Enumeration<DaysOfWeek>> theDaysOfWeek) { 
+          this.daysOfWeek = theDaysOfWeek;
+          return this;
+        }
+
+        public boolean hasDaysOfWeek() { 
+          if (this.daysOfWeek == null)
+            return false;
+          for (Enumeration<DaysOfWeek> item : this.daysOfWeek)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
+         */
+        public Enumeration<DaysOfWeek> addDaysOfWeekElement() {//2 
+          Enumeration<DaysOfWeek> t = new Enumeration<DaysOfWeek>(new DaysOfWeekEnumFactory());
+          if (this.daysOfWeek == null)
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
+          this.daysOfWeek.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
+         */
+        public LocationHoursOfOperationComponent addDaysOfWeek(DaysOfWeek value) { //1
+          Enumeration<DaysOfWeek> t = new Enumeration<DaysOfWeek>(new DaysOfWeekEnumFactory());
+          t.setValue(value);
+          if (this.daysOfWeek == null)
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
+          this.daysOfWeek.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
+         */
+        public boolean hasDaysOfWeek(DaysOfWeek value) { 
+          if (this.daysOfWeek == null)
+            return false;
+          for (Enumeration<DaysOfWeek> v : this.daysOfWeek)
+            if (v.getValue().equals(value)) // code
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #allDay} (The Location is open all day.). This is the underlying object with id, value and extensions. The accessor "getAllDay" gives direct access to the value
+         */
+        public BooleanType getAllDayElement() { 
+          if (this.allDay == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create LocationHoursOfOperationComponent.allDay");
+            else if (Configuration.doAutoCreate())
+              this.allDay = new BooleanType(); // bb
+          return this.allDay;
+        }
+
+        public boolean hasAllDayElement() { 
+          return this.allDay != null && !this.allDay.isEmpty();
+        }
+
+        public boolean hasAllDay() { 
+          return this.allDay != null && !this.allDay.isEmpty();
+        }
+
+        /**
+         * @param value {@link #allDay} (The Location is open all day.). This is the underlying object with id, value and extensions. The accessor "getAllDay" gives direct access to the value
+         */
+        public LocationHoursOfOperationComponent setAllDayElement(BooleanType value) { 
+          this.allDay = value;
+          return this;
+        }
+
+        /**
+         * @return The Location is open all day.
+         */
+        public boolean getAllDay() { 
+          return this.allDay == null || this.allDay.isEmpty() ? false : this.allDay.getValue();
+        }
+
+        /**
+         * @param value The Location is open all day.
+         */
+        public LocationHoursOfOperationComponent setAllDay(boolean value) { 
+            if (this.allDay == null)
+              this.allDay = new BooleanType();
+            this.allDay.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #openingTime} (Time that the Location opens.). This is the underlying object with id, value and extensions. The accessor "getOpeningTime" gives direct access to the value
+         */
+        public TimeType getOpeningTimeElement() { 
+          if (this.openingTime == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create LocationHoursOfOperationComponent.openingTime");
+            else if (Configuration.doAutoCreate())
+              this.openingTime = new TimeType(); // bb
+          return this.openingTime;
+        }
+
+        public boolean hasOpeningTimeElement() { 
+          return this.openingTime != null && !this.openingTime.isEmpty();
+        }
+
+        public boolean hasOpeningTime() { 
+          return this.openingTime != null && !this.openingTime.isEmpty();
+        }
+
+        /**
+         * @param value {@link #openingTime} (Time that the Location opens.). This is the underlying object with id, value and extensions. The accessor "getOpeningTime" gives direct access to the value
+         */
+        public LocationHoursOfOperationComponent setOpeningTimeElement(TimeType value) { 
+          this.openingTime = value;
+          return this;
+        }
+
+        /**
+         * @return Time that the Location opens.
+         */
+        public String getOpeningTime() { 
+          return this.openingTime == null ? null : this.openingTime.getValue();
+        }
+
+        /**
+         * @param value Time that the Location opens.
+         */
+        public LocationHoursOfOperationComponent setOpeningTime(String value) { 
+          if (value == null)
+            this.openingTime = null;
+          else {
+            if (this.openingTime == null)
+              this.openingTime = new TimeType();
+            this.openingTime.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #closingTime} (Time that the Location closes.). This is the underlying object with id, value and extensions. The accessor "getClosingTime" gives direct access to the value
+         */
+        public TimeType getClosingTimeElement() { 
+          if (this.closingTime == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create LocationHoursOfOperationComponent.closingTime");
+            else if (Configuration.doAutoCreate())
+              this.closingTime = new TimeType(); // bb
+          return this.closingTime;
+        }
+
+        public boolean hasClosingTimeElement() { 
+          return this.closingTime != null && !this.closingTime.isEmpty();
+        }
+
+        public boolean hasClosingTime() { 
+          return this.closingTime != null && !this.closingTime.isEmpty();
+        }
+
+        /**
+         * @param value {@link #closingTime} (Time that the Location closes.). This is the underlying object with id, value and extensions. The accessor "getClosingTime" gives direct access to the value
+         */
+        public LocationHoursOfOperationComponent setClosingTimeElement(TimeType value) { 
+          this.closingTime = value;
+          return this;
+        }
+
+        /**
+         * @return Time that the Location closes.
+         */
+        public String getClosingTime() { 
+          return this.closingTime == null ? null : this.closingTime.getValue();
+        }
+
+        /**
+         * @param value Time that the Location closes.
+         */
+        public LocationHoursOfOperationComponent setClosingTime(String value) { 
+          if (value == null)
+            this.closingTime = null;
+          else {
+            if (this.closingTime == null)
+              this.closingTime = new TimeType();
+            this.closingTime.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("daysOfWeek", "code", "Indicates which days of the week are available between the start and end Times.", 0, java.lang.Integer.MAX_VALUE, daysOfWeek));
+          children.add(new Property("allDay", "boolean", "The Location is open all day.", 0, 1, allDay));
+          children.add(new Property("openingTime", "time", "Time that the Location opens.", 0, 1, openingTime));
+          children.add(new Property("closingTime", "time", "Time that the Location closes.", 0, 1, closingTime));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 68050338: /*daysOfWeek*/  return new Property("daysOfWeek", "code", "Indicates which days of the week are available between the start and end Times.", 0, java.lang.Integer.MAX_VALUE, daysOfWeek);
+          case -1414913477: /*allDay*/  return new Property("allDay", "boolean", "The Location is open all day.", 0, 1, allDay);
+          case 84062277: /*openingTime*/  return new Property("openingTime", "time", "Time that the Location opens.", 0, 1, openingTime);
+          case 188137762: /*closingTime*/  return new Property("closingTime", "time", "Time that the Location closes.", 0, 1, closingTime);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 68050338: /*daysOfWeek*/ return this.daysOfWeek == null ? new Base[0] : this.daysOfWeek.toArray(new Base[this.daysOfWeek.size()]); // Enumeration<DaysOfWeek>
+        case -1414913477: /*allDay*/ return this.allDay == null ? new Base[0] : new Base[] {this.allDay}; // BooleanType
+        case 84062277: /*openingTime*/ return this.openingTime == null ? new Base[0] : new Base[] {this.openingTime}; // TimeType
+        case 188137762: /*closingTime*/ return this.closingTime == null ? new Base[0] : new Base[] {this.closingTime}; // TimeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 68050338: // daysOfWeek
+          value = new DaysOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDaysOfWeek().add((Enumeration) value); // Enumeration<DaysOfWeek>
+          return value;
+        case -1414913477: // allDay
+          this.allDay = castToBoolean(value); // BooleanType
+          return value;
+        case 84062277: // openingTime
+          this.openingTime = castToTime(value); // TimeType
+          return value;
+        case 188137762: // closingTime
+          this.closingTime = castToTime(value); // TimeType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("daysOfWeek")) {
+          value = new DaysOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDaysOfWeek().add((Enumeration) value);
+        } else if (name.equals("allDay")) {
+          this.allDay = castToBoolean(value); // BooleanType
+        } else if (name.equals("openingTime")) {
+          this.openingTime = castToTime(value); // TimeType
+        } else if (name.equals("closingTime")) {
+          this.closingTime = castToTime(value); // TimeType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 68050338:  return addDaysOfWeekElement();
+        case -1414913477:  return getAllDayElement();
+        case 84062277:  return getOpeningTimeElement();
+        case 188137762:  return getClosingTimeElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 68050338: /*daysOfWeek*/ return new String[] {"code"};
+        case -1414913477: /*allDay*/ return new String[] {"boolean"};
+        case 84062277: /*openingTime*/ return new String[] {"time"};
+        case 188137762: /*closingTime*/ return new String[] {"time"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("daysOfWeek")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.daysOfWeek");
+        }
+        else if (name.equals("allDay")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.allDay");
+        }
+        else if (name.equals("openingTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.openingTime");
+        }
+        else if (name.equals("closingTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.closingTime");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public LocationHoursOfOperationComponent copy() {
+        LocationHoursOfOperationComponent dst = new LocationHoursOfOperationComponent();
+        copyValues(dst);
+        if (daysOfWeek != null) {
+          dst.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
+          for (Enumeration<DaysOfWeek> i : daysOfWeek)
+            dst.daysOfWeek.add(i.copy());
+        };
+        dst.allDay = allDay == null ? null : allDay.copy();
+        dst.openingTime = openingTime == null ? null : openingTime.copy();
+        dst.closingTime = closingTime == null ? null : closingTime.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof LocationHoursOfOperationComponent))
+          return false;
+        LocationHoursOfOperationComponent o = (LocationHoursOfOperationComponent) other_;
+        return compareDeep(daysOfWeek, o.daysOfWeek, true) && compareDeep(allDay, o.allDay, true) && compareDeep(openingTime, o.openingTime, true)
+           && compareDeep(closingTime, o.closingTime, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof LocationHoursOfOperationComponent))
+          return false;
+        LocationHoursOfOperationComponent o = (LocationHoursOfOperationComponent) other_;
+        return compareValues(daysOfWeek, o.daysOfWeek, true) && compareValues(allDay, o.allDay, true) && compareValues(openingTime, o.openingTime, true)
+           && compareValues(closingTime, o.closingTime, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(daysOfWeek, allDay, openingTime
+          , closingTime);
+      }
+
+  public String fhirType() {
+    return "Location.hoursOfOperation";
 
   }
 
@@ -669,7 +1244,7 @@ public class Location extends DomainResource {
     /**
      * Indicates whether a resource instance represents a specific location or a class of locations.
      */
-    @Child(name = "mode", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "mode", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="instance | kind", formalDefinition="Indicates whether a resource instance represents a specific location or a class of locations." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-mode")
     protected Enumeration<LocationMode> mode;
@@ -736,9 +1311,23 @@ public class Location extends DomainResource {
     protected Location partOfTarget;
 
     /**
+     * What days/times during a week is this location usually open.
+     */
+    @Child(name = "hoursOfOperation", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="What days/times during a week is this location usually open", formalDefinition="What days/times during a week is this location usually open." )
+    protected List<LocationHoursOfOperationComponent> hoursOfOperation;
+
+    /**
+     * A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.
+     */
+    @Child(name = "availabilityExceptions", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Description of availability exceptions", formalDefinition="A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times." )
+    protected StringType availabilityExceptions;
+
+    /**
      * Technical endpoints providing access to services operated for the location.
      */
-    @Child(name = "endpoint", type = {Endpoint.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "endpoint", type = {Endpoint.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Technical endpoints providing access to services operated for the location", formalDefinition="Technical endpoints providing access to services operated for the location." )
     protected List<Reference> endpoint;
     /**
@@ -747,7 +1336,7 @@ public class Location extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = -1603579027L;
+    private static final long serialVersionUID = -999560379L;
 
   /**
    * Constructor
@@ -1328,6 +1917,108 @@ public class Location extends DomainResource {
     }
 
     /**
+     * @return {@link #hoursOfOperation} (What days/times during a week is this location usually open.)
+     */
+    public List<LocationHoursOfOperationComponent> getHoursOfOperation() { 
+      if (this.hoursOfOperation == null)
+        this.hoursOfOperation = new ArrayList<LocationHoursOfOperationComponent>();
+      return this.hoursOfOperation;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setHoursOfOperation(List<LocationHoursOfOperationComponent> theHoursOfOperation) { 
+      this.hoursOfOperation = theHoursOfOperation;
+      return this;
+    }
+
+    public boolean hasHoursOfOperation() { 
+      if (this.hoursOfOperation == null)
+        return false;
+      for (LocationHoursOfOperationComponent item : this.hoursOfOperation)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public LocationHoursOfOperationComponent addHoursOfOperation() { //3
+      LocationHoursOfOperationComponent t = new LocationHoursOfOperationComponent();
+      if (this.hoursOfOperation == null)
+        this.hoursOfOperation = new ArrayList<LocationHoursOfOperationComponent>();
+      this.hoursOfOperation.add(t);
+      return t;
+    }
+
+    public Location addHoursOfOperation(LocationHoursOfOperationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.hoursOfOperation == null)
+        this.hoursOfOperation = new ArrayList<LocationHoursOfOperationComponent>();
+      this.hoursOfOperation.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #hoursOfOperation}, creating it if it does not already exist
+     */
+    public LocationHoursOfOperationComponent getHoursOfOperationFirstRep() { 
+      if (getHoursOfOperation().isEmpty()) {
+        addHoursOfOperation();
+      }
+      return getHoursOfOperation().get(0);
+    }
+
+    /**
+     * @return {@link #availabilityExceptions} (A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
+     */
+    public StringType getAvailabilityExceptionsElement() { 
+      if (this.availabilityExceptions == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Location.availabilityExceptions");
+        else if (Configuration.doAutoCreate())
+          this.availabilityExceptions = new StringType(); // bb
+      return this.availabilityExceptions;
+    }
+
+    public boolean hasAvailabilityExceptionsElement() { 
+      return this.availabilityExceptions != null && !this.availabilityExceptions.isEmpty();
+    }
+
+    public boolean hasAvailabilityExceptions() { 
+      return this.availabilityExceptions != null && !this.availabilityExceptions.isEmpty();
+    }
+
+    /**
+     * @param value {@link #availabilityExceptions} (A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
+     */
+    public Location setAvailabilityExceptionsElement(StringType value) { 
+      this.availabilityExceptions = value;
+      return this;
+    }
+
+    /**
+     * @return A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.
+     */
+    public String getAvailabilityExceptions() { 
+      return this.availabilityExceptions == null ? null : this.availabilityExceptions.getValue();
+    }
+
+    /**
+     * @param value A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.
+     */
+    public Location setAvailabilityExceptions(String value) { 
+      if (Utilities.noString(value))
+        this.availabilityExceptions = null;
+      else {
+        if (this.availabilityExceptions == null)
+          this.availabilityExceptions = new StringType();
+        this.availabilityExceptions.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #endpoint} (Technical endpoints providing access to services operated for the location.)
      */
     public List<Reference> getEndpoint() { 
@@ -1418,6 +2109,8 @@ public class Location extends DomainResource {
         children.add(new Property("position", "", "The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).", 0, 1, position));
         children.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, 1, managingOrganization));
         children.add(new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, 1, partOf));
+        children.add(new Property("hoursOfOperation", "", "What days/times during a week is this location usually open.", 0, java.lang.Integer.MAX_VALUE, hoursOfOperation));
+        children.add(new Property("availabilityExceptions", "string", "A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.", 0, 1, availabilityExceptions));
         children.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the location.", 0, java.lang.Integer.MAX_VALUE, endpoint));
       }
 
@@ -1438,6 +2131,8 @@ public class Location extends DomainResource {
         case 747804969: /*position*/  return new Property("position", "", "The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).", 0, 1, position);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, 1, managingOrganization);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, 1, partOf);
+        case -1588872511: /*hoursOfOperation*/  return new Property("hoursOfOperation", "", "What days/times during a week is this location usually open.", 0, java.lang.Integer.MAX_VALUE, hoursOfOperation);
+        case -1149143617: /*availabilityExceptions*/  return new Property("availabilityExceptions", "string", "A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.", 0, 1, availabilityExceptions);
         case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the location.", 0, java.lang.Integer.MAX_VALUE, endpoint);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -1461,6 +2156,8 @@ public class Location extends DomainResource {
         case 747804969: /*position*/ return this.position == null ? new Base[0] : new Base[] {this.position}; // LocationPositionComponent
         case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : new Base[] {this.partOf}; // Reference
+        case -1588872511: /*hoursOfOperation*/ return this.hoursOfOperation == null ? new Base[0] : this.hoursOfOperation.toArray(new Base[this.hoursOfOperation.size()]); // LocationHoursOfOperationComponent
+        case -1149143617: /*availabilityExceptions*/ return this.availabilityExceptions == null ? new Base[0] : new Base[] {this.availabilityExceptions}; // StringType
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1514,6 +2211,12 @@ public class Location extends DomainResource {
         case -995410646: // partOf
           this.partOf = castToReference(value); // Reference
           return value;
+        case -1588872511: // hoursOfOperation
+          this.getHoursOfOperation().add((LocationHoursOfOperationComponent) value); // LocationHoursOfOperationComponent
+          return value;
+        case -1149143617: // availabilityExceptions
+          this.availabilityExceptions = castToString(value); // StringType
+          return value;
         case 1741102485: // endpoint
           this.getEndpoint().add(castToReference(value)); // Reference
           return value;
@@ -1554,6 +2257,10 @@ public class Location extends DomainResource {
           this.managingOrganization = castToReference(value); // Reference
         } else if (name.equals("partOf")) {
           this.partOf = castToReference(value); // Reference
+        } else if (name.equals("hoursOfOperation")) {
+          this.getHoursOfOperation().add((LocationHoursOfOperationComponent) value);
+        } else if (name.equals("availabilityExceptions")) {
+          this.availabilityExceptions = castToString(value); // StringType
         } else if (name.equals("endpoint")) {
           this.getEndpoint().add(castToReference(value));
         } else
@@ -1578,6 +2285,8 @@ public class Location extends DomainResource {
         case 747804969:  return getPosition(); 
         case -2058947787:  return getManagingOrganization(); 
         case -995410646:  return getPartOf(); 
+        case -1588872511:  return addHoursOfOperation(); 
+        case -1149143617:  return getAvailabilityExceptionsElement();
         case 1741102485:  return addEndpoint(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1601,6 +2310,8 @@ public class Location extends DomainResource {
         case 747804969: /*position*/ return new String[] {};
         case -2058947787: /*managingOrganization*/ return new String[] {"Reference"};
         case -995410646: /*partOf*/ return new String[] {"Reference"};
+        case -1588872511: /*hoursOfOperation*/ return new String[] {};
+        case -1149143617: /*availabilityExceptions*/ return new String[] {"string"};
         case 1741102485: /*endpoint*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1658,6 +2369,12 @@ public class Location extends DomainResource {
           this.partOf = new Reference();
           return this.partOf;
         }
+        else if (name.equals("hoursOfOperation")) {
+          return addHoursOfOperation();
+        }
+        else if (name.equals("availabilityExceptions")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.availabilityExceptions");
+        }
         else if (name.equals("endpoint")) {
           return addEndpoint();
         }
@@ -1699,6 +2416,12 @@ public class Location extends DomainResource {
         dst.position = position == null ? null : position.copy();
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
         dst.partOf = partOf == null ? null : partOf.copy();
+        if (hoursOfOperation != null) {
+          dst.hoursOfOperation = new ArrayList<LocationHoursOfOperationComponent>();
+          for (LocationHoursOfOperationComponent i : hoursOfOperation)
+            dst.hoursOfOperation.add(i.copy());
+        };
+        dst.availabilityExceptions = availabilityExceptions == null ? null : availabilityExceptions.copy();
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
@@ -1712,35 +2435,38 @@ public class Location extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Location))
+        if (!(other_ instanceof Location))
           return false;
-        Location o = (Location) other;
+        Location o = (Location) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(name, o.name, true) && compareDeep(alias, o.alias, true) && compareDeep(description, o.description, true)
            && compareDeep(mode, o.mode, true) && compareDeep(type, o.type, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true) && compareDeep(physicalType, o.physicalType, true) && compareDeep(position, o.position, true)
            && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(partOf, o.partOf, true)
+           && compareDeep(hoursOfOperation, o.hoursOfOperation, true) && compareDeep(availabilityExceptions, o.availabilityExceptions, true)
            && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Location))
+        if (!(other_ instanceof Location))
           return false;
-        Location o = (Location) other;
+        Location o = (Location) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
-           && compareValues(description, o.description, true) && compareValues(mode, o.mode, true);
+           && compareValues(description, o.description, true) && compareValues(mode, o.mode, true) && compareValues(availabilityExceptions, o.availabilityExceptions, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, operationalStatus
           , name, alias, description, mode, type, telecom, address, physicalType, position
-          , managingOrganization, partOf, endpoint);
+          , managingOrganization, partOf, hoursOfOperation, availabilityExceptions, endpoint
+          );
       }
 
   @Override

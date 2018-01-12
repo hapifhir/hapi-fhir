@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,10 @@ public enum MedicationRequestCategory {
          */
         COMMUNITY, 
         /**
+         * Includes orders for medications created when the patient is being released from a facility
+         */
+        DISCHARGE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -61,6 +65,8 @@ public enum MedicationRequestCategory {
           return OUTPATIENT;
         if ("community".equals(codeString))
           return COMMUNITY;
+        if ("discharge".equals(codeString))
+          return DISCHARGE;
         throw new FHIRException("Unknown MedicationRequestCategory code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum MedicationRequestCategory {
             case INPATIENT: return "inpatient";
             case OUTPATIENT: return "outpatient";
             case COMMUNITY: return "community";
+            case DISCHARGE: return "discharge";
             default: return "?";
           }
         }
@@ -79,6 +86,7 @@ public enum MedicationRequestCategory {
             case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting";
             case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
             case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc)";
+            case DISCHARGE: return "Includes orders for medications created when the patient is being released from a facility";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum MedicationRequestCategory {
             case INPATIENT: return "Inpatient";
             case OUTPATIENT: return "Outpatient";
             case COMMUNITY: return "Community";
+            case DISCHARGE: return "Discharge";
             default: return "?";
           }
     }

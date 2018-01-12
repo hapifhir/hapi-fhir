@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -687,24 +687,24 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContactComponent))
+        if (!(other_ instanceof ContactComponent))
           return false;
-        ContactComponent o = (ContactComponent) other;
+        ContactComponent o = (ContactComponent) other_;
         return compareDeep(relationship, o.relationship, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true) && compareDeep(organization, o.organization, true)
            && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContactComponent))
+        if (!(other_ instanceof ContactComponent))
           return false;
-        ContactComponent o = (ContactComponent) other;
+        ContactComponent o = (ContactComponent) other_;
         return compareValues(gender, o.gender, true);
       }
 
@@ -944,23 +944,23 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AnimalComponent))
+        if (!(other_ instanceof AnimalComponent))
           return false;
-        AnimalComponent o = (AnimalComponent) other;
+        AnimalComponent o = (AnimalComponent) other_;
         return compareDeep(species, o.species, true) && compareDeep(breed, o.breed, true) && compareDeep(genderStatus, o.genderStatus, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AnimalComponent))
+        if (!(other_ instanceof AnimalComponent))
           return false;
-        AnimalComponent o = (AnimalComponent) other;
+        AnimalComponent o = (AnimalComponent) other_;
         return true;
       }
 
@@ -1172,22 +1172,22 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PatientCommunicationComponent))
+        if (!(other_ instanceof PatientCommunicationComponent))
           return false;
-        PatientCommunicationComponent o = (PatientCommunicationComponent) other;
+        PatientCommunicationComponent o = (PatientCommunicationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(preferred, o.preferred, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PatientCommunicationComponent))
+        if (!(other_ instanceof PatientCommunicationComponent))
           return false;
-        PatientCommunicationComponent o = (PatientCommunicationComponent) other;
+        PatientCommunicationComponent o = (PatientCommunicationComponent) other_;
         return compareValues(preferred, o.preferred, true);
       }
 
@@ -1421,22 +1421,22 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PatientLinkComponent))
+        if (!(other_ instanceof PatientLinkComponent))
           return false;
-        PatientLinkComponent o = (PatientLinkComponent) other;
+        PatientLinkComponent o = (PatientLinkComponent) other_;
         return compareDeep(other, o.other, true) && compareDeep(type, o.type, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PatientLinkComponent))
+        if (!(other_ instanceof PatientLinkComponent))
           return false;
-        PatientLinkComponent o = (PatientLinkComponent) other;
+        PatientLinkComponent o = (PatientLinkComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -1502,10 +1502,10 @@ public class Patient extends DomainResource {
     protected Type deceased;
 
     /**
-     * Addresses for the individual.
+     * An address for the individual.
      */
     @Child(name = "address", type = {Address.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Addresses for the individual", formalDefinition="Addresses for the individual." )
+    @Description(shortDefinition="An address for the individual", formalDefinition="An address for the individual." )
     protected List<Address> address;
 
     /**
@@ -1545,10 +1545,10 @@ public class Patient extends DomainResource {
     protected AnimalComponent animal;
 
     /**
-     * Languages which may be used to communicate with the patient about his or her health.
+     * A language which may be used to communicate with the patient about his or her health.
      */
     @Child(name = "communication", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of Languages which may be used to communicate with the patient about his or her health", formalDefinition="Languages which may be used to communicate with the patient about his or her health." )
+    @Description(shortDefinition="A language which may be used to communicate with the patient about his or her health", formalDefinition="A language which may be used to communicate with the patient about his or her health." )
     protected List<PatientCommunicationComponent> communication;
 
     /**
@@ -1939,7 +1939,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #address} (Addresses for the individual.)
+     * @return {@link #address} (An address for the individual.)
      */
     public List<Address> getAddress() { 
       if (this.address == null)
@@ -2191,7 +2191,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #communication} (Languages which may be used to communicate with the patient about his or her health.)
+     * @return {@link #communication} (A language which may be used to communicate with the patient about his or her health.)
      */
     public List<PatientCommunicationComponent> getCommunication() { 
       if (this.communication == null)
@@ -2412,13 +2412,13 @@ public class Patient extends DomainResource {
         children.add(new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, 1, gender));
         children.add(new Property("birthDate", "date", "The date of birth for the individual.", 0, 1, birthDate));
         children.add(new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased));
-        children.add(new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
+        children.add(new Property("address", "Address", "An address for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
         children.add(new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus));
         children.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth));
         children.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
         children.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal));
-        children.add(new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
+        children.add(new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
         children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
         children.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization));
         children.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
@@ -2437,7 +2437,7 @@ public class Patient extends DomainResource {
         case 561497972: /*deceased*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
         case 497463828: /*deceasedBoolean*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
         case -1971804369: /*deceasedDateTime*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
-        case -1147692044: /*address*/  return new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address);
+        case -1147692044: /*address*/  return new Property("address", "Address", "An address for the individual.", 0, java.lang.Integer.MAX_VALUE, address);
         case 1756919302: /*maritalStatus*/  return new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus);
         case -1764672111: /*multipleBirth[x]*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
         case -677369713: /*multipleBirth*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
@@ -2446,7 +2446,7 @@ public class Patient extends DomainResource {
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo);
         case 951526432: /*contact*/  return new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1413116420: /*animal*/  return new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal);
-        case -1035284522: /*communication*/  return new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
+        case -1035284522: /*communication*/  return new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
         case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization);
         case 3321850: /*link*/  return new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link);
@@ -2773,12 +2773,12 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Patient))
+        if (!(other_ instanceof Patient))
           return false;
-        Patient o = (Patient) other;
+        Patient o = (Patient) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(name, o.name, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true)
            && compareDeep(deceased, o.deceased, true) && compareDeep(address, o.address, true) && compareDeep(maritalStatus, o.maritalStatus, true)
@@ -2789,12 +2789,12 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Patient))
+        if (!(other_ instanceof Patient))
           return false;
-        Patient o = (Patient) other;
+        Patient o = (Patient) other_;
         return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
           ;
       }
@@ -3005,7 +3005,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceasedDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
+  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(dateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATH_DATE = "death-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
@@ -3140,17 +3140,17 @@ public class Patient extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Patient.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
+  @SearchParamDefinition(name="address", path="Patient.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.address</b><br>
    * </p>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
  */
 @ResourceDef(name="ActivityDefinition", profile="http://hl7.org/fhir/Profile/ActivityDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "kind", "code", "timing[x]", "location", "participant", "product[x]", "quantity", "dosage", "bodySite", "transform", "dynamicValue"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "kind", "code", "doNotPerform", "timing[x]", "location", "participant", "product[x]", "quantity", "dosage", "bodySite", "specimenRequirement", "transform", "dynamicValue"})
 public class ActivityDefinition extends MetadataResource {
 
     public enum ActivityDefinitionKind {
@@ -88,6 +88,11 @@ public class ActivityDefinition extends MetadataResource {
          */
         BINARY, 
         /**
+         * A material substance originating from a biological entity intended to be transplanted or infused
+into another (possibly the same) biological entity.
+         */
+        BIOLOGICALLYDERIVEDPRODUCT, 
+        /**
          * Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
          */
         BODYSTRUCTURE, 
@@ -107,10 +112,6 @@ public class ActivityDefinition extends MetadataResource {
          * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
          */
         CARETEAM, 
-        /**
-         * Catalog entries are wrappers that contextualize items included in a catalog.
-         */
-        CATALOGENTRY, 
         /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
@@ -156,7 +157,7 @@ public class ActivityDefinition extends MetadataResource {
          */
         CONDITION, 
         /**
-         * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
+         * A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
          */
         CONSENT, 
         /**
@@ -232,6 +233,10 @@ public class ActivityDefinition extends MetadataResource {
          */
         ENROLLMENTRESPONSE, 
         /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        ENTRYDEFINITION, 
+        /**
          * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
          */
         EPISODEOFCARE, 
@@ -280,25 +285,41 @@ public class ActivityDefinition extends MetadataResource {
          */
         HEALTHCARESERVICE, 
         /**
-         * A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.
-         */
-        IMAGINGMANIFEST, 
-        /**
          * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
          */
         IMAGINGSTUDY, 
         /**
-         * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
+         * Describes the event of a patient being administered a vaccine or a record of an immunization as reported by a patient, a clinician or another party.
          */
         IMMUNIZATION, 
         /**
-         * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
+         * Describes a comparison of an immunization event against published recommendations to determine if the administration is "valid" in relation to those  recommendations.
+         */
+        IMMUNIZATIONEVALUATION, 
+        /**
+         * A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.
          */
         IMMUNIZATIONRECOMMENDATION, 
         /**
          * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
          */
         IMPLEMENTATIONGUIDE, 
+        /**
+         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
+         */
+        IMPLEMENTATIONGUIDEINPUT, 
+        /**
+         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
+         */
+        IMPLEMENTATIONGUIDEOUTPUT, 
+        /**
+         * Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.
+         */
+        INVOICE, 
+        /**
+         * A physical, countable instance of an item, for example one box or one unit.
+         */
+        ITEMINSTANCE, 
         /**
          * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
          */
@@ -328,7 +349,7 @@ public class ActivityDefinition extends MetadataResource {
          */
         MEDIA, 
         /**
-         * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
+         * This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.
          */
         MEDICATION, 
         /**
@@ -347,6 +368,34 @@ public class ActivityDefinition extends MetadataResource {
          * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
+        /**
+         * Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).
+         */
+        MEDICINALPRODUCT, 
+        /**
+         * The regulatory authorization of a medicinal product.
+         */
+        MEDICINALPRODUCTAUTHORIZATION, 
+        /**
+         * The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.
+         */
+        MEDICINALPRODUCTCLINICALS, 
+        /**
+         * A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.
+         */
+        MEDICINALPRODUCTDEVICESPEC, 
+        /**
+         * An ingredient of a manufactured item or pharmaceutical product.
+         */
+        MEDICINALPRODUCTINGREDIENT, 
+        /**
+         * A medicinal product in a container or package.
+         */
+        MEDICINALPRODUCTPACKAGED, 
+        /**
+         * A pharmaceutical product described in terms of its composition and dose form.
+         */
+        MEDICINALPRODUCTPHARMACEUTICAL, 
         /**
          * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
          */
@@ -368,6 +417,14 @@ public class ActivityDefinition extends MetadataResource {
          */
         OBSERVATION, 
         /**
+         * Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.
+         */
+        OBSERVATIONDEFINITION, 
+        /**
+         * Patient’s or family member's work information.
+         */
+        OCCUPATIONALDATA, 
+        /**
          * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
          */
         OPERATIONDEFINITION, 
@@ -379,6 +436,10 @@ public class ActivityDefinition extends MetadataResource {
          * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
          */
         ORGANIZATION, 
+        /**
+         * A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.
+         */
+        ORGANIZATIONROLE, 
         /**
          * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
          */
@@ -416,10 +477,6 @@ public class ActivityDefinition extends MetadataResource {
          */
         PROCEDURE, 
         /**
-         * A record of a request for diagnostic investigations, treatments, or operations to be performed.
-         */
-        PROCEDUREREQUEST, 
-        /**
          * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
          */
         PROCESSREQUEST, 
@@ -427,6 +484,10 @@ public class ActivityDefinition extends MetadataResource {
          * This resource provides processing status, errors and notes from the processing of a resource.
          */
         PROCESSRESPONSE, 
+        /**
+         * Details of a Health Insurance product/plan provided by an organization.
+         */
+        PRODUCTPLAN, 
         /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
@@ -452,7 +513,7 @@ public class ActivityDefinition extends MetadataResource {
          */
         RESEARCHSTUDY, 
         /**
-         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
+         * A physical entity which is the primary unit of operational and/or administrative interest in a study.
          */
         RESEARCHSUBJECT, 
         /**
@@ -479,6 +540,10 @@ public class ActivityDefinition extends MetadataResource {
          * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
          */
         SERVICEDEFINITION, 
+        /**
+         * A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.
+         */
+        SERVICEREQUEST, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -508,6 +573,18 @@ public class ActivityDefinition extends MetadataResource {
          */
         SUBSTANCE, 
         /**
+         * Todo.
+         */
+        SUBSTANCEPOLYMER, 
+        /**
+         * Todo.
+         */
+        SUBSTANCEREFERENCEINFORMATION, 
+        /**
+         * The detailed description of a substance, typically at a level beyond what is used for prescribing.
+         */
+        SUBSTANCESPECIFICATION, 
+        /**
          * Record of delivery of what is supplied.
          */
         SUPPLYDELIVERY, 
@@ -520,17 +597,29 @@ public class ActivityDefinition extends MetadataResource {
          */
         TASK, 
         /**
+         * A Terminology Capabilities documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         */
+        TERMINOLOGYCAPABILITIES, 
+        /**
          * A summary of information based on the results of executing a TestScript.
          */
         TESTREPORT, 
         /**
-         * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
+         * A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.
          */
         TESTSCRIPT, 
+        /**
+         * Information about a user's current session.
+         */
+        USERSESSION, 
         /**
          * A value set specifies a set of codes drawn from one or more code systems.
          */
         VALUESET, 
+        /**
+         * Describes validation requirements, source(s), status and dates for one or more elements.
+         */
+        VERIFICATIONRESULT, 
         /**
          * An authorization for the supply of glasses and/or contact lenses to a patient.
          */
@@ -560,6 +649,8 @@ public class ActivityDefinition extends MetadataResource {
           return BASIC;
         if ("Binary".equals(codeString))
           return BINARY;
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return BIOLOGICALLYDERIVEDPRODUCT;
         if ("BodyStructure".equals(codeString))
           return BODYSTRUCTURE;
         if ("Bundle".equals(codeString))
@@ -570,8 +661,6 @@ public class ActivityDefinition extends MetadataResource {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
-        if ("CatalogEntry".equals(codeString))
-          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -632,6 +721,8 @@ public class ActivityDefinition extends MetadataResource {
           return ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
           return ENROLLMENTRESPONSE;
+        if ("EntryDefinition".equals(codeString))
+          return ENTRYDEFINITION;
         if ("EpisodeOfCare".equals(codeString))
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
@@ -656,16 +747,24 @@ public class ActivityDefinition extends MetadataResource {
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return HEALTHCARESERVICE;
-        if ("ImagingManifest".equals(codeString))
-          return IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
           return IMMUNIZATION;
+        if ("ImmunizationEvaluation".equals(codeString))
+          return IMMUNIZATIONEVALUATION;
         if ("ImmunizationRecommendation".equals(codeString))
           return IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return IMPLEMENTATIONGUIDE;
+        if ("ImplementationGuideInput".equals(codeString))
+          return IMPLEMENTATIONGUIDEINPUT;
+        if ("ImplementationGuideOutput".equals(codeString))
+          return IMPLEMENTATIONGUIDEOUTPUT;
+        if ("Invoice".equals(codeString))
+          return INVOICE;
+        if ("ItemInstance".equals(codeString))
+          return ITEMINSTANCE;
         if ("Library".equals(codeString))
           return LIBRARY;
         if ("Linkage".equals(codeString))
@@ -690,6 +789,20 @@ public class ActivityDefinition extends MetadataResource {
           return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MedicinalProduct".equals(codeString))
+          return MEDICINALPRODUCT;
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return MEDICINALPRODUCTAUTHORIZATION;
+        if ("MedicinalProductClinicals".equals(codeString))
+          return MEDICINALPRODUCTCLINICALS;
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return MEDICINALPRODUCTDEVICESPEC;
+        if ("MedicinalProductIngredient".equals(codeString))
+          return MEDICINALPRODUCTINGREDIENT;
+        if ("MedicinalProductPackaged".equals(codeString))
+          return MEDICINALPRODUCTPACKAGED;
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return MEDICINALPRODUCTPHARMACEUTICAL;
         if ("MessageDefinition".equals(codeString))
           return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
@@ -700,12 +813,18 @@ public class ActivityDefinition extends MetadataResource {
           return NUTRITIONORDER;
         if ("Observation".equals(codeString))
           return OBSERVATION;
+        if ("ObservationDefinition".equals(codeString))
+          return OBSERVATIONDEFINITION;
+        if ("OccupationalData".equals(codeString))
+          return OCCUPATIONALDATA;
         if ("OperationDefinition".equals(codeString))
           return OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return OPERATIONOUTCOME;
         if ("Organization".equals(codeString))
           return ORGANIZATION;
+        if ("OrganizationRole".equals(codeString))
+          return ORGANIZATIONROLE;
         if ("Parameters".equals(codeString))
           return PARAMETERS;
         if ("Patient".equals(codeString))
@@ -724,12 +843,12 @@ public class ActivityDefinition extends MetadataResource {
           return PRACTITIONERROLE;
         if ("Procedure".equals(codeString))
           return PROCEDURE;
-        if ("ProcedureRequest".equals(codeString))
-          return PROCEDUREREQUEST;
         if ("ProcessRequest".equals(codeString))
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
+        if ("ProductPlan".equals(codeString))
+          return PRODUCTPLAN;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -756,6 +875,8 @@ public class ActivityDefinition extends MetadataResource {
           return SEQUENCE;
         if ("ServiceDefinition".equals(codeString))
           return SERVICEDEFINITION;
+        if ("ServiceRequest".equals(codeString))
+          return SERVICEREQUEST;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -770,18 +891,30 @@ public class ActivityDefinition extends MetadataResource {
           return SUBSCRIPTION;
         if ("Substance".equals(codeString))
           return SUBSTANCE;
+        if ("SubstancePolymer".equals(codeString))
+          return SUBSTANCEPOLYMER;
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return SUBSTANCEREFERENCEINFORMATION;
+        if ("SubstanceSpecification".equals(codeString))
+          return SUBSTANCESPECIFICATION;
         if ("SupplyDelivery".equals(codeString))
           return SUPPLYDELIVERY;
         if ("SupplyRequest".equals(codeString))
           return SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return TASK;
+        if ("TerminologyCapabilities".equals(codeString))
+          return TERMINOLOGYCAPABILITIES;
         if ("TestReport".equals(codeString))
           return TESTREPORT;
         if ("TestScript".equals(codeString))
           return TESTSCRIPT;
+        if ("UserSession".equals(codeString))
+          return USERSESSION;
         if ("ValueSet".equals(codeString))
           return VALUESET;
+        if ("VerificationResult".equals(codeString))
+          return VERIFICATIONRESULT;
         if ("VisionPrescription".equals(codeString))
           return VISIONPRESCRIPTION;
         if (Configuration.isAcceptInvalidEnums())
@@ -800,12 +933,12 @@ public class ActivityDefinition extends MetadataResource {
             case AUDITEVENT: return "AuditEvent";
             case BASIC: return "Basic";
             case BINARY: return "Binary";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "BiologicallyDerivedProduct";
             case BODYSTRUCTURE: return "BodyStructure";
             case BUNDLE: return "Bundle";
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
-            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -836,6 +969,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
+            case ENTRYDEFINITION: return "EntryDefinition";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
             case EXAMPLESCENARIO: return "ExampleScenario";
@@ -848,11 +982,15 @@ public class ActivityDefinition extends MetadataResource {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
+            case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
+            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
+            case INVOICE: return "Invoice";
+            case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
             case LINKAGE: return "Linkage";
             case LIST: return "List";
@@ -865,14 +1003,24 @@ public class ActivityDefinition extends MetadataResource {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MEDICINALPRODUCT: return "MedicinalProduct";
+            case MEDICINALPRODUCTAUTHORIZATION: return "MedicinalProductAuthorization";
+            case MEDICINALPRODUCTCLINICALS: return "MedicinalProductClinicals";
+            case MEDICINALPRODUCTDEVICESPEC: return "MedicinalProductDeviceSpec";
+            case MEDICINALPRODUCTINGREDIENT: return "MedicinalProductIngredient";
+            case MEDICINALPRODUCTPACKAGED: return "MedicinalProductPackaged";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "MedicinalProductPharmaceutical";
             case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONORDER: return "NutritionOrder";
             case OBSERVATION: return "Observation";
+            case OBSERVATIONDEFINITION: return "ObservationDefinition";
+            case OCCUPATIONALDATA: return "OccupationalData";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
             case ORGANIZATION: return "Organization";
+            case ORGANIZATIONROLE: return "OrganizationRole";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
@@ -882,9 +1030,9 @@ public class ActivityDefinition extends MetadataResource {
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
-            case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PRODUCTPLAN: return "ProductPlan";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -898,6 +1046,7 @@ public class ActivityDefinition extends MetadataResource {
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
             case SERVICEDEFINITION: return "ServiceDefinition";
+            case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case SPECIMENDEFINITION: return "SpecimenDefinition";
@@ -905,12 +1054,18 @@ public class ActivityDefinition extends MetadataResource {
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
             case SUBSTANCE: return "Substance";
+            case SUBSTANCEPOLYMER: return "SubstancePolymer";
+            case SUBSTANCEREFERENCEINFORMATION: return "SubstanceReferenceInformation";
+            case SUBSTANCESPECIFICATION: return "SubstanceSpecification";
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TERMINOLOGYCAPABILITIES: return "TerminologyCapabilities";
             case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
+            case USERSESSION: return "UserSession";
             case VALUESET: return "ValueSet";
+            case VERIFICATIONRESULT: return "VerificationResult";
             case VISIONPRESCRIPTION: return "VisionPrescription";
             default: return "?";
           }
@@ -926,12 +1081,12 @@ public class ActivityDefinition extends MetadataResource {
             case AUDITEVENT: return "http://hl7.org/fhir/resource-types";
             case BASIC: return "http://hl7.org/fhir/resource-types";
             case BINARY: return "http://hl7.org/fhir/resource-types";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "http://hl7.org/fhir/resource-types";
             case BODYSTRUCTURE: return "http://hl7.org/fhir/resource-types";
             case BUNDLE: return "http://hl7.org/fhir/resource-types";
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
-            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -962,6 +1117,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENDPOINT: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTREQUEST: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case ENTRYDEFINITION: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
             case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
@@ -974,11 +1130,15 @@ public class ActivityDefinition extends MetadataResource {
             case GROUP: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGMANIFEST: return "http://hl7.org/fhir/resource-types";
             case IMAGINGSTUDY: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATION: return "http://hl7.org/fhir/resource-types";
+            case IMMUNIZATIONEVALUATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
             case IMPLEMENTATIONGUIDE: return "http://hl7.org/fhir/resource-types";
+            case IMPLEMENTATIONGUIDEINPUT: return "http://hl7.org/fhir/resource-types";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "http://hl7.org/fhir/resource-types";
+            case INVOICE: return "http://hl7.org/fhir/resource-types";
+            case ITEMINSTANCE: return "http://hl7.org/fhir/resource-types";
             case LIBRARY: return "http://hl7.org/fhir/resource-types";
             case LINKAGE: return "http://hl7.org/fhir/resource-types";
             case LIST: return "http://hl7.org/fhir/resource-types";
@@ -991,14 +1151,24 @@ public class ActivityDefinition extends MetadataResource {
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTAUTHORIZATION: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTCLINICALS: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTDEVICESPEC: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTINGREDIENT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTPACKAGED: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "http://hl7.org/fhir/resource-types";
             case MESSAGEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case MESSAGEHEADER: return "http://hl7.org/fhir/resource-types";
             case NAMINGSYSTEM: return "http://hl7.org/fhir/resource-types";
             case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
             case OBSERVATION: return "http://hl7.org/fhir/resource-types";
+            case OBSERVATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case OCCUPATIONALDATA: return "http://hl7.org/fhir/resource-types";
             case OPERATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONOUTCOME: return "http://hl7.org/fhir/resource-types";
             case ORGANIZATION: return "http://hl7.org/fhir/resource-types";
+            case ORGANIZATIONROLE: return "http://hl7.org/fhir/resource-types";
             case PARAMETERS: return "http://hl7.org/fhir/resource-types";
             case PATIENT: return "http://hl7.org/fhir/resource-types";
             case PAYMENTNOTICE: return "http://hl7.org/fhir/resource-types";
@@ -1008,9 +1178,9 @@ public class ActivityDefinition extends MetadataResource {
             case PRACTITIONER: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONERROLE: return "http://hl7.org/fhir/resource-types";
             case PROCEDURE: return "http://hl7.org/fhir/resource-types";
-            case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case PRODUCTPLAN: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -1024,6 +1194,7 @@ public class ActivityDefinition extends MetadataResource {
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case SERVICEREQUEST: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -1031,12 +1202,18 @@ public class ActivityDefinition extends MetadataResource {
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
             case SUBSTANCE: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCEPOLYMER: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCEREFERENCEINFORMATION: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCESPECIFICATION: return "http://hl7.org/fhir/resource-types";
             case SUPPLYDELIVERY: return "http://hl7.org/fhir/resource-types";
             case SUPPLYREQUEST: return "http://hl7.org/fhir/resource-types";
             case TASK: return "http://hl7.org/fhir/resource-types";
+            case TERMINOLOGYCAPABILITIES: return "http://hl7.org/fhir/resource-types";
             case TESTREPORT: return "http://hl7.org/fhir/resource-types";
             case TESTSCRIPT: return "http://hl7.org/fhir/resource-types";
+            case USERSESSION: return "http://hl7.org/fhir/resource-types";
             case VALUESET: return "http://hl7.org/fhir/resource-types";
+            case VERIFICATIONRESULT: return "http://hl7.org/fhir/resource-types";
             case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
             default: return "?";
           }
@@ -1052,12 +1229,12 @@ public class ActivityDefinition extends MetadataResource {
             case AUDITEVENT: return "A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.";
             case BASIC: return "Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.";
             case BINARY: return "A binary resource can contain any content, whether text, image, pdf, zip archive, etc.";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "A material substance originating from a biological entity intended to be transplanted or infused\ninto another (possibly the same) biological entity.";
             case BODYSTRUCTURE: return "Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.";
             case BUNDLE: return "A container for a collection of resources.";
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
-            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -1069,7 +1246,7 @@ public class ActivityDefinition extends MetadataResource {
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
-            case CONSENT: return "A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
+            case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
             case CONTRACT: return "A formal agreement between parties regarding the conduct of business, exchange of information or other matters.";
             case COVERAGE: return "Financial instrument which may be used to reimburse or pay for health care products and services.";
             case DETECTEDISSUE: return "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.";
@@ -1088,6 +1265,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
             case ENROLLMENTREQUEST: return "This resource provides the insurance enrollment details to the insurer regarding a specified coverage.";
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
+            case ENTRYDEFINITION: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
             case EXAMPLESCENARIO: return "Example of workflow instance.";
@@ -1100,11 +1278,15 @@ public class ActivityDefinition extends MetadataResource {
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
-            case IMAGINGMANIFEST: return "A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.";
             case IMAGINGSTUDY: return "Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.";
-            case IMMUNIZATION: return "Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.";
-            case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
+            case IMMUNIZATION: return "Describes the event of a patient being administered a vaccine or a record of an immunization as reported by a patient, a clinician or another party.";
+            case IMMUNIZATIONEVALUATION: return "Describes a comparison of an immunization event against published recommendations to determine if the administration is \"valid\" in relation to those  recommendations.";
+            case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case IMPLEMENTATIONGUIDEINPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case INVOICE: return "Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.";
+            case ITEMINSTANCE: return "A physical, countable instance of an item, for example one box or one unit.";
             case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
@@ -1112,19 +1294,29 @@ public class ActivityDefinition extends MetadataResource {
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
             case MEASUREREPORT: return "The MeasureReport resource contains the results of evaluating a measure.";
             case MEDIA: return "A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.";
-            case MEDICATION: return "This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.";
+            case MEDICATION: return "This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICINALPRODUCT: return "Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).";
+            case MEDICINALPRODUCTAUTHORIZATION: return "The regulatory authorization of a medicinal product.";
+            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.";
+            case MEDICINALPRODUCTDEVICESPEC: return "A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.";
+            case MEDICINALPRODUCTINGREDIENT: return "An ingredient of a manufactured item or pharmaceutical product.";
+            case MEDICINALPRODUCTPACKAGED: return "A medicinal product in a container or package.";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "A pharmaceutical product described in terms of its composition and dose form.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
+            case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
+            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
+            case ORGANIZATIONROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PARAMETERS: return "This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.";
             case PATIENT: return "Demographics and other administrative information about an individual or animal receiving care or other health-related services.";
             case PAYMENTNOTICE: return "This resource provides the status of the payment for goods and services rendered, and the request and response resource references.";
@@ -1134,22 +1326,23 @@ public class ActivityDefinition extends MetadataResource {
             case PRACTITIONER: return "A person who is directly or indirectly involved in the provisioning of healthcare.";
             case PRACTITIONERROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PROCEDURE: return "An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.";
-            case PROCEDUREREQUEST: return "A record of a request for diagnostic investigations, treatments, or operations to be performed.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
+            case PRODUCTPLAN: return "Details of a Health Insurance product/plan provided by an organization.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers from end-users. Questionnaires provide detailed control over order, presentation, phraseology and grouping to allow coherent, consistent data collection.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the questionnaire being responded to.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
             case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
             case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.";
-            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A physical entity which is the primary unit of operational and/or administrative interest in a study.";
             case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slots of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
             case SEQUENCE: return "Raw data describing a biological sequence.";
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
+            case SERVICEREQUEST: return "A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
@@ -1157,12 +1350,18 @@ public class ActivityDefinition extends MetadataResource {
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
             case SUBSTANCE: return "A homogeneous material with a definite composition.";
+            case SUBSTANCEPOLYMER: return "Todo.";
+            case SUBSTANCEREFERENCEINFORMATION: return "Todo.";
+            case SUBSTANCESPECIFICATION: return "The detailed description of a substance, typically at a level beyond what is used for prescribing.";
             case SUPPLYDELIVERY: return "Record of delivery of what is supplied.";
             case SUPPLYREQUEST: return "A record of a request for a medication, substance or device used in the healthcare setting.";
             case TASK: return "A task to be performed.";
+            case TERMINOLOGYCAPABILITIES: return "A Terminology Capabilities documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case TESTREPORT: return "A summary of information based on the results of executing a TestScript.";
-            case TESTSCRIPT: return "A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.";
+            case TESTSCRIPT: return "A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.";
+            case USERSESSION: return "Information about a user's current session.";
             case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
+            case VERIFICATIONRESULT: return "Describes validation requirements, source(s), status and dates for one or more elements.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
             default: return "?";
           }
@@ -1178,12 +1377,12 @@ public class ActivityDefinition extends MetadataResource {
             case AUDITEVENT: return "AuditEvent";
             case BASIC: return "Basic";
             case BINARY: return "Binary";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "BiologicallyDerivedProduct";
             case BODYSTRUCTURE: return "BodyStructure";
             case BUNDLE: return "Bundle";
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
-            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -1214,6 +1413,7 @@ public class ActivityDefinition extends MetadataResource {
             case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
+            case ENTRYDEFINITION: return "EntryDefinition";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
             case EXAMPLESCENARIO: return "ExampleScenario";
@@ -1226,11 +1426,15 @@ public class ActivityDefinition extends MetadataResource {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
+            case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
+            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
+            case INVOICE: return "Invoice";
+            case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
             case LINKAGE: return "Linkage";
             case LIST: return "List";
@@ -1243,14 +1447,24 @@ public class ActivityDefinition extends MetadataResource {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MEDICINALPRODUCT: return "MedicinalProduct";
+            case MEDICINALPRODUCTAUTHORIZATION: return "MedicinalProductAuthorization";
+            case MEDICINALPRODUCTCLINICALS: return "MedicinalProductClinicals";
+            case MEDICINALPRODUCTDEVICESPEC: return "MedicinalProductDeviceSpec";
+            case MEDICINALPRODUCTINGREDIENT: return "MedicinalProductIngredient";
+            case MEDICINALPRODUCTPACKAGED: return "MedicinalProductPackaged";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "MedicinalProductPharmaceutical";
             case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONORDER: return "NutritionOrder";
             case OBSERVATION: return "Observation";
+            case OBSERVATIONDEFINITION: return "ObservationDefinition";
+            case OCCUPATIONALDATA: return "OccupationalData";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
             case ORGANIZATION: return "Organization";
+            case ORGANIZATIONROLE: return "OrganizationRole";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
@@ -1260,9 +1474,9 @@ public class ActivityDefinition extends MetadataResource {
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
-            case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PRODUCTPLAN: return "ProductPlan";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -1276,6 +1490,7 @@ public class ActivityDefinition extends MetadataResource {
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
             case SERVICEDEFINITION: return "ServiceDefinition";
+            case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case SPECIMENDEFINITION: return "SpecimenDefinition";
@@ -1283,12 +1498,18 @@ public class ActivityDefinition extends MetadataResource {
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
             case SUBSTANCE: return "Substance";
+            case SUBSTANCEPOLYMER: return "SubstancePolymer";
+            case SUBSTANCEREFERENCEINFORMATION: return "SubstanceReferenceInformation";
+            case SUBSTANCESPECIFICATION: return "SubstanceSpecification";
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TERMINOLOGYCAPABILITIES: return "TerminologyCapabilities";
             case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
+            case USERSESSION: return "UserSession";
             case VALUESET: return "ValueSet";
+            case VERIFICATIONRESULT: return "VerificationResult";
             case VISIONPRESCRIPTION: return "VisionPrescription";
             default: return "?";
           }
@@ -1318,6 +1539,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.BASIC;
         if ("Binary".equals(codeString))
           return ActivityDefinitionKind.BINARY;
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return ActivityDefinitionKind.BIOLOGICALLYDERIVEDPRODUCT;
         if ("BodyStructure".equals(codeString))
           return ActivityDefinitionKind.BODYSTRUCTURE;
         if ("Bundle".equals(codeString))
@@ -1328,8 +1551,6 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return ActivityDefinitionKind.CARETEAM;
-        if ("CatalogEntry".equals(codeString))
-          return ActivityDefinitionKind.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return ActivityDefinitionKind.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -1390,6 +1611,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
           return ActivityDefinitionKind.ENROLLMENTRESPONSE;
+        if ("EntryDefinition".equals(codeString))
+          return ActivityDefinitionKind.ENTRYDEFINITION;
         if ("EpisodeOfCare".equals(codeString))
           return ActivityDefinitionKind.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
@@ -1414,16 +1637,24 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return ActivityDefinitionKind.HEALTHCARESERVICE;
-        if ("ImagingManifest".equals(codeString))
-          return ActivityDefinitionKind.IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return ActivityDefinitionKind.IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
           return ActivityDefinitionKind.IMMUNIZATION;
+        if ("ImmunizationEvaluation".equals(codeString))
+          return ActivityDefinitionKind.IMMUNIZATIONEVALUATION;
         if ("ImmunizationRecommendation".equals(codeString))
           return ActivityDefinitionKind.IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return ActivityDefinitionKind.IMPLEMENTATIONGUIDE;
+        if ("ImplementationGuideInput".equals(codeString))
+          return ActivityDefinitionKind.IMPLEMENTATIONGUIDEINPUT;
+        if ("ImplementationGuideOutput".equals(codeString))
+          return ActivityDefinitionKind.IMPLEMENTATIONGUIDEOUTPUT;
+        if ("Invoice".equals(codeString))
+          return ActivityDefinitionKind.INVOICE;
+        if ("ItemInstance".equals(codeString))
+          return ActivityDefinitionKind.ITEMINSTANCE;
         if ("Library".equals(codeString))
           return ActivityDefinitionKind.LIBRARY;
         if ("Linkage".equals(codeString))
@@ -1448,6 +1679,20 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return ActivityDefinitionKind.MEDICATIONSTATEMENT;
+        if ("MedicinalProduct".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCT;
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTAUTHORIZATION;
+        if ("MedicinalProductClinicals".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTCLINICALS;
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTDEVICESPEC;
+        if ("MedicinalProductIngredient".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTINGREDIENT;
+        if ("MedicinalProductPackaged".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTPACKAGED;
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return ActivityDefinitionKind.MEDICINALPRODUCTPHARMACEUTICAL;
         if ("MessageDefinition".equals(codeString))
           return ActivityDefinitionKind.MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
@@ -1458,12 +1703,18 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.NUTRITIONORDER;
         if ("Observation".equals(codeString))
           return ActivityDefinitionKind.OBSERVATION;
+        if ("ObservationDefinition".equals(codeString))
+          return ActivityDefinitionKind.OBSERVATIONDEFINITION;
+        if ("OccupationalData".equals(codeString))
+          return ActivityDefinitionKind.OCCUPATIONALDATA;
         if ("OperationDefinition".equals(codeString))
           return ActivityDefinitionKind.OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return ActivityDefinitionKind.OPERATIONOUTCOME;
         if ("Organization".equals(codeString))
           return ActivityDefinitionKind.ORGANIZATION;
+        if ("OrganizationRole".equals(codeString))
+          return ActivityDefinitionKind.ORGANIZATIONROLE;
         if ("Parameters".equals(codeString))
           return ActivityDefinitionKind.PARAMETERS;
         if ("Patient".equals(codeString))
@@ -1482,12 +1733,12 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.PRACTITIONERROLE;
         if ("Procedure".equals(codeString))
           return ActivityDefinitionKind.PROCEDURE;
-        if ("ProcedureRequest".equals(codeString))
-          return ActivityDefinitionKind.PROCEDUREREQUEST;
         if ("ProcessRequest".equals(codeString))
           return ActivityDefinitionKind.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return ActivityDefinitionKind.PROCESSRESPONSE;
+        if ("ProductPlan".equals(codeString))
+          return ActivityDefinitionKind.PRODUCTPLAN;
         if ("Provenance".equals(codeString))
           return ActivityDefinitionKind.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -1514,6 +1765,8 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.SEQUENCE;
         if ("ServiceDefinition".equals(codeString))
           return ActivityDefinitionKind.SERVICEDEFINITION;
+        if ("ServiceRequest".equals(codeString))
+          return ActivityDefinitionKind.SERVICEREQUEST;
         if ("Slot".equals(codeString))
           return ActivityDefinitionKind.SLOT;
         if ("Specimen".equals(codeString))
@@ -1528,18 +1781,30 @@ public class ActivityDefinition extends MetadataResource {
           return ActivityDefinitionKind.SUBSCRIPTION;
         if ("Substance".equals(codeString))
           return ActivityDefinitionKind.SUBSTANCE;
+        if ("SubstancePolymer".equals(codeString))
+          return ActivityDefinitionKind.SUBSTANCEPOLYMER;
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return ActivityDefinitionKind.SUBSTANCEREFERENCEINFORMATION;
+        if ("SubstanceSpecification".equals(codeString))
+          return ActivityDefinitionKind.SUBSTANCESPECIFICATION;
         if ("SupplyDelivery".equals(codeString))
           return ActivityDefinitionKind.SUPPLYDELIVERY;
         if ("SupplyRequest".equals(codeString))
           return ActivityDefinitionKind.SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return ActivityDefinitionKind.TASK;
+        if ("TerminologyCapabilities".equals(codeString))
+          return ActivityDefinitionKind.TERMINOLOGYCAPABILITIES;
         if ("TestReport".equals(codeString))
           return ActivityDefinitionKind.TESTREPORT;
         if ("TestScript".equals(codeString))
           return ActivityDefinitionKind.TESTSCRIPT;
+        if ("UserSession".equals(codeString))
+          return ActivityDefinitionKind.USERSESSION;
         if ("ValueSet".equals(codeString))
           return ActivityDefinitionKind.VALUESET;
+        if ("VerificationResult".equals(codeString))
+          return ActivityDefinitionKind.VERIFICATIONRESULT;
         if ("VisionPrescription".equals(codeString))
           return ActivityDefinitionKind.VISIONPRESCRIPTION;
         throw new IllegalArgumentException("Unknown ActivityDefinitionKind code '"+codeString+"'");
@@ -1570,6 +1835,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.BASIC);
         if ("Binary".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.BINARY);
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.BIOLOGICALLYDERIVEDPRODUCT);
         if ("BodyStructure".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.BODYSTRUCTURE);
         if ("Bundle".equals(codeString))
@@ -1580,8 +1847,6 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CARETEAM);
-        if ("CatalogEntry".equals(codeString))
-          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -1642,6 +1907,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ENROLLMENTREQUEST);
         if ("EnrollmentResponse".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ENROLLMENTRESPONSE);
+        if ("EntryDefinition".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ENTRYDEFINITION);
         if ("EpisodeOfCare".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
@@ -1666,16 +1933,24 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.HEALTHCARESERVICE);
-        if ("ImagingManifest".equals(codeString))
-          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMAGINGMANIFEST);
         if ("ImagingStudy".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMAGINGSTUDY);
         if ("Immunization".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMMUNIZATION);
+        if ("ImmunizationEvaluation".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMMUNIZATIONEVALUATION);
         if ("ImmunizationRecommendation".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMMUNIZATIONRECOMMENDATION);
         if ("ImplementationGuide".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMPLEMENTATIONGUIDE);
+        if ("ImplementationGuideInput".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMPLEMENTATIONGUIDEINPUT);
+        if ("ImplementationGuideOutput".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.IMPLEMENTATIONGUIDEOUTPUT);
+        if ("Invoice".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.INVOICE);
+        if ("ItemInstance".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ITEMINSTANCE);
         if ("Library".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.LIBRARY);
         if ("Linkage".equals(codeString))
@@ -1700,6 +1975,20 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICATIONSTATEMENT);
+        if ("MedicinalProduct".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCT);
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTAUTHORIZATION);
+        if ("MedicinalProductClinicals".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTCLINICALS);
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTDEVICESPEC);
+        if ("MedicinalProductIngredient".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTINGREDIENT);
+        if ("MedicinalProductPackaged".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTPACKAGED);
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MEDICINALPRODUCTPHARMACEUTICAL);
         if ("MessageDefinition".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.MESSAGEDEFINITION);
         if ("MessageHeader".equals(codeString))
@@ -1710,12 +1999,18 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.NUTRITIONORDER);
         if ("Observation".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.OBSERVATION);
+        if ("ObservationDefinition".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.OBSERVATIONDEFINITION);
+        if ("OccupationalData".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.OCCUPATIONALDATA);
         if ("OperationDefinition".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.OPERATIONDEFINITION);
         if ("OperationOutcome".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.OPERATIONOUTCOME);
         if ("Organization".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ORGANIZATION);
+        if ("OrganizationRole".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.ORGANIZATIONROLE);
         if ("Parameters".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PARAMETERS);
         if ("Patient".equals(codeString))
@@ -1734,12 +2029,12 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PRACTITIONERROLE);
         if ("Procedure".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PROCEDURE);
-        if ("ProcedureRequest".equals(codeString))
-          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PROCEDUREREQUEST);
         if ("ProcessRequest".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PROCESSRESPONSE);
+        if ("ProductPlan".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PRODUCTPLAN);
         if ("Provenance".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -1766,6 +2061,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SEQUENCE);
         if ("ServiceDefinition".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SERVICEDEFINITION);
+        if ("ServiceRequest".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SERVICEREQUEST);
         if ("Slot".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SLOT);
         if ("Specimen".equals(codeString))
@@ -1780,18 +2077,30 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUBSCRIPTION);
         if ("Substance".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUBSTANCE);
+        if ("SubstancePolymer".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUBSTANCEPOLYMER);
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUBSTANCEREFERENCEINFORMATION);
+        if ("SubstanceSpecification".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUBSTANCESPECIFICATION);
         if ("SupplyDelivery".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUPPLYDELIVERY);
         if ("SupplyRequest".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.SUPPLYREQUEST);
         if ("Task".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.TASK);
+        if ("TerminologyCapabilities".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.TERMINOLOGYCAPABILITIES);
         if ("TestReport".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.TESTREPORT);
         if ("TestScript".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.TESTSCRIPT);
+        if ("UserSession".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.USERSESSION);
         if ("ValueSet".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.VALUESET);
+        if ("VerificationResult".equals(codeString))
+          return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.VERIFICATIONRESULT);
         if ("VisionPrescription".equals(codeString))
           return new Enumeration<ActivityDefinitionKind>(this, ActivityDefinitionKind.VISIONPRESCRIPTION);
         throw new FHIRException("Unknown ActivityDefinitionKind code '"+codeString+"'");
@@ -1815,6 +2124,8 @@ public class ActivityDefinition extends MetadataResource {
         return "Basic";
       if (code == ActivityDefinitionKind.BINARY)
         return "Binary";
+      if (code == ActivityDefinitionKind.BIOLOGICALLYDERIVEDPRODUCT)
+        return "BiologicallyDerivedProduct";
       if (code == ActivityDefinitionKind.BODYSTRUCTURE)
         return "BodyStructure";
       if (code == ActivityDefinitionKind.BUNDLE)
@@ -1825,8 +2136,6 @@ public class ActivityDefinition extends MetadataResource {
         return "CarePlan";
       if (code == ActivityDefinitionKind.CARETEAM)
         return "CareTeam";
-      if (code == ActivityDefinitionKind.CATALOGENTRY)
-        return "CatalogEntry";
       if (code == ActivityDefinitionKind.CHARGEITEM)
         return "ChargeItem";
       if (code == ActivityDefinitionKind.CLAIM)
@@ -1887,6 +2196,8 @@ public class ActivityDefinition extends MetadataResource {
         return "EnrollmentRequest";
       if (code == ActivityDefinitionKind.ENROLLMENTRESPONSE)
         return "EnrollmentResponse";
+      if (code == ActivityDefinitionKind.ENTRYDEFINITION)
+        return "EntryDefinition";
       if (code == ActivityDefinitionKind.EPISODEOFCARE)
         return "EpisodeOfCare";
       if (code == ActivityDefinitionKind.EVENTDEFINITION)
@@ -1911,16 +2222,24 @@ public class ActivityDefinition extends MetadataResource {
         return "GuidanceResponse";
       if (code == ActivityDefinitionKind.HEALTHCARESERVICE)
         return "HealthcareService";
-      if (code == ActivityDefinitionKind.IMAGINGMANIFEST)
-        return "ImagingManifest";
       if (code == ActivityDefinitionKind.IMAGINGSTUDY)
         return "ImagingStudy";
       if (code == ActivityDefinitionKind.IMMUNIZATION)
         return "Immunization";
+      if (code == ActivityDefinitionKind.IMMUNIZATIONEVALUATION)
+        return "ImmunizationEvaluation";
       if (code == ActivityDefinitionKind.IMMUNIZATIONRECOMMENDATION)
         return "ImmunizationRecommendation";
       if (code == ActivityDefinitionKind.IMPLEMENTATIONGUIDE)
         return "ImplementationGuide";
+      if (code == ActivityDefinitionKind.IMPLEMENTATIONGUIDEINPUT)
+        return "ImplementationGuideInput";
+      if (code == ActivityDefinitionKind.IMPLEMENTATIONGUIDEOUTPUT)
+        return "ImplementationGuideOutput";
+      if (code == ActivityDefinitionKind.INVOICE)
+        return "Invoice";
+      if (code == ActivityDefinitionKind.ITEMINSTANCE)
+        return "ItemInstance";
       if (code == ActivityDefinitionKind.LIBRARY)
         return "Library";
       if (code == ActivityDefinitionKind.LINKAGE)
@@ -1945,6 +2264,20 @@ public class ActivityDefinition extends MetadataResource {
         return "MedicationRequest";
       if (code == ActivityDefinitionKind.MEDICATIONSTATEMENT)
         return "MedicationStatement";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCT)
+        return "MedicinalProduct";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTAUTHORIZATION)
+        return "MedicinalProductAuthorization";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTCLINICALS)
+        return "MedicinalProductClinicals";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTDEVICESPEC)
+        return "MedicinalProductDeviceSpec";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTINGREDIENT)
+        return "MedicinalProductIngredient";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTPACKAGED)
+        return "MedicinalProductPackaged";
+      if (code == ActivityDefinitionKind.MEDICINALPRODUCTPHARMACEUTICAL)
+        return "MedicinalProductPharmaceutical";
       if (code == ActivityDefinitionKind.MESSAGEDEFINITION)
         return "MessageDefinition";
       if (code == ActivityDefinitionKind.MESSAGEHEADER)
@@ -1955,12 +2288,18 @@ public class ActivityDefinition extends MetadataResource {
         return "NutritionOrder";
       if (code == ActivityDefinitionKind.OBSERVATION)
         return "Observation";
+      if (code == ActivityDefinitionKind.OBSERVATIONDEFINITION)
+        return "ObservationDefinition";
+      if (code == ActivityDefinitionKind.OCCUPATIONALDATA)
+        return "OccupationalData";
       if (code == ActivityDefinitionKind.OPERATIONDEFINITION)
         return "OperationDefinition";
       if (code == ActivityDefinitionKind.OPERATIONOUTCOME)
         return "OperationOutcome";
       if (code == ActivityDefinitionKind.ORGANIZATION)
         return "Organization";
+      if (code == ActivityDefinitionKind.ORGANIZATIONROLE)
+        return "OrganizationRole";
       if (code == ActivityDefinitionKind.PARAMETERS)
         return "Parameters";
       if (code == ActivityDefinitionKind.PATIENT)
@@ -1979,12 +2318,12 @@ public class ActivityDefinition extends MetadataResource {
         return "PractitionerRole";
       if (code == ActivityDefinitionKind.PROCEDURE)
         return "Procedure";
-      if (code == ActivityDefinitionKind.PROCEDUREREQUEST)
-        return "ProcedureRequest";
       if (code == ActivityDefinitionKind.PROCESSREQUEST)
         return "ProcessRequest";
       if (code == ActivityDefinitionKind.PROCESSRESPONSE)
         return "ProcessResponse";
+      if (code == ActivityDefinitionKind.PRODUCTPLAN)
+        return "ProductPlan";
       if (code == ActivityDefinitionKind.PROVENANCE)
         return "Provenance";
       if (code == ActivityDefinitionKind.QUESTIONNAIRE)
@@ -2011,6 +2350,8 @@ public class ActivityDefinition extends MetadataResource {
         return "Sequence";
       if (code == ActivityDefinitionKind.SERVICEDEFINITION)
         return "ServiceDefinition";
+      if (code == ActivityDefinitionKind.SERVICEREQUEST)
+        return "ServiceRequest";
       if (code == ActivityDefinitionKind.SLOT)
         return "Slot";
       if (code == ActivityDefinitionKind.SPECIMEN)
@@ -2025,18 +2366,30 @@ public class ActivityDefinition extends MetadataResource {
         return "Subscription";
       if (code == ActivityDefinitionKind.SUBSTANCE)
         return "Substance";
+      if (code == ActivityDefinitionKind.SUBSTANCEPOLYMER)
+        return "SubstancePolymer";
+      if (code == ActivityDefinitionKind.SUBSTANCEREFERENCEINFORMATION)
+        return "SubstanceReferenceInformation";
+      if (code == ActivityDefinitionKind.SUBSTANCESPECIFICATION)
+        return "SubstanceSpecification";
       if (code == ActivityDefinitionKind.SUPPLYDELIVERY)
         return "SupplyDelivery";
       if (code == ActivityDefinitionKind.SUPPLYREQUEST)
         return "SupplyRequest";
       if (code == ActivityDefinitionKind.TASK)
         return "Task";
+      if (code == ActivityDefinitionKind.TERMINOLOGYCAPABILITIES)
+        return "TerminologyCapabilities";
       if (code == ActivityDefinitionKind.TESTREPORT)
         return "TestReport";
       if (code == ActivityDefinitionKind.TESTSCRIPT)
         return "TestScript";
+      if (code == ActivityDefinitionKind.USERSESSION)
+        return "UserSession";
       if (code == ActivityDefinitionKind.VALUESET)
         return "ValueSet";
+      if (code == ActivityDefinitionKind.VERIFICATIONRESULT)
+        return "VerificationResult";
       if (code == ActivityDefinitionKind.VISIONPRESCRIPTION)
         return "VisionPrescription";
       return "?";
@@ -2353,22 +2706,22 @@ public class ActivityDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActivityDefinitionParticipantComponent))
+        if (!(other_ instanceof ActivityDefinitionParticipantComponent))
           return false;
-        ActivityDefinitionParticipantComponent o = (ActivityDefinitionParticipantComponent) other;
+        ActivityDefinitionParticipantComponent o = (ActivityDefinitionParticipantComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(role, o.role, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActivityDefinitionParticipantComponent))
+        if (!(other_ instanceof ActivityDefinitionParticipantComponent))
           return false;
-        ActivityDefinitionParticipantComponent o = (ActivityDefinitionParticipantComponent) other;
+        ActivityDefinitionParticipantComponent o = (ActivityDefinitionParticipantComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -2738,23 +3091,23 @@ public class ActivityDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActivityDefinitionDynamicValueComponent))
+        if (!(other_ instanceof ActivityDefinitionDynamicValueComponent))
           return false;
-        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other;
+        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other_;
         return compareDeep(description, o.description, true) && compareDeep(path, o.path, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActivityDefinitionDynamicValueComponent))
+        if (!(other_ instanceof ActivityDefinitionDynamicValueComponent))
           return false;
-        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other;
+        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other_;
         return compareValues(description, o.description, true) && compareValues(path, o.path, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
@@ -2786,10 +3139,10 @@ public class ActivityDefinition extends MetadataResource {
     protected MarkdownType purpose;
 
     /**
-     * A detailed description of how the asset is used from a clinical perspective.
+     * A detailed description of how the activity definition is used from a clinical perspective.
      */
     @Child(name = "usage", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the clinical usage of the asset", formalDefinition="A detailed description of how the asset is used from a clinical perspective." )
+    @Description(shortDefinition="Describes the clinical usage of the activity definition", formalDefinition="A detailed description of how the activity definition is used from a clinical perspective." )
     protected StringType usage;
 
     /**
@@ -2822,10 +3175,10 @@ public class ActivityDefinition extends MetadataResource {
     protected List<CodeableConcept> topic;
 
     /**
-     * A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.
+     * A contributor to the content of the activity definition, including authors, editors, reviewers, and endorsers.
      */
     @Child(name = "contributor", type = {Contributor.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the asset, including authors, editors, reviewers, and endorsers." )
+    @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the activity definition, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
@@ -2843,44 +3196,51 @@ public class ActivityDefinition extends MetadataResource {
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
-     * A reference to a Library resource containing any formal logic used by the asset.
+     * A reference to a Library resource containing any formal logic used by the activity definition.
      */
     @Child(name = "library", type = {Library.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Logic used by the asset", formalDefinition="A reference to a Library resource containing any formal logic used by the asset." )
+    @Description(shortDefinition="Logic used by the activity definition", formalDefinition="A reference to a Library resource containing any formal logic used by the activity definition." )
     protected List<Reference> library;
     /**
-     * The actual objects that are the target of the reference (A reference to a Library resource containing any formal logic used by the asset.)
+     * The actual objects that are the target of the reference (A reference to a Library resource containing any formal logic used by the activity definition.)
      */
     protected List<Library> libraryTarget;
 
 
     /**
-     * A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
+     * A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
      */
-    @Child(name = "kind", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Kind of resource", formalDefinition="A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource." )
+    @Child(name = "kind", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Kind of resource", formalDefinition="A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected Enumeration<ActivityDefinitionKind> kind;
 
     /**
      * Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "code", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Detail type of activity", formalDefinition="Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
     protected CodeableConcept code;
 
     /**
+     * Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.
+     */
+    @Child(name = "doNotPerform", type = {BooleanType.class}, order=13, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="True if the activity should not be performed", formalDefinition="Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action." )
+    protected BooleanType doNotPerform;
+
+    /**
      * The period, timing or frequency upon which the described activity is to occur.
      */
-    @Child(name = "timing", type = {Timing.class, DateTimeType.class, Period.class, Range.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "timing", type = {Timing.class, DateTimeType.class, Age.class, Period.class, Range.class, Duration.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When activity is to occur", formalDefinition="The period, timing or frequency upon which the described activity is to occur." )
     protected Type timing;
 
     /**
      * Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.
      */
-    @Child(name = "location", type = {Location.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "location", type = {Location.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Where it should happen", formalDefinition="Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc." )
     protected Reference location;
 
@@ -2892,14 +3252,14 @@ public class ActivityDefinition extends MetadataResource {
     /**
      * Indicates who should participate in performing the action described.
      */
-    @Child(name = "participant", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "participant", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who should participate in the action", formalDefinition="Indicates who should participate in performing the action described." )
     protected List<ActivityDefinitionParticipantComponent> participant;
 
     /**
      * Identifies the food, drug or other product being consumed or supplied in the activity.
      */
-    @Child(name = "product", type = {Medication.class, Substance.class, CodeableConcept.class}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "product", type = {Medication.class, Substance.class, CodeableConcept.class}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What's administered/supplied", formalDefinition="Identifies the food, drug or other product being consumed or supplied in the activity." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
     protected Type product;
@@ -2907,29 +3267,41 @@ public class ActivityDefinition extends MetadataResource {
     /**
      * Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).
      */
-    @Child(name = "quantity", type = {SimpleQuantity.class}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "quantity", type = {SimpleQuantity.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How much is administered/consumed/supplied", formalDefinition="Identifies the quantity expected to be consumed at once (per dose, per meal, etc.)." )
     protected SimpleQuantity quantity;
 
     /**
      * Provides detailed dosage instructions in the same way that they are described for MedicationRequest resources.
      */
-    @Child(name = "dosage", type = {Dosage.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dosage", type = {Dosage.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Detailed dosage instructions", formalDefinition="Provides detailed dosage instructions in the same way that they are described for MedicationRequest resources." )
     protected List<Dosage> dosage;
 
     /**
      * Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What part of body to perform on", formalDefinition="Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodySite;
 
     /**
+     * Defines specimen requirements for the action to be performed, such as required specimens for a lab test.
+     */
+    @Child(name = "specimenRequirement", type = {SpecimenDefinition.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="What specimens are required to perform this action", formalDefinition="Defines specimen requirements for the action to be performed, such as required specimens for a lab test." )
+    protected List<Reference> specimenRequirement;
+    /**
+     * The actual objects that are the target of the reference (Defines specimen requirements for the action to be performed, such as required specimens for a lab test.)
+     */
+    protected List<SpecimenDefinition> specimenRequirementTarget;
+
+
+    /**
      * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
      */
-    @Child(name = "transform", type = {StructureMap.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "transform", type = {StructureMap.class}, order=22, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
     protected Reference transform;
 
@@ -2941,11 +3313,11 @@ public class ActivityDefinition extends MetadataResource {
     /**
      * Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.
      */
-    @Child(name = "dynamicValue", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dynamicValue", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result." )
     protected List<ActivityDefinitionDynamicValueComponent> dynamicValue;
 
-    private static final long serialVersionUID = 1741931476L;
+    private static final long serialVersionUID = 1228341422L;
 
   /**
    * Constructor
@@ -2963,7 +3335,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2983,7 +3355,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ActivityDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -2991,14 +3363,14 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.
      */
     public ActivityDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -3498,7 +3870,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #usage} (A detailed description of how the asset is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     * @return {@link #usage} (A detailed description of how the activity definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
      */
     public StringType getUsageElement() { 
       if (this.usage == null)
@@ -3518,7 +3890,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #usage} (A detailed description of how the asset is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     * @param value {@link #usage} (A detailed description of how the activity definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
      */
     public ActivityDefinition setUsageElement(StringType value) { 
       this.usage = value;
@@ -3526,14 +3898,14 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return A detailed description of how the asset is used from a clinical perspective.
+     * @return A detailed description of how the activity definition is used from a clinical perspective.
      */
     public String getUsage() { 
       return this.usage == null ? null : this.usage.getValue();
     }
 
     /**
-     * @param value A detailed description of how the asset is used from a clinical perspective.
+     * @param value A detailed description of how the activity definition is used from a clinical perspective.
      */
     public ActivityDefinition setUsage(String value) { 
       if (Utilities.noString(value))
@@ -3828,7 +4200,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #contributor} (A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.)
+     * @return {@link #contributor} (A contributor to the content of the activity definition, including authors, editors, reviewers, and endorsers.)
      */
     public List<Contributor> getContributor() { 
       if (this.contributor == null)
@@ -4036,7 +4408,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #library} (A reference to a Library resource containing any formal logic used by the asset.)
+     * @return {@link #library} (A reference to a Library resource containing any formal logic used by the activity definition.)
      */
     public List<Reference> getLibrary() { 
       if (this.library == null)
@@ -4111,7 +4483,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #kind} (A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @return {@link #kind} (A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public Enumeration<ActivityDefinitionKind> getKindElement() { 
       if (this.kind == null)
@@ -4131,7 +4503,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #kind} (A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @param value {@link #kind} (A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public ActivityDefinition setKindElement(Enumeration<ActivityDefinitionKind> value) { 
       this.kind = value;
@@ -4139,14 +4511,14 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
+     * @return A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
      */
     public ActivityDefinitionKind getKind() { 
       return this.kind == null ? null : this.kind.getValue();
     }
 
     /**
-     * @param value A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
+     * @param value A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.
      */
     public ActivityDefinition setKind(ActivityDefinitionKind value) { 
       if (value == null)
@@ -4180,6 +4552,51 @@ public class ActivityDefinition extends MetadataResource {
      */
     public ActivityDefinition setCode(CodeableConcept value) { 
       this.code = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #doNotPerform} (Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.). This is the underlying object with id, value and extensions. The accessor "getDoNotPerform" gives direct access to the value
+     */
+    public BooleanType getDoNotPerformElement() { 
+      if (this.doNotPerform == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ActivityDefinition.doNotPerform");
+        else if (Configuration.doAutoCreate())
+          this.doNotPerform = new BooleanType(); // bb
+      return this.doNotPerform;
+    }
+
+    public boolean hasDoNotPerformElement() { 
+      return this.doNotPerform != null && !this.doNotPerform.isEmpty();
+    }
+
+    public boolean hasDoNotPerform() { 
+      return this.doNotPerform != null && !this.doNotPerform.isEmpty();
+    }
+
+    /**
+     * @param value {@link #doNotPerform} (Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.). This is the underlying object with id, value and extensions. The accessor "getDoNotPerform" gives direct access to the value
+     */
+    public ActivityDefinition setDoNotPerformElement(BooleanType value) { 
+      this.doNotPerform = value;
+      return this;
+    }
+
+    /**
+     * @return Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.
+     */
+    public boolean getDoNotPerform() { 
+      return this.doNotPerform == null || this.doNotPerform.isEmpty() ? false : this.doNotPerform.getValue();
+    }
+
+    /**
+     * @param value Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.
+     */
+    public ActivityDefinition setDoNotPerform(boolean value) { 
+        if (this.doNotPerform == null)
+          this.doNotPerform = new BooleanType();
+        this.doNotPerform.setValue(value);
       return this;
     }
 
@@ -4219,6 +4636,19 @@ public class ActivityDefinition extends MetadataResource {
     /**
      * @return {@link #timing} (The period, timing or frequency upon which the described activity is to occur.)
      */
+    public Age getTimingAge() throws FHIRException { 
+      if (!(this.timing instanceof Age))
+        throw new FHIRException("Type mismatch: the type Age was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (Age) this.timing;
+    }
+
+    public boolean hasTimingAge() { 
+      return this.timing instanceof Age;
+    }
+
+    /**
+     * @return {@link #timing} (The period, timing or frequency upon which the described activity is to occur.)
+     */
     public Period getTimingPeriod() throws FHIRException { 
       if (!(this.timing instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
@@ -4240,6 +4670,19 @@ public class ActivityDefinition extends MetadataResource {
 
     public boolean hasTimingRange() { 
       return this.timing instanceof Range;
+    }
+
+    /**
+     * @return {@link #timing} (The period, timing or frequency upon which the described activity is to occur.)
+     */
+    public Duration getTimingDuration() throws FHIRException { 
+      if (!(this.timing instanceof Duration))
+        throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
+      return (Duration) this.timing;
+    }
+
+    public boolean hasTimingDuration() { 
+      return this.timing instanceof Duration;
     }
 
     public boolean hasTiming() { 
@@ -4527,6 +4970,81 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
+     * @return {@link #specimenRequirement} (Defines specimen requirements for the action to be performed, such as required specimens for a lab test.)
+     */
+    public List<Reference> getSpecimenRequirement() { 
+      if (this.specimenRequirement == null)
+        this.specimenRequirement = new ArrayList<Reference>();
+      return this.specimenRequirement;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ActivityDefinition setSpecimenRequirement(List<Reference> theSpecimenRequirement) { 
+      this.specimenRequirement = theSpecimenRequirement;
+      return this;
+    }
+
+    public boolean hasSpecimenRequirement() { 
+      if (this.specimenRequirement == null)
+        return false;
+      for (Reference item : this.specimenRequirement)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addSpecimenRequirement() { //3
+      Reference t = new Reference();
+      if (this.specimenRequirement == null)
+        this.specimenRequirement = new ArrayList<Reference>();
+      this.specimenRequirement.add(t);
+      return t;
+    }
+
+    public ActivityDefinition addSpecimenRequirement(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.specimenRequirement == null)
+        this.specimenRequirement = new ArrayList<Reference>();
+      this.specimenRequirement.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specimenRequirement}, creating it if it does not already exist
+     */
+    public Reference getSpecimenRequirementFirstRep() { 
+      if (getSpecimenRequirement().isEmpty()) {
+        addSpecimenRequirement();
+      }
+      return getSpecimenRequirement().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<SpecimenDefinition> getSpecimenRequirementTarget() { 
+      if (this.specimenRequirementTarget == null)
+        this.specimenRequirementTarget = new ArrayList<SpecimenDefinition>();
+      return this.specimenRequirementTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public SpecimenDefinition addSpecimenRequirementTarget() { 
+      SpecimenDefinition r = new SpecimenDefinition();
+      if (this.specimenRequirementTarget == null)
+        this.specimenRequirementTarget = new ArrayList<SpecimenDefinition>();
+      this.specimenRequirementTarget.add(r);
+      return r;
+    }
+
+    /**
      * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
      */
     public Reference getTransform() { 
@@ -4625,7 +5143,7 @@ public class ActivityDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this activity definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the activity definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the activity definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active assets.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the activity definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -4636,27 +5154,29 @@ public class ActivityDefinition extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the individual or organization that published the activity definition.", 0, 1, publisher));
         children.add(new Property("description", "markdown", "A free text natural language description of the activity definition from a consumer's perspective.", 0, 1, description));
         children.add(new Property("purpose", "markdown", "Explaination of why this activity definition is needed and why it has been designed as it has.", 0, 1, purpose));
-        children.add(new Property("usage", "string", "A detailed description of how the asset is used from a clinical perspective.", 0, 1, usage));
+        children.add(new Property("usage", "string", "A detailed description of how the activity definition is used from a clinical perspective.", 0, 1, usage));
         children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
         children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate));
         children.add(new Property("effectivePeriod", "Period", "The period during which the activity definition content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the activity definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the activity. Topics provide a high-level categorization of the activity that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
-        children.add(new Property("contributor", "Contributor", "A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
+        children.add(new Property("contributor", "Contributor", "A contributor to the content of the activity definition, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the activity definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the activity definition.", 0, 1, copyright));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        children.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the asset.", 0, java.lang.Integer.MAX_VALUE, library));
-        children.add(new Property("kind", "code", "A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.", 0, 1, kind));
+        children.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the activity definition.", 0, java.lang.Integer.MAX_VALUE, library));
+        children.add(new Property("kind", "code", "A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.", 0, 1, kind));
         children.add(new Property("code", "CodeableConcept", "Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code));
-        children.add(new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing));
+        children.add(new Property("doNotPerform", "boolean", "Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.", 0, 1, doNotPerform));
+        children.add(new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing));
         children.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location));
         children.add(new Property("participant", "", "Indicates who should participate in performing the action described.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("product[x]", "Reference(Medication|Substance)|CodeableConcept", "Identifies the food, drug or other product being consumed or supplied in the activity.", 0, 1, product));
         children.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).", 0, 1, quantity));
         children.add(new Property("dosage", "Dosage", "Provides detailed dosage instructions in the same way that they are described for MedicationRequest resources.", 0, java.lang.Integer.MAX_VALUE, dosage));
         children.add(new Property("bodySite", "CodeableConcept", "Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        children.add(new Property("specimenRequirement", "Reference(SpecimenDefinition)", "Defines specimen requirements for the action to be performed, such as required specimens for a lab test.", 0, java.lang.Integer.MAX_VALUE, specimenRequirement));
         children.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform));
         children.add(new Property("dynamicValue", "", "Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
       }
@@ -4664,7 +5184,7 @@ public class ActivityDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this activity definition is (or will be) published. The URL SHOULD include the major version of the activity definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this activity definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this activity definition is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this activity definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the activity definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the activity definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active assets.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the activity definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
@@ -4675,26 +5195,29 @@ public class ActivityDefinition extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the activity definition.", 0, 1, publisher);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the activity definition from a consumer's perspective.", 0, 1, description);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this activity definition is needed and why it has been designed as it has.", 0, 1, purpose);
-        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the asset is used from a clinical perspective.", 0, 1, usage);
+        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the activity definition is used from a clinical perspective.", 0, 1, usage);
         case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
         case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate);
         case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the activity definition content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the activity definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the activity. Topics provide a high-level categorization of the activity that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
-        case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
+        case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the activity definition, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the activity definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the activity definition.", 0, 1, copyright);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
-        case 166208699: /*library*/  return new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the asset.", 0, java.lang.Integer.MAX_VALUE, library);
-        case 3292052: /*kind*/  return new Property("kind", "code", "A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ProcedureRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.", 0, 1, kind);
+        case 166208699: /*library*/  return new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the activity definition.", 0, java.lang.Integer.MAX_VALUE, library);
+        case 3292052: /*kind*/  return new Property("kind", "code", "A description of the kind of resource the activity definition is representing. For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest. Typically, but not always, this is a Request resource.", 0, 1, kind);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code);
-        case 164632566: /*timing[x]*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
-        case -873664438: /*timing*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
-        case -497554124: /*timingTiming*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
-        case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
-        case -615615829: /*timingPeriod*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
-        case -710871277: /*timingRange*/  return new Property("timing[x]", "Timing|dateTime|Period|Range", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -1788508167: /*doNotPerform*/  return new Property("doNotPerform", "boolean", "Set this to true if the definition is to indicate that a particular activity should NOT be performed. If true, this element should be interpreted to reinforce a negative coding. For example NPO as a code with a doNotPerform of true would still indicate to NOT perform the action.", 0, 1, doNotPerform);
+        case 164632566: /*timing[x]*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -873664438: /*timing*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -497554124: /*timingTiming*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case 164607061: /*timingAge*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -615615829: /*timingPeriod*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -710871277: /*timingRange*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
+        case -1327253506: /*timingDuration*/  return new Property("timing[x]", "Timing|dateTime|Age|Period|Range|Duration", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, timing);
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location);
         case 767422259: /*participant*/  return new Property("participant", "", "Indicates who should participate in performing the action described.", 0, java.lang.Integer.MAX_VALUE, participant);
         case 1753005361: /*product[x]*/  return new Property("product[x]", "Reference(Medication|Substance)|CodeableConcept", "Identifies the food, drug or other product being consumed or supplied in the activity.", 0, 1, product);
@@ -4704,6 +5227,7 @@ public class ActivityDefinition extends MetadataResource {
         case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).", 0, 1, quantity);
         case -1326018889: /*dosage*/  return new Property("dosage", "Dosage", "Provides detailed dosage instructions in the same way that they are described for MedicationRequest resources.", 0, java.lang.Integer.MAX_VALUE, dosage);
         case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, bodySite);
+        case 1498467355: /*specimenRequirement*/  return new Property("specimenRequirement", "Reference(SpecimenDefinition)", "Defines specimen requirements for the action to be performed, such as required specimens for a lab test.", 0, java.lang.Integer.MAX_VALUE, specimenRequirement);
         case 1052666732: /*transform*/  return new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform);
         case 572625010: /*dynamicValue*/  return new Property("dynamicValue", "", "Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -4739,6 +5263,7 @@ public class ActivityDefinition extends MetadataResource {
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<ActivityDefinitionKind>
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1788508167: /*doNotPerform*/ return this.doNotPerform == null ? new Base[0] : new Base[] {this.doNotPerform}; // BooleanType
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // ActivityDefinitionParticipantComponent
@@ -4746,6 +5271,7 @@ public class ActivityDefinition extends MetadataResource {
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
         case -1326018889: /*dosage*/ return this.dosage == null ? new Base[0] : this.dosage.toArray(new Base[this.dosage.size()]); // Dosage
         case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : this.bodySite.toArray(new Base[this.bodySite.size()]); // CodeableConcept
+        case 1498467355: /*specimenRequirement*/ return this.specimenRequirement == null ? new Base[0] : this.specimenRequirement.toArray(new Base[this.specimenRequirement.size()]); // Reference
         case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
         case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // ActivityDefinitionDynamicValueComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -4833,6 +5359,9 @@ public class ActivityDefinition extends MetadataResource {
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case -1788508167: // doNotPerform
+          this.doNotPerform = castToBoolean(value); // BooleanType
+          return value;
         case -873664438: // timing
           this.timing = castToType(value); // Type
           return value;
@@ -4853,6 +5382,9 @@ public class ActivityDefinition extends MetadataResource {
           return value;
         case 1702620169: // bodySite
           this.getBodySite().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 1498467355: // specimenRequirement
+          this.getSpecimenRequirement().add(castToReference(value)); // Reference
           return value;
         case 1052666732: // transform
           this.transform = castToReference(value); // Reference
@@ -4919,6 +5451,8 @@ public class ActivityDefinition extends MetadataResource {
           this.kind = (Enumeration) value; // Enumeration<ActivityDefinitionKind>
         } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("doNotPerform")) {
+          this.doNotPerform = castToBoolean(value); // BooleanType
         } else if (name.equals("timing[x]")) {
           this.timing = castToType(value); // Type
         } else if (name.equals("location")) {
@@ -4933,6 +5467,8 @@ public class ActivityDefinition extends MetadataResource {
           this.getDosage().add(castToDosage(value));
         } else if (name.equals("bodySite")) {
           this.getBodySite().add(castToCodeableConcept(value));
+        } else if (name.equals("specimenRequirement")) {
+          this.getSpecimenRequirement().add(castToReference(value));
         } else if (name.equals("transform")) {
           this.transform = castToReference(value); // Reference
         } else if (name.equals("dynamicValue")) {
@@ -4970,6 +5506,7 @@ public class ActivityDefinition extends MetadataResource {
         case 166208699:  return addLibrary(); 
         case 3292052:  return getKindElement();
         case 3059181:  return getCode(); 
+        case -1788508167:  return getDoNotPerformElement();
         case 164632566:  return getTiming(); 
         case -873664438:  return getTiming(); 
         case 1901043637:  return getLocation(); 
@@ -4979,6 +5516,7 @@ public class ActivityDefinition extends MetadataResource {
         case -1285004149:  return getQuantity(); 
         case -1326018889:  return addDosage(); 
         case 1702620169:  return addBodySite(); 
+        case 1498467355:  return addSpecimenRequirement(); 
         case 1052666732:  return getTransform(); 
         case 572625010:  return addDynamicValue(); 
         default: return super.makeProperty(hash, name);
@@ -5014,13 +5552,15 @@ public class ActivityDefinition extends MetadataResource {
         case 166208699: /*library*/ return new String[] {"Reference"};
         case 3292052: /*kind*/ return new String[] {"code"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
-        case -873664438: /*timing*/ return new String[] {"Timing", "dateTime", "Period", "Range"};
+        case -1788508167: /*doNotPerform*/ return new String[] {"boolean"};
+        case -873664438: /*timing*/ return new String[] {"Timing", "dateTime", "Age", "Period", "Range", "Duration"};
         case 1901043637: /*location*/ return new String[] {"Reference"};
         case 767422259: /*participant*/ return new String[] {};
         case -309474065: /*product*/ return new String[] {"Reference", "CodeableConcept"};
         case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
         case -1326018889: /*dosage*/ return new String[] {"Dosage"};
         case 1702620169: /*bodySite*/ return new String[] {"CodeableConcept"};
+        case 1498467355: /*specimenRequirement*/ return new String[] {"Reference"};
         case 1052666732: /*transform*/ return new String[] {"Reference"};
         case 572625010: /*dynamicValue*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
@@ -5107,6 +5647,9 @@ public class ActivityDefinition extends MetadataResource {
           this.code = new CodeableConcept();
           return this.code;
         }
+        else if (name.equals("doNotPerform")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ActivityDefinition.doNotPerform");
+        }
         else if (name.equals("timingTiming")) {
           this.timing = new Timing();
           return this.timing;
@@ -5115,12 +5658,20 @@ public class ActivityDefinition extends MetadataResource {
           this.timing = new DateTimeType();
           return this.timing;
         }
+        else if (name.equals("timingAge")) {
+          this.timing = new Age();
+          return this.timing;
+        }
         else if (name.equals("timingPeriod")) {
           this.timing = new Period();
           return this.timing;
         }
         else if (name.equals("timingRange")) {
           this.timing = new Range();
+          return this.timing;
+        }
+        else if (name.equals("timingDuration")) {
+          this.timing = new Duration();
           return this.timing;
         }
         else if (name.equals("location")) {
@@ -5147,6 +5698,9 @@ public class ActivityDefinition extends MetadataResource {
         }
         else if (name.equals("bodySite")) {
           return addBodySite();
+        }
+        else if (name.equals("specimenRequirement")) {
+          return addSpecimenRequirement();
         }
         else if (name.equals("transform")) {
           this.transform = new Reference();
@@ -5224,6 +5778,7 @@ public class ActivityDefinition extends MetadataResource {
         };
         dst.kind = kind == null ? null : kind.copy();
         dst.code = code == null ? null : code.copy();
+        dst.doNotPerform = doNotPerform == null ? null : doNotPerform.copy();
         dst.timing = timing == null ? null : timing.copy();
         dst.location = location == null ? null : location.copy();
         if (participant != null) {
@@ -5243,6 +5798,11 @@ public class ActivityDefinition extends MetadataResource {
           for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
         };
+        if (specimenRequirement != null) {
+          dst.specimenRequirement = new ArrayList<Reference>();
+          for (Reference i : specimenRequirement)
+            dst.specimenRequirement.add(i.copy());
+        };
         dst.transform = transform == null ? null : transform.copy();
         if (dynamicValue != null) {
           dst.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
@@ -5257,40 +5817,41 @@ public class ActivityDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActivityDefinition))
+        if (!(other_ instanceof ActivityDefinition))
           return false;
-        ActivityDefinition o = (ActivityDefinition) other;
+        ActivityDefinition o = (ActivityDefinition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
            && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
            && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
            && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
            && compareDeep(library, o.library, true) && compareDeep(kind, o.kind, true) && compareDeep(code, o.code, true)
-           && compareDeep(timing, o.timing, true) && compareDeep(location, o.location, true) && compareDeep(participant, o.participant, true)
-           && compareDeep(product, o.product, true) && compareDeep(quantity, o.quantity, true) && compareDeep(dosage, o.dosage, true)
-           && compareDeep(bodySite, o.bodySite, true) && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
+           && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(timing, o.timing, true) && compareDeep(location, o.location, true)
+           && compareDeep(participant, o.participant, true) && compareDeep(product, o.product, true) && compareDeep(quantity, o.quantity, true)
+           && compareDeep(dosage, o.dosage, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(specimenRequirement, o.specimenRequirement, true)
+           && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActivityDefinition))
+        if (!(other_ instanceof ActivityDefinition))
           return false;
-        ActivityDefinition o = (ActivityDefinition) other;
+        ActivityDefinition o = (ActivityDefinition) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-           && compareValues(kind, o.kind, true);
+           && compareValues(kind, o.kind, true) && compareValues(doNotPerform, o.doNotPerform, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
           , approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright, relatedArtifact
-          , library, kind, code, timing, location, participant, product, quantity, dosage
-          , bodySite, transform, dynamicValue);
+          , library, kind, code, doNotPerform, timing, location, participant, product
+          , quantity, dosage, bodySite, specimenRequirement, transform, dynamicValue);
       }
 
   @Override
@@ -5429,6 +5990,26 @@ public class ActivityDefinition extends MetadataResource {
    * the path value of "<b>ActivityDefinition:derived-from</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_DERIVED_FROM = new ca.uhn.fhir.model.api.Include("ActivityDefinition:derived-from").toLocked();
+
+ /**
+   * Search parameter: <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the activity definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ActivityDefinition.useContext.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type", path="ActivityDefinition.useContext.code", description="A type of use context assigned to the activity definition", type="token" )
+  public static final String SP_CONTEXT_TYPE = "context-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the activity definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ActivityDefinition.useContext.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
 
  /**
    * Search parameter: <b>predecessor</b>

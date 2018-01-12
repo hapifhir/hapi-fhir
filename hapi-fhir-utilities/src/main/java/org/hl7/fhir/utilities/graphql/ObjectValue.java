@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.graphql.Argument.ArgumentListStatus;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,7 +28,7 @@ public class ObjectValue extends Value {
     return fields;
   }
 
-  public Argument addField(String name, boolean isList) {
+  public Argument addField(String name, ArgumentListStatus listStatus) throws FHIRException {
     Argument result = null;
     for (Argument t : fields)
       if ((t.name.equals(name)))
@@ -34,10 +36,12 @@ public class ObjectValue extends Value {
     if (result == null) {
       result = new Argument();
       result.setName(name);
-      result.setList(isList);
+      result.setListStatus(listStatus);
       fields.add(result);
-    } else
-      result.list = true;
+    } else if (result.getListStatus() == ArgumentListStatus.SINGLETON)
+        throw new FHIRException("Error: Attempt to make '+name+' into a repeating field when it is constrained by @singleton");
+    else
+      result.setListStatus(ArgumentListStatus.REPEATING);
     return result;
   }
 
@@ -50,7 +54,6 @@ public class ObjectValue extends Value {
     write(b, indent, System.lineSeparator());
   }
 
-  @Override
   public String getValue() {
     return null;
   }

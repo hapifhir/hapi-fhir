@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -56,6 +56,10 @@ public enum OrganizationType {
          * A company that provides insurance to its subscribers that may include healthcare related policies.
          */
         INS, 
+        /**
+         * A company, charity, or governmental organization which processes claims and/or issues payments to providers on behalf of patients or groups of patients.
+         */
+        PAY, 
         /**
          * An educational institution that provides education or research facilities.
          */
@@ -97,6 +101,8 @@ public enum OrganizationType {
           return GOVT;
         if ("ins".equals(codeString))
           return INS;
+        if ("pay".equals(codeString))
+          return PAY;
         if ("edu".equals(codeString))
           return EDU;
         if ("reli".equals(codeString))
@@ -118,6 +124,7 @@ public enum OrganizationType {
             case TEAM: return "team";
             case GOVT: return "govt";
             case INS: return "ins";
+            case PAY: return "pay";
             case EDU: return "edu";
             case RELI: return "reli";
             case CRS: return "crs";
@@ -137,6 +144,7 @@ public enum OrganizationType {
             case TEAM: return "An organizational team is usually a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department).";
             case GOVT: return "A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government.";
             case INS: return "A company that provides insurance to its subscribers that may include healthcare related policies.";
+            case PAY: return "A company, charity, or governmental organization which processes claims and/or issues payments to providers on behalf of patients or groups of patients.";
             case EDU: return "An educational institution that provides education or research facilities.";
             case RELI: return "An organization that is identified as a part of a religious institution.";
             case CRS: return "An organization that is identified as a Pharmaceutical/Clinical Research Sponsor.";
@@ -153,6 +161,7 @@ public enum OrganizationType {
             case TEAM: return "Organizational team";
             case GOVT: return "Government";
             case INS: return "Insurance Company";
+            case PAY: return "Payer";
             case EDU: return "Educational Institute";
             case RELI: return "Religious Institution";
             case CRS: return "Clinical Research Sponsor";

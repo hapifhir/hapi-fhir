@@ -7613,7 +7613,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#6</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Information  Suppressed</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Some information was not or might not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7734,7 +7734,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Incomplete Results</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>

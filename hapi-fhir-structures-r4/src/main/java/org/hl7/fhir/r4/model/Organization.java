@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -340,23 +340,23 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof OrganizationContactComponent))
+        if (!(other_ instanceof OrganizationContactComponent))
           return false;
-        OrganizationContactComponent o = (OrganizationContactComponent) other;
+        OrganizationContactComponent o = (OrganizationContactComponent) other_;
         return compareDeep(purpose, o.purpose, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof OrganizationContactComponent))
+        if (!(other_ instanceof OrganizationContactComponent))
           return false;
-        OrganizationContactComponent o = (OrganizationContactComponent) other;
+        OrganizationContactComponent o = (OrganizationContactComponent) other_;
         return true;
       }
 
@@ -1243,12 +1243,12 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Organization))
+        if (!(other_ instanceof Organization))
           return false;
-        Organization o = (Organization) other;
+        Organization o = (Organization) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
            && compareDeep(name, o.name, true) && compareDeep(alias, o.alias, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true) && compareDeep(partOf, o.partOf, true) && compareDeep(contact, o.contact, true)
@@ -1256,12 +1256,12 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Organization))
+        if (!(other_ instanceof Organization))
           return false;
-        Organization o = (Organization) other;
+        Organization o = (Organization) other_;
         return compareValues(active, o.active, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
           ;
       }
@@ -1325,17 +1325,17 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A (part of the) address of the organization</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the organization", type="string" )
+  @SearchParamDefinition(name="address", path="Organization.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A (part of the) address of the organization</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.address</b><br>
    * </p>
@@ -1365,17 +1365,17 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>active</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>Is the Organization record active</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Organization.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Organization.active", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="token" )
+  @SearchParamDefinition(name="active", path="Organization.active", description="Is the Organization record active", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>Is the Organization record active</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Organization.active</b><br>
    * </p>

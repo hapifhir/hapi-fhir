@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -537,23 +537,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RelatedClaimComponent))
+        if (!(other_ instanceof RelatedClaimComponent))
           return false;
-        RelatedClaimComponent o = (RelatedClaimComponent) other;
+        RelatedClaimComponent o = (RelatedClaimComponent) other_;
         return compareDeep(claim, o.claim, true) && compareDeep(relationship, o.relationship, true) && compareDeep(reference, o.reference, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RelatedClaimComponent))
+        if (!(other_ instanceof RelatedClaimComponent))
           return false;
-        RelatedClaimComponent o = (RelatedClaimComponent) other;
+        RelatedClaimComponent o = (RelatedClaimComponent) other_;
         return true;
       }
 
@@ -812,23 +812,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PayeeComponent))
+        if (!(other_ instanceof PayeeComponent))
           return false;
-        PayeeComponent o = (PayeeComponent) other;
+        PayeeComponent o = (PayeeComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(party, o.party, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PayeeComponent))
+        if (!(other_ instanceof PayeeComponent))
           return false;
-        PayeeComponent o = (PayeeComponent) other;
+        PayeeComponent o = (PayeeComponent) other_;
         return true;
       }
 
@@ -1219,23 +1219,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CareTeamComponent))
+        if (!(other_ instanceof CareTeamComponent))
           return false;
-        CareTeamComponent o = (CareTeamComponent) other;
+        CareTeamComponent o = (CareTeamComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(provider, o.provider, true) && compareDeep(responsible, o.responsible, true)
            && compareDeep(role, o.role, true) && compareDeep(qualification, o.qualification, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CareTeamComponent))
+        if (!(other_ instanceof CareTeamComponent))
           return false;
-        CareTeamComponent o = (CareTeamComponent) other;
+        CareTeamComponent o = (CareTeamComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(responsible, o.responsible, true)
           ;
       }
@@ -1729,24 +1729,24 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SpecialConditionComponent))
+        if (!(other_ instanceof SpecialConditionComponent))
           return false;
-        SpecialConditionComponent o = (SpecialConditionComponent) other;
+        SpecialConditionComponent o = (SpecialConditionComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(category, o.category, true) && compareDeep(code, o.code, true)
            && compareDeep(timing, o.timing, true) && compareDeep(value, o.value, true) && compareDeep(reason, o.reason, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SpecialConditionComponent))
+        if (!(other_ instanceof SpecialConditionComponent))
           return false;
-        SpecialConditionComponent o = (SpecialConditionComponent) other;
+        SpecialConditionComponent o = (SpecialConditionComponent) other_;
         return compareValues(sequence, o.sequence, true);
       }
 
@@ -2114,23 +2114,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(type, o.type, true)
            && compareDeep(packageCode, o.packageCode, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareValues(sequence, o.sequence, true);
       }
 
@@ -2442,23 +2442,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProcedureComponent))
+        if (!(other_ instanceof ProcedureComponent))
           return false;
-        ProcedureComponent o = (ProcedureComponent) other;
+        ProcedureComponent o = (ProcedureComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(date, o.date, true) && compareDeep(procedure, o.procedure, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProcedureComponent))
+        if (!(other_ instanceof ProcedureComponent))
           return false;
-        ProcedureComponent o = (ProcedureComponent) other;
+        ProcedureComponent o = (ProcedureComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(date, o.date, true);
       }
 
@@ -3035,12 +3035,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(coverage, o.coverage, true) && compareDeep(businessArrangement, o.businessArrangement, true)
            && compareDeep(preAuthRef, o.preAuthRef, true) && compareDeep(claimResponse, o.claimResponse, true)
@@ -3048,12 +3048,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(focal, o.focal, true) && compareValues(businessArrangement, o.businessArrangement, true)
            && compareValues(preAuthRef, o.preAuthRef, true);
       }
@@ -3341,23 +3341,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AccidentComponent))
+        if (!(other_ instanceof AccidentComponent))
           return false;
-        AccidentComponent o = (AccidentComponent) other;
+        AccidentComponent o = (AccidentComponent) other_;
         return compareDeep(date, o.date, true) && compareDeep(type, o.type, true) && compareDeep(location, o.location, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AccidentComponent))
+        if (!(other_ instanceof AccidentComponent))
           return false;
-        AccidentComponent o = (AccidentComponent) other;
+        AccidentComponent o = (AccidentComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -3384,30 +3384,30 @@ public class Claim extends DomainResource {
         /**
          * CareTeam applicable for this service or product line.
          */
-        @Child(name = "careTeamLinkId", type = {PositiveIntType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "careTeamSequence", type = {PositiveIntType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Applicable careTeam members", formalDefinition="CareTeam applicable for this service or product line." )
-        protected List<PositiveIntType> careTeamLinkId;
+        protected List<PositiveIntType> careTeamSequence;
 
         /**
          * Diagnosis applicable for this service or product line.
          */
-        @Child(name = "diagnosisLinkId", type = {PositiveIntType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "diagnosisSequence", type = {PositiveIntType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Applicable diagnoses", formalDefinition="Diagnosis applicable for this service or product line." )
-        protected List<PositiveIntType> diagnosisLinkId;
+        protected List<PositiveIntType> diagnosisSequence;
 
         /**
          * Procedures applicable for this service or product line.
          */
-        @Child(name = "procedureLinkId", type = {PositiveIntType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "procedureSequence", type = {PositiveIntType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Applicable procedures", formalDefinition="Procedures applicable for this service or product line." )
-        protected List<PositiveIntType> procedureLinkId;
+        protected List<PositiveIntType> procedureSequence;
 
         /**
          * Exceptions, special conditions and supporting information pplicable for this service or product line.
          */
-        @Child(name = "informationLinkId", type = {PositiveIntType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "informationSequence", type = {PositiveIntType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Applicable exception and supporting information", formalDefinition="Exceptions, special conditions and supporting information pplicable for this service or product line." )
-        protected List<PositiveIntType> informationLinkId;
+        protected List<PositiveIntType> informationSequence;
 
         /**
          * The type of reveneu or cost center providing the product and/or service.
@@ -3539,7 +3539,7 @@ public class Claim extends DomainResource {
         @Description(shortDefinition="Additional items", formalDefinition="Second tier of goods and services." )
         protected List<DetailComponent> detail;
 
-        private static final long serialVersionUID = 784765825L;
+        private static final long serialVersionUID = -974659823L;
 
     /**
      * Constructor
@@ -3602,244 +3602,244 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #careTeamLinkId} (CareTeam applicable for this service or product line.)
+         * @return {@link #careTeamSequence} (CareTeam applicable for this service or product line.)
          */
-        public List<PositiveIntType> getCareTeamLinkId() { 
-          if (this.careTeamLinkId == null)
-            this.careTeamLinkId = new ArrayList<PositiveIntType>();
-          return this.careTeamLinkId;
+        public List<PositiveIntType> getCareTeamSequence() { 
+          if (this.careTeamSequence == null)
+            this.careTeamSequence = new ArrayList<PositiveIntType>();
+          return this.careTeamSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ItemComponent setCareTeamLinkId(List<PositiveIntType> theCareTeamLinkId) { 
-          this.careTeamLinkId = theCareTeamLinkId;
+        public ItemComponent setCareTeamSequence(List<PositiveIntType> theCareTeamSequence) { 
+          this.careTeamSequence = theCareTeamSequence;
           return this;
         }
 
-        public boolean hasCareTeamLinkId() { 
-          if (this.careTeamLinkId == null)
+        public boolean hasCareTeamSequence() { 
+          if (this.careTeamSequence == null)
             return false;
-          for (PositiveIntType item : this.careTeamLinkId)
+          for (PositiveIntType item : this.careTeamSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #careTeamLinkId} (CareTeam applicable for this service or product line.)
+         * @return {@link #careTeamSequence} (CareTeam applicable for this service or product line.)
          */
-        public PositiveIntType addCareTeamLinkIdElement() {//2 
+        public PositiveIntType addCareTeamSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.careTeamLinkId == null)
-            this.careTeamLinkId = new ArrayList<PositiveIntType>();
-          this.careTeamLinkId.add(t);
+          if (this.careTeamSequence == null)
+            this.careTeamSequence = new ArrayList<PositiveIntType>();
+          this.careTeamSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #careTeamLinkId} (CareTeam applicable for this service or product line.)
+         * @param value {@link #careTeamSequence} (CareTeam applicable for this service or product line.)
          */
-        public ItemComponent addCareTeamLinkId(int value) { //1
+        public ItemComponent addCareTeamSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.careTeamLinkId == null)
-            this.careTeamLinkId = new ArrayList<PositiveIntType>();
-          this.careTeamLinkId.add(t);
+          if (this.careTeamSequence == null)
+            this.careTeamSequence = new ArrayList<PositiveIntType>();
+          this.careTeamSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #careTeamLinkId} (CareTeam applicable for this service or product line.)
+         * @param value {@link #careTeamSequence} (CareTeam applicable for this service or product line.)
          */
-        public boolean hasCareTeamLinkId(int value) { 
-          if (this.careTeamLinkId == null)
+        public boolean hasCareTeamSequence(int value) { 
+          if (this.careTeamSequence == null)
             return false;
-          for (PositiveIntType v : this.careTeamLinkId)
+          for (PositiveIntType v : this.careTeamSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
         }
 
         /**
-         * @return {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         * @return {@link #diagnosisSequence} (Diagnosis applicable for this service or product line.)
          */
-        public List<PositiveIntType> getDiagnosisLinkId() { 
-          if (this.diagnosisLinkId == null)
-            this.diagnosisLinkId = new ArrayList<PositiveIntType>();
-          return this.diagnosisLinkId;
+        public List<PositiveIntType> getDiagnosisSequence() { 
+          if (this.diagnosisSequence == null)
+            this.diagnosisSequence = new ArrayList<PositiveIntType>();
+          return this.diagnosisSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ItemComponent setDiagnosisLinkId(List<PositiveIntType> theDiagnosisLinkId) { 
-          this.diagnosisLinkId = theDiagnosisLinkId;
+        public ItemComponent setDiagnosisSequence(List<PositiveIntType> theDiagnosisSequence) { 
+          this.diagnosisSequence = theDiagnosisSequence;
           return this;
         }
 
-        public boolean hasDiagnosisLinkId() { 
-          if (this.diagnosisLinkId == null)
+        public boolean hasDiagnosisSequence() { 
+          if (this.diagnosisSequence == null)
             return false;
-          for (PositiveIntType item : this.diagnosisLinkId)
+          for (PositiveIntType item : this.diagnosisSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         * @return {@link #diagnosisSequence} (Diagnosis applicable for this service or product line.)
          */
-        public PositiveIntType addDiagnosisLinkIdElement() {//2 
+        public PositiveIntType addDiagnosisSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.diagnosisLinkId == null)
-            this.diagnosisLinkId = new ArrayList<PositiveIntType>();
-          this.diagnosisLinkId.add(t);
+          if (this.diagnosisSequence == null)
+            this.diagnosisSequence = new ArrayList<PositiveIntType>();
+          this.diagnosisSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         * @param value {@link #diagnosisSequence} (Diagnosis applicable for this service or product line.)
          */
-        public ItemComponent addDiagnosisLinkId(int value) { //1
+        public ItemComponent addDiagnosisSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.diagnosisLinkId == null)
-            this.diagnosisLinkId = new ArrayList<PositiveIntType>();
-          this.diagnosisLinkId.add(t);
+          if (this.diagnosisSequence == null)
+            this.diagnosisSequence = new ArrayList<PositiveIntType>();
+          this.diagnosisSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         * @param value {@link #diagnosisSequence} (Diagnosis applicable for this service or product line.)
          */
-        public boolean hasDiagnosisLinkId(int value) { 
-          if (this.diagnosisLinkId == null)
+        public boolean hasDiagnosisSequence(int value) { 
+          if (this.diagnosisSequence == null)
             return false;
-          for (PositiveIntType v : this.diagnosisLinkId)
+          for (PositiveIntType v : this.diagnosisSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
         }
 
         /**
-         * @return {@link #procedureLinkId} (Procedures applicable for this service or product line.)
+         * @return {@link #procedureSequence} (Procedures applicable for this service or product line.)
          */
-        public List<PositiveIntType> getProcedureLinkId() { 
-          if (this.procedureLinkId == null)
-            this.procedureLinkId = new ArrayList<PositiveIntType>();
-          return this.procedureLinkId;
+        public List<PositiveIntType> getProcedureSequence() { 
+          if (this.procedureSequence == null)
+            this.procedureSequence = new ArrayList<PositiveIntType>();
+          return this.procedureSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ItemComponent setProcedureLinkId(List<PositiveIntType> theProcedureLinkId) { 
-          this.procedureLinkId = theProcedureLinkId;
+        public ItemComponent setProcedureSequence(List<PositiveIntType> theProcedureSequence) { 
+          this.procedureSequence = theProcedureSequence;
           return this;
         }
 
-        public boolean hasProcedureLinkId() { 
-          if (this.procedureLinkId == null)
+        public boolean hasProcedureSequence() { 
+          if (this.procedureSequence == null)
             return false;
-          for (PositiveIntType item : this.procedureLinkId)
+          for (PositiveIntType item : this.procedureSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #procedureLinkId} (Procedures applicable for this service or product line.)
+         * @return {@link #procedureSequence} (Procedures applicable for this service or product line.)
          */
-        public PositiveIntType addProcedureLinkIdElement() {//2 
+        public PositiveIntType addProcedureSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.procedureLinkId == null)
-            this.procedureLinkId = new ArrayList<PositiveIntType>();
-          this.procedureLinkId.add(t);
+          if (this.procedureSequence == null)
+            this.procedureSequence = new ArrayList<PositiveIntType>();
+          this.procedureSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #procedureLinkId} (Procedures applicable for this service or product line.)
+         * @param value {@link #procedureSequence} (Procedures applicable for this service or product line.)
          */
-        public ItemComponent addProcedureLinkId(int value) { //1
+        public ItemComponent addProcedureSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.procedureLinkId == null)
-            this.procedureLinkId = new ArrayList<PositiveIntType>();
-          this.procedureLinkId.add(t);
+          if (this.procedureSequence == null)
+            this.procedureSequence = new ArrayList<PositiveIntType>();
+          this.procedureSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #procedureLinkId} (Procedures applicable for this service or product line.)
+         * @param value {@link #procedureSequence} (Procedures applicable for this service or product line.)
          */
-        public boolean hasProcedureLinkId(int value) { 
-          if (this.procedureLinkId == null)
+        public boolean hasProcedureSequence(int value) { 
+          if (this.procedureSequence == null)
             return false;
-          for (PositiveIntType v : this.procedureLinkId)
+          for (PositiveIntType v : this.procedureSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
         }
 
         /**
-         * @return {@link #informationLinkId} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
+         * @return {@link #informationSequence} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
          */
-        public List<PositiveIntType> getInformationLinkId() { 
-          if (this.informationLinkId == null)
-            this.informationLinkId = new ArrayList<PositiveIntType>();
-          return this.informationLinkId;
+        public List<PositiveIntType> getInformationSequence() { 
+          if (this.informationSequence == null)
+            this.informationSequence = new ArrayList<PositiveIntType>();
+          return this.informationSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ItemComponent setInformationLinkId(List<PositiveIntType> theInformationLinkId) { 
-          this.informationLinkId = theInformationLinkId;
+        public ItemComponent setInformationSequence(List<PositiveIntType> theInformationSequence) { 
+          this.informationSequence = theInformationSequence;
           return this;
         }
 
-        public boolean hasInformationLinkId() { 
-          if (this.informationLinkId == null)
+        public boolean hasInformationSequence() { 
+          if (this.informationSequence == null)
             return false;
-          for (PositiveIntType item : this.informationLinkId)
+          for (PositiveIntType item : this.informationSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #informationLinkId} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
+         * @return {@link #informationSequence} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
          */
-        public PositiveIntType addInformationLinkIdElement() {//2 
+        public PositiveIntType addInformationSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.informationLinkId == null)
-            this.informationLinkId = new ArrayList<PositiveIntType>();
-          this.informationLinkId.add(t);
+          if (this.informationSequence == null)
+            this.informationSequence = new ArrayList<PositiveIntType>();
+          this.informationSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #informationLinkId} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
+         * @param value {@link #informationSequence} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
          */
-        public ItemComponent addInformationLinkId(int value) { //1
+        public ItemComponent addInformationSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.informationLinkId == null)
-            this.informationLinkId = new ArrayList<PositiveIntType>();
-          this.informationLinkId.add(t);
+          if (this.informationSequence == null)
+            this.informationSequence = new ArrayList<PositiveIntType>();
+          this.informationSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #informationLinkId} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
+         * @param value {@link #informationSequence} (Exceptions, special conditions and supporting information pplicable for this service or product line.)
          */
-        public boolean hasInformationLinkId(int value) { 
-          if (this.informationLinkId == null)
+        public boolean hasInformationSequence(int value) { 
+          if (this.informationSequence == null)
             return false;
-          for (PositiveIntType v : this.informationLinkId)
+          for (PositiveIntType v : this.informationSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
@@ -4548,10 +4548,10 @@ public class Claim extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("sequence", "positiveInt", "A service line number.", 0, 1, sequence));
-          children.add(new Property("careTeamLinkId", "positiveInt", "CareTeam applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, careTeamLinkId));
-          children.add(new Property("diagnosisLinkId", "positiveInt", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisLinkId));
-          children.add(new Property("procedureLinkId", "positiveInt", "Procedures applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, procedureLinkId));
-          children.add(new Property("informationLinkId", "positiveInt", "Exceptions, special conditions and supporting information pplicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, informationLinkId));
+          children.add(new Property("careTeamSequence", "positiveInt", "CareTeam applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, careTeamSequence));
+          children.add(new Property("diagnosisSequence", "positiveInt", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisSequence));
+          children.add(new Property("procedureSequence", "positiveInt", "Procedures applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, procedureSequence));
+          children.add(new Property("informationSequence", "positiveInt", "Exceptions, special conditions and supporting information pplicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, informationSequence));
           children.add(new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue));
           children.add(new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category));
           children.add(new Property("service", "CodeableConcept", "If this is an actual service or product line, ie. not a Group, then use code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,RXNorm,ACHI,CCI). If a grouping item then use a group code to indicate the type of thing being grouped eg. 'glasses' or 'compound'.", 0, 1, service));
@@ -4574,10 +4574,10 @@ public class Claim extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 1349547969: /*sequence*/  return new Property("sequence", "positiveInt", "A service line number.", 0, 1, sequence);
-          case -186757789: /*careTeamLinkId*/  return new Property("careTeamLinkId", "positiveInt", "CareTeam applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, careTeamLinkId);
-          case -1659207418: /*diagnosisLinkId*/  return new Property("diagnosisLinkId", "positiveInt", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisLinkId);
-          case -532846744: /*procedureLinkId*/  return new Property("procedureLinkId", "positiveInt", "Procedures applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, procedureLinkId);
-          case 1965585153: /*informationLinkId*/  return new Property("informationLinkId", "positiveInt", "Exceptions, special conditions and supporting information pplicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, informationLinkId);
+          case 1070083823: /*careTeamSequence*/  return new Property("careTeamSequence", "positiveInt", "CareTeam applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, careTeamSequence);
+          case -909769262: /*diagnosisSequence*/  return new Property("diagnosisSequence", "positiveInt", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisSequence);
+          case -808920140: /*procedureSequence*/  return new Property("procedureSequence", "positiveInt", "Procedures applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, procedureSequence);
+          case -702585587: /*informationSequence*/  return new Property("informationSequence", "positiveInt", "Exceptions, special conditions and supporting information pplicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, informationSequence);
           case 1099842588: /*revenue*/  return new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue);
           case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category);
           case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "If this is an actual service or product line, ie. not a Group, then use code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,RXNorm,ACHI,CCI). If a grouping item then use a group code to indicate the type of thing being grouped eg. 'glasses' or 'compound'.", 0, 1, service);
@@ -4610,10 +4610,10 @@ public class Claim extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
-        case -186757789: /*careTeamLinkId*/ return this.careTeamLinkId == null ? new Base[0] : this.careTeamLinkId.toArray(new Base[this.careTeamLinkId.size()]); // PositiveIntType
-        case -1659207418: /*diagnosisLinkId*/ return this.diagnosisLinkId == null ? new Base[0] : this.diagnosisLinkId.toArray(new Base[this.diagnosisLinkId.size()]); // PositiveIntType
-        case -532846744: /*procedureLinkId*/ return this.procedureLinkId == null ? new Base[0] : this.procedureLinkId.toArray(new Base[this.procedureLinkId.size()]); // PositiveIntType
-        case 1965585153: /*informationLinkId*/ return this.informationLinkId == null ? new Base[0] : this.informationLinkId.toArray(new Base[this.informationLinkId.size()]); // PositiveIntType
+        case 1070083823: /*careTeamSequence*/ return this.careTeamSequence == null ? new Base[0] : this.careTeamSequence.toArray(new Base[this.careTeamSequence.size()]); // PositiveIntType
+        case -909769262: /*diagnosisSequence*/ return this.diagnosisSequence == null ? new Base[0] : this.diagnosisSequence.toArray(new Base[this.diagnosisSequence.size()]); // PositiveIntType
+        case -808920140: /*procedureSequence*/ return this.procedureSequence == null ? new Base[0] : this.procedureSequence.toArray(new Base[this.procedureSequence.size()]); // PositiveIntType
+        case -702585587: /*informationSequence*/ return this.informationSequence == null ? new Base[0] : this.informationSequence.toArray(new Base[this.informationSequence.size()]); // PositiveIntType
         case 1099842588: /*revenue*/ return this.revenue == null ? new Base[0] : new Base[] {this.revenue}; // CodeableConcept
         case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
         case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // CodeableConcept
@@ -4641,17 +4641,17 @@ public class Claim extends DomainResource {
         case 1349547969: // sequence
           this.sequence = castToPositiveInt(value); // PositiveIntType
           return value;
-        case -186757789: // careTeamLinkId
-          this.getCareTeamLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case 1070083823: // careTeamSequence
+          this.getCareTeamSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case -1659207418: // diagnosisLinkId
-          this.getDiagnosisLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case -909769262: // diagnosisSequence
+          this.getDiagnosisSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case -532846744: // procedureLinkId
-          this.getProcedureLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case -808920140: // procedureSequence
+          this.getProcedureSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case 1965585153: // informationLinkId
-          this.getInformationLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case -702585587: // informationSequence
+          this.getInformationSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
         case 1099842588: // revenue
           this.revenue = castToCodeableConcept(value); // CodeableConcept
@@ -4710,14 +4710,14 @@ public class Claim extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence")) {
           this.sequence = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("careTeamLinkId")) {
-          this.getCareTeamLinkId().add(castToPositiveInt(value));
-        } else if (name.equals("diagnosisLinkId")) {
-          this.getDiagnosisLinkId().add(castToPositiveInt(value));
-        } else if (name.equals("procedureLinkId")) {
-          this.getProcedureLinkId().add(castToPositiveInt(value));
-        } else if (name.equals("informationLinkId")) {
-          this.getInformationLinkId().add(castToPositiveInt(value));
+        } else if (name.equals("careTeamSequence")) {
+          this.getCareTeamSequence().add(castToPositiveInt(value));
+        } else if (name.equals("diagnosisSequence")) {
+          this.getDiagnosisSequence().add(castToPositiveInt(value));
+        } else if (name.equals("procedureSequence")) {
+          this.getProcedureSequence().add(castToPositiveInt(value));
+        } else if (name.equals("informationSequence")) {
+          this.getInformationSequence().add(castToPositiveInt(value));
         } else if (name.equals("revenue")) {
           this.revenue = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("category")) {
@@ -4759,10 +4759,10 @@ public class Claim extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 1349547969:  return getSequenceElement();
-        case -186757789:  return addCareTeamLinkIdElement();
-        case -1659207418:  return addDiagnosisLinkIdElement();
-        case -532846744:  return addProcedureLinkIdElement();
-        case 1965585153:  return addInformationLinkIdElement();
+        case 1070083823:  return addCareTeamSequenceElement();
+        case -909769262:  return addDiagnosisSequenceElement();
+        case -808920140:  return addProcedureSequenceElement();
+        case -702585587:  return addInformationSequenceElement();
         case 1099842588:  return getRevenue(); 
         case 50511102:  return getCategory(); 
         case 1984153269:  return getService(); 
@@ -4790,10 +4790,10 @@ public class Claim extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 1349547969: /*sequence*/ return new String[] {"positiveInt"};
-        case -186757789: /*careTeamLinkId*/ return new String[] {"positiveInt"};
-        case -1659207418: /*diagnosisLinkId*/ return new String[] {"positiveInt"};
-        case -532846744: /*procedureLinkId*/ return new String[] {"positiveInt"};
-        case 1965585153: /*informationLinkId*/ return new String[] {"positiveInt"};
+        case 1070083823: /*careTeamSequence*/ return new String[] {"positiveInt"};
+        case -909769262: /*diagnosisSequence*/ return new String[] {"positiveInt"};
+        case -808920140: /*procedureSequence*/ return new String[] {"positiveInt"};
+        case -702585587: /*informationSequence*/ return new String[] {"positiveInt"};
         case 1099842588: /*revenue*/ return new String[] {"CodeableConcept"};
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
@@ -4820,17 +4820,17 @@ public class Claim extends DomainResource {
         if (name.equals("sequence")) {
           throw new FHIRException("Cannot call addChild on a primitive type Claim.sequence");
         }
-        else if (name.equals("careTeamLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Claim.careTeamLinkId");
+        else if (name.equals("careTeamSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Claim.careTeamSequence");
         }
-        else if (name.equals("diagnosisLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Claim.diagnosisLinkId");
+        else if (name.equals("diagnosisSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Claim.diagnosisSequence");
         }
-        else if (name.equals("procedureLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Claim.procedureLinkId");
+        else if (name.equals("procedureSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Claim.procedureSequence");
         }
-        else if (name.equals("informationLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Claim.informationLinkId");
+        else if (name.equals("informationSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Claim.informationSequence");
         }
         else if (name.equals("revenue")) {
           this.revenue = new CodeableConcept();
@@ -4909,25 +4909,25 @@ public class Claim extends DomainResource {
         ItemComponent dst = new ItemComponent();
         copyValues(dst);
         dst.sequence = sequence == null ? null : sequence.copy();
-        if (careTeamLinkId != null) {
-          dst.careTeamLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : careTeamLinkId)
-            dst.careTeamLinkId.add(i.copy());
+        if (careTeamSequence != null) {
+          dst.careTeamSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : careTeamSequence)
+            dst.careTeamSequence.add(i.copy());
         };
-        if (diagnosisLinkId != null) {
-          dst.diagnosisLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : diagnosisLinkId)
-            dst.diagnosisLinkId.add(i.copy());
+        if (diagnosisSequence != null) {
+          dst.diagnosisSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : diagnosisSequence)
+            dst.diagnosisSequence.add(i.copy());
         };
-        if (procedureLinkId != null) {
-          dst.procedureLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : procedureLinkId)
-            dst.procedureLinkId.add(i.copy());
+        if (procedureSequence != null) {
+          dst.procedureSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : procedureSequence)
+            dst.procedureSequence.add(i.copy());
         };
-        if (informationLinkId != null) {
-          dst.informationLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : informationLinkId)
-            dst.informationLinkId.add(i.copy());
+        if (informationSequence != null) {
+          dst.informationSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : informationSequence)
+            dst.informationSequence.add(i.copy());
         };
         dst.revenue = revenue == null ? null : revenue.copy();
         dst.category = category == null ? null : category.copy();
@@ -4973,15 +4973,15 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
-        return compareDeep(sequence, o.sequence, true) && compareDeep(careTeamLinkId, o.careTeamLinkId, true)
-           && compareDeep(diagnosisLinkId, o.diagnosisLinkId, true) && compareDeep(procedureLinkId, o.procedureLinkId, true)
-           && compareDeep(informationLinkId, o.informationLinkId, true) && compareDeep(revenue, o.revenue, true)
+        ItemComponent o = (ItemComponent) other_;
+        return compareDeep(sequence, o.sequence, true) && compareDeep(careTeamSequence, o.careTeamSequence, true)
+           && compareDeep(diagnosisSequence, o.diagnosisSequence, true) && compareDeep(procedureSequence, o.procedureSequence, true)
+           && compareDeep(informationSequence, o.informationSequence, true) && compareDeep(revenue, o.revenue, true)
            && compareDeep(category, o.category, true) && compareDeep(service, o.service, true) && compareDeep(modifier, o.modifier, true)
            && compareDeep(programCode, o.programCode, true) && compareDeep(serviced, o.serviced, true) && compareDeep(location, o.location, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
@@ -4991,23 +4991,23 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
-        return compareValues(sequence, o.sequence, true) && compareValues(careTeamLinkId, o.careTeamLinkId, true)
-           && compareValues(diagnosisLinkId, o.diagnosisLinkId, true) && compareValues(procedureLinkId, o.procedureLinkId, true)
-           && compareValues(informationLinkId, o.informationLinkId, true) && compareValues(factor, o.factor, true)
+        ItemComponent o = (ItemComponent) other_;
+        return compareValues(sequence, o.sequence, true) && compareValues(careTeamSequence, o.careTeamSequence, true)
+           && compareValues(diagnosisSequence, o.diagnosisSequence, true) && compareValues(procedureSequence, o.procedureSequence, true)
+           && compareValues(informationSequence, o.informationSequence, true) && compareValues(factor, o.factor, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, careTeamLinkId, diagnosisLinkId
-          , procedureLinkId, informationLinkId, revenue, category, service, modifier, programCode
-          , serviced, location, quantity, unitPrice, factor, net, udi, bodySite, subSite
-          , encounter, detail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, careTeamSequence
+          , diagnosisSequence, procedureSequence, informationSequence, revenue, category, service
+          , modifier, programCode, serviced, location, quantity, unitPrice, factor, net
+          , udi, bodySite, subSite, encounter, detail);
       }
 
   public String fhirType() {
@@ -5874,12 +5874,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetailComponent))
+        if (!(other_ instanceof DetailComponent))
           return false;
-        DetailComponent o = (DetailComponent) other;
+        DetailComponent o = (DetailComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(revenue, o.revenue, true) && compareDeep(category, o.category, true)
            && compareDeep(service, o.service, true) && compareDeep(modifier, o.modifier, true) && compareDeep(programCode, o.programCode, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
@@ -5888,12 +5888,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetailComponent))
+        if (!(other_ instanceof DetailComponent))
           return false;
-        DetailComponent o = (DetailComponent) other;
+        DetailComponent o = (DetailComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(factor, o.factor, true);
       }
 
@@ -6689,12 +6689,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
+        SubDetailComponent o = (SubDetailComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(revenue, o.revenue, true) && compareDeep(category, o.category, true)
            && compareDeep(service, o.service, true) && compareDeep(modifier, o.modifier, true) && compareDeep(programCode, o.programCode, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
@@ -6702,12 +6702,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
+        SubDetailComponent o = (SubDetailComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(factor, o.factor, true);
       }
 
@@ -6893,14 +6893,14 @@ public class Claim extends DomainResource {
     /**
      * The referral resource which lists the date, practitioner, reason and other supporting information.
      */
-    @Child(name = "referral", type = {ProcedureRequest.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "referral", type = {ServiceRequest.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Treatment Referral", formalDefinition="The referral resource which lists the date, practitioner, reason and other supporting information." )
     protected Reference referral;
 
     /**
      * The actual object that is the target of the reference (The referral resource which lists the date, practitioner, reason and other supporting information.)
      */
-    protected ProcedureRequest referralTarget;
+    protected ServiceRequest referralTarget;
 
     /**
      * Facility where the services were provided.
@@ -6984,7 +6984,7 @@ public class Claim extends DomainResource {
     @Description(shortDefinition="Total claim cost", formalDefinition="The total value of the claim." )
     protected Money total;
 
-    private static final long serialVersionUID = 1359646878L;
+    private static final long serialVersionUID = 1349991484L;
 
   /**
    * Constructor
@@ -7749,19 +7749,19 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #referral} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The referral resource which lists the date, practitioner, reason and other supporting information.)
      */
-    public ProcedureRequest getReferralTarget() { 
+    public ServiceRequest getReferralTarget() { 
       if (this.referralTarget == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Claim.referral");
         else if (Configuration.doAutoCreate())
-          this.referralTarget = new ProcedureRequest(); // aa
+          this.referralTarget = new ServiceRequest(); // aa
       return this.referralTarget;
     }
 
     /**
      * @param value {@link #referral} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The referral resource which lists the date, practitioner, reason and other supporting information.)
      */
-    public Claim setReferralTarget(ProcedureRequest value) { 
+    public Claim setReferralTarget(ServiceRequest value) { 
       this.referralTarget = value;
       return this;
     }
@@ -8244,7 +8244,7 @@ public class Claim extends DomainResource {
         children.add(new Property("prescription", "Reference(MedicationRequest|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, 1, prescription));
         children.add(new Property("originalPrescription", "Reference(MedicationRequest)", "Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products. For example, a physician may prescribe a medication which the pharmacy determines is contraindicated, or for which the patient has an intolerance, and therefor issues a new precription for an alternate medication which has the same theraputic intent. The prescription from the pharmacy becomes the 'prescription' and that from the physician becomes the 'original prescription'.", 0, 1, originalPrescription));
         children.add(new Property("payee", "", "The party to be reimbursed for the services.", 0, 1, payee));
-        children.add(new Property("referral", "Reference(ProcedureRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, 1, referral));
+        children.add(new Property("referral", "Reference(ServiceRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, 1, referral));
         children.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, 1, facility));
         children.add(new Property("careTeam", "", "The members of the team who provided the overall service as well as their role and whether responsible and qualifications.", 0, java.lang.Integer.MAX_VALUE, careTeam));
         children.add(new Property("information", "", "Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required.", 0, java.lang.Integer.MAX_VALUE, information));
@@ -8279,7 +8279,7 @@ public class Claim extends DomainResource {
         case 460301338: /*prescription*/  return new Property("prescription", "Reference(MedicationRequest|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, 1, prescription);
         case -1814015861: /*originalPrescription*/  return new Property("originalPrescription", "Reference(MedicationRequest)", "Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products. For example, a physician may prescribe a medication which the pharmacy determines is contraindicated, or for which the patient has an intolerance, and therefor issues a new precription for an alternate medication which has the same theraputic intent. The prescription from the pharmacy becomes the 'prescription' and that from the physician becomes the 'original prescription'.", 0, 1, originalPrescription);
         case 106443592: /*payee*/  return new Property("payee", "", "The party to be reimbursed for the services.", 0, 1, payee);
-        case -722568291: /*referral*/  return new Property("referral", "Reference(ProcedureRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, 1, referral);
+        case -722568291: /*referral*/  return new Property("referral", "Reference(ServiceRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, 1, referral);
         case 501116579: /*facility*/  return new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, 1, facility);
         case -7323378: /*careTeam*/  return new Property("careTeam", "", "The members of the team who provided the overall service as well as their role and whether responsible and qualifications.", 0, java.lang.Integer.MAX_VALUE, careTeam);
         case 1968600364: /*information*/  return new Property("information", "", "Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required.", 0, java.lang.Integer.MAX_VALUE, information);
@@ -8775,12 +8775,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Claim))
+        if (!(other_ instanceof Claim))
           return false;
-        Claim o = (Claim) other;
+        Claim o = (Claim) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(subType, o.subType, true) && compareDeep(use, o.use, true) && compareDeep(patient, o.patient, true)
            && compareDeep(billablePeriod, o.billablePeriod, true) && compareDeep(created, o.created, true)
@@ -8795,12 +8795,12 @@ public class Claim extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Claim))
+        if (!(other_ instanceof Claim))
           return false;
-        Claim o = (Claim) other;
+        Claim o = (Claim) other_;
         return compareValues(status, o.status, true) && compareValues(use, o.use, true) && compareValues(created, o.created, true)
           ;
       }

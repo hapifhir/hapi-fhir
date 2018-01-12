@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -117,7 +117,11 @@ public enum DataTypes {
          */
         IDENTIFIER, 
         /**
-         * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
+         * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
+         */
+        MARKETINGSTATUS, 
+        /**
+         * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.
          */
         META, 
         /**
@@ -136,6 +140,14 @@ public enum DataTypes {
          * A time period defined by a start and end date and optionally time.
          */
         PERIOD, 
+        /**
+         * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
+         */
+        PRODCHARACTERISTIC, 
+        /**
+         * The shelf-life and storage information for a medicinal product item or container can be described using the this class.
+         */
+        PRODUCTSHELFLIFE, 
         /**
          * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
          */
@@ -168,6 +180,14 @@ public enum DataTypes {
          * null
          */
         SIMPLEQUANTITY, 
+        /**
+         * Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.
+         */
+        SUBSTANCEAMOUNT, 
+        /**
+         * Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.
+         */
+        SUBSTANCEMOIETY, 
         /**
          * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
          */
@@ -299,6 +319,8 @@ public enum DataTypes {
           return HUMANNAME;
         if ("Identifier".equals(codeString))
           return IDENTIFIER;
+        if ("MarketingStatus".equals(codeString))
+          return MARKETINGSTATUS;
         if ("Meta".equals(codeString))
           return META;
         if ("Money".equals(codeString))
@@ -309,6 +331,10 @@ public enum DataTypes {
           return PARAMETERDEFINITION;
         if ("Period".equals(codeString))
           return PERIOD;
+        if ("ProdCharacteristic".equals(codeString))
+          return PRODCHARACTERISTIC;
+        if ("ProductShelfLife".equals(codeString))
+          return PRODUCTSHELFLIFE;
         if ("Quantity".equals(codeString))
           return QUANTITY;
         if ("Range".equals(codeString))
@@ -325,6 +351,10 @@ public enum DataTypes {
           return SIGNATURE;
         if ("SimpleQuantity".equals(codeString))
           return SIMPLEQUANTITY;
+        if ("SubstanceAmount".equals(codeString))
+          return SUBSTANCEAMOUNT;
+        if ("SubstanceMoiety".equals(codeString))
+          return SUBSTANCEMOIETY;
         if ("Timing".equals(codeString))
           return TIMING;
         if ("TriggerDefinition".equals(codeString))
@@ -391,11 +421,14 @@ public enum DataTypes {
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
+            case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";
+            case PRODCHARACTERISTIC: return "ProdCharacteristic";
+            case PRODUCTSHELFLIFE: return "ProductShelfLife";
             case QUANTITY: return "Quantity";
             case RANGE: return "Range";
             case RATIO: return "Ratio";
@@ -404,6 +437,8 @@ public enum DataTypes {
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
+            case SUBSTANCEAMOUNT: return "SubstanceAmount";
+            case SUBSTANCEMOIETY: return "SubstanceMoiety";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
             case USAGECONTEXT: return "UsageContext";
@@ -453,11 +488,14 @@ public enum DataTypes {
             case EXTENSION: return "Optional Extension Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
             case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
-            case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
+            case MARKETINGSTATUS: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
+            case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.";
             case MONEY: return "An amount of economic utility in some recognized currency.";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
+            case PRODCHARACTERISTIC: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
+            case PRODUCTSHELFLIFE: return "The shelf-life and storage information for a medicinal product item or container can be described using the this class.";
             case QUANTITY: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
@@ -466,6 +504,8 @@ public enum DataTypes {
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
+            case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
+            case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
             case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
@@ -512,11 +552,14 @@ public enum DataTypes {
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
+            case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";
+            case PRODCHARACTERISTIC: return "ProdCharacteristic";
+            case PRODUCTSHELFLIFE: return "ProductShelfLife";
             case QUANTITY: return "Quantity";
             case RANGE: return "Range";
             case RATIO: return "Ratio";
@@ -525,6 +568,8 @@ public enum DataTypes {
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
+            case SUBSTANCEAMOUNT: return "SubstanceAmount";
+            case SUBSTANCEMOIETY: return "SubstanceMoiety";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
             case USAGECONTEXT: return "UsageContext";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -637,24 +637,24 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptMapGroupComponent))
+        if (!(other_ instanceof ConceptMapGroupComponent))
           return false;
-        ConceptMapGroupComponent o = (ConceptMapGroupComponent) other;
+        ConceptMapGroupComponent o = (ConceptMapGroupComponent) other_;
         return compareDeep(source, o.source, true) && compareDeep(sourceVersion, o.sourceVersion, true)
            && compareDeep(target, o.target, true) && compareDeep(targetVersion, o.targetVersion, true) && compareDeep(element, o.element, true)
            && compareDeep(unmapped, o.unmapped, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptMapGroupComponent))
+        if (!(other_ instanceof ConceptMapGroupComponent))
           return false;
-        ConceptMapGroupComponent o = (ConceptMapGroupComponent) other;
+        ConceptMapGroupComponent o = (ConceptMapGroupComponent) other_;
         return compareValues(source, o.source, true) && compareValues(sourceVersion, o.sourceVersion, true)
            && compareValues(target, o.target, true) && compareValues(targetVersion, o.targetVersion, true);
       }
@@ -964,23 +964,23 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SourceElementComponent))
+        if (!(other_ instanceof SourceElementComponent))
           return false;
-        SourceElementComponent o = (SourceElementComponent) other;
+        SourceElementComponent o = (SourceElementComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(target, o.target, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SourceElementComponent))
+        if (!(other_ instanceof SourceElementComponent))
           return false;
-        SourceElementComponent o = (SourceElementComponent) other;
+        SourceElementComponent o = (SourceElementComponent) other_;
         return compareValues(code, o.code, true) && compareValues(display, o.display, true);
       }
 
@@ -1509,24 +1509,24 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TargetElementComponent))
+        if (!(other_ instanceof TargetElementComponent))
           return false;
-        TargetElementComponent o = (TargetElementComponent) other;
+        TargetElementComponent o = (TargetElementComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(equivalence, o.equivalence, true)
            && compareDeep(comment, o.comment, true) && compareDeep(dependsOn, o.dependsOn, true) && compareDeep(product, o.product, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TargetElementComponent))
+        if (!(other_ instanceof TargetElementComponent))
           return false;
-        TargetElementComponent o = (TargetElementComponent) other;
+        TargetElementComponent o = (TargetElementComponent) other_;
         return compareValues(code, o.code, true) && compareValues(display, o.display, true) && compareValues(equivalence, o.equivalence, true)
            && compareValues(comment, o.comment, true);
       }
@@ -1899,23 +1899,23 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof OtherElementComponent))
+        if (!(other_ instanceof OtherElementComponent))
           return false;
-        OtherElementComponent o = (OtherElementComponent) other;
+        OtherElementComponent o = (OtherElementComponent) other_;
         return compareDeep(property, o.property, true) && compareDeep(system, o.system, true) && compareDeep(code, o.code, true)
            && compareDeep(display, o.display, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof OtherElementComponent))
+        if (!(other_ instanceof OtherElementComponent))
           return false;
-        OtherElementComponent o = (OtherElementComponent) other;
+        OtherElementComponent o = (OtherElementComponent) other_;
         return compareValues(property, o.property, true) && compareValues(system, o.system, true) && compareValues(code, o.code, true)
            && compareValues(display, o.display, true);
       }
@@ -2294,23 +2294,23 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptMapGroupUnmappedComponent))
+        if (!(other_ instanceof ConceptMapGroupUnmappedComponent))
           return false;
-        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other;
+        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other_;
         return compareDeep(mode, o.mode, true) && compareDeep(code, o.code, true) && compareDeep(display, o.display, true)
            && compareDeep(url, o.url, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptMapGroupUnmappedComponent))
+        if (!(other_ instanceof ConceptMapGroupUnmappedComponent))
           return false;
-        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other;
+        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other_;
         return compareValues(mode, o.mode, true) && compareValues(code, o.code, true) && compareValues(display, o.display, true)
            && compareValues(url, o.url, true);
       }
@@ -2387,7 +2387,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2407,7 +2407,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ConceptMap setUrlElement(UriType value) { 
       this.url = value;
@@ -2415,14 +2415,14 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.
      */
     public ConceptMap setUrl(String value) { 
       if (Utilities.noString(value))
@@ -3245,7 +3245,7 @@ public class ConceptMap extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the concept map. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -3268,7 +3268,7 @@ public class ConceptMap extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this concept map is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the concept map. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
@@ -3605,24 +3605,24 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptMap))
+        if (!(other_ instanceof ConceptMap))
           return false;
-        ConceptMap o = (ConceptMap) other;
+        ConceptMap o = (ConceptMap) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(source, o.source, true) && compareDeep(target, o.target, true) && compareDeep(group, o.group, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptMap))
+        if (!(other_ instanceof ConceptMap))
           return false;
-        ConceptMap o = (ConceptMap) other;
+        ConceptMap o = (ConceptMap) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true);
       }
 
@@ -3936,7 +3936,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.sourceUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={ValueSet.class } )
+  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={ValueSet.class } )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-uri</b>
@@ -4062,7 +4062,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.targetUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-uri", path="ConceptMap.target.as(Uri)", description="Provides context to the mappings", type="reference", target={ValueSet.class } )
+  @SearchParamDefinition(name="target-uri", path="ConceptMap.target.as(uri)", description="Provides context to the mappings", type="reference", target={ValueSet.class } )
   public static final String SP_TARGET_URI = "target-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-uri</b>

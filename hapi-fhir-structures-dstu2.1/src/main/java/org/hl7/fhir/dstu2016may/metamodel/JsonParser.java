@@ -18,8 +18,6 @@ import org.hl7.fhir.dstu2016may.formats.JsonCreatorCanonical;
 import org.hl7.fhir.dstu2016may.formats.JsonCreatorGson;
 import org.hl7.fhir.dstu2016may.metamodel.Element.SpecialElement;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 import org.hl7.fhir.dstu2016may.utils.JsonTrackingParser;
@@ -28,6 +26,8 @@ import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
 import com.google.gson.JsonArray;

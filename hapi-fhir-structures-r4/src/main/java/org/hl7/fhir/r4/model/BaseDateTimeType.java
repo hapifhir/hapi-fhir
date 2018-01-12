@@ -428,7 +428,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 					if (timeLength > 5) {
 						validateLengthIsAtLeast(value, 19);
 						validateCharAtIndexIs(value, 16, ':'); // yyyy-mm-ddThh:mm:ss
-						cal.set(Calendar.SECOND, parseInt(value, value.substring(17, 19), 0, 59));
+						cal.set(Calendar.SECOND, parseInt(value, value.substring(17, 19), 0, 60)); // note: this allows leap seconds
 						precision = TemporalPrecisionEnum.SECOND;
 						if (timeLength > 8) {
 							validateCharAtIndexIs(value, 19, '.'); // yyyy-mm-ddThh:mm:ss.SSSS

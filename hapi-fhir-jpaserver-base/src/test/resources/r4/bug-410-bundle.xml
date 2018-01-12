@@ -1,0 +1,468 @@
+<Bundle xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir">
+	<id value="af89d63e90e34ec4b123c5fcc74b54e5" />
+	<type value="transaction" />
+	<entry>
+		<fullUrl value="urn:uuid:3E286BBC7F4D6C4BB951011E2F6B7C03" />
+		<resource>
+			<Patient>
+				<text>
+					<status value="generated" />
+					<xhtml:div>Rose, Eileen. IHI:8103601123724176</xhtml:div>
+				</text>
+				<identifier>
+					<use value="official" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="NI" />
+							<display value="National unique individual identifier" />
+						</coding>
+						<text value="IHI" />
+					</type>
+					<system value="http://ns.electronichealth.net.au/id/hi/ihi/1.0" />
+					<value value="8103601123724176" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="MC" />
+							<display value="Patients Medicare Number" />
+						</coding>
+						<text value="Medicare Number" />
+					</type>
+					<system value="http://ns.electronichealth.net.au/id/hi/mc" />
+					<value value="30237183772" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<assigner>
+						<display value="Entitlement" />
+					</assigner>
+				</identifier>
+				<identifier>
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="PEN" />
+							<display value="Pension Number" />
+						</coding>
+						<text value="Pension Number" />
+					</type>
+					<system value="http://ns.electronichealth.net.au/id/hi/crn" />
+					<value value="305096371H" />
+				</identifier>
+				<name>
+					<use value="official" />
+					<family value="Rose" />
+					<given value="Eileen" />
+					<prefix value="Mrs" />
+				</name>
+				<gender value="female" />
+				<birthDate value="1933-10-11" />
+				<address>
+					<use value="home" />
+					<type value="physical" />
+					<line value="28 Warkil St " />
+					<city value="Cobram      " />
+					<state value="VIC" />
+					<postalCode value="3644" />
+				</address>
+			</Patient>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Patient" />
+			<ifNoneExist value="Patient?identifier=8103601123724176" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:902d418781be4fc185d9f45e523598f1" />
+		<resource>
+			<MedicationRequest>
+				<text>
+					<status value="generated" />
+					<xhtml:div>TEST</xhtml:div>
+				</text>
+				<contained>
+					<Medication xmlns:xhtml="http://www.w3.org/1999/xhtml">
+						<id value="990f3dd481f3486d83ade87ce1f5e6ee" />
+						<code>
+							<coding>
+								<system value="http://erx.com.au/id/pbsmedication" />
+								<code value="01172Q" />
+								<display value="Chloromycetin Ear Drops" />
+							</coding>
+							<coding>
+								<system value="http://erx.com.au/id/itembarcode" />
+								<code value="0" />
+								<display value="Chloromycetin Ear Drops" />
+							</coding>
+							<text value="Chloromycetin Ear Drops" />
+						</code>
+						<manufacturer>
+							<display value="PF" />
+						</manufacturer>
+					</Medication>
+				</contained>
+				<contained>
+					<Organization>
+						<id value="eb5685fc5cc94b3282a7ecceb0ec59c5" />
+						<text>
+							<status value="generated" />
+							<xhtml:div>MILLENNIUM HEALTH SERVICE. HPIO:8003623233353381</xhtml:div>
+						</text>
+						<identifier>
+							<use value="official" />
+							<type>
+								<coding>
+									<system value="http://hl7.org/fhir/v2/0203" />
+									<code value="NOI" />
+									<display value="National Organization Identifier" />
+								</coding>
+								<text value="HPI-O" />
+							</type>
+							<system value="http://ns.electronichealth.net.au/id/hi/hpio/1.0" />
+							<value value="8003623233353381" />
+						</identifier>
+						<name value="MILLENNIUM HEALTH SERVICE" />
+						<address>
+							<use value="work" />
+							<type value="physical" />
+							<line value="Unit 1, 103 Garling Street " />
+							<city value="O'Connor" />
+							<state value="WA" />
+							<postalCode value="6163" />
+						</address>
+					</Organization>
+				</contained>
+				<identifier>
+					<use value="official" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="eRx SCID" />
+					</type>
+					<system value="http://erx.com.au/id/eRxSCID" />
+					<value value="1MN89XMN3B26M4B7P0-4" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<text value="DVA Authority Number + Phone Approval" />
+					</type>
+					<system value="http://erx.com.au/id/DVAAuthority" />
+					<value value="0:" />
+				</identifier>
+				<status value="active" />
+				<subject>
+					<reference value="urn:uuid:3E286BBC7F4D6C4BB951011E2F6B7C03" />
+					<display value="JENKINS, Margurite" />
+				</subject>
+				<medicationReference>
+					<reference value="#990f3dd481f3486d83ade87ce1f5e6ee" />
+					<display value="Chloramphenicol" />
+				</medicationReference>
+				<dosageInstruction>
+					<text value="one daily" />
+				</dosageInstruction>
+				<dispenseRequest>
+					<numberOfRepeatsAllowed value="0" />
+					<quantity>
+						<value value="1" />
+					</quantity>
+				</dispenseRequest>
+			</MedicationRequest>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="MedicationRequest" />
+			<ifNoneExist value="MedicationRequest?identifier=1MN89XMN3B26M4B7P0-4" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:c6f81e7e4c844cb3a9e423edaf70e92b" />
+		<resource>
+			<Organization>
+				<text>
+					<status value="generated" />
+					<xhtml:div>PCEHRCERT47. Approval Number:HN249M. HPIO:8003623233350106</xhtml:div>
+				</text>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="NOI" />
+							<display value="National Organization Identifier" />
+						</coding>
+						<text value="HPI-O" />
+					</type>
+					<system value="http://ns.electronichealth.net.au/id/hi/hpio/1.0" />
+					<value value="8003623233350106" />
+				</identifier>
+				<identifier>
+					<use value="official" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="Pharmacy Approval Number" />
+					</type>
+					<system value="http://erx.com.au/id/PharmacyApprovalNumber" />
+					<value value="HN249M" />
+				</identifier>
+				<name value="PCEHRCERT47" />
+				<telecom>
+					<system value="phone" />
+					<value value="394181800" />
+					<use value="work" />
+				</telecom>
+				<address>
+					<use value="work" />
+					<type value="physical" />
+					<line value="20 TRENERRY CRESCENT " />
+					<city value="ABBOTSFORD" />
+					<state value="VIC" />
+					<postalCode value="3067" />
+				</address>
+			</Organization>
+		</resource>
+		<request>
+			<method value="PUT" />
+			<url value="Organization?identifier=HN249M" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:854b6f6e4398497ea91238a223310a2d" />
+		<resource>
+			<Practitioner>
+				<text>
+					<status value="generated" />
+					<xhtml:div>LENNON, GEORGE. HPI-I:8003614900014588</xhtml:div>
+				</text>
+				<identifier>
+					<use value="official" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="NPI" />
+							<display value="National Provider Identifier" />
+						</coding>
+						<text value="HPI-I" />
+					</type>
+					<system value="http://ns.electronichealth.net.au/id/hi/hpii/1.0" />
+					<value value="8003614900014588" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="PharmacyApprovalNumberAndPharmacistInitials" />
+					</type>
+					<system value="http://erx.com.au/id/PharmacyApprovalNumberAndPharmacistInitials" />
+					<value value="HN249M:GL" />
+				</identifier>
+				<name>
+					<use value="official" />
+					<family value="LENNON" />
+					<given value="GEORGE" />
+				</name>
+			</Practitioner>
+		</resource>
+		<request>
+			<method value="PUT" />
+			<url value="Practitioner?identifier=8003614900014588" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:eeb32fb81c18455ab8d2fcc0b2a33ed6" />
+		<resource>
+			<MedicationDispense>
+				<text>
+					<status value="generated" />
+					<xhtml:div>
+						<xhtml:table>
+							<xhtml:tbody style="xFgColour000000 xBgColourFFFFFF">
+								<xhtml:tr>
+									<xhtml:td style="xFgColourFFFFFF xBgColour000000" colspan="2">THERAPEUTIC GOOD</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Medication</xhtml:td>
+									<xhtml:td>CHLOROMYCETIN</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Medication Generic Name</xhtml:td>
+									<xhtml:td>CHLORAMPHENICOL</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Additional Description</xhtml:td>
+									<xhtml:td>CHLOROMYCETIN EAR-DRP 0.5%</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Strength</xhtml:td>
+									<xhtml:td>0.5%</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Label Instruction</xhtml:td>
+									<xhtml:td>Instil ONE drop daily - Discard contents 28 days after opening</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Medication Form</xhtml:td>
+									<xhtml:td>EAR-DRP</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Quantity</xhtml:td>
+									<xhtml:td>1</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Number of this Dispense</xhtml:td>
+									<xhtml:td>1</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Maximum Number of Repeats</xhtml:td>
+									<xhtml:td>0</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td style="xFgColourFFFFFF xBgColour000000" colspan="2">ADMINISTRATIVE INFORMATION</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Date/Time of Dispense Event</xhtml:td>
+									<xhtml:td>20-May-2016</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>PBS Item Code</xhtml:td>
+									<xhtml:td>1172Q</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>PBS Manufacturer Code</xhtml:td>
+									<xhtml:td>PF</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>PBS Unique Pharmacy Prescription Number</xhtml:td>
+									<xhtml:td>6775</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Prescription Item ID</xhtml:td>
+									<xhtml:td>1MN89XMN3B26M4B7P0-4</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Dispense Item ID</xhtml:td>
+									<xhtml:td>1MN89XMN3B26M4B7P0-4</xhtml:td>
+								</xhtml:tr>
+								<xhtml:tr>
+									<xhtml:td>Script Type</xhtml:td>
+									<xhtml:td>N</xhtml:td>
+								</xhtml:tr>
+							</xhtml:tbody>
+						</xhtml:table>
+					</xhtml:div>
+				</text>
+				<contained>
+					<Medication xmlns:xhtml="http://www.w3.org/1999/xhtml">
+						<id value="9f5b6672bc3645428c32c8871226bae4" />
+						<code>
+							<coding>
+								<system value="http://erx.com.au/id/pbsmedication" />
+								<code value="01172Q" />
+								<display value="CHLOROMYCETIN" />
+							</coding>
+							<coding>
+								<system value="http://erx.com.au/id/itembarcode" />
+								<code value="93287951" />
+								<display value="CHLOROMYCETIN" />
+							</coding>
+							<text value="CHLOROMYCETIN EAR-DRP 0.5%" />
+						</code>
+						<manufacturer>
+							<display value="PF" />
+						</manufacturer>
+					</Medication>
+				</contained>
+				<extension url="http://erx.com.au/id/SupplyNumber">
+					<valueInteger value="1" />
+				</extension>
+				<identifier>
+					<use value="official" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="eRx SCID" />
+					</type>
+					<system value="http://erx.com.au/id/eRxSCID" />
+					<value value="1MN89XMN3B26M4B7P0-4" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="OriginalScriptNumber" />
+					</type>
+					<system value="http://erx.com.au/id/OriginalScriptNumber" />
+					<value value="6775" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="LocalScriptNumber" />
+					</type>
+					<system value="http://erx.com.au/id/LocalScriptNumber" />
+					<value value="6775" />
+				</identifier>
+				<identifier>
+					<use value="secondary" />
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/v2/0203" />
+							<code value="U" />
+							<display value="Unspecified identifier" />
+						</coding>
+						<text value="OriginalPharmacyApprovalNumber" />
+					</type>
+					<system value="http://erx.com.au/id/OriginalPharmacyApprovalNumber" />
+					<value value="HN249M" />
+				</identifier>
+				<authorizingPrescription>
+					<reference value="urn:uuid:902d418781be4fc185d9f45e523598f1" />
+					<display value="1MN89XMN3B26M4B7P0-4" />
+				</authorizingPrescription>
+				<quantity>
+					<value value="1" />
+				</quantity>
+				<medicationReference>
+					<reference value="#9f5b6672bc3645428c32c8871226bae4" />
+					<display value="CHLORAMPHENICOL" />
+				</medicationReference>
+				<whenPrepared value="2016-05-28" />
+				<whenHandedOver value="2016-06-28" />
+			</MedicationDispense>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="MedicationDispense" />
+			<ifNoneExist value="MedicationDispense?identifier=1MN89XMN3B26M4B7P0-4" />
+		</request>
+	</entry>
+</Bundle>

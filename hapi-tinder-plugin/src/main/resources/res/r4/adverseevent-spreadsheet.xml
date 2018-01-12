@@ -17,12 +17,13 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>5355</WindowHeight>
-  <WindowWidth>17970</WindowWidth>
+  <WindowHeight>9210</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>837</TabRatio>
   <ActiveSheet>1</ActiveSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -960,9 +961,9 @@
    <Row ss:AutoFitHeight="0" ss:Height="87">
     <Cell><Data ss:Type="String">AdverseEvent.category</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">code</Data><NamedCell
+    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="8"><Data ss:Type="String">AdverseEventCategory</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -992,13 +993,17 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">patient</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference(Patient|ResearchSubject|Practitioner|RelatedPerson)</Data><NamedCell
+    <Cell ss:Index="5"><Data ss:Type="String">Reference(Patient|Group|Practitioner|RelatedPerson)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">who</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="14"><Data ss:Type="String">Subject impacted by event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.  </Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="17"><Data ss:Type="String">If AdverseEvent.resultingCondition differs among members of the group, then use Patient as the subject.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="24"><Data ss:Type="String">GF#13890</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="42.9375" ss:StyleID="s77">
@@ -1064,7 +1069,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="14"><Data ss:Type="String">Mild | Moderate | Severe</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.</Data><NamedCell
+    <Cell><Data ss:Type="String">Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14.0625" ss:StyleID="s77">
@@ -1100,7 +1105,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference (Practitioner|Device)</Data><NamedCell
+    <Cell ss:Index="5"><Data ss:Type="String">Reference(Practitioner|Device)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="14"><Data ss:Type="String">Who  was involved in the adverse event or the potential adverse event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1189,7 +1194,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference (Practitioner|PractitionerRole)</Data><NamedCell
+    <Cell ss:Index="5"><Data ss:Type="String">Reference(Practitioner|PractitionerRole)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="14"><Data ss:Type="String">AdverseEvent.suspectEntity.causalityAuthor</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1284,7 +1289,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>23</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -1292,14 +1297,14 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>6</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>7</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3735,7 +3740,7 @@
    <Column ss:StyleID="s97" ss:AutoFitWidth="0" ss:Width="184.5"/>
    <Column ss:StyleID="s97" ss:AutoFitWidth="0" ss:Width="292.5"/>
    <Column ss:StyleID="s97" ss:Width="54"/>
-   <Column ss:StyleID="s97" ss:Width="46.5"/>
+   <Column ss:StyleID="s97" ss:AutoFitWidth="0" ss:Width="90"/>
    <Column ss:StyleID="s97" ss:Width="232.5"/>
    <Column ss:StyleID="s97" ss:Width="184.5"/>
    <Column ss:StyleID="s97" ss:AutoFitWidth="0" ss:Width="103.5"/>
@@ -3817,7 +3822,7 @@
     <Cell ss:StyleID="s139"><Data ss:Type="String">AdverseEventCategory</Data></Cell>
     <Cell ss:StyleID="s101"><Data ss:Type="String">Overall categorization of the event, e.g. product related or situational</Data></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">extensible</Data></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">#adverse-event-category</Data></Cell>
     <Cell ss:StyleID="s100"/>
     <Cell ss:StyleID="s100"/>

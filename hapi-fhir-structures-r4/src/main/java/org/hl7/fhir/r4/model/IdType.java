@@ -58,16 +58,19 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import org.apache.commons.lang3.*;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * This class represents the logical identity for a resource, or as much of that
@@ -107,7 +110,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity on objects it creates as a convenience.
  * </p>
  * <p>
- * Regex for ID: [a-z0-9\-\.]{1,64}
+ * Regex for ID: [a-z0-9\-\.]{1,36}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf = StringType.class)
@@ -284,6 +287,10 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
   }
 
+  public String fhirType() {
+    return "id";
+  }
+
   /**
    * Returns the portion of this resource ID which corresponds to the server
    * base URL. For example given the resource ID
@@ -392,127 +399,6 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return retVal;
   }
 
-  @Override
-  public String getValueAsString() {
-    return getValue();
-  }
-
-  @Override
-  public String getVersionIdPart() {
-    return myUnqualifiedVersionId;
-  }
-
-  public Long getVersionIdPartAsLong() {
-    if (!hasVersionIdPart()) {
-      return null;
-    } else {
-      return Long.parseLong(getVersionIdPart());
-    }
-  }
-
-  /**
-   * Returns true if this ID has a base url
-   *
-   * @see #getBaseUrl()
-   */
-  public boolean hasBaseUrl() {
-    return isNotBlank(myBaseUrl);
-  }
-
-  @Override
-  public int hashCode() {
-    HashCodeBuilder b = new HashCodeBuilder();
-    b.append(getValueAsString());
-    return b.toHashCode();
-  }
-
-  @Override
-  public boolean hasIdPart() {
-    return isNotBlank(getIdPart());
-  }
-
-  @Override
-  public boolean hasResourceType() {
-    return isNotBlank(myResourceType);
-  }
-
-  @Override
-  public boolean hasVersionIdPart() {
-    return isNotBlank(getVersionIdPart());
-  }
-
-  /**
-   * Returns <code>true</code> if this ID contains an absolute URL (in other
-   * words, a URL starting with "http://" or "https://"
-   */
-  @Override
-  public boolean isAbsolute() {
-    if (StringUtils.isBlank(getValue())) {
-      return false;
-    }
-    return isUrlAbsolute(getValue());
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return isBlank(getValue());
-  }
-
-  @Override
-  public boolean isIdPartValid() {
-    String id = getIdPart();
-    if (StringUtils.isBlank(id)) {
-      return false;
-    }
-    if (id.length() > 64) {
-      return false;
-    }
-    for (int i = 0; i < id.length(); i++) {
-      char nextChar = id.charAt(i);
-      if (nextChar >= 'a' && nextChar <= 'z') {
-        continue;
-      }
-      if (nextChar >= 'A' && nextChar <= 'Z') {
-        continue;
-      }
-      if (nextChar >= '0' && nextChar <= '9') {
-        continue;
-      }
-      if (nextChar == '-' || nextChar == '.') {
-        continue;
-      }
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Returns <code>true</code> if the unqualified ID is a valid {@link Long}
-   * value (in other words, it consists only of digits)
-   */
-  @Override
-  public boolean isIdPartValidLong() {
-    return isValidLong(getIdPart());
-  }
-
-  /**
-   * Returns <code>true</code> if the ID is a local reference (in other words,
-   * it begins with the '#' character)
-   */
-  @Override
-  public boolean isLocal() {
-    return defaultString(myUnqualifiedId).startsWith("#");
-  }
-
-  public boolean isUrn() {
-    return defaultString(myUnqualifiedId).startsWith(URN_PREFIX);
-  }
-
-  @Override
-  public boolean isVersionIdPartValidLong() {
-    return isValidLong(getVersionIdPart());
-  }
-
   /**
    * Set the value
    * <p>
@@ -597,6 +483,10 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     }
     return this;
   }
+  @Override
+  public String getValueAsString() {
+    return getValue();
+  }
 
   /**
    * Set the value
@@ -613,6 +503,143 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
   @Override
   public void setValueAsString(String theValue) {
     setValue(theValue);
+  }
+
+  @Override
+  public String getVersionIdPart() {
+    return myUnqualifiedVersionId;
+  }
+
+  public Long getVersionIdPartAsLong() {
+    if (!hasVersionIdPart()) {
+      return null;
+    } else {
+      return Long.parseLong(getVersionIdPart());
+    }
+  }
+
+  /**
+   * Returns true if this ID has a base url
+   *
+   * @see #getBaseUrl()
+   */
+  public boolean hasBaseUrl() {
+    return isNotBlank(myBaseUrl);
+  }
+
+  @Override
+  public boolean hasIdPart() {
+    return isNotBlank(getIdPart());
+  }
+
+  @Override
+  public boolean hasResourceType() {
+    return isNotBlank(myResourceType);
+  }
+
+  @Override
+  public boolean hasVersionIdPart() {
+    return isNotBlank(getVersionIdPart());
+  }
+
+  @Override
+  public int hashCode() {
+    HashCodeBuilder b = new HashCodeBuilder();
+    b.append(getValueAsString());
+    return b.toHashCode();
+  }
+
+  /**
+   * Returns <code>true</code> if this ID contains an absolute URL (in other
+   * words, a URL starting with "http://" or "https://"
+   */
+  @Override
+  public boolean isAbsolute() {
+    if (StringUtils.isBlank(getValue())) {
+      return false;
+    }
+    return isUrlAbsolute(getValue());
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return isBlank(getValue());
+  }
+
+  @Override
+  public boolean isIdPartValid() {
+    String id = getIdPart();
+    if (StringUtils.isBlank(id)) {
+      return false;
+    }
+    if (id.length() > 64) {
+      return false;
+    }
+    for (int i = 0; i < id.length(); i++) {
+      char nextChar = id.charAt(i);
+      if (nextChar >= 'a' && nextChar <= 'z') {
+        continue;
+      }
+      if (nextChar >= 'A' && nextChar <= 'Z') {
+        continue;
+      }
+      if (nextChar >= '0' && nextChar <= '9') {
+        continue;
+      }
+      if (nextChar == '-' || nextChar == '.') {
+        continue;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns <code>true</code> if the unqualified ID is a valid {@link Long}
+   * value (in other words, it consists only of digits)
+   */
+  @Override
+  public boolean isIdPartValidLong() {
+    return isValidLong(getIdPart());
+  }
+
+  /**
+   * Returns <code>true</code> if the ID is a local reference (in other words,
+   * it begins with the '#' character)
+   */
+  @Override
+  public boolean isLocal() {
+    return defaultString(myUnqualifiedId).startsWith("#");
+  }
+
+  public boolean isUrn() {
+    return defaultString(myUnqualifiedId).startsWith(URN_PREFIX);
+  }
+
+  @Override
+  public boolean isVersionIdPartValidLong() {
+    return isValidLong(getVersionIdPart());
+  }
+
+  @Override
+  public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
+    if (isNotBlank(theVersionIdPart)) {
+      Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+      Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+    }
+    if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
+      Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
+    }
+
+    setValue(null);
+
+    myBaseUrl = theBaseUrl;
+    myResourceType = theResourceType;
+    myUnqualifiedId = theIdPart;
+    myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
+    myHaveComponentParts = true;
+
+    return this;
   }
 
   @Override
@@ -762,31 +789,6 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       throw new NullPointerException("Long ID can not be null");
     }
     return theIdPart.toString();
-  }
-
-  public String fhirType() {
-    return "id";
-  }
-
-  @Override
-  public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
-    if (isNotBlank(theVersionIdPart)) {
-      Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
-      Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
-    }
-    if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
-      Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
-    }
-
-    setValue(null);
-
-    myBaseUrl = theBaseUrl;
-    myResourceType = theResourceType;
-    myUnqualifiedId = theIdPart;
-    myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
-    myHaveComponentParts = true;
-
-    return this;
   }
 
 }

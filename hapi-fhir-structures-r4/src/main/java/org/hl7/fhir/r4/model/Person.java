@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -395,22 +395,22 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PersonLinkComponent))
+        if (!(other_ instanceof PersonLinkComponent))
           return false;
-        PersonLinkComponent o = (PersonLinkComponent) other;
+        PersonLinkComponent o = (PersonLinkComponent) other_;
         return compareDeep(target, o.target, true) && compareDeep(assurance, o.assurance, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PersonLinkComponent))
+        if (!(other_ instanceof PersonLinkComponent))
           return false;
-        PersonLinkComponent o = (PersonLinkComponent) other;
+        PersonLinkComponent o = (PersonLinkComponent) other_;
         return compareValues(assurance, o.assurance, true);
       }
 
@@ -1223,12 +1223,12 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Person))
+        if (!(other_ instanceof Person))
           return false;
-        Person o = (Person) other;
+        Person o = (Person) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true)
            && compareDeep(photo, o.photo, true) && compareDeep(managingOrganization, o.managingOrganization, true)
@@ -1236,12 +1236,12 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Person))
+        if (!(other_ instanceof Person))
           return false;
-        Person o = (Person) other;
+        Person o = (Person) other_;
         return compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true) && compareValues(active, o.active, true)
           ;
       }
@@ -1279,17 +1279,17 @@ public class Person extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Person.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
+  @SearchParamDefinition(name="address", path="Person.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.address</b><br>
    * </p>

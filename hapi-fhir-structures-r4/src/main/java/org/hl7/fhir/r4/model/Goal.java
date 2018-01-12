@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -606,23 +606,23 @@ public class Goal extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GoalTargetComponent))
+        if (!(other_ instanceof GoalTargetComponent))
           return false;
-        GoalTargetComponent o = (GoalTargetComponent) other;
+        GoalTargetComponent o = (GoalTargetComponent) other_;
         return compareDeep(measure, o.measure, true) && compareDeep(detail, o.detail, true) && compareDeep(due, o.due, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GoalTargetComponent))
+        if (!(other_ instanceof GoalTargetComponent))
           return false;
-        GoalTargetComponent o = (GoalTargetComponent) other;
+        GoalTargetComponent o = (GoalTargetComponent) other_;
         return true;
       }
 
@@ -732,7 +732,7 @@ public class Goal extends DomainResource {
     /**
      * The identified conditions and other health record elements that are intended to be addressed by the goal.
      */
-    @Child(name = "addresses", type = {Condition.class, Observation.class, MedicationStatement.class, NutritionOrder.class, ProcedureRequest.class, RiskAssessment.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "addresses", type = {Condition.class, Observation.class, MedicationStatement.class, NutritionOrder.class, ServiceRequest.class, RiskAssessment.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Issues addressed by this goal", formalDefinition="The identified conditions and other health record elements that are intended to be addressed by the goal." )
     protected List<Reference> addresses;
     /**
@@ -1488,7 +1488,7 @@ public class Goal extends DomainResource {
         children.add(new Property("statusDate", "date", "Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.", 0, 1, statusDate));
         children.add(new Property("statusReason", "string", "Captures the reason for the current status.", 0, 1, statusReason));
         children.add(new Property("expressedBy", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, 1, expressedBy));
-        children.add(new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses));
+        children.add(new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ServiceRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses));
         children.add(new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("outcomeCode", "CodeableConcept", "Identifies the change (or lack of change) at the point when the status of the goal is assessed.", 0, java.lang.Integer.MAX_VALUE, outcomeCode));
         children.add(new Property("outcomeReference", "Reference(Observation)", "Details of what's changed (or not changed).", 0, java.lang.Integer.MAX_VALUE, outcomeReference));
@@ -1511,7 +1511,7 @@ public class Goal extends DomainResource {
         case 247524032: /*statusDate*/  return new Property("statusDate", "date", "Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.", 0, 1, statusDate);
         case 2051346646: /*statusReason*/  return new Property("statusReason", "string", "Captures the reason for the current status.", 0, 1, statusReason);
         case 175423686: /*expressedBy*/  return new Property("expressedBy", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, 1, expressedBy);
-        case 874544034: /*addresses*/  return new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses);
+        case 874544034: /*addresses*/  return new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ServiceRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note);
         case 1062482015: /*outcomeCode*/  return new Property("outcomeCode", "CodeableConcept", "Identifies the change (or lack of change) at the point when the status of the goal is assessed.", 0, java.lang.Integer.MAX_VALUE, outcomeCode);
         case -782273511: /*outcomeReference*/  return new Property("outcomeReference", "Reference(Observation)", "Details of what's changed (or not changed).", 0, java.lang.Integer.MAX_VALUE, outcomeReference);
@@ -1798,12 +1798,12 @@ public class Goal extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Goal))
+        if (!(other_ instanceof Goal))
           return false;
-        Goal o = (Goal) other;
+        Goal o = (Goal) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true)
            && compareDeep(start, o.start, true) && compareDeep(target, o.target, true) && compareDeep(statusDate, o.statusDate, true)
@@ -1813,12 +1813,12 @@ public class Goal extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Goal))
+        if (!(other_ instanceof Goal))
           return false;
-        Goal o = (Goal) other;
+        Goal o = (Goal) other_;
         return compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(statusReason, o.statusReason, true)
           ;
       }
@@ -1914,7 +1914,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.startDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start-date", path="Goal.start.as(Date)", description="When goal pursuit begins", type="date" )
+  @SearchParamDefinition(name="start-date", path="Goal.start.as(date)", description="When goal pursuit begins", type="date" )
   public static final String SP_START_DATE = "start-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start-date</b>
@@ -1954,7 +1954,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.target.dueDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-date", path="Goal.target.due.as(Date)", description="Reach goal on or before", type="date" )
+  @SearchParamDefinition(name="target-date", path="Goal.target.due.as(date)", description="Reach goal on or before", type="date" )
   public static final String SP_TARGET_DATE = "target-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-date</b>

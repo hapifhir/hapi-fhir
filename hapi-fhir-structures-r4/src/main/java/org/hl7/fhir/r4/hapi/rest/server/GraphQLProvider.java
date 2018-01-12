@@ -15,11 +15,8 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ObjectValue;
 import org.hl7.fhir.utilities.graphql.Parser;
 import org.slf4j.Logger;
@@ -28,14 +25,14 @@ import org.slf4j.LoggerFactory;
 public class GraphQLProvider {
   private final IWorkerContext myWorkerContext;
   private Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
-  private IGraphQLStorageServices<Resource, Reference, Bundle> myStorageServices;
+  private GraphQLEngine.IGraphQLStorageServices myStorageServices;
 
   /**
    * Constructor which uses a default context and validation support object
    *
    * @param theStorageServices The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
    */
-  public GraphQLProvider(IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
+  public GraphQLProvider(GraphQLEngine.IGraphQLStorageServices theStorageServices) {
     this(FhirContext.forR4(), new DefaultProfileValidationSupport(), theStorageServices);
   }
 
@@ -46,7 +43,7 @@ public class GraphQLProvider {
    * @param theValidationSupport The HAPI Validation Support object
    * @param theStorageServices   The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
    */
-  public GraphQLProvider(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
+  public GraphQLProvider(FhirContext theFhirContext, IValidationSupport theValidationSupport, GraphQLEngine.IGraphQLStorageServices theStorageServices) {
     myWorkerContext = new HapiWorkerContext(theFhirContext, theValidationSupport);
     myStorageServices = theStorageServices;
   }

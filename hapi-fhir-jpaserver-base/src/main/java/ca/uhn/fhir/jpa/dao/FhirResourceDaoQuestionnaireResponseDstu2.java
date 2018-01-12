@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import javax.annotation.PostConstruct;
 
 import org.hl7.fhir.instance.hapi.validation.FhirQuestionnaireResponseValidator;
+import org.hl7.fhir.instance.hapi.validation.HapiWorkerContext;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,6 +51,10 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 	
 	private Boolean myValidateResponses;
 
+	@Autowired()
+	@Qualifier("myJpaValidationSupportDstu2")
+	private IValidationSupport myValidationSupport;
+
 	/**
 	 * Initialize the bean
 	 */
@@ -69,7 +75,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 			return;
 		}
 		
-		QuestionnaireResponse qa = (QuestionnaireResponse) theResource;
+		QuestionnaireResponse qa = theResource;
 		if (qa == null || qa.getQuestionnaire() == null || qa.getQuestionnaire().getReference() == null || qa.getQuestionnaire().getReference().isEmpty()) {
 			return;
 		}
@@ -80,6 +86,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 
 		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
 		module.setResourceLoader(new JpaResourceLoader());
+		module.setWorkerContext(new HapiWorkerContext(myRefImplCtx, myValidationSupport));
 		val.registerValidatorModule(module);
 
 		ValidationResult result = val.validateWithResult(myRefImplCtx.newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(qa)));

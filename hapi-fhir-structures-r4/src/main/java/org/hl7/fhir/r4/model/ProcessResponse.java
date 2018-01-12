@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -499,22 +499,22 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProcessResponseProcessNoteComponent))
+        if (!(other_ instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(text, o.text, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProcessResponseProcessNoteComponent))
+        if (!(other_ instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other_;
         return compareValues(type, o.type, true) && compareValues(text, o.text, true);
       }
 
@@ -1563,12 +1563,12 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProcessResponse))
+        if (!(other_ instanceof ProcessResponse))
           return false;
-        ProcessResponse o = (ProcessResponse) other;
+        ProcessResponse o = (ProcessResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(created, o.created, true)
            && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true)
            && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
@@ -1578,12 +1578,12 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProcessResponse))
+        if (!(other_ instanceof ProcessResponse))
           return false;
-        ProcessResponse o = (ProcessResponse) other;
+        ProcessResponse o = (ProcessResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
            && compareValues(disposition, o.disposition, true);
       }

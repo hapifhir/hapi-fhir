@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -262,10 +262,6 @@ public class Condition extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The condition status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
-         */
-        UNKNOWN, 
-        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -284,8 +280,6 @@ public class Condition extends DomainResource {
           return REFUTED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        if ("unknown".equals(codeString))
-          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -299,7 +293,6 @@ public class Condition extends DomainResource {
             case CONFIRMED: return "confirmed";
             case REFUTED: return "refuted";
             case ENTEREDINERROR: return "entered-in-error";
-            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -311,7 +304,6 @@ public class Condition extends DomainResource {
             case CONFIRMED: return "http://hl7.org/fhir/condition-ver-status";
             case REFUTED: return "http://hl7.org/fhir/condition-ver-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/condition-ver-status";
-            case UNKNOWN: return "http://hl7.org/fhir/condition-ver-status";
             default: return "?";
           }
         }
@@ -323,7 +315,6 @@ public class Condition extends DomainResource {
             case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.";
             case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence.";
             case ENTEREDINERROR: return "The statement was entered in error and is not valid.";
-            case UNKNOWN: return "The condition status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\".";
             default: return "?";
           }
         }
@@ -335,7 +326,6 @@ public class Condition extends DomainResource {
             case CONFIRMED: return "Confirmed";
             case REFUTED: return "Refuted";
             case ENTEREDINERROR: return "Entered In Error";
-            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -358,8 +348,6 @@ public class Condition extends DomainResource {
           return ConditionVerificationStatus.REFUTED;
         if ("entered-in-error".equals(codeString))
           return ConditionVerificationStatus.ENTEREDINERROR;
-        if ("unknown".equals(codeString))
-          return ConditionVerificationStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown ConditionVerificationStatus code '"+codeString+"'");
         }
         public Enumeration<ConditionVerificationStatus> fromType(Base code) throws FHIRException {
@@ -382,8 +370,6 @@ public class Condition extends DomainResource {
           return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.REFUTED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.ENTEREDINERROR);
-        if ("unknown".equals(codeString))
-          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.UNKNOWN);
         throw new FHIRException("Unknown ConditionVerificationStatus code '"+codeString+"'");
         }
     public String toCode(ConditionVerificationStatus code) {
@@ -399,8 +385,6 @@ public class Condition extends DomainResource {
         return "refuted";
       if (code == ConditionVerificationStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == ConditionVerificationStatus.UNKNOWN)
-        return "unknown";
       return "?";
       }
     public String toSystem(ConditionVerificationStatus code) {
@@ -670,23 +654,23 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConditionStageComponent))
+        if (!(other_ instanceof ConditionStageComponent))
           return false;
-        ConditionStageComponent o = (ConditionStageComponent) other;
+        ConditionStageComponent o = (ConditionStageComponent) other_;
         return compareDeep(summary, o.summary, true) && compareDeep(assessment, o.assessment, true) && compareDeep(type, o.type, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConditionStageComponent))
+        if (!(other_ instanceof ConditionStageComponent))
           return false;
-        ConditionStageComponent o = (ConditionStageComponent) other;
+        ConditionStageComponent o = (ConditionStageComponent) other_;
         return true;
       }
 
@@ -949,22 +933,22 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConditionEvidenceComponent))
+        if (!(other_ instanceof ConditionEvidenceComponent))
           return false;
-        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other;
+        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(detail, o.detail, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConditionEvidenceComponent))
+        if (!(other_ instanceof ConditionEvidenceComponent))
           return false;
-        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other;
+        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other_;
         return true;
       }
 
@@ -998,7 +982,7 @@ public class Condition extends DomainResource {
      * The verification status to support the clinical status of the condition.
      */
     @Child(name = "verificationStatus", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="unconfirmed | provisional | differential | confirmed | refuted | entered-in-error | unknown", formalDefinition="The verification status to support the clinical status of the condition." )
+    @Description(shortDefinition="unconfirmed | provisional | differential | confirmed | refuted | entered-in-error", formalDefinition="The verification status to support the clinical status of the condition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-ver-status")
     protected Enumeration<ConditionVerificationStatus> verificationStatus;
 
@@ -1080,9 +1064,21 @@ public class Condition extends DomainResource {
     protected DateTimeType assertedDate;
 
     /**
+     * Individual who recorded the record and takes responsibility for its content.
+     */
+    @Child(name = "recorder", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who recorded the condition", formalDefinition="Individual who recorded the record and takes responsibility for its content." )
+    protected Reference recorder;
+
+    /**
+     * The actual object that is the target of the reference (Individual who recorded the record and takes responsibility for its content.)
+     */
+    protected Resource recorderTarget;
+
+    /**
      * Individual who is making the condition statement.
      */
-    @Child(name = "asserter", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "asserter", type = {Practitioner.class, PractitionerRole.class, Patient.class, RelatedPerson.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Person who asserts this condition", formalDefinition="Individual who is making the condition statement." )
     protected Reference asserter;
 
@@ -1094,25 +1090,25 @@ public class Condition extends DomainResource {
     /**
      * Clinical stage or grade of a condition. May include formal severity assessments.
      */
-    @Child(name = "stage", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "stage", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Stage/grade, usually assessed formally", formalDefinition="Clinical stage or grade of a condition. May include formal severity assessments." )
     protected List<ConditionStageComponent> stage;
 
     /**
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.
      */
-    @Child(name = "evidence", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "evidence", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Supporting evidence", formalDefinition="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed." )
     protected List<ConditionEvidenceComponent> evidence;
 
     /**
      * Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.
      */
-    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 1239346096L;
+    private static final long serialVersionUID = 874829326L;
 
   /**
    * Constructor
@@ -1730,6 +1726,45 @@ public class Condition extends DomainResource {
     }
 
     /**
+     * @return {@link #recorder} (Individual who recorded the record and takes responsibility for its content.)
+     */
+    public Reference getRecorder() { 
+      if (this.recorder == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Condition.recorder");
+        else if (Configuration.doAutoCreate())
+          this.recorder = new Reference(); // cc
+      return this.recorder;
+    }
+
+    public boolean hasRecorder() { 
+      return this.recorder != null && !this.recorder.isEmpty();
+    }
+
+    /**
+     * @param value {@link #recorder} (Individual who recorded the record and takes responsibility for its content.)
+     */
+    public Condition setRecorder(Reference value) { 
+      this.recorder = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #recorder} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Individual who recorded the record and takes responsibility for its content.)
+     */
+    public Resource getRecorderTarget() { 
+      return this.recorderTarget;
+    }
+
+    /**
+     * @param value {@link #recorder} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Individual who recorded the record and takes responsibility for its content.)
+     */
+    public Condition setRecorderTarget(Resource value) { 
+      this.recorderTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #asserter} (Individual who is making the condition statement.)
      */
     public Reference getAsserter() { 
@@ -1941,7 +1976,8 @@ public class Condition extends DomainResource {
         children.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset));
         children.add(new Property("abatement[x]", "dateTime|Age|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement));
         children.add(new Property("assertedDate", "dateTime", "The date on which the existance of the Condition was first asserted or acknowledged.", 0, 1, assertedDate));
-        children.add(new Property("asserter", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter));
+        children.add(new Property("recorder", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder));
+        children.add(new Property("asserter", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter));
         children.add(new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, java.lang.Integer.MAX_VALUE, stage));
         children.add(new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence));
         children.add(new Property("note", "Annotation", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, note));
@@ -1974,7 +2010,8 @@ public class Condition extends DomainResource {
         case 1218906830: /*abatementRange*/  return new Property("abatement[x]", "dateTime|Age|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
         case -822296416: /*abatementString*/  return new Property("abatement[x]", "dateTime|Age|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
         case -174231629: /*assertedDate*/  return new Property("assertedDate", "dateTime", "The date on which the existance of the Condition was first asserted or acknowledged.", 0, 1, assertedDate);
-        case -373242253: /*asserter*/  return new Property("asserter", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter);
+        case -799233858: /*recorder*/  return new Property("recorder", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder);
+        case -373242253: /*asserter*/  return new Property("asserter", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter);
         case 109757182: /*stage*/  return new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, java.lang.Integer.MAX_VALUE, stage);
         case 382967383: /*evidence*/  return new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, note);
@@ -1998,6 +2035,7 @@ public class Condition extends DomainResource {
         case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // Type
         case -921554001: /*abatement*/ return this.abatement == null ? new Base[0] : new Base[] {this.abatement}; // Type
         case -174231629: /*assertedDate*/ return this.assertedDate == null ? new Base[0] : new Base[] {this.assertedDate}; // DateTimeType
+        case -799233858: /*recorder*/ return this.recorder == null ? new Base[0] : new Base[] {this.recorder}; // Reference
         case -373242253: /*asserter*/ return this.asserter == null ? new Base[0] : new Base[] {this.asserter}; // Reference
         case 109757182: /*stage*/ return this.stage == null ? new Base[0] : this.stage.toArray(new Base[this.stage.size()]); // ConditionStageComponent
         case 382967383: /*evidence*/ return this.evidence == null ? new Base[0] : this.evidence.toArray(new Base[this.evidence.size()]); // ConditionEvidenceComponent
@@ -2048,6 +2086,9 @@ public class Condition extends DomainResource {
         case -174231629: // assertedDate
           this.assertedDate = castToDateTime(value); // DateTimeType
           return value;
+        case -799233858: // recorder
+          this.recorder = castToReference(value); // Reference
+          return value;
         case -373242253: // asserter
           this.asserter = castToReference(value); // Reference
           return value;
@@ -2093,6 +2134,8 @@ public class Condition extends DomainResource {
           this.abatement = castToType(value); // Type
         } else if (name.equals("assertedDate")) {
           this.assertedDate = castToDateTime(value); // DateTimeType
+        } else if (name.equals("recorder")) {
+          this.recorder = castToReference(value); // Reference
         } else if (name.equals("asserter")) {
           this.asserter = castToReference(value); // Reference
         } else if (name.equals("stage")) {
@@ -2123,6 +2166,7 @@ public class Condition extends DomainResource {
         case -584196495:  return getAbatement(); 
         case -921554001:  return getAbatement(); 
         case -174231629:  return getAssertedDateElement();
+        case -799233858:  return getRecorder(); 
         case -373242253:  return getAsserter(); 
         case 109757182:  return addStage(); 
         case 382967383:  return addEvidence(); 
@@ -2147,6 +2191,7 @@ public class Condition extends DomainResource {
         case 105901603: /*onset*/ return new String[] {"dateTime", "Age", "Period", "Range", "string"};
         case -921554001: /*abatement*/ return new String[] {"dateTime", "Age", "Period", "Range", "string"};
         case -174231629: /*assertedDate*/ return new String[] {"dateTime"};
+        case -799233858: /*recorder*/ return new String[] {"Reference"};
         case -373242253: /*asserter*/ return new String[] {"Reference"};
         case 109757182: /*stage*/ return new String[] {};
         case 382967383: /*evidence*/ return new String[] {};
@@ -2232,6 +2277,10 @@ public class Condition extends DomainResource {
         else if (name.equals("assertedDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type Condition.assertedDate");
         }
+        else if (name.equals("recorder")) {
+          this.recorder = new Reference();
+          return this.recorder;
+        }
         else if (name.equals("asserter")) {
           this.asserter = new Reference();
           return this.asserter;
@@ -2281,6 +2330,7 @@ public class Condition extends DomainResource {
         dst.onset = onset == null ? null : onset.copy();
         dst.abatement = abatement == null ? null : abatement.copy();
         dst.assertedDate = assertedDate == null ? null : assertedDate.copy();
+        dst.recorder = recorder == null ? null : recorder.copy();
         dst.asserter = asserter == null ? null : asserter.copy();
         if (stage != null) {
           dst.stage = new ArrayList<ConditionStageComponent>();
@@ -2305,28 +2355,28 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Condition))
+        if (!(other_ instanceof Condition))
           return false;
-        Condition o = (Condition) other;
+        Condition o = (Condition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(clinicalStatus, o.clinicalStatus, true)
            && compareDeep(verificationStatus, o.verificationStatus, true) && compareDeep(category, o.category, true)
            && compareDeep(severity, o.severity, true) && compareDeep(code, o.code, true) && compareDeep(bodySite, o.bodySite, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(onset, o.onset, true)
            && compareDeep(abatement, o.abatement, true) && compareDeep(assertedDate, o.assertedDate, true)
-           && compareDeep(asserter, o.asserter, true) && compareDeep(stage, o.stage, true) && compareDeep(evidence, o.evidence, true)
-           && compareDeep(note, o.note, true);
+           && compareDeep(recorder, o.recorder, true) && compareDeep(asserter, o.asserter, true) && compareDeep(stage, o.stage, true)
+           && compareDeep(evidence, o.evidence, true) && compareDeep(note, o.note, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Condition))
+        if (!(other_ instanceof Condition))
           return false;
-        Condition o = (Condition) other;
+        Condition o = (Condition) other_;
         return compareValues(clinicalStatus, o.clinicalStatus, true) && compareValues(verificationStatus, o.verificationStatus, true)
            && compareValues(assertedDate, o.assertedDate, true);
       }
@@ -2334,7 +2384,7 @@ public class Condition extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, clinicalStatus
           , verificationStatus, category, severity, code, bodySite, subject, context, onset
-          , abatement, assertedDate, asserter, stage, evidence, note);
+          , abatement, assertedDate, recorder, asserter, stage, evidence, note);
       }
 
   @Override
@@ -2497,17 +2547,17 @@ public class Condition extends DomainResource {
  /**
    * Search parameter: <b>verification-status</b>
    * <p>
-   * Description: <b>unconfirmed | provisional | differential | confirmed | refuted | entered-in-error | unknown</b><br>
+   * Description: <b>unconfirmed | provisional | differential | confirmed | refuted | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Condition.verificationStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="verification-status", path="Condition.verificationStatus", description="unconfirmed | provisional | differential | confirmed | refuted | entered-in-error | unknown", type="token" )
+  @SearchParamDefinition(name="verification-status", path="Condition.verificationStatus", description="unconfirmed | provisional | differential | confirmed | refuted | entered-in-error", type="token" )
   public static final String SP_VERIFICATION_STATUS = "verification-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>verification-status</b>
    * <p>
-   * Description: <b>unconfirmed | provisional | differential | confirmed | refuted | entered-in-error | unknown</b><br>
+   * Description: <b>unconfirmed | provisional | differential | confirmed | refuted | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Condition.verificationStatus</b><br>
    * </p>
@@ -2608,7 +2658,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.asserter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_ASSERTER = "asserter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>asserter</b>

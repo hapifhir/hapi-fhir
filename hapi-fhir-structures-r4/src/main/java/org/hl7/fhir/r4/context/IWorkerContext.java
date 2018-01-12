@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 
@@ -387,4 +388,5 @@ public interface IWorkerContext {
 
   public boolean isNoTerminologyServer();
 
+  public TranslationServices translator();
 }

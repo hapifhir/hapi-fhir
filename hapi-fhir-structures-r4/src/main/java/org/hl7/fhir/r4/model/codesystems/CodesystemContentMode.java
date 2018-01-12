@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum CodesystemContentMode {
          */
         COMPLETE, 
         /**
+         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system
+         */
+        SUPPLEMENT, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -67,6 +71,8 @@ public enum CodesystemContentMode {
           return FRAGMENT;
         if ("complete".equals(codeString))
           return COMPLETE;
+        if ("supplement".equals(codeString))
+          return SUPPLEMENT;
         throw new FHIRException("Unknown CodesystemContentMode code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,6 +81,7 @@ public enum CodesystemContentMode {
             case EXAMPLE: return "example";
             case FRAGMENT: return "fragment";
             case COMPLETE: return "complete";
+            case SUPPLEMENT: return "supplement";
             default: return "?";
           }
         }
@@ -87,6 +94,7 @@ public enum CodesystemContentMode {
             case EXAMPLE: return "A few representative concepts are included in the code system resource";
             case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
             case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
+            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum CodesystemContentMode {
             case EXAMPLE: return "Example";
             case FRAGMENT: return "Fragment";
             case COMPLETE: return "Complete";
+            case SUPPLEMENT: return "Supplement";
             default: return "?";
           }
     }

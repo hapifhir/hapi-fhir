@@ -1,49 +1,33 @@
 package ca.uhn.fhir.tinder.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.tinder.model.AnyChild;
-import ca.uhn.fhir.tinder.model.BaseElement;
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.Child;
-import ca.uhn.fhir.tinder.model.ResourceBlock;
-import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
-import ca.uhn.fhir.tinder.model.SearchParameter;
-import ca.uhn.fhir.tinder.model.SimpleChild;
+import ca.uhn.fhir.tinder.model.*;
 import ca.uhn.fhir.tinder.util.XMLUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
 
 	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
 
-		myBindingStrengths = new HashMap<String, String>();
-		myBindingRefs = new HashMap<String, String>();
+		myBindingStrengths = new HashMap<>();
+		myBindingRefs = new HashMap<>();
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureSpreadsheetParser.class);

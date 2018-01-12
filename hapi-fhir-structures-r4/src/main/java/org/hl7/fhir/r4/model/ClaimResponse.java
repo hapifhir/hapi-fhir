@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -287,9 +287,9 @@ public class ClaimResponse extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "itemSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
-        protected PositiveIntType sequenceLinkId;
+        protected PositiveIntType itemSequence;
 
         /**
          * A list of note references to the notes provided below.
@@ -312,7 +312,7 @@ public class ClaimResponse extends DomainResource {
         @Description(shortDefinition="Detail line items", formalDefinition="The second tier service adjudications for submitted services." )
         protected List<ItemDetailComponent> detail;
 
-        private static final long serialVersionUID = -1282041398L;
+        private static final long serialVersionUID = 701277928L;
 
     /**
      * Constructor
@@ -324,53 +324,53 @@ public class ClaimResponse extends DomainResource {
     /**
      * Constructor
      */
-      public ItemComponent(PositiveIntType sequenceLinkId) {
+      public ItemComponent(PositiveIntType itemSequence) {
         super();
-        this.sequenceLinkId = sequenceLinkId;
+        this.itemSequence = itemSequence;
       }
 
         /**
-         * @return {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @return {@link #itemSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getItemSequence" gives direct access to the value
          */
-        public PositiveIntType getSequenceLinkIdElement() { 
-          if (this.sequenceLinkId == null)
+        public PositiveIntType getItemSequenceElement() { 
+          if (this.itemSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ItemComponent.sequenceLinkId");
+              throw new Error("Attempt to auto-create ItemComponent.itemSequence");
             else if (Configuration.doAutoCreate())
-              this.sequenceLinkId = new PositiveIntType(); // bb
-          return this.sequenceLinkId;
+              this.itemSequence = new PositiveIntType(); // bb
+          return this.itemSequence;
         }
 
-        public boolean hasSequenceLinkIdElement() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasItemSequenceElement() { 
+          return this.itemSequence != null && !this.itemSequence.isEmpty();
         }
 
-        public boolean hasSequenceLinkId() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasItemSequence() { 
+          return this.itemSequence != null && !this.itemSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @param value {@link #itemSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getItemSequence" gives direct access to the value
          */
-        public ItemComponent setSequenceLinkIdElement(PositiveIntType value) { 
-          this.sequenceLinkId = value;
+        public ItemComponent setItemSequenceElement(PositiveIntType value) { 
+          this.itemSequence = value;
           return this;
         }
 
         /**
          * @return A service line number.
          */
-        public int getSequenceLinkId() { 
-          return this.sequenceLinkId == null || this.sequenceLinkId.isEmpty() ? 0 : this.sequenceLinkId.getValue();
+        public int getItemSequence() { 
+          return this.itemSequence == null || this.itemSequence.isEmpty() ? 0 : this.itemSequence.getValue();
         }
 
         /**
          * @param value A service line number.
          */
-        public ItemComponent setSequenceLinkId(int value) { 
-            if (this.sequenceLinkId == null)
-              this.sequenceLinkId = new PositiveIntType();
-            this.sequenceLinkId.setValue(value);
+        public ItemComponent setItemSequence(int value) { 
+            if (this.itemSequence == null)
+              this.itemSequence = new PositiveIntType();
+            this.itemSequence.setValue(value);
           return this;
         }
 
@@ -543,7 +543,7 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("itemSequence", "positiveInt", "A service line number.", 0, 1, itemSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
           children.add(new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
           children.add(new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
@@ -552,7 +552,7 @@ public class ClaimResponse extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "A service line number.", 0, 1, itemSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
           case -231349275: /*adjudication*/  return new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
           case -1335224239: /*detail*/  return new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail);
@@ -564,7 +564,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : new Base[] {this.sequenceLinkId}; // PositiveIntType
+        case 1977979892: /*itemSequence*/ return this.itemSequence == null ? new Base[0] : new Base[] {this.itemSequence}; // PositiveIntType
         case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
         case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
         case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // ItemDetailComponent
@@ -576,8 +576,8 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1422298666: // sequenceLinkId
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case 1977979892: // itemSequence
+          this.itemSequence = castToPositiveInt(value); // PositiveIntType
           return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
@@ -595,8 +595,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        if (name.equals("itemSequence")) {
+          this.itemSequence = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
         } else if (name.equals("adjudication")) {
@@ -611,7 +611,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666:  return getSequenceLinkIdElement();
+        case 1977979892:  return getItemSequenceElement();
         case -1110033957:  return addNoteNumberElement();
         case -231349275:  return addAdjudication(); 
         case -1335224239:  return addDetail(); 
@@ -623,7 +623,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case 1977979892: /*itemSequence*/ return new String[] {"positiveInt"};
         case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
         case -231349275: /*adjudication*/ return new String[] {};
         case -1335224239: /*detail*/ return new String[] {};
@@ -634,8 +634,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.sequenceLinkId");
+        if (name.equals("itemSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.itemSequence");
         }
         else if (name.equals("noteNumber")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
@@ -653,7 +653,7 @@ public class ClaimResponse extends DomainResource {
       public ItemComponent copy() {
         ItemComponent dst = new ItemComponent();
         copyValues(dst);
-        dst.sequenceLinkId = sequenceLinkId == null ? null : sequenceLinkId.copy();
+        dst.itemSequence = itemSequence == null ? null : itemSequence.copy();
         if (noteNumber != null) {
           dst.noteNumber = new ArrayList<PositiveIntType>();
           for (PositiveIntType i : noteNumber)
@@ -673,30 +673,30 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
-        return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
+        ItemComponent o = (ItemComponent) other_;
+        return compareDeep(itemSequence, o.itemSequence, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true) && compareDeep(detail, o.detail, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
-        return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
+        ItemComponent o = (ItemComponent) other_;
+        return compareValues(itemSequence, o.itemSequence, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId, noteNumber
-          , adjudication, detail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemSequence, noteNumber, adjudication
+          , detail);
       }
 
   public String fhirType() {
@@ -1017,23 +1017,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AdjudicationComponent))
+        if (!(other_ instanceof AdjudicationComponent))
           return false;
-        AdjudicationComponent o = (AdjudicationComponent) other;
+        AdjudicationComponent o = (AdjudicationComponent) other_;
         return compareDeep(category, o.category, true) && compareDeep(reason, o.reason, true) && compareDeep(amount, o.amount, true)
            && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AdjudicationComponent))
+        if (!(other_ instanceof AdjudicationComponent))
           return false;
-        AdjudicationComponent o = (AdjudicationComponent) other;
+        AdjudicationComponent o = (AdjudicationComponent) other_;
         return compareValues(value, o.value, true);
       }
 
@@ -1054,9 +1054,9 @@ public class ClaimResponse extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "detailSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
-        protected PositiveIntType sequenceLinkId;
+        protected PositiveIntType detailSequence;
 
         /**
          * A list of note references to the notes provided below.
@@ -1079,7 +1079,7 @@ public class ClaimResponse extends DomainResource {
         @Description(shortDefinition="Subdetail line items", formalDefinition="The third tier service adjudications for submitted services." )
         protected List<SubDetailComponent> subDetail;
 
-        private static final long serialVersionUID = -1245557773L;
+        private static final long serialVersionUID = 1066636111L;
 
     /**
      * Constructor
@@ -1091,53 +1091,53 @@ public class ClaimResponse extends DomainResource {
     /**
      * Constructor
      */
-      public ItemDetailComponent(PositiveIntType sequenceLinkId) {
+      public ItemDetailComponent(PositiveIntType detailSequence) {
         super();
-        this.sequenceLinkId = sequenceLinkId;
+        this.detailSequence = detailSequence;
       }
 
         /**
-         * @return {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @return {@link #detailSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getDetailSequence" gives direct access to the value
          */
-        public PositiveIntType getSequenceLinkIdElement() { 
-          if (this.sequenceLinkId == null)
+        public PositiveIntType getDetailSequenceElement() { 
+          if (this.detailSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ItemDetailComponent.sequenceLinkId");
+              throw new Error("Attempt to auto-create ItemDetailComponent.detailSequence");
             else if (Configuration.doAutoCreate())
-              this.sequenceLinkId = new PositiveIntType(); // bb
-          return this.sequenceLinkId;
+              this.detailSequence = new PositiveIntType(); // bb
+          return this.detailSequence;
         }
 
-        public boolean hasSequenceLinkIdElement() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasDetailSequenceElement() { 
+          return this.detailSequence != null && !this.detailSequence.isEmpty();
         }
 
-        public boolean hasSequenceLinkId() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasDetailSequence() { 
+          return this.detailSequence != null && !this.detailSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @param value {@link #detailSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getDetailSequence" gives direct access to the value
          */
-        public ItemDetailComponent setSequenceLinkIdElement(PositiveIntType value) { 
-          this.sequenceLinkId = value;
+        public ItemDetailComponent setDetailSequenceElement(PositiveIntType value) { 
+          this.detailSequence = value;
           return this;
         }
 
         /**
          * @return A service line number.
          */
-        public int getSequenceLinkId() { 
-          return this.sequenceLinkId == null || this.sequenceLinkId.isEmpty() ? 0 : this.sequenceLinkId.getValue();
+        public int getDetailSequence() { 
+          return this.detailSequence == null || this.detailSequence.isEmpty() ? 0 : this.detailSequence.getValue();
         }
 
         /**
          * @param value A service line number.
          */
-        public ItemDetailComponent setSequenceLinkId(int value) { 
-            if (this.sequenceLinkId == null)
-              this.sequenceLinkId = new PositiveIntType();
-            this.sequenceLinkId.setValue(value);
+        public ItemDetailComponent setDetailSequence(int value) { 
+            if (this.detailSequence == null)
+              this.detailSequence = new PositiveIntType();
+            this.detailSequence.setValue(value);
           return this;
         }
 
@@ -1310,7 +1310,7 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("detailSequence", "positiveInt", "A service line number.", 0, 1, detailSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
           children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
           children.add(new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
@@ -1319,7 +1319,7 @@ public class ClaimResponse extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "A service line number.", 0, 1, detailSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
           case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
           case -828829007: /*subDetail*/  return new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail);
@@ -1331,7 +1331,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : new Base[] {this.sequenceLinkId}; // PositiveIntType
+        case 1321472818: /*detailSequence*/ return this.detailSequence == null ? new Base[0] : new Base[] {this.detailSequence}; // PositiveIntType
         case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
         case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
         case -828829007: /*subDetail*/ return this.subDetail == null ? new Base[0] : this.subDetail.toArray(new Base[this.subDetail.size()]); // SubDetailComponent
@@ -1343,8 +1343,8 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1422298666: // sequenceLinkId
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case 1321472818: // detailSequence
+          this.detailSequence = castToPositiveInt(value); // PositiveIntType
           return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
@@ -1362,8 +1362,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        if (name.equals("detailSequence")) {
+          this.detailSequence = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
         } else if (name.equals("adjudication")) {
@@ -1378,7 +1378,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666:  return getSequenceLinkIdElement();
+        case 1321472818:  return getDetailSequenceElement();
         case -1110033957:  return addNoteNumberElement();
         case -231349275:  return addAdjudication(); 
         case -828829007:  return addSubDetail(); 
@@ -1390,7 +1390,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case 1321472818: /*detailSequence*/ return new String[] {"positiveInt"};
         case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
         case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
         case -828829007: /*subDetail*/ return new String[] {};
@@ -1401,8 +1401,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.sequenceLinkId");
+        if (name.equals("detailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.detailSequence");
         }
         else if (name.equals("noteNumber")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
@@ -1420,7 +1420,7 @@ public class ClaimResponse extends DomainResource {
       public ItemDetailComponent copy() {
         ItemDetailComponent dst = new ItemDetailComponent();
         copyValues(dst);
-        dst.sequenceLinkId = sequenceLinkId == null ? null : sequenceLinkId.copy();
+        dst.detailSequence = detailSequence == null ? null : detailSequence.copy();
         if (noteNumber != null) {
           dst.noteNumber = new ArrayList<PositiveIntType>();
           for (PositiveIntType i : noteNumber)
@@ -1440,30 +1440,30 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ItemDetailComponent))
+        if (!(other_ instanceof ItemDetailComponent))
           return false;
-        ItemDetailComponent o = (ItemDetailComponent) other;
-        return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
+        ItemDetailComponent o = (ItemDetailComponent) other_;
+        return compareDeep(detailSequence, o.detailSequence, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true) && compareDeep(subDetail, o.subDetail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ItemDetailComponent))
+        if (!(other_ instanceof ItemDetailComponent))
           return false;
-        ItemDetailComponent o = (ItemDetailComponent) other;
-        return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
+        ItemDetailComponent o = (ItemDetailComponent) other_;
+        return compareValues(detailSequence, o.detailSequence, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId, noteNumber
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(detailSequence, noteNumber
           , adjudication, subDetail);
       }
 
@@ -1479,9 +1479,9 @@ public class ClaimResponse extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "subDetailSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
-        protected PositiveIntType sequenceLinkId;
+        protected PositiveIntType subDetailSequence;
 
         /**
          * A list of note references to the notes provided below.
@@ -1497,7 +1497,7 @@ public class ClaimResponse extends DomainResource {
         @Description(shortDefinition="Subdetail level adjudication details", formalDefinition="The adjudications results." )
         protected List<AdjudicationComponent> adjudication;
 
-        private static final long serialVersionUID = 1770463342L;
+        private static final long serialVersionUID = -1083724362L;
 
     /**
      * Constructor
@@ -1509,53 +1509,53 @@ public class ClaimResponse extends DomainResource {
     /**
      * Constructor
      */
-      public SubDetailComponent(PositiveIntType sequenceLinkId) {
+      public SubDetailComponent(PositiveIntType subDetailSequence) {
         super();
-        this.sequenceLinkId = sequenceLinkId;
+        this.subDetailSequence = subDetailSequence;
       }
 
         /**
-         * @return {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @return {@link #subDetailSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSubDetailSequence" gives direct access to the value
          */
-        public PositiveIntType getSequenceLinkIdElement() { 
-          if (this.sequenceLinkId == null)
+        public PositiveIntType getSubDetailSequenceElement() { 
+          if (this.subDetailSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubDetailComponent.sequenceLinkId");
+              throw new Error("Attempt to auto-create SubDetailComponent.subDetailSequence");
             else if (Configuration.doAutoCreate())
-              this.sequenceLinkId = new PositiveIntType(); // bb
-          return this.sequenceLinkId;
+              this.subDetailSequence = new PositiveIntType(); // bb
+          return this.subDetailSequence;
         }
 
-        public boolean hasSequenceLinkIdElement() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasSubDetailSequenceElement() { 
+          return this.subDetailSequence != null && !this.subDetailSequence.isEmpty();
         }
 
-        public boolean hasSequenceLinkId() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasSubDetailSequence() { 
+          return this.subDetailSequence != null && !this.subDetailSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @param value {@link #subDetailSequence} (A service line number.). This is the underlying object with id, value and extensions. The accessor "getSubDetailSequence" gives direct access to the value
          */
-        public SubDetailComponent setSequenceLinkIdElement(PositiveIntType value) { 
-          this.sequenceLinkId = value;
+        public SubDetailComponent setSubDetailSequenceElement(PositiveIntType value) { 
+          this.subDetailSequence = value;
           return this;
         }
 
         /**
          * @return A service line number.
          */
-        public int getSequenceLinkId() { 
-          return this.sequenceLinkId == null || this.sequenceLinkId.isEmpty() ? 0 : this.sequenceLinkId.getValue();
+        public int getSubDetailSequence() { 
+          return this.subDetailSequence == null || this.subDetailSequence.isEmpty() ? 0 : this.subDetailSequence.getValue();
         }
 
         /**
          * @param value A service line number.
          */
-        public SubDetailComponent setSequenceLinkId(int value) { 
-            if (this.sequenceLinkId == null)
-              this.sequenceLinkId = new PositiveIntType();
-            this.sequenceLinkId.setValue(value);
+        public SubDetailComponent setSubDetailSequence(int value) { 
+            if (this.subDetailSequence == null)
+              this.subDetailSequence = new PositiveIntType();
+            this.subDetailSequence.setValue(value);
           return this;
         }
 
@@ -1675,7 +1675,7 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("subDetailSequence", "positiveInt", "A service line number.", 0, 1, subDetailSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
           children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
         }
@@ -1683,7 +1683,7 @@ public class ClaimResponse extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case -855462510: /*subDetailSequence*/  return new Property("subDetailSequence", "positiveInt", "A service line number.", 0, 1, subDetailSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
           case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1694,7 +1694,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : new Base[] {this.sequenceLinkId}; // PositiveIntType
+        case -855462510: /*subDetailSequence*/ return this.subDetailSequence == null ? new Base[0] : new Base[] {this.subDetailSequence}; // PositiveIntType
         case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
         case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1705,8 +1705,8 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1422298666: // sequenceLinkId
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case -855462510: // subDetailSequence
+          this.subDetailSequence = castToPositiveInt(value); // PositiveIntType
           return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
@@ -1721,8 +1721,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        if (name.equals("subDetailSequence")) {
+          this.subDetailSequence = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
         } else if (name.equals("adjudication")) {
@@ -1735,7 +1735,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666:  return getSequenceLinkIdElement();
+        case -855462510:  return getSubDetailSequenceElement();
         case -1110033957:  return addNoteNumberElement();
         case -231349275:  return addAdjudication(); 
         default: return super.makeProperty(hash, name);
@@ -1746,7 +1746,7 @@ public class ClaimResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case -855462510: /*subDetailSequence*/ return new String[] {"positiveInt"};
         case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
         case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
         default: return super.getTypesForProperty(hash, name);
@@ -1756,8 +1756,8 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.sequenceLinkId");
+        if (name.equals("subDetailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subDetailSequence");
         }
         else if (name.equals("noteNumber")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
@@ -1772,7 +1772,7 @@ public class ClaimResponse extends DomainResource {
       public SubDetailComponent copy() {
         SubDetailComponent dst = new SubDetailComponent();
         copyValues(dst);
-        dst.sequenceLinkId = sequenceLinkId == null ? null : sequenceLinkId.copy();
+        dst.subDetailSequence = subDetailSequence == null ? null : subDetailSequence.copy();
         if (noteNumber != null) {
           dst.noteNumber = new ArrayList<PositiveIntType>();
           for (PositiveIntType i : noteNumber)
@@ -1787,29 +1787,29 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
-        return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
+        SubDetailComponent o = (SubDetailComponent) other_;
+        return compareDeep(subDetailSequence, o.subDetailSequence, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
-        return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
+        SubDetailComponent o = (SubDetailComponent) other_;
+        return compareValues(subDetailSequence, o.subDetailSequence, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId, noteNumber
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subDetailSequence, noteNumber
           , adjudication);
       }
 
@@ -1825,23 +1825,23 @@ public class ClaimResponse extends DomainResource {
         /**
          * List of input service items which this service line is intended to replace.
          */
-        @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "itemSequence", type = {PositiveIntType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Service instances", formalDefinition="List of input service items which this service line is intended to replace." )
-        protected List<PositiveIntType> sequenceLinkId;
+        protected List<PositiveIntType> itemSequence;
 
         /**
          * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        @Child(name = "detailSequenceLinkId", type = {PositiveIntType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "detailSequence", type = {PositiveIntType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Detail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
-        protected List<PositiveIntType> detailSequenceLinkId;
+        protected List<PositiveIntType> detailSequence;
 
         /**
          * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        @Child(name = "subdetailSequenceLinkId", type = {PositiveIntType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "subdetailSequence", type = {PositiveIntType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Subdetail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
-        protected List<PositiveIntType> subdetailSequenceLinkId;
+        protected List<PositiveIntType> subdetailSequence;
 
         /**
          * A code to indicate the Professional Service or Product supplied.
@@ -1880,7 +1880,7 @@ public class ClaimResponse extends DomainResource {
         @Description(shortDefinition="Added items adjudication", formalDefinition="The adjudications results." )
         protected List<AdjudicationComponent> adjudication;
 
-        private static final long serialVersionUID = 286653346L;
+        private static final long serialVersionUID = -245636774L;
 
     /**
      * Constructor
@@ -1890,183 +1890,183 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #sequenceLinkId} (List of input service items which this service line is intended to replace.)
+         * @return {@link #itemSequence} (List of input service items which this service line is intended to replace.)
          */
-        public List<PositiveIntType> getSequenceLinkId() { 
-          if (this.sequenceLinkId == null)
-            this.sequenceLinkId = new ArrayList<PositiveIntType>();
-          return this.sequenceLinkId;
+        public List<PositiveIntType> getItemSequence() { 
+          if (this.itemSequence == null)
+            this.itemSequence = new ArrayList<PositiveIntType>();
+          return this.itemSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AddedItemComponent setSequenceLinkId(List<PositiveIntType> theSequenceLinkId) { 
-          this.sequenceLinkId = theSequenceLinkId;
+        public AddedItemComponent setItemSequence(List<PositiveIntType> theItemSequence) { 
+          this.itemSequence = theItemSequence;
           return this;
         }
 
-        public boolean hasSequenceLinkId() { 
-          if (this.sequenceLinkId == null)
+        public boolean hasItemSequence() { 
+          if (this.itemSequence == null)
             return false;
-          for (PositiveIntType item : this.sequenceLinkId)
+          for (PositiveIntType item : this.itemSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #sequenceLinkId} (List of input service items which this service line is intended to replace.)
+         * @return {@link #itemSequence} (List of input service items which this service line is intended to replace.)
          */
-        public PositiveIntType addSequenceLinkIdElement() {//2 
+        public PositiveIntType addItemSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.sequenceLinkId == null)
-            this.sequenceLinkId = new ArrayList<PositiveIntType>();
-          this.sequenceLinkId.add(t);
+          if (this.itemSequence == null)
+            this.itemSequence = new ArrayList<PositiveIntType>();
+          this.itemSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (List of input service items which this service line is intended to replace.)
+         * @param value {@link #itemSequence} (List of input service items which this service line is intended to replace.)
          */
-        public AddedItemComponent addSequenceLinkId(int value) { //1
+        public AddedItemComponent addItemSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.sequenceLinkId == null)
-            this.sequenceLinkId = new ArrayList<PositiveIntType>();
-          this.sequenceLinkId.add(t);
+          if (this.itemSequence == null)
+            this.itemSequence = new ArrayList<PositiveIntType>();
+          this.itemSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (List of input service items which this service line is intended to replace.)
+         * @param value {@link #itemSequence} (List of input service items which this service line is intended to replace.)
          */
-        public boolean hasSequenceLinkId(int value) { 
-          if (this.sequenceLinkId == null)
+        public boolean hasItemSequence(int value) { 
+          if (this.itemSequence == null)
             return false;
-          for (PositiveIntType v : this.sequenceLinkId)
+          for (PositiveIntType v : this.itemSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
         }
 
         /**
-         * @return {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @return {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public List<PositiveIntType> getDetailSequenceLinkId() { 
-          if (this.detailSequenceLinkId == null)
-            this.detailSequenceLinkId = new ArrayList<PositiveIntType>();
-          return this.detailSequenceLinkId;
+        public List<PositiveIntType> getDetailSequence() { 
+          if (this.detailSequence == null)
+            this.detailSequence = new ArrayList<PositiveIntType>();
+          return this.detailSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AddedItemComponent setDetailSequenceLinkId(List<PositiveIntType> theDetailSequenceLinkId) { 
-          this.detailSequenceLinkId = theDetailSequenceLinkId;
+        public AddedItemComponent setDetailSequence(List<PositiveIntType> theDetailSequence) { 
+          this.detailSequence = theDetailSequence;
           return this;
         }
 
-        public boolean hasDetailSequenceLinkId() { 
-          if (this.detailSequenceLinkId == null)
+        public boolean hasDetailSequence() { 
+          if (this.detailSequence == null)
             return false;
-          for (PositiveIntType item : this.detailSequenceLinkId)
+          for (PositiveIntType item : this.detailSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @return {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public PositiveIntType addDetailSequenceLinkIdElement() {//2 
+        public PositiveIntType addDetailSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.detailSequenceLinkId == null)
-            this.detailSequenceLinkId = new ArrayList<PositiveIntType>();
-          this.detailSequenceLinkId.add(t);
+          if (this.detailSequence == null)
+            this.detailSequence = new ArrayList<PositiveIntType>();
+          this.detailSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @param value {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public AddedItemComponent addDetailSequenceLinkId(int value) { //1
+        public AddedItemComponent addDetailSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.detailSequenceLinkId == null)
-            this.detailSequenceLinkId = new ArrayList<PositiveIntType>();
-          this.detailSequenceLinkId.add(t);
+          if (this.detailSequence == null)
+            this.detailSequence = new ArrayList<PositiveIntType>();
+          this.detailSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @param value {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public boolean hasDetailSequenceLinkId(int value) { 
-          if (this.detailSequenceLinkId == null)
+        public boolean hasDetailSequence(int value) { 
+          if (this.detailSequence == null)
             return false;
-          for (PositiveIntType v : this.detailSequenceLinkId)
+          for (PositiveIntType v : this.detailSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
         }
 
         /**
-         * @return {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @return {@link #subdetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public List<PositiveIntType> getSubdetailSequenceLinkId() { 
-          if (this.subdetailSequenceLinkId == null)
-            this.subdetailSequenceLinkId = new ArrayList<PositiveIntType>();
-          return this.subdetailSequenceLinkId;
+        public List<PositiveIntType> getSubdetailSequence() { 
+          if (this.subdetailSequence == null)
+            this.subdetailSequence = new ArrayList<PositiveIntType>();
+          return this.subdetailSequence;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AddedItemComponent setSubdetailSequenceLinkId(List<PositiveIntType> theSubdetailSequenceLinkId) { 
-          this.subdetailSequenceLinkId = theSubdetailSequenceLinkId;
+        public AddedItemComponent setSubdetailSequence(List<PositiveIntType> theSubdetailSequence) { 
+          this.subdetailSequence = theSubdetailSequence;
           return this;
         }
 
-        public boolean hasSubdetailSequenceLinkId() { 
-          if (this.subdetailSequenceLinkId == null)
+        public boolean hasSubdetailSequence() { 
+          if (this.subdetailSequence == null)
             return false;
-          for (PositiveIntType item : this.subdetailSequenceLinkId)
+          for (PositiveIntType item : this.subdetailSequence)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @return {@link #subdetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public PositiveIntType addSubdetailSequenceLinkIdElement() {//2 
+        public PositiveIntType addSubdetailSequenceElement() {//2 
           PositiveIntType t = new PositiveIntType();
-          if (this.subdetailSequenceLinkId == null)
-            this.subdetailSequenceLinkId = new ArrayList<PositiveIntType>();
-          this.subdetailSequenceLinkId.add(t);
+          if (this.subdetailSequence == null)
+            this.subdetailSequence = new ArrayList<PositiveIntType>();
+          this.subdetailSequence.add(t);
           return t;
         }
 
         /**
-         * @param value {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @param value {@link #subdetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public AddedItemComponent addSubdetailSequenceLinkId(int value) { //1
+        public AddedItemComponent addSubdetailSequence(int value) { //1
           PositiveIntType t = new PositiveIntType();
           t.setValue(value);
-          if (this.subdetailSequenceLinkId == null)
-            this.subdetailSequenceLinkId = new ArrayList<PositiveIntType>();
-          this.subdetailSequenceLinkId.add(t);
+          if (this.subdetailSequence == null)
+            this.subdetailSequence = new ArrayList<PositiveIntType>();
+          this.subdetailSequence.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
+         * @param value {@link #subdetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.)
          */
-        public boolean hasSubdetailSequenceLinkId(int value) { 
-          if (this.subdetailSequenceLinkId == null)
+        public boolean hasSubdetailSequence(int value) { 
+          if (this.subdetailSequence == null)
             return false;
-          for (PositiveIntType v : this.subdetailSequenceLinkId)
+          for (PositiveIntType v : this.subdetailSequence)
             if (v.equals(value)) // positiveInt
               return true;
           return false;
@@ -2289,9 +2289,9 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("sequenceLinkId", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          children.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId));
-          children.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId));
+          children.add(new Property("itemSequence", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, itemSequence));
+          children.add(new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequence));
+          children.add(new Property("subdetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequence));
           children.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service));
           children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
           children.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee));
@@ -2302,9 +2302,9 @@ public class ClaimResponse extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId);
-          case 516748423: /*detailSequenceLinkId*/  return new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId);
-          case -1061088569: /*subdetailSequenceLinkId*/  return new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId);
+          case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, itemSequence);
+          case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequence);
+          case 146530674: /*subdetailSequence*/  return new Property("subdetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequence);
           case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service);
           case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
           case 101254: /*fee*/  return new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee);
@@ -2318,9 +2318,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : this.sequenceLinkId.toArray(new Base[this.sequenceLinkId.size()]); // PositiveIntType
-        case 516748423: /*detailSequenceLinkId*/ return this.detailSequenceLinkId == null ? new Base[0] : this.detailSequenceLinkId.toArray(new Base[this.detailSequenceLinkId.size()]); // PositiveIntType
-        case -1061088569: /*subdetailSequenceLinkId*/ return this.subdetailSequenceLinkId == null ? new Base[0] : this.subdetailSequenceLinkId.toArray(new Base[this.subdetailSequenceLinkId.size()]); // PositiveIntType
+        case 1977979892: /*itemSequence*/ return this.itemSequence == null ? new Base[0] : this.itemSequence.toArray(new Base[this.itemSequence.size()]); // PositiveIntType
+        case 1321472818: /*detailSequence*/ return this.detailSequence == null ? new Base[0] : this.detailSequence.toArray(new Base[this.detailSequence.size()]); // PositiveIntType
+        case 146530674: /*subdetailSequence*/ return this.subdetailSequence == null ? new Base[0] : this.subdetailSequence.toArray(new Base[this.subdetailSequence.size()]); // PositiveIntType
         case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // CodeableConcept
         case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
         case 101254: /*fee*/ return this.fee == null ? new Base[0] : new Base[] {this.fee}; // Money
@@ -2334,14 +2334,14 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1422298666: // sequenceLinkId
-          this.getSequenceLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case 1977979892: // itemSequence
+          this.getItemSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case 516748423: // detailSequenceLinkId
-          this.getDetailSequenceLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case 1321472818: // detailSequence
+          this.getDetailSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case -1061088569: // subdetailSequenceLinkId
-          this.getSubdetailSequenceLinkId().add(castToPositiveInt(value)); // PositiveIntType
+        case 146530674: // subdetailSequence
+          this.getSubdetailSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
         case 1984153269: // service
           this.service = castToCodeableConcept(value); // CodeableConcept
@@ -2365,12 +2365,12 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          this.getSequenceLinkId().add(castToPositiveInt(value));
-        } else if (name.equals("detailSequenceLinkId")) {
-          this.getDetailSequenceLinkId().add(castToPositiveInt(value));
-        } else if (name.equals("subdetailSequenceLinkId")) {
-          this.getSubdetailSequenceLinkId().add(castToPositiveInt(value));
+        if (name.equals("itemSequence")) {
+          this.getItemSequence().add(castToPositiveInt(value));
+        } else if (name.equals("detailSequence")) {
+          this.getDetailSequence().add(castToPositiveInt(value));
+        } else if (name.equals("subdetailSequence")) {
+          this.getSubdetailSequence().add(castToPositiveInt(value));
         } else if (name.equals("service")) {
           this.service = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("modifier")) {
@@ -2389,9 +2389,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666:  return addSequenceLinkIdElement();
-        case 516748423:  return addDetailSequenceLinkIdElement();
-        case -1061088569:  return addSubdetailSequenceLinkIdElement();
+        case 1977979892:  return addItemSequenceElement();
+        case 1321472818:  return addDetailSequenceElement();
+        case 146530674:  return addSubdetailSequenceElement();
         case 1984153269:  return getService(); 
         case -615513385:  return addModifier(); 
         case 101254:  return getFee(); 
@@ -2405,9 +2405,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
-        case 516748423: /*detailSequenceLinkId*/ return new String[] {"positiveInt"};
-        case -1061088569: /*subdetailSequenceLinkId*/ return new String[] {"positiveInt"};
+        case 1977979892: /*itemSequence*/ return new String[] {"positiveInt"};
+        case 1321472818: /*detailSequence*/ return new String[] {"positiveInt"};
+        case 146530674: /*subdetailSequence*/ return new String[] {"positiveInt"};
         case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
         case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
         case 101254: /*fee*/ return new String[] {"Money"};
@@ -2420,14 +2420,14 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.sequenceLinkId");
+        if (name.equals("itemSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.itemSequence");
         }
-        else if (name.equals("detailSequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.detailSequenceLinkId");
+        else if (name.equals("detailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.detailSequence");
         }
-        else if (name.equals("subdetailSequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subdetailSequenceLinkId");
+        else if (name.equals("subdetailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subdetailSequence");
         }
         else if (name.equals("service")) {
           this.service = new CodeableConcept();
@@ -2453,20 +2453,20 @@ public class ClaimResponse extends DomainResource {
       public AddedItemComponent copy() {
         AddedItemComponent dst = new AddedItemComponent();
         copyValues(dst);
-        if (sequenceLinkId != null) {
-          dst.sequenceLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : sequenceLinkId)
-            dst.sequenceLinkId.add(i.copy());
+        if (itemSequence != null) {
+          dst.itemSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : itemSequence)
+            dst.itemSequence.add(i.copy());
         };
-        if (detailSequenceLinkId != null) {
-          dst.detailSequenceLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : detailSequenceLinkId)
-            dst.detailSequenceLinkId.add(i.copy());
+        if (detailSequence != null) {
+          dst.detailSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : detailSequence)
+            dst.detailSequence.add(i.copy());
         };
-        if (subdetailSequenceLinkId != null) {
-          dst.subdetailSequenceLinkId = new ArrayList<PositiveIntType>();
-          for (PositiveIntType i : subdetailSequenceLinkId)
-            dst.subdetailSequenceLinkId.add(i.copy());
+        if (subdetailSequence != null) {
+          dst.subdetailSequence = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : subdetailSequence)
+            dst.subdetailSequence.add(i.copy());
         };
         dst.service = service == null ? null : service.copy();
         if (modifier != null) {
@@ -2489,33 +2489,33 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other;
-        return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(detailSequenceLinkId, o.detailSequenceLinkId, true)
-           && compareDeep(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true) && compareDeep(service, o.service, true)
+        AddedItemComponent o = (AddedItemComponent) other_;
+        return compareDeep(itemSequence, o.itemSequence, true) && compareDeep(detailSequence, o.detailSequence, true)
+           && compareDeep(subdetailSequence, o.subdetailSequence, true) && compareDeep(service, o.service, true)
            && compareDeep(modifier, o.modifier, true) && compareDeep(fee, o.fee, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other;
-        return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(detailSequenceLinkId, o.detailSequenceLinkId, true)
-           && compareValues(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
+        AddedItemComponent o = (AddedItemComponent) other_;
+        return compareValues(itemSequence, o.itemSequence, true) && compareValues(detailSequence, o.detailSequence, true)
+           && compareValues(subdetailSequence, o.subdetailSequence, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId, detailSequenceLinkId
-          , subdetailSequenceLinkId, service, modifier, fee, noteNumber, adjudication);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemSequence, detailSequence
+          , subdetailSequence, service, modifier, fee, noteNumber, adjudication);
       }
 
   public String fhirType() {
@@ -2530,23 +2530,23 @@ public class ClaimResponse extends DomainResource {
         /**
          * The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
-        @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "itemSequence", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Item sequence number", formalDefinition="The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere." )
-        protected PositiveIntType sequenceLinkId;
+        protected PositiveIntType itemSequence;
 
         /**
          * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        @Child(name = "detailSequenceLinkId", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "detailSequence", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Detail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
-        protected PositiveIntType detailSequenceLinkId;
+        protected PositiveIntType detailSequence;
 
         /**
          * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        @Child(name = "subdetailSequenceLinkId", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "subDetailSequence", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Subdetail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
-        protected PositiveIntType subdetailSequenceLinkId;
+        protected PositiveIntType subDetailSequence;
 
         /**
          * An error code,from a specified code system, which details why the claim could not be adjudicated.
@@ -2556,7 +2556,7 @@ public class ClaimResponse extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication-error")
         protected CodeableConcept code;
 
-        private static final long serialVersionUID = -1379670472L;
+        private static final long serialVersionUID = 843818320L;
 
     /**
      * Constructor
@@ -2574,137 +2574,137 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @return {@link #itemSequence} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getItemSequence" gives direct access to the value
          */
-        public PositiveIntType getSequenceLinkIdElement() { 
-          if (this.sequenceLinkId == null)
+        public PositiveIntType getItemSequenceElement() { 
+          if (this.itemSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ErrorComponent.sequenceLinkId");
+              throw new Error("Attempt to auto-create ErrorComponent.itemSequence");
             else if (Configuration.doAutoCreate())
-              this.sequenceLinkId = new PositiveIntType(); // bb
-          return this.sequenceLinkId;
+              this.itemSequence = new PositiveIntType(); // bb
+          return this.itemSequence;
         }
 
-        public boolean hasSequenceLinkIdElement() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasItemSequenceElement() { 
+          return this.itemSequence != null && !this.itemSequence.isEmpty();
         }
 
-        public boolean hasSequenceLinkId() { 
-          return this.sequenceLinkId != null && !this.sequenceLinkId.isEmpty();
+        public boolean hasItemSequence() { 
+          return this.itemSequence != null && !this.itemSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @param value {@link #itemSequence} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getItemSequence" gives direct access to the value
          */
-        public ErrorComponent setSequenceLinkIdElement(PositiveIntType value) { 
-          this.sequenceLinkId = value;
+        public ErrorComponent setItemSequenceElement(PositiveIntType value) { 
+          this.itemSequence = value;
           return this;
         }
 
         /**
          * @return The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
-        public int getSequenceLinkId() { 
-          return this.sequenceLinkId == null || this.sequenceLinkId.isEmpty() ? 0 : this.sequenceLinkId.getValue();
+        public int getItemSequence() { 
+          return this.itemSequence == null || this.itemSequence.isEmpty() ? 0 : this.itemSequence.getValue();
         }
 
         /**
          * @param value The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
-        public ErrorComponent setSequenceLinkId(int value) { 
-            if (this.sequenceLinkId == null)
-              this.sequenceLinkId = new PositiveIntType();
-            this.sequenceLinkId.setValue(value);
+        public ErrorComponent setItemSequence(int value) { 
+            if (this.itemSequence == null)
+              this.itemSequence = new PositiveIntType();
+            this.itemSequence.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
+         * @return {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequence" gives direct access to the value
          */
-        public PositiveIntType getDetailSequenceLinkIdElement() { 
-          if (this.detailSequenceLinkId == null)
+        public PositiveIntType getDetailSequenceElement() { 
+          if (this.detailSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ErrorComponent.detailSequenceLinkId");
+              throw new Error("Attempt to auto-create ErrorComponent.detailSequence");
             else if (Configuration.doAutoCreate())
-              this.detailSequenceLinkId = new PositiveIntType(); // bb
-          return this.detailSequenceLinkId;
+              this.detailSequence = new PositiveIntType(); // bb
+          return this.detailSequence;
         }
 
-        public boolean hasDetailSequenceLinkIdElement() { 
-          return this.detailSequenceLinkId != null && !this.detailSequenceLinkId.isEmpty();
+        public boolean hasDetailSequenceElement() { 
+          return this.detailSequence != null && !this.detailSequence.isEmpty();
         }
 
-        public boolean hasDetailSequenceLinkId() { 
-          return this.detailSequenceLinkId != null && !this.detailSequenceLinkId.isEmpty();
+        public boolean hasDetailSequence() { 
+          return this.detailSequence != null && !this.detailSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
+         * @param value {@link #detailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequence" gives direct access to the value
          */
-        public ErrorComponent setDetailSequenceLinkIdElement(PositiveIntType value) { 
-          this.detailSequenceLinkId = value;
+        public ErrorComponent setDetailSequenceElement(PositiveIntType value) { 
+          this.detailSequence = value;
           return this;
         }
 
         /**
          * @return The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        public int getDetailSequenceLinkId() { 
-          return this.detailSequenceLinkId == null || this.detailSequenceLinkId.isEmpty() ? 0 : this.detailSequenceLinkId.getValue();
+        public int getDetailSequence() { 
+          return this.detailSequence == null || this.detailSequence.isEmpty() ? 0 : this.detailSequence.getValue();
         }
 
         /**
          * @param value The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        public ErrorComponent setDetailSequenceLinkId(int value) { 
-            if (this.detailSequenceLinkId == null)
-              this.detailSequenceLinkId = new PositiveIntType();
-            this.detailSequenceLinkId.setValue(value);
+        public ErrorComponent setDetailSequence(int value) { 
+            if (this.detailSequence == null)
+              this.detailSequence = new PositiveIntType();
+            this.detailSequence.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
+         * @return {@link #subDetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubDetailSequence" gives direct access to the value
          */
-        public PositiveIntType getSubdetailSequenceLinkIdElement() { 
-          if (this.subdetailSequenceLinkId == null)
+        public PositiveIntType getSubDetailSequenceElement() { 
+          if (this.subDetailSequence == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ErrorComponent.subdetailSequenceLinkId");
+              throw new Error("Attempt to auto-create ErrorComponent.subDetailSequence");
             else if (Configuration.doAutoCreate())
-              this.subdetailSequenceLinkId = new PositiveIntType(); // bb
-          return this.subdetailSequenceLinkId;
+              this.subDetailSequence = new PositiveIntType(); // bb
+          return this.subDetailSequence;
         }
 
-        public boolean hasSubdetailSequenceLinkIdElement() { 
-          return this.subdetailSequenceLinkId != null && !this.subdetailSequenceLinkId.isEmpty();
+        public boolean hasSubDetailSequenceElement() { 
+          return this.subDetailSequence != null && !this.subDetailSequence.isEmpty();
         }
 
-        public boolean hasSubdetailSequenceLinkId() { 
-          return this.subdetailSequenceLinkId != null && !this.subdetailSequenceLinkId.isEmpty();
+        public boolean hasSubDetailSequence() { 
+          return this.subDetailSequence != null && !this.subDetailSequence.isEmpty();
         }
 
         /**
-         * @param value {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
+         * @param value {@link #subDetailSequence} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubDetailSequence" gives direct access to the value
          */
-        public ErrorComponent setSubdetailSequenceLinkIdElement(PositiveIntType value) { 
-          this.subdetailSequenceLinkId = value;
+        public ErrorComponent setSubDetailSequenceElement(PositiveIntType value) { 
+          this.subDetailSequence = value;
           return this;
         }
 
         /**
          * @return The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        public int getSubdetailSequenceLinkId() { 
-          return this.subdetailSequenceLinkId == null || this.subdetailSequenceLinkId.isEmpty() ? 0 : this.subdetailSequenceLinkId.getValue();
+        public int getSubDetailSequence() { 
+          return this.subDetailSequence == null || this.subDetailSequence.isEmpty() ? 0 : this.subDetailSequence.getValue();
         }
 
         /**
          * @param value The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
-        public ErrorComponent setSubdetailSequenceLinkId(int value) { 
-            if (this.subdetailSequenceLinkId == null)
-              this.subdetailSequenceLinkId = new PositiveIntType();
-            this.subdetailSequenceLinkId.setValue(value);
+        public ErrorComponent setSubDetailSequence(int value) { 
+            if (this.subDetailSequence == null)
+              this.subDetailSequence = new PositiveIntType();
+            this.subDetailSequence.setValue(value);
           return this;
         }
 
@@ -2734,18 +2734,18 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, sequenceLinkId));
-          children.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequenceLinkId));
-          children.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subdetailSequenceLinkId));
+          children.add(new Property("itemSequence", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, itemSequence));
+          children.add(new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequence));
+          children.add(new Property("subDetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subDetailSequence));
           children.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, sequenceLinkId);
-          case 516748423: /*detailSequenceLinkId*/  return new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequenceLinkId);
-          case -1061088569: /*subdetailSequenceLinkId*/  return new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subdetailSequenceLinkId);
+          case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, itemSequence);
+          case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequence);
+          case -855462510: /*subDetailSequence*/  return new Property("subDetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subDetailSequence);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -2755,9 +2755,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : new Base[] {this.sequenceLinkId}; // PositiveIntType
-        case 516748423: /*detailSequenceLinkId*/ return this.detailSequenceLinkId == null ? new Base[0] : new Base[] {this.detailSequenceLinkId}; // PositiveIntType
-        case -1061088569: /*subdetailSequenceLinkId*/ return this.subdetailSequenceLinkId == null ? new Base[0] : new Base[] {this.subdetailSequenceLinkId}; // PositiveIntType
+        case 1977979892: /*itemSequence*/ return this.itemSequence == null ? new Base[0] : new Base[] {this.itemSequence}; // PositiveIntType
+        case 1321472818: /*detailSequence*/ return this.detailSequence == null ? new Base[0] : new Base[] {this.detailSequence}; // PositiveIntType
+        case -855462510: /*subDetailSequence*/ return this.subDetailSequence == null ? new Base[0] : new Base[] {this.subDetailSequence}; // PositiveIntType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2767,14 +2767,14 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1422298666: // sequenceLinkId
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case 1977979892: // itemSequence
+          this.itemSequence = castToPositiveInt(value); // PositiveIntType
           return value;
-        case 516748423: // detailSequenceLinkId
-          this.detailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case 1321472818: // detailSequence
+          this.detailSequence = castToPositiveInt(value); // PositiveIntType
           return value;
-        case -1061088569: // subdetailSequenceLinkId
-          this.subdetailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        case -855462510: // subDetailSequence
+          this.subDetailSequence = castToPositiveInt(value); // PositiveIntType
           return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -2786,12 +2786,12 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("detailSequenceLinkId")) {
-          this.detailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("subdetailSequenceLinkId")) {
-          this.subdetailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
+        if (name.equals("itemSequence")) {
+          this.itemSequence = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("detailSequence")) {
+          this.detailSequence = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("subDetailSequence")) {
+          this.subDetailSequence = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else
@@ -2802,9 +2802,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666:  return getSequenceLinkIdElement();
-        case 516748423:  return getDetailSequenceLinkIdElement();
-        case -1061088569:  return getSubdetailSequenceLinkIdElement();
+        case 1977979892:  return getItemSequenceElement();
+        case 1321472818:  return getDetailSequenceElement();
+        case -855462510:  return getSubDetailSequenceElement();
         case 3059181:  return getCode(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2814,9 +2814,9 @@ public class ClaimResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
-        case 516748423: /*detailSequenceLinkId*/ return new String[] {"positiveInt"};
-        case -1061088569: /*subdetailSequenceLinkId*/ return new String[] {"positiveInt"};
+        case 1977979892: /*itemSequence*/ return new String[] {"positiveInt"};
+        case 1321472818: /*detailSequence*/ return new String[] {"positiveInt"};
+        case -855462510: /*subDetailSequence*/ return new String[] {"positiveInt"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2825,14 +2825,14 @@ public class ClaimResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("sequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.sequenceLinkId");
+        if (name.equals("itemSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.itemSequence");
         }
-        else if (name.equals("detailSequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.detailSequenceLinkId");
+        else if (name.equals("detailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.detailSequence");
         }
-        else if (name.equals("subdetailSequenceLinkId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subdetailSequenceLinkId");
+        else if (name.equals("subDetailSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subDetailSequence");
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -2845,39 +2845,39 @@ public class ClaimResponse extends DomainResource {
       public ErrorComponent copy() {
         ErrorComponent dst = new ErrorComponent();
         copyValues(dst);
-        dst.sequenceLinkId = sequenceLinkId == null ? null : sequenceLinkId.copy();
-        dst.detailSequenceLinkId = detailSequenceLinkId == null ? null : detailSequenceLinkId.copy();
-        dst.subdetailSequenceLinkId = subdetailSequenceLinkId == null ? null : subdetailSequenceLinkId.copy();
+        dst.itemSequence = itemSequence == null ? null : itemSequence.copy();
+        dst.detailSequence = detailSequence == null ? null : detailSequence.copy();
+        dst.subDetailSequence = subDetailSequence == null ? null : subDetailSequence.copy();
         dst.code = code == null ? null : code.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ErrorComponent))
+        if (!(other_ instanceof ErrorComponent))
           return false;
-        ErrorComponent o = (ErrorComponent) other;
-        return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(detailSequenceLinkId, o.detailSequenceLinkId, true)
-           && compareDeep(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true) && compareDeep(code, o.code, true)
+        ErrorComponent o = (ErrorComponent) other_;
+        return compareDeep(itemSequence, o.itemSequence, true) && compareDeep(detailSequence, o.detailSequence, true)
+           && compareDeep(subDetailSequence, o.subDetailSequence, true) && compareDeep(code, o.code, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ErrorComponent))
+        if (!(other_ instanceof ErrorComponent))
           return false;
-        ErrorComponent o = (ErrorComponent) other;
-        return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(detailSequenceLinkId, o.detailSequenceLinkId, true)
-           && compareValues(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true);
+        ErrorComponent o = (ErrorComponent) other_;
+        return compareValues(itemSequence, o.itemSequence, true) && compareValues(detailSequence, o.detailSequence, true)
+           && compareValues(subDetailSequence, o.subDetailSequence, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId, detailSequenceLinkId
-          , subdetailSequenceLinkId, code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemSequence, detailSequence
+          , subDetailSequence, code);
       }
 
   public String fhirType() {
@@ -3264,24 +3264,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PaymentComponent))
+        if (!(other_ instanceof PaymentComponent))
           return false;
-        PaymentComponent o = (PaymentComponent) other;
+        PaymentComponent o = (PaymentComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(adjustment, o.adjustment, true) && compareDeep(adjustmentReason, o.adjustmentReason, true)
            && compareDeep(date, o.date, true) && compareDeep(amount, o.amount, true) && compareDeep(identifier, o.identifier, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PaymentComponent))
+        if (!(other_ instanceof PaymentComponent))
           return false;
-        PaymentComponent o = (PaymentComponent) other;
+        PaymentComponent o = (PaymentComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -3628,23 +3628,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NoteComponent))
+        if (!(other_ instanceof NoteComponent))
           return false;
-        NoteComponent o = (NoteComponent) other;
+        NoteComponent o = (NoteComponent) other_;
         return compareDeep(number, o.number, true) && compareDeep(type, o.type, true) && compareDeep(text, o.text, true)
            && compareDeep(language, o.language, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NoteComponent))
+        if (!(other_ instanceof NoteComponent))
           return false;
-        NoteComponent o = (NoteComponent) other;
+        NoteComponent o = (NoteComponent) other_;
         return compareValues(number, o.number, true) && compareValues(type, o.type, true) && compareValues(text, o.text, true)
           ;
       }
@@ -4176,24 +4176,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(coverage, o.coverage, true)
            && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(preAuthRef, o.preAuthRef, true)
            && compareDeep(claimResponse, o.claimResponse, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(focal, o.focal, true) && compareValues(businessArrangement, o.businessArrangement, true)
            && compareValues(preAuthRef, o.preAuthRef, true);
       }
@@ -5831,12 +5831,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClaimResponse))
+        if (!(other_ instanceof ClaimResponse))
           return false;
-        ClaimResponse o = (ClaimResponse) other;
+        ClaimResponse o = (ClaimResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
            && compareDeep(created, o.created, true) && compareDeep(insurer, o.insurer, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(request, o.request, true)
@@ -5849,12 +5849,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClaimResponse))
+        if (!(other_ instanceof ClaimResponse))
           return false;
-        ClaimResponse o = (ClaimResponse) other;
+        ClaimResponse o = (ClaimResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
            && compareValues(disposition, o.disposition, true);
       }

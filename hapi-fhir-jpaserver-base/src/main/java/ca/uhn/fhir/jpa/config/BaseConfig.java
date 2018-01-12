@@ -20,14 +20,12 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.search.*;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -65,11 +63,6 @@ public class BaseConfig implements SchedulingConfigurer {
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
 		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		return retVal;
-	}
-
-	@Bean
-	public IGraphQLStorageServices jpaStorageServices() {
-		return new JpaStorageServices();
 	}
 
 	@Bean()

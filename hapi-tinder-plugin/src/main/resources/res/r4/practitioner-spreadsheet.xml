@@ -4723,7 +4723,7 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">Practitioner.address</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"><Data ss:Type="String">address-city</Data></Cell>

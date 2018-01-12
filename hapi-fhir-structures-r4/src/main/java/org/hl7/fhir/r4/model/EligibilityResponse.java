@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -468,23 +468,23 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(coverage, o.coverage, true) && compareDeep(contract, o.contract, true) && compareDeep(benefitBalance, o.benefitBalance, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return true;
       }
 
@@ -1102,12 +1102,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BenefitsComponent))
+        if (!(other_ instanceof BenefitsComponent))
           return false;
-        BenefitsComponent o = (BenefitsComponent) other;
+        BenefitsComponent o = (BenefitsComponent) other_;
         return compareDeep(category, o.category, true) && compareDeep(subCategory, o.subCategory, true)
            && compareDeep(excluded, o.excluded, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
            && compareDeep(network, o.network, true) && compareDeep(unit, o.unit, true) && compareDeep(term, o.term, true)
@@ -1115,12 +1115,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BenefitsComponent))
+        if (!(other_ instanceof BenefitsComponent))
           return false;
-        BenefitsComponent o = (BenefitsComponent) other;
+        BenefitsComponent o = (BenefitsComponent) other_;
         return compareValues(excluded, o.excluded, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
           ;
       }
@@ -1435,23 +1435,23 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BenefitComponent))
+        if (!(other_ instanceof BenefitComponent))
           return false;
-        BenefitComponent o = (BenefitComponent) other;
+        BenefitComponent o = (BenefitComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(allowed, o.allowed, true) && compareDeep(used, o.used, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BenefitComponent))
+        if (!(other_ instanceof BenefitComponent))
           return false;
-        BenefitComponent o = (BenefitComponent) other;
+        BenefitComponent o = (BenefitComponent) other_;
         return true;
       }
 
@@ -1461,6 +1461,333 @@ public class EligibilityResponse extends DomainResource {
 
   public String fhirType() {
     return "EligibilityResponse.insurance.benefitBalance.financial";
+
+  }
+
+  }
+
+    @Block()
+    public static class AuthorizationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Sequence of procedures which serves to order and provide a link.
+         */
+        @Child(name = "authorizationSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Procedure sequence for reference", formalDefinition="Sequence of procedures which serves to order and provide a link." )
+        protected PositiveIntType authorizationSequence;
+
+        /**
+         * A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.
+         */
+        @Child(name = "required", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Authorization required flag", formalDefinition="A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery." )
+        protected BooleanType required;
+
+        /**
+         * Any comments regarding information or actions assciated with the pre-authorization.
+         */
+        @Child(name = "note", type = {Annotation.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Comments and instructions", formalDefinition="Any comments regarding information or actions assciated with the pre-authorization." )
+        protected List<Annotation> note;
+
+        private static final long serialVersionUID = 746325778L;
+
+    /**
+     * Constructor
+     */
+      public AuthorizationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public AuthorizationComponent(PositiveIntType authorizationSequence, BooleanType required) {
+        super();
+        this.authorizationSequence = authorizationSequence;
+        this.required = required;
+      }
+
+        /**
+         * @return {@link #authorizationSequence} (Sequence of procedures which serves to order and provide a link.). This is the underlying object with id, value and extensions. The accessor "getAuthorizationSequence" gives direct access to the value
+         */
+        public PositiveIntType getAuthorizationSequenceElement() { 
+          if (this.authorizationSequence == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.authorizationSequence");
+            else if (Configuration.doAutoCreate())
+              this.authorizationSequence = new PositiveIntType(); // bb
+          return this.authorizationSequence;
+        }
+
+        public boolean hasAuthorizationSequenceElement() { 
+          return this.authorizationSequence != null && !this.authorizationSequence.isEmpty();
+        }
+
+        public boolean hasAuthorizationSequence() { 
+          return this.authorizationSequence != null && !this.authorizationSequence.isEmpty();
+        }
+
+        /**
+         * @param value {@link #authorizationSequence} (Sequence of procedures which serves to order and provide a link.). This is the underlying object with id, value and extensions. The accessor "getAuthorizationSequence" gives direct access to the value
+         */
+        public AuthorizationComponent setAuthorizationSequenceElement(PositiveIntType value) { 
+          this.authorizationSequence = value;
+          return this;
+        }
+
+        /**
+         * @return Sequence of procedures which serves to order and provide a link.
+         */
+        public int getAuthorizationSequence() { 
+          return this.authorizationSequence == null || this.authorizationSequence.isEmpty() ? 0 : this.authorizationSequence.getValue();
+        }
+
+        /**
+         * @param value Sequence of procedures which serves to order and provide a link.
+         */
+        public AuthorizationComponent setAuthorizationSequence(int value) { 
+            if (this.authorizationSequence == null)
+              this.authorizationSequence = new PositiveIntType();
+            this.authorizationSequence.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #required} (A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         */
+        public BooleanType getRequiredElement() { 
+          if (this.required == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.required");
+            else if (Configuration.doAutoCreate())
+              this.required = new BooleanType(); // bb
+          return this.required;
+        }
+
+        public boolean hasRequiredElement() { 
+          return this.required != null && !this.required.isEmpty();
+        }
+
+        public boolean hasRequired() { 
+          return this.required != null && !this.required.isEmpty();
+        }
+
+        /**
+         * @param value {@link #required} (A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         */
+        public AuthorizationComponent setRequiredElement(BooleanType value) { 
+          this.required = value;
+          return this;
+        }
+
+        /**
+         * @return A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.
+         */
+        public boolean getRequired() { 
+          return this.required == null || this.required.isEmpty() ? false : this.required.getValue();
+        }
+
+        /**
+         * @param value A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.
+         */
+        public AuthorizationComponent setRequired(boolean value) { 
+            if (this.required == null)
+              this.required = new BooleanType();
+            this.required.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #note} (Any comments regarding information or actions assciated with the pre-authorization.)
+         */
+        public List<Annotation> getNote() { 
+          if (this.note == null)
+            this.note = new ArrayList<Annotation>();
+          return this.note;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AuthorizationComponent setNote(List<Annotation> theNote) { 
+          this.note = theNote;
+          return this;
+        }
+
+        public boolean hasNote() { 
+          if (this.note == null)
+            return false;
+          for (Annotation item : this.note)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Annotation addNote() { //3
+          Annotation t = new Annotation();
+          if (this.note == null)
+            this.note = new ArrayList<Annotation>();
+          this.note.add(t);
+          return t;
+        }
+
+        public AuthorizationComponent addNote(Annotation t) { //3
+          if (t == null)
+            return this;
+          if (this.note == null)
+            this.note = new ArrayList<Annotation>();
+          this.note.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+         */
+        public Annotation getNoteFirstRep() { 
+          if (getNote().isEmpty()) {
+            addNote();
+          }
+          return getNote().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("authorizationSequence", "positiveInt", "Sequence of procedures which serves to order and provide a link.", 0, 1, authorizationSequence));
+          children.add(new Property("required", "boolean", "A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.", 0, 1, required));
+          children.add(new Property("note", "Annotation", "Any comments regarding information or actions assciated with the pre-authorization.", 0, java.lang.Integer.MAX_VALUE, note));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 2116891482: /*authorizationSequence*/  return new Property("authorizationSequence", "positiveInt", "Sequence of procedures which serves to order and provide a link.", 0, 1, authorizationSequence);
+          case -393139297: /*required*/  return new Property("required", "boolean", "A boolean flag indicating whether a prior authorization or pre-authorization is required prior to actual service delivery.", 0, 1, required);
+          case 3387378: /*note*/  return new Property("note", "Annotation", "Any comments regarding information or actions assciated with the pre-authorization.", 0, java.lang.Integer.MAX_VALUE, note);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 2116891482: /*authorizationSequence*/ return this.authorizationSequence == null ? new Base[0] : new Base[] {this.authorizationSequence}; // PositiveIntType
+        case -393139297: /*required*/ return this.required == null ? new Base[0] : new Base[] {this.required}; // BooleanType
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 2116891482: // authorizationSequence
+          this.authorizationSequence = castToPositiveInt(value); // PositiveIntType
+          return value;
+        case -393139297: // required
+          this.required = castToBoolean(value); // BooleanType
+          return value;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("authorizationSequence")) {
+          this.authorizationSequence = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("required")) {
+          this.required = castToBoolean(value); // BooleanType
+        } else if (name.equals("note")) {
+          this.getNote().add(castToAnnotation(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2116891482:  return getAuthorizationSequenceElement();
+        case -393139297:  return getRequiredElement();
+        case 3387378:  return addNote(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2116891482: /*authorizationSequence*/ return new String[] {"positiveInt"};
+        case -393139297: /*required*/ return new String[] {"boolean"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("authorizationSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityResponse.authorizationSequence");
+        }
+        else if (name.equals("required")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityResponse.required");
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public AuthorizationComponent copy() {
+        AuthorizationComponent dst = new AuthorizationComponent();
+        copyValues(dst);
+        dst.authorizationSequence = authorizationSequence == null ? null : authorizationSequence.copy();
+        dst.required = required == null ? null : required.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof AuthorizationComponent))
+          return false;
+        AuthorizationComponent o = (AuthorizationComponent) other_;
+        return compareDeep(authorizationSequence, o.authorizationSequence, true) && compareDeep(required, o.required, true)
+           && compareDeep(note, o.note, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof AuthorizationComponent))
+          return false;
+        AuthorizationComponent o = (AuthorizationComponent) other_;
+        return compareValues(authorizationSequence, o.authorizationSequence, true) && compareValues(required, o.required, true)
+          ;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(authorizationSequence, required
+          , note);
+      }
+
+  public String fhirType() {
+    return "EligibilityResponse.authorization";
 
   }
 
@@ -1596,22 +1923,22 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ErrorsComponent))
+        if (!(other_ instanceof ErrorsComponent))
           return false;
-        ErrorsComponent o = (ErrorsComponent) other;
+        ErrorsComponent o = (ErrorsComponent) other_;
         return compareDeep(code, o.code, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ErrorsComponent))
+        if (!(other_ instanceof ErrorsComponent))
           return false;
-        ErrorsComponent o = (ErrorsComponent) other;
+        ErrorsComponent o = (ErrorsComponent) other_;
         return true;
       }
 
@@ -1726,9 +2053,23 @@ public class EligibilityResponse extends DomainResource {
     protected List<InsuranceComponent> insurance;
 
     /**
+     * A reference from the Insurer to which these services pertain.
+     */
+    @Child(name = "preAuthRef", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Pre-Authorization/Determination Reference", formalDefinition="A reference from the Insurer to which these services pertain." )
+    protected StringType preAuthRef;
+
+    /**
+     * A list of billable services for which an authorization prior to service delivery may be required by the payor.
+     */
+    @Child(name = "authorization", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Services which may require prior authorization", formalDefinition="A list of billable services for which an authorization prior to service delivery may be required by the payor." )
+    protected List<AuthorizationComponent> authorization;
+
+    /**
      * The form to be used for printing the content.
      */
-    @Child(name = "form", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "form", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
     protected CodeableConcept form;
@@ -1736,11 +2077,11 @@ public class EligibilityResponse extends DomainResource {
     /**
      * Mutually exclusive with Services Provided (Item).
      */
-    @Child(name = "error", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "error", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing errors", formalDefinition="Mutually exclusive with Services Provided (Item)." )
     protected List<ErrorsComponent> error;
 
-    private static final long serialVersionUID = -1850509253L;
+    private static final long serialVersionUID = -1357747241L;
 
   /**
    * Constructor
@@ -2273,6 +2614,108 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
+     * @return {@link #preAuthRef} (A reference from the Insurer to which these services pertain.). This is the underlying object with id, value and extensions. The accessor "getPreAuthRef" gives direct access to the value
+     */
+    public StringType getPreAuthRefElement() { 
+      if (this.preAuthRef == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityResponse.preAuthRef");
+        else if (Configuration.doAutoCreate())
+          this.preAuthRef = new StringType(); // bb
+      return this.preAuthRef;
+    }
+
+    public boolean hasPreAuthRefElement() { 
+      return this.preAuthRef != null && !this.preAuthRef.isEmpty();
+    }
+
+    public boolean hasPreAuthRef() { 
+      return this.preAuthRef != null && !this.preAuthRef.isEmpty();
+    }
+
+    /**
+     * @param value {@link #preAuthRef} (A reference from the Insurer to which these services pertain.). This is the underlying object with id, value and extensions. The accessor "getPreAuthRef" gives direct access to the value
+     */
+    public EligibilityResponse setPreAuthRefElement(StringType value) { 
+      this.preAuthRef = value;
+      return this;
+    }
+
+    /**
+     * @return A reference from the Insurer to which these services pertain.
+     */
+    public String getPreAuthRef() { 
+      return this.preAuthRef == null ? null : this.preAuthRef.getValue();
+    }
+
+    /**
+     * @param value A reference from the Insurer to which these services pertain.
+     */
+    public EligibilityResponse setPreAuthRef(String value) { 
+      if (Utilities.noString(value))
+        this.preAuthRef = null;
+      else {
+        if (this.preAuthRef == null)
+          this.preAuthRef = new StringType();
+        this.preAuthRef.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #authorization} (A list of billable services for which an authorization prior to service delivery may be required by the payor.)
+     */
+    public List<AuthorizationComponent> getAuthorization() { 
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      return this.authorization;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EligibilityResponse setAuthorization(List<AuthorizationComponent> theAuthorization) { 
+      this.authorization = theAuthorization;
+      return this;
+    }
+
+    public boolean hasAuthorization() { 
+      if (this.authorization == null)
+        return false;
+      for (AuthorizationComponent item : this.authorization)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public AuthorizationComponent addAuthorization() { //3
+      AuthorizationComponent t = new AuthorizationComponent();
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      this.authorization.add(t);
+      return t;
+    }
+
+    public EligibilityResponse addAuthorization(AuthorizationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      this.authorization.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #authorization}, creating it if it does not already exist
+     */
+    public AuthorizationComponent getAuthorizationFirstRep() { 
+      if (getAuthorization().isEmpty()) {
+        addAuthorization();
+      }
+      return getAuthorization().get(0);
+    }
+
+    /**
      * @return {@link #form} (The form to be used for printing the content.)
      */
     public CodeableConcept getForm() { 
@@ -2362,6 +2805,8 @@ public class EligibilityResponse extends DomainResource {
         children.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer));
         children.add(new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce));
         children.add(new Property("insurance", "", "The insurer may provide both the details for the requested coverage as well as details for additional coverages known to the insurer.", 0, java.lang.Integer.MAX_VALUE, insurance));
+        children.add(new Property("preAuthRef", "string", "A reference from the Insurer to which these services pertain.", 0, 1, preAuthRef));
+        children.add(new Property("authorization", "", "A list of billable services for which an authorization prior to service delivery may be required by the payor.", 0, java.lang.Integer.MAX_VALUE, authorization));
         children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
         children.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
       }
@@ -2380,6 +2825,8 @@ public class EligibilityResponse extends DomainResource {
         case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer);
         case 1945431270: /*inforce*/  return new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce);
         case 73049818: /*insurance*/  return new Property("insurance", "", "The insurer may provide both the details for the requested coverage as well as details for additional coverages known to the insurer.", 0, java.lang.Integer.MAX_VALUE, insurance);
+        case 522246568: /*preAuthRef*/  return new Property("preAuthRef", "string", "A reference from the Insurer to which these services pertain.", 0, 1, preAuthRef);
+        case -1385570183: /*authorization*/  return new Property("authorization", "", "A list of billable services for which an authorization prior to service delivery may be required by the payor.", 0, java.lang.Integer.MAX_VALUE, authorization);
         case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
         case 96784904: /*error*/  return new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2401,6 +2848,8 @@ public class EligibilityResponse extends DomainResource {
         case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Reference
         case 1945431270: /*inforce*/ return this.inforce == null ? new Base[0] : new Base[] {this.inforce}; // BooleanType
         case 73049818: /*insurance*/ return this.insurance == null ? new Base[0] : this.insurance.toArray(new Base[this.insurance.size()]); // InsuranceComponent
+        case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : new Base[] {this.preAuthRef}; // StringType
+        case -1385570183: /*authorization*/ return this.authorization == null ? new Base[0] : this.authorization.toArray(new Base[this.authorization.size()]); // AuthorizationComponent
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
         case 96784904: /*error*/ return this.error == null ? new Base[0] : this.error.toArray(new Base[this.error.size()]); // ErrorsComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -2446,6 +2895,12 @@ public class EligibilityResponse extends DomainResource {
         case 73049818: // insurance
           this.getInsurance().add((InsuranceComponent) value); // InsuranceComponent
           return value;
+        case 522246568: // preAuthRef
+          this.preAuthRef = castToString(value); // StringType
+          return value;
+        case -1385570183: // authorization
+          this.getAuthorization().add((AuthorizationComponent) value); // AuthorizationComponent
+          return value;
         case 3148996: // form
           this.form = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -2483,6 +2938,10 @@ public class EligibilityResponse extends DomainResource {
           this.inforce = castToBoolean(value); // BooleanType
         } else if (name.equals("insurance")) {
           this.getInsurance().add((InsuranceComponent) value);
+        } else if (name.equals("preAuthRef")) {
+          this.preAuthRef = castToString(value); // StringType
+        } else if (name.equals("authorization")) {
+          this.getAuthorization().add((AuthorizationComponent) value);
         } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("error")) {
@@ -2506,6 +2965,8 @@ public class EligibilityResponse extends DomainResource {
         case 1957615864:  return getInsurer(); 
         case 1945431270:  return getInforceElement();
         case 73049818:  return addInsurance(); 
+        case 522246568:  return getPreAuthRefElement();
+        case -1385570183:  return addAuthorization(); 
         case 3148996:  return getForm(); 
         case 96784904:  return addError(); 
         default: return super.makeProperty(hash, name);
@@ -2527,6 +2988,8 @@ public class EligibilityResponse extends DomainResource {
         case 1957615864: /*insurer*/ return new String[] {"Reference"};
         case 1945431270: /*inforce*/ return new String[] {"boolean"};
         case 73049818: /*insurance*/ return new String[] {};
+        case 522246568: /*preAuthRef*/ return new String[] {"string"};
+        case -1385570183: /*authorization*/ return new String[] {};
         case 3148996: /*form*/ return new String[] {"CodeableConcept"};
         case 96784904: /*error*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
@@ -2573,6 +3036,12 @@ public class EligibilityResponse extends DomainResource {
         else if (name.equals("insurance")) {
           return addInsurance();
         }
+        else if (name.equals("preAuthRef")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityResponse.preAuthRef");
+        }
+        else if (name.equals("authorization")) {
+          return addAuthorization();
+        }
         else if (name.equals("form")) {
           this.form = new CodeableConcept();
           return this.form;
@@ -2611,6 +3080,12 @@ public class EligibilityResponse extends DomainResource {
           for (InsuranceComponent i : insurance)
             dst.insurance.add(i.copy());
         };
+        dst.preAuthRef = preAuthRef == null ? null : preAuthRef.copy();
+        if (authorization != null) {
+          dst.authorization = new ArrayList<AuthorizationComponent>();
+          for (AuthorizationComponent i : authorization)
+            dst.authorization.add(i.copy());
+        };
         dst.form = form == null ? null : form.copy();
         if (error != null) {
           dst.error = new ArrayList<ErrorsComponent>();
@@ -2625,34 +3100,36 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EligibilityResponse))
+        if (!(other_ instanceof EligibilityResponse))
           return false;
-        EligibilityResponse o = (EligibilityResponse) other;
+        EligibilityResponse o = (EligibilityResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(created, o.created, true)
            && compareDeep(requestProvider, o.requestProvider, true) && compareDeep(requestOrganization, o.requestOrganization, true)
            && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true)
            && compareDeep(insurer, o.insurer, true) && compareDeep(inforce, o.inforce, true) && compareDeep(insurance, o.insurance, true)
+           && compareDeep(preAuthRef, o.preAuthRef, true) && compareDeep(authorization, o.authorization, true)
            && compareDeep(form, o.form, true) && compareDeep(error, o.error, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EligibilityResponse))
+        if (!(other_ instanceof EligibilityResponse))
           return false;
-        EligibilityResponse o = (EligibilityResponse) other;
+        EligibilityResponse o = (EligibilityResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
-           && compareValues(disposition, o.disposition, true) && compareValues(inforce, o.inforce, true);
+           && compareValues(disposition, o.disposition, true) && compareValues(inforce, o.inforce, true) && compareValues(preAuthRef, o.preAuthRef, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, created
           , requestProvider, requestOrganization, request, outcome, disposition, insurer, inforce
-          , insurance, form, error);
+          , insurance, preAuthRef, authorization, form, error);
       }
 
   @Override

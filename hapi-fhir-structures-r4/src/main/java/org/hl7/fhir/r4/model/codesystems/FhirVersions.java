@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -107,7 +107,7 @@ public enum FhirVersions {
         /**
          * Current Development build
          */
-        _3_1_0, 
+        _3_2_0, 
         /**
          * added to help the parsers
          */
@@ -149,8 +149,8 @@ public enum FhirVersions {
           return _3_0_0;
         if ("3.0.1".equals(codeString))
           return _3_0_1;
-        if ("3.1.0".equals(codeString))
-          return _3_1_0;
+        if ("3.2.0".equals(codeString))
+          return _3_2_0;
         throw new FHIRException("Unknown FhirVersions code '"+codeString+"'");
         }
         public String toCode() {
@@ -172,7 +172,7 @@ public enum FhirVersions {
             case _1_8_0: return "1.8.0";
             case _3_0_0: return "3.0.0";
             case _3_0_1: return "3.0.1";
-            case _3_1_0: return "3.1.0";
+            case _3_2_0: return "3.2.0";
             default: return "?";
           }
         }
@@ -198,7 +198,7 @@ public enum FhirVersions {
             case _1_8_0: return "FHIR STU3 Candidate + Connectathon 14 (San Antonio)";
             case _3_0_0: return "FHIR Release 3 (STU)";
             case _3_0_1: return "FHIR Release 3 (STU) with 1 technical errata";
-            case _3_1_0: return "Current Development build";
+            case _3_2_0: return "Current Development build";
             default: return "?";
           }
         }
@@ -221,7 +221,7 @@ public enum FhirVersions {
             case _1_8_0: return "1.8.0";
             case _3_0_0: return "3.0.0";
             case _3_0_1: return "3.0.1";
-            case _3_1_0: return "3.1.0";
+            case _3_2_0: return "3.2.0";
             default: return "?";
           }
     }

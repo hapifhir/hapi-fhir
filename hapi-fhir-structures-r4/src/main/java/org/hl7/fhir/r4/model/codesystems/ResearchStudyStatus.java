@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,29 +37,51 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ResearchStudyStatus {
 
         /**
-         * The study is undergoing design but the process of selecting study subjects and capturing data has not yet begun.
+         * Study is opened for accrual.
          */
-        DRAFT, 
+        ACTIVE, 
         /**
-         * The study is currently being executed
+         * Study is completed prematurely and will not resume; patients are no longer examined nor treated.
+Tagged
          */
-        INPROGRESS, 
+        ADMINISTRATIVELYCOMPLETED, 
         /**
-         * Execution of the study has been temporarily paused
+         * Protocol is approved by the review board.
          */
-        SUSPENDED, 
+        APPROVED, 
         /**
-         * The study was terminated prior to the final determination of results
+         * Study is closed for accrual; patients can be examined and treated.
          */
-        STOPPED, 
+        CLOSEDTOACCRUAL, 
         /**
-         * The information sought by the study has been gathered and compiled and no further work is being performed
+         * Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.
+         */
+        CLOSEDTOACCRUALANDINTERVENTION, 
+        /**
+         * Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment
+or intervention but are still being followed according to the primary objective of the study.
          */
         COMPLETED, 
         /**
-         * This study never actually existed.  The record is retained for tracking purposes in the event decisions may have been made based on this erroneous information.
+         * Protocol was disapproved by the review board.
          */
-        ENTEREDINERROR, 
+        DISAPPROVED, 
+        /**
+         * Protocol is submitted to the review board for approval.
+         */
+        INREVIEW, 
+        /**
+         * Study is temporarily closed for accrual; can be potentially resumed in the future; patients can be examined and treated.
+         */
+        TEMPORARILYCLOSEDTOACCRUAL, 
+        /**
+         * Study is temporarily closed for accrual and intervention and potentially can be resumed in the future.
+         */
+        TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION, 
+        /**
+         * Protocol was withdrawn by the lead organization.
+         */
+        WITHDRAWN, 
         /**
          * added to help the parsers
          */
@@ -67,28 +89,43 @@ public enum ResearchStudyStatus {
         public static ResearchStudyStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("in-progress".equals(codeString))
-          return INPROGRESS;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("stopped".equals(codeString))
-          return STOPPED;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("administratively-completed".equals(codeString))
+          return ADMINISTRATIVELYCOMPLETED;
+        if ("approved".equals(codeString))
+          return APPROVED;
+        if ("closed-to-accrual".equals(codeString))
+          return CLOSEDTOACCRUAL;
+        if ("closed-to-accrual-and-intervention".equals(codeString))
+          return CLOSEDTOACCRUALANDINTERVENTION;
         if ("completed".equals(codeString))
           return COMPLETED;
-        if ("entered-in-error".equals(codeString))
-          return ENTEREDINERROR;
+        if ("disapproved".equals(codeString))
+          return DISAPPROVED;
+        if ("in-review".equals(codeString))
+          return INREVIEW;
+        if ("temporarily-closed-to-accrual".equals(codeString))
+          return TEMPORARILYCLOSEDTOACCRUAL;
+        if ("temporarily-closed-to-accrual-and-intervention".equals(codeString))
+          return TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION;
+        if ("withdrawn".equals(codeString))
+          return WITHDRAWN;
         throw new FHIRException("Unknown ResearchStudyStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case DRAFT: return "draft";
-            case INPROGRESS: return "in-progress";
-            case SUSPENDED: return "suspended";
-            case STOPPED: return "stopped";
+            case ACTIVE: return "active";
+            case ADMINISTRATIVELYCOMPLETED: return "administratively-completed";
+            case APPROVED: return "approved";
+            case CLOSEDTOACCRUAL: return "closed-to-accrual";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "closed-to-accrual-and-intervention";
             case COMPLETED: return "completed";
-            case ENTEREDINERROR: return "entered-in-error";
+            case DISAPPROVED: return "disapproved";
+            case INREVIEW: return "in-review";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "temporarily-closed-to-accrual";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "temporarily-closed-to-accrual-and-intervention";
+            case WITHDRAWN: return "withdrawn";
             default: return "?";
           }
         }
@@ -97,23 +134,33 @@ public enum ResearchStudyStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The study is undergoing design but the process of selecting study subjects and capturing data has not yet begun.";
-            case INPROGRESS: return "The study is currently being executed";
-            case SUSPENDED: return "Execution of the study has been temporarily paused";
-            case STOPPED: return "The study was terminated prior to the final determination of results";
-            case COMPLETED: return "The information sought by the study has been gathered and compiled and no further work is being performed";
-            case ENTEREDINERROR: return "This study never actually existed.  The record is retained for tracking purposes in the event decisions may have been made based on this erroneous information.";
+            case ACTIVE: return "Study is opened for accrual.";
+            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged";
+            case APPROVED: return "Protocol is approved by the review board.";
+            case CLOSEDTOACCRUAL: return "Study is closed for accrual; patients can be examined and treated.";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.";
+            case COMPLETED: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment\nor intervention but are still being followed according to the primary objective of the study.";
+            case DISAPPROVED: return "Protocol was disapproved by the review board.";
+            case INREVIEW: return "Protocol is submitted to the review board for approval.";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "Study is temporarily closed for accrual; can be potentially resumed in the future; patients can be examined and treated.";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "Study is temporarily closed for accrual and intervention and potentially can be resumed in the future.";
+            case WITHDRAWN: return "Protocol was withdrawn by the lead organization.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DRAFT: return "Draft";
-            case INPROGRESS: return "In-progress";
-            case SUSPENDED: return "Suspended";
-            case STOPPED: return "Stopped";
+            case ACTIVE: return "Active";
+            case ADMINISTRATIVELYCOMPLETED: return "Administratively Completed";
+            case APPROVED: return "Approved";
+            case CLOSEDTOACCRUAL: return "Closed to Accrual";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "Closed to Accrual and Intervention";
             case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered in error";
+            case DISAPPROVED: return "Disapproved";
+            case INREVIEW: return "In Review";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "Temporarily Closed to Accrual";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "Temporarily Closed to Accrual and Intervention";
+            case WITHDRAWN: return "Withdrawn";
             default: return "?";
           }
     }

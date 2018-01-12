@@ -33,13 +33,14 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueType;
-import org.hl7.fhir.dstu2016may.validation.ValidationMessage.Source;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 public class BaseValidator {
 
-  protected Source source;
+  protected ValidationMessage.Source source;
   
   /**
    * Test a rule and add a {@link IssueSeverity#FATAL} validation message if the validation fails
@@ -48,9 +49,9 @@ public class BaseValidator {
    *          Set this parameter to <code>false</code> if the validation does not pass
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
-  protected boolean fail(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg) {
+  protected boolean fail(List<ValidationMessage> errors, ValidationMessage.IssueType type, int line, int col, String path, boolean thePass, String msg) {
     if (!thePass) {
-      errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.FATAL));
+      errors.add(new ValidationMessage(source, type, line, col, path, msg, ValidationMessage.IssueSeverity.FATAL));
     }
     return thePass;
   }
@@ -62,10 +63,10 @@ public class BaseValidator {
    *          Set this parameter to <code>false</code> if the validation does not pass
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
-  protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
+  protected boolean fail(List<ValidationMessage> errors, ValidationMessage.IssueType type, List<String> pathParts, boolean thePass, String msg) {
     if (!thePass) {
       String path = toPath(pathParts);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.FATAL));
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, ValidationMessage.IssueSeverity.FATAL));
     }
     return thePass;
   }

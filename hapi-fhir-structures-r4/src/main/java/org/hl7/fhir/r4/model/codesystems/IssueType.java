@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -77,7 +77,7 @@ public enum IssueType {
          */
         FORBIDDEN, 
         /**
-         * Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.
+         * Some information was not or might not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.
          */
         SUPPRESSED, 
         /**
@@ -121,7 +121,7 @@ public enum IssueType {
          */
         CONFLICT, 
         /**
-         * Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete.
+         * Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.
          */
         INCOMPLETE, 
         /**
@@ -268,7 +268,7 @@ public enum IssueType {
             case UNKNOWN: return "The user or system was not able to be authenticated (either there is no process, or the proferred token is unacceptable).";
             case EXPIRED: return "User session expired; a login may be required.";
             case FORBIDDEN: return "The user does not have the rights to perform this action.";
-            case SUPPRESSED: return "Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.";
+            case SUPPRESSED: return "Some information was not or might not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.";
             case PROCESSING: return "Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged.";
             case NOTSUPPORTED: return "The resource or profile is not supported.";
             case DUPLICATE: return "An attempt was made to create a duplicate record.";
@@ -279,7 +279,7 @@ public enum IssueType {
             case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
             case BUSINESSRULE: return "The content/operation failed to pass some business rule, and so could not proceed.";
             case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)";
-            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete.";
+            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.";
             case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
             case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
             case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action.";

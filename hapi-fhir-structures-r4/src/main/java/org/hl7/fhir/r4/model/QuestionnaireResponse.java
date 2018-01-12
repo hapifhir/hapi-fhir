@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -699,24 +699,24 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemComponent))
           return false;
-        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
+        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other_;
         return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(text, o.text, true)
            && compareDeep(subject, o.subject, true) && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemComponent))
           return false;
-        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
+        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other_;
         return compareValues(linkId, o.linkId, true) && compareValues(definition, o.definition, true) && compareValues(text, o.text, true)
           ;
       }
@@ -1142,22 +1142,22 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemAnswerComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemAnswerComponent))
           return false;
-        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other;
+        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other_;
         return compareDeep(value, o.value, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemAnswerComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemAnswerComponent))
           return false;
-        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other;
+        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other_;
         return true;
       }
 
@@ -1180,13 +1180,13 @@ public class QuestionnaireResponse extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.
+     * The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.
      */
-    @Child(name = "basedOn", type = {CarePlan.class, ProcedureRequest.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Request fulfilled by this QuestionnaireResponse", formalDefinition="The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression." )
+    @Child(name = "basedOn", type = {CarePlan.class, ServiceRequest.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Request fulfilled by this QuestionnaireResponse", formalDefinition="The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression." )
     protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.)
+     * The actual objects that are the target of the reference (The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.)
      */
     protected List<Resource> basedOnTarget;
 
@@ -1194,13 +1194,13 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.
      */
-    @Child(name = "parent", type = {Observation.class, Procedure.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "partOf", type = {Observation.class, Procedure.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Part of this action", formalDefinition="A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of." )
-    protected List<Reference> parent;
+    protected List<Reference> partOf;
     /**
      * The actual objects that are the target of the reference (A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.)
      */
-    protected List<Resource> parentTarget;
+    protected List<Resource> partOfTarget;
 
 
     /**
@@ -1285,7 +1285,7 @@ public class QuestionnaireResponse extends DomainResource {
     @Description(shortDefinition="Groups and questions", formalDefinition="A group or question item from the original questionnaire for which answers are provided." )
     protected List<QuestionnaireResponseItemComponent> item;
 
-    private static final long serialVersionUID = -1559552776L;
+    private static final long serialVersionUID = -93457416L;
 
   /**
    * Constructor
@@ -1327,7 +1327,7 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #basedOn} (The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.)
+     * @return {@link #basedOn} (The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.)
      */
     public List<Reference> getBasedOn() { 
       if (this.basedOn == null)
@@ -1390,66 +1390,66 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.)
+     * @return {@link #partOf} (A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.)
      */
-    public List<Reference> getParent() { 
-      if (this.parent == null)
-        this.parent = new ArrayList<Reference>();
-      return this.parent;
+    public List<Reference> getPartOf() { 
+      if (this.partOf == null)
+        this.partOf = new ArrayList<Reference>();
+      return this.partOf;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public QuestionnaireResponse setParent(List<Reference> theParent) { 
-      this.parent = theParent;
+    public QuestionnaireResponse setPartOf(List<Reference> thePartOf) { 
+      this.partOf = thePartOf;
       return this;
     }
 
-    public boolean hasParent() { 
-      if (this.parent == null)
+    public boolean hasPartOf() { 
+      if (this.partOf == null)
         return false;
-      for (Reference item : this.parent)
+      for (Reference item : this.partOf)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addParent() { //3
+    public Reference addPartOf() { //3
       Reference t = new Reference();
-      if (this.parent == null)
-        this.parent = new ArrayList<Reference>();
-      this.parent.add(t);
+      if (this.partOf == null)
+        this.partOf = new ArrayList<Reference>();
+      this.partOf.add(t);
       return t;
     }
 
-    public QuestionnaireResponse addParent(Reference t) { //3
+    public QuestionnaireResponse addPartOf(Reference t) { //3
       if (t == null)
         return this;
-      if (this.parent == null)
-        this.parent = new ArrayList<Reference>();
-      this.parent.add(t);
+      if (this.partOf == null)
+        this.partOf = new ArrayList<Reference>();
+      this.partOf.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #parent}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #partOf}, creating it if it does not already exist
      */
-    public Reference getParentFirstRep() { 
-      if (getParent().isEmpty()) {
-        addParent();
+    public Reference getPartOfFirstRep() { 
+      if (getPartOf().isEmpty()) {
+        addPartOf();
       }
-      return getParent().get(0);
+      return getPartOf().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getParentTarget() { 
-      if (this.parentTarget == null)
-        this.parentTarget = new ArrayList<Resource>();
-      return this.parentTarget;
+    public List<Resource> getPartOfTarget() { 
+      if (this.partOfTarget == null)
+        this.partOfTarget = new ArrayList<Resource>();
+      return this.partOfTarget;
     }
 
     /**
@@ -1802,8 +1802,8 @@ public class QuestionnaireResponse extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, 1, identifier));
-        children.add(new Property("basedOn", "Reference(CarePlan|ProcedureRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        children.add(new Property("parent", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, parent));
+        children.add(new Property("basedOn", "Reference(CarePlan|ServiceRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("partOf", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("questionnaire", "Reference(Questionnaire)", "The Questionnaire that defines and organizes the questions for which answers are being provided.", 0, 1, questionnaire));
         children.add(new Property("status", "code", "The position of the questionnaire response within its overall lifecycle.", 0, 1, status));
         children.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject));
@@ -1818,8 +1818,8 @@ public class QuestionnaireResponse extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, 1, identifier);
-        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ProcedureRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn);
-        case -995424086: /*parent*/  return new Property("parent", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, parent);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ServiceRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ServiceRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -1017049693: /*questionnaire*/  return new Property("questionnaire", "Reference(Questionnaire)", "The Questionnaire that defines and organizes the questions for which answers are being provided.", 0, 1, questionnaire);
         case -892481550: /*status*/  return new Property("status", "code", "The position of the questionnaire response within its overall lifecycle.", 0, 1, status);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject);
@@ -1838,7 +1838,7 @@ public class QuestionnaireResponse extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
-        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // Reference
+        case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
         case -1017049693: /*questionnaire*/ return this.questionnaire == null ? new Base[0] : new Base[] {this.questionnaire}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<QuestionnaireResponseStatus>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
@@ -1861,8 +1861,8 @@ public class QuestionnaireResponse extends DomainResource {
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
           return value;
-        case -995424086: // parent
-          this.getParent().add(castToReference(value)); // Reference
+        case -995410646: // partOf
+          this.getPartOf().add(castToReference(value)); // Reference
           return value;
         case -1017049693: // questionnaire
           this.questionnaire = castToReference(value); // Reference
@@ -1900,8 +1900,8 @@ public class QuestionnaireResponse extends DomainResource {
           this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
-        } else if (name.equals("parent")) {
-          this.getParent().add(castToReference(value));
+        } else if (name.equals("partOf")) {
+          this.getPartOf().add(castToReference(value));
         } else if (name.equals("questionnaire")) {
           this.questionnaire = castToReference(value); // Reference
         } else if (name.equals("status")) {
@@ -1929,7 +1929,7 @@ public class QuestionnaireResponse extends DomainResource {
         switch (hash) {
         case -1618432855:  return getIdentifier(); 
         case -332612366:  return addBasedOn(); 
-        case -995424086:  return addParent(); 
+        case -995410646:  return addPartOf(); 
         case -1017049693:  return getQuestionnaire(); 
         case -892481550:  return getStatusElement();
         case -1867885268:  return getSubject(); 
@@ -1948,7 +1948,7 @@ public class QuestionnaireResponse extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -332612366: /*basedOn*/ return new String[] {"Reference"};
-        case -995424086: /*parent*/ return new String[] {"Reference"};
+        case -995410646: /*partOf*/ return new String[] {"Reference"};
         case -1017049693: /*questionnaire*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
@@ -1971,8 +1971,8 @@ public class QuestionnaireResponse extends DomainResource {
         else if (name.equals("basedOn")) {
           return addBasedOn();
         }
-        else if (name.equals("parent")) {
-          return addParent();
+        else if (name.equals("partOf")) {
+          return addPartOf();
         }
         else if (name.equals("questionnaire")) {
           this.questionnaire = new Reference();
@@ -2021,10 +2021,10 @@ public class QuestionnaireResponse extends DomainResource {
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
         };
-        if (parent != null) {
-          dst.parent = new ArrayList<Reference>();
-          for (Reference i : parent)
-            dst.parent.add(i.copy());
+        if (partOf != null) {
+          dst.partOf = new ArrayList<Reference>();
+          for (Reference i : partOf)
+            dst.partOf.add(i.copy());
         };
         dst.questionnaire = questionnaire == null ? null : questionnaire.copy();
         dst.status = status == null ? null : status.copy();
@@ -2046,30 +2046,30 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponse))
+        if (!(other_ instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireResponse o = (QuestionnaireResponse) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
+        QuestionnaireResponse o = (QuestionnaireResponse) other_;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(partOf, o.partOf, true)
            && compareDeep(questionnaire, o.questionnaire, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(authored, o.authored, true) && compareDeep(author, o.author, true)
            && compareDeep(source, o.source, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponse))
+        if (!(other_ instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireResponse o = (QuestionnaireResponse) other;
+        QuestionnaireResponse o = (QuestionnaireResponse) other_;
         return compareValues(status, o.status, true) && compareValues(authored, o.authored, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, partOf
           , questionnaire, status, subject, context, authored, author, source, item);
       }
 
@@ -2119,32 +2119,6 @@ public class QuestionnaireResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>parent</b>
-   * <p>
-   * Description: <b>Procedure or observation this questionnaire response was performed as a part of</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>QuestionnaireResponse.parent</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="parent", path="QuestionnaireResponse.parent", description="Procedure or observation this questionnaire response was performed as a part of", type="reference", target={Observation.class, Procedure.class } )
-  public static final String SP_PARENT = "parent";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>parent</b>
-   * <p>
-   * Description: <b>Procedure or observation this questionnaire response was performed as a part of</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>QuestionnaireResponse.parent</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARENT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>QuestionnaireResponse:parent</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:parent").toLocked();
-
- /**
    * Search parameter: <b>questionnaire</b>
    * <p>
    * Description: <b>The questionnaire the answers are provided for</b><br>
@@ -2178,7 +2152,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="based-on", path="QuestionnaireResponse.basedOn", description="Plan/proposal/order fulfilled by this questionnaire response", type="reference", target={CarePlan.class, ProcedureRequest.class } )
+  @SearchParamDefinition(name="based-on", path="QuestionnaireResponse.basedOn", description="Plan/proposal/order fulfilled by this questionnaire response", type="reference", target={CarePlan.class, ServiceRequest.class } )
   public static final String SP_BASED_ON = "based-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
@@ -2299,6 +2273,32 @@ public class QuestionnaireResponse extends DomainResource {
    * the path value of "<b>QuestionnaireResponse:context</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:context").toLocked();
+
+ /**
+   * Search parameter: <b>part-of</b>
+   * <p>
+   * Description: <b>Procedure or observation this questionnaire response was performed as a part of</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.partOf</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="part-of", path="QuestionnaireResponse.partOf", description="Procedure or observation this questionnaire response was performed as a part of", type="reference", target={Observation.class, Procedure.class } )
+  public static final String SP_PART_OF = "part-of";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>part-of</b>
+   * <p>
+   * Description: <b>Procedure or observation this questionnaire response was performed as a part of</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.partOf</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PART_OF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PART_OF);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>QuestionnaireResponse:part-of</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PART_OF = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:part-of").toLocked();
 
  /**
    * Search parameter: <b>source</b>

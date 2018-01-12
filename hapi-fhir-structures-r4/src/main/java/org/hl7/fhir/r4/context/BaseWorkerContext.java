@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.context.BaseWorkerContext.NullTranslator;
 import org.hl7.fhir.r4.context.IWorkerContext.ILoggingService.LogCategory;
 import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -67,6 +69,7 @@ import org.hl7.fhir.exceptions.NoTerminologyServiceException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -112,9 +115,11 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   private int expandCodesLimit = 1000;
   protected ILoggingService logger;
   protected ExpansionProfile expProfile;
+  private TranslationServices translator = new NullTranslator();
 
   protected void copy(BaseWorkerContext other) {
     allResourcesById.putAll(other.allResourcesById);
+    translator = other.translator;
     codeSystems.putAll(other.codeSystems);
     nonSupportedCodeSystems.addAll(other.nonSupportedCodeSystems);
     valueSets.putAll(other.valueSets);
@@ -862,7 +867,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
 
   private ValidationResult verifyCodeInExpansion(ValueSet vs, String system,String code, String display) {
-    ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code);
+    ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code, system);
     if (cc == null)
       return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getUrl());
     if (display == null)
@@ -879,18 +884,18 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     if (vs.getExpansion().hasExtension("http://hl7.org/fhir/StructureDefinition/valueset-toocostly")) {
       throw new FHIRException("Unable to validate core - value set is too costly to expand"); 
     } else {
-      ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code);
+      ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code, null);
       if (cc == null)
         return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getUrl());
       return null;
     }
   }
 
-  private ValueSetExpansionContainsComponent findCode(List<ValueSetExpansionContainsComponent> contains, String code) {
+  private ValueSetExpansionContainsComponent findCode(List<ValueSetExpansionContainsComponent> contains, String code, String system) {
     for (ValueSetExpansionContainsComponent cc : contains) {
-      if (code.equals(cc.getCode()))
+      if (code.equals(cc.getCode()) && (system == null || cc.getSystem().equals(system)))
         return cc;
-      ValueSetExpansionContainsComponent c = findCode(cc.getContains(), code);
+      ValueSetExpansionContainsComponent c = findCode(cc.getContains(), code, system);
       if (c != null)
         return c;
     }
@@ -1073,4 +1078,53 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   }
   
 
+  public TranslationServices translator() {
+    return translator;
+  }
+
+  public void setTranslator(TranslationServices translator) {
+    this.translator = translator;
+  }
+  
+  public class NullTranslator implements TranslationServices {
+
+    @Override
+    public String translate(String context, String value, String targetLang) {
+      return value;
+    }
+
+    @Override
+    public String translate(String context, String value) {
+      return value;
+    }
+
+    @Override
+    public String toStr(float value) {
+      return null;
+    }
+
+    @Override
+    public String toStr(Date value) {
+      return null;
+    }
+
+    @Override
+    public String translateAndFormat(String contest, String lang, String value, Object... args) {
+      return String.format(value, args);
+    }
+
+    @Override
+    public Map<String, String> translations(String value) {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public Set<String> listTranslations(String category) {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+  }
+  
 }

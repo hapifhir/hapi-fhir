@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.validation.*;
 import org.hl7.fhir.dstu2016may.validation.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
@@ -144,7 +145,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();
-				m.setLevel(IssueSeverity.FATAL);
+				m.setLevel(ValidationMessage.IssueSeverity.FATAL);
 				m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
 				return Collections.singletonList(m);
 			}

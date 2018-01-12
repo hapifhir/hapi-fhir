@@ -3678,19 +3678,19 @@ public class ElementDefinition extends Type implements ICompositeType {
         else if (name.equals("nameReference"))
           this.nameReference = castToString(value); // StringType
         else if (name.equals("defaultValue[x]"))
-          this.defaultValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.defaultValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("meaningWhenMissing"))
           this.meaningWhenMissing = castToMarkdown(value); // MarkdownType
         else if (name.equals("fixed[x]"))
-          this.fixed = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.fixed = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("pattern[x]"))
-          this.pattern = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.pattern = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("example[x]"))
-          this.example = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.example = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("minValue[x]"))
-          this.minValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.minValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("maxValue[x]"))
-          this.maxValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.maxValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else if (name.equals("maxLength"))
           this.maxLength = castToInteger(value); // IntegerType
         else if (name.equals("condition"))

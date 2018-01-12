@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -78,10 +78,10 @@ public class RelatedPerson extends DomainResource {
     /**
      * The nature of the relationship between a patient and the related person.
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The nature of the relationship", formalDefinition="The nature of the relationship between a patient and the related person." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype")
-    protected CodeableConcept relationship;
+    protected List<CodeableConcept> relationship;
 
     /**
      * A name associated with the person.
@@ -127,13 +127,13 @@ public class RelatedPerson extends DomainResource {
     protected List<Attachment> photo;
 
     /**
-     * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
+     * The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown.
      */
     @Child(name = "period", type = {Period.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
+    @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
-    private static final long serialVersionUID = 1633785157L;
+    private static final long serialVersionUID = -243680341L;
 
   /**
    * Constructor
@@ -295,25 +295,54 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #relationship} (The nature of the relationship between a patient and the related person.)
      */
-    public CodeableConcept getRelationship() { 
+    public List<CodeableConcept> getRelationship() { 
       if (this.relationship == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RelatedPerson.relationship");
-        else if (Configuration.doAutoCreate())
-          this.relationship = new CodeableConcept(); // cc
+        this.relationship = new ArrayList<CodeableConcept>();
       return this.relationship;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RelatedPerson setRelationship(List<CodeableConcept> theRelationship) { 
+      this.relationship = theRelationship;
+      return this;
+    }
+
     public boolean hasRelationship() { 
-      return this.relationship != null && !this.relationship.isEmpty();
+      if (this.relationship == null)
+        return false;
+      for (CodeableConcept item : this.relationship)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addRelationship() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.relationship == null)
+        this.relationship = new ArrayList<CodeableConcept>();
+      this.relationship.add(t);
+      return t;
+    }
+
+    public RelatedPerson addRelationship(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.relationship == null)
+        this.relationship = new ArrayList<CodeableConcept>();
+      this.relationship.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #relationship} (The nature of the relationship between a patient and the related person.)
+     * @return The first repetition of repeating field {@link #relationship}, creating it if it does not already exist
      */
-    public RelatedPerson setRelationship(CodeableConcept value) { 
-      this.relationship = value;
-      return this;
+    public CodeableConcept getRelationshipFirstRep() { 
+      if (getRelationship().isEmpty()) {
+        addRelationship();
+      }
+      return getRelationship().get(0);
     }
 
     /**
@@ -627,7 +656,7 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
-     * @return {@link #period} (The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.)
+     * @return {@link #period} (The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown.)
      */
     public Period getPeriod() { 
       if (this.period == null)
@@ -643,7 +672,7 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
-     * @param value {@link #period} (The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.)
+     * @param value {@link #period} (The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown.)
      */
     public RelatedPerson setPeriod(Period value) { 
       this.period = value;
@@ -655,14 +684,14 @@ public class RelatedPerson extends DomainResource {
         children.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("active", "boolean", "Whether this related person record is in active use.", 0, 1, active));
         children.add(new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, 1, patient));
-        children.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, 1, relationship));
+        children.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, java.lang.Integer.MAX_VALUE, relationship));
         children.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
         children.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
         children.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, 1, gender));
         children.add(new Property("birthDate", "date", "The date on which the related person was born.", 0, 1, birthDate));
         children.add(new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address));
         children.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
-        children.add(new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, 1, period));
+        children.add(new Property("period", "Period", "The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown.", 0, 1, period));
       }
 
       @Override
@@ -671,14 +700,14 @@ public class RelatedPerson extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this related person record is in active use.", 0, 1, active);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, 1, patient);
-        case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, 1, relationship);
+        case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, java.lang.Integer.MAX_VALUE, relationship);
         case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom);
         case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, 1, gender);
         case -1210031859: /*birthDate*/  return new Property("birthDate", "date", "The date on which the related person was born.", 0, 1, birthDate);
         case -1147692044: /*address*/  return new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address);
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo);
-        case -991726143: /*period*/  return new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, 1, period);
+        case -991726143: /*period*/  return new Property("period", "Period", "The period of time during which this relationship is or was active. If there are no dates defined, then the interval is unknown.", 0, 1, period);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -690,7 +719,7 @@ public class RelatedPerson extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
-        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : this.relationship.toArray(new Base[this.relationship.size()]); // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : this.name.toArray(new Base[this.name.size()]); // HumanName
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
         case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // Enumeration<AdministrativeGender>
@@ -716,7 +745,7 @@ public class RelatedPerson extends DomainResource {
           this.patient = castToReference(value); // Reference
           return value;
         case -261851592: // relationship
-          this.relationship = castToCodeableConcept(value); // CodeableConcept
+          this.getRelationship().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 3373707: // name
           this.getName().add(castToHumanName(value)); // HumanName
@@ -754,7 +783,7 @@ public class RelatedPerson extends DomainResource {
         } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
         } else if (name.equals("relationship")) {
-          this.relationship = castToCodeableConcept(value); // CodeableConcept
+          this.getRelationship().add(castToCodeableConcept(value));
         } else if (name.equals("name")) {
           this.getName().add(castToHumanName(value));
         } else if (name.equals("telecom")) {
@@ -781,7 +810,7 @@ public class RelatedPerson extends DomainResource {
         case -1618432855:  return addIdentifier(); 
         case -1422950650:  return getActiveElement();
         case -791418107:  return getPatient(); 
-        case -261851592:  return getRelationship(); 
+        case -261851592:  return addRelationship(); 
         case 3373707:  return addName(); 
         case -1429363305:  return addTelecom(); 
         case -1249512767:  return getGenderElement();
@@ -826,8 +855,7 @@ public class RelatedPerson extends DomainResource {
           return this.patient;
         }
         else if (name.equals("relationship")) {
-          this.relationship = new CodeableConcept();
-          return this.relationship;
+          return addRelationship();
         }
         else if (name.equals("name")) {
           return addName();
@@ -870,7 +898,11 @@ public class RelatedPerson extends DomainResource {
         };
         dst.active = active == null ? null : active.copy();
         dst.patient = patient == null ? null : patient.copy();
-        dst.relationship = relationship == null ? null : relationship.copy();
+        if (relationship != null) {
+          dst.relationship = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : relationship)
+            dst.relationship.add(i.copy());
+        };
         if (name != null) {
           dst.name = new ArrayList<HumanName>();
           for (HumanName i : name)
@@ -902,12 +934,12 @@ public class RelatedPerson extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RelatedPerson))
+        if (!(other_ instanceof RelatedPerson))
           return false;
-        RelatedPerson o = (RelatedPerson) other;
+        RelatedPerson o = (RelatedPerson) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(patient, o.patient, true)
            && compareDeep(relationship, o.relationship, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true)
@@ -915,12 +947,12 @@ public class RelatedPerson extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RelatedPerson))
+        if (!(other_ instanceof RelatedPerson))
           return false;
-        RelatedPerson o = (RelatedPerson) other;
+        RelatedPerson o = (RelatedPerson) other_;
         return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
           ;
       }
@@ -958,17 +990,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
+  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.address</b><br>
    * </p>

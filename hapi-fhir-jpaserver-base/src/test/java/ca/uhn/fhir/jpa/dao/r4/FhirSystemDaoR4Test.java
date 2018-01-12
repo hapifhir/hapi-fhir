@@ -325,7 +325,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/bug-410-bundle.xml"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug-410-bundle.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
@@ -1744,7 +1744,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testTransactionOruBundle() throws IOException {
 		myDaoConfig.setAllowMultipleDelete(true);
 
-		String input = IOUtils.toString(getClass().getResourceAsStream("/oruBundle.json"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/oruBundle.json"), StandardCharsets.UTF_8);
 
 		Bundle inputBundle;
 		Bundle outputBundle;
@@ -2362,7 +2362,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithMultiBundle() throws IOException {
-		String inputBundleString = loadClasspath("/batch-error.xml");
+		String inputBundleString = loadClasspath("/r4/batch-error.xml");
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 

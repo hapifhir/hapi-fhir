@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1115,23 +1115,23 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionSlicingComponent))
+        if (!(other_ instanceof ElementDefinitionSlicingComponent))
           return false;
-        ElementDefinitionSlicingComponent o = (ElementDefinitionSlicingComponent) other;
+        ElementDefinitionSlicingComponent o = (ElementDefinitionSlicingComponent) other_;
         return compareDeep(discriminator, o.discriminator, true) && compareDeep(description, o.description, true)
            && compareDeep(ordered, o.ordered, true) && compareDeep(rules, o.rules, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionSlicingComponent))
+        if (!(other_ instanceof ElementDefinitionSlicingComponent))
           return false;
-        ElementDefinitionSlicingComponent o = (ElementDefinitionSlicingComponent) other;
+        ElementDefinitionSlicingComponent o = (ElementDefinitionSlicingComponent) other_;
         return compareValues(description, o.description, true) && compareValues(ordered, o.ordered, true) && compareValues(rules, o.rules, true)
           ;
       }
@@ -1367,22 +1367,22 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionSlicingDiscriminatorComponent))
+        if (!(other_ instanceof ElementDefinitionSlicingDiscriminatorComponent))
           return false;
-        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other;
+        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(path, o.path, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionSlicingDiscriminatorComponent))
+        if (!(other_ instanceof ElementDefinitionSlicingDiscriminatorComponent))
           return false;
-        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other;
+        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other_;
         return compareValues(type, o.type, true) && compareValues(path, o.path, true);
       }
 
@@ -1680,23 +1680,23 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionBaseComponent))
+        if (!(other_ instanceof ElementDefinitionBaseComponent))
           return false;
-        ElementDefinitionBaseComponent o = (ElementDefinitionBaseComponent) other;
+        ElementDefinitionBaseComponent o = (ElementDefinitionBaseComponent) other_;
         return compareDeep(path, o.path, true) && compareDeep(min, o.min, true) && compareDeep(max, o.max, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionBaseComponent))
+        if (!(other_ instanceof ElementDefinitionBaseComponent))
           return false;
-        ElementDefinitionBaseComponent o = (ElementDefinitionBaseComponent) other;
+        ElementDefinitionBaseComponent o = (ElementDefinitionBaseComponent) other_;
         return compareValues(path, o.path, true) && compareValues(min, o.min, true) && compareValues(max, o.max, true)
           ;
       }
@@ -1723,17 +1723,17 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected UriType code;
 
         /**
-         * Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.
          */
         @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Profile (StructureDefinition) to apply (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
+        @Description(shortDefinition="Profile (StructureDefinition or IG) that applies", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide." )
         protected UriType profile;
 
         /**
-         * Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * Used when the type is "Reference", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.
          */
         @Child(name = "targetProfile", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Profile (StructureDefinition) to apply to reference target (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
+        @Description(shortDefinition="Profile (StructureDefinition or IG) that applies to the Reference target", formalDefinition="Used when the type is \"Reference\", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide." )
         protected UriType targetProfile;
 
         /**
@@ -1815,7 +1815,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @return {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public UriType getProfileElement() { 
           if (this.profile == null)
@@ -1835,7 +1835,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @param value {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public TypeRefComponent setProfileElement(UriType value) { 
           this.profile = value;
@@ -1843,14 +1843,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @return Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.
          */
         public String getProfile() { 
           return this.profile == null ? null : this.profile.getValue();
         }
 
         /**
-         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.
          */
         public TypeRefComponent setProfile(String value) { 
           if (Utilities.noString(value))
@@ -1864,7 +1864,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
+         * @return {@link #targetProfile} (Used when the type is "Reference", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
          */
         public UriType getTargetProfileElement() { 
           if (this.targetProfile == null)
@@ -1884,7 +1884,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
+         * @param value {@link #targetProfile} (Used when the type is "Reference", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
          */
         public TypeRefComponent setTargetProfileElement(UriType value) { 
           this.targetProfile = value;
@@ -1892,14 +1892,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @return Used when the type is "Reference", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public String getTargetProfile() { 
           return this.targetProfile == null ? null : this.targetProfile.getValue();
         }
 
         /**
-         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @param value Used when the type is "Reference", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public TypeRefComponent setTargetProfile(String value) { 
           if (Utilities.noString(value))
@@ -2025,8 +2025,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("code", "uri", "URL of Data type or Resource that is a(or the) type used for this element. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.", 0, 1, code));
-          children.add(new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, profile));
-          children.add(new Property("targetProfile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, targetProfile));
+          children.add(new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.", 0, 1, profile));
+          children.add(new Property("targetProfile", "uri", "Used when the type is \"Reference\", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, targetProfile));
           children.add(new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation));
           children.add(new Property("versioning", "code", "Whether this reference needs to be version specific or version independent, or whether either can be used.", 0, 1, versioning));
         }
@@ -2035,8 +2035,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3059181: /*code*/  return new Property("code", "uri", "URL of Data type or Resource that is a(or the) type used for this element. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.", 0, 1, code);
-          case -309425751: /*profile*/  return new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, profile);
-          case 1994521304: /*targetProfile*/  return new Property("targetProfile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, targetProfile);
+          case -309425751: /*profile*/  return new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the type SHALL conform to at least one profile defined in the implementation guide.", 0, 1, profile);
+          case 1994521304: /*targetProfile*/  return new Property("targetProfile", "uri", "Used when the type is \"Reference\", and Identifies a profile structure or implementation Guide that SHALL be true for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the target resource SHALL conform to at least one profile defined in the implementation guide.", 0, 1, targetProfile);
           case 841524962: /*aggregation*/  return new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation);
           case -670487542: /*versioning*/  return new Property("versioning", "code", "Whether this reference needs to be version specific or version independent, or whether either can be used.", 0, 1, versioning);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2164,24 +2164,24 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TypeRefComponent))
+        if (!(other_ instanceof TypeRefComponent))
           return false;
-        TypeRefComponent o = (TypeRefComponent) other;
+        TypeRefComponent o = (TypeRefComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(profile, o.profile, true) && compareDeep(targetProfile, o.targetProfile, true)
            && compareDeep(aggregation, o.aggregation, true) && compareDeep(versioning, o.versioning, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TypeRefComponent))
+        if (!(other_ instanceof TypeRefComponent))
           return false;
-        TypeRefComponent o = (TypeRefComponent) other;
+        TypeRefComponent o = (TypeRefComponent) other_;
         return compareValues(code, o.code, true) && compareValues(profile, o.profile, true) && compareValues(targetProfile, o.targetProfile, true)
            && compareValues(aggregation, o.aggregation, true) && compareValues(versioning, o.versioning, true)
           ;
@@ -2342,6 +2342,14 @@ public class ElementDefinition extends Type implements ICompositeType {
           case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
           case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
           case -765920490: /*valueMeta*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case -1125200224: /*valueContactDetail*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 1281021610: /*valueContributor*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 1710554248: /*valueDataRequirement*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 1387478187: /*valueParameterDefinition*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 1748214124: /*valueRelatedArtifact*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 976830394: /*valueTriggerDefinition*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
+          case 588000479: /*valueUsageContext*/  return new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2540,6 +2548,38 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.value = new Meta();
           return this.value;
         }
+        else if (name.equals("valueDosage")) {
+          this.value = new Dosage();
+          return this.value;
+        }
+        else if (name.equals("valueContactDetail")) {
+          this.value = new ContactDetail();
+          return this.value;
+        }
+        else if (name.equals("valueContributor")) {
+          this.value = new Contributor();
+          return this.value;
+        }
+        else if (name.equals("valueDataRequirement")) {
+          this.value = new DataRequirement();
+          return this.value;
+        }
+        else if (name.equals("valueParameterDefinition")) {
+          this.value = new ParameterDefinition();
+          return this.value;
+        }
+        else if (name.equals("valueRelatedArtifact")) {
+          this.value = new RelatedArtifact();
+          return this.value;
+        }
+        else if (name.equals("valueTriggerDefinition")) {
+          this.value = new TriggerDefinition();
+          return this.value;
+        }
+        else if (name.equals("valueUsageContext")) {
+          this.value = new UsageContext();
+          return this.value;
+        }
         else
           return super.addChild(name);
       }
@@ -2553,22 +2593,22 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionExampleComponent))
+        if (!(other_ instanceof ElementDefinitionExampleComponent))
           return false;
-        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other;
+        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other_;
         return compareDeep(label, o.label, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionExampleComponent))
+        if (!(other_ instanceof ElementDefinitionExampleComponent))
           return false;
-        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other;
+        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other_;
         return compareValues(label, o.label, true);
       }
 
@@ -3146,24 +3186,24 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionConstraintComponent))
+        if (!(other_ instanceof ElementDefinitionConstraintComponent))
           return false;
-        ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
+        ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other_;
         return compareDeep(key, o.key, true) && compareDeep(requirements, o.requirements, true) && compareDeep(severity, o.severity, true)
            && compareDeep(human, o.human, true) && compareDeep(expression, o.expression, true) && compareDeep(xpath, o.xpath, true)
            && compareDeep(source, o.source, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionConstraintComponent))
+        if (!(other_ instanceof ElementDefinitionConstraintComponent))
           return false;
-        ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
+        ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other_;
         return compareValues(key, o.key, true) && compareValues(requirements, o.requirements, true) && compareValues(severity, o.severity, true)
            && compareValues(human, o.human, true) && compareValues(expression, o.expression, true) && compareValues(xpath, o.xpath, true)
            && compareValues(source, o.source, true);
@@ -3478,23 +3518,23 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionBindingComponent))
+        if (!(other_ instanceof ElementDefinitionBindingComponent))
           return false;
-        ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other;
+        ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other_;
         return compareDeep(strength, o.strength, true) && compareDeep(description, o.description, true)
            && compareDeep(valueSet, o.valueSet, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionBindingComponent))
+        if (!(other_ instanceof ElementDefinitionBindingComponent))
           return false;
-        ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other;
+        ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other_;
         return compareValues(strength, o.strength, true) && compareValues(description, o.description, true)
           ;
       }
@@ -3867,23 +3907,23 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinitionMappingComponent))
+        if (!(other_ instanceof ElementDefinitionMappingComponent))
           return false;
-        ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other;
+        ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other_;
         return compareDeep(identity, o.identity, true) && compareDeep(language, o.language, true) && compareDeep(map, o.map, true)
            && compareDeep(comment, o.comment, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinitionMappingComponent))
+        if (!(other_ instanceof ElementDefinitionMappingComponent))
           return false;
-        ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other;
+        ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other_;
         return compareValues(identity, o.identity, true) && compareValues(language, o.language, true) && compareValues(map, o.map, true)
            && compareValues(comment, o.comment, true);
       }
@@ -5842,6 +5882,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         case -302193638: /*defaultValueTiming*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
         case -1488914053: /*defaultValueReference*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
         case 1045282261: /*defaultValueMeta*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case -754548089: /*defaultValueDosage*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case 1845473985: /*defaultValueContactDetail*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case 1793609483: /*defaultValueContributor*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case 375217257: /*defaultValueDataRequirement*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case -701053940: /*defaultValueParameterDefinition*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case 412877133: /*defaultValueRelatedArtifact*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case 1913203547: /*defaultValueTriggerDefinition*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
+        case -701644642: /*defaultValueUsageContext*/  return new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, 1, defaultValue);
         case 1857257103: /*meaningWhenMissing*/  return new Property("meaningWhenMissing", "markdown", "The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'.", 0, 1, meaningWhenMissing);
         case 1828196047: /*orderMeaning*/  return new Property("orderMeaning", "string", "If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.", 0, 1, orderMeaning);
         case -391522164: /*fixed[x]*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
@@ -5879,6 +5927,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         case 1080712414: /*fixedTiming*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
         case -661022153: /*fixedReference*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
         case 747280281: /*fixedMeta*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case 628357963: /*fixedDosage*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case 207721853: /*fixedContactDetail*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case -1466191673: /*fixedContributor*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case -1546551259: /*fixedDataRequirement*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case -2126861880: /*fixedParameterDefinition*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case -1508891383: /*fixedRelatedArtifact*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case 1929596951: /*fixedTriggerDefinition*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
+        case 1323734626: /*fixedUsageContext*/  return new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, 1, fixed);
         case -885125392: /*pattern[x]*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
         case -791090288: /*pattern*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
         case -1776945544: /*patternBoolean*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
@@ -5914,6 +5970,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         case 2114968570: /*patternTiming*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
         case -1231260261: /*patternReference*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
         case -1669517899: /*patternMeta*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 1662614119: /*patternDosage*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 754982625: /*patternContactDetail*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 290800427: /*patternContributor*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 385040521: /*patternDataRequirement*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 318609452: /*patternParameterDefinition*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case 422700397: /*patternRelatedArtifact*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case -1531541637: /*patternTriggerDefinition*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
+        case -44085122: /*patternUsageContext*/  return new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, 1, pattern);
         case -1322970774: /*example*/  return new Property("example", "", "A sample value for this element demonstrating the type of information that would typically be found in the element.", 0, java.lang.Integer.MAX_VALUE, example);
         case -55301663: /*minValue[x]*/  return new Property("minValue[x]", "date|dateTime|instant|time|decimal|integer|positiveInt|unsignedInt|Quantity", "The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.", 0, 1, minValue);
         case -1376969153: /*minValue*/  return new Property("minValue[x]", "date|dateTime|instant|time|decimal|integer|positiveInt|unsignedInt|Quantity", "The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.", 0, 1, minValue);
@@ -6436,6 +6500,38 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.defaultValue = new Meta();
           return this.defaultValue;
         }
+        else if (name.equals("defaultValueDosage")) {
+          this.defaultValue = new Dosage();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueContactDetail")) {
+          this.defaultValue = new ContactDetail();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueContributor")) {
+          this.defaultValue = new Contributor();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueDataRequirement")) {
+          this.defaultValue = new DataRequirement();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueParameterDefinition")) {
+          this.defaultValue = new ParameterDefinition();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueRelatedArtifact")) {
+          this.defaultValue = new RelatedArtifact();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueTriggerDefinition")) {
+          this.defaultValue = new TriggerDefinition();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueUsageContext")) {
+          this.defaultValue = new UsageContext();
+          return this.defaultValue;
+        }
         else if (name.equals("meaningWhenMissing")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.meaningWhenMissing");
         }
@@ -6574,6 +6670,38 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.fixed = new Meta();
           return this.fixed;
         }
+        else if (name.equals("fixedDosage")) {
+          this.fixed = new Dosage();
+          return this.fixed;
+        }
+        else if (name.equals("fixedContactDetail")) {
+          this.fixed = new ContactDetail();
+          return this.fixed;
+        }
+        else if (name.equals("fixedContributor")) {
+          this.fixed = new Contributor();
+          return this.fixed;
+        }
+        else if (name.equals("fixedDataRequirement")) {
+          this.fixed = new DataRequirement();
+          return this.fixed;
+        }
+        else if (name.equals("fixedParameterDefinition")) {
+          this.fixed = new ParameterDefinition();
+          return this.fixed;
+        }
+        else if (name.equals("fixedRelatedArtifact")) {
+          this.fixed = new RelatedArtifact();
+          return this.fixed;
+        }
+        else if (name.equals("fixedTriggerDefinition")) {
+          this.fixed = new TriggerDefinition();
+          return this.fixed;
+        }
+        else if (name.equals("fixedUsageContext")) {
+          this.fixed = new UsageContext();
+          return this.fixed;
+        }
         else if (name.equals("patternBoolean")) {
           this.pattern = new BooleanType();
           return this.pattern;
@@ -6704,6 +6832,38 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         else if (name.equals("patternMeta")) {
           this.pattern = new Meta();
+          return this.pattern;
+        }
+        else if (name.equals("patternDosage")) {
+          this.pattern = new Dosage();
+          return this.pattern;
+        }
+        else if (name.equals("patternContactDetail")) {
+          this.pattern = new ContactDetail();
+          return this.pattern;
+        }
+        else if (name.equals("patternContributor")) {
+          this.pattern = new Contributor();
+          return this.pattern;
+        }
+        else if (name.equals("patternDataRequirement")) {
+          this.pattern = new DataRequirement();
+          return this.pattern;
+        }
+        else if (name.equals("patternParameterDefinition")) {
+          this.pattern = new ParameterDefinition();
+          return this.pattern;
+        }
+        else if (name.equals("patternRelatedArtifact")) {
+          this.pattern = new RelatedArtifact();
+          return this.pattern;
+        }
+        else if (name.equals("patternTriggerDefinition")) {
+          this.pattern = new TriggerDefinition();
+          return this.pattern;
+        }
+        else if (name.equals("patternUsageContext")) {
+          this.pattern = new UsageContext();
           return this.pattern;
         }
         else if (name.equals("example")) {
@@ -6890,12 +7050,12 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ElementDefinition))
+        if (!(other_ instanceof ElementDefinition))
           return false;
-        ElementDefinition o = (ElementDefinition) other;
+        ElementDefinition o = (ElementDefinition) other_;
         return compareDeep(path, o.path, true) && compareDeep(representation, o.representation, true) && compareDeep(sliceName, o.sliceName, true)
            && compareDeep(label, o.label, true) && compareDeep(code, o.code, true) && compareDeep(slicing, o.slicing, true)
            && compareDeep(short_, o.short_, true) && compareDeep(definition, o.definition, true) && compareDeep(comment, o.comment, true)
@@ -6911,12 +7071,12 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ElementDefinition))
+        if (!(other_ instanceof ElementDefinition))
           return false;
-        ElementDefinition o = (ElementDefinition) other;
+        ElementDefinition o = (ElementDefinition) other_;
         return compareValues(path, o.path, true) && compareValues(representation, o.representation, true) && compareValues(sliceName, o.sliceName, true)
            && compareValues(label, o.label, true) && compareValues(short_, o.short_, true) && compareValues(definition, o.definition, true)
            && compareValues(comment, o.comment, true) && compareValues(requirements, o.requirements, true) && compareValues(alias, o.alias, true)

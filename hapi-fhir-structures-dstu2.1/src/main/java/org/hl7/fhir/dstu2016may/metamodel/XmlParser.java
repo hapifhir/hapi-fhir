@@ -20,8 +20,6 @@ import org.hl7.fhir.dstu2016may.metamodel.Element.SpecialElement;
 import org.hl7.fhir.dstu2016may.model.DateTimeType;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.PropertyRepresentation;
 import org.hl7.fhir.dstu2016may.model.Enumeration;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 import org.hl7.fhir.dstu2016may.utils.ToolingExtensions;
@@ -30,6 +28,8 @@ import org.hl7.fhir.dstu2016may.utils.XmlLocationData;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
@@ -235,7 +235,7 @@ public class XmlParser extends ParserBase {
 				if (property != null) {
 					if (!property.isChoice() && "xhtml".equals(property.getType())) {
 						XhtmlNode xhtml = new XhtmlParser().setValidatorMode(true).parseHtmlNode((org.w3c.dom.Element) child);
-						context.getChildren().add(new Element("div", property, "xhtml", new XhtmlComposer().setXmlOnly(true).compose(xhtml)).setXhtml(xhtml).markLocation(line(child), col(child)));
+						context.getChildren().add(new Element("div", property, "xhtml", new XhtmlComposer(true, false).compose(xhtml)).setXhtml(xhtml).markLocation(line(child), col(child)));
 					} else {
 						String npath = path+"/"+pathPrefix(child.getNamespaceURI())+child.getLocalName();
 						Element n = new Element(child.getLocalName(), property).markLocation(line(child), col(child));
@@ -264,7 +264,7 @@ public class XmlParser extends ParserBase {
 						}
 					}
 				} else
-					logError(line(child), col(child), path, IssueType.STRUCTURE, "Undefined element '"+child.getLocalName()+'"', IssueSeverity.ERROR);    		
+					logError(line(child), col(child), path, IssueType.STRUCTURE, "Undefined element '"+child.getLocalName()+"'", IssueSeverity.ERROR);    		
 			} else if (child.getNodeType() == Node.CDATA_SECTION_NODE){
 				logError(line(child), col(child), path, IssueType.STRUCTURE, "CDATA is not allowed", IssueSeverity.ERROR);      		
 			} else if (!Utilities.existsInList(child.getNodeType(), 3, 8)) {

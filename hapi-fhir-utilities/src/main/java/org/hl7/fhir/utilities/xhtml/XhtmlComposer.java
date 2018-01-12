@@ -44,27 +44,22 @@ public class XhtmlComposer {
 
   public static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
   private boolean pretty;
-  private boolean xmlOnly;
+  private boolean xml; 
   
+  public static final boolean XML = true; 
+  public static final boolean HTML = false; 
   
-  public boolean isPretty() {
-    return pretty;
-  }
-
-  public XhtmlComposer setPretty(boolean pretty) {
+  public XhtmlComposer(boolean xml, boolean pretty) {
+    super();
     this.pretty = pretty;
-    return this;
+    this.xml = xml;
   }
 
-  public boolean isXmlOnly() {
-    return xmlOnly;
+  public XhtmlComposer(boolean xml) {
+    super();
+    this.pretty = false;
+    this.xml = xml;
   }
-
-  public XhtmlComposer setXmlOnly(boolean xmlOnly) {
-    this.xmlOnly = xmlOnly;
-    return this;
-  }
-
 
   private Writer dst;
 
@@ -92,10 +87,10 @@ public class XhtmlComposer {
 
   private void composeDoc(XhtmlDocument doc) throws IOException  {
     // headers....
-//    dst.append("<html>" + (isPretty() ? "\r\n" : ""));
+//    dst.append("<html>" + (pretty ? "\r\n" : ""));
     for (XhtmlNode c : doc.getChildNodes())
       writeNode("  ", c);
-//    dst.append("</html>" + (isPretty() ? "\r\n" : ""));
+//    dst.append("</html>" + (pretty ? "\r\n" : ""));
   }
 
   private void writeNode(String indent, XhtmlNode node) throws IOException  {
@@ -126,10 +121,11 @@ public class XhtmlComposer {
         dst.append("&lt;");
       else if (c == '>')
         dst.append("&gt;");
-      else if (c == '"')
-        dst.append("&quot;");
-      else if (xmlOnly) {
-        dst.append(c);
+      else if (xml) {
+        if (c == '"')
+          dst.append("&quot;");
+        else 
+          dst.append(c);
       } else {
         if (c == XhtmlNode.NBSP.charAt(0))
           dst.append("&nbsp;");
@@ -150,7 +146,7 @@ public class XhtmlComposer {
   }
 
   private void writeComment(String indent, XhtmlNode node) throws IOException {
-    dst.append(indent + "<!-- " + node.getContent().trim() + " -->" + (isPretty() ? "\r\n" : ""));
+    dst.append(indent + "<!-- " + node.getContent().trim() + " -->" + (pretty ? "\r\n" : ""));
 }
 
   private void writeDocType(XhtmlNode node) throws IOException {
@@ -189,9 +185,10 @@ public class XhtmlComposer {
   private void writeElement(String indent, XhtmlNode node) throws IOException  {
     if (!pretty)
       indent = "";
-    
-    if (node.getChildNodes().size() == 0)
-      dst.append(indent + "<" + node.getName() + attributes(node) + "/>" + (isPretty() ? "\r\n" : ""));
+
+    // html self closing tags: http://xahlee.info/js/html5_non-closing_tag.html 
+    if (node.getChildNodes().size() == 0 && (xml || Utilities.existsInList(node.getName(), "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "menuitem", "meta", "param", "source", "track", "wbr")))
+      dst.append(indent + "<" + node.getName() + attributes(node) + "/>" + (pretty ? "\r\n" : ""));
     else {
     boolean act = node.allChildrenAreText();
     if (act || !pretty)
@@ -199,17 +196,17 @@ public class XhtmlComposer {
     else
       dst.append(indent + "<" + node.getName() + attributes(node) + ">\r\n");
     if (node.getName() == "head" && node.getElement("meta") == null)
-      dst.append(indent + "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" + (isPretty() ? "\r\n" : ""));
+      dst.append(indent + "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" + (pretty ? "\r\n" : ""));
 
 
     for (XhtmlNode c : node.getChildNodes())
       writeNode(indent + "  ", c);
     if (act)
-      dst.append("</" + node.getName() + ">" + (isPretty() ? "\r\n" : ""));
+      dst.append("</" + node.getName() + ">" + (pretty ? "\r\n" : ""));
     else if (node.getChildNodes().get(node.getChildNodes().size() - 1).getNodeType() == NodeType.Text)
-      dst.append((isPretty() ? "\r\n"+ indent : "")  + "</" + node.getName() + ">" + (isPretty() ? "\r\n" : ""));
+      dst.append((pretty ? "\r\n"+ indent : "")  + "</" + node.getName() + ">" + (pretty ? "\r\n" : ""));
     else
-      dst.append(indent + "</" + node.getName() + ">" + (isPretty() ? "\r\n" : ""));
+      dst.append(indent + "</" + node.getName() + ">" + (pretty ? "\r\n" : ""));
     }
   }
 
@@ -222,7 +219,7 @@ public class XhtmlComposer {
 
   public void compose(IXMLWriter xml, XhtmlNode node) throws IOException  {
     if (node.getNodeType() == NodeType.Comment)
-      xml.comment(node.getContent(), isPretty());
+      xml.comment(node.getContent(), pretty);
     else if (node.getNodeType() == NodeType.Element)
       composeElement(xml, node);
     else if (node.getNodeType() == NodeType.Text)

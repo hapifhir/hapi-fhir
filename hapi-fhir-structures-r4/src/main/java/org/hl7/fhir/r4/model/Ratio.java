@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -220,23 +220,23 @@ public class Ratio extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Ratio))
+        if (!(other_ instanceof Ratio))
           return false;
-        Ratio o = (Ratio) other;
+        Ratio o = (Ratio) other_;
         return compareDeep(numerator, o.numerator, true) && compareDeep(denominator, o.denominator, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Ratio))
+        if (!(other_ instanceof Ratio))
           return false;
-        Ratio o = (Ratio) other;
+        Ratio o = (Ratio) other_;
         return true;
       }
 

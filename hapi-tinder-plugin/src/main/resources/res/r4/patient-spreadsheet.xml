@@ -10,18 +10,18 @@
   <LastAuthor>Eric Haas</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2017-05-15T17:34:27Z</LastSaved>
-  <Version>12.00</Version>
+  <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>13410</WindowHeight>
+  <WindowHeight>12210</WindowHeight>
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>808</TabRatio>
-  <ActiveSheet>7</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1166,7 +1166,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">People have (primary) ways to contact them in some way such as phone, email.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">A Patient may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently and also to help with identification. The address may not go directly to the individual, but may reach another party that is able to proxy for the patient (i.e. home phone, or pet owner's phone)</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A Patient may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently and also to help with identification. The address might not go directly to the individual, but may reach another party that is able to proxy for the patient (i.e. home phone, or pet owner's phone)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">telecom</Data><NamedCell
@@ -1205,7 +1205,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Needed for identification of the individual, in combination with (at least) name and birth date. Gender of individual drives many clinical processes.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">The gender may not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F.  Systems providing decision support or enforcing business rules should ideally do this on the basis of Observations dealing with the specific gender aspect of interest (anatomical, chromosonal, social, etc.)  However, because these observations are infrequently recorded, defaulting to the administrative gender is common practice.  Where such defaulting occurs, rule enforcement should allow for the variation between administrative and biological, chromosonal and other gender aspects.  For example, an alert about a hysterectomy on a male should be handled as a warning or overrideable error, not a &quot;hard&quot; error.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The gender might not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F.  Systems providing decision support or enforcing business rules should ideally do this on the basis of Observations dealing with the specific gender aspect of interest (anatomical, chromosonal, social, etc.)  However, because these observations are infrequently recorded, defaulting to the administrative gender is common practice.  Where such defaulting occurs, rule enforcement should allow for the variation between administrative and biological, chromosonal and other gender aspects.  For example, an alert about a hysterectomy on a male should be handled as a warning or overrideable error, not a &quot;hard&quot; error.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender</Data><NamedCell
@@ -1298,7 +1298,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">The time field is not used in 80% of systems, and is available as a standard extension</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="230.4375">
+   <Row ss:AutoFitHeight="0" ss:Height="228">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.deceased[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1337,7 +1337,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="86.4375" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="85.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.address</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1355,9 +1355,9 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Addresses for the individual</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">An address for the individual</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Addresses for the individual</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">An address for the individual</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">May need to keep track of patient addresses for contacting, billing or reporting requirements and also to help with identification</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1375,7 +1375,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.6875" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="28.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.maritalStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1412,7 +1412,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="216" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="213.75" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.multipleBirth[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1435,7 +1435,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">For disambiguation of multiple-birth children, especially relevant where the care provider doesn't meet the patient, such as labs.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Where the valueInteger is provided, the number is the birth number in the sequence.&#10;E.g. The middle birth in tripplets would be valueInteger=2 and the third born would have valueInteger=3&#10;If a bool value was provided for this tripplets examle, then all 3 patient records would have valueBool=true (the ordering is not indicated).</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Where the valueInteger is provided, the number is the birth number in the sequence.&#10;E.g. The middle birth in triplets would be valueInteger=2 and the third born would have valueInteger=3&#10;If a bool value was provided for this triplets example, then all 3 patient records would have valueBool=true (the ordering is not indicated).</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthInd,  player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthOrderNumber</Data><NamedCell
@@ -1449,7 +1449,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="71.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.photo</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1485,7 +1485,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="115.3125" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="114" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1522,7 +1522,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="71.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.relationship</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1559,7 +1559,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="86.4375" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="85.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.name</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1595,7 +1595,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="100.6875" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="99.75" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.telecom</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1632,7 +1632,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="57" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.address</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1668,7 +1668,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="71.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.gender</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1705,7 +1705,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="71.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.organization</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1742,7 +1742,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="72" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="71.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.contact.period</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1776,7 +1776,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="288">
+   <Row ss:AutoFitHeight="0" ss:Height="285">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.animal</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1815,7 +1815,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="302.4375" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="299.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.animal.species</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1840,7 +1840,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Need to know what kind of animal</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">If the patient is non-human, at least a species SHALL be specified. Species SHALL be a widely recognised taxonomic classification.  It may or may not be Linnaean taxonomy and may or may not be at the level of species. If the level is finer than species&#45;-such as a breed code&#45;-the code system used SHALL allow inference of the species.  (The common example is that the word &quot;Hereford&quot; does not allow inference of the species Bos taurus, because there is a Hereford pig breed, but the SNOMED CT code for &quot;Hereford Cattle Breed&quot; does.) </Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">If the patient is non-human, at least a species SHALL be specified. Species SHALL be a widely recognised taxonomic classification.  It might or might not be Linnaean taxonomy and might or might not be at the level of species. If the level is finer than species&#45;-such as a breed code&#45;-the code system used SHALL allow inference of the species.  (The common example is that the word &quot;Hereford&quot; does not allow inference of the species Bos taurus, because there is a Hereford pig breed, but the SNOMED CT code for &quot;Hereford Cattle Breed&quot; does.) </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">code</Data><NamedCell
@@ -1854,7 +1854,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="129.5625" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="128.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.animal.breed</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1884,7 +1884,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">playedRole[classCode=GEN]/scoper[classCode=ANM, determinerCode=KIND]/code</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">PID-37</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">PID-35 (where more detailed value is present)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">n/a</Data><NamedCell
@@ -1893,7 +1893,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="43.3125" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="42.75" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.animal.genderStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1931,7 +1931,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="129.5625" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="128.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">!Patient.communication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1970,7 +1970,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">Define proficiency and mode as extensions</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="259.3125" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="256.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.communication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1986,9 +1986,9 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">A list of Languages which may be used to communicate with the patient about his or her health</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">A language which may be used to communicate with the patient about his or her health</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Languages which may be used to communicate with the patient about his or her health</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A language which may be used to communicate with the patient about his or her health</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">If a patient does not speak the local language, interpreters may be required, so languages spoken and proficiency is an important things to keep track of both for patient and other persons of interest</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2007,7 +2007,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">Rationale for putting this in the core is based on input from Canada. Other persons on call are from single language countries. Committee felt uncomfortable with leaving any of the 3 optional attributes modeCode, proficiencyLevelCode, or preferenceInd up to extensions. Instead we said that isModifier is &quot;no&quot; on modeCode and preferenceInd.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="129.5625" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="128.25" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.communication.language</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2045,7 +2045,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="158.4375" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="156.75" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">!Patient.communication.mode</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2083,7 +2083,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="86.4375" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="85.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">!Patient.communication.proficiencyLevel</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2121,7 +2121,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="144" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="142.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.communication.preferred</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2158,7 +2158,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="216" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="213.75" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.generalPractitioner</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">careProvider</Data><NamedCell
@@ -2196,7 +2196,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">This has been discussed as to how it relates to the CareTeam, and is desired to be a separate item, just for the Primary Care Provider (Typically a GP)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="144" ss:Hidden="1">
+   <Row ss:AutoFitHeight="0" ss:Height="142.5" ss:Hidden="1">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Patient.managingOrganization</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2257,7 +2257,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">There are multiple usecases: &#10;&#10;* Duplicate patient records due to the clerical errors associated with the difficulties of identifying humans consistently, and * Distribution of patient information across multiple servers</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">There is no assumption that linked patient records have mutual links. &#10;&#10;This element is labelled as a modifier because it may not be the main Patient resource, and the referenced patient should be used instead of this Patient record. This is when the link.type value is 'replaced-by'</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">There is no assumption that linked patient records have mutual links. &#10;&#10;This element is labelled as a modifier because it might not be the main Patient resource, and the referenced patient should be used instead of this Patient record. This is when the link.type value is 'replaced-by'</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">outboundLink</Data><NamedCell
@@ -4089,9 +4089,9 @@
    <FrozenNoSplit/>
    <FilterOn/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>3</TopRowBottomPane>
+   <TopRowBottomPane>27</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>14</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4107,7 +4107,6 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>16</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4768,7 +4767,7 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">Patient.address</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"><Data ss:Type="String">address-city</Data></Cell>
@@ -5067,14 +5066,14 @@
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="131.25"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="125.25"/>
-   <Column ss:StyleID="s111" ss:Width="24.75"/>
-   <Column ss:StyleID="s111" ss:Width="27"/>
-   <Column ss:StyleID="s111" ss:Width="29.25"/>
+   <Column ss:StyleID="s111" ss:Width="25.5"/>
+   <Column ss:StyleID="s111" ss:Width="27.75"/>
+   <Column ss:StyleID="s111" ss:Width="33"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="107.25" ss:Span="2"/>
    <Column ss:Index="9" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="222.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="254.25" ss:Span="1"/>
    <Column ss:Index="12" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="81.75"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="88.5"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="89.25"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s124"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -5134,7 +5133,7 @@
     <Cell ss:StyleID="s118"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Find patient matches using MPI based logic</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">A Master Patient Index ([MPI](http://en.wikipedia.org/wiki/Enterprise_master_patient_index) ) is a service used to manage patient identification in a context where multiple patient databases exist. Healthcare applications and middleware use the MPI to match patients between the databases, and as new patient details are encountered. MPIs are highly specialized applications, often tailored extensively to the institution\'s particular mix of patients. MPIs can also be run on a regional and national basis.\n\nTo ask an MPI to match a patient, clients use the \&quot;$match\&quot; operation, which accepts a patient resource which may be only partially complete. The data provided is interpreted as an MPI input and passed processed by an algorithm of some kind that uses the data to determine the most appropriate matches in the patient set. \n\nNote that different MPI matching algorithms have different required inputs. The generic $match operation does not specify any particular algorithm, nor a minimum set of information that must be provided when asking for an MPI match operation to be performed, but may implementations will have a set of minimum information, which may be declared in their definition of the $match operation by specifying a profile on the resource parameter, indicating which properties are required in the search.\n\nThe patient resource coming into the operation does not have to be complete, nor does it need to pass validation (i.e. Mandatory fields don\'t need to be populated), but it does have to be a valid instance. This is due to the resource being used for reference data to match from, and not being stored.</Data><NamedCell
+    <Cell ss:StyleID="s129"><Data ss:Type="String">A Master Patient Index ([MPI](http://en.wikipedia.org/wiki/Enterprise_master_patient_index) ) is a service used to manage patient identification in a context where multiple patient databases exist. Healthcare applications and middleware use the MPI to match patients between the databases, and as new patient details are encountered. MPIs are highly specialized applications, often tailored extensively to the institution's particular mix of patients. MPIs can also be run on a regional and national basis.&#10;&#10;To ask an MPI to match a patient, clients use the &quot;$match&quot; operation, which accepts a patient resource which may be only partially complete. The data provided is interpreted as an MPI input and passed processed by an algorithm of some kind that uses the data to determine the most appropriate matches in the patient set.&#10;&#10;Note that different MPI matching algorithms have different required inputs. The generic $match operation does not specify any particular algorithm, nor a minimum set of information that must be provided when asking for an MPI match operation to be performed, but may implementations will have a set of minimum information, which may be declared in their definition of the $match operation by specifying a profile on the resource parameter, indicating which properties are required in the search.&#10;&#10;The patient resource coming into the operation does not have to be complete, nor does it need to pass validation (i.e. Mandatory fields don't need to be populated), but it does have to be a valid instance. This is due to the resource being used for reference data to match from, and not being stored.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="String">The response from an &quot;mpi&quot; query is a bundle containing patient records, ordered from most likely to least likely. If there are no patient matches, the MPI SHALL return an empty search set with no error, but may include an operation outcome with further advice regarding patient selection. All patient records SHALL have a search score from 0 to 1, where 1 is the most certain match, along with an extension &quot;[match-grade](extension-match-grade.html)&quot; that indicates the MPI's position on the match quality.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5157,7 +5156,7 @@
     <Cell ss:StyleID="s118"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">A (Patient) resource (complete or fragment) that contains property values to match in the search</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">Use this to provide an entire set of patient details for the MPI to match against (e.g. POST a patient record to Patient/$match). If a patient record is not provided, then one or more of the other parameters must be provided</Data><NamedCell
+    <Cell ss:StyleID="s129"><Data ss:Type="String">Use this to provide an entire set of patient details for the MPI to match against (e.g. POST a patient record to Patient/$match).</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s130"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
@@ -5445,9 +5444,9 @@
     <Cell ss:StyleID="s115"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Fetch Patient Record</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s134"><Data ss:Type="String">This operation is used to return all the information related to the patient described in the resource on which this operation is invoked. The response is a bundle of type &quot;searchset&quot;. At a minimum, the patient resource itself is returned, along with any other resources that the server has that are related to the patient, and that are available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, medications, locations, organizations etc. The principle intended use for this operation is to provide a patient with access to their entire record (e.g. &quot;Blue Button&quot;).  The server SHOULD return at least all resources that it has that are in the patient compartment for the identified patient, and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements as defined in [DAF](http://hl7.org/fhir/us/daf). Other applicable implementation guides may make additional rules about how much information that is returned</Data><NamedCell
+    <Cell ss:StyleID="s134"><Data ss:Type="String">This operation is used to return all the information related to one or mores patient described in the resource or context on which this operation is invoked. The response is a bundle of type &quot;searchset&quot;. At a minimum, the patient resource(s) itself is returned, along with any other resources that the server has that are related to the patient(s), and that are available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, medications, locations, organizations etc. The intended use for this operation is to provide a patient with access to their entire record (e.g. &quot;Blue Button&quot;), or for bulk data download.  The server SHOULD return at least all resources that it has that are in the patient compartment for the identified patient(s), and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements as defined in [DAF](http://hl7.org/fhir/us/daf). Other applicable implementation guides may make additional rules about how much information that is returned</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">The key differences between this operation and simply searching the patient compartment are:  &#10;&#10;* unless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging) &#10;* the server is responsible for determining what resources to return as included resources (rather than the client specifying which ones). This frees the client from needing to determine what it could or should ask for&#10;&#10;It is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a single patient, or determine whether the context has the rights to the nominated patient, if there is one. If there is no nominated patient (e.g. the operation is invoked at the system level) and the context is not associated with a single patient record, then the server should return an error. Specifying the relationship between the context, a user and patient records is outside the scope of this specification.</Data><NamedCell
+    <Cell ss:StyleID="s135"><Data ss:Type="String">The key differences between this operation and simply searching the patient compartment are:  &#10;&#10;* unless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging) &#10;* the server is responsible for determining what resources to return as included resources (rather than the client specifying which ones). This frees the client from needing to determine what it could or should ask for&#10;&#10;It is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a single patient, or determine whether the context has the rights to the nominated patient, if there is one, or can determine an appropriate list of patients to provide data for from the context of the request. If there is no nominated patient (e.g. the operation is invoked at the system level) and the context is not associated with a single patient record, then the server may choose to return an error. Specifying the relationship between the context, a user and patient records is outside the scope of this specification.&#10;&#10;When this operation is used to access multiple patient records at once (GET /Patient/$everything), the actual list of patients is all patients that the user associated with the request has access to. This may be all patients in the family that the patient has access to, or it may be all patients that a care provider has access to. In the second case, this could be a lot of patient; servers may choose to require that the such requests are made [asynchronously](http.html#async), and associated with [bulk data formats](formats.html#bulk).</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$everything-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$everything-response.txt</Data></Cell>
@@ -5929,10 +5928,11 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5946,11 +5946,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>15</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>10</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6925,7 +6925,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7519,6 +7518,7 @@
    <Column ss:Index="6" ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="245.25"/>
    <Column ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
    <Column ss:Index="9" ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="242.25"/>
+   <Column ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="136.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -7568,7 +7568,7 @@
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s143"/>
-    <Cell><Data ss:Type="String">vervangen</Data></Cell>
+    <Cell><Data ss:Type="String">Vervangen door</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s144"><Data ss:Type="String">replaces</Data></Cell>
@@ -7580,6 +7580,7 @@
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s145"/>
+    <Cell><Data ss:Type="String">Vervangt</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="90">
     <Cell ss:StyleID="s144"><Data ss:Type="String">refer</Data></Cell>
@@ -7591,7 +7592,7 @@
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s145"/>
-    <Cell><Data ss:Type="String">verwijzing</Data></Cell>
+    <Cell><Data ss:Type="String">Verwijzing</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
     <Cell ss:StyleID="s144"><Data ss:Type="String">seealso</Data></Cell>
@@ -7603,7 +7604,7 @@
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s145"/>
-    <Cell><Data ss:Type="String">zie ook</Data></Cell>
+    <Cell><Data ss:Type="String">Zie ook</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"/>
@@ -8130,7 +8131,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>4</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -8138,14 +8139,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>9</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

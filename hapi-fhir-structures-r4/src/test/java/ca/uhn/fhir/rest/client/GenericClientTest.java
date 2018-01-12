@@ -912,11 +912,11 @@ public class GenericClientTest {
 
     Bundle response = client.search()
         .forResource(Patient.class)
-        .where(Encounter.LENGTH.exactly().number(123))
+        .where(Encounter.LENGTH.exactly().number(123).andNoUnits())
         .returnBundle(Bundle.class)
         .execute();
 
-    assertEquals("http://example.com/fhir/Patient?length=123", capt.getValue().getURI().toString());
+    assertEquals("http://example.com/fhir/Patient?length=123%7C%7C", capt.getValue().getURI().toString());
 
   }
 

@@ -1573,7 +1573,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     return !p.contains(".");
   }
 
-  public XhtmlNode generateExtensionTable(String defFile, StructureDefinition ed, String imageFolder, boolean inlineGraphics, boolean full, String corePath, String imagePath) throws IOException, FHIRException {
+  public XhtmlNode generateExtensionTable(String defFile, StructureDefinition ed, String imageFolder, boolean inlineGraphics, boolean full, String corePath, String imagePath, Set<String> outputTracker) throws IOException, FHIRException {
     HierarchicalTableGenerator gen = new HierarchicalTableGenerator(imageFolder, inlineGraphics);
     gen.setTranslator(getTranslator());
     TableModel model = gen.initNormalTable(corePath, false);
@@ -1653,7 +1653,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     r.getCells().add(c);
     
     try {
-      return gen.generate(model, corePath, 0);
+      return gen.generate(model, corePath, 0, outputTracker);
   	} catch (org.hl7.fhir.exceptions.FHIRException e) {
   		throw new FHIRException(e.getMessage(), e);
   	}
@@ -1833,7 +1833,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     case BUNDLED : return "b";
     case CONTAINED : return "c";
     case REFERENCED: return "r";
-    default: return "?";
+	 default: return "?";
     }
   }
 
@@ -1941,7 +1941,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     return piece;
   }
 
-  public XhtmlNode generateTable(String defFile, StructureDefinition profile, boolean diff, String imageFolder, boolean inlineGraphics, String profileBaseFileName, boolean snapshot, String corePath, String imagePath, boolean logicalModel, boolean allInvariants) throws IOException, FHIRException {
+  public XhtmlNode generateTable(String defFile, StructureDefinition profile, boolean diff, String imageFolder, boolean inlineGraphics, String profileBaseFileName, boolean snapshot, String corePath, String imagePath, boolean logicalModel, boolean allInvariants, Set<String> outputTracker) throws IOException, FHIRException {
     assert(diff != snapshot);// check it's ok to get rid of one of these
     HierarchicalTableGenerator gen = new HierarchicalTableGenerator(imageFolder, inlineGraphics);
     gen.setTranslator(getTranslator());
@@ -1951,14 +1951,14 @@ public class ProfileUtilities extends TranslatingUtilities {
     profiles.add(profile);
     genElement(defFile == null ? null : defFile+"#", gen, model.getRows(), list.get(0), list, profiles, diff, profileBaseFileName, null, snapshot, corePath, imagePath, true, logicalModel, profile.getDerivation() == TypeDerivationRule.CONSTRAINT && usesMustSupport(list), allInvariants);
     try {
-      return gen.generate(model, imagePath, 0);
+      return gen.generate(model, imagePath, 0, outputTracker);
   	} catch (org.hl7.fhir.exceptions.FHIRException e) {
   		throw new FHIRException(e.getMessage(), e);
   	}
   }
 
 
-  public XhtmlNode generateGrid(String defFile, StructureDefinition profile, String imageFolder, boolean inlineGraphics, String profileBaseFileName, String corePath, String imagePath) throws IOException, FHIRException {
+  public XhtmlNode generateGrid(String defFile, StructureDefinition profile, String imageFolder, boolean inlineGraphics, String profileBaseFileName, String corePath, String imagePath, Set<String> outputTracker) throws IOException, FHIRException {
     HierarchicalTableGenerator gen = new HierarchicalTableGenerator(imageFolder, inlineGraphics);
     gen.setTranslator(getTranslator());
     TableModel model = gen.initGridTable(corePath);
@@ -1967,7 +1967,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     profiles.add(profile);
     genGridElement(defFile == null ? null : defFile+"#", gen, model.getRows(), list.get(0), list, profiles, true, profileBaseFileName, null, corePath, imagePath, true, profile.getDerivation() == TypeDerivationRule.CONSTRAINT && usesMustSupport(list));
     try {
-      return gen.generate(model, imagePath, 1);
+      return gen.generate(model, imagePath, 1, outputTracker);
     } catch (org.hl7.fhir.exceptions.FHIRException e) {
       throw new FHIRException(e.getMessage(), e);
     }
@@ -2031,6 +2031,14 @@ public class ProfileUtilities extends TranslatingUtilities {
       row.getCells().add(left);
       Cell gc = gen.new Cell();
       row.getCells().add(gc);
+      if (element != null && element.getIsModifier())
+        checkForNoChange(element.getIsModifierElement(), gc.addStyledText(translate("sd.table", "This element is a modifier element"), "?!", null, null, null, false));
+      if (element != null && element.getMustSupport())
+        checkForNoChange(element.getMustSupportElement(), gc.addStyledText(translate("sd.table", "This element must be supported"), "S", "white", "red", null, false));
+      if (element != null && element.getIsSummary())
+        checkForNoChange(element.getIsSummaryElement(), gc.addStyledText(translate("sd.table", "This element is included in summaries"), "Σ", null, null, null, false));
+      if (element != null && (!element.getConstraint().isEmpty() || !element.getCondition().isEmpty()))
+        gc.addStyledText(translate("sd.table", "This element has or is affected by some invariants"), "I", null, null, null, false);
 
       ExtensionContext extDefn = null;
       if (ext) {
@@ -3427,7 +3435,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     
   }
 
-  public XhtmlNode generateSpanningTable(StructureDefinition profile, String imageFolder, boolean onlyConstraints, String constraintPrefix) throws IOException, FHIRException {
+  public XhtmlNode generateSpanningTable(StructureDefinition profile, String imageFolder, boolean onlyConstraints, String constraintPrefix, Set<String> outputTracker) throws IOException, FHIRException {
     HierarchicalTableGenerator gen = new HierarchicalTableGenerator(imageFolder, false);
     gen.setTranslator(getTranslator());
     TableModel model = initSpanningTable(gen, "", false);
@@ -3435,7 +3443,7 @@ public class ProfileUtilities extends TranslatingUtilities {
     SpanEntry span = buildSpanningTable("(focus)", "", profile, processed, onlyConstraints, constraintPrefix);
     
     genSpanEntry(gen, model.getRows(), span);
-    return gen.generate(model, "", 0);
+    return gen.generate(model, "", 0, outputTracker);
   }
 
   private SpanEntry buildSpanningTable(String name, String cardinality, StructureDefinition profile, Set<String> processed, boolean onlyConstraints, String constraintPrefix) throws IOException {

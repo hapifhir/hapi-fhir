@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -716,24 +716,24 @@ public class RelatedArtifact extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RelatedArtifact))
+        if (!(other_ instanceof RelatedArtifact))
           return false;
-        RelatedArtifact o = (RelatedArtifact) other;
+        RelatedArtifact o = (RelatedArtifact) other_;
         return compareDeep(type, o.type, true) && compareDeep(display, o.display, true) && compareDeep(citation, o.citation, true)
            && compareDeep(url, o.url, true) && compareDeep(document, o.document, true) && compareDeep(resource, o.resource, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RelatedArtifact))
+        if (!(other_ instanceof RelatedArtifact))
           return false;
-        RelatedArtifact o = (RelatedArtifact) other;
+        RelatedArtifact o = (RelatedArtifact) other_;
         return compareValues(type, o.type, true) && compareValues(display, o.display, true) && compareValues(citation, o.citation, true)
            && compareValues(url, o.url, true);
       }

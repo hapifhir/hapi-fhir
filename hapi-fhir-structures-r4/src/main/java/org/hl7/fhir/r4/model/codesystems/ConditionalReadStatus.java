@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConditionalReadStatus {
 
         /**
-         * No support for conditional deletes.
+         * No support for conditional reads
          */
         NOTSUPPORTED, 
         /**
@@ -83,7 +83,7 @@ public enum ConditionalReadStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSUPPORTED: return "No support for conditional deletes.";
+            case NOTSUPPORTED: return "No support for conditional reads";
             case MODIFIEDSINCE: return "Conditional reads are supported, but only with the If-Modified-Since HTTP Header.";
             case NOTMATCH: return "Conditional reads are supported, but only with the If-None-Match HTTP Header.";
             case FULLSUPPORT: return "Conditional reads are supported, with both If-Modified-Since and If-None-Match HTTP Headers.";

@@ -595,6 +595,36 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Meta");
 	}
 		
+	
+  public MarketingStatus castToMarketingStatus(Base b) throws FHIRException {
+    if (b instanceof MarketingStatus)
+      return (MarketingStatus) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a MarketingStatus");
+  }
+    
+  public ProductShelfLife castToProductShelfLife(Base b) throws FHIRException {
+    if (b instanceof ProductShelfLife)
+      return (ProductShelfLife) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ProductShelfLife");
+  }
+    
+  public ProdCharacteristic castToProdCharacteristic(Base b) throws FHIRException {
+    if (b instanceof ProdCharacteristic)
+      return (ProdCharacteristic) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ProdCharacteristic");
+  }
+    
+  
+  public SubstanceAmount castToSubstanceAmount(Base b) throws FHIRException {
+    if (b instanceof SubstanceAmount)
+      return (SubstanceAmount) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a SubstanceAmount");
+  }
+    
 	public Extension castToExtension(Base b) throws FHIRException {
 		if (b instanceof Extension)
 			return (Extension) b;

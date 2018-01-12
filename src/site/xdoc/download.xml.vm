@@ -134,7 +134,24 @@
 						<td style="background: #EEB;">Draft 1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">Draft 3.1.0-12370</td>
+						</tr>
+					<tr>
+						<td>HAPI FHIR 3.1.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">Draft 3.1.0-12370</td>
 					</tr>
+					<tr>
+						<td>HAPI FHIR 3.2.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">Draft 3.2.0-12917</td>
+					</tr>
+
 				</tbody>
 			</table>
 

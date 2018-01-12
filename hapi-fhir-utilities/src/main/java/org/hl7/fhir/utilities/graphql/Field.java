@@ -52,4 +52,19 @@ public class Field {
     }
     return null;
   }
+
+
+  public boolean hasDirective(String name) {
+    for (Directive d : directives)
+      if (d.getName().equals(name))
+        return true;
+    return false;
+  }
+
+  public Directive directive(String name) {
+    for (Directive d : directives)
+      if (d.getName().equals(name))
+        return d;
+    return null;
+  }
 }

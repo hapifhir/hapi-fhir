@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -47,6 +47,8 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return TestscriptOperationCodes.UPDATE;
     if ("updateCreate".equals(codeString))
       return TestscriptOperationCodes.UPDATECREATE;
+    if ("patch".equals(codeString))
+      return TestscriptOperationCodes.PATCH;
     if ("delete".equals(codeString))
       return TestscriptOperationCodes.DELETE;
     if ("deleteCondSingle".equals(codeString))
@@ -67,8 +69,6 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return TestscriptOperationCodes.CAPABILITIES;
     if ("apply".equals(codeString))
       return TestscriptOperationCodes.APPLY;
-    if ("cancel".equals(codeString))
-      return TestscriptOperationCodes.CANCEL;
     if ("closure".equals(codeString))
       return TestscriptOperationCodes.CLOSURE;
     if ("compose".equals(codeString))
@@ -87,14 +87,14 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return TestscriptOperationCodes.EVERYTHING;
     if ("expand".equals(codeString))
       return TestscriptOperationCodes.EXPAND;
-    if ("fail".equals(codeString))
-      return TestscriptOperationCodes.FAIL;
     if ("find".equals(codeString))
       return TestscriptOperationCodes.FIND;
-    if ("finish".equals(codeString))
-      return TestscriptOperationCodes.FINISH;
+    if ("graphql".equals(codeString))
+      return TestscriptOperationCodes.GRAPHQL;
     if ("implements".equals(codeString))
       return TestscriptOperationCodes.IMPLEMENTS;
+    if ("lastn".equals(codeString))
+      return TestscriptOperationCodes.LASTN;
     if ("lookup".equals(codeString))
       return TestscriptOperationCodes.LOOKUP;
     if ("match".equals(codeString))
@@ -115,28 +115,12 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return TestscriptOperationCodes.PROCESSMESSAGE;
     if ("questionnaire".equals(codeString))
       return TestscriptOperationCodes.QUESTIONNAIRE;
-    if ("release".equals(codeString))
-      return TestscriptOperationCodes.RELEASE;
-    if ("reserve".equals(codeString))
-      return TestscriptOperationCodes.RESERVE;
-    if ("resume".equals(codeString))
-      return TestscriptOperationCodes.RESUME;
-    if ("set-input".equals(codeString))
-      return TestscriptOperationCodes.SETINPUT;
-    if ("set-output".equals(codeString))
-      return TestscriptOperationCodes.SETOUTPUT;
-    if ("start".equals(codeString))
-      return TestscriptOperationCodes.START;
     if ("stats".equals(codeString))
       return TestscriptOperationCodes.STATS;
-    if ("stop".equals(codeString))
-      return TestscriptOperationCodes.STOP;
     if ("subset".equals(codeString))
       return TestscriptOperationCodes.SUBSET;
     if ("subsumes".equals(codeString))
       return TestscriptOperationCodes.SUBSUMES;
-    if ("suspend".equals(codeString))
-      return TestscriptOperationCodes.SUSPEND;
     if ("transform".equals(codeString))
       return TestscriptOperationCodes.TRANSFORM;
     if ("translate".equals(codeString))
@@ -157,6 +141,8 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return "update";
     if (code == TestscriptOperationCodes.UPDATECREATE)
       return "updateCreate";
+    if (code == TestscriptOperationCodes.PATCH)
+      return "patch";
     if (code == TestscriptOperationCodes.DELETE)
       return "delete";
     if (code == TestscriptOperationCodes.DELETECONDSINGLE)
@@ -177,8 +163,6 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return "capabilities";
     if (code == TestscriptOperationCodes.APPLY)
       return "apply";
-    if (code == TestscriptOperationCodes.CANCEL)
-      return "cancel";
     if (code == TestscriptOperationCodes.CLOSURE)
       return "closure";
     if (code == TestscriptOperationCodes.COMPOSE)
@@ -197,14 +181,14 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return "everything";
     if (code == TestscriptOperationCodes.EXPAND)
       return "expand";
-    if (code == TestscriptOperationCodes.FAIL)
-      return "fail";
     if (code == TestscriptOperationCodes.FIND)
       return "find";
-    if (code == TestscriptOperationCodes.FINISH)
-      return "finish";
+    if (code == TestscriptOperationCodes.GRAPHQL)
+      return "graphql";
     if (code == TestscriptOperationCodes.IMPLEMENTS)
       return "implements";
+    if (code == TestscriptOperationCodes.LASTN)
+      return "lastn";
     if (code == TestscriptOperationCodes.LOOKUP)
       return "lookup";
     if (code == TestscriptOperationCodes.MATCH)
@@ -225,28 +209,12 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return "process-message";
     if (code == TestscriptOperationCodes.QUESTIONNAIRE)
       return "questionnaire";
-    if (code == TestscriptOperationCodes.RELEASE)
-      return "release";
-    if (code == TestscriptOperationCodes.RESERVE)
-      return "reserve";
-    if (code == TestscriptOperationCodes.RESUME)
-      return "resume";
-    if (code == TestscriptOperationCodes.SETINPUT)
-      return "set-input";
-    if (code == TestscriptOperationCodes.SETOUTPUT)
-      return "set-output";
-    if (code == TestscriptOperationCodes.START)
-      return "start";
     if (code == TestscriptOperationCodes.STATS)
       return "stats";
-    if (code == TestscriptOperationCodes.STOP)
-      return "stop";
     if (code == TestscriptOperationCodes.SUBSET)
       return "subset";
     if (code == TestscriptOperationCodes.SUBSUMES)
       return "subsumes";
-    if (code == TestscriptOperationCodes.SUSPEND)
-      return "suspend";
     if (code == TestscriptOperationCodes.TRANSFORM)
       return "transform";
     if (code == TestscriptOperationCodes.TRANSLATE)
