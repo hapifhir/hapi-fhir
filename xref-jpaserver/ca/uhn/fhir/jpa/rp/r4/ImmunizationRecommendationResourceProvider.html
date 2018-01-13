@@ -71,15 +71,15 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  			@OptionalParam(name=<span class="jxr_string">"_language"</span>)
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  			StringAndListParam the_language, 
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>    
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			@Description(shortDefinition=<span class="jxr_string">"Date recommendation created"</span>)
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			@Description(shortDefinition=<span class="jxr_string">"Date recommendation(s) created"</span>)
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"date"</span>)
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			DateRangeParam theDate, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Recommended dose number"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Recommended dose number within series"</span>)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"dose-number"</span>)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			NumberAndListParam theDose_number, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Dose number within sequence"</span>)
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Recommended number of doses for immunity"</span>)
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"dose-sequence"</span>)
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  			NumberAndListParam theDose_sequence, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
@@ -95,7 +95,7 @@
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"Vaccine administration status"</span>)
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"Vaccine recommendation status"</span>)
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"status"</span>)
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
@@ -107,7 +107,7 @@
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"target-disease"</span>)
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			TokenAndListParam theTarget_disease, 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>   
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Vaccine recommendation applies to"</span>)
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Vaccine  or vaccine group recommendation applies to"</span>)
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"vaccine-type"</span>)
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			TokenAndListParam theVaccine_type, 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 
@@ -170,7 +170,7 @@
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

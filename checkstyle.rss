@@ -23,11 +23,11 @@ under the License.
     <link>http://jamesagnew.github.io/hapi-fhir/</link>
     <description>HAPI FHIR - Core Library - Checkstyle report</description>
     <language>en-us</language>
-    <copyright>&#169;2014 - 2017 University Health Network</copyright>
+    <copyright>&#169;2014 - 2018 University Health Network</copyright>
     <item>
       <title>File: 425,
              Errors: 0,
-             Warnings: 1303,
+             Warnings: 1311,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -2096,7 +2096,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  16
                 </td>
                 <td>
                   0
@@ -2432,7 +2432,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  13
+                  14
                 </td>
                 <td>
                   0
@@ -3412,7 +3412,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  2
                 </td>
                 <td>
                   0

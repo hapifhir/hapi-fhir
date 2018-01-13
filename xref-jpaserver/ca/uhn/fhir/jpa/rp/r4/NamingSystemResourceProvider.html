@@ -107,95 +107,90 @@
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"publisher"</span>)
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			StringAndListParam thePublisher, 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>   
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Use this instead"</span>)
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"replaced-by"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			ReferenceAndListParam theReplaced_by, 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Who maintains system namespace?"</span>)
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"responsible"</span>)
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			StringAndListParam theResponsible, 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>   
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Who maintains system namespace?"</span>)
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"responsible"</span>)
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			StringAndListParam theResponsible, 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"The current status of the naming system"</span>)
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>   
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"The current status of the naming system"</span>)
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			TokenAndListParam theStatus, 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"Contact details for individual or organization"</span>)
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"telecom"</span>)
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			TokenAndListParam theTelecom, 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>   
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"Contact details for individual or organization"</span>)
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"telecom"</span>)
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			TokenAndListParam theTelecom, 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"e.g. driver,  provider,  patient, bank etc."</span>)
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"type"</span>)
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			TokenAndListParam theType, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>   
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"e.g. driver,  provider,  patient, bank etc."</span>)
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			@OptionalParam(name=<span class="jxr_string">"type"</span>)
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			TokenAndListParam theType, 
-<a class="jxr_linenumber" name="L121" href="#L121">121</a>   
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			@Description(shortDefinition=<span class="jxr_string">"The unique identifier"</span>)
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			@OptionalParam(name=<span class="jxr_string">"value"</span>)
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			StringAndListParam theValue, 
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			@RawParam
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			Map&lt;String, List&lt;String&gt;&gt; theAdditionalRawParams,
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 			@IncludeParam(reverse=<strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			Set&lt;Include&gt; theRevIncludes,
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			@Description(shortDefinition=<span class="jxr_string">"Only return resources which were last updated as specified by the given range"</span>)
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			@OptionalParam(name=<span class="jxr_string">"_lastUpdated"</span>)
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			DateRangeParam theLastUpdated, 
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 					<span class="jxr_string">"NamingSystem:replaced-by"</span> 					, <span class="jxr_string">"*"</span>
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			}) 
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			Set&lt;Include&gt; theIncludes,
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			@Sort 
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			SortSpec theSort,
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			@ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Count
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 			Integer theCount
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 	) {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 		startRequest(theServletRequest);
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_CONTENT, theFtContent);
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TEXT, theFtText);
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TAG, theSearchForTag);
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_SECURITY, theSearchForSecurity);
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_PROFILE, theSearchForProfile);
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"_has"</span>, theHas);
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"contact"</span>, theContact);
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"id-type"</span>, theId_type);
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"jurisdiction"</span>, theJurisdiction);
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.add(<span class="jxr_string">"kind"</span>, theKind);
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.add(<span class="jxr_string">"name"</span>, theName);
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			paramMap.add(<span class="jxr_string">"period"</span>, thePeriod);
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			paramMap.add(<span class="jxr_string">"publisher"</span>, thePublisher);
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			paramMap.add(<span class="jxr_string">"replaced-by"</span>, theReplaced_by);
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			paramMap.add(<span class="jxr_string">"responsible"</span>, theResponsible);
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			paramMap.add(<span class="jxr_string">"telecom"</span>, theTelecom);
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			paramMap.add(<span class="jxr_string">"value"</span>, theValue);
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 			paramMap.setRevIncludes(theRevIncludes);
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			paramMap.setLastUpdated(theLastUpdated);
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			paramMap.setIncludes(theIncludes);
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			paramMap.setSort(theSort);
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			paramMap.setCount(theCount);
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails, theServletResponse);
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			endRequest(theServletRequest);
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 		}
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	}
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"The unique identifier"</span>)
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			@OptionalParam(name=<span class="jxr_string">"value"</span>)
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			StringAndListParam theValue, 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			@RawParam
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			Map&lt;String, List&lt;String&gt;&gt; theAdditionalRawParams,
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			@IncludeParam(reverse=<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			Set&lt;Include&gt; theRevIncludes,
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			@Description(shortDefinition=<span class="jxr_string">"Only return resources which were last updated as specified by the given range"</span>)
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			@OptionalParam(name=<span class="jxr_string">"_lastUpdated"</span>)
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 			DateRangeParam theLastUpdated, 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			@IncludeParam(allow= {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 				<span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			}) 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			Set&lt;Include&gt; theIncludes,
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			@Sort 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			SortSpec theSort,
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Count
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			Integer theCount
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	) {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		startRequest(theServletRequest);
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_CONTENT, theFtContent);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TEXT, theFtText);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TAG, theSearchForTag);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_SECURITY, theSearchForSecurity);
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_PROFILE, theSearchForProfile);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(<span class="jxr_string">"_has"</span>, theHas);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"contact"</span>, theContact);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"id-type"</span>, theId_type);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"jurisdiction"</span>, theJurisdiction);
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"kind"</span>, theKind);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"name"</span>, theName);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"period"</span>, thePeriod);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"publisher"</span>, thePublisher);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.add(<span class="jxr_string">"responsible"</span>, theResponsible);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			paramMap.add(<span class="jxr_string">"telecom"</span>, theTelecom);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			paramMap.add(<span class="jxr_string">"value"</span>, theValue);
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			paramMap.setRevIncludes(theRevIncludes);
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			paramMap.setLastUpdated(theLastUpdated);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			paramMap.setIncludes(theIncludes);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 			paramMap.setSort(theSort);
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			paramMap.setCount(theCount);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails, theServletResponse);
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			endRequest(theServletRequest);
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		}
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 	}
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -95,13 +95,13 @@
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"The ProcedureRequest that initiated this encounter"</span>)
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"The ServiceRequest that initiated this encounter"</span>)
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"incomingreferral"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ReferenceAndListParam theIncomingreferral, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Length of encounter in days"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"length"</span>)
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			NumberAndListParam theLength, 
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			QuantityAndListParam theLength, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Location the encounter takes place"</span>)
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"location"</span>, targetTypes={  } )
@@ -123,7 +123,7 @@
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"participant-type"</span>)
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			TokenAndListParam theParticipant_type, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>   
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"The patient ro group present at the encounter"</span>)
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"The patient or group present at the encounter"</span>)
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L121" href="#L121">121</a>   
@@ -135,7 +135,7 @@
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 			@OptionalParam(name=<span class="jxr_string">"reason"</span>)
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 			TokenAndListParam theReason, 
 <a class="jxr_linenumber" name="L129" href="#L129">129</a>   
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			@Description(shortDefinition=<span class="jxr_string">"The custodian organization of this Encounter record"</span>)
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			@Description(shortDefinition=<span class="jxr_string">"The organization (facility) responsible for this encounter"</span>)
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 			@OptionalParam(name=<span class="jxr_string">"service-provider"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 			ReferenceAndListParam theService_provider, 
 <a class="jxr_linenumber" name="L133" href="#L133">133</a>   
@@ -147,7 +147,7 @@
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L141" href="#L141">141</a>   
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			@Description(shortDefinition=<span class="jxr_string">"The patient ro group present at the encounter"</span>)
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			@Description(shortDefinition=<span class="jxr_string">"The patient or group present at the encounter"</span>)
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 			@OptionalParam(name=<span class="jxr_string">"subject"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 			ReferenceAndListParam theSubject, 
 <a class="jxr_linenumber" name="L145" href="#L145">145</a>   
@@ -225,7 +225,7 @@
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

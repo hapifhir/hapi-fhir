@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2018 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -89,48 +89,50 @@
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		b.append(getParamName(), obj.getParamName());
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		b.append(getResource(), obj.getResource());
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		b.append(getValue(), obj.getValue());
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<strong class="jxr_keyword">return</strong> b.isEquals();
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	}
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	@Override
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">protected</strong> Long getId() {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		<strong class="jxr_keyword">return</strong> myId;
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	}
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	<strong class="jxr_keyword">public</strong> BigDecimal getValue() {
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">return</strong> myValue;
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	}
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(BigDecimal theValue) {
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		myValue = theValue;
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	}
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	@Override
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		HashCodeBuilder b = <strong class="jxr_keyword">new</strong> HashCodeBuilder();
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		b.append(getParamName());
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		b.append(getResource());
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		b.append(getValue());
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<strong class="jxr_keyword">return</strong> b.toHashCode();
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	}
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	@Override
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	<strong class="jxr_keyword">public</strong> IQueryParameterType toQueryParameterType() {
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> NumberParam(myValue.toPlainString());
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	@Override
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 		ToStringBuilder b = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		b.append(<span class="jxr_string">"paramName"</span>, getParamName());
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		b.append(<span class="jxr_string">"resourceId"</span>, getResource().getId()); <em class="jxr_comment">// TODO: add a field so we don't need to resolve this</em>
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		b.append(<span class="jxr_string">"value"</span>, getValue());
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		<strong class="jxr_keyword">return</strong> b.build();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> }
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		b.append(isMissing(), obj.isMissing());
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">return</strong> b.isEquals();
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	}
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	@Override
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">protected</strong> Long getId() {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		<strong class="jxr_keyword">return</strong> myId;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	}
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	<strong class="jxr_keyword">public</strong> BigDecimal getValue() {
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">return</strong> myValue;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(BigDecimal theValue) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		myValue = theValue;
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	}
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	@Override
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		HashCodeBuilder b = <strong class="jxr_keyword">new</strong> HashCodeBuilder();
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		b.append(getParamName());
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		b.append(getResource());
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		b.append(getValue());
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		b.append(isMissing());
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">return</strong> b.toHashCode();
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	}
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	@Override
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	<strong class="jxr_keyword">public</strong> IQueryParameterType toQueryParameterType() {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> NumberParam(myValue.toPlainString());
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	}
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	@Override
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		ToStringBuilder b = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		b.append(<span class="jxr_string">"paramName"</span>, getParamName());
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		b.append(<span class="jxr_string">"resourceId"</span>, getResource().getId()); <em class="jxr_comment">// TODO: add a field so we don't need to resolve this</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		b.append(<span class="jxr_string">"value"</span>, getValue());
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">return</strong> b.build();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	}
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

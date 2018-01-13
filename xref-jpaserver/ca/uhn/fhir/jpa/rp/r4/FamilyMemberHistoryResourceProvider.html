@@ -79,17 +79,17 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"date"</span>)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			DateRangeParam theDate, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Instantiates protocol or definition"</span>)
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"definition"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theDefinition, 
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"A search by a gender code of a family member"</span>)
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"gender"</span>)
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			TokenAndListParam theGender, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"A search by a gender code of a family member"</span>)
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"gender"</span>)
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			TokenAndListParam theGender, 
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"A search by a record identifier"</span>)
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>    
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"A search by a record identifier"</span>)
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			TokenAndListParam theIdentifier, 
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"Instantiates protocol or definition"</span>)
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"instantiates"</span>)
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			UriAndListParam theInstantiates, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"The identity of a subject to list family member history items for"</span>)
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
@@ -113,7 +113,7 @@
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 					<span class="jxr_string">"FamilyMemberHistory:definition"</span> , 					<span class="jxr_string">"FamilyMemberHistory:patient"</span> , 						<span class="jxr_string">"FamilyMemberHistory:definition"</span> , 					<span class="jxr_string">"FamilyMemberHistory:patient"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 					<span class="jxr_string">"FamilyMemberHistory:patient"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 			}) 
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			
@@ -136,9 +136,9 @@
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 			paramMap.add(<span class="jxr_string">"code"</span>, theCode);
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			paramMap.add(<span class="jxr_string">"definition"</span>, theDefinition);
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			paramMap.add(<span class="jxr_string">"gender"</span>, theGender);
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			paramMap.add(<span class="jxr_string">"gender"</span>, theGender);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			paramMap.add(<span class="jxr_string">"instantiates"</span>, theInstantiates);
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 			paramMap.add(<span class="jxr_string">"patient"</span>, thePatient);
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			paramMap.add(<span class="jxr_string">"relationship"</span>, theRelationship);
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
@@ -160,7 +160,7 @@
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

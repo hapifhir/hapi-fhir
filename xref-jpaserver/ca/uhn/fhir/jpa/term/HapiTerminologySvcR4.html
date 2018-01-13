@@ -53,7 +53,7 @@
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_comment"> * Copyright (C) 2014 - 2018 University Health Network</em>
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -333,7 +333,7 @@
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> 		cs.setUrl(theSystem);
 <a class="jxr_linenumber" name="L326" href="#L326">326</a> 		cs.setContent(CodeSystemContentMode.NOTPRESENT);
 <a class="jxr_linenumber" name="L327" href="#L327">327</a> 
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, <span class="jxr_string">"CodeSystem?url="</span> + UrlUtil.escape(theSystem), theRequestDetails);
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, <span class="jxr_string">"CodeSystem?url="</span> + UrlUtil.escapeUrlParam(theSystem), theRequestDetails);
 <a class="jxr_linenumber" name="L329" href="#L329">329</a> 		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
 <a class="jxr_linenumber" name="L330" href="#L330">330</a> 		<strong class="jxr_keyword">if</strong> (createOutcome.getCreated() != Boolean.TRUE) {
 <a class="jxr_linenumber" name="L331" href="#L331">331</a> 			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
@@ -370,7 +370,7 @@
 <a class="jxr_linenumber" name="L362" href="#L362">362</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
