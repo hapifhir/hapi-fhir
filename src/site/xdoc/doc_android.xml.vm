@@ -69,7 +69,7 @@
 				<source><![CDATA[configurations {
   all*.exclude group: 'org.codehaus.woodstox'
   all*.exclude group: 'org.apache.httpcomponents'
-}</source>
+  }]]></source>
 
 				<p>
 					To see a sample Gradle file for a working Android project
@@ -115,3 +115,4 @@
 	</body>
 
 </document>
+
