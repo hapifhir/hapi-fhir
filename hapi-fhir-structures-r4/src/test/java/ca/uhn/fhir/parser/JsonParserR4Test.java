@@ -3,13 +3,17 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +24,19 @@ import static org.junit.Assert.*;
 public class JsonParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
+	@Test
+	public void testParseExtensionOnPrimitive() throws IOException {
+		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"));
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		Patient pt = parser.parseResource(Patient.class, input);
+
+		StringType line0 = pt.getAddressFirstRep().getLine().get(0);
+		assertEquals("535 Sheppard Avenue West, Unit 1907", line0.getValue());
+		Extension houseNumberExt = line0.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber");
+		assertEquals("535", ((StringType)houseNumberExt.getValue()).getValue());
+
+	}
 
 	@Test
 	public void testExcludeNothing() {

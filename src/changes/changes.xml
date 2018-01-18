@@ -6,6 +6,15 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.3.0" date="TBD">
+			<action type="fix">
+				Fix a crash in the JSON parser when parsing extensions on repeatable
+				elements (e.g. Patient.address.line) where there is an extension on the
+				first repetion but not on subsequent repetitions of the
+				repeatable primitive. Thanks to Igor Sirkovich for providing a
+				test case!
+			</action>
+		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
 				Support for custom search parameters has been backported in the JPA server
