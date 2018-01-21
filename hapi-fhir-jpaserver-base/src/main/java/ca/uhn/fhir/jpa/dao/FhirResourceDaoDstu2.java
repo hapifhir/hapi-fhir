@@ -80,7 +80,9 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
 			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
-			validateOkToDelete(deleteConflicts, entity);
+			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+				validateOkToDelete(deleteConflicts, entity, true);
+			}
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			OperationOutcome oo = new OperationOutcome();

@@ -1109,8 +1109,51 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteTwicePerformsNoOp() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		assertNotNull(id.getIdPartAsLong());
+		assertEquals("1", id.getVersionIdPart());
+
+		IIdType id2 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("2", id2.getVersionIdPart());
+
+		IIdType id3 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id3.getIdPart());
+		assertEquals("2", id3.getVersionIdPart());
+
+		IIdType id4 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id.getIdPart(), id4.getIdPart());
+		assertEquals("2", id4.getVersionIdPart());
+
+		patient = new Patient();
+		patient.setId(id.getIdPart());
+		patient.setActive(false);
+		IIdType id5 = myPatientDao.update(patient).getId();
+		assertEquals(id.getIdPart(), id5.getIdPart());
+		assertEquals("3", id5.getVersionIdPart());
+
+		patient = myPatientDao.read(id.withVersion("1"));
+		assertEquals(true, patient.getActive());
+
+		try {
+			myPatientDao.read(id.withVersion("2"));
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		patient = myPatientDao.read(id.withVersion("3"));
+		assertEquals(false, patient.getActive());
+
+	}
+
+	@Test
 	public void testDeleteResource() {
-		int initialHistory = myPatientDao.history((Date) null, null, mySrd).size();
+		int initialHistory = myPatientDao.history(null, null, mySrd).size();
 
 		IIdType id1;
 		IIdType id2;
@@ -1132,7 +1175,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("ZZZZZZZ").setValue("ZZZZZZZZZ");
 			id2b = myPatientDao.update(patient, mySrd).getId();
 		}
-		ourLog.info("ID1:{}   ID2:{}   ID2b:{}", new Object[] { id1, id2, id2b });
+		ourLog.info("ID1:{}   ID2:{}   ID2b:{}", id1, id2, id2b);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -1153,7 +1196,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			// good
 		}
 
-		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) resources.get(0)));
@@ -1525,7 +1568,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 
 		// By type
-		history = myPatientDao.history((Date) null, null, mySrd);
+		history = myPatientDao.history(null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1592,7 +1635,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 
 		// By type
-		history = myPatientDao.history((Date) null, null, mySrd);
+		history = myPatientDao.history(null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1643,13 +1686,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testHistoryReflectsMetaOperations() throws Exception {
+	public void testHistoryReflectsMetaOperations() {
 		Patient inPatient = new Patient();
 		inPatient.addName().setFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
 		IIdType id = myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
-		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1663,7 +1706,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		inPatient.getMeta().addProfile("http://example.com/2");
 		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd);
 
-		history = myPatientDao.history((Date) null, null, mySrd);
+		history = myPatientDao.history(null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1679,7 +1722,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		inPatient.getName().get(0).setFamily("version2");
 		myPatientDao.update(inPatient, mySrd);
 
-		history = myPatientDao.history((Date) null, null, mySrd);
+		history = myPatientDao.history(null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 2).get(0);
 		assertEquals("version2", outPatient.getName().get(0).getFamily());
@@ -1694,7 +1737,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testHistoryWithDeletedResource() throws Exception {
+	public void testHistoryWithDeletedResource() {
 		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
@@ -1707,9 +1750,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
 		List<IBaseResource> entries = history.getResources(0, 3);
-		ourLog.info(((IAnyResource) entries.get(0)).getIdElement() + " - " + ((IAnyResource) entries.get(0)).getMeta().getLastUpdated());
-		ourLog.info(((IAnyResource) entries.get(1)).getIdElement() + " - " + ((IAnyResource) entries.get(1)).getMeta().getLastUpdated());
-		ourLog.info(((IAnyResource) entries.get(2)).getIdElement() + " - " + ((IAnyResource) entries.get(2)).getMeta().getLastUpdated());
+		ourLog.info(entries.get(0).getIdElement() + " - " + entries.get(0).getMeta().getLastUpdated());
+		ourLog.info(entries.get(1).getIdElement() + " - " + entries.get(1).getMeta().getLastUpdated());
+		ourLog.info(entries.get(2).getIdElement() + " - " + entries.get(2).getMeta().getLastUpdated());
 		assertEquals(3, history.size().intValue());
 
 		assertEquals(id.withVersion("3"), entries.get(0).getIdElement());
@@ -1773,7 +1816,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		// No since
 
-		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1797,7 +1840,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testHistoryWithInvalidId() throws Exception {
+	public void testHistoryWithInvalidId() {
 		try {
 			myPatientDao.history(new IdType("Patient/FOOFOOFOO"), null, null, mySrd);
 			fail();
@@ -2175,7 +2218,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		dr01.setSubject(new Reference(patientId01));
 		IIdType drId01 = myDiagnosticReportDao.create(dr01, mySrd).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
 		List<Observation> result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getIdPart())).setLoadSynchronous(true)));
 		assertEquals(1, result.size());
@@ -2185,7 +2228,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals(1, result.size());
 		assertEquals(obsId02.getIdPart(), result.get(0).getIdElement().getIdPart());
 
-		result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam("999999999999")).setLoadSynchronous(true)));;
+		result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam("999999999999")).setLoadSynchronous(true)));
 		assertEquals(0, result.size());
 
 	}
@@ -2268,7 +2311,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		long id = outcome.getId().getIdPartAsLong();
 
 		TokenParam value = new TokenParam("urn:system", "001testPersistSearchParams");
-		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_IDENTIFIER, value).setLoadSynchronous(true)));;
+		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_IDENTIFIER, value).setLoadSynchronous(true)));
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getIdElement().getIdPartAsLong().longValue());
 
@@ -2380,7 +2423,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReadInvalidVersion() throws Exception {
+	public void testReadInvalidVersion() {
 		String methodName = "testReadInvalidVersion";
 
 		Patient pat = new Patient();
@@ -2565,12 +2608,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResource(newContent.getBytes(Charsets.UTF_8));
 				table.setEncoding(ResourceEncodingEnum.JSON);
-				myResourceTableDao.save(table);
+				myResourceHistoryTableDao.save(table);
 			}
 		});
 		
@@ -2592,7 +2635,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			id1 = myPatientDao.create(patient, mySrd).getId();
 
 			Meta metaAdd = new Meta();
-			metaAdd.addTag().setSystem((String) null).setCode("Dog").setDisplay("Puppies");
+			metaAdd.addTag().setSystem(null).setCode("Dog").setDisplay("Puppies");
 			metaAdd.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
 			metaAdd.addProfile("http://profile/1");
 			myPatientDao.metaAddOperation(id1, metaAdd, mySrd);
@@ -2662,7 +2705,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		{
 			Meta metaDel = new Meta();
-			metaDel.addTag().setSystem((String) null).setCode("Dog");
+			metaDel.addTag().setSystem(null).setCode("Dog");
 			metaDel.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1");
 			metaDel.addProfile("http://profile/1");
 			myPatientDao.metaDeleteOperation(id1, metaDel, mySrd);
@@ -3387,7 +3430,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	 * Test for issue #60
 	 */
 	@Test
-	public void testStoreUtf8Characters() throws Exception {
+	public void testStoreUtf8Characters() {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
@@ -3547,7 +3590,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTimingSearchParams() throws Exception {
+	public void testTimingSearchParams() {
 		Date before = new DateTimeType("2011-01-01T10:00:00Z").getValue();
 		Date middle = new DateTimeType("2011-01-02T10:00:00Z").getValue();
 		Date after = new DateTimeType("2011-01-03T10:00:00Z").getValue();
@@ -3613,7 +3656,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateRejectsIdWhichPointsToForcedId() throws InterruptedException {
+	public void testUpdateRejectsIdWhichPointsToForcedId() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");

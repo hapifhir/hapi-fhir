@@ -45,40 +45,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
 
-	@Before
-	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-	}
-
 	@After
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 	}
-
-	/**
-	 * See #773
-	 */
-	@Test
-	public void testDeleteResourceWithOutboundDeletedResources() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
-
-		Organization org = new Organization();
-		org.setId("ORG");
-		org.setName("ORG");
-		myOrganizationDao.update(org);
-
-		Patient pat = new Patient();
-		pat.setId("PAT");
-		pat.setActive(true);
-		pat.setManagingOrganization(new ResourceReferenceDt("Organization/ORG"));
-		myPatientDao.update(pat);
-
-		myOrganizationDao.delete(new IdDt("Organization/ORG"));
-
-		myPatientDao.delete(new IdDt("Patient/PAT"));
-	}
-
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -100,6 +72,11 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		} else {
 			fail("No type");
 		}
+	}
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
@@ -863,6 +840,29 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		patients = toList(myPatientDao.search(params));
 		assertEquals(0, patients.size());
 
+	}
+
+	/**
+	 * See #773
+	 */
+	@Test
+	public void testDeleteResourceWithOutboundDeletedResources() {
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+
+		Organization org = new Organization();
+		org.setId("ORG");
+		org.setName("ORG");
+		myOrganizationDao.update(org);
+
+		Patient pat = new Patient();
+		pat.setId("PAT");
+		pat.setActive(true);
+		pat.setManagingOrganization(new ResourceReferenceDt("Organization/ORG"));
+		myPatientDao.update(pat);
+
+		myOrganizationDao.delete(new IdDt("Organization/ORG"));
+
+		myPatientDao.delete(new IdDt("Patient/PAT"));
 	}
 
 	@Test

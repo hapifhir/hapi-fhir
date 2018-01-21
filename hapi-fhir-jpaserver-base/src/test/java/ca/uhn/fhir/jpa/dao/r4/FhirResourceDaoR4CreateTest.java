@@ -74,7 +74,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionCreateWithUuidResourceStrategy() throws Exception {
+	public void testTransactionCreateWithUuidResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
 		Organization org = new Organization();

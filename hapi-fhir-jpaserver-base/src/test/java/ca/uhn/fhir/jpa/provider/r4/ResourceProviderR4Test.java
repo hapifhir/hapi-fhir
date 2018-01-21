@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -54,6 +55,8 @@ import org.junit.*;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -1642,31 +1645,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = myClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// myClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = myClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// myClient.delete().resource(next).execute();
-	// }
-	// }
-
 	@Test
 	public void testHasParameter() throws Exception {
 		IIdType pid0;
@@ -1703,6 +1681,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = myClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// myClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = myClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// myClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testHasParameterNoResults() throws Exception {
@@ -2345,6 +2348,54 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Bundle returned = myClient.search().forResource(Patient.class).encodedJson().returnBundle(Bundle.class).execute();
 			assertThat(returned.getEntry().size(), greaterThan(1));
 		}
+	}
+
+	@Test
+	public void testRetrieveMissingVersionsDoesntCrashSearch() {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		final IIdType id1 = myClient.create().resource(p1).execute().getId();
+
+		Patient p2 = new Patient();
+		p2.setActive(false);
+		IIdType id2 = myClient.create().resource(p2).execute().getId();
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
+				myResourceHistoryTableDao.delete(version);
+			}
+		});
+
+		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		assertEquals(2, bundle.getTotal());
+		assertEquals(1, bundle.getEntry().size());
+		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testRetrieveMissingVersionsDoesntCrashHistory() {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		final IIdType id1 = myClient.create().resource(p1).execute().getId();
+
+		Patient p2 = new Patient();
+		p2.setActive(false);
+		IIdType id2 = myClient.create().resource(p2).execute().getId();
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
+				myResourceHistoryTableDao.delete(version);
+			}
+		});
+
+		Bundle bundle = myClient.history().onServer().andReturnBundle(Bundle.class).execute();
+		assertEquals(1, bundle.getTotal());
+		assertEquals(1, bundle.getEntry().size());
+		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test

@@ -3,10 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,6 +24,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -443,7 +442,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testReindexing() {
 		Patient p = new Patient();
 		p.addName().setFamily("family");
-		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
@@ -487,15 +486,19 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
 			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				ResourceTable table = myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-				table.setEncoding(ResourceEncodingEnum.JSON);
-				table.setIndexStatus(null);
+				ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
+				resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
 				try {
-					table.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
+					resourceHistoryTable.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					throw new Error(e);
 				}
-				myEntityManager.merge(table);
+				myResourceHistoryTableDao.save(resourceHistoryTable);
+
+				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				table.setIndexStatus(null);
+				myResourceTableDao.save(table);
+
 				return null;
 			}
 		});

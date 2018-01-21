@@ -86,6 +86,12 @@
 				DSTU3/R4 structure in the getMeta() version field instead of in the
 				getIdElement() ID. Thanks to GitHub user @Chrisjobling for reporting!
 			</action>
+			<action type="fix">
+				A bug was fixed in the JPA server when performing a validate operation with a mode
+				of DELETE on a server with referential integrity disabled, the validate operation would delete
+				resource reference indexes as though the delete was actually happening, which negatively
+				affected searching for the resource being validated.
+			</action>
 			<action type="add">
 				The HAPI FHIR Server framework now has initial support for
 				multitenancy. At this time the support is limited to the server
