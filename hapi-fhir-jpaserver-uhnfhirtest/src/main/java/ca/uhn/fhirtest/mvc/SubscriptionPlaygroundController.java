@@ -5,12 +5,11 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.to.BaseController;
 import ca.uhn.fhir.to.model.HomeRequest;
@@ -43,7 +42,7 @@ public class SubscriptionPlaygroundController extends BaseController {
 			.execute();
 		
 		List<Subscription> subscriptions = new ArrayList<Subscription>();
-		for (Entry next : resp.getEntry()) {
+		for (Bundle.BundleEntryComponent next : resp.getEntry()) {
 			if (next.getResource() instanceof Subscription) {
 				subscriptions.add((Subscription) next.getResource());
 			}

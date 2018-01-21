@@ -73,7 +73,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+import java.io.CharArrayWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
@@ -1999,7 +2002,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	public static String normalizeString(String theString) {
-		char[] out = new char[theString.length()];
+		CharArrayWriter outBuffer = new CharArrayWriter(theString.length());
 
 		/*
 		 * The following block of code is used to strip out diacritical marks from latin script
@@ -2009,18 +2012,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 * behind stripping 0300-036F
 		 * 
 		 * See #454 for an issue where we were completely stripping non latin characters
+		 * See #832 for an issue where we normalize korean characters, which are decomposed
 		 */
 		String string = Normalizer.normalize(theString, Normalizer.Form.NFD);
-		int j = 0;
 		for (int i = 0, n = string.length(); i < n; ++i) {
 			char c = string.charAt(i);
 			if (c >= '\u0300' && c <= '\u036F') {
 				continue;
 			} else {
-				out[j++] = c;
+				outBuffer.append(c);
 			}
 		}
-		return new String(out).toUpperCase();
+
+		return new String(outBuffer.toCharArray()).toUpperCase();
 	}
 
 	private static String parseNarrativeTextIntoWords(IBaseResource theResource) {
