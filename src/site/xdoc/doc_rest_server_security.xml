@@ -214,6 +214,20 @@
 				</macro>
 				
 			</subsection>
+
+			<subsection name="Authorizing Multitenant Servers">
+
+				<p>
+					The AuthorizationInterceptor has the ability to direct individual
+					rules as only applying to a single tenant in a multitenant
+					server. The following example shows such a rule.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="authorizeTenantAction" />
+					<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+				</macro>
+
+			</subsection>
 			
 		</section>
 		

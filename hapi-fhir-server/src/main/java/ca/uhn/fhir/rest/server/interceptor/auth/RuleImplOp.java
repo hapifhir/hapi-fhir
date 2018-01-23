@@ -52,6 +52,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private List<IIdType> myAppliesToInstances;
+	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
 	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
@@ -60,6 +61,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 			IRuleApplier theRuleApplier) {
+
+		if (myTenantApplicabilityChecker != null) {
+			if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
+				return null;
+			}
+		}
+
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		IBaseResource appliesToResource;
@@ -275,6 +283,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return newVerdict();
 	}
 
+	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -282,6 +294,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
 		builder.append("appliesTo", myAppliesTo);
 		builder.append("appliesToTypes", myAppliesToTypes);
+		builder.append("appliesToTenant", myTenantApplicabilityChecker);
 		builder.append("classifierCompartmentName", myClassifierCompartmentName);
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);

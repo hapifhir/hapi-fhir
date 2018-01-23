@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -494,6 +494,17 @@
 				<groupId>de.juplo</groupId>
 				<artifactId>hibernate-maven-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>derby107</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.DerbyTenSevenDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_derby107.sql</outputFile>
+						</configuration>
+					</execution>
 					<execution>
 						<id>postgres94</id>
 						<phase>process-classes</phase>

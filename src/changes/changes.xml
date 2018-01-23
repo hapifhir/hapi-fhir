@@ -7,6 +7,20 @@
 	</properties>
 	<body>
 		<release version="3.3.0" date="TBD">
+			<action type="add">
+				This release corrects an ineffiency in the JPA Server, but requires a schema
+				change in order to update. Prior to this version of HAPI FHIR, a CLOB column
+				containing the complete resource body was stored in two 
+				tables: HFJ_RESOURCE and HFJ_RES_VER. Because the same content was stored in two
+				places, the database consumed more space than is needed to.
+				<![CDATA[<br/><br/>]]>
+				In order to reduce this duplication, the columns have been removed from the
+				HFJ_RESOURCE column. This means that on any database that is being upgraded
+				to HAPI FHIR 3.2.0, you will need to remove the columns
+				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]> (or
+				set them to nullable if you want an easy means of rolling back). Naturally
+				you should back your database up prior to making this change.
+			</action>
 			<action type="fix">
 				Fix a crash in the JSON parser when parsing extensions on repeatable
 				elements (e.g. Patient.address.line) where there is an extension on the
