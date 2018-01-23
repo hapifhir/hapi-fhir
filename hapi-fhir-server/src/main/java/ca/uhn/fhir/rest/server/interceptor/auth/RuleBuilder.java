@@ -131,19 +131,23 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(final Collection<String> theTenantIds) {
-			myTenantApplicabilityChecker = new ITenantApplicabilityChecker(){
+			setTenantApplicabilityChecker(new ITenantApplicabilityChecker() {
 				@Override
 				public boolean applies(RequestDetails theRequest) {
 					return theTenantIds.contains(theRequest.getTenantId());
 				}
-			};
+			});
+			return this;
+		}
+
+		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
 			if (myOpRule != null) {
 				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
 			}
 			if (myOperationRule != null) {
 				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
 			}
-			return this;
 		}
 
 		@Override
@@ -152,8 +156,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
-		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(Collection<String> theTenantIds) {
-			return null;// TODO: implement method body
+		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(final Collection<String> theTenantIds) {
+			setTenantApplicabilityChecker(new ITenantApplicabilityChecker() {
+				@Override
+				public boolean applies(RequestDetails theRequest) {
+					return !theTenantIds.contains(theRequest.getTenantId());
+				}
+			});
+			return this;
 		}
 	}
 
