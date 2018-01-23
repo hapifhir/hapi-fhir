@@ -609,6 +609,7 @@ public class AuthorizationInterceptorR4Test {
 	 */
 	@Test
 	public void testDenyActionsNotOnTenant() throws Exception {
+		ourServlet.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -634,7 +635,7 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
+		assertThat(response, containsString("Access denied by rule: (unnamed rule)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
