@@ -176,7 +176,7 @@ public abstract class BaseJpaTest {
 		ourLog.info("Found {} results", size);
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -184,7 +184,7 @@ public abstract class BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -223,7 +223,7 @@ public abstract class BaseJpaTest {
 	}
 
 	@AfterClass
-	public static void afterClassShutdownDerby() throws SQLException {
+	public static void afterClassShutdownDerby() {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
