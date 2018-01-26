@@ -409,8 +409,9 @@
 		<!-- Dependency Versions -->
 		<derby_version>10.14.1.0</derby_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.6.v20170531</jetty_version>
-		<hibernate_version>5.2.10.Final</hibernate_version>
+		<jetty_version>9.4.8.v20171121</jetty_version>
+		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
+		<hibernate_version>5.2.12.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
@@ -419,9 +420,9 @@
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.11</phloc_commons_version>
-		<spring_version>5.0.0.RELEASE</spring_version>
+		<spring_version>5.0.3.RELEASE</spring_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
-		<thymeleaf-version>3.0.7.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
 		<slf4j_target_version>1.6.0</slf4j_target_version>
@@ -1114,7 +1115,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>3.0.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1210,7 +1211,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.2</version>
+					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
