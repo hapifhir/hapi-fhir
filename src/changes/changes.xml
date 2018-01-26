@@ -43,6 +43,12 @@
 				Fix an issue where the JPA server crashed while attempting to normalize string values
 				containing Korean text. Thanks to GitHub user @JoonggeonLee for reporting!
 			</action>
+			<action type="fix">
+				An issue was solved where it was possible for server interceptors
+				to have both processingCompletedNormally and handleException called
+				if the stream.close() method threw an exception. Thanks to Carlos
+				Eduardo Lara Augusto for investigating!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
