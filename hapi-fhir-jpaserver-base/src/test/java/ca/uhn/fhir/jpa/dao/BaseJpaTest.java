@@ -49,6 +49,11 @@ public abstract class BaseJpaTest {
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
+	@After
+	public final void afterPerformCleanup() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+	}
+
 	@Before
 	public void beforeCreateSrd() {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
@@ -56,11 +61,6 @@ public abstract class BaseJpaTest {
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
-	}
-
-	@After
-	public final void afterPerformCleanup() {
-		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
 	}
 
 	protected abstract FhirContext getContext();
@@ -159,7 +159,20 @@ public abstract class BaseJpaTest {
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
-		int size = theFound.size();
+		Integer size = theFound.size();
+		StopWatch sw = new StopWatch();
+		while (size == null) {
+			int timeout = 20000;
+			if (sw.getMillis() > timeout) {
+				fail("Waited over "+timeout+"ms for search");
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException theE) {
+				//ignore
+			}
+		}
+
 		ourLog.info("Found {} results", size);
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
