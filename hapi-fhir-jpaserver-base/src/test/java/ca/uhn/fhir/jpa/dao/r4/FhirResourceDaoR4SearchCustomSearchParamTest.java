@@ -914,6 +914,51 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
+	public void testSearchForStringOnIdentifierWithSpecificSystem() {
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.identifier.where(system = 'http://AAA').value");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		IIdType spId = mySearchParameterDao.create(fooSp, mySrd).getId().toUnqualifiedVersionless();
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("http://AAA").setValue("BAR678");
+		pat.setGender(AdministrativeGender.MALE);
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pat2 = new Patient();
+		pat2.addIdentifier().setSystem("http://BBB").setValue("BAR678");
+		pat2.setGender(AdministrativeGender.FEMALE);
+		myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Partial match
+		map = new SearchParameterMap();
+		map.add("foo", new StringParam("bar"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(patId.getValue()));
+
+		// Non match
+		map = new SearchParameterMap();
+		map.add("foo", new StringParam("zzz"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
+	}
+
+	@Test
 	public void testSearchWithCustomParam() {
 
 		SearchParameter fooSp = new SearchParameter();

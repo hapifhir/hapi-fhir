@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -153,7 +154,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -408,7 +409,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**
@@ -442,7 +443,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	@Test
@@ -475,7 +476,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -504,7 +505,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -540,7 +541,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -579,7 +580,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -615,7 +616,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// True here means the interceptor didn't handle the request, because HTML wasn't the top ranked accept header
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**

@@ -38,6 +38,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -129,6 +130,68 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 		}
 		return retVal;
+	}
+
+	@Test
+	public void testSelfReferentialInclude() {
+		Location loc1 = new Location();
+		loc1.setName("loc1");
+		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		Location loc2 = new Location();
+		loc2.setName("loc2");
+		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		loc1 = new Location();
+		loc1.setId(loc1id);
+		loc1.setName("loc1");
+		loc1.getPartOf().setReference(loc2id.getValue());
+		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		loc2 = new Location();
+		loc2.setId(loc2id);
+		loc2.setName("loc2");
+		loc2.getPartOf().setReference(loc1id.getValue());
+		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		IBaseBundle result = myClient
+			.search()
+			.forResource(Location.class)
+			.where(Location.NAME.matches().value("loc1"))
+			.include(Location.INCLUDE_PARTOF.asRecursive())
+			.execute();
+		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
+	}
+
+	@Test
+	public void testSelfReferentialRevInclude() {
+		Location loc1 = new Location();
+		loc1.setName("loc1");
+		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		Location loc2 = new Location();
+		loc2.setName("loc2");
+		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		loc1 = new Location();
+		loc1.setId(loc1id);
+		loc1.setName("loc1");
+		loc1.getPartOf().setReference(loc2id.getValue());
+		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		loc2 = new Location();
+		loc2.setId(loc2id);
+		loc2.setName("loc2");
+		loc2.getPartOf().setReference(loc1id.getValue());
+		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		IBaseBundle result = myClient
+			.search()
+			.forResource(Location.class)
+			.where(Location.NAME.matches().value("loc1"))
+			.revInclude(Location.INCLUDE_PARTOF.asRecursive())
+			.execute();
+		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
 	}
 
 	/**

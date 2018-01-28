@@ -82,6 +82,21 @@ public enum FhirVersionEnum {
 		return ordinal() >= theVersion.ordinal();
 	}
 
+	/**
+	 * Returns the {@link FhirVersionEnum} which corresponds to a specific version of
+	 * FHIR. Partial version strings (e.g. "3.0") are acceptable.
+	 *
+	 * @return Returns null if no version exists matching the given string
+	 */
+	public static FhirVersionEnum forVersionString(String theVersionString) {
+		for (FhirVersionEnum next : values()) {
+			if (next.getFhirVersionString().startsWith(theVersionString)) {
+				return next;
+			}
+		}
+		return null;
+	}
+
 	public boolean isEquivalentTo(FhirVersionEnum theVersion) {
 		if (this.equals(theVersion)) {
 			return true;

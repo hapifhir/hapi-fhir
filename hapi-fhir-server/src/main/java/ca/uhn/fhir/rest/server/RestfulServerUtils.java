@@ -581,7 +581,7 @@ public class RestfulServerUtils {
 		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage,
 																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
@@ -636,7 +636,7 @@ public class RestfulServerUtils {
 				}
 			}
 
-			return response.sendAttachmentResponse(bin, theStausCode, contentType);
+			return response.sendAttachmentResponse(bin, theStatusCode, contentType);
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding
@@ -683,7 +683,7 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = response.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
+		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
@@ -693,7 +693,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 		//FIXME resource leak
-		return response.sendWriterResponse(theStausCode, contentType, charset, writer);
+		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
 	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
