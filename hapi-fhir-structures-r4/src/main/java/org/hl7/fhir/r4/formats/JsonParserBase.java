@@ -220,9 +220,7 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
 		if (!Utilities.noString(xhtmlMessage)) {
       prop(name, "<div>!-- "+xhtmlMessage+" --></div>");
 		} else {
-		XhtmlComposer comp = new XhtmlComposer();
-		comp.setPretty(htmlPretty);
-		  comp.setXmlOnly(true);
+		XhtmlComposer comp = new XhtmlComposer(XhtmlComposer.XML, htmlPretty);
 		prop(name, comp.compose(html));
 		}
 	}

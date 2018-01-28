@@ -74,7 +74,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 
       List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
       do {
-        List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
+        List<IAnyResource> addedResourcesThisPass = new ArrayList<>();
 
         for (IBaseReference nextRef : references) {
           IAnyResource nextRes = (IAnyResource) nextRef.getResource();
@@ -101,7 +101,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         }
 
         // Linked resources may themselves have linked resources
-        references = new ArrayList<IBaseReference>();
+        references = new ArrayList<>();
         for (IAnyResource iResource : addedResourcesThisPass) {
           List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
           references.addAll(newReferences);

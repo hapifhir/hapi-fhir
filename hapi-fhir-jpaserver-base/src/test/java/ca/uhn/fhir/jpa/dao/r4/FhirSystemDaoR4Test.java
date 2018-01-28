@@ -3,10 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,6 +24,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -325,7 +324,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/bug-410-bundle.xml"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug-410-bundle.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
@@ -443,7 +442,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testReindexing() {
 		Patient p = new Patient();
 		p.addName().setFamily("family");
-		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
@@ -487,15 +486,19 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
 			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				ResourceTable table = myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-				table.setEncoding(ResourceEncodingEnum.JSON);
-				table.setIndexStatus(null);
+				ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
+				resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
 				try {
-					table.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
+					resourceHistoryTable.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					throw new Error(e);
 				}
-				myEntityManager.merge(table);
+				myResourceHistoryTableDao.save(resourceHistoryTable);
+
+				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				table.setIndexStatus(null);
+				myResourceTableDao.save(table);
+
 				return null;
 			}
 		});
@@ -584,90 +587,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		profiles = meta.getProfile();
 		assertEquals(1, profiles.size());
 		assertEquals("http://profile/2", profiles.get(0).getValue());
-
-	}
-
-	@Test
-	public void testTransactionWithIfMatch() {
-		Patient p = new Patient();
-		p.setId("P1");
-		p.setActive(true);
-		myPatientDao.update(p);
-
-		p.setActive(false);
-		Bundle b = new Bundle();
-		b.setType(BundleType.TRANSACTION);
-		b.addEntry()
-			.setFullUrl("Patient/P1")
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient/P1")
-			.setIfMatch("2");
-
-		try {
-			mySystemDao.transaction(mySrd, b);
-		} catch (ResourceVersionConflictException e) {
-			assertEquals("Trying to update Patient/P1/_history/2 but this is not the current version", e.getMessage());
-		}
-
-		b = new Bundle();
-		b.setType(BundleType.TRANSACTION);
-		b.addEntry()
-			.setFullUrl("Patient/P1")
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient/P1")
-			.setIfMatch("1");
-
-		Bundle resp = mySystemDao.transaction(mySrd, b);
-		assertEquals("Patient/P1/_history/2", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
-
-
-	}
-
-	@Test
-	public void testTransactionWithIfNoneExist() {
-		Patient p = new Patient();
-		p.setId("P1");
-		p.setActive(true);
-		myPatientDao.update(p);
-
-		p = new Patient();
-		p.setActive(true);
-		p.addName().setFamily("AAA");
-
-		Bundle b = new Bundle();
-		b.setType(BundleType.TRANSACTION);
-		b.addEntry()
-			.setFullUrl("Patient")
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient/P1")
-			.setIfNoneExist("Patient?active=true");
-
-		Bundle resp = mySystemDao.transaction(mySrd, b);
-		assertEquals("Patient/P1/_history/1", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
-
-		p = new Patient();
-		p.setActive(true);
-		p.addName().setFamily("AAA");
-
-		b = new Bundle();
-		b.setType(BundleType.TRANSACTION);
-		b.addEntry()
-			.setFullUrl("Patient")
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient/P1")
-			.setIfNoneExist("Patient?active=false");
-
-		resp = mySystemDao.transaction(mySrd, b);
-		assertThat( new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue(), matchesPattern("Patient/[0-9]+/_history/1"));
-
 
 	}
 
@@ -1828,7 +1747,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testTransactionOruBundle() throws IOException {
 		myDaoConfig.setAllowMultipleDelete(true);
 
-		String input = IOUtils.toString(getClass().getResourceAsStream("/oruBundle.json"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/oruBundle.json"), StandardCharsets.UTF_8);
 
 		Bundle inputBundle;
 		Bundle outputBundle;
@@ -2272,6 +2191,90 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithIfMatch() {
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		p.setActive(false);
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient/P1")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/P1")
+			.setIfMatch("2");
+
+		try {
+			mySystemDao.transaction(mySrd, b);
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("Trying to update Patient/P1/_history/2 but this is not the current version", e.getMessage());
+		}
+
+		b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient/P1")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/P1")
+			.setIfMatch("1");
+
+		Bundle resp = mySystemDao.transaction(mySrd, b);
+		assertEquals("Patient/P1/_history/2", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
+
+
+	}
+
+	@Test
+	public void testTransactionWithIfNoneExist() {
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("AAA");
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/P1")
+			.setIfNoneExist("Patient?active=true");
+
+		Bundle resp = mySystemDao.transaction(mySrd, b);
+		assertEquals("Patient/P1/_history/1", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
+
+		p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("AAA");
+
+		b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+		b.addEntry()
+			.setFullUrl("Patient")
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/P1")
+			.setIfNoneExist("Patient?active=false");
+
+		resp = mySystemDao.transaction(mySrd, b);
+		assertThat(new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue(), matchesPattern("Patient/[0-9]+/_history/1"));
+
+
+	}
+
+	@Test
 	public void testTransactionWithInlineMatchUrl() throws Exception {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 
@@ -2343,9 +2346,26 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	/**
+	 * See #801
+	 */
+	@Test
+	@Ignore
+	public void testTransactionWithMatchUrlToReferenceInSameBundle() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug801.json"), StandardCharsets.UTF_8);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// expected
+		}
+	}
+
 	@Test
 	public void testTransactionWithMultiBundle() throws IOException {
-		String inputBundleString = loadClasspath("/batch-error.xml");
+		String inputBundleString = loadClasspath("/r4/batch-error.xml");
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 

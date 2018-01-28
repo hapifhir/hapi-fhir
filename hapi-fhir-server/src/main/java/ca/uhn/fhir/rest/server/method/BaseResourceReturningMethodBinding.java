@@ -5,7 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import ca.uhn.fhir.util.CollectionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -178,7 +179,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				boolean first = true;
 				Map<String, String[]> parameters = theRequest.getParameters();
-				for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
+				for (String nextParamName : new TreeSet<>(parameters.keySet())) {
 					for (String nextParamValue : parameters.get(nextParamName)) {
 						if (first) {
 							b.append('?');
@@ -308,6 +309,29 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
+		/*
+		 * Remove any null entries in the list - This generally shouldn't happen but can if
+		 * data has been manually purged from the JPA database
+		 */
+		boolean hasNull = false;
+		for (IBaseResource next : resourceList) {
+			if (next == null) {
+				hasNull = true;
+				break;
+			}
+		}
+		if (hasNull) {
+			for (Iterator<IBaseResource> iter = resourceList.iterator(); iter.hasNext(); ) {
+				if (iter.next() == null) {
+					iter.remove();
+				}
+			}
+		}
+
+		/*
+		 * Make sure all returned resources have an ID (if not, this is a bug
+		 * in the user server code)
+		 */
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {

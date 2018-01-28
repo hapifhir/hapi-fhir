@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -67,7 +68,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private void deleteSearch(final Long theSearchPid) {
 		Search searchToDelete = mySearchDao.findOne(theSearchPid);
 		if (searchToDelete != null) {
-			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
+			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
 			mySearchResultDao.deleteForSearch(searchToDelete.getId());
 			mySearchDao.delete(searchToDelete);
@@ -77,12 +78,19 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void pollForStaleSearchesAndDeleteThem() {
+		if (!myDaoConfig.isExpireSearchResults()) {
+			return;
+		}
 
 		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
 		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
 			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
 		}
 		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
+
+		if (ourNowForUnitTests != null) {
+			ourLog.info("Searching for searches which are before {} - now is {}", new InstantType(cutoff), new InstantType(new Date(now())));
+		}
 
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
@@ -115,9 +123,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
 		if (!myDaoConfig.isSchedulingDisabled()) {
-			if (myDaoConfig.isExpireSearchResults()) {
-				pollForStaleSearchesAndDeleteThem();
-			}
+			pollForStaleSearchesAndDeleteThem();
 		}
 	}
 

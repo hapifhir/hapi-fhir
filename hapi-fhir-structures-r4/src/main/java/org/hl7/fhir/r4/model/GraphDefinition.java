@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -905,24 +905,24 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkComponent))
+        if (!(other_ instanceof GraphDefinitionLinkComponent))
           return false;
-        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other;
+        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other_;
         return compareDeep(path, o.path, true) && compareDeep(sliceName, o.sliceName, true) && compareDeep(min, o.min, true)
            && compareDeep(max, o.max, true) && compareDeep(description, o.description, true) && compareDeep(target, o.target, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkComponent))
+        if (!(other_ instanceof GraphDefinitionLinkComponent))
           return false;
-        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other;
+        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other_;
         return compareValues(path, o.path, true) && compareValues(sliceName, o.sliceName, true) && compareValues(min, o.min, true)
            && compareValues(max, o.max, true) && compareValues(description, o.description, true);
       }
@@ -1385,23 +1385,23 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetComponent))
           return false;
-        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
+        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(params, o.params, true) && compareDeep(profile, o.profile, true)
            && compareDeep(compartment, o.compartment, true) && compareDeep(link, o.link, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetComponent))
           return false;
-        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
+        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other_;
         return compareValues(type, o.type, true) && compareValues(params, o.params, true) && compareValues(profile, o.profile, true)
           ;
       }
@@ -1850,24 +1850,24 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
-        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
+        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other_;
         return compareDeep(use, o.use, true) && compareDeep(code, o.code, true) && compareDeep(rule, o.rule, true)
            && compareDeep(expression, o.expression, true) && compareDeep(description, o.description, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
-        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
+        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other_;
         return compareValues(use, o.use, true) && compareValues(code, o.code, true) && compareValues(rule, o.rule, true)
            && compareValues(expression, o.expression, true) && compareValues(description, o.description, true)
           ;
@@ -1895,7 +1895,7 @@ public class GraphDefinition extends MetadataResource {
     /**
      * The type of FHIR resource at which instances of this graph start.
      */
-    @Child(name = "start", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "start", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of resource at which the graph starts", formalDefinition="The type of FHIR resource at which instances of this graph start." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected CodeType start;
@@ -1934,7 +1934,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1954,7 +1954,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public GraphDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1962,14 +1962,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.
      */
     public GraphDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2670,7 +2670,7 @@ public class GraphDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status));
@@ -2690,7 +2690,7 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this graph definition is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status);
@@ -2969,23 +2969,23 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinition))
+        if (!(other_ instanceof GraphDefinition))
           return false;
-        GraphDefinition o = (GraphDefinition) other;
+        GraphDefinition o = (GraphDefinition) other_;
         return compareDeep(purpose, o.purpose, true) && compareDeep(start, o.start, true) && compareDeep(profile, o.profile, true)
            && compareDeep(link, o.link, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinition))
+        if (!(other_ instanceof GraphDefinition))
           return false;
-        GraphDefinition o = (GraphDefinition) other;
+        GraphDefinition o = (GraphDefinition) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(start, o.start, true) && compareValues(profile, o.profile, true)
           ;
       }

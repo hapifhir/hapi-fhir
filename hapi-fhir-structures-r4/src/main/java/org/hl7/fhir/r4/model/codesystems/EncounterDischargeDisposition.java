@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -40,6 +40,10 @@ public enum EncounterDischargeDisposition {
          * The patient was dicharged and has indicated that they are going to return home afterwards.
          */
         HOME, 
+        /**
+         * The patient was discharged and has indicated that they are going to return home afterwards, but not the patient's home - e.g. a family member's home.
+         */
+        ALTHOME, 
         /**
          * The patient was transferred to another healthcare facility.
          */
@@ -85,6 +89,8 @@ public enum EncounterDischargeDisposition {
                 return null;
         if ("home".equals(codeString))
           return HOME;
+        if ("alt-home".equals(codeString))
+          return ALTHOME;
         if ("other-hcf".equals(codeString))
           return OTHERHCF;
         if ("hosp".equals(codeString))
@@ -108,6 +114,7 @@ public enum EncounterDischargeDisposition {
         public String toCode() {
           switch (this) {
             case HOME: return "home";
+            case ALTHOME: return "alt-home";
             case OTHERHCF: return "other-hcf";
             case HOSP: return "hosp";
             case LONG: return "long";
@@ -126,6 +133,7 @@ public enum EncounterDischargeDisposition {
         public String getDefinition() {
           switch (this) {
             case HOME: return "The patient was dicharged and has indicated that they are going to return home afterwards.";
+            case ALTHOME: return "The patient was discharged and has indicated that they are going to return home afterwards, but not the patient's home - e.g. a family member's home.";
             case OTHERHCF: return "The patient was transferred to another healthcare facility.";
             case HOSP: return "The patient has been discharged into palliative care.";
             case LONG: return "The patient has been discharged into long-term care where is likely to be monitored through an ongoing episode-of-care.";
@@ -141,6 +149,7 @@ public enum EncounterDischargeDisposition {
         public String getDisplay() {
           switch (this) {
             case HOME: return "Home";
+            case ALTHOME: return "Alternative home";
             case OTHERHCF: return "Other healthcare facility";
             case HOSP: return "Hospice";
             case LONG: return "Long-term care";

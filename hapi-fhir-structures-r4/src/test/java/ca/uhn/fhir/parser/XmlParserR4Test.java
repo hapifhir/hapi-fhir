@@ -35,6 +35,22 @@ public class XmlParserR4Test {
 	}
 
 	@Test
+	public void testParseAndEncodeXmlNumericEntity() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <name>\n" +
+			"       <family value=\"A &#xA; B\"/>\n" +
+			"    </name>\n" +
+			"</Patient>";
+
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, input);
+		assertEquals("A \n B", p.getNameFirstRep().getFamily());
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+
+	}
+
+	@Test
 	public void testExcludeNothing() {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();

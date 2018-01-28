@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -165,7 +165,7 @@ public enum ContractSignerType {
          */
         LEGAUTHN, 
         /**
-         * A party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and may or may not be the policy holder.
+         * A party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and might or might not be the policy holder.
          */
         NMDINS, 
         /**
@@ -193,7 +193,7 @@ public enum ContractSignerType {
          */
         PRIRECIP, 
         /**
-         * An entity that may, should receive, or has received information or an object, which may not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary.
+         * An entity that may, should receive, or has received information or an object, which might not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary.
          */
         RECIP, 
         /**
@@ -423,14 +423,14 @@ public enum ContractSignerType {
             case HPOWATT: return "A person who has been granted the authority to represent or act on another's behalf for healthcare related matters in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific healthcare legal rights belonging to the grantee such as signing a consent directive; (2) performing specific healthcare related legal duties on behalf of a grantee such as claims payment; and (3) making specific healthcare legal decisions concerning a grantee such as consenting to healthcare services.";
             case HPROV: return "An entity that is authorized to provide health care services by an authorizing organization or jurisdiction.";
             case LEGAUTHN: return "A person in the role of verifier who attests to the accuracy of information content, and who has privileges to certify the legal authenticity of that content with a signature that constitutes a legal authentication.  For example, a licensed physician who signs a consult authored by a resident physician who authenticated it.";
-            case NMDINS: return "A party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and may or may not be the policy holder.";
+            case NMDINS: return "A party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and might or might not be the policy holder.";
             case NOK: return "A person, who is a type of contact, designated to receive notifications on behalf of another person who is a relative.";
             case NOTARY: return "The party credentialed to legally attest to the contract binding by verifying the identity and capacity of the grantor and grantee, and witnessing their signing of the contract or agreement such as a real estate transaction, pre-nuptial agreement, or a will.";
             case PAT: return "A person, animal, or other living subject that is the actual or potential recipient of health care services.";
             case POWATT: return "A person who has been granted the authority to represent or act on another's behalf generally in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific legal rights belonging to the grantee such as signing a contract; (2) performing specific legal duties on behalf of a grantee such as making loan payments; and (3) making specific legal decisions concerning a grantee such as financial investment decisions.";
             case PRIMAUTH: return "An entity that is the primary or sole author of information content.  In the healthcare context, there can be only one primary author of health information content in a record entry or document.";
             case PRIRECIP: return "An entity that may, should receive, or has received information or an object to which it was primarily addressed.";
-            case RECIP: return "An entity that may, should receive, or has received information or an object, which may not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary.";
+            case RECIP: return "An entity that may, should receive, or has received information or an object, which might not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary.";
             case RESPRSN: return "An entity that has legal responsibility for another party.";
             case REVIEWER: return "A person, device, or algorithm that has used approved criteria for filtered data for inclusion into the patient record.  Examples: (1) a medical records clerk who scans a document for inclusion in the medical record, enters header information, or catalogues and classifies the data, or a combination thereof; (2) a gateway that receives data from another computer system and interprets that data or changes its format, or both, before entering it into the patient record.";
             case TRANS: return "An entity entering the data into the originating system. This includes the transcriptionist for dictated text transcribed into electronic form.";

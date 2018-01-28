@@ -29,6 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.r4.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.utils.ToolingExtensions;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
@@ -91,5 +93,16 @@ public class StringType extends PrimitiveType<String> {
 	public String fhirType() {
 		return "string";
 	}
+
+  public String getTranslation(String l) throws FHIRException {
+    for (Extension e : getExtension()) {
+      if (e.getUrl().equals(ToolingExtensions.EXT_TRANSLATION)) {
+        String lang = ToolingExtensions.readStringExtension(e, "lang");
+        if (lang.equals(l))
+          return e.getExtensionString("content");
+      }
+    }
+    return null;
+  }
 
 }

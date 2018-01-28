@@ -1,23 +1,17 @@
 package org.hl7.fhir.dstu2016may.utils;
 
-import java.util.List;
-import java.util.Set;
-
 import org.hl7.fhir.dstu2016may.formats.IParser;
 import org.hl7.fhir.dstu2016may.formats.ParserType;
-import org.hl7.fhir.dstu2016may.model.CodeSystem;
+import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.ConceptMap;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.dstu2016may.model.StructureDefinition;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.dstu2016may.validation.IResourceValidator;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -109,8 +103,6 @@ public interface IWorkerContext {
    * It's an error if the second form doesn't agree with class_. It's an 
    * error if class_ is null for the last form
    * 
-   * @param resource
-   * @param Reference
    * @return
    * @throws Exception
    */

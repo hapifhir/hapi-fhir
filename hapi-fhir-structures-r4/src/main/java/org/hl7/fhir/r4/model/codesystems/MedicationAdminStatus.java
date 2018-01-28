@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -40,6 +40,10 @@ public enum MedicationAdminStatus {
          * The administration has started but has not yet completed.
          */
         INPROGRESS, 
+        /**
+         * The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)
+         */
+        NOTDONE, 
         /**
          * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended".
          */
@@ -69,6 +73,8 @@ public enum MedicationAdminStatus {
                 return null;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
         if ("on-hold".equals(codeString))
           return ONHOLD;
         if ("completed".equals(codeString))
@@ -84,6 +90,7 @@ public enum MedicationAdminStatus {
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in-progress";
+            case NOTDONE: return "not-done";
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
@@ -98,6 +105,7 @@ public enum MedicationAdminStatus {
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The administration has started but has not yet completed.";
+            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
@@ -109,6 +117,7 @@ public enum MedicationAdminStatus {
         public String getDisplay() {
           switch (this) {
             case INPROGRESS: return "In Progress";
+            case NOTDONE: return "Not Done";
             case ONHOLD: return "On Hold";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";

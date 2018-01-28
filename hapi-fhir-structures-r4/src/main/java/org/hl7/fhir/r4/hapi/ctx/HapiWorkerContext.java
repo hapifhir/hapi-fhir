@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.util.*;
@@ -303,6 +304,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public boolean isNoTerminologyServer() {
     return false;
+  }
+
+  @Override
+  public TranslationServices translator() {
+    throw new UnsupportedOperationException();
   }
 
   @Override

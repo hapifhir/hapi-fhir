@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1378,7 +1378,13 @@ public class SearchBuilder implements ISearchBuilder {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			}
-			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, myParams);
+
+			List<Long> pids;
+			if (myParams.getEverythingMode() != null) {
+				pids = myFulltextSearchSvc.everything(myResourceName, myParams);
+			} else {
+				pids = myFulltextSearchSvc.search(myResourceName, myParams);
+			}
 			if (pids.isEmpty()) {
 				// Will never match
 				pids = Collections.singletonList(-1L);
@@ -1522,7 +1528,7 @@ public class SearchBuilder implements ISearchBuilder {
 				thePredicates.add(joinParam1);
 			}
 		} else {
-			ourLog.info("Reusing join for {}", theSort.getParamName());
+			ourLog.debug("Reusing join for {}", theSort.getParamName());
 		}
 
 		for (String next : sortAttrName) {
@@ -1576,9 +1582,15 @@ public class SearchBuilder implements ISearchBuilder {
 		cq.where(from.get("myId").in(pids));
 		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
-		for (ResourceTable next : q.getResultList()) {
+		List<ResourceTable> resultList = q.getResultList();
+
+		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
 			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
+			if (resource == null) {
+				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
+				continue;
+			}
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1615,7 +1627,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// when running asserts
 		assert new HashSet<>(theIncludePids).size() == theIncludePids.size() : "PID list contains duplicates: " + theIncludePids;
 
-		Map<Long, Integer> position = new HashMap<Long, Integer>();
+		Map<Long, Integer> position = new HashMap<>();
 		for (Long next : theIncludePids) {
 			position.put(next, theResourceListToPopulate.size());
 			theResourceListToPopulate.add(null);
@@ -1754,7 +1766,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+				pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 			}
 			for (Long next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
@@ -1973,7 +1985,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.info("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
 				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}
@@ -2195,12 +2207,12 @@ public class SearchBuilder implements ISearchBuilder {
 			} // if we need to fetch the next result
 
 			if (myFirst) {
-				ourLog.info("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
+				ourLog.debug("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
 				myFirst = false;
 			}
 
 			if (myNext == NO_MORE) {
-				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
+				ourLog.debug("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
 			}
 
 		}
@@ -2272,10 +2284,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void ensureHaveQuery() {
 			if (myWrap == null) {
-				ourLog.info("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
+				ourLog.debug("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
 				StopWatch sw = new StopWatch();
 				Collection<Long> resourcePids = myCallingDao.getResourceIndexedCompositeStringUniqueDao().findResourcePidsByQueryStrings(myUniqueQueryStrings);
-				ourLog.info("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
+				ourLog.debug("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
 				myWrap = resourcePids.iterator();
 			}
 		}

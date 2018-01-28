@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -47,6 +48,11 @@ public abstract class BaseJpaTest {
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+
+	@After
+	public final void afterPerformCleanup() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+	}
 
 	@Before
 	public void beforeCreateSrd() {
@@ -153,11 +159,24 @@ public abstract class BaseJpaTest {
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
-		int size = theFound.size();
+		Integer size = theFound.size();
+		StopWatch sw = new StopWatch();
+		while (size == null) {
+			int timeout = 20000;
+			if (sw.getMillis() > timeout) {
+				fail("Waited over "+timeout+"ms for search");
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException theE) {
+				//ignore
+			}
+		}
+
 		ourLog.info("Found {} results", size);
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -165,7 +184,7 @@ public abstract class BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -204,7 +223,7 @@ public abstract class BaseJpaTest {
 	}
 
 	@AfterClass
-	public static void afterClassShutdownDerby() throws SQLException {
+	public static void afterClassShutdownDerby() {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");

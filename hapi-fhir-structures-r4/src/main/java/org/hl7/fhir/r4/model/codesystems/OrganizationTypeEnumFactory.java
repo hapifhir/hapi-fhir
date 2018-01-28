@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -49,6 +49,8 @@ public class OrganizationTypeEnumFactory implements EnumFactory<OrganizationType
       return OrganizationType.GOVT;
     if ("ins".equals(codeString))
       return OrganizationType.INS;
+    if ("pay".equals(codeString))
+      return OrganizationType.PAY;
     if ("edu".equals(codeString))
       return OrganizationType.EDU;
     if ("reli".equals(codeString))
@@ -75,6 +77,8 @@ public class OrganizationTypeEnumFactory implements EnumFactory<OrganizationType
       return "govt";
     if (code == OrganizationType.INS)
       return "ins";
+    if (code == OrganizationType.PAY)
+      return "pay";
     if (code == OrganizationType.EDU)
       return "edu";
     if (code == OrganizationType.RELI)

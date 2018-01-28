@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,12 +271,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case CONTAINED_RESOURCE_LIST:
 			case CONTAINED_RESOURCES: {
-			/*
-			 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next :
-			 * value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
-			 * encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true,
-			 * fixContainedResourceId(next.getId().getValue())); }
-			 */
+				/*
+				 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next :
+				 * value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
+				 * encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true,
+				 * fixContainedResourceId(next.getId().getValue())); }
+				 */
 				List<IBaseResource> containedResources = getContainedResources().getContainedResources();
 				if (containedResources.size() > 0) {
 					beginArray(theEventWriter, theChildName);
@@ -998,7 +998,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			for (int i = 0; i < nextArray.size(); i++) {
 				JsonLikeValue nextObject = nextArray.get(i);
 				JsonLikeValue nextAlternate = null;
-				if (nextAlternateArray != null) {
+				if (nextAlternateArray != null && nextAlternateArray.size() >= (i + 1)) {
 					nextAlternate = nextAlternateArray.get(i);
 				}
 				parseChildren(theState, theName, nextObject, nextAlternate, theAlternateName, true);
@@ -1082,12 +1082,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 			}
 
-      /*
-		 * This happens if an element has an extension but no actual value. I.e.
-		   * if a resource has a "_status" element but no corresponding "status"
-		   * element. This could be used to handle a null value with an extension
-		   * for example.
-		  */
+			/*
+			 * This happens if an element has an extension but no actual value. I.e.
+			 * if a resource has a "_status" element but no corresponding "status"
+			 * element. This could be used to handle a null value with an extension
+			 * for example.
+			 */
 			if (allUnderscoreNames > handledUnderscoreNames) {
 				for (String alternateName : nextExtObj.keySet()) {
 					if (alternateName.startsWith("_") && alternateName.length() > 1) {

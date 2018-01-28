@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -992,12 +992,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceReferenceSeqComponent))
+        if (!(other_ instanceof SequenceReferenceSeqComponent))
           return false;
-        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
+        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
         return compareDeep(chromosome, o.chromosome, true) && compareDeep(genomeBuild, o.genomeBuild, true)
            && compareDeep(referenceSeqId, o.referenceSeqId, true) && compareDeep(referenceSeqPointer, o.referenceSeqPointer, true)
            && compareDeep(referenceSeqString, o.referenceSeqString, true) && compareDeep(strand, o.strand, true)
@@ -1005,12 +1005,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceReferenceSeqComponent))
+        if (!(other_ instanceof SequenceReferenceSeqComponent))
           return false;
-        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
+        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
         return compareValues(genomeBuild, o.genomeBuild, true) && compareValues(referenceSeqString, o.referenceSeqString, true)
            && compareValues(strand, o.strand, true) && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true)
           ;
@@ -1516,24 +1516,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceVariantComponent))
+        if (!(other_ instanceof SequenceVariantComponent))
           return false;
-        SequenceVariantComponent o = (SequenceVariantComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other_;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(observedAllele, o.observedAllele, true)
            && compareDeep(referenceAllele, o.referenceAllele, true) && compareDeep(cigar, o.cigar, true) && compareDeep(variantPointer, o.variantPointer, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceVariantComponent))
+        if (!(other_ instanceof SequenceVariantComponent))
           return false;
-        SequenceVariantComponent o = (SequenceVariantComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(observedAllele, o.observedAllele, true)
            && compareValues(referenceAllele, o.referenceAllele, true) && compareValues(cigar, o.cigar, true);
       }
@@ -2724,12 +2724,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceQualityComponent))
+        if (!(other_ instanceof SequenceQualityComponent))
           return false;
-        SequenceQualityComponent o = (SequenceQualityComponent) other;
+        SequenceQualityComponent o = (SequenceQualityComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(standardSequence, o.standardSequence, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(score, o.score, true)
            && compareDeep(method, o.method, true) && compareDeep(truthTP, o.truthTP, true) && compareDeep(queryTP, o.queryTP, true)
@@ -2739,12 +2739,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceQualityComponent))
+        if (!(other_ instanceof SequenceQualityComponent))
           return false;
-        SequenceQualityComponent o = (SequenceQualityComponent) other;
+        SequenceQualityComponent o = (SequenceQualityComponent) other_;
         return compareValues(type, o.type, true) && compareValues(start, o.start, true) && compareValues(end, o.end, true)
            && compareValues(truthTP, o.truthTP, true) && compareValues(queryTP, o.queryTP, true) && compareValues(truthFN, o.truthFN, true)
            && compareValues(queryFP, o.queryFP, true) && compareValues(gtFP, o.gtFP, true) && compareValues(precision, o.precision, true)
@@ -3441,24 +3441,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceQualityRocComponent))
+        if (!(other_ instanceof SequenceQualityRocComponent))
           return false;
-        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other;
+        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other_;
         return compareDeep(score, o.score, true) && compareDeep(numTP, o.numTP, true) && compareDeep(numFP, o.numFP, true)
            && compareDeep(numFN, o.numFN, true) && compareDeep(precision, o.precision, true) && compareDeep(sensitivity, o.sensitivity, true)
            && compareDeep(fMeasure, o.fMeasure, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceQualityRocComponent))
+        if (!(other_ instanceof SequenceQualityRocComponent))
           return false;
-        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other;
+        SequenceQualityRocComponent o = (SequenceQualityRocComponent) other_;
         return compareValues(score, o.score, true) && compareValues(numTP, o.numTP, true) && compareValues(numFP, o.numFP, true)
            && compareValues(numFN, o.numFN, true) && compareValues(precision, o.precision, true) && compareValues(sensitivity, o.sensitivity, true)
            && compareValues(fMeasure, o.fMeasure, true);
@@ -3978,24 +3978,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceRepositoryComponent))
+        if (!(other_ instanceof SequenceRepositoryComponent))
           return false;
-        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other;
+        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(url, o.url, true) && compareDeep(name, o.name, true)
            && compareDeep(datasetId, o.datasetId, true) && compareDeep(variantsetId, o.variantsetId, true)
            && compareDeep(readsetId, o.readsetId, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceRepositoryComponent))
+        if (!(other_ instanceof SequenceRepositoryComponent))
           return false;
-        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other;
+        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other_;
         return compareValues(type, o.type, true) && compareValues(url, o.url, true) && compareValues(name, o.name, true)
            && compareValues(datasetId, o.datasetId, true) && compareValues(variantsetId, o.variantsetId, true)
            && compareValues(readsetId, o.readsetId, true);
@@ -4404,24 +4404,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantComponent))
+        if (!(other_ instanceof SequenceStructureVariantComponent))
           return false;
-        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other_;
         return compareDeep(precision, o.precision, true) && compareDeep(reportedaCGHRatio, o.reportedaCGHRatio, true)
            && compareDeep(length, o.length, true) && compareDeep(outer, o.outer, true) && compareDeep(inner, o.inner, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantComponent))
+        if (!(other_ instanceof SequenceStructureVariantComponent))
           return false;
-        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other_;
         return compareValues(precision, o.precision, true) && compareValues(reportedaCGHRatio, o.reportedaCGHRatio, true)
            && compareValues(length, o.length, true);
       }
@@ -4645,22 +4645,22 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantOuterComponent))
+        if (!(other_ instanceof SequenceStructureVariantOuterComponent))
           return false;
-        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other_;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantOuterComponent))
+        if (!(other_ instanceof SequenceStructureVariantOuterComponent))
           return false;
-        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true);
       }
 
@@ -4882,22 +4882,22 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantInnerComponent))
+        if (!(other_ instanceof SequenceStructureVariantInnerComponent))
           return false;
-        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other_;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceStructureVariantInnerComponent))
+        if (!(other_ instanceof SequenceStructureVariantInnerComponent))
           return false;
-        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true);
       }
 
@@ -6148,12 +6148,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Sequence))
+        if (!(other_ instanceof Sequence))
           return false;
-        Sequence o = (Sequence) other;
+        Sequence o = (Sequence) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(coordinateSystem, o.coordinateSystem, true)
            && compareDeep(patient, o.patient, true) && compareDeep(specimen, o.specimen, true) && compareDeep(device, o.device, true)
            && compareDeep(performer, o.performer, true) && compareDeep(quantity, o.quantity, true) && compareDeep(referenceSeq, o.referenceSeq, true)
@@ -6164,12 +6164,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Sequence))
+        if (!(other_ instanceof Sequence))
           return false;
-        Sequence o = (Sequence) other;
+        Sequence o = (Sequence) other_;
         return compareValues(type, o.type, true) && compareValues(coordinateSystem, o.coordinateSystem, true)
            && compareValues(observedSeq, o.observedSeq, true) && compareValues(readCoverage, o.readCoverage, true)
           ;

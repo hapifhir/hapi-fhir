@@ -12,7 +12,7 @@ import java.util.*;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,6 @@ public class DaoConfig {
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
 	private int myHardTagListLimit = 1000;
-	private int myIncludeLimit = 2000;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -104,11 +103,13 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
-	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
+	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
+	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
+	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
+	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 
 	/**
 	 * Constructor
@@ -117,6 +118,7 @@ public class DaoConfig {
 		setSubscriptionEnabled(true);
 		setSubscriptionPollDelay(0);
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
+		setMarkResourcesForReindexingUponSearchParameterChange(true);
 	}
 
 	/**
@@ -128,7 +130,7 @@ public class DaoConfig {
 		validateTreatBaseUrlsAsLocal(theTreatReferencesAsLogical);
 
 		if (myTreatReferencesAsLogical == null) {
-			myTreatReferencesAsLogical = new HashSet<String>();
+			myTreatReferencesAsLogical = new HashSet<>();
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
@@ -160,18 +162,18 @@ public class DaoConfig {
 	 * whether a "total count" is included in the response bundle for searches that
 	 * return large amounts of data.
 	 * <p>
-	 *    For a search that returns 10000 results, if this value is set to
-	 *    10000 the search coordinator will find all 10000 results
-	 *    prior to returning, so the initial response bundle will have the
-	 *    total set to 10000. If this value is null (or less than 10000)
-	 *    the response bundle will likely return slightly faster, but will
-	 *    not include the total. Subsequent page requests will likely
-	 *    include the total however, if they are performed after the
-	 *    search coordinator has found all results.
+	 * For a search that returns 10000 results, if this value is set to
+	 * 10000 the search coordinator will find all 10000 results
+	 * prior to returning, so the initial response bundle will have the
+	 * total set to 10000. If this value is null (or less than 10000)
+	 * the response bundle will likely return slightly faster, but will
+	 * not include the total. Subsequent page requests will likely
+	 * include the total however, if they are performed after the
+	 * search coordinator has found all results.
 	 * </p>
 	 * <p>
-	 *    Set this value to <code>0</code> to always load all
-	 *    results before returning.
+	 * Set this value to <code>0</code> to always load all
+	 * results before returning.
 	 * </p>
 	 */
 	public Integer getCountSearchResultsUpTo() {
@@ -185,18 +187,18 @@ public class DaoConfig {
 	 * whether a "total count" is included in the response bundle for searches that
 	 * return large amounts of data.
 	 * <p>
-	 *    For a search that returns 10000 results, if this value is set to
-	 *    10000 the search coordinator will find all 10000 results
-	 *    prior to returning, so the initial response bundle will have the
-	 *    total set to 10000. If this value is null (or less than 10000)
-	 *    the response bundle will likely return slightly faster, but will
-	 *    not include the total. Subsequent page requests will likely
-	 *    include the total however, if they are performed after the
-	 *    search coordinator has found all results.
+	 * For a search that returns 10000 results, if this value is set to
+	 * 10000 the search coordinator will find all 10000 results
+	 * prior to returning, so the initial response bundle will have the
+	 * total set to 10000. If this value is null (or less than 10000)
+	 * the response bundle will likely return slightly faster, but will
+	 * not include the total. Subsequent page requests will likely
+	 * include the total however, if they are performed after the
+	 * search coordinator has found all results.
 	 * </p>
 	 * <p>
-	 *    Set this value to <code>0</code> to always load all
-	 *    results before returning.
+	 * Set this value to <code>0</code> to always load all
+	 * results before returning.
 	 * </p>
 	 */
 	public void setCountSearchResultsUpTo(Integer theCountSearchResultsUpTo) {
@@ -270,7 +272,6 @@ public class DaoConfig {
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
-	 * <p>
 	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
 	 *
@@ -289,8 +290,6 @@ public class DaoConfig {
 	 * number of milliseconds, they will be deleted from the database, and any paging links
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
-	 * <p>
-	 * <p>
 	 * <p>
 	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
@@ -343,19 +342,6 @@ public class DaoConfig {
 		myHardTagListLimit = theHardTagListLimit;
 	}
 
-	public int getIncludeLimit() {
-		return myIncludeLimit;
-	}
-
-	/**
-	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
-	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
-	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
-	 */
-	public void setIncludeLimit(int theIncludeLimit) {
-		myIncludeLimit = theIncludeLimit;
-	}
-
 	/**
 	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
@@ -386,6 +372,11 @@ public class DaoConfig {
 	 * <p>
 	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
 	 * of higher importance than raw write performance
+	 * </p>
+	 * <p>
+	 *    Note that this setting also has an impact on sorting (i.e. using the
+	 *    <code>_sort</code> parameter on searches): If the server is configured
+	 *    to not index missing field.
 	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
@@ -494,6 +485,25 @@ public class DaoConfig {
 	 */
 	public void setResourceMetaCountHardLimit(Integer theResourceMetaCountHardLimit) {
 		myResourceMetaCountHardLimit = theResourceMetaCountHardLimit;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 */
+	public IdStrategyEnum getResourceServerIdStrategy() {
+		return myResourceServerIdStrategy;
+	}
+
+	/**
+	 * This setting configures the strategy to use in generating IDs for newly
+	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 *
+	 * @param theResourceIdStrategy The strategy. Must not be null.
+	 */
+	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
+		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
+		myResourceServerIdStrategy = theResourceIdStrategy;
 	}
 
 	/**
@@ -904,6 +914,24 @@ public class DaoConfig {
 		myIndexContainedResources = theIndexContainedResources;
 	}
 
+	/**
+	 * Should resources be marked as needing reindexing when a
+	 * SearchParameter resource is added or changed. This should generally
+	 * be true (which is the default)
+	 */
+	public boolean isMarkResourcesForReindexingUponSearchParameterChange() {
+		return myMarkResourcesForReindexingUponSearchParameterChange;
+	}
+
+	/**
+	 * Should resources be marked as needing reindexing when a
+	 * SearchParameter resource is added or changed. This should generally
+	 * be true (which is the default)
+	 */
+	public void setMarkResourcesForReindexingUponSearchParameterChange(boolean theMarkResourcesForReindexingUponSearchParameterChange) {
+		myMarkResourcesForReindexingUponSearchParameterChange = theMarkResourcesForReindexingUponSearchParameterChange;
+	}
+
 	public boolean isSchedulingDisabled() {
 		return mySchedulingDisabled;
 	}
@@ -961,7 +989,7 @@ public class DaoConfig {
 	 * a new one.
 	 * <p>
 	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for eavh save so it can cause
+	 * extra round-trip to the database for each save so it can cause
 	 * a small performance hit.
 	 * </p>
 	 */
@@ -1002,6 +1030,18 @@ public class DaoConfig {
 	@Deprecated
 	public void setHardSearchLimit(int theHardSearchLimit) {
 		// this method does nothing
+	}
+
+	/**
+	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
+	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
+	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
+	 *
+	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
+	 */
+	@Deprecated
+	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
+		// nothing
 	}
 
 	/**
@@ -1060,6 +1100,18 @@ public class DaoConfig {
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
+	}
+
+	public enum IdStrategyEnum {
+		/**
+		 * This strategy is the default strategy, and it simply uses a sequential
+		 * numeric ID for each newly created resource.
+		 */
+		SEQUENTIAL_NUMERIC,
+		/**
+		 * Each resource will receive a randomly generated UUID
+		 */
+		UUID
 	}
 
 }

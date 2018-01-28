@@ -40,8 +40,6 @@ import org.hl7.fhir.dstu2016may.model.Extension;
 import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.Identifier;
 import org.hl7.fhir.dstu2016may.model.IntegerType;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu2016may.model.Period;
 import org.hl7.fhir.dstu2016may.model.Quantity;
 import org.hl7.fhir.dstu2016may.model.Questionnaire;
@@ -69,7 +67,6 @@ import org.hl7.fhir.dstu2016may.utils.FHIRPathEngine;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext.ValidationResult;
 import org.hl7.fhir.dstu2016may.utils.ProfileUtilities;
-import org.hl7.fhir.dstu2016may.validation.ValidationMessage.Source;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
@@ -82,6 +79,10 @@ import org.w3c.dom.Node;
 import com.google.gson.JsonObject;
 
 import ca.uhn.fhir.util.ObjectUtil;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 
 /* 

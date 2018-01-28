@@ -76,6 +76,27 @@ public class JsonParserDstu2Test {
 	}
 
 	@Test
+	public void testParseEmptyString() {
+		try {
+			String tmp = "{\"resourceType\":\"Bundle\",\"entry\":[{\"fullUrl\":\"\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\"patxuzos\"}}]}";
+			ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) ourCtx.newJsonParser().parseResource(tmp);
+			assertEquals(1, bundle.getEntry().size());
+			{
+				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+				IIdType o1Id = o1.getIdElement();
+				assertFalse(o1Id.hasBaseUrl());
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
+				assertFalse(o1Id.hasVersionIdPart());
+			}
+		} finally {
+			// ensure we cleanup ourCtx so other tests continue to work
+			ourCtx = FhirContext.forDstu2();
+		}
+	}
+
+	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
 		try {
 			String tmp = "{\"resourceType\":\"Bundle\",\"entry\":[{\"fullUrl\":\"http://lalaland.org/patient/pat1\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\"patxuzos\"}}]}";

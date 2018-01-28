@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,15 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import java.util.Collection;
+
 public interface IAuthRuleBuilderRuleOpClassifierFinished extends IAuthRuleFinished {
-	// nothing
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(String... theTenantId);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(Collection<String> theTenantId);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(String... theTenantIds);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(Collection<String> theTenantIds);
 }

@@ -11,8 +11,10 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
@@ -179,7 +181,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
 
-		Set<String> allIds = new TreeSet<String>();
+		Set<String> allIds = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
 			nextEntry.getRequest().setMethod(HTTPVerb.PUT);
 			nextEntry.getRequest().setUrl(nextEntry.getResource().getId());
@@ -193,7 +195,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IPrimitiveType<Integer> count = new IntegerType(1000);
 		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, mySrd);
 
-		TreeSet<String> ids = new TreeSet<String>(toUnqualifiedVersionlessIdValues(everything));
+		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
 		assertThat(ids, hasItem("List/A161500"));
@@ -202,7 +204,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
 		assertEquals(allIds, ids);
 
-		ids = new TreeSet<String>();
+		ids = new TreeSet<>();
 		for (int i = 0; i < everything.size(); i++) {
 			for (IBaseResource next : everything.getResources(i, i + 1)) {
 				ids.add(next.getIdElement().toUnqualifiedVersionless().getValue());
@@ -1385,37 +1387,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testSearchPagesExpiryDisabled() throws Exception {
-		IIdType pid1;
-		IIdType pid2;
-		{
-			Patient patient = new Patient();
-			patient.addName().setFamily("EXPIRE");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		Date between = new Date();
-		Thread.sleep(10);
-		{
-			Patient patient = new Patient();
-			patient.addName().setFamily("EXPIRE");
-			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		Thread.sleep(10);
-
-		SearchParameterMap params;
-		params = new SearchParameterMap();
-		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
-		IBundleProvider bundleProvider = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
-
-		myDaoConfig.setExpireSearchResults(false);
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		Thread.sleep(1500);
-
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), (containsInAnyOrder(pid1, pid2)));
-	}
 
 	@Test
 	public void testSearchParamChangesType() {

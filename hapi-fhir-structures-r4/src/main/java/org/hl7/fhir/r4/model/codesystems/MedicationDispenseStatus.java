@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -44,6 +44,10 @@ public enum MedicationDispenseStatus {
          * The dispense has started but has not yet completed.
          */
         INPROGRESS, 
+        /**
+         * The dispense was terminated prior to any impact on the subject (though prepartory actions may have been taken
+         */
+        NOTDONE, 
         /**
          * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended"
          */
@@ -71,6 +75,8 @@ public enum MedicationDispenseStatus {
           return PREPARATION;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
         if ("on-hold".equals(codeString))
           return ONHOLD;
         if ("completed".equals(codeString))
@@ -85,6 +91,7 @@ public enum MedicationDispenseStatus {
           switch (this) {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
+            case NOTDONE: return "not-done";
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
@@ -99,6 +106,7 @@ public enum MedicationDispenseStatus {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.";
             case INPROGRESS: return "The dispense has started but has not yet completed.";
+            case NOTDONE: return "The dispense was terminated prior to any impact on the subject (though prepartory actions may have been taken";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\"";
             case COMPLETED: return "All actions that are implied by the dispense have occurred.";
             case ENTEREDINERROR: return "The dispense was entered in error and therefore nullified.";
@@ -110,6 +118,7 @@ public enum MedicationDispenseStatus {
           switch (this) {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
+            case NOTDONE: return "Not Done";
             case ONHOLD: return "On Hold";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in-Error";

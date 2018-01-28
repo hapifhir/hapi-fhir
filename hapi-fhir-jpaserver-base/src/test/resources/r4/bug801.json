@@ -1,0 +1,118 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs",
+								"userSelected": false
+							}
+						],
+						"text": "Vital Signs"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "55284-4",
+							"display": "Blood pressure systolic and diastolic",
+							"userSelected": false
+						}
+					],
+					"text": "Blood pressure systolic and diastolic"
+				},
+				"subject": {
+					"reference": "Patient?identifier=http://ehr.example.com|Patient/A9"
+				},
+				"performer": [{
+					"reference": "Patient?identifier=http://ehr.example.com|Patient/A9"
+				}],
+				"effectiveDateTime": "2009-09-09T00:00:00",
+				"component": [
+					{
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "8480-6",
+									"display": "Systolic blood pressure",
+									"userSelected": false
+								}
+							],
+							"text": "Systolic blood pressure"
+						},
+						"valueQuantity": {
+							"value": 109,
+							"unit": "mmHg",
+							"system": "http://unitsofmeasure.org",
+							"code": "mm[Hg]"
+						}
+					},
+					{
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "8462-4",
+									"display": "Diastolic blood pressure",
+									"userSelected": false
+								}
+							],
+							"text": "Diastolic blood pressure"
+						},
+						"valueQuantity": {
+							"value": 66,
+							"unit": "mmHg",
+							"system": "http://unitsofmeasure.org",
+							"code": "mm[Hg]"
+						}
+					}
+				],
+				"comment": "BUNDLE testing."
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"identifier": [
+					{
+						"use": "usual",
+						"system": "http://ehr.example.com",
+						"value": "Patient/A9"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"use": "official",
+						"family": "Chalmers",
+						"given": [
+							"Peter",
+							"James"
+						]
+					}
+				],
+				"gender": "male",
+				"birthDate": "1974-12-25"
+			},
+			"request": {
+				"method": "POST",
+				"url": "Patient",
+				"ifNoneExist": "identifier=http://ehr.example.com|Patient/A9"
+			}
+		}
+	]
+}

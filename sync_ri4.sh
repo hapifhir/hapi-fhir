@@ -9,15 +9,23 @@ cp -R /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.u
 cp -R /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.validation/src/org hapi-fhir-validation/src/main/java/
 #cp -R ./hapi-fhir-validation/src/main/java/org/hl7/fhir/validation/dstu3/tests/* ./hapi-fhir-validation/src/test/java/org/hl7/fhir/validation/dstu3/tests/
 #rm -R ./hapi-fhir-validation/src/main/java/org/hl7/fhir/validation/dstu3/tests
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/r4/validation/ValidationEngine.java
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/dstu2/validation/ValidationEngine.java
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/dstu2/validation/Validator.java
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/dstu3/validation/Validator.java
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/r4/validation/Validator.java
+rm -R hapi-fhir-validation/src/main/java/org/hl7/fhir/validation/dstu3/tests
+rm -R hapi-fhir-validation/src/main/java/org/hl7/fhir/validation/r4/tests
 
 # Converter
 #cp -R ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.convertors/src/org ./hapi-fhir-converter/src/main/java/
 
 # RI R4 Model
-cp -R /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.r4/src/org hapi-fhir-structures-r4/src/main/java/
-cp -R ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/test/* hapi-fhir-structures-r4/src/test/java/org/hl7/fhir/r4/test/
-rm -R ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/test
-cp -R /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/* hapi-fhir-structures-r4/src/main/java/
+cp -fR /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.r4/src/org hapi-fhir-structures-r4/src/main/java/
+cp -fR /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/model/* hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/model/
+#cp -R ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/test/* hapi-fhir-structures-r4/src/test/java/org/hl7/fhir/r4/test/
+#rm -R ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/test
+#cp -R /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/* hapi-fhir-structures-r4/src/main/java/
 
 
 # Resource Spreadsheets

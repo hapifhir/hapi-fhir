@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -615,23 +615,23 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetectedIssueMitigationComponent))
+        if (!(other_ instanceof DetectedIssueMitigationComponent))
           return false;
-        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other;
+        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other_;
         return compareDeep(action, o.action, true) && compareDeep(date, o.date, true) && compareDeep(author, o.author, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetectedIssueMitigationComponent))
+        if (!(other_ instanceof DetectedIssueMitigationComponent))
           return false;
-        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other;
+        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -1489,12 +1489,12 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetectedIssue))
+        if (!(other_ instanceof DetectedIssue))
           return false;
-        DetectedIssue o = (DetectedIssue) other;
+        DetectedIssue o = (DetectedIssue) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(severity, o.severity, true) && compareDeep(patient, o.patient, true) && compareDeep(date, o.date, true)
            && compareDeep(author, o.author, true) && compareDeep(implicated, o.implicated, true) && compareDeep(detail, o.detail, true)
@@ -1502,12 +1502,12 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetectedIssue))
+        if (!(other_ instanceof DetectedIssue))
           return false;
-        DetectedIssue o = (DetectedIssue) other;
+        DetectedIssue o = (DetectedIssue) other_;
         return compareValues(status, o.status, true) && compareValues(severity, o.severity, true) && compareValues(date, o.date, true)
            && compareValues(detail, o.detail, true) && compareValues(reference, o.reference, true);
       }

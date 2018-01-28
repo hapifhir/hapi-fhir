@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -47,6 +47,8 @@ public class IdentifierUseEnumFactory implements EnumFactory<IdentifierUse> {
       return IdentifierUse.TEMP;
     if ("secondary".equals(codeString))
       return IdentifierUse.SECONDARY;
+    if ("old".equals(codeString))
+      return IdentifierUse.OLD;
     throw new IllegalArgumentException("Unknown IdentifierUse code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class IdentifierUseEnumFactory implements EnumFactory<IdentifierUse> {
       return "temp";
     if (code == IdentifierUse.SECONDARY)
       return "secondary";
+    if (code == IdentifierUse.OLD)
+      return "old";
     return "?";
   }
 

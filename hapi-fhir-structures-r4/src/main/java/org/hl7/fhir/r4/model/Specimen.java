@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -533,23 +533,23 @@ public class Specimen extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SpecimenCollectionComponent))
+        if (!(other_ instanceof SpecimenCollectionComponent))
           return false;
-        SpecimenCollectionComponent o = (SpecimenCollectionComponent) other;
+        SpecimenCollectionComponent o = (SpecimenCollectionComponent) other_;
         return compareDeep(collector, o.collector, true) && compareDeep(collected, o.collected, true) && compareDeep(quantity, o.quantity, true)
            && compareDeep(method, o.method, true) && compareDeep(bodySite, o.bodySite, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SpecimenCollectionComponent))
+        if (!(other_ instanceof SpecimenCollectionComponent))
           return false;
-        SpecimenCollectionComponent o = (SpecimenCollectionComponent) other;
+        SpecimenCollectionComponent o = (SpecimenCollectionComponent) other_;
         return true;
       }
 
@@ -937,23 +937,23 @@ public class Specimen extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SpecimenProcessingComponent))
+        if (!(other_ instanceof SpecimenProcessingComponent))
           return false;
-        SpecimenProcessingComponent o = (SpecimenProcessingComponent) other;
+        SpecimenProcessingComponent o = (SpecimenProcessingComponent) other_;
         return compareDeep(description, o.description, true) && compareDeep(procedure, o.procedure, true)
            && compareDeep(additive, o.additive, true) && compareDeep(time, o.time, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SpecimenProcessingComponent))
+        if (!(other_ instanceof SpecimenProcessingComponent))
           return false;
-        SpecimenProcessingComponent o = (SpecimenProcessingComponent) other;
+        SpecimenProcessingComponent o = (SpecimenProcessingComponent) other_;
         return compareValues(description, o.description, true);
       }
 
@@ -1407,24 +1407,24 @@ public class Specimen extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SpecimenContainerComponent))
+        if (!(other_ instanceof SpecimenContainerComponent))
           return false;
-        SpecimenContainerComponent o = (SpecimenContainerComponent) other;
+        SpecimenContainerComponent o = (SpecimenContainerComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(description, o.description, true)
            && compareDeep(type, o.type, true) && compareDeep(capacity, o.capacity, true) && compareDeep(specimenQuantity, o.specimenQuantity, true)
            && compareDeep(additive, o.additive, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SpecimenContainerComponent))
+        if (!(other_ instanceof SpecimenContainerComponent))
           return false;
-        SpecimenContainerComponent o = (SpecimenContainerComponent) other;
+        SpecimenContainerComponent o = (SpecimenContainerComponent) other_;
         return compareValues(description, o.description, true);
       }
 
@@ -1502,15 +1502,15 @@ public class Specimen extends DomainResource {
 
 
     /**
-     * Details concerning a test or procedure request that required a specimen to be collected.
+     * Details concerning a service request that required a specimen to be collected.
      */
-    @Child(name = "request", type = {ProcedureRequest.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Why the specimen was collected", formalDefinition="Details concerning a test or procedure request that required a specimen to be collected." )
+    @Child(name = "request", type = {ServiceRequest.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why the specimen was collected", formalDefinition="Details concerning a service request that required a specimen to be collected." )
     protected List<Reference> request;
     /**
-     * The actual objects that are the target of the reference (Details concerning a test or procedure request that required a specimen to be collected.)
+     * The actual objects that are the target of the reference (Details concerning a service request that required a specimen to be collected.)
      */
-    protected List<ProcedureRequest> requestTarget;
+    protected List<ServiceRequest> requestTarget;
 
 
     /**
@@ -1541,7 +1541,7 @@ public class Specimen extends DomainResource {
     @Description(shortDefinition="Comments", formalDefinition="To communicate any details or issues about the specimen or during the specimen collection. (for example: broken vial, sent with patient, frozen)." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = -743921079L;
+    private static final long serialVersionUID = -621357717L;
 
   /**
    * Constructor
@@ -1872,7 +1872,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #request} (Details concerning a test or procedure request that required a specimen to be collected.)
+     * @return {@link #request} (Details concerning a service request that required a specimen to be collected.)
      */
     public List<Reference> getRequest() { 
       if (this.request == null)
@@ -1928,9 +1928,9 @@ public class Specimen extends DomainResource {
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<ProcedureRequest> getRequestTarget() { 
+    public List<ServiceRequest> getRequestTarget() { 
       if (this.requestTarget == null)
-        this.requestTarget = new ArrayList<ProcedureRequest>();
+        this.requestTarget = new ArrayList<ServiceRequest>();
       return this.requestTarget;
     }
 
@@ -1938,10 +1938,10 @@ public class Specimen extends DomainResource {
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public ProcedureRequest addRequestTarget() { 
-      ProcedureRequest r = new ProcedureRequest();
+    public ServiceRequest addRequestTarget() { 
+      ServiceRequest r = new ServiceRequest();
       if (this.requestTarget == null)
-        this.requestTarget = new ArrayList<ProcedureRequest>();
+        this.requestTarget = new ArrayList<ServiceRequest>();
       this.requestTarget.add(r);
       return r;
     }
@@ -2138,7 +2138,7 @@ public class Specimen extends DomainResource {
         children.add(new Property("subject", "Reference(Patient|Group|Device|Substance)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, 1, subject));
         children.add(new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, 1, receivedTime));
         children.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
-        children.add(new Property("request", "Reference(ProcedureRequest)", "Details concerning a test or procedure request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request));
+        children.add(new Property("request", "Reference(ServiceRequest)", "Details concerning a service request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request));
         children.add(new Property("collection", "", "Details concerning the specimen collection.", 0, 1, collection));
         children.add(new Property("processing", "", "Details concerning processing and processing steps for the specimen.", 0, java.lang.Integer.MAX_VALUE, processing));
         children.add(new Property("container", "", "The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.", 0, java.lang.Integer.MAX_VALUE, container));
@@ -2155,7 +2155,7 @@ public class Specimen extends DomainResource {
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Substance)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, 1, subject);
         case -767961010: /*receivedTime*/  return new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, 1, receivedTime);
         case -995424086: /*parent*/  return new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent);
-        case 1095692943: /*request*/  return new Property("request", "Reference(ProcedureRequest)", "Details concerning a test or procedure request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request);
+        case 1095692943: /*request*/  return new Property("request", "Reference(ServiceRequest)", "Details concerning a service request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request);
         case -1741312354: /*collection*/  return new Property("collection", "", "Details concerning the specimen collection.", 0, 1, collection);
         case 422194963: /*processing*/  return new Property("processing", "", "Details concerning processing and processing steps for the specimen.", 0, java.lang.Integer.MAX_VALUE, processing);
         case -410956671: /*container*/  return new Property("container", "", "The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.", 0, java.lang.Integer.MAX_VALUE, container);
@@ -2400,12 +2400,12 @@ public class Specimen extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Specimen))
+        if (!(other_ instanceof Specimen))
           return false;
-        Specimen o = (Specimen) other;
+        Specimen o = (Specimen) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(accessionIdentifier, o.accessionIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(subject, o.subject, true)
            && compareDeep(receivedTime, o.receivedTime, true) && compareDeep(parent, o.parent, true) && compareDeep(request, o.request, true)
@@ -2414,12 +2414,12 @@ public class Specimen extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Specimen))
+        if (!(other_ instanceof Specimen))
           return false;
-        Specimen o = (Specimen) other;
+        Specimen o = (Specimen) other_;
         return compareValues(status, o.status, true) && compareValues(receivedTime, o.receivedTime, true);
       }
 

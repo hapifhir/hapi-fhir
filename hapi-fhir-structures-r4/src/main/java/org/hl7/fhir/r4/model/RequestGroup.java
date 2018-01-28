@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class RequestGroup extends DomainResource {
          */
         DRAFT, 
         /**
-         * The request is ready to be acted upon
+         * The request is in force and ready to be acted upon
          */
         ACTIVE, 
         /**
@@ -130,7 +130,7 @@ public class RequestGroup extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case DRAFT: return "The request has been created but is not yet complete or ready for action";
-            case ACTIVE: return "The request is ready to be acted upon";
+            case ACTIVE: return "The request is in force and ready to be acted upon";
             case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
             case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
             case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
@@ -968,7 +968,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
          */
         ALLORNONE, 
         /**
-         * The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group
+         * The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group
          */
         EXACTLYONE, 
         /**
@@ -1030,7 +1030,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case ANY: return "Any number of the actions in the group may be chosen, from zero to all";
             case ALL: return "All the actions in the group must be selected as a single unit";
             case ALLORNONE: return "All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected";
-            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group";
+            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group";
             case ATMOSTONE: return "The end user may choose zero or at most one of the actions in the group";
             case ONEORMORE: return "The end user must choose a minimum of one, and as many additional as desired";
             default: return "?";
@@ -1112,7 +1112,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
     public enum ActionRequiredBehavior {
         /**
-         * An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action
+         * An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action
          */
         MUST, 
         /**
@@ -1159,7 +1159,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
         public String getDefinition() {
           switch (this) {
-            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action";
+            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action";
             case COULD: return "An action with this behavior may be included in the set of actions processed by the end user";
             case MUSTUNLESSDOCUMENTED: return "An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included";
             default: return "?";
@@ -1426,10 +1426,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         protected StringType description;
 
         /**
-         * A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
+         * A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.
          */
         @Child(name = "textEquivalent", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Static text equivalent of the action, used if the dynamic aspects cannot be interpreted by the receiving system", formalDefinition="A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically." )
+        @Description(shortDefinition="Static text equivalent of the action, used if the dynamic aspects cannot be interpreted by the receiving system", formalDefinition="A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically." )
         protected StringType textEquivalent;
 
         /**
@@ -1463,7 +1463,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * An optional value describing when the action should be performed.
          */
-        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "timing", type = {DateTimeType.class, Age.class, Period.class, Duration.class, Range.class, Timing.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
         protected Type timing;
 
@@ -1703,7 +1703,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
+         * @return {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
          */
         public StringType getTextEquivalentElement() { 
           if (this.textEquivalent == null)
@@ -1723,7 +1723,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @param value {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
+         * @param value {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
          */
         public RequestGroupActionComponent setTextEquivalentElement(StringType value) { 
           this.textEquivalent = value;
@@ -1731,14 +1731,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
+         * @return A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.
          */
         public String getTextEquivalent() { 
           return this.textEquivalent == null ? null : this.textEquivalent.getValue();
         }
 
         /**
-         * @param value A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
+         * @param value A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.
          */
         public RequestGroupActionComponent setTextEquivalent(String value) { 
           if (Utilities.noString(value))
@@ -1981,6 +1981,19 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
         public boolean hasTimingDateTimeType() { 
           return this.timing instanceof DateTimeType;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Age getTimingAge() throws FHIRException { 
+          if (!(this.timing instanceof Age))
+            throw new FHIRException("Type mismatch: the type Age was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Age) this.timing;
+        }
+
+        public boolean hasTimingAge() { 
+          return this.timing instanceof Age;
         }
 
         /**
@@ -2476,12 +2489,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           children.add(new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix));
           children.add(new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title));
           children.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description));
-          children.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent));
+          children.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.", 0, 1, textEquivalent));
           children.add(new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code));
           children.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           children.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
           children.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
-          children.add(new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing));
+          children.add(new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing));
           children.add(new Property("participant", "Reference(Patient|Person|Practitioner|RelatedPerson)", "The participant that should perform or be responsible for this action.", 0, java.lang.Integer.MAX_VALUE, participant));
           children.add(new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, 1, type));
           children.add(new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, 1, groupingBehavior));
@@ -2499,18 +2512,19 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           case -980110702: /*prefix*/  return new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix);
           case 110371416: /*title*/  return new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title);
           case -1724546052: /*description*/  return new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description);
-          case -900391049: /*textEquivalent*/  return new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, 1, textEquivalent);
+          case -900391049: /*textEquivalent*/  return new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.", 0, 1, textEquivalent);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code);
           case 1587405498: /*documentation*/  return new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation);
           case -861311717: /*condition*/  return new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition);
           case -384107967: /*relatedAction*/  return new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction);
-          case 164632566: /*timing[x]*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -873664438: /*timing*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -615615829: /*timingPeriod*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -1327253506: /*timingDuration*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -710871277: /*timingRange*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
-          case -497554124: /*timingTiming*/  return new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case 164632566: /*timing[x]*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -873664438: /*timing*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case 164607061: /*timingAge*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -615615829: /*timingPeriod*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -1327253506: /*timingDuration*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -710871277: /*timingRange*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
+          case -497554124: /*timingTiming*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
           case 767422259: /*participant*/  return new Property("participant", "Reference(Patient|Person|Practitioner|RelatedPerson)", "The participant that should perform or be responsible for this action.", 0, java.lang.Integer.MAX_VALUE, participant);
           case 3575610: /*type*/  return new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, 1, type);
           case 586678389: /*groupingBehavior*/  return new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, 1, groupingBehavior);
@@ -2704,7 +2718,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case 1587405498: /*documentation*/ return new String[] {"RelatedArtifact"};
         case -861311717: /*condition*/ return new String[] {};
         case -384107967: /*relatedAction*/ return new String[] {};
-        case -873664438: /*timing*/ return new String[] {"dateTime", "Period", "Duration", "Range", "Timing"};
+        case -873664438: /*timing*/ return new String[] {"dateTime", "Age", "Period", "Duration", "Range", "Timing"};
         case 767422259: /*participant*/ return new String[] {"Reference"};
         case 3575610: /*type*/ return new String[] {"Coding"};
         case 586678389: /*groupingBehavior*/ return new String[] {"code"};
@@ -2747,6 +2761,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
         else if (name.equals("timingDateTime")) {
           this.timing = new DateTimeType();
+          return this.timing;
+        }
+        else if (name.equals("timingAge")) {
+          this.timing = new Age();
           return this.timing;
         }
         else if (name.equals("timingPeriod")) {
@@ -2847,12 +2865,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RequestGroupActionComponent))
+        if (!(other_ instanceof RequestGroupActionComponent))
           return false;
-        RequestGroupActionComponent o = (RequestGroupActionComponent) other;
+        RequestGroupActionComponent o = (RequestGroupActionComponent) other_;
         return compareDeep(prefix, o.prefix, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true)
            && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
@@ -2864,12 +2882,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RequestGroupActionComponent))
+        if (!(other_ instanceof RequestGroupActionComponent))
           return false;
-        RequestGroupActionComponent o = (RequestGroupActionComponent) other;
+        RequestGroupActionComponent o = (RequestGroupActionComponent) other_;
         return compareValues(prefix, o.prefix, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
            && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(groupingBehavior, o.groupingBehavior, true)
            && compareValues(selectionBehavior, o.selectionBehavior, true) && compareValues(requiredBehavior, o.requiredBehavior, true)
@@ -3253,23 +3271,23 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RequestGroupActionConditionComponent))
+        if (!(other_ instanceof RequestGroupActionConditionComponent))
           return false;
-        RequestGroupActionConditionComponent o = (RequestGroupActionConditionComponent) other;
+        RequestGroupActionConditionComponent o = (RequestGroupActionConditionComponent) other_;
         return compareDeep(kind, o.kind, true) && compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RequestGroupActionConditionComponent))
+        if (!(other_ instanceof RequestGroupActionConditionComponent))
           return false;
-        RequestGroupActionConditionComponent o = (RequestGroupActionConditionComponent) other;
+        RequestGroupActionConditionComponent o = (RequestGroupActionConditionComponent) other_;
         return compareValues(kind, o.kind, true) && compareValues(description, o.description, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
@@ -3580,23 +3598,23 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RequestGroupActionRelatedActionComponent))
+        if (!(other_ instanceof RequestGroupActionRelatedActionComponent))
           return false;
-        RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other;
+        RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other_;
         return compareDeep(actionId, o.actionId, true) && compareDeep(relationship, o.relationship, true)
            && compareDeep(offset, o.offset, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RequestGroupActionRelatedActionComponent))
+        if (!(other_ instanceof RequestGroupActionRelatedActionComponent))
           return false;
-        RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other;
+        RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other_;
         return compareValues(actionId, o.actionId, true) && compareValues(relationship, o.relationship, true)
           ;
       }
@@ -4959,12 +4977,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RequestGroup))
+        if (!(other_ instanceof RequestGroup))
           return false;
-        RequestGroup o = (RequestGroup) other;
+        RequestGroup o = (RequestGroup) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
@@ -4975,12 +4993,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RequestGroup))
+        if (!(other_ instanceof RequestGroup))
           return false;
-        RequestGroup o = (RequestGroup) other;
+        RequestGroup o = (RequestGroup) other_;
         return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true)
            && compareValues(authoredOn, o.authoredOn, true);
       }

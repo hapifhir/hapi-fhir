@@ -29,9 +29,11 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Mon, Apr 17, 2017 08:38+1000 for FHIR v3.0.1
 
 import java.util.*;
+
+import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import org.hl7.fhir.utilities.Utilities;
@@ -283,7 +285,7 @@ public class Narrative extends BaseNarrative implements INarrative {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NarrativeStatus>
-        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer().setXmlOnly(true).composeEx(this.div))}; // XhtmlNode
+        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer(XhtmlComposer.XML).composeEx(this.div))}; // XhtmlNode
         default: return super.getProperty(hash, name, checkValid);
         }
 

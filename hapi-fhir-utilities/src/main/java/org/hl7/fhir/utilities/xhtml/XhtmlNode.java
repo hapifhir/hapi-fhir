@@ -337,7 +337,7 @@ public class XhtmlNode implements IBaseXhtml {
       return null;
     }
     try {
-      String retVal = new XhtmlComposer().compose(this);
+      String retVal = new XhtmlComposer(XhtmlComposer.HTML).compose(this);
       retVal = XhtmlDt.preprocessXhtmlNamespaceDeclaration(retVal);
       return retVal;
     } catch (Exception e) {
@@ -545,7 +545,7 @@ public class XhtmlNode implements IBaseXhtml {
     case Document: 
     case Element:
       try {
-        return new XhtmlComposer().compose(this);
+        return new XhtmlComposer(XhtmlComposer.HTML).compose(this);
       } catch (IOException e) {
         return super.toString();
       }

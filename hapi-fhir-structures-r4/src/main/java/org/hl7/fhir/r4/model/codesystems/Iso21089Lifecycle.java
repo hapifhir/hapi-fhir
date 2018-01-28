@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum Iso21089Lifecycle {
          */
         _27, 
         /**
-         * occurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that may or may not be reversible
+         * occurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that might or might not be reversible
          */
         _10, 
         /**
@@ -234,7 +234,7 @@ public enum Iso21089Lifecycle {
             case _14: return "occurs when an agent causes the system to create and move archive artifacts containing record entry content, typically to long-term offline storage";
             case _4: return "occurs when an agent causes the system to capture the agentâ€™s digital signature (or equivalent indication) during formal validation of record entry content";
             case _27: return "occurs when an agent causes the system to decode record entry content from a cipher";
-            case _10: return "occurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that may or may not be reversible";
+            case _10: return "occurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that might or might not be reversible";
             case _17: return "occurs when an agent causes the system to tag record entry(ies) as obsolete, erroneous or untrustworthy, to warn against its future use";
             case _16: return "occurs when an agent causes the system to permanently erase record entry content from the system";
             case _7: return "occurs when an agent causes the system to release, transfer, provision access to, or otherwise divulge record entry content";

@@ -149,7 +149,7 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+          this.value = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.instance.model.Type
         else
           super.setProperty(name, value);
       }

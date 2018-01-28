@@ -716,7 +716,7 @@ public class GenericClientR4Test {
     client
         .search()
         .forResource(Encounter.class)
-        .where(Encounter.LENGTH.exactly().number(null))
+        .where(Encounter.LENGTH.exactly().number(null).andNoUnits())
         .returnBundle(Bundle.class)
         .execute();
 

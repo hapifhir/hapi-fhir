@@ -10,21 +10,20 @@
   <LastAuthor>rik</LastAuthor>
   <LastPrinted>2017-01-21T02:43:06Z</LastPrinted>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2017-05-16T16:56:59Z</LastSaved>
+  <LastSaved>2017-12-16T13:30:03Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>8880</WindowHeight>
-  <WindowWidth>20160</WindowWidth>
+  <WindowHeight>8376</WindowHeight>
+  <WindowWidth>15360</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>837</TabRatio>
   <ActiveSheet>1</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
-  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -701,17 +700,18 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R41C24"
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R34C24"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="41" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="35" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultColumnWidth="433.2"
    ss:DefaultRowHeight="14.55">
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="359.4"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="46.800000000000004"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="346.79999999999995"/>
+   <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0"
+    ss:Width="287.39999999999998"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.2"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="40.200000000000003"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="463.20000000000005"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="175.8"/>
    <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0"
     ss:Width="37.200000000000003"/>
    <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0" ss:Width="58.8"/>
@@ -724,9 +724,7 @@
    <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0" ss:Width="85.8"/>
    <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0"
     ss:Width="37.800000000000004"/>
-   <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0"/>
-   <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0" ss:Width="579"/>
-   <Column ss:StyleID="s68" ss:Hidden="1" ss:AutoFitWidth="0" ss:Span="5"/>
+   <Column ss:Index="15" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="579"/>
    <Column ss:Index="22" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="66"/>
    <Row ss:AutoFitHeight="0" ss:Height="43.199999999999996" ss:StyleID="s69">
     <Cell ss:StyleID="s70"><Data ss:Type="String">Element</Data><Comment
@@ -827,13 +825,13 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">DomainResource</Data><NamedCell
+    <Cell ss:Index="5" ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">DomainResource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">clinical.general</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="14" ss:StyleID="s77"><Data ss:Type="String">MedicinalProductClinicalParticulars</Data><NamedCell
+    <Cell ss:Index="14" ss:StyleID="s77"><Data ss:Type="String">MedicinalProductClinicals</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">The clinical particulars - indications, contraindications etc of the Medicinal Product for regulatory purposes</Data><NamedCell
+    <Cell><Data ss:Type="String">The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">314;0</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -855,39 +853,19 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class shall be used to describe the undesirable effects of the Medicinal Product as described in the regulated product information. A jurisdiction may further refine the requirements in relation to the undesirable effects information at implementation so that this information is to be specified only if required</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Describe the undesirable effects of the medicinal product</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="22"><Data ss:Type="String">334;145</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.undesirableEffectText</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">string</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The text of the undesirable effect shall be given</Data><NamedCell
+    <Cell ss:Index="22"><Data ss:Type="String">334;135</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.symptomConditionEffect</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -897,17 +875,17 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The symptom, condition or effect in relation to the undesirable effect as described in the regulated product information can be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The symptom, condition or undesirable effect</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.effectClassification</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.classification</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -917,17 +895,17 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The classification of the “symptom/condition/effect” can be specified The controlled term and the controlled term identifier shall be specified using an appropriate controlled vocabulary</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Classification of the effect</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.frequencyOfOccurrence</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -937,11 +915,11 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The frequency of occurrence of the “symptom/condition/effect” can be specified, using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The frequency of occurrence of the effect</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics</Data><NamedCell
+    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
@@ -957,19 +935,19 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class can be used to describe the population for which a particular indication or contraindication applies as authorised for the Medicinal Product in accordance with the regulated product information</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The population group to which this applies</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22" ss:StyleID="Default"><Data ss:Type="String">334;330</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.age</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.population.age[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Range|CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -979,17 +957,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The age of the specific population for an indication or a contraindication as authorised for the Medicinal Product in accordance with the regulated product information can be specified Either age or age range should be specified for a single indication/contraindication; both should not be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The age of the specific population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.ageRangeLow</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.population.gender</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -999,17 +977,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The lower limit of the age range of the specific population for an indication or a contraindication as authorised for the Medicinal Product in accordance with the regulated product information can be specified Either age or age range should be specified for a single indication/contraindication; both should not be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The gender of the specific population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.ageRangeHigh</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.population.race</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1019,17 +997,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The upper limit of the age range of the specific population for an indication or a contraindication as authorised for the Medicinal Product in accordance with the regulated product information can be specified Either age or age range should be specified for a single indication/contraindication; both should not be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Race of the specific population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.gender</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.population.physiologicalCondition</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1039,47 +1017,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The gender of the specific population for an indication or a contraindication in accordance with the regulated product information shall be specified using ISO/IEC 5218</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.race</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The race of the specific population for an indication or a contraindication in accordance with the regulated product information can be specified using an appropriate controlled terminology The controlled term and the controlled term identifier shall be specified</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.undesirableEffects.populationSpecifics.physiologicalCondition</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Various aspects of the physiological conditions of the specific population for an indication or contraindication in accordance with the regulated product information can be specified using an appropriate controlled reference terminology The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The existing physiological conditions of the specific population to which this applies</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
@@ -1089,7 +1027,7 @@
     <Cell ss:StyleID="s79"><Data ss:Type="String">1..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Backbone Element</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Backbone Element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1099,39 +1037,19 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class shall be used to describe the authorised indication(s) for the Medicinal Product in accordance with the regulated product information. A region may further refine the requirements in relation to the therapeutic indication(s) information at implementation so that this information is to be specified only if required</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Indication for the Medicinal Product</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22" ss:StyleID="s68"><Data ss:Type="String">0;200</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.indicationText</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">string</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The authorised therapeutic indication(s) shall be described in text</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.asDiseaseSymptomProcedure</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.diseaseSymptomProcedure</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1141,17 +1059,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The underlying disease, symptom or procedure that is the indication for treatment can be specified as it is referenced in the regulated product information using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The disease, symptom or procedure that is the indication for treatment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.diseaseStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1161,17 +1079,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The status of the disease or symptom of the indication can be specified as it is referenced in the regulated product information using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The status of the disease or symptom for which the indication applies</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.comorbidity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1181,17 +1099,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is any comorbidity (concurrent condition) or co-infection described as part of the indication as it is referenced in the regulated product information, it can be specified here using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Comorbidity (concurrent condition) or co-infection as part of the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="82.8" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="82.8" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.intendedEffect</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1201,17 +1119,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The intended effect, aim or strategy to be achieved by the indication can be specified as it is referenced in the regulated product information using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified NOTE The Intended Effect is specifically the part of the Indication that describes the type of outcome or result intended for the target condition, whereas the Indication is the full text description of the benefits from the medicine for the target condition in the target population</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The intended effect, aim or strategy to be achieved by the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.timingDuration</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.duration</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Quantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1221,7 +1139,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is timing or duration information described as part of the indication as it is referenced in the regulated product information, it can be specified here</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Timing or duration information as part of the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
@@ -1241,17 +1159,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is information about the use of the Medicinal Product in relation to other therapies described as part of the indication or contraindication in accordance with the regulated product information, this can be specified using this class</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Information about the use of the medicinal product in relation to other therapies as part of the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapySpecifics</Data><NamedCell
+    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Backbone Element</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Backbone Element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1261,19 +1179,19 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is information about the use of the Medicinal Product in relation to other therapies described as part of the indication or contraindication in accordance with the regulated product information, this can be specified using this class</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Information about the use of the medicinal product in relation to other therapies described as part of the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">335;530</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapySpecifics.therapyRelationshipType</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapy.therapyRelationshipType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1283,17 +1201,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The type of relationship between the Medicinal Product indication or contraindication and a specific other therapy shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The type of relationship between the medicinal product indication or contraindication and another therapy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapySpecifics.medication</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.otherTherapy.medication[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept | Reference (MedicinalProduct|Medication|Substance|SubstanceSpecification)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1303,17 +1221,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Reference to a specific medication, which can be expressed as an active substance, Medicinal Product or class of Medicinal Products, as part of a specific indication or contraindication in accordance with the regulated product information shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Reference to a specific medication (active substance, medicinal product or class of products) as part of an indication or contraindication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.populationSpecifics</Data><NamedCell
+    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.therapeuticIndication.population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">1..*</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s76"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.undesirableEffects.populationSpecifics</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.undesirableEffects.population</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1323,7 +1241,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class can be used to describe the population for which a particular indication or contraindication applies as authorised for the Medicinal Product in accordance with the regulated product information</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The population group to which this applies</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="55.2" ss:StyleID="Default">
@@ -1333,7 +1251,7 @@
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Backbone Element</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Backbone Element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1343,39 +1261,19 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class shall be used to describe the authorised contraindication(s) for the Medicinal Product as described in the regulated product information. A jurisdiction may further refine the requirements in relation to the contraindications information at implementation so that this information is to be specified only if required</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Contraindication for the medicinal product</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">605;213</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.contraindication.text</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">string</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The text of the contraindication(s) in line with the regulated product information shall be described</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.contraindication.asDiseaseSymptomProcedure</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.contraindication.disease</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1385,17 +1283,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The underlying disease, symptom or procedure of the contraindication can be specified as it is referenced in the regulated product information using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The disease, symptom or procedure for the contraindication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.contraindication.diseaseStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1405,17 +1303,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The status of the disease or symptom of the contraindication can be specified as it is referenced in the regulated product information using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The status of the disease or symptom for the contraindication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.contraindication.comorbidity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1425,7 +1323,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The comorbidity (concurrent condition) or coinfection shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">A comorbidity (concurrent condition) or coinfection</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
@@ -1445,17 +1343,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is information about the use of the Medicinal Product in relation to other therapies described as part of the indication or contraindication in accordance with the regulated product information, this can be specified using this class</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Information about the use of the medicinal product in relation to other therapies as part of the indication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.contraindication.otherTherapySpecifics</Data><NamedCell
+    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.contraindication.otherTherapy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.therapeuticIndication.otherTherapySpecifics</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.therapeuticIndication.otherTherapy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1465,7 +1363,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">If there is information about the use of the Medicinal Product in relation to other therapies described as part of the indication or contraindication in accordance with the regulated product information, this can be specified using this class</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Information about the use of the medicinal product in relation to other therapies described as part of the contraindication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="27.45" ss:StyleID="Default">
@@ -1475,7 +1373,7 @@
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Backbone Element</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">Backbone Element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1485,39 +1383,19 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class can be used to describe the interactions of the Medicinal Product (with other Medicinal Products) and other forms of interactions as described in the regulated product information</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The interactions of the medicinal product with other medicinal products, or other forms of interactions</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">650;40</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.interactionsText</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">1..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">string</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The text of the interaction in accordance with the regulated product information shall be provided</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
     <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.interactant</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1527,97 +1405,17 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This element can be used to describe the specific medication, food or laboratory test that is the secondary interactant of the interaction as described in the regulated product information For more information refer to regional implementation guides</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.interactionsType</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The type of interaction in line with the regulated product information can be described using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.interactionsEffect</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The effect of the interaction in line with the regulated product information can be described using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.interactionsIncidence</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The incidence of the interaction in accordance with the regulated product information can be described using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:Hidden="1" ss:StyleID="Default">
-    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.managementActions</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">CodeableConcept</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The actions to provide management of the interaction in accordance with the regulated product information can be described using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The specific medication, food or laboratory test that interacts</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.contraindication.populationSpecifics</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s76"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.undesirableEffects.populationSpecifics</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1627,8 +1425,84 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">This class can be used to describe the population for which a particular indication or contraindication applies as authorised for the Medicinal Product in accordance with the regulated product information</Data><NamedCell
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The type of the interaction</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.effect</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The effect of the interaction</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.incidence</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The incidence of the interaction</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">MedicinalProductClinicals.interactions.management</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">CodeableConcept</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Actions for managing the interaction</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="41.55" ss:StyleID="Default">
+    <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductClinicals.contraindication.population</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">@MedicinalProductClinicals.undesirableEffects.population</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The population group to which this applies</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -1648,11 +1522,10 @@
    <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
-   <FilterOn/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -1660,26 +1533,23 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>21</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
-  <AutoFilter x:Range="R1C1:R41C24"
+  <AutoFilter x:Range="R1C1:R34C24"
    xmlns="urn:schemas-microsoft-com:office:excel">
-   <AutoFilterColumn x:Index="5" x:Type="Custom">
-    <AutoFilterCondition x:Operator="Equals"
-     x:Value="@MedicinalProductClinicals.therapeuticIndication"/>
-   </AutoFilterColumn>
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
@@ -2201,8 +2071,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>29</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>7</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

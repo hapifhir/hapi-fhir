@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -676,23 +676,23 @@ public class Quantity extends Type implements ICompositeType, ICoding {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Quantity))
+        if (!(other_ instanceof Quantity))
           return false;
-        Quantity o = (Quantity) other;
+        Quantity o = (Quantity) other_;
         return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(unit, o.unit, true)
            && compareDeep(system, o.system, true) && compareDeep(code, o.code, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Quantity))
+        if (!(other_ instanceof Quantity))
           return false;
-        Quantity o = (Quantity) other;
+        Quantity o = (Quantity) other_;
         return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(unit, o.unit, true)
            && compareValues(system, o.system, true) && compareValues(code, o.code, true);
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,32 +41,60 @@ public class ResearchSubjectStatusEnumFactory implements EnumFactory<ResearchSub
       return null;
     if ("candidate".equals(codeString))
       return ResearchSubjectStatus.CANDIDATE;
-    if ("enrolled".equals(codeString))
-      return ResearchSubjectStatus.ENROLLED;
-    if ("active".equals(codeString))
-      return ResearchSubjectStatus.ACTIVE;
-    if ("suspended".equals(codeString))
-      return ResearchSubjectStatus.SUSPENDED;
+    if ("eligible".equals(codeString))
+      return ResearchSubjectStatus.ELIGIBLE;
+    if ("follow-up".equals(codeString))
+      return ResearchSubjectStatus.FOLLOWUP;
+    if ("ineligible".equals(codeString))
+      return ResearchSubjectStatus.INELIGIBLE;
+    if ("not-registered".equals(codeString))
+      return ResearchSubjectStatus.NOTREGISTERED;
+    if ("off-study".equals(codeString))
+      return ResearchSubjectStatus.OFFSTUDY;
+    if ("on-study".equals(codeString))
+      return ResearchSubjectStatus.ONSTUDY;
+    if ("on-study-intervention".equals(codeString))
+      return ResearchSubjectStatus.ONSTUDYINTERVENTION;
+    if ("on-study-observation".equals(codeString))
+      return ResearchSubjectStatus.ONSTUDYOBSERVATION;
+    if ("pending-on-study".equals(codeString))
+      return ResearchSubjectStatus.PENDINGONSTUDY;
+    if ("potential-candidate".equals(codeString))
+      return ResearchSubjectStatus.POTENTIALCANDIDATE;
+    if ("screening".equals(codeString))
+      return ResearchSubjectStatus.SCREENING;
     if ("withdrawn".equals(codeString))
       return ResearchSubjectStatus.WITHDRAWN;
-    if ("completed".equals(codeString))
-      return ResearchSubjectStatus.COMPLETED;
     throw new IllegalArgumentException("Unknown ResearchSubjectStatus code '"+codeString+"'");
   }
 
   public String toCode(ResearchSubjectStatus code) {
     if (code == ResearchSubjectStatus.CANDIDATE)
       return "candidate";
-    if (code == ResearchSubjectStatus.ENROLLED)
-      return "enrolled";
-    if (code == ResearchSubjectStatus.ACTIVE)
-      return "active";
-    if (code == ResearchSubjectStatus.SUSPENDED)
-      return "suspended";
+    if (code == ResearchSubjectStatus.ELIGIBLE)
+      return "eligible";
+    if (code == ResearchSubjectStatus.FOLLOWUP)
+      return "follow-up";
+    if (code == ResearchSubjectStatus.INELIGIBLE)
+      return "ineligible";
+    if (code == ResearchSubjectStatus.NOTREGISTERED)
+      return "not-registered";
+    if (code == ResearchSubjectStatus.OFFSTUDY)
+      return "off-study";
+    if (code == ResearchSubjectStatus.ONSTUDY)
+      return "on-study";
+    if (code == ResearchSubjectStatus.ONSTUDYINTERVENTION)
+      return "on-study-intervention";
+    if (code == ResearchSubjectStatus.ONSTUDYOBSERVATION)
+      return "on-study-observation";
+    if (code == ResearchSubjectStatus.PENDINGONSTUDY)
+      return "pending-on-study";
+    if (code == ResearchSubjectStatus.POTENTIALCANDIDATE)
+      return "potential-candidate";
+    if (code == ResearchSubjectStatus.SCREENING)
+      return "screening";
     if (code == ResearchSubjectStatus.WITHDRAWN)
       return "withdrawn";
-    if (code == ResearchSubjectStatus.COMPLETED)
-      return "completed";
     return "?";
   }
 

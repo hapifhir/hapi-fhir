@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -303,22 +303,22 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Element))
+        if (!(other_ instanceof Element))
           return false;
-        Element o = (Element) other;
+        Element o = (Element) other_;
         return compareDeep(id, o.id, true) && compareDeep(extension, o.extension, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Element))
+        if (!(other_ instanceof Element))
           return false;
-        Element o = (Element) other;
+        Element o = (Element) other_;
         return compareValues(id, o.id, true);
       }
 
@@ -343,6 +343,23 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     getExtension().add(ex);    
   }
 
+
+   public Extension getExtensionByUrl(String theUrl) {
+     org.apache.commons.lang3.Validate.notBlank(theUrl, "theUrl must not be blank or null");
+     ArrayList<Extension> retVal = new ArrayList<Extension>();
+     for (Extension next : getExtension()) {
+       if (theUrl.equals(next.getUrl())) {
+         retVal.add(next);
+       }
+     }
+     if (retVal.size() == 0)
+       return null;
+     else {
+       org.apache.commons.lang3.Validate.isTrue(retVal.size() == 1, "Url "+theUrl+" must have only one match");
+       return retVal.get(0);
+     }
+   }
+  
 
 // end addition
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Appointmentstatus {
 
         /**
-         * None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet.
+         * None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet.
          */
         PROPOSED, 
         /**
@@ -111,7 +111,7 @@ public enum Appointmentstatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet.";
+            case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet.";
             case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request.";
             case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.";
             case ARRIVED: return "Some of the patients have arrived.";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Example of workflow instance.
  */
 @ResourceDef(name="ExampleScenario", profile="http://hl7.org/fhir/Profile/ExampleScenario")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "copyright", "description", "purpose", "actor", "instance", "process", "workflow"})
+@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "copyright", "purpose", "actor", "instance", "process", "workflow"})
 public class ExampleScenario extends MetadataResource {
 
     public enum ExampleScenarioActorType {
@@ -180,6 +180,11 @@ public class ExampleScenario extends MetadataResource {
          */
         BINARY, 
         /**
+         * A material substance originating from a biological entity intended to be transplanted or infused
+into another (possibly the same) biological entity.
+         */
+        BIOLOGICALLYDERIVEDPRODUCT, 
+        /**
          * Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
          */
         BODYSTRUCTURE, 
@@ -199,10 +204,6 @@ public class ExampleScenario extends MetadataResource {
          * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
          */
         CARETEAM, 
-        /**
-         * Catalog entries are wrappers that contextualize items included in a catalog.
-         */
-        CATALOGENTRY, 
         /**
          * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
          */
@@ -248,7 +249,7 @@ public class ExampleScenario extends MetadataResource {
          */
         CONDITION, 
         /**
-         * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
+         * A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
          */
         CONSENT, 
         /**
@@ -324,6 +325,10 @@ public class ExampleScenario extends MetadataResource {
          */
         ENROLLMENTRESPONSE, 
         /**
+         * Catalog entries are wrappers that contextualize items included in a catalog.
+         */
+        ENTRYDEFINITION, 
+        /**
          * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
          */
         EPISODEOFCARE, 
@@ -372,25 +377,41 @@ public class ExampleScenario extends MetadataResource {
          */
         HEALTHCARESERVICE, 
         /**
-         * A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.
-         */
-        IMAGINGMANIFEST, 
-        /**
          * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
          */
         IMAGINGSTUDY, 
         /**
-         * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
+         * Describes the event of a patient being administered a vaccine or a record of an immunization as reported by a patient, a clinician or another party.
          */
         IMMUNIZATION, 
         /**
-         * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
+         * Describes a comparison of an immunization event against published recommendations to determine if the administration is "valid" in relation to those  recommendations.
+         */
+        IMMUNIZATIONEVALUATION, 
+        /**
+         * A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.
          */
         IMMUNIZATIONRECOMMENDATION, 
         /**
          * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
          */
         IMPLEMENTATIONGUIDE, 
+        /**
+         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
+         */
+        IMPLEMENTATIONGUIDEINPUT, 
+        /**
+         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
+         */
+        IMPLEMENTATIONGUIDEOUTPUT, 
+        /**
+         * Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.
+         */
+        INVOICE, 
+        /**
+         * A physical, countable instance of an item, for example one box or one unit.
+         */
+        ITEMINSTANCE, 
         /**
          * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
          */
@@ -420,7 +441,7 @@ public class ExampleScenario extends MetadataResource {
          */
         MEDIA, 
         /**
-         * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
+         * This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.
          */
         MEDICATION, 
         /**
@@ -439,6 +460,34 @@ public class ExampleScenario extends MetadataResource {
          * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
+        /**
+         * Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).
+         */
+        MEDICINALPRODUCT, 
+        /**
+         * The regulatory authorization of a medicinal product.
+         */
+        MEDICINALPRODUCTAUTHORIZATION, 
+        /**
+         * The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.
+         */
+        MEDICINALPRODUCTCLINICALS, 
+        /**
+         * A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.
+         */
+        MEDICINALPRODUCTDEVICESPEC, 
+        /**
+         * An ingredient of a manufactured item or pharmaceutical product.
+         */
+        MEDICINALPRODUCTINGREDIENT, 
+        /**
+         * A medicinal product in a container or package.
+         */
+        MEDICINALPRODUCTPACKAGED, 
+        /**
+         * A pharmaceutical product described in terms of its composition and dose form.
+         */
+        MEDICINALPRODUCTPHARMACEUTICAL, 
         /**
          * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
          */
@@ -460,6 +509,14 @@ public class ExampleScenario extends MetadataResource {
          */
         OBSERVATION, 
         /**
+         * Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.
+         */
+        OBSERVATIONDEFINITION, 
+        /**
+         * Patient’s or family member's work information.
+         */
+        OCCUPATIONALDATA, 
+        /**
          * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
          */
         OPERATIONDEFINITION, 
@@ -471,6 +528,10 @@ public class ExampleScenario extends MetadataResource {
          * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
          */
         ORGANIZATION, 
+        /**
+         * A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.
+         */
+        ORGANIZATIONROLE, 
         /**
          * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
          */
@@ -508,10 +569,6 @@ public class ExampleScenario extends MetadataResource {
          */
         PROCEDURE, 
         /**
-         * A record of a request for diagnostic investigations, treatments, or operations to be performed.
-         */
-        PROCEDUREREQUEST, 
-        /**
          * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
          */
         PROCESSREQUEST, 
@@ -519,6 +576,10 @@ public class ExampleScenario extends MetadataResource {
          * This resource provides processing status, errors and notes from the processing of a resource.
          */
         PROCESSRESPONSE, 
+        /**
+         * Details of a Health Insurance product/plan provided by an organization.
+         */
+        PRODUCTPLAN, 
         /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
@@ -544,7 +605,7 @@ public class ExampleScenario extends MetadataResource {
          */
         RESEARCHSTUDY, 
         /**
-         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
+         * A physical entity which is the primary unit of operational and/or administrative interest in a study.
          */
         RESEARCHSUBJECT, 
         /**
@@ -571,6 +632,10 @@ public class ExampleScenario extends MetadataResource {
          * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
          */
         SERVICEDEFINITION, 
+        /**
+         * A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.
+         */
+        SERVICEREQUEST, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -600,6 +665,18 @@ public class ExampleScenario extends MetadataResource {
          */
         SUBSTANCE, 
         /**
+         * Todo.
+         */
+        SUBSTANCEPOLYMER, 
+        /**
+         * Todo.
+         */
+        SUBSTANCEREFERENCEINFORMATION, 
+        /**
+         * The detailed description of a substance, typically at a level beyond what is used for prescribing.
+         */
+        SUBSTANCESPECIFICATION, 
+        /**
          * Record of delivery of what is supplied.
          */
         SUPPLYDELIVERY, 
@@ -612,17 +689,29 @@ public class ExampleScenario extends MetadataResource {
          */
         TASK, 
         /**
+         * A Terminology Capabilities documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         */
+        TERMINOLOGYCAPABILITIES, 
+        /**
          * A summary of information based on the results of executing a TestScript.
          */
         TESTREPORT, 
         /**
-         * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
+         * A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.
          */
         TESTSCRIPT, 
+        /**
+         * Information about a user's current session.
+         */
+        USERSESSION, 
         /**
          * A value set specifies a set of codes drawn from one or more code systems.
          */
         VALUESET, 
+        /**
+         * Describes validation requirements, source(s), status and dates for one or more elements.
+         */
+        VERIFICATIONRESULT, 
         /**
          * An authorization for the supply of glasses and/or contact lenses to a patient.
          */
@@ -652,6 +741,8 @@ public class ExampleScenario extends MetadataResource {
           return BASIC;
         if ("Binary".equals(codeString))
           return BINARY;
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return BIOLOGICALLYDERIVEDPRODUCT;
         if ("BodyStructure".equals(codeString))
           return BODYSTRUCTURE;
         if ("Bundle".equals(codeString))
@@ -662,8 +753,6 @@ public class ExampleScenario extends MetadataResource {
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
           return CARETEAM;
-        if ("CatalogEntry".equals(codeString))
-          return CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -724,6 +813,8 @@ public class ExampleScenario extends MetadataResource {
           return ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
           return ENROLLMENTRESPONSE;
+        if ("EntryDefinition".equals(codeString))
+          return ENTRYDEFINITION;
         if ("EpisodeOfCare".equals(codeString))
           return EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
@@ -748,16 +839,24 @@ public class ExampleScenario extends MetadataResource {
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return HEALTHCARESERVICE;
-        if ("ImagingManifest".equals(codeString))
-          return IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
           return IMMUNIZATION;
+        if ("ImmunizationEvaluation".equals(codeString))
+          return IMMUNIZATIONEVALUATION;
         if ("ImmunizationRecommendation".equals(codeString))
           return IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return IMPLEMENTATIONGUIDE;
+        if ("ImplementationGuideInput".equals(codeString))
+          return IMPLEMENTATIONGUIDEINPUT;
+        if ("ImplementationGuideOutput".equals(codeString))
+          return IMPLEMENTATIONGUIDEOUTPUT;
+        if ("Invoice".equals(codeString))
+          return INVOICE;
+        if ("ItemInstance".equals(codeString))
+          return ITEMINSTANCE;
         if ("Library".equals(codeString))
           return LIBRARY;
         if ("Linkage".equals(codeString))
@@ -782,6 +881,20 @@ public class ExampleScenario extends MetadataResource {
           return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MedicinalProduct".equals(codeString))
+          return MEDICINALPRODUCT;
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return MEDICINALPRODUCTAUTHORIZATION;
+        if ("MedicinalProductClinicals".equals(codeString))
+          return MEDICINALPRODUCTCLINICALS;
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return MEDICINALPRODUCTDEVICESPEC;
+        if ("MedicinalProductIngredient".equals(codeString))
+          return MEDICINALPRODUCTINGREDIENT;
+        if ("MedicinalProductPackaged".equals(codeString))
+          return MEDICINALPRODUCTPACKAGED;
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return MEDICINALPRODUCTPHARMACEUTICAL;
         if ("MessageDefinition".equals(codeString))
           return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
@@ -792,12 +905,18 @@ public class ExampleScenario extends MetadataResource {
           return NUTRITIONORDER;
         if ("Observation".equals(codeString))
           return OBSERVATION;
+        if ("ObservationDefinition".equals(codeString))
+          return OBSERVATIONDEFINITION;
+        if ("OccupationalData".equals(codeString))
+          return OCCUPATIONALDATA;
         if ("OperationDefinition".equals(codeString))
           return OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return OPERATIONOUTCOME;
         if ("Organization".equals(codeString))
           return ORGANIZATION;
+        if ("OrganizationRole".equals(codeString))
+          return ORGANIZATIONROLE;
         if ("Parameters".equals(codeString))
           return PARAMETERS;
         if ("Patient".equals(codeString))
@@ -816,12 +935,12 @@ public class ExampleScenario extends MetadataResource {
           return PRACTITIONERROLE;
         if ("Procedure".equals(codeString))
           return PROCEDURE;
-        if ("ProcedureRequest".equals(codeString))
-          return PROCEDUREREQUEST;
         if ("ProcessRequest".equals(codeString))
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
+        if ("ProductPlan".equals(codeString))
+          return PRODUCTPLAN;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -848,6 +967,8 @@ public class ExampleScenario extends MetadataResource {
           return SEQUENCE;
         if ("ServiceDefinition".equals(codeString))
           return SERVICEDEFINITION;
+        if ("ServiceRequest".equals(codeString))
+          return SERVICEREQUEST;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -862,18 +983,30 @@ public class ExampleScenario extends MetadataResource {
           return SUBSCRIPTION;
         if ("Substance".equals(codeString))
           return SUBSTANCE;
+        if ("SubstancePolymer".equals(codeString))
+          return SUBSTANCEPOLYMER;
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return SUBSTANCEREFERENCEINFORMATION;
+        if ("SubstanceSpecification".equals(codeString))
+          return SUBSTANCESPECIFICATION;
         if ("SupplyDelivery".equals(codeString))
           return SUPPLYDELIVERY;
         if ("SupplyRequest".equals(codeString))
           return SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return TASK;
+        if ("TerminologyCapabilities".equals(codeString))
+          return TERMINOLOGYCAPABILITIES;
         if ("TestReport".equals(codeString))
           return TESTREPORT;
         if ("TestScript".equals(codeString))
           return TESTSCRIPT;
+        if ("UserSession".equals(codeString))
+          return USERSESSION;
         if ("ValueSet".equals(codeString))
           return VALUESET;
+        if ("VerificationResult".equals(codeString))
+          return VERIFICATIONRESULT;
         if ("VisionPrescription".equals(codeString))
           return VISIONPRESCRIPTION;
         if (Configuration.isAcceptInvalidEnums())
@@ -892,12 +1025,12 @@ public class ExampleScenario extends MetadataResource {
             case AUDITEVENT: return "AuditEvent";
             case BASIC: return "Basic";
             case BINARY: return "Binary";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "BiologicallyDerivedProduct";
             case BODYSTRUCTURE: return "BodyStructure";
             case BUNDLE: return "Bundle";
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
-            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -928,6 +1061,7 @@ public class ExampleScenario extends MetadataResource {
             case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
+            case ENTRYDEFINITION: return "EntryDefinition";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
             case EXAMPLESCENARIO: return "ExampleScenario";
@@ -940,11 +1074,15 @@ public class ExampleScenario extends MetadataResource {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
+            case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
+            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
+            case INVOICE: return "Invoice";
+            case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
             case LINKAGE: return "Linkage";
             case LIST: return "List";
@@ -957,14 +1095,24 @@ public class ExampleScenario extends MetadataResource {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MEDICINALPRODUCT: return "MedicinalProduct";
+            case MEDICINALPRODUCTAUTHORIZATION: return "MedicinalProductAuthorization";
+            case MEDICINALPRODUCTCLINICALS: return "MedicinalProductClinicals";
+            case MEDICINALPRODUCTDEVICESPEC: return "MedicinalProductDeviceSpec";
+            case MEDICINALPRODUCTINGREDIENT: return "MedicinalProductIngredient";
+            case MEDICINALPRODUCTPACKAGED: return "MedicinalProductPackaged";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "MedicinalProductPharmaceutical";
             case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONORDER: return "NutritionOrder";
             case OBSERVATION: return "Observation";
+            case OBSERVATIONDEFINITION: return "ObservationDefinition";
+            case OCCUPATIONALDATA: return "OccupationalData";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
             case ORGANIZATION: return "Organization";
+            case ORGANIZATIONROLE: return "OrganizationRole";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
@@ -974,9 +1122,9 @@ public class ExampleScenario extends MetadataResource {
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
-            case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PRODUCTPLAN: return "ProductPlan";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -990,6 +1138,7 @@ public class ExampleScenario extends MetadataResource {
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
             case SERVICEDEFINITION: return "ServiceDefinition";
+            case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case SPECIMENDEFINITION: return "SpecimenDefinition";
@@ -997,12 +1146,18 @@ public class ExampleScenario extends MetadataResource {
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
             case SUBSTANCE: return "Substance";
+            case SUBSTANCEPOLYMER: return "SubstancePolymer";
+            case SUBSTANCEREFERENCEINFORMATION: return "SubstanceReferenceInformation";
+            case SUBSTANCESPECIFICATION: return "SubstanceSpecification";
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TERMINOLOGYCAPABILITIES: return "TerminologyCapabilities";
             case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
+            case USERSESSION: return "UserSession";
             case VALUESET: return "ValueSet";
+            case VERIFICATIONRESULT: return "VerificationResult";
             case VISIONPRESCRIPTION: return "VisionPrescription";
             default: return "?";
           }
@@ -1018,12 +1173,12 @@ public class ExampleScenario extends MetadataResource {
             case AUDITEVENT: return "http://hl7.org/fhir/resource-types";
             case BASIC: return "http://hl7.org/fhir/resource-types";
             case BINARY: return "http://hl7.org/fhir/resource-types";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "http://hl7.org/fhir/resource-types";
             case BODYSTRUCTURE: return "http://hl7.org/fhir/resource-types";
             case BUNDLE: return "http://hl7.org/fhir/resource-types";
             case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
-            case CATALOGENTRY: return "http://hl7.org/fhir/resource-types";
             case CHARGEITEM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -1054,6 +1209,7 @@ public class ExampleScenario extends MetadataResource {
             case ENDPOINT: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTREQUEST: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case ENTRYDEFINITION: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
             case EVENTDEFINITION: return "http://hl7.org/fhir/resource-types";
             case EXAMPLESCENARIO: return "http://hl7.org/fhir/resource-types";
@@ -1066,11 +1222,15 @@ public class ExampleScenario extends MetadataResource {
             case GROUP: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGMANIFEST: return "http://hl7.org/fhir/resource-types";
             case IMAGINGSTUDY: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATION: return "http://hl7.org/fhir/resource-types";
+            case IMMUNIZATIONEVALUATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
             case IMPLEMENTATIONGUIDE: return "http://hl7.org/fhir/resource-types";
+            case IMPLEMENTATIONGUIDEINPUT: return "http://hl7.org/fhir/resource-types";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "http://hl7.org/fhir/resource-types";
+            case INVOICE: return "http://hl7.org/fhir/resource-types";
+            case ITEMINSTANCE: return "http://hl7.org/fhir/resource-types";
             case LIBRARY: return "http://hl7.org/fhir/resource-types";
             case LINKAGE: return "http://hl7.org/fhir/resource-types";
             case LIST: return "http://hl7.org/fhir/resource-types";
@@ -1083,14 +1243,24 @@ public class ExampleScenario extends MetadataResource {
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTAUTHORIZATION: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTCLINICALS: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTDEVICESPEC: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTINGREDIENT: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTPACKAGED: return "http://hl7.org/fhir/resource-types";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "http://hl7.org/fhir/resource-types";
             case MESSAGEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case MESSAGEHEADER: return "http://hl7.org/fhir/resource-types";
             case NAMINGSYSTEM: return "http://hl7.org/fhir/resource-types";
             case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
             case OBSERVATION: return "http://hl7.org/fhir/resource-types";
+            case OBSERVATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case OCCUPATIONALDATA: return "http://hl7.org/fhir/resource-types";
             case OPERATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONOUTCOME: return "http://hl7.org/fhir/resource-types";
             case ORGANIZATION: return "http://hl7.org/fhir/resource-types";
+            case ORGANIZATIONROLE: return "http://hl7.org/fhir/resource-types";
             case PARAMETERS: return "http://hl7.org/fhir/resource-types";
             case PATIENT: return "http://hl7.org/fhir/resource-types";
             case PAYMENTNOTICE: return "http://hl7.org/fhir/resource-types";
@@ -1100,9 +1270,9 @@ public class ExampleScenario extends MetadataResource {
             case PRACTITIONER: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONERROLE: return "http://hl7.org/fhir/resource-types";
             case PROCEDURE: return "http://hl7.org/fhir/resource-types";
-            case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case PRODUCTPLAN: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -1116,6 +1286,7 @@ public class ExampleScenario extends MetadataResource {
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
             case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
+            case SERVICEREQUEST: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case SPECIMENDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -1123,12 +1294,18 @@ public class ExampleScenario extends MetadataResource {
             case STRUCTUREMAP: return "http://hl7.org/fhir/resource-types";
             case SUBSCRIPTION: return "http://hl7.org/fhir/resource-types";
             case SUBSTANCE: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCEPOLYMER: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCEREFERENCEINFORMATION: return "http://hl7.org/fhir/resource-types";
+            case SUBSTANCESPECIFICATION: return "http://hl7.org/fhir/resource-types";
             case SUPPLYDELIVERY: return "http://hl7.org/fhir/resource-types";
             case SUPPLYREQUEST: return "http://hl7.org/fhir/resource-types";
             case TASK: return "http://hl7.org/fhir/resource-types";
+            case TERMINOLOGYCAPABILITIES: return "http://hl7.org/fhir/resource-types";
             case TESTREPORT: return "http://hl7.org/fhir/resource-types";
             case TESTSCRIPT: return "http://hl7.org/fhir/resource-types";
+            case USERSESSION: return "http://hl7.org/fhir/resource-types";
             case VALUESET: return "http://hl7.org/fhir/resource-types";
+            case VERIFICATIONRESULT: return "http://hl7.org/fhir/resource-types";
             case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
             default: return "?";
           }
@@ -1144,12 +1321,12 @@ public class ExampleScenario extends MetadataResource {
             case AUDITEVENT: return "A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.";
             case BASIC: return "Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.";
             case BINARY: return "A binary resource can contain any content, whether text, image, pdf, zip archive, etc.";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "A material substance originating from a biological entity intended to be transplanted or infused\ninto another (possibly the same) biological entity.";
             case BODYSTRUCTURE: return "Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.";
             case BUNDLE: return "A container for a collection of resources.";
             case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
-            case CATALOGENTRY: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case CHARGEITEM: return "The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
@@ -1161,7 +1338,7 @@ public class ExampleScenario extends MetadataResource {
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
-            case CONSENT: return "A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
+            case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
             case CONTRACT: return "A formal agreement between parties regarding the conduct of business, exchange of information or other matters.";
             case COVERAGE: return "Financial instrument which may be used to reimburse or pay for health care products and services.";
             case DETECTEDISSUE: return "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.";
@@ -1180,6 +1357,7 @@ public class ExampleScenario extends MetadataResource {
             case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
             case ENROLLMENTREQUEST: return "This resource provides the insurance enrollment details to the insurer regarding a specified coverage.";
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
+            case ENTRYDEFINITION: return "Catalog entries are wrappers that contextualize items included in a catalog.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
             case EVENTDEFINITION: return "The EventDefinition resource provides a reusable description of when a particular event can occur.";
             case EXAMPLESCENARIO: return "Example of workflow instance.";
@@ -1192,11 +1370,15 @@ public class ExampleScenario extends MetadataResource {
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
-            case IMAGINGMANIFEST: return "A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.";
             case IMAGINGSTUDY: return "Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.";
-            case IMMUNIZATION: return "Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.";
-            case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
+            case IMMUNIZATION: return "Describes the event of a patient being administered a vaccine or a record of an immunization as reported by a patient, a clinician or another party.";
+            case IMMUNIZATIONEVALUATION: return "Describes a comparison of an immunization event against published recommendations to determine if the administration is \"valid\" in relation to those  recommendations.";
+            case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case IMPLEMENTATIONGUIDEINPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
+            case INVOICE: return "Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.";
+            case ITEMINSTANCE: return "A physical, countable instance of an item, for example one box or one unit.";
             case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
@@ -1204,19 +1386,29 @@ public class ExampleScenario extends MetadataResource {
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
             case MEASUREREPORT: return "The MeasureReport resource contains the results of evaluating a measure.";
             case MEDIA: return "A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.";
-            case MEDICATION: return "This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.";
+            case MEDICATION: return "This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MEDICINALPRODUCT: return "Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).";
+            case MEDICINALPRODUCTAUTHORIZATION: return "The regulatory authorization of a medicinal product.";
+            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.";
+            case MEDICINALPRODUCTDEVICESPEC: return "A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.";
+            case MEDICINALPRODUCTINGREDIENT: return "An ingredient of a manufactured item or pharmaceutical product.";
+            case MEDICINALPRODUCTPACKAGED: return "A medicinal product in a container or package.";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "A pharmaceutical product described in terms of its composition and dose form.";
             case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
+            case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
+            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
+            case ORGANIZATIONROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PARAMETERS: return "This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.";
             case PATIENT: return "Demographics and other administrative information about an individual or animal receiving care or other health-related services.";
             case PAYMENTNOTICE: return "This resource provides the status of the payment for goods and services rendered, and the request and response resource references.";
@@ -1226,22 +1418,23 @@ public class ExampleScenario extends MetadataResource {
             case PRACTITIONER: return "A person who is directly or indirectly involved in the provisioning of healthcare.";
             case PRACTITIONERROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PROCEDURE: return "An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.";
-            case PROCEDUREREQUEST: return "A record of a request for diagnostic investigations, treatments, or operations to be performed.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
+            case PRODUCTPLAN: return "Details of a Health Insurance product/plan provided by an organization.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers from end-users. Questionnaires provide detailed control over order, presentation, phraseology and grouping to allow coherent, consistent data collection.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the questionnaire being responded to.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
             case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
             case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.";
-            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A physical entity which is the primary unit of operational and/or administrative interest in a study.";
             case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slots of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
             case SEQUENCE: return "Raw data describing a biological sequence.";
             case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
+            case SERVICEREQUEST: return "A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
@@ -1249,12 +1442,18 @@ public class ExampleScenario extends MetadataResource {
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
             case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
             case SUBSTANCE: return "A homogeneous material with a definite composition.";
+            case SUBSTANCEPOLYMER: return "Todo.";
+            case SUBSTANCEREFERENCEINFORMATION: return "Todo.";
+            case SUBSTANCESPECIFICATION: return "The detailed description of a substance, typically at a level beyond what is used for prescribing.";
             case SUPPLYDELIVERY: return "Record of delivery of what is supplied.";
             case SUPPLYREQUEST: return "A record of a request for a medication, substance or device used in the healthcare setting.";
             case TASK: return "A task to be performed.";
+            case TERMINOLOGYCAPABILITIES: return "A Terminology Capabilities documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case TESTREPORT: return "A summary of information based on the results of executing a TestScript.";
-            case TESTSCRIPT: return "A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.";
+            case TESTSCRIPT: return "A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.";
+            case USERSESSION: return "Information about a user's current session.";
             case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
+            case VERIFICATIONRESULT: return "Describes validation requirements, source(s), status and dates for one or more elements.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
             default: return "?";
           }
@@ -1270,12 +1469,12 @@ public class ExampleScenario extends MetadataResource {
             case AUDITEVENT: return "AuditEvent";
             case BASIC: return "Basic";
             case BINARY: return "Binary";
+            case BIOLOGICALLYDERIVEDPRODUCT: return "BiologicallyDerivedProduct";
             case BODYSTRUCTURE: return "BodyStructure";
             case BUNDLE: return "Bundle";
             case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
-            case CATALOGENTRY: return "CatalogEntry";
             case CHARGEITEM: return "ChargeItem";
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
@@ -1306,6 +1505,7 @@ public class ExampleScenario extends MetadataResource {
             case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
+            case ENTRYDEFINITION: return "EntryDefinition";
             case EPISODEOFCARE: return "EpisodeOfCare";
             case EVENTDEFINITION: return "EventDefinition";
             case EXAMPLESCENARIO: return "ExampleScenario";
@@ -1318,11 +1518,15 @@ public class ExampleScenario extends MetadataResource {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
+            case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
+            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
+            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
+            case INVOICE: return "Invoice";
+            case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
             case LINKAGE: return "Linkage";
             case LIST: return "List";
@@ -1335,14 +1539,24 @@ public class ExampleScenario extends MetadataResource {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MEDICINALPRODUCT: return "MedicinalProduct";
+            case MEDICINALPRODUCTAUTHORIZATION: return "MedicinalProductAuthorization";
+            case MEDICINALPRODUCTCLINICALS: return "MedicinalProductClinicals";
+            case MEDICINALPRODUCTDEVICESPEC: return "MedicinalProductDeviceSpec";
+            case MEDICINALPRODUCTINGREDIENT: return "MedicinalProductIngredient";
+            case MEDICINALPRODUCTPACKAGED: return "MedicinalProductPackaged";
+            case MEDICINALPRODUCTPHARMACEUTICAL: return "MedicinalProductPharmaceutical";
             case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONORDER: return "NutritionOrder";
             case OBSERVATION: return "Observation";
+            case OBSERVATIONDEFINITION: return "ObservationDefinition";
+            case OCCUPATIONALDATA: return "OccupationalData";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
             case ORGANIZATION: return "Organization";
+            case ORGANIZATIONROLE: return "OrganizationRole";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
@@ -1352,9 +1566,9 @@ public class ExampleScenario extends MetadataResource {
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
-            case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PRODUCTPLAN: return "ProductPlan";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -1368,6 +1582,7 @@ public class ExampleScenario extends MetadataResource {
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
             case SERVICEDEFINITION: return "ServiceDefinition";
+            case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case SPECIMENDEFINITION: return "SpecimenDefinition";
@@ -1375,12 +1590,18 @@ public class ExampleScenario extends MetadataResource {
             case STRUCTUREMAP: return "StructureMap";
             case SUBSCRIPTION: return "Subscription";
             case SUBSTANCE: return "Substance";
+            case SUBSTANCEPOLYMER: return "SubstancePolymer";
+            case SUBSTANCEREFERENCEINFORMATION: return "SubstanceReferenceInformation";
+            case SUBSTANCESPECIFICATION: return "SubstanceSpecification";
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TERMINOLOGYCAPABILITIES: return "TerminologyCapabilities";
             case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
+            case USERSESSION: return "UserSession";
             case VALUESET: return "ValueSet";
+            case VERIFICATIONRESULT: return "VerificationResult";
             case VISIONPRESCRIPTION: return "VisionPrescription";
             default: return "?";
           }
@@ -1410,6 +1631,8 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.BASIC;
         if ("Binary".equals(codeString))
           return FHIRResourceType.BINARY;
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return FHIRResourceType.BIOLOGICALLYDERIVEDPRODUCT;
         if ("BodyStructure".equals(codeString))
           return FHIRResourceType.BODYSTRUCTURE;
         if ("Bundle".equals(codeString))
@@ -1420,8 +1643,6 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.CAREPLAN;
         if ("CareTeam".equals(codeString))
           return FHIRResourceType.CARETEAM;
-        if ("CatalogEntry".equals(codeString))
-          return FHIRResourceType.CATALOGENTRY;
         if ("ChargeItem".equals(codeString))
           return FHIRResourceType.CHARGEITEM;
         if ("Claim".equals(codeString))
@@ -1482,6 +1703,8 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
           return FHIRResourceType.ENROLLMENTRESPONSE;
+        if ("EntryDefinition".equals(codeString))
+          return FHIRResourceType.ENTRYDEFINITION;
         if ("EpisodeOfCare".equals(codeString))
           return FHIRResourceType.EPISODEOFCARE;
         if ("EventDefinition".equals(codeString))
@@ -1506,16 +1729,24 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return FHIRResourceType.HEALTHCARESERVICE;
-        if ("ImagingManifest".equals(codeString))
-          return FHIRResourceType.IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return FHIRResourceType.IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
           return FHIRResourceType.IMMUNIZATION;
+        if ("ImmunizationEvaluation".equals(codeString))
+          return FHIRResourceType.IMMUNIZATIONEVALUATION;
         if ("ImmunizationRecommendation".equals(codeString))
           return FHIRResourceType.IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return FHIRResourceType.IMPLEMENTATIONGUIDE;
+        if ("ImplementationGuideInput".equals(codeString))
+          return FHIRResourceType.IMPLEMENTATIONGUIDEINPUT;
+        if ("ImplementationGuideOutput".equals(codeString))
+          return FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT;
+        if ("Invoice".equals(codeString))
+          return FHIRResourceType.INVOICE;
+        if ("ItemInstance".equals(codeString))
+          return FHIRResourceType.ITEMINSTANCE;
         if ("Library".equals(codeString))
           return FHIRResourceType.LIBRARY;
         if ("Linkage".equals(codeString))
@@ -1540,6 +1771,20 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return FHIRResourceType.MEDICATIONSTATEMENT;
+        if ("MedicinalProduct".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCT;
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTAUTHORIZATION;
+        if ("MedicinalProductClinicals".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTCLINICALS;
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTDEVICESPEC;
+        if ("MedicinalProductIngredient".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTINGREDIENT;
+        if ("MedicinalProductPackaged".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTPACKAGED;
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return FHIRResourceType.MEDICINALPRODUCTPHARMACEUTICAL;
         if ("MessageDefinition".equals(codeString))
           return FHIRResourceType.MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
@@ -1550,12 +1795,18 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.NUTRITIONORDER;
         if ("Observation".equals(codeString))
           return FHIRResourceType.OBSERVATION;
+        if ("ObservationDefinition".equals(codeString))
+          return FHIRResourceType.OBSERVATIONDEFINITION;
+        if ("OccupationalData".equals(codeString))
+          return FHIRResourceType.OCCUPATIONALDATA;
         if ("OperationDefinition".equals(codeString))
           return FHIRResourceType.OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return FHIRResourceType.OPERATIONOUTCOME;
         if ("Organization".equals(codeString))
           return FHIRResourceType.ORGANIZATION;
+        if ("OrganizationRole".equals(codeString))
+          return FHIRResourceType.ORGANIZATIONROLE;
         if ("Parameters".equals(codeString))
           return FHIRResourceType.PARAMETERS;
         if ("Patient".equals(codeString))
@@ -1574,12 +1825,12 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.PRACTITIONERROLE;
         if ("Procedure".equals(codeString))
           return FHIRResourceType.PROCEDURE;
-        if ("ProcedureRequest".equals(codeString))
-          return FHIRResourceType.PROCEDUREREQUEST;
         if ("ProcessRequest".equals(codeString))
           return FHIRResourceType.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return FHIRResourceType.PROCESSRESPONSE;
+        if ("ProductPlan".equals(codeString))
+          return FHIRResourceType.PRODUCTPLAN;
         if ("Provenance".equals(codeString))
           return FHIRResourceType.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -1606,6 +1857,8 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.SEQUENCE;
         if ("ServiceDefinition".equals(codeString))
           return FHIRResourceType.SERVICEDEFINITION;
+        if ("ServiceRequest".equals(codeString))
+          return FHIRResourceType.SERVICEREQUEST;
         if ("Slot".equals(codeString))
           return FHIRResourceType.SLOT;
         if ("Specimen".equals(codeString))
@@ -1620,18 +1873,30 @@ public class ExampleScenario extends MetadataResource {
           return FHIRResourceType.SUBSCRIPTION;
         if ("Substance".equals(codeString))
           return FHIRResourceType.SUBSTANCE;
+        if ("SubstancePolymer".equals(codeString))
+          return FHIRResourceType.SUBSTANCEPOLYMER;
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return FHIRResourceType.SUBSTANCEREFERENCEINFORMATION;
+        if ("SubstanceSpecification".equals(codeString))
+          return FHIRResourceType.SUBSTANCESPECIFICATION;
         if ("SupplyDelivery".equals(codeString))
           return FHIRResourceType.SUPPLYDELIVERY;
         if ("SupplyRequest".equals(codeString))
           return FHIRResourceType.SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return FHIRResourceType.TASK;
+        if ("TerminologyCapabilities".equals(codeString))
+          return FHIRResourceType.TERMINOLOGYCAPABILITIES;
         if ("TestReport".equals(codeString))
           return FHIRResourceType.TESTREPORT;
         if ("TestScript".equals(codeString))
           return FHIRResourceType.TESTSCRIPT;
+        if ("UserSession".equals(codeString))
+          return FHIRResourceType.USERSESSION;
         if ("ValueSet".equals(codeString))
           return FHIRResourceType.VALUESET;
+        if ("VerificationResult".equals(codeString))
+          return FHIRResourceType.VERIFICATIONRESULT;
         if ("VisionPrescription".equals(codeString))
           return FHIRResourceType.VISIONPRESCRIPTION;
         throw new IllegalArgumentException("Unknown FHIRResourceType code '"+codeString+"'");
@@ -1662,6 +1927,8 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.BASIC);
         if ("Binary".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.BINARY);
+        if ("BiologicallyDerivedProduct".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.BIOLOGICALLYDERIVEDPRODUCT);
         if ("BodyStructure".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.BODYSTRUCTURE);
         if ("Bundle".equals(codeString))
@@ -1672,8 +1939,6 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.CAREPLAN);
         if ("CareTeam".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.CARETEAM);
-        if ("CatalogEntry".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.CATALOGENTRY);
         if ("ChargeItem".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.CHARGEITEM);
         if ("Claim".equals(codeString))
@@ -1734,6 +1999,8 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ENROLLMENTREQUEST);
         if ("EnrollmentResponse".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ENROLLMENTRESPONSE);
+        if ("EntryDefinition".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ENTRYDEFINITION);
         if ("EpisodeOfCare".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.EPISODEOFCARE);
         if ("EventDefinition".equals(codeString))
@@ -1758,16 +2025,24 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.HEALTHCARESERVICE);
-        if ("ImagingManifest".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMAGINGMANIFEST);
         if ("ImagingStudy".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMAGINGSTUDY);
         if ("Immunization".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMMUNIZATION);
+        if ("ImmunizationEvaluation".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMMUNIZATIONEVALUATION);
         if ("ImmunizationRecommendation".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMMUNIZATIONRECOMMENDATION);
         if ("ImplementationGuide".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDE);
+        if ("ImplementationGuideInput".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDEINPUT);
+        if ("ImplementationGuideOutput".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT);
+        if ("Invoice".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.INVOICE);
+        if ("ItemInstance".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ITEMINSTANCE);
         if ("Library".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.LIBRARY);
         if ("Linkage".equals(codeString))
@@ -1792,6 +2067,20 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONSTATEMENT);
+        if ("MedicinalProduct".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCT);
+        if ("MedicinalProductAuthorization".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTAUTHORIZATION);
+        if ("MedicinalProductClinicals".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTCLINICALS);
+        if ("MedicinalProductDeviceSpec".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTDEVICESPEC);
+        if ("MedicinalProductIngredient".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTINGREDIENT);
+        if ("MedicinalProductPackaged".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTPACKAGED);
+        if ("MedicinalProductPharmaceutical".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICINALPRODUCTPHARMACEUTICAL);
         if ("MessageDefinition".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MESSAGEDEFINITION);
         if ("MessageHeader".equals(codeString))
@@ -1802,12 +2091,18 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.NUTRITIONORDER);
         if ("Observation".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.OBSERVATION);
+        if ("ObservationDefinition".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.OBSERVATIONDEFINITION);
+        if ("OccupationalData".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.OCCUPATIONALDATA);
         if ("OperationDefinition".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.OPERATIONDEFINITION);
         if ("OperationOutcome".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.OPERATIONOUTCOME);
         if ("Organization".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ORGANIZATION);
+        if ("OrganizationRole".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.ORGANIZATIONROLE);
         if ("Parameters".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PARAMETERS);
         if ("Patient".equals(codeString))
@@ -1826,12 +2121,12 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PRACTITIONERROLE);
         if ("Procedure".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PROCEDURE);
-        if ("ProcedureRequest".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PROCEDUREREQUEST);
         if ("ProcessRequest".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PROCESSRESPONSE);
+        if ("ProductPlan".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PRODUCTPLAN);
         if ("Provenance".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -1858,6 +2153,8 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SEQUENCE);
         if ("ServiceDefinition".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SERVICEDEFINITION);
+        if ("ServiceRequest".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SERVICEREQUEST);
         if ("Slot".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SLOT);
         if ("Specimen".equals(codeString))
@@ -1872,18 +2169,30 @@ public class ExampleScenario extends MetadataResource {
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUBSCRIPTION);
         if ("Substance".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUBSTANCE);
+        if ("SubstancePolymer".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUBSTANCEPOLYMER);
+        if ("SubstanceReferenceInformation".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUBSTANCEREFERENCEINFORMATION);
+        if ("SubstanceSpecification".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUBSTANCESPECIFICATION);
         if ("SupplyDelivery".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUPPLYDELIVERY);
         if ("SupplyRequest".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SUPPLYREQUEST);
         if ("Task".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.TASK);
+        if ("TerminologyCapabilities".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.TERMINOLOGYCAPABILITIES);
         if ("TestReport".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.TESTREPORT);
         if ("TestScript".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.TESTSCRIPT);
+        if ("UserSession".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.USERSESSION);
         if ("ValueSet".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.VALUESET);
+        if ("VerificationResult".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.VERIFICATIONRESULT);
         if ("VisionPrescription".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.VISIONPRESCRIPTION);
         throw new FHIRException("Unknown FHIRResourceType code '"+codeString+"'");
@@ -1907,6 +2216,8 @@ public class ExampleScenario extends MetadataResource {
         return "Basic";
       if (code == FHIRResourceType.BINARY)
         return "Binary";
+      if (code == FHIRResourceType.BIOLOGICALLYDERIVEDPRODUCT)
+        return "BiologicallyDerivedProduct";
       if (code == FHIRResourceType.BODYSTRUCTURE)
         return "BodyStructure";
       if (code == FHIRResourceType.BUNDLE)
@@ -1917,8 +2228,6 @@ public class ExampleScenario extends MetadataResource {
         return "CarePlan";
       if (code == FHIRResourceType.CARETEAM)
         return "CareTeam";
-      if (code == FHIRResourceType.CATALOGENTRY)
-        return "CatalogEntry";
       if (code == FHIRResourceType.CHARGEITEM)
         return "ChargeItem";
       if (code == FHIRResourceType.CLAIM)
@@ -1979,6 +2288,8 @@ public class ExampleScenario extends MetadataResource {
         return "EnrollmentRequest";
       if (code == FHIRResourceType.ENROLLMENTRESPONSE)
         return "EnrollmentResponse";
+      if (code == FHIRResourceType.ENTRYDEFINITION)
+        return "EntryDefinition";
       if (code == FHIRResourceType.EPISODEOFCARE)
         return "EpisodeOfCare";
       if (code == FHIRResourceType.EVENTDEFINITION)
@@ -2003,16 +2314,24 @@ public class ExampleScenario extends MetadataResource {
         return "GuidanceResponse";
       if (code == FHIRResourceType.HEALTHCARESERVICE)
         return "HealthcareService";
-      if (code == FHIRResourceType.IMAGINGMANIFEST)
-        return "ImagingManifest";
       if (code == FHIRResourceType.IMAGINGSTUDY)
         return "ImagingStudy";
       if (code == FHIRResourceType.IMMUNIZATION)
         return "Immunization";
+      if (code == FHIRResourceType.IMMUNIZATIONEVALUATION)
+        return "ImmunizationEvaluation";
       if (code == FHIRResourceType.IMMUNIZATIONRECOMMENDATION)
         return "ImmunizationRecommendation";
       if (code == FHIRResourceType.IMPLEMENTATIONGUIDE)
         return "ImplementationGuide";
+      if (code == FHIRResourceType.IMPLEMENTATIONGUIDEINPUT)
+        return "ImplementationGuideInput";
+      if (code == FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT)
+        return "ImplementationGuideOutput";
+      if (code == FHIRResourceType.INVOICE)
+        return "Invoice";
+      if (code == FHIRResourceType.ITEMINSTANCE)
+        return "ItemInstance";
       if (code == FHIRResourceType.LIBRARY)
         return "Library";
       if (code == FHIRResourceType.LINKAGE)
@@ -2037,6 +2356,20 @@ public class ExampleScenario extends MetadataResource {
         return "MedicationRequest";
       if (code == FHIRResourceType.MEDICATIONSTATEMENT)
         return "MedicationStatement";
+      if (code == FHIRResourceType.MEDICINALPRODUCT)
+        return "MedicinalProduct";
+      if (code == FHIRResourceType.MEDICINALPRODUCTAUTHORIZATION)
+        return "MedicinalProductAuthorization";
+      if (code == FHIRResourceType.MEDICINALPRODUCTCLINICALS)
+        return "MedicinalProductClinicals";
+      if (code == FHIRResourceType.MEDICINALPRODUCTDEVICESPEC)
+        return "MedicinalProductDeviceSpec";
+      if (code == FHIRResourceType.MEDICINALPRODUCTINGREDIENT)
+        return "MedicinalProductIngredient";
+      if (code == FHIRResourceType.MEDICINALPRODUCTPACKAGED)
+        return "MedicinalProductPackaged";
+      if (code == FHIRResourceType.MEDICINALPRODUCTPHARMACEUTICAL)
+        return "MedicinalProductPharmaceutical";
       if (code == FHIRResourceType.MESSAGEDEFINITION)
         return "MessageDefinition";
       if (code == FHIRResourceType.MESSAGEHEADER)
@@ -2047,12 +2380,18 @@ public class ExampleScenario extends MetadataResource {
         return "NutritionOrder";
       if (code == FHIRResourceType.OBSERVATION)
         return "Observation";
+      if (code == FHIRResourceType.OBSERVATIONDEFINITION)
+        return "ObservationDefinition";
+      if (code == FHIRResourceType.OCCUPATIONALDATA)
+        return "OccupationalData";
       if (code == FHIRResourceType.OPERATIONDEFINITION)
         return "OperationDefinition";
       if (code == FHIRResourceType.OPERATIONOUTCOME)
         return "OperationOutcome";
       if (code == FHIRResourceType.ORGANIZATION)
         return "Organization";
+      if (code == FHIRResourceType.ORGANIZATIONROLE)
+        return "OrganizationRole";
       if (code == FHIRResourceType.PARAMETERS)
         return "Parameters";
       if (code == FHIRResourceType.PATIENT)
@@ -2071,12 +2410,12 @@ public class ExampleScenario extends MetadataResource {
         return "PractitionerRole";
       if (code == FHIRResourceType.PROCEDURE)
         return "Procedure";
-      if (code == FHIRResourceType.PROCEDUREREQUEST)
-        return "ProcedureRequest";
       if (code == FHIRResourceType.PROCESSREQUEST)
         return "ProcessRequest";
       if (code == FHIRResourceType.PROCESSRESPONSE)
         return "ProcessResponse";
+      if (code == FHIRResourceType.PRODUCTPLAN)
+        return "ProductPlan";
       if (code == FHIRResourceType.PROVENANCE)
         return "Provenance";
       if (code == FHIRResourceType.QUESTIONNAIRE)
@@ -2103,6 +2442,8 @@ public class ExampleScenario extends MetadataResource {
         return "Sequence";
       if (code == FHIRResourceType.SERVICEDEFINITION)
         return "ServiceDefinition";
+      if (code == FHIRResourceType.SERVICEREQUEST)
+        return "ServiceRequest";
       if (code == FHIRResourceType.SLOT)
         return "Slot";
       if (code == FHIRResourceType.SPECIMEN)
@@ -2117,18 +2458,30 @@ public class ExampleScenario extends MetadataResource {
         return "Subscription";
       if (code == FHIRResourceType.SUBSTANCE)
         return "Substance";
+      if (code == FHIRResourceType.SUBSTANCEPOLYMER)
+        return "SubstancePolymer";
+      if (code == FHIRResourceType.SUBSTANCEREFERENCEINFORMATION)
+        return "SubstanceReferenceInformation";
+      if (code == FHIRResourceType.SUBSTANCESPECIFICATION)
+        return "SubstanceSpecification";
       if (code == FHIRResourceType.SUPPLYDELIVERY)
         return "SupplyDelivery";
       if (code == FHIRResourceType.SUPPLYREQUEST)
         return "SupplyRequest";
       if (code == FHIRResourceType.TASK)
         return "Task";
+      if (code == FHIRResourceType.TERMINOLOGYCAPABILITIES)
+        return "TerminologyCapabilities";
       if (code == FHIRResourceType.TESTREPORT)
         return "TestReport";
       if (code == FHIRResourceType.TESTSCRIPT)
         return "TestScript";
+      if (code == FHIRResourceType.USERSESSION)
+        return "UserSession";
       if (code == FHIRResourceType.VALUESET)
         return "ValueSet";
+      if (code == FHIRResourceType.VERIFICATIONRESULT)
+        return "VerificationResult";
       if (code == FHIRResourceType.VISIONPRESCRIPTION)
         return "VisionPrescription";
       return "?";
@@ -2497,23 +2850,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioActorComponent))
+        if (!(other_ instanceof ExampleScenarioActorComponent))
           return false;
-        ExampleScenarioActorComponent o = (ExampleScenarioActorComponent) other;
+        ExampleScenarioActorComponent o = (ExampleScenarioActorComponent) other_;
         return compareDeep(actorId, o.actorId, true) && compareDeep(type, o.type, true) && compareDeep(name, o.name, true)
            && compareDeep(description, o.description, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioActorComponent))
+        if (!(other_ instanceof ExampleScenarioActorComponent))
           return false;
-        ExampleScenarioActorComponent o = (ExampleScenarioActorComponent) other;
+        ExampleScenarioActorComponent o = (ExampleScenarioActorComponent) other_;
         return compareValues(actorId, o.actorId, true) && compareValues(type, o.type, true) && compareValues(name, o.name, true)
            && compareValues(description, o.description, true);
       }
@@ -3045,24 +3398,24 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceComponent))
           return false;
-        ExampleScenarioInstanceComponent o = (ExampleScenarioInstanceComponent) other;
+        ExampleScenarioInstanceComponent o = (ExampleScenarioInstanceComponent) other_;
         return compareDeep(resourceId, o.resourceId, true) && compareDeep(resourceType, o.resourceType, true)
            && compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(version, o.version, true)
            && compareDeep(containedInstance, o.containedInstance, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceComponent))
           return false;
-        ExampleScenarioInstanceComponent o = (ExampleScenarioInstanceComponent) other;
+        ExampleScenarioInstanceComponent o = (ExampleScenarioInstanceComponent) other_;
         return compareValues(resourceId, o.resourceId, true) && compareValues(resourceType, o.resourceType, true)
            && compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
@@ -3295,23 +3648,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceVersionComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceVersionComponent))
           return false;
-        ExampleScenarioInstanceVersionComponent o = (ExampleScenarioInstanceVersionComponent) other;
+        ExampleScenarioInstanceVersionComponent o = (ExampleScenarioInstanceVersionComponent) other_;
         return compareDeep(versionId, o.versionId, true) && compareDeep(description, o.description, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceVersionComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceVersionComponent))
           return false;
-        ExampleScenarioInstanceVersionComponent o = (ExampleScenarioInstanceVersionComponent) other;
+        ExampleScenarioInstanceVersionComponent o = (ExampleScenarioInstanceVersionComponent) other_;
         return compareValues(versionId, o.versionId, true) && compareValues(description, o.description, true)
           ;
       }
@@ -3546,23 +3899,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceContainedInstanceComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceContainedInstanceComponent))
           return false;
-        ExampleScenarioInstanceContainedInstanceComponent o = (ExampleScenarioInstanceContainedInstanceComponent) other;
+        ExampleScenarioInstanceContainedInstanceComponent o = (ExampleScenarioInstanceContainedInstanceComponent) other_;
         return compareDeep(resourceId, o.resourceId, true) && compareDeep(versionId, o.versionId, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioInstanceContainedInstanceComponent))
+        if (!(other_ instanceof ExampleScenarioInstanceContainedInstanceComponent))
           return false;
-        ExampleScenarioInstanceContainedInstanceComponent o = (ExampleScenarioInstanceContainedInstanceComponent) other;
+        ExampleScenarioInstanceContainedInstanceComponent o = (ExampleScenarioInstanceContainedInstanceComponent) other_;
         return compareValues(resourceId, o.resourceId, true) && compareValues(versionId, o.versionId, true)
           ;
       }
@@ -3583,7 +3936,7 @@ public class ExampleScenario extends MetadataResource {
         /**
          * The diagram title of the group of operations.
          */
-        @Child(name = "title", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "title", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The diagram title of the group of operations", formalDefinition="The diagram title of the group of operations." )
         protected StringType title;
 
@@ -4015,23 +4368,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessComponent))
+        if (!(other_ instanceof ExampleScenarioProcessComponent))
           return false;
-        ExampleScenarioProcessComponent o = (ExampleScenarioProcessComponent) other;
+        ExampleScenarioProcessComponent o = (ExampleScenarioProcessComponent) other_;
         return compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(preConditions, o.preConditions, true)
            && compareDeep(postConditions, o.postConditions, true) && compareDeep(step, o.step, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessComponent))
+        if (!(other_ instanceof ExampleScenarioProcessComponent))
           return false;
-        ExampleScenarioProcessComponent o = (ExampleScenarioProcessComponent) other;
+        ExampleScenarioProcessComponent o = (ExampleScenarioProcessComponent) other_;
         return compareValues(title, o.title, true) && compareValues(description, o.description, true) && compareValues(preConditions, o.preConditions, true)
            && compareValues(postConditions, o.postConditions, true);
       }
@@ -4359,23 +4712,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepComponent))
           return false;
-        ExampleScenarioProcessStepComponent o = (ExampleScenarioProcessStepComponent) other;
+        ExampleScenarioProcessStepComponent o = (ExampleScenarioProcessStepComponent) other_;
         return compareDeep(process, o.process, true) && compareDeep(pause, o.pause, true) && compareDeep(operation, o.operation, true)
            && compareDeep(alternative, o.alternative, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepComponent))
           return false;
-        ExampleScenarioProcessStepComponent o = (ExampleScenarioProcessStepComponent) other;
+        ExampleScenarioProcessStepComponent o = (ExampleScenarioProcessStepComponent) other_;
         return compareValues(pause, o.pause, true);
       }
 
@@ -5114,12 +5467,12 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepOperationComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepOperationComponent))
           return false;
-        ExampleScenarioProcessStepOperationComponent o = (ExampleScenarioProcessStepOperationComponent) other;
+        ExampleScenarioProcessStepOperationComponent o = (ExampleScenarioProcessStepOperationComponent) other_;
         return compareDeep(number, o.number, true) && compareDeep(type, o.type, true) && compareDeep(name, o.name, true)
            && compareDeep(initiator, o.initiator, true) && compareDeep(receiver, o.receiver, true) && compareDeep(description, o.description, true)
            && compareDeep(initiatorActive, o.initiatorActive, true) && compareDeep(receiverActive, o.receiverActive, true)
@@ -5127,12 +5480,12 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepOperationComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepOperationComponent))
           return false;
-        ExampleScenarioProcessStepOperationComponent o = (ExampleScenarioProcessStepOperationComponent) other;
+        ExampleScenarioProcessStepOperationComponent o = (ExampleScenarioProcessStepOperationComponent) other_;
         return compareValues(number, o.number, true) && compareValues(type, o.type, true) && compareValues(name, o.name, true)
            && compareValues(initiator, o.initiator, true) && compareValues(receiver, o.receiver, true) && compareValues(description, o.description, true)
            && compareValues(initiatorActive, o.initiatorActive, true) && compareValues(receiverActive, o.receiverActive, true)
@@ -5374,22 +5727,22 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepAlternativeComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepAlternativeComponent))
           return false;
-        ExampleScenarioProcessStepAlternativeComponent o = (ExampleScenarioProcessStepAlternativeComponent) other;
+        ExampleScenarioProcessStepAlternativeComponent o = (ExampleScenarioProcessStepAlternativeComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(option, o.option, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepAlternativeComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepAlternativeComponent))
           return false;
-        ExampleScenarioProcessStepAlternativeComponent o = (ExampleScenarioProcessStepAlternativeComponent) other;
+        ExampleScenarioProcessStepAlternativeComponent o = (ExampleScenarioProcessStepAlternativeComponent) other_;
         return compareValues(name, o.name, true);
       }
 
@@ -5717,23 +6070,23 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepAlternativeOptionComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepAlternativeOptionComponent))
           return false;
-        ExampleScenarioProcessStepAlternativeOptionComponent o = (ExampleScenarioProcessStepAlternativeOptionComponent) other;
+        ExampleScenarioProcessStepAlternativeOptionComponent o = (ExampleScenarioProcessStepAlternativeOptionComponent) other_;
         return compareDeep(description, o.description, true) && compareDeep(step, o.step, true) && compareDeep(pause, o.pause, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenarioProcessStepAlternativeOptionComponent))
+        if (!(other_ instanceof ExampleScenarioProcessStepAlternativeOptionComponent))
           return false;
-        ExampleScenarioProcessStepAlternativeOptionComponent o = (ExampleScenarioProcessStepAlternativeOptionComponent) other;
+        ExampleScenarioProcessStepAlternativeOptionComponent o = (ExampleScenarioProcessStepAlternativeOptionComponent) other_;
         return compareValues(description, o.description, true) && compareValues(pause, o.pause, true);
       }
 
@@ -5764,10 +6117,10 @@ public class ExampleScenario extends MetadataResource {
     protected MarkdownType copyright;
 
     /**
-     * What is the example supposed to resolve.
+     * What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="What is the example supposed to resolve", formalDefinition="What is the example supposed to resolve." )
+    @Description(shortDefinition="The purpose of the example, e.g. to illustrate a scenario", formalDefinition="What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario." )
     protected MarkdownType purpose;
 
     /**
@@ -5787,9 +6140,9 @@ public class ExampleScenario extends MetadataResource {
     /**
      * Each major process - a group of operations.
      */
-    @Child(name = "process", type = {}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "process", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Each major process - a group of operations", formalDefinition="Each major process - a group of operations." )
-    protected ExampleScenarioProcessComponent process;
+    protected List<ExampleScenarioProcessComponent> process;
 
     /**
      * Another nested workflow.
@@ -5803,7 +6156,7 @@ public class ExampleScenario extends MetadataResource {
     protected List<ExampleScenario> workflowTarget;
 
 
-    private static final long serialVersionUID = -1982575274L;
+    private static final long serialVersionUID = 1418844010L;
 
   /**
    * Constructor
@@ -5821,7 +6174,7 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -5841,7 +6194,7 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ExampleScenario setUrlElement(UriType value) { 
       this.url = value;
@@ -5849,14 +6202,14 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.
      */
     public ExampleScenario setUrl(String value) { 
       if (Utilities.noString(value))
@@ -6016,55 +6369,6 @@ public class ExampleScenario extends MetadataResource {
         if (this.name == null)
           this.name = new StringType();
         this.name.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #title} (The name of the example as showin in the title page.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
-     */
-    public StringType getTitleElement() { 
-      if (this.title == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExampleScenario.title");
-        else if (Configuration.doAutoCreate())
-          this.title = new StringType(); // bb
-      return this.title;
-    }
-
-    public boolean hasTitleElement() { 
-      return this.title != null && !this.title.isEmpty();
-    }
-
-    public boolean hasTitle() { 
-      return this.title != null && !this.title.isEmpty();
-    }
-
-    /**
-     * @param value {@link #title} (The name of the example as showin in the title page.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
-     */
-    public ExampleScenario setTitleElement(StringType value) { 
-      this.title = value;
-      return this;
-    }
-
-    /**
-     * @return The name of the example as showin in the title page.
-     */
-    public String getTitle() { 
-      return this.title == null ? null : this.title.getValue();
-    }
-
-    /**
-     * @param value The name of the example as showin in the title page.
-     */
-    public ExampleScenario setTitle(String value) { 
-      if (Utilities.noString(value))
-        this.title = null;
-      else {
-        if (this.title == null)
-          this.title = new StringType();
-        this.title.setValue(value);
       }
       return this;
     }
@@ -6466,56 +6770,7 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (Description of behaviour of the workflow example.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public MarkdownType getDescriptionElement() { 
-      if (this.description == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExampleScenario.description");
-        else if (Configuration.doAutoCreate())
-          this.description = new MarkdownType(); // bb
-      return this.description;
-    }
-
-    public boolean hasDescriptionElement() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    public boolean hasDescription() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    /**
-     * @param value {@link #description} (Description of behaviour of the workflow example.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public ExampleScenario setDescriptionElement(MarkdownType value) { 
-      this.description = value;
-      return this;
-    }
-
-    /**
-     * @return Description of behaviour of the workflow example.
-     */
-    public String getDescription() { 
-      return this.description == null ? null : this.description.getValue();
-    }
-
-    /**
-     * @param value Description of behaviour of the workflow example.
-     */
-    public ExampleScenario setDescription(String value) { 
-      if (value == null)
-        this.description = null;
-      else {
-        if (this.description == null)
-          this.description = new MarkdownType();
-        this.description.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #purpose} (What is the example supposed to resolve.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -6535,7 +6790,7 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (What is the example supposed to resolve.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public ExampleScenario setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -6543,14 +6798,14 @@ public class ExampleScenario extends MetadataResource {
     }
 
     /**
-     * @return What is the example supposed to resolve.
+     * @return What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value What is the example supposed to resolve.
+     * @param value What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     public ExampleScenario setPurpose(String value) { 
       if (value == null)
@@ -6672,25 +6927,54 @@ public class ExampleScenario extends MetadataResource {
     /**
      * @return {@link #process} (Each major process - a group of operations.)
      */
-    public ExampleScenarioProcessComponent getProcess() { 
+    public List<ExampleScenarioProcessComponent> getProcess() { 
       if (this.process == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExampleScenario.process");
-        else if (Configuration.doAutoCreate())
-          this.process = new ExampleScenarioProcessComponent(); // cc
+        this.process = new ArrayList<ExampleScenarioProcessComponent>();
       return this.process;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ExampleScenario setProcess(List<ExampleScenarioProcessComponent> theProcess) { 
+      this.process = theProcess;
+      return this;
+    }
+
     public boolean hasProcess() { 
-      return this.process != null && !this.process.isEmpty();
+      if (this.process == null)
+        return false;
+      for (ExampleScenarioProcessComponent item : this.process)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ExampleScenarioProcessComponent addProcess() { //3
+      ExampleScenarioProcessComponent t = new ExampleScenarioProcessComponent();
+      if (this.process == null)
+        this.process = new ArrayList<ExampleScenarioProcessComponent>();
+      this.process.add(t);
+      return t;
+    }
+
+    public ExampleScenario addProcess(ExampleScenarioProcessComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.process == null)
+        this.process = new ArrayList<ExampleScenarioProcessComponent>();
+      this.process.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #process} (Each major process - a group of operations.)
+     * @return The first repetition of repeating field {@link #process}, creating it if it does not already exist
      */
-    public ExampleScenario setProcess(ExampleScenarioProcessComponent value) { 
-      this.process = value;
-      return this;
+    public ExampleScenarioProcessComponent getProcessFirstRep() { 
+      if (getProcess().isEmpty()) {
+        addProcess();
+      }
+      return getProcess().get(0);
     }
 
     /**
@@ -6770,11 +7054,10 @@ public class ExampleScenario extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this example scenario when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the example scenario when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the example scenario author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the example scenario. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
-        children.add(new Property("title", "string", "The name of the example as showin in the title page.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this example scenario. Enables tracking the life-cycle of the content.", 0, 1, status));
         children.add(new Property("experimental", "boolean", "A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
         children.add(new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date));
@@ -6783,22 +7066,20 @@ public class ExampleScenario extends MetadataResource {
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate example scenario instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the example scenario is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the example scenario and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the example scenario.", 0, 1, copyright));
-        children.add(new Property("description", "markdown", "Description of behaviour of the workflow example.", 0, 1, description));
-        children.add(new Property("purpose", "markdown", "What is the example supposed to resolve.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose));
         children.add(new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor));
         children.add(new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance));
-        children.add(new Property("process", "", "Each major process - a group of operations.", 0, 1, process));
+        children.add(new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process));
         children.add(new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this example scenario is (or will be) published. The URL SHOULD include the major version of the example scenario. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this example scenario when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the example scenario when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the example scenario author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the example scenario. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
-        case 110371416: /*title*/  return new Property("title", "string", "The name of the example as showin in the title page.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this example scenario. Enables tracking the life-cycle of the content.", 0, 1, status);
         case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date);
@@ -6807,11 +7088,10 @@ public class ExampleScenario extends MetadataResource {
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate example scenario instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the example scenario is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the example scenario and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the example scenario.", 0, 1, copyright);
-        case -1724546052: /*description*/  return new Property("description", "markdown", "Description of behaviour of the workflow example.", 0, 1, description);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "What is the example supposed to resolve.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose);
         case 92645877: /*actor*/  return new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor);
         case 555127957: /*instance*/  return new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance);
-        case -309518737: /*process*/  return new Property("process", "", "Each major process - a group of operations.", 0, 1, process);
+        case -309518737: /*process*/  return new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process);
         case 35379135: /*workflow*/  return new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -6825,7 +7105,6 @@ public class ExampleScenario extends MetadataResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
@@ -6834,11 +7113,10 @@ public class ExampleScenario extends MetadataResource {
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 92645877: /*actor*/ return this.actor == null ? new Base[0] : this.actor.toArray(new Base[this.actor.size()]); // ExampleScenarioActorComponent
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // ExampleScenarioInstanceComponent
-        case -309518737: /*process*/ return this.process == null ? new Base[0] : new Base[] {this.process}; // ExampleScenarioProcessComponent
+        case -309518737: /*process*/ return this.process == null ? new Base[0] : this.process.toArray(new Base[this.process.size()]); // ExampleScenarioProcessComponent
         case 35379135: /*workflow*/ return this.workflow == null ? new Base[0] : this.workflow.toArray(new Base[this.workflow.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -6859,9 +7137,6 @@ public class ExampleScenario extends MetadataResource {
           return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          return value;
-        case 110371416: // title
-          this.title = castToString(value); // StringType
           return value;
         case -892481550: // status
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
@@ -6888,9 +7163,6 @@ public class ExampleScenario extends MetadataResource {
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
           return value;
-        case -1724546052: // description
-          this.description = castToMarkdown(value); // MarkdownType
-          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
           return value;
@@ -6901,7 +7173,7 @@ public class ExampleScenario extends MetadataResource {
           this.getInstance().add((ExampleScenarioInstanceComponent) value); // ExampleScenarioInstanceComponent
           return value;
         case -309518737: // process
-          this.process = (ExampleScenarioProcessComponent) value; // ExampleScenarioProcessComponent
+          this.getProcess().add((ExampleScenarioProcessComponent) value); // ExampleScenarioProcessComponent
           return value;
         case 35379135: // workflow
           this.getWorkflow().add(castToReference(value)); // Reference
@@ -6921,8 +7193,6 @@ public class ExampleScenario extends MetadataResource {
           this.version = castToString(value); // StringType
         } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        } else if (name.equals("title")) {
-          this.title = castToString(value); // StringType
         } else if (name.equals("status")) {
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -6940,8 +7210,6 @@ public class ExampleScenario extends MetadataResource {
           this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        } else if (name.equals("description")) {
-          this.description = castToMarkdown(value); // MarkdownType
         } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("actor")) {
@@ -6949,7 +7217,7 @@ public class ExampleScenario extends MetadataResource {
         } else if (name.equals("instance")) {
           this.getInstance().add((ExampleScenarioInstanceComponent) value);
         } else if (name.equals("process")) {
-          this.process = (ExampleScenarioProcessComponent) value; // ExampleScenarioProcessComponent
+          this.getProcess().add((ExampleScenarioProcessComponent) value);
         } else if (name.equals("workflow")) {
           this.getWorkflow().add(castToReference(value));
         } else
@@ -6964,7 +7232,6 @@ public class ExampleScenario extends MetadataResource {
         case -1618432855:  return addIdentifier(); 
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
-        case 110371416:  return getTitleElement();
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
         case 3076014:  return getDateElement();
@@ -6973,11 +7240,10 @@ public class ExampleScenario extends MetadataResource {
         case -669707736:  return addUseContext(); 
         case -507075711:  return addJurisdiction(); 
         case 1522889671:  return getCopyrightElement();
-        case -1724546052:  return getDescriptionElement();
         case -220463842:  return getPurposeElement();
         case 92645877:  return addActor(); 
         case 555127957:  return addInstance(); 
-        case -309518737:  return getProcess(); 
+        case -309518737:  return addProcess(); 
         case 35379135:  return addWorkflow(); 
         default: return super.makeProperty(hash, name);
         }
@@ -6991,7 +7257,6 @@ public class ExampleScenario extends MetadataResource {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
-        case 110371416: /*title*/ return new String[] {"string"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
@@ -7000,7 +7265,6 @@ public class ExampleScenario extends MetadataResource {
         case -669707736: /*useContext*/ return new String[] {"UsageContext"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case 1522889671: /*copyright*/ return new String[] {"markdown"};
-        case -1724546052: /*description*/ return new String[] {"markdown"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 92645877: /*actor*/ return new String[] {};
         case 555127957: /*instance*/ return new String[] {};
@@ -7024,9 +7288,6 @@ public class ExampleScenario extends MetadataResource {
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.name");
-        }
-        else if (name.equals("title")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.title");
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.status");
@@ -7052,9 +7313,6 @@ public class ExampleScenario extends MetadataResource {
         else if (name.equals("copyright")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.copyright");
         }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.description");
-        }
         else if (name.equals("purpose")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.purpose");
         }
@@ -7065,8 +7323,7 @@ public class ExampleScenario extends MetadataResource {
           return addInstance();
         }
         else if (name.equals("process")) {
-          this.process = new ExampleScenarioProcessComponent();
-          return this.process;
+          return addProcess();
         }
         else if (name.equals("workflow")) {
           return addWorkflow();
@@ -7091,7 +7348,6 @@ public class ExampleScenario extends MetadataResource {
         };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
-        dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
@@ -7112,7 +7368,6 @@ public class ExampleScenario extends MetadataResource {
             dst.jurisdiction.add(i.copy());
         };
         dst.copyright = copyright == null ? null : copyright.copy();
-        dst.description = description == null ? null : description.copy();
         dst.purpose = purpose == null ? null : purpose.copy();
         if (actor != null) {
           dst.actor = new ArrayList<ExampleScenarioActorComponent>();
@@ -7124,7 +7379,11 @@ public class ExampleScenario extends MetadataResource {
           for (ExampleScenarioInstanceComponent i : instance)
             dst.instance.add(i.copy());
         };
-        dst.process = process == null ? null : process.copy();
+        if (process != null) {
+          dst.process = new ArrayList<ExampleScenarioProcessComponent>();
+          for (ExampleScenarioProcessComponent i : process)
+            dst.process.add(i.copy());
+        };
         if (workflow != null) {
           dst.workflow = new ArrayList<Reference>();
           for (Reference i : workflow)
@@ -7138,24 +7397,24 @@ public class ExampleScenario extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExampleScenario))
+        if (!(other_ instanceof ExampleScenario))
           return false;
-        ExampleScenario o = (ExampleScenario) other;
+        ExampleScenario o = (ExampleScenario) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(purpose, o.purpose, true) && compareDeep(actor, o.actor, true) && compareDeep(instance, o.instance, true)
            && compareDeep(process, o.process, true) && compareDeep(workflow, o.workflow, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExampleScenario))
+        if (!(other_ instanceof ExampleScenario))
           return false;
-        ExampleScenario o = (ExampleScenario) other;
+        ExampleScenario o = (ExampleScenario) other_;
         return compareValues(copyright, o.copyright, true) && compareValues(purpose, o.purpose, true);
       }
 
@@ -7250,26 +7509,6 @@ public class ExampleScenario extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>The description of the example scenario</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExampleScenario.description</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="description", path="ExampleScenario.description", description="The description of the example scenario", type="string" )
-  public static final String SP_DESCRIPTION = "description";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
-   * <p>
-   * Description: <b>The description of the example scenario</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExampleScenario.description</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
    * Search parameter: <b>publisher</b>
    * <p>
    * Description: <b>Name of the publisher of the example scenario</b><br>
@@ -7288,26 +7527,6 @@ public class ExampleScenario extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
-
- /**
-   * Search parameter: <b>title</b>
-   * <p>
-   * Description: <b>The human-friendly name of the example scenario</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExampleScenario.title</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="title", path="ExampleScenario.title", description="The human-friendly name of the example scenario", type="string" )
-  public static final String SP_TITLE = "title";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>title</b>
-   * <p>
-   * Description: <b>The human-friendly name of the example scenario</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExampleScenario.title</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
 
  /**
    * Search parameter: <b>version</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -108,7 +108,7 @@ public class Contract extends DomainResource {
          */
         RESOLVED, 
         /**
-         * Contract reaches its expiry date. It may or may not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.
+         * Contract reaches its expiry date. It might or might not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.
          */
         TERMINATED, 
         /**
@@ -209,7 +209,7 @@ public class Contract extends DomainResource {
             case RENEWED: return "Beginning of a successor Contract at the termination of predecessor Contract lifecycle. Usage: Follows termination of a preceding Contract that has reached its expiry date. Precedence Order = 13. Comparable FHIR and v.3 status codes: superseded.";
             case REVOKED: return "A Contract that is rescinded.  May be required prior to replacing with an updated Contract. Comparable FHIR and v.3 status codes: nullified.";
             case RESOLVED: return "Contract is reactivated after being pended because of faulty execution. *E.g., competency of the signer(s), or where the policy is substantially different from and did not accompany the application/form so that the applicant could not compare them. Aka - ''reactivated''. Usage: Optional stage where a pended contract is reactivated. Precedence Order = 8. Comparable FHIR and v.3 status codes: reactivated.";
-            case TERMINATED: return "Contract reaches its expiry date. It may or may not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.";
+            case TERMINATED: return "Contract reaches its expiry date. It might or might not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.";
             default: return "?";
           }
         }
@@ -1251,12 +1251,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TermComponent))
+        if (!(other_ instanceof TermComponent))
           return false;
-        TermComponent o = (TermComponent) other;
+        TermComponent o = (TermComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(issued, o.issued, true) && compareDeep(applies, o.applies, true)
            && compareDeep(type, o.type, true) && compareDeep(subType, o.subType, true) && compareDeep(offer, o.offer, true)
            && compareDeep(asset, o.asset, true) && compareDeep(agent, o.agent, true) && compareDeep(action, o.action, true)
@@ -1264,12 +1264,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TermComponent))
+        if (!(other_ instanceof TermComponent))
           return false;
-        TermComponent o = (TermComponent) other;
+        TermComponent o = (TermComponent) other_;
         return compareValues(issued, o.issued, true);
       }
 
@@ -1660,23 +1660,23 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContractOfferComponent))
+        if (!(other_ instanceof ContractOfferComponent))
           return false;
-        ContractOfferComponent o = (ContractOfferComponent) other;
+        ContractOfferComponent o = (ContractOfferComponent) other_;
         return compareDeep(topic, o.topic, true) && compareDeep(type, o.type, true) && compareDeep(decision, o.decision, true)
            && compareDeep(text, o.text, true) && compareDeep(linkId, o.linkId, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContractOfferComponent))
+        if (!(other_ instanceof ContractOfferComponent))
           return false;
-        ContractOfferComponent o = (ContractOfferComponent) other;
+        ContractOfferComponent o = (ContractOfferComponent) other_;
         return compareValues(text, o.text, true) && compareValues(linkId, o.linkId, true);
       }
 
@@ -2188,24 +2188,24 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContractAssetComponent))
+        if (!(other_ instanceof ContractAssetComponent))
           return false;
-        ContractAssetComponent o = (ContractAssetComponent) other;
+        ContractAssetComponent o = (ContractAssetComponent) other_;
         return compareDeep(class_, o.class_, true) && compareDeep(code, o.code, true) && compareDeep(period, o.period, true)
            && compareDeep(dataPeriod, o.dataPeriod, true) && compareDeep(data, o.data, true) && compareDeep(valuedItem, o.valuedItem, true)
            && compareDeep(securityLabel, o.securityLabel, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContractAssetComponent))
+        if (!(other_ instanceof ContractAssetComponent))
           return false;
-        ContractAssetComponent o = (ContractAssetComponent) other;
+        ContractAssetComponent o = (ContractAssetComponent) other_;
         return true;
       }
 
@@ -2435,22 +2435,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AssetDataComponent))
+        if (!(other_ instanceof AssetDataComponent))
           return false;
-        AssetDataComponent o = (AssetDataComponent) other;
+        AssetDataComponent o = (AssetDataComponent) other_;
         return compareDeep(meaning, o.meaning, true) && compareDeep(reference, o.reference, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AssetDataComponent))
+        if (!(other_ instanceof AssetDataComponent))
           return false;
-        AssetDataComponent o = (AssetDataComponent) other;
+        AssetDataComponent o = (AssetDataComponent) other_;
         return compareValues(meaning, o.meaning, true);
       }
 
@@ -3045,24 +3045,24 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValuedItemComponent))
+        if (!(other_ instanceof ValuedItemComponent))
           return false;
-        ValuedItemComponent o = (ValuedItemComponent) other;
+        ValuedItemComponent o = (ValuedItemComponent) other_;
         return compareDeep(entity, o.entity, true) && compareDeep(identifier, o.identifier, true) && compareDeep(effectiveTime, o.effectiveTime, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
            && compareDeep(points, o.points, true) && compareDeep(net, o.net, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValuedItemComponent))
+        if (!(other_ instanceof ValuedItemComponent))
           return false;
-        ValuedItemComponent o = (ValuedItemComponent) other;
+        ValuedItemComponent o = (ValuedItemComponent) other_;
         return compareValues(effectiveTime, o.effectiveTime, true) && compareValues(factor, o.factor, true)
            && compareValues(points, o.points, true);
       }
@@ -3307,22 +3307,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AgentComponent))
+        if (!(other_ instanceof AgentComponent))
           return false;
-        AgentComponent o = (AgentComponent) other;
+        AgentComponent o = (AgentComponent) other_;
         return compareDeep(actor, o.actor, true) && compareDeep(role, o.role, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AgentComponent))
+        if (!(other_ instanceof AgentComponent))
           return false;
-        AgentComponent o = (AgentComponent) other;
+        AgentComponent o = (AgentComponent) other_;
         return true;
       }
 
@@ -3612,23 +3612,23 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SignatoryComponent))
+        if (!(other_ instanceof SignatoryComponent))
           return false;
-        SignatoryComponent o = (SignatoryComponent) other;
+        SignatoryComponent o = (SignatoryComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(party, o.party, true) && compareDeep(signature, o.signature, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SignatoryComponent))
+        if (!(other_ instanceof SignatoryComponent))
           return false;
-        SignatoryComponent o = (SignatoryComponent) other;
+        SignatoryComponent o = (SignatoryComponent) other_;
         return true;
       }
 
@@ -3801,22 +3801,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof FriendlyLanguageComponent))
+        if (!(other_ instanceof FriendlyLanguageComponent))
           return false;
-        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other;
+        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof FriendlyLanguageComponent))
+        if (!(other_ instanceof FriendlyLanguageComponent))
           return false;
-        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other;
+        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other_;
         return true;
       }
 
@@ -3989,22 +3989,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof LegalLanguageComponent))
+        if (!(other_ instanceof LegalLanguageComponent))
           return false;
-        LegalLanguageComponent o = (LegalLanguageComponent) other;
+        LegalLanguageComponent o = (LegalLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof LegalLanguageComponent))
+        if (!(other_ instanceof LegalLanguageComponent))
           return false;
-        LegalLanguageComponent o = (LegalLanguageComponent) other;
+        LegalLanguageComponent o = (LegalLanguageComponent) other_;
         return true;
       }
 
@@ -4177,22 +4177,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ComputableLanguageComponent))
+        if (!(other_ instanceof ComputableLanguageComponent))
           return false;
-        ComputableLanguageComponent o = (ComputableLanguageComponent) other;
+        ComputableLanguageComponent o = (ComputableLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ComputableLanguageComponent))
+        if (!(other_ instanceof ComputableLanguageComponent))
           return false;
-        ComputableLanguageComponent o = (ComputableLanguageComponent) other;
+        ComputableLanguageComponent o = (ComputableLanguageComponent) other_;
         return true;
       }
 
@@ -5433,12 +5433,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Contract))
+        if (!(other_ instanceof Contract))
           return false;
-        Contract o = (Contract) other;
+        Contract o = (Contract) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(contentDerivative, o.contentDerivative, true)
            && compareDeep(issued, o.issued, true) && compareDeep(applies, o.applies, true) && compareDeep(subject, o.subject, true)
            && compareDeep(authority, o.authority, true) && compareDeep(domain, o.domain, true) && compareDeep(type, o.type, true)
@@ -5448,12 +5448,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Contract))
+        if (!(other_ instanceof Contract))
           return false;
-        Contract o = (Contract) other;
+        Contract o = (Contract) other_;
         return compareValues(status, o.status, true) && compareValues(issued, o.issued, true);
       }
 

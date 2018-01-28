@@ -1,32 +1,40 @@
 package org.hl7.fhir.instance.validation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.hl7.fhir.exceptions.*;
+import com.google.gson.*;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.formats.FormatUtilities;
 import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.ElementDefinition.*;
+import org.hl7.fhir.instance.model.ElementDefinition.ConstraintSeverity;
+import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
-import org.hl7.fhir.instance.model.StructureDefinition.*;
+import org.hl7.fhir.instance.model.StructureDefinition.ExtensionContext;
+import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.instance.utils.FHIRPathEngine;
+import org.hl7.fhir.instance.utils.IResourceValidator;
+import org.hl7.fhir.instance.utils.IWorkerContext;
 import org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult;
-//import org.hl7.fhir.instance.utils.ProfileUtilities;
-import org.hl7.fhir.instance.utils.*;
-import org.hl7.fhir.instance.utils.IResourceValidator.BestPracticeWarningLevel;
-import org.hl7.fhir.instance.utils.IResourceValidator.CheckDisplayOption;
+import org.hl7.fhir.instance.utils.ProfileUtilities;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.hl7.fhir.utilities.validation.ValidationMessage.*;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 import org.hl7.fhir.utilities.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.gson.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
 
 /* 
@@ -35,281 +43,13 @@ import com.google.gson.*;
  */
 public class InstanceValidator extends BaseValidator implements IResourceValidator {
 
-	private class ElementDefinitionOutcome {
-		public ElementDefinitionOutcome(ElementDefinition ed) {
-			definition = ed;
-		}
-		public ElementDefinitionOutcome(ElementDefinition ed, TypeRefComponent tr) {
-			definition = ed;
-			typename = tr.getCode();
-			if (tr.hasProfile())
-				profile = tr.getProfile().get(0).getValue();
-		}
-		private ElementDefinition definition;
-		private String typename;
-		private String profile;
-	}
-
-	public class ResourceOnWrapper extends Resource {
-		private static final long serialVersionUID = 1L;
-		private IWorkerContext services;
-		private WrapperElement wrapper;
-		private List<ElementDefinition> elementList;
-		private StructureDefinition profile;
-		private ElementDefinition definition;
-		private List<ElementDefinition> childDefinitions;
-
-		public ResourceOnWrapper(IWorkerContext services, WrapperElement wrapper, StructureDefinition profile) {
-			super();
-			this.services = services;
-			this.wrapper = wrapper;
-			this.profile = profile;
-			this.definition = profile.getSnapshot().getElement().get(0);
-		}
-
-		private ElementDefinitionOutcome getDefinition(String name) throws DefinitionException {
-			if (childDefinitions == null) 
-				childDefinitions = ProfileUtilities.getChildMap(profile, definition.getName(), definition.getPath(), definition.getNameReference());
-			for (ElementDefinition ed : childDefinitions) {
-				String tail = ed.getPath().substring(ed.getPath().lastIndexOf('.')+1);
-				if (tail.equals(name)) {
-					return new ElementDefinitionOutcome(ed);
-				}
-				if (tail.endsWith("[x]") && tail.substring(0, tail.length()-3).equals(name.substring(0, tail.length()-3))) {
-					TypeRefComponent tr = getType(ed, name.substring(tail.length()-3));
-					if (tr != null)
-						return new ElementDefinitionOutcome(ed, tr);
-				}
-			}
-			return null;
-		}
-
-		private TypeRefComponent getType(ElementDefinition ed, String type) {
-			for (TypeRefComponent t : ed.getType()) {
-				if (t.getCode().equals(type))
-					return t;
-			}
-			return null;
-		}
-
-		@Override
-		public List<Base> listChildrenByName(String child_name) {
-			List<Base> list = new ArrayList<Base>();
-			List<WrapperElement> children = new ArrayList<WrapperElement>();
-			wrapper.getNamedChildren(child_name, children);
-			for (WrapperElement child : children) {
-				ElementDefinitionOutcome definition;
-				try {
-					definition = getDefinition(child.getName());
-				} catch (Exception e) {
-					definition = null;
-				}
-				if (definition != null) {
-					TypeRefComponent tr = getType(definition.definition, "Resource");
-					if (tr != null && wrapper.isXml())  // special case for DomainResource.contained and Bundle.entry
-						list.add(new BaseOnWrapper(services, child.getFirstChild(), profile, definition.definition, definition.typename, definition.profile));
-					else
-						list.add(new BaseOnWrapper(services, child, profile, definition.definition, definition.typename, definition.profile));
-				}
-			}
-			return list;
-		}  	
-
-		@Override
-		public String fhirType() {
-			return wrapper.getResourceType();
-		}
-
-		@Override
-		public Resource copy() {
-			throw new Error("copy() is not implemented here");
-		}
-
-
-		@Override
-		public ResourceType getResourceType() {
-			try {
-				return ResourceType.fromCode(fhirType());
-			} catch (Exception e) {
-				return null;
-			}
-		}
-		
-		@Override
-		protected boolean isMetadataBased() {
-	  	return true;
-		}
-
-		@Override
-		public String toString() {
-			return fhirType();
-		}
-	}
-
-	public class BaseOnWrapper extends Base {
-		private static final long serialVersionUID = 1L;
-		private IWorkerContext services;
-		private WrapperElement wrapper;
-		private List<ElementDefinition> elementList;
-		private StructureDefinition profile;
-		private ElementDefinition definition;
-		private List<ElementDefinition> childDefinitions;
-		private String typeName;
-		private String typeProfile;
-
-
-		public BaseOnWrapper(IWorkerContext services, WrapperElement wrapper, StructureDefinition profile,
-				ElementDefinition definition, String typeName, String typeProfile) {
-			super();
-			this.services = services;
-			this.wrapper = wrapper;
-			this.profile = profile;
-			this.definition = definition;
-			this.typeName = typeName;
-			this.typeProfile = typeProfile;
-		}
-
-		private ElementDefinitionOutcome getDefinition(String name) throws DefinitionException {
-			if (childDefinitions == null) 
-				childDefinitions = ProfileUtilities.getChildMap(profile, definition.getName(), definition.getPath(), definition.getNameReference());
-
-			if (childDefinitions.size() == 0) {
-				String pn = typeProfile;
-				if (Utilities.noString(pn) && !Utilities.noString(typeName))
-					pn = "http://hl7.org/fhir/StructureDefinition/"+typeName;
-				if (Utilities.noString(pn) && definition.getType().size() == 1) {
-					if (definition.getType().get(0).getProfile().size() > 0)
-						pn = definition.getType().get(0).getProfile().get(0).getValue();
-					else
-						pn = "http://hl7.org/fhir/StructureDefinition/"+ definition.getType().get(0).getCode();
-				}
-				if (!Utilities.noString(pn)) { 
-					StructureDefinition profile = services.fetchResource(StructureDefinition.class, pn);
-					if (profile != null) {
-						this.profile = profile;
-						childDefinitions = ProfileUtilities.getChildMap(profile, null, profile.getSnapshot().getElement().get(0).getPath(), null);
-					}
-				}
-			}
-
-
-			for (ElementDefinition ed : childDefinitions) {
-				String tail = ed.getPath().substring(ed.getPath().lastIndexOf('.')+1);
-				if (tail.equals(name)) {
-					return new ElementDefinitionOutcome(ed);
-				}
-				if (tail.endsWith("[x]") && name.length() > tail.length()-1 && tail.substring(0, tail.length()-3).equals(name.substring(0, tail.length()-3))) {
-					TypeRefComponent tr = getType(ed, name.substring(tail.length()-3));
-					if (tr != null)
-						return new ElementDefinitionOutcome(ed, tr);
-				}
-			}
-			return null;
-		}
-
-		private TypeRefComponent getType(ElementDefinition ed, String type) {
-			for (TypeRefComponent t : ed.getType()) {
-				if (t.getCode().equalsIgnoreCase(type))
-					return t;
-			}
-			return null;
-		}
-
-		@Override
-		public List<Base> listChildrenByName(String child_name) {
-			List<Base> list = new ArrayList<Base>();
-			List<WrapperElement> children = new ArrayList<WrapperElement>();
-			wrapper.getNamedChildrenWithWildcard(child_name, children);
-			for (WrapperElement child : children) {
-				ElementDefinitionOutcome definition;
-				try {
-					definition = getDefinition(child.getName());
-				} catch (Exception e) {
-					definition = null;
-				}
-				if (definition != null) { 
-					TypeRefComponent tr = getType(definition.definition, "Resource");
-					if (tr != null && wrapper.isXml())  // special case for DomainResource.contained and Bundle.entry
-						list.add(new BaseOnWrapper(services, child.getFirstChild(), profile, definition.definition, definition.typename, definition.profile));
-					else
-						list.add(new BaseOnWrapper(services, child, profile, definition.definition, definition.typename, definition.profile));
-				}
-			}
-			return list;
-		}
-
-		public boolean isPrimitive() {
-			String t = fhirType();
-			return t.equalsIgnoreCase("boolean") || t.equalsIgnoreCase("integer") || t.equalsIgnoreCase("string") || t.equalsIgnoreCase("decimal") || t.equalsIgnoreCase("uri") || t.equalsIgnoreCase("base64Binary") ||
-					t.equalsIgnoreCase("instant") || t.equalsIgnoreCase("date") || t.equalsIgnoreCase("uuid") || t.equalsIgnoreCase("id") || t.equalsIgnoreCase("xhtml") || t.equalsIgnoreCase("markdown") || 
-					t.equalsIgnoreCase("dateTime") || t.equalsIgnoreCase("time") || t.equalsIgnoreCase("code") || t.equalsIgnoreCase("oid") || t.equalsIgnoreCase("id");
-		}
-
-		public String primitiveValue() {
-			return wrapper.getAttribute("value");
-		}
-
-		@Override
-		public String fhirType() {
-			if (!Utilities.noString(typeName))
-				return typeName;
-			else
-				return definition.getType().get(0).getCode();
-		}
-
-		@Override
-		protected void listChildren(List<Property> result) {			
-			throw new Error("not done yet");
-		}
-
-		@Override
-		protected boolean isMetadataBased() {
-	  	return true;
-		}
-
-		public boolean equalsDeep(Base other) {
-			if (!super.equalsDeep(other) || !fhirType().equals(other.fhirType()))
-			  return false;
-
-			// make sure we have child definitions
-			try {
-				getDefinition("xxxx");
-				List<ElementDefinition> childList = childDefinitions; 
-				// there's a problem here - we're going to iterate by the definition, where as equality should - probably - be 
-				// based on the underlying definitions. is it worth getting them? it's kind of complicated....
-				for (ElementDefinition ed : childList) {
-					String tail = tail(ed.getPath());
-					List<Base> thisList = listChildrenByName(tail);
-					List<Base> otherList = other.listChildrenByName(tail);
-					if (!compareDeep(thisList, otherList, false))
-						return false;					
-				}
-				return true;
-			} catch (Exception e) {
-				return false;// because we can't decide
-			}
-		}
-
-		@Override
-		public String toString() {
-			if (isPrimitive())
-				return primitiveValue();
-			else
-				return fhirType();
-		}
-	}
-
   private boolean anyExtensionsAllowed;
-
   private BestPracticeWarningLevel bpWarnings;
   // configuration items
   private CheckDisplayOption checkDisplay;
   private IWorkerContext context;
-
   private List<String> extensionDomains = new ArrayList<String>();
-
 	private IdStatus resourceIdRule;
-
   // used during the build process to keep the overall volume of messages down
   private boolean suppressLoincSnomedMessages;
 
@@ -333,13 +73,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       switch (bpWarnings) {
       case Error:
         rule(errors, invalid, line, col, literalPath, test, message);
-		  break;
+        break;
       case Warning:
         warning(errors, invalid, line, col, literalPath, test, message);
-		  break;
+        break;
       case Hint:
         hint(errors, invalid, line, col, literalPath, test, message);
-		  break;
+        break;
       default: // do nothing
       }
     }
@@ -375,8 +115,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkFixedValue(errors, path + ".hash", focus.getNamedChild("hash"), fixed.getHashElement(), "hash");
     checkFixedValue(errors, path + ".title", focus.getNamedChild("title"), fixed.getTitleElement(), "title");
   }
-
-  // public API
 
 	private boolean checkCode(List<ValidationMessage> errors, WrapperElement element, String path, String code, String system, String display) {
     if (context.supportsSystem(system)) {
@@ -459,24 +197,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
   }
 
-  private CodeableConcept readAsCodeableConcept(WrapperElement element) {
-	  CodeableConcept cc = new CodeableConcept();
-	  List<WrapperElement> list = new ArrayList<WrapperElement>();
-	  element.getNamedChildren("coding", list);
-	  for (WrapperElement item : list)
-	  	cc.addCoding(readAsCoding(item));
-    cc.setText(element.getNamedChildValue("text"));
-	  return cc;
-	}
-
-	private Coding readAsCoding(WrapperElement item) {
-		Coding c = new Coding();
-		c.setSystem(item.getNamedChildValue("system"));
-		c.setVersion(item.getNamedChildValue("version"));
-		c.setCode(item.getNamedChildValue("code"));
-		c.setDisplay(item.getNamedChildValue("display"));
-  	return c;
-	}
+  // public API
 
 	private void checkCoding(List<ValidationMessage> errors, String path, WrapperElement focus, Coding fixed) {
     checkFixedValue(errors, path + ".system", focus.getNamedChild("system"), fixed.getSystemElement(), "system");
@@ -632,34 +353,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     } else
       throw new Error("Unknown context type");
   }
-  //
-  // private String simplifyPath(String path) {
-  // String s = path.replace("/f:", ".");
-  // while (s.contains("["))
-  // s = s.substring(0, s.indexOf("["))+s.substring(s.indexOf("]")+1);
-  // String[] parts = s.split("\\.");
-  // int i = 0;
-  // while (i < parts.length && !context.getProfiles().containsKey(parts[i].toLowerCase()))
-  // i++;
-  // if (i >= parts.length)
-  // throw new Error("Unable to process part "+path);
-  // int j = parts.length - 1;
-  // while (j > 0 && (parts[j].equals("extension") || parts[j].equals("modifierExtension")))
-  // j--;
-  // StringBuilder b = new StringBuilder();
-  // boolean first = true;
-  // for (int k = i; k <= j; k++) {
-  // if (k == j || !parts[k].equals(parts[k+1])) {
-  // if (first)
-  // first = false;
-  // else
-  // b.append(".");
-  // b.append(parts[k]);
-  // }
-  // }
-  // return b.toString();
-  // }
-  //
 
   private void checkFixedValue(List<ValidationMessage> errors, String path, WrapperElement focus, org.hl7.fhir.instance.model.Element fixed, String propName) {
     if (fixed == null && focus == null)
@@ -807,6 +500,57 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkFixedValue(errors, path + ".period", focus.getNamedChild("period"), fixed.getPeriod(), "period");
     checkFixedValue(errors, path + ".assigner", focus.getNamedChild("assigner"), fixed.getAssigner(), "assigner");
   }
+  //
+  // private String simplifyPath(String path) {
+  // String s = path.replace("/f:", ".");
+  // while (s.contains("["))
+  // s = s.substring(0, s.indexOf("["))+s.substring(s.indexOf("]")+1);
+  // String[] parts = s.split("\\.");
+  // int i = 0;
+  // while (i < parts.length && !context.getProfiles().containsKey(parts[i].toLowerCase()))
+  // i++;
+  // if (i >= parts.length)
+  // throw new Error("Unable to process part "+path);
+  // int j = parts.length - 1;
+  // while (j > 0 && (parts[j].equals("extension") || parts[j].equals("modifierExtension")))
+  // j--;
+  // StringBuilder b = new StringBuilder();
+  // boolean first = true;
+  // for (int k = i; k <= j; k++) {
+  // if (k == j || !parts[k].equals(parts[k+1])) {
+  // if (first)
+  // first = false;
+  // else
+  // b.append(".");
+  // b.append(parts[k]);
+  // }
+  // }
+  // return b.toString();
+  // }
+  //
+
+	private void checkInvariants(List<ValidationMessage> errors, String path, StructureDefinition profile, ElementDefinition ed, String typename, String typeProfile, WrapperElement resource, WrapperElement element) throws FHIRException {
+		for (ElementDefinitionConstraintComponent inv : ed.getConstraint()) {
+			if (inv.hasExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression")) {
+				ResourceOnWrapper res = new ResourceOnWrapper(context, resource, resource.getProfile());
+				BaseOnWrapper e = new BaseOnWrapper(context, element, profile, ed, typename, typeProfile);
+				String expr = inv.getExtensionString("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression");
+				FHIRPathEngine fpe = new FHIRPathEngine(context);
+		    boolean ok = true;
+        try {
+          ok = fpe.evaluateToBoolean(res, e, expr);
+        } catch (PathEngineException e1) {
+          rule(errors, IssueType.INVARIANT, element.line(), element.col(), path, false, e1.getMessage()+": "+inv.getHuman()+fpe.forLog());
+        }
+				if (!ok) {
+					if (inv.getSeverity() == ConstraintSeverity.ERROR)
+						rule(errors, IssueType.INVARIANT, element.line(), element.col(), path, ok, inv.getHuman()+fpe.forLog());
+					else if (inv.getSeverity() == ConstraintSeverity.WARNING)
+						warning(errors, IssueType.INVARIANT, element.line(), element.line(), path, ok, inv.getHuman()+fpe.forLog());
+        }
+      }
+    }
+  }
 
   private void checkPeriod(List<ValidationMessage> errors, String path, WrapperElement focus, Period fixed) {
     checkFixedValue(errors, path + ".start", focus.getNamedChild("start"), fixed.getStartElement(), "start");
@@ -826,7 +570,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     if (type.equals("dateTime")) {
       rule(errors, IssueType.INVALID, e.line(), e.col(), path, yearIsValid(e.getAttribute("value")), "The value '" + e.getAttribute("value") + "' does not have a valid year");
-      boolean ok = e.getAttribute("value").matches("-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?)?)?)?");
+      boolean ok = e.getAttribute("value").matches("-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?");
       if (!ok)
         rule(errors, IssueType.INVALID, e.line(), e.col(), path,ok, "'"+e.getAttribute("value")+"' is not a valid date time");
       rule(errors, IssueType.INVALID, e.line(), e.col(), path, !hasTime(e.getAttribute("value")) || hasTimeZone(e.getAttribute("value")), "if a date has a time, it must have a timezone");
@@ -885,8 +629,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkFixedValue(errors, path + ".system", focus.getNamedChild("system"), fixed.getSystemElement(), "system");
     checkFixedValue(errors, path + ".code", focus.getNamedChild("code"), fixed.getCodeElement(), "code");
   }
-
-  // implementation
 
   private void checkRange(List<ValidationMessage> errors, String path, WrapperElement focus, Range fixed) {
     checkFixedValue(errors, path + ".low", focus.getNamedChild("low"), fixed.getLow(), "low");
@@ -949,6 +691,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return null;
   }
 
+  // implementation
+
   private void checkSampledData(List<ValidationMessage> errors, String path, WrapperElement focus, SampledData fixed) {
     checkFixedValue(errors, path + ".origin", focus.getNamedChild("origin"), fixed.getOrigin(), "origin");
     checkFixedValue(errors, path + ".period", focus.getNamedChild("period"), fixed.getPeriodElement(), "period");
@@ -971,19 +715,19 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
   }
 
-  private boolean codeinExpansion(ValueSetExpansionContainsComponent cnt, String system, String code) {
-    for (ValueSetExpansionContainsComponent c : cnt.getContains()) {
-      if (code.equals(c.getCode()) && system.equals(c.getSystem().toString()))
-        return true;
-      if (codeinExpansion(c, system, code))
-        return true;
-    }    
-    return false;
-  }
-
   private boolean codeInExpansion(ValueSet vs, String system, String code) {
     for (ValueSetExpansionContainsComponent c : vs.getExpansion().getContains()) {
       if (code.equals(c.getCode()) && (system == null || system.equals(c.getSystem())))
+        return true;
+      if (codeinExpansion(c, system, code))
+        return true;
+    }
+    return false;
+  }
+
+  private boolean codeinExpansion(ValueSetExpansionContainsComponent cnt, String system, String code) {
+    for (ValueSetExpansionContainsComponent c : cnt.getContains()) {
+      if (code.equals(c.getCode()) && system.equals(c.getSystem().toString()))
         return true;
       if (codeinExpansion(c, system, code))
         return true;
@@ -1041,11 +785,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return base + id;
     else
       return Utilities.appendSlash(base) + type + "/" + id;
-  }  
+  }
 
   public BestPracticeWarningLevel getBasePracticeWarningLevel() {
     return bpWarnings;
-  }  
+  }
 
   private String getBaseType(StructureDefinition profile, String pr)  {
     // if (pr.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
@@ -1067,17 +811,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return checkDisplay;
   }
 
-  //	private String findProfileTag(WrapperElement element) {
-  //  	String uri = null;
-  //	  List<WrapperElement> list = new ArrayList<WrapperElement>();
-  //	  element.getNamedChildren("category", list);
-  //	  for (WrapperElement c : list) {
-  //	  	if ("http://hl7.org/fhir/tag/profile".equals(c.getAttribute("scheme"))) {
-  //	  		uri = c.getAttribute("term");
-  //	  	}
-  //	  }
-  //	  return uri;
-  //  }
+  @Override
+  public void setCheckDisplay(CheckDisplayOption checkDisplay) {
+    this.checkDisplay = checkDisplay;
+  }
 
   private ConceptDefinitionComponent getCodeDefinition(ConceptDefinitionComponent c, String code) {
     if (code.equals(c.getCode()))
@@ -1106,9 +843,21 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       WrapperElement res = we.isXml() ? we.getFirstChild() : we;
       if (id.equals(res.getNamedChildValue("id")))
         return res;
-    }   
+    }
     return null;
   }
+
+  //	private String findProfileTag(WrapperElement element) {
+  //  	String uri = null;
+  //	  List<WrapperElement> list = new ArrayList<WrapperElement>();
+  //	  element.getNamedChildren("category", list);
+  //	  for (WrapperElement c : list) {
+  //	  	if ("http://hl7.org/fhir/tag/profile".equals(c.getAttribute("scheme"))) {
+  //	  		uri = c.getAttribute("term");
+  //	  	}
+  //	  }
+  //	  return uri;
+  //  }
 
   public IWorkerContext getContext() {
     return context;
@@ -1162,6 +911,18 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return extensionDomains;
   }
 
+  private WrapperElement getFirstEntry(WrapperElement bundle) {
+    List<WrapperElement> list = new ArrayList<WrapperElement>();
+    bundle.getNamedChildren("entry", list);
+    if (list.isEmpty())
+      return null;
+    WrapperElement resource = list.get(0).getNamedChild("resource");
+    if (resource == null)
+      return null;
+    else
+      return resource.getFirstChild();
+  }
+
   private WrapperElement getFromBundle(WrapperElement bundle, String ref) {
     List<WrapperElement> entries = new ArrayList<WrapperElement>();
     bundle.getNamedChildren("entry", entries);
@@ -1174,11 +935,19 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       }
     }
     return null;
-  }  
+  }
 
 	private StructureDefinition getProfileForType(String type) {
     return context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + type);
   }
+
+	public IdStatus getResourceIdRule() {
+		return resourceIdRule;
+	}
+
+	public void setResourceIdRule(IdStatus resourceIdRule) {
+		this.resourceIdRule = resourceIdRule;
+	}
 
   private Element getValueForDiscriminator(WrapperElement element, String discriminator, ElementDefinition criteria) {
     // throw new Error("validation of slices not done yet");
@@ -1197,25 +966,55 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return fmt.length() > 10 && (fmt.substring(10).contains("-") || fmt.substring(10).contains("+") || fmt.substring(10).contains("Z"));
   }
 
+	private IdStatus idStatusForEntry(WrapperElement ep, ElementInfo ei) {
+		if (isBundleEntry(ei.path)) {
+			WrapperElement req = ep.getNamedChild("request");
+			WrapperElement resp = ep.getNamedChild("response");
+			WrapperElement fullUrl = ep.getNamedChild("fullUrl");
+			WrapperElement method = null;
+			WrapperElement url = null;
+			if (req != null) {
+				method = req.getNamedChild("method");
+				url = req.getNamedChild("url");
+			}
+			if (resp != null) {
+				return IdStatus.OPTIONAL;
+			} if (method == null) {
+				if (fullUrl == null)
+				return IdStatus.REQUIRED;
+				else if (fullUrl.getAttribute("value").startsWith("urn:uuid:"))
+				  return IdStatus.OPTIONAL;
+				else
+				  return IdStatus.REQUIRED;
+			} else {
+				String s = method.getAttribute("value");
+				if (s.equals("PUT")) {
+					if (url == null)
+					return IdStatus.REQUIRED;
+					else
+					  return IdStatus.OPTIONAL; // or maybe prohibited? not clear
+				} else if (s.equals("POST"))
+					return IdStatus.OPTIONAL; // this should be prohibited, but see task 9102
+				else // actually, we should never get to here; a bundle entry with method get/delete should not have a resource
+					return IdStatus.OPTIONAL;
+			}
+		} else if (isParametersEntry(ei.path))
+			return IdStatus.OPTIONAL;
+		else
+			return this.getResourceIdRule();
+	}
+
   private boolean isAbsolute(String uri) {
     return Utilities.noString(uri) || uri.startsWith("http:") || uri.startsWith("https:") || uri.startsWith("urn:uuid:") || uri.startsWith("urn:oid:") || uri.startsWith("urn:ietf:")
         || uri.startsWith("urn:iso:") || isValidFHIRUrn(uri);
-  }
-
-  private boolean isValidFHIRUrn(String uri) {
-    return (uri.equals("urn:x-fhir:uk:id:nhs-number"));
   }
 
   public boolean isAnyExtensionsAllowed() {
     return anyExtensionsAllowed;
   }
 
-  private boolean isParametersEntry(String path) {
-    String[] parts = path.split("\\/");
-    if (path.startsWith("/f:"))
-      return parts.length == 4 && parts[parts.length-3].equals("f:Parameters") && parts[parts.length-2].startsWith("f:parameter") && parts[parts.length-1].startsWith("f:resource");
-    else
-      return parts.length == 4 && parts[parts.length-3].equals("Parameters") && parts[parts.length-2].startsWith("parameter") && parts[parts.length-1].startsWith("resource");
+  public void setAnyExtensionsAllowed(boolean anyExtensionsAllowed) {
+    this.anyExtensionsAllowed = anyExtensionsAllowed;
   }
   
   private boolean isBundleEntry(String path) {
@@ -1226,6 +1025,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         return parts.length > 2 && parts[parts.length - 1].equals("resource") && ((parts.length > 2 && parts[parts.length - 3].equals("entry")) || parts[parts.length - 2].equals("entry"));
   }
 
+  private boolean isParametersEntry(String path) {
+    String[] parts = path.split("\\/");
+    if (path.startsWith("/f:"))
+      return parts.length == 4 && parts[parts.length-3].equals("f:Parameters") && parts[parts.length-2].startsWith("f:parameter") && parts[parts.length-1].startsWith("f:resource");
+    else
+      return parts.length == 4 && parts[parts.length-3].equals("Parameters") && parts[parts.length-2].startsWith("parameter") && parts[parts.length-1].startsWith("resource");
+  }
+
   private boolean isPrimitiveType(String type) {
     return type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("integer") || type.equalsIgnoreCase("string") || type.equalsIgnoreCase("decimal") || type.equalsIgnoreCase("uri")
         || type.equalsIgnoreCase("base64Binary") || type.equalsIgnoreCase("instant") || type.equalsIgnoreCase("date") || type.equalsIgnoreCase("uuid") || type.equalsIgnoreCase("id")
@@ -1233,17 +1040,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         || type.equalsIgnoreCase("oid") || type.equalsIgnoreCase("id");
   }
 
-
-
   public boolean isSuppressLoincSnomedMessages() {
     return suppressLoincSnomedMessages;
-  }
-
-  private boolean nameMatches(String name, String tail) {
-    if (tail.endsWith("[x]"))
-      return name.startsWith(tail.substring(0, tail.length() - 3));
-    else
-      return (name.equals(tail));
   }
 
   // private String mergePath(String path1, String path2) {
@@ -1255,6 +1053,21 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   // b.append("/f:"+parts[i]);
   // return b.toString();
   // }
+
+  public void setSuppressLoincSnomedMessages(boolean suppressLoincSnomedMessages) {
+    this.suppressLoincSnomedMessages = suppressLoincSnomedMessages;
+  }
+
+  private boolean isValidFHIRUrn(String uri) {
+    return (uri.equals("urn:x-fhir:uk:id:nhs-number"));
+  }
+
+  private boolean nameMatches(String name, String tail) {
+    if (tail.endsWith("[x]"))
+      return name.startsWith(tail.substring(0, tail.length() - 3));
+    else
+      return (name.equals(tail));
+  }
 
   private boolean passesCodeWhitespaceRules(String v) {
     if (!v.trim().equals(v))
@@ -1273,6 +1086,25 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     return true;
   }
+
+  private CodeableConcept readAsCodeableConcept(WrapperElement element) {
+	  CodeableConcept cc = new CodeableConcept();
+	  List<WrapperElement> list = new ArrayList<WrapperElement>();
+	  element.getNamedChildren("coding", list);
+	  for (WrapperElement item : list)
+	  	cc.addCoding(readAsCoding(item));
+    cc.setText(element.getNamedChildValue("text"));
+	  return cc;
+	}
+
+	private Coding readAsCoding(WrapperElement item) {
+		Coding c = new Coding();
+		c.setSystem(item.getNamedChildValue("system"));
+		c.setVersion(item.getNamedChildValue("version"));
+		c.setCode(item.getNamedChildValue("code"));
+		c.setDisplay(item.getNamedChildValue("display"));
+  	return c;
+	}
 
   private WrapperElement resolve(String ref, NodeStack stack) {
     if (ref.startsWith("#")) {
@@ -1315,7 +1147,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   private WrapperElement resolveInBundle(List<WrapperElement> entries, String ref, String fullUrl, String type, String id) {
     if (Utilities.isAbsoluteUrl(ref)) {
-      // if the reference is absolute, then you resolve by fullUrl. No other thinking is required. 
+      // if the reference is absolute, then you resolve by fullUrl. No other thinking is required.
       for (WrapperElement entry : entries) {
         String fu = entry.getNamedChildValue("fullUrl");
         if (ref.equals(fu))
@@ -1377,30 +1209,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return sd.getSnapshot().getElement().get(0);
   }
 
-  public void setAnyExtensionsAllowed(boolean anyExtensionsAllowed) {
-    this.anyExtensionsAllowed = anyExtensionsAllowed;
-  }
-
   public void setBestPracticeWarningLevel(BestPracticeWarningLevel value) {
     bpWarnings = value;
   }
-
-  @Override
-  public void setCheckDisplay(CheckDisplayOption checkDisplay) {
-    this.checkDisplay = checkDisplay;
-  }
-
-  public void setSuppressLoincSnomedMessages(boolean suppressLoincSnomedMessages) {
-    this.suppressLoincSnomedMessages = suppressLoincSnomedMessages;
-  }
-
-	public IdStatus getResourceIdRule() {
-		return resourceIdRule;
-	}
-
-	public void setResourceIdRule(IdStatus resourceIdRule) {
-		this.resourceIdRule = resourceIdRule;
-	}
 
   /**
    * 
@@ -2038,67 +1849,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		}
 	}
 
-	private IdStatus idStatusForEntry(WrapperElement ep, ElementInfo ei) {
-		if (isBundleEntry(ei.path)) {
-			WrapperElement req = ep.getNamedChild("request");
-			WrapperElement resp = ep.getNamedChild("response");
-			WrapperElement fullUrl = ep.getNamedChild("fullUrl");
-			WrapperElement method = null;
-			WrapperElement url = null;
-			if (req != null) {
-				method = req.getNamedChild("method");
-				url = req.getNamedChild("url");
-			}
-			if (resp != null) {
-				return IdStatus.OPTIONAL;
-			} if (method == null) {
-				if (fullUrl == null)
-				return IdStatus.REQUIRED;
-				else if (fullUrl.getAttribute("value").startsWith("urn:uuid:"))
-				  return IdStatus.OPTIONAL;
-				else
-				  return IdStatus.REQUIRED;
-			} else {
-				String s = method.getAttribute("value");
-				if (s.equals("PUT")) {
-					if (url == null)
-					return IdStatus.REQUIRED;
-					else
-					  return IdStatus.OPTIONAL; // or maybe prohibited? not clear
-				} else if (s.equals("POST"))
-					return IdStatus.OPTIONAL; // this should be prohibited, but see task 9102
-				else // actually, we should never get to here; a bundle entry with method get/delete should not have a resource
-					return IdStatus.OPTIONAL;					
-			}
-		} else if (isParametersEntry(ei.path))
-			return IdStatus.OPTIONAL; 
-		else
-			return this.getResourceIdRule(); 
-	}
-
-	private void checkInvariants(List<ValidationMessage> errors, String path, StructureDefinition profile, ElementDefinition ed, String typename, String typeProfile, WrapperElement resource, WrapperElement element) throws FHIRException {
-		for (ElementDefinitionConstraintComponent inv : ed.getConstraint()) {
-			if (inv.hasExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression")) {
-				ResourceOnWrapper res = new ResourceOnWrapper(context, resource, resource.getProfile());
-				BaseOnWrapper e = new BaseOnWrapper(context, element, profile, ed, typename, typeProfile);
-				String expr = inv.getExtensionString("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression");
-				FHIRPathEngine fpe = new FHIRPathEngine(context);
-		    boolean ok = true;
-        try {
-          ok = fpe.evaluateToBoolean(res, e, expr);
-        } catch (PathEngineException e1) {
-          rule(errors, IssueType.INVARIANT, element.line(), element.col(), path, false, e1.getMessage()+": "+inv.getHuman()+fpe.forLog());
-        }
-				if (!ok) {
-					if (inv.getSeverity() == ConstraintSeverity.ERROR)
-						rule(errors, IssueType.INVARIANT, element.line(), element.col(), path, ok, inv.getHuman()+fpe.forLog());
-					else if (inv.getSeverity() == ConstraintSeverity.WARNING)
-						warning(errors, IssueType.INVARIANT, element.line(), element.line(), path, ok, inv.getHuman()+fpe.forLog());
-        }
-      }
-    }
-  }
-
   private void validateMessage(List<ValidationMessage> errors, WrapperElement bundle) {
     // TODO Auto-generated method stub
 
@@ -2135,7 +1885,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         ok = rule(errors, IssueType.INVALID, element.line(), element.col(), stack.addToLiteralPath(resourceName), profile != null, "No profile found for resource type '" + resourceName + "'");
       } else {
         String type = profile.hasConstrainedType() ? profile.getConstrainedType() : profile.getName();
-        // special case: we have a bundle, and the profile is not for a bundle. We'll try the first entry instead 
+        // special case: we have a bundle, and the profile is not for a bundle. We'll try the first entry instead
         if (!type.equals(resourceName) && resourceName.equals("Bundle")) {
           WrapperElement first = getFirstEntry(element);
           if (first != null && first.getResourceType().equals(type)) {
@@ -2157,18 +1907,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 				rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), false, "Resource has an id, but none is allowed");
 			start(errors, resource, element, profile, stack); // root is both definition and type
     }
-  }
-
-  private WrapperElement getFirstEntry(WrapperElement bundle) {
-    List<WrapperElement> list = new ArrayList<WrapperElement>();
-    bundle.getNamedChildren("entry", list);
-    if (list.isEmpty())
-      return null;
-    WrapperElement resource = list.get(0).getNamedChild("resource");
-    if (resource == null)
-      return null;
-    else
-      return resource.getFirstChild();
   }
 
   private void validateSections(List<ValidationMessage> errors, List<WrapperElement> entries, WrapperElement focus, NodeStack stack, String fullUrl, String id) {
@@ -2199,6 +1937,269 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return false;
     }
   }
+
+	private class ElementDefinitionOutcome {
+		private ElementDefinition definition;
+		private String typename;
+		private String profile;
+		public ElementDefinitionOutcome(ElementDefinition ed) {
+			definition = ed;
+		}
+		public ElementDefinitionOutcome(ElementDefinition ed, TypeRefComponent tr) {
+			definition = ed;
+			typename = tr.getCode();
+			if (tr.hasProfile())
+				profile = tr.getProfile().get(0).getValue();
+		}
+	}
+
+	public class ResourceOnWrapper extends Resource {
+		private static final long serialVersionUID = 1L;
+		private IWorkerContext services;
+		private WrapperElement wrapper;
+		private List<ElementDefinition> elementList;
+		private StructureDefinition profile;
+		private ElementDefinition definition;
+		private List<ElementDefinition> childDefinitions;
+
+		public ResourceOnWrapper(IWorkerContext services, WrapperElement wrapper, StructureDefinition profile) {
+			super();
+			this.services = services;
+			this.wrapper = wrapper;
+			this.profile = profile;
+			this.definition = profile.getSnapshot().getElement().get(0);
+		}
+
+		@Override
+		public Resource copy() {
+			throw new Error("copy() is not implemented here");
+		}
+
+		@Override
+		public String fhirType() {
+			return wrapper.getResourceType();
+		}
+
+		private ElementDefinitionOutcome getDefinition(String name) throws DefinitionException {
+			if (childDefinitions == null)
+				childDefinitions = ProfileUtilities.getChildMap(profile, definition.getName(), definition.getPath(), definition.getNameReference());
+			for (ElementDefinition ed : childDefinitions) {
+				String tail = ed.getPath().substring(ed.getPath().lastIndexOf('.')+1);
+				if (tail.equals(name)) {
+					return new ElementDefinitionOutcome(ed);
+				}
+				if (tail.endsWith("[x]") && tail.substring(0, tail.length()-3).equals(name.substring(0, tail.length()-3))) {
+					TypeRefComponent tr = getType(ed, name.substring(tail.length()-3));
+					if (tr != null)
+						return new ElementDefinitionOutcome(ed, tr);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public ResourceType getResourceType() {
+			try {
+				return ResourceType.fromCode(fhirType());
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		private TypeRefComponent getType(ElementDefinition ed, String type) {
+			for (TypeRefComponent t : ed.getType()) {
+				if (t.getCode().equals(type))
+					return t;
+			}
+			return null;
+		}
+
+		@Override
+		protected boolean isMetadataBased() {
+	  	return true;
+		}
+
+		@Override
+		public List<Base> listChildrenByName(String child_name) {
+			List<Base> list = new ArrayList<Base>();
+			List<WrapperElement> children = new ArrayList<WrapperElement>();
+			wrapper.getNamedChildren(child_name, children);
+			for (WrapperElement child : children) {
+				ElementDefinitionOutcome definition;
+				try {
+					definition = getDefinition(child.getName());
+				} catch (Exception e) {
+					definition = null;
+				}
+				if (definition != null) {
+					TypeRefComponent tr = getType(definition.definition, "Resource");
+					if (tr != null && wrapper.isXml())  // special case for DomainResource.contained and Bundle.entry
+						list.add(new BaseOnWrapper(services, child.getFirstChild(), profile, definition.definition, definition.typename, definition.profile));
+					else
+						list.add(new BaseOnWrapper(services, child, profile, definition.definition, definition.typename, definition.profile));
+				}
+			}
+			return list;
+		}
+
+		@Override
+		public String toString() {
+			return fhirType();
+		}
+	}
+
+	public class BaseOnWrapper extends Base {
+		private static final long serialVersionUID = 1L;
+		private IWorkerContext services;
+		private WrapperElement wrapper;
+		private List<ElementDefinition> elementList;
+		private StructureDefinition profile;
+		private ElementDefinition definition;
+		private List<ElementDefinition> childDefinitions;
+		private String typeName;
+		private String typeProfile;
+
+
+		public BaseOnWrapper(IWorkerContext services, WrapperElement wrapper, StructureDefinition profile,
+				ElementDefinition definition, String typeName, String typeProfile) {
+			super();
+			this.services = services;
+			this.wrapper = wrapper;
+			this.profile = profile;
+			this.definition = definition;
+			this.typeName = typeName;
+			this.typeProfile = typeProfile;
+		}
+
+		public boolean equalsDeep(Base other) {
+			if (!super.equalsDeep(other) || !fhirType().equals(other.fhirType()))
+			  return false;
+
+			// make sure we have child definitions
+			try {
+				getDefinition("xxxx");
+				List<ElementDefinition> childList = childDefinitions;
+				// there's a problem here - we're going to iterate by the definition, where as equality should - probably - be
+				// based on the underlying definitions. is it worth getting them? it's kind of complicated....
+				for (ElementDefinition ed : childList) {
+					String tail = tail(ed.getPath());
+					List<Base> thisList = listChildrenByName(tail);
+					List<Base> otherList = other.listChildrenByName(tail);
+					if (!compareDeep(thisList, otherList, false))
+						return false;
+				}
+				return true;
+			} catch (Exception e) {
+				return false;// because we can't decide
+			}
+		}
+
+		@Override
+		public String fhirType() {
+			if (!Utilities.noString(typeName))
+				return typeName;
+			else
+				return definition.getType().get(0).getCode();
+		}
+
+		private ElementDefinitionOutcome getDefinition(String name) throws DefinitionException {
+			if (childDefinitions == null)
+				childDefinitions = ProfileUtilities.getChildMap(profile, definition.getName(), definition.getPath(), definition.getNameReference());
+
+			if (childDefinitions.size() == 0) {
+				String pn = typeProfile;
+				if (Utilities.noString(pn) && !Utilities.noString(typeName))
+					pn = "http://hl7.org/fhir/StructureDefinition/"+typeName;
+				if (Utilities.noString(pn) && definition.getType().size() == 1) {
+					if (definition.getType().get(0).getProfile().size() > 0)
+						pn = definition.getType().get(0).getProfile().get(0).getValue();
+					else
+						pn = "http://hl7.org/fhir/StructureDefinition/"+ definition.getType().get(0).getCode();
+				}
+				if (!Utilities.noString(pn)) {
+					StructureDefinition profile = services.fetchResource(StructureDefinition.class, pn);
+					if (profile != null) {
+						this.profile = profile;
+						childDefinitions = ProfileUtilities.getChildMap(profile, null, profile.getSnapshot().getElement().get(0).getPath(), null);
+					}
+				}
+			}
+
+
+			for (ElementDefinition ed : childDefinitions) {
+				String tail = ed.getPath().substring(ed.getPath().lastIndexOf('.')+1);
+				if (tail.equals(name)) {
+					return new ElementDefinitionOutcome(ed);
+				}
+				if (tail.endsWith("[x]") && name.length() > tail.length()-1 && tail.substring(0, tail.length()-3).equals(name.substring(0, tail.length()-3))) {
+					TypeRefComponent tr = getType(ed, name.substring(tail.length()-3));
+					if (tr != null)
+						return new ElementDefinitionOutcome(ed, tr);
+				}
+			}
+			return null;
+		}
+
+		private TypeRefComponent getType(ElementDefinition ed, String type) {
+			for (TypeRefComponent t : ed.getType()) {
+				if (t.getCode().equalsIgnoreCase(type))
+					return t;
+			}
+			return null;
+		}
+
+		@Override
+		protected boolean isMetadataBased() {
+	  	return true;
+		}
+
+		public boolean isPrimitive() {
+			String t = fhirType();
+			return t.equalsIgnoreCase("boolean") || t.equalsIgnoreCase("integer") || t.equalsIgnoreCase("string") || t.equalsIgnoreCase("decimal") || t.equalsIgnoreCase("uri") || t.equalsIgnoreCase("base64Binary") ||
+					t.equalsIgnoreCase("instant") || t.equalsIgnoreCase("date") || t.equalsIgnoreCase("uuid") || t.equalsIgnoreCase("id") || t.equalsIgnoreCase("xhtml") || t.equalsIgnoreCase("markdown") ||
+					t.equalsIgnoreCase("dateTime") || t.equalsIgnoreCase("time") || t.equalsIgnoreCase("code") || t.equalsIgnoreCase("oid") || t.equalsIgnoreCase("id");
+		}
+
+		@Override
+		protected void listChildren(List<Property> result) {
+			throw new Error("not done yet");
+		}
+
+		@Override
+		public List<Base> listChildrenByName(String child_name) {
+			List<Base> list = new ArrayList<Base>();
+			List<WrapperElement> children = new ArrayList<WrapperElement>();
+			wrapper.getNamedChildrenWithWildcard(child_name, children);
+			for (WrapperElement child : children) {
+				ElementDefinitionOutcome definition;
+				try {
+					definition = getDefinition(child.getName());
+				} catch (Exception e) {
+					definition = null;
+				}
+				if (definition != null) {
+					TypeRefComponent tr = getType(definition.definition, "Resource");
+					if (tr != null && wrapper.isXml())  // special case for DomainResource.contained and Bundle.entry
+						list.add(new BaseOnWrapper(services, child.getFirstChild(), profile, definition.definition, definition.typename, definition.profile));
+					else
+						list.add(new BaseOnWrapper(services, child, profile, definition.definition, definition.typename, definition.profile));
+				}
+			}
+			return list;
+		}
+
+		public String primitiveValue() {
+			return wrapper.getAttribute("value");
+		}
+
+		@Override
+		public String toString() {
+			if (isPrimitive())
+				return primitiveValue();
+			else
+				return fhirType();
+		}
+	}
 
   public class ChildIterator {
     private String basePath;
@@ -2310,6 +2311,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
 
     @Override
+    public String getNamedChildValue(String name) {
+      return XMLUtil.getNamedChildValue(element, name);
+    }
+
+    @Override
     public void getNamedChildren(String name, List<WrapperElement> list) {
       List<Element> el = new ArrayList<Element>();
       XMLUtil.getNamedChildren(element, name, el);
@@ -2323,11 +2329,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       XMLUtil.getNamedChildrenWithWildcard(element, name, el);
       for (Element e : el)
         list.add(new DOMWrapperElement(e));
-    }
-
-    @Override
-    public String getNamedChildValue(String name) {
-      return XMLUtil.getNamedChildValue(element, name);
     }
 
     @Override
@@ -2518,6 +2519,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
 
     @Override
+    public String getNamedChildValue(String name) {
+      WrapperElement c = getNamedChild(name);
+      return c == null ? null : c.getAttribute("value");
+    }
+
+    @Override
     public void getNamedChildren(String name, List<WrapperElement> list) {
       for (JsonWrapperElement j : children)
         if (j.name.equals(name))
@@ -2531,12 +2538,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		    if (n.equals(name) || (name.endsWith("[x]") && n.startsWith(name.substring(0, name.length() - 3))))
 		      list.add(j);
 		  }
-    }
-
-    @Override
-    public String getNamedChildValue(String name) {
-      WrapperElement c = getNamedChild(name);
-      return c == null ? null : c.getAttribute("value");
     }
 
     @Override
@@ -2690,6 +2691,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return type;
     }
 
+    private void setType(ElementDefinition type) {
+      this.type = type;
+    }
+
     private NodeStack push(WrapperElement element, int count, ElementDefinition definition, ElementDefinition type) {
       NodeStack res = new NodeStack(element.isXml());
       res.parent = this;
@@ -2729,24 +2734,15 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       // System.out.println(res.literalPath+" : "+b.toString());
       return res;
     }
-
-    private void setType(ElementDefinition type) {
-      this.type = type;
-    }
   }
 
   public abstract class WrapperElement {
 		private StructureDefinition profile; 
 		private ElementDefinition definition;
 
+    public abstract int col();
 
-		public StructureDefinition getProfile() {
-			return profile;
-		}
-
-		public void setProfile(StructureDefinition profile) {
-			this.profile = profile;
-		}
+    public abstract String getAttribute(String name);
 
 		public ElementDefinition getDefinition() {
 			return definition;
@@ -2756,25 +2752,29 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			this.definition = definition;
 		}
 
-    public abstract int col();
-
-    public abstract String getAttribute(String name);
-
     public abstract WrapperElement getFirstChild();
 
     public abstract String getName();
 
     public abstract WrapperElement getNamedChild(String name);
 
+    public abstract String getNamedChildValue(String name);
+
     public abstract void getNamedChildren(String name, List<WrapperElement> list);
 
     public abstract void getNamedChildrenWithWildcard(String name, List<WrapperElement> list);
 
-    public abstract String getNamedChildValue(String name);
-
     public abstract String getNamespace();
 
     public abstract WrapperElement getNextSibling();
+
+		public StructureDefinition getProfile() {
+			return profile;
+		}
+
+		public void setProfile(StructureDefinition profile) {
+			this.profile = profile;
+		}
 
     public abstract String getResourceType();
 

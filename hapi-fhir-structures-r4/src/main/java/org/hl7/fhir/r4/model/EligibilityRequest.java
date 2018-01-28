@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -171,6 +171,426 @@ public class EligibilityRequest extends DomainResource {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class AuthorizationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Sequence of procedures which serves to order and provide a link.
+         */
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Procedure sequence for reference", formalDefinition="Sequence of procedures which serves to order and provide a link." )
+        protected PositiveIntType sequence;
+
+        /**
+         * A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI).
+         */
+        @Child(name = "service", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Billing Code", formalDefinition="A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-uscls")
+        protected CodeableConcept service;
+
+        /**
+         * Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.
+         */
+        @Child(name = "modifier", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-modifiers")
+        protected List<CodeableConcept> modifier;
+
+        /**
+         * The fee for an addittional service or product or charge.
+         */
+        @Child(name = "unitPrice", type = {Money.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The fee for an addittional service or product or charge." )
+        protected Money unitPrice;
+
+        /**
+         * Facility where the services were provided.
+         */
+        @Child(name = "facility", type = {Location.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
+        protected Reference facility;
+
+        /**
+         * The actual object that is the target of the reference (Facility where the services were provided.)
+         */
+        protected Resource facilityTarget;
+
+        private static final long serialVersionUID = 1090625004L;
+
+    /**
+     * Constructor
+     */
+      public AuthorizationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public AuthorizationComponent(PositiveIntType sequence, CodeableConcept service) {
+        super();
+        this.sequence = sequence;
+        this.service = service;
+      }
+
+        /**
+         * @return {@link #sequence} (Sequence of procedures which serves to order and provide a link.). This is the underlying object with id, value and extensions. The accessor "getSequence" gives direct access to the value
+         */
+        public PositiveIntType getSequenceElement() { 
+          if (this.sequence == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.sequence");
+            else if (Configuration.doAutoCreate())
+              this.sequence = new PositiveIntType(); // bb
+          return this.sequence;
+        }
+
+        public boolean hasSequenceElement() { 
+          return this.sequence != null && !this.sequence.isEmpty();
+        }
+
+        public boolean hasSequence() { 
+          return this.sequence != null && !this.sequence.isEmpty();
+        }
+
+        /**
+         * @param value {@link #sequence} (Sequence of procedures which serves to order and provide a link.). This is the underlying object with id, value and extensions. The accessor "getSequence" gives direct access to the value
+         */
+        public AuthorizationComponent setSequenceElement(PositiveIntType value) { 
+          this.sequence = value;
+          return this;
+        }
+
+        /**
+         * @return Sequence of procedures which serves to order and provide a link.
+         */
+        public int getSequence() { 
+          return this.sequence == null || this.sequence.isEmpty() ? 0 : this.sequence.getValue();
+        }
+
+        /**
+         * @param value Sequence of procedures which serves to order and provide a link.
+         */
+        public AuthorizationComponent setSequence(int value) { 
+            if (this.sequence == null)
+              this.sequence = new PositiveIntType();
+            this.sequence.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #service} (A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI).)
+         */
+        public CodeableConcept getService() { 
+          if (this.service == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.service");
+            else if (Configuration.doAutoCreate())
+              this.service = new CodeableConcept(); // cc
+          return this.service;
+        }
+
+        public boolean hasService() { 
+          return this.service != null && !this.service.isEmpty();
+        }
+
+        /**
+         * @param value {@link #service} (A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI).)
+         */
+        public AuthorizationComponent setService(CodeableConcept value) { 
+          this.service = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #modifier} (Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.)
+         */
+        public List<CodeableConcept> getModifier() { 
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          return this.modifier;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AuthorizationComponent setModifier(List<CodeableConcept> theModifier) { 
+          this.modifier = theModifier;
+          return this;
+        }
+
+        public boolean hasModifier() { 
+          if (this.modifier == null)
+            return false;
+          for (CodeableConcept item : this.modifier)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addModifier() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return t;
+        }
+
+        public AuthorizationComponent addModifier(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+         */
+        public CodeableConcept getModifierFirstRep() { 
+          if (getModifier().isEmpty()) {
+            addModifier();
+          }
+          return getModifier().get(0);
+        }
+
+        /**
+         * @return {@link #unitPrice} (The fee for an addittional service or product or charge.)
+         */
+        public Money getUnitPrice() { 
+          if (this.unitPrice == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.unitPrice");
+            else if (Configuration.doAutoCreate())
+              this.unitPrice = new Money(); // cc
+          return this.unitPrice;
+        }
+
+        public boolean hasUnitPrice() { 
+          return this.unitPrice != null && !this.unitPrice.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unitPrice} (The fee for an addittional service or product or charge.)
+         */
+        public AuthorizationComponent setUnitPrice(Money value) { 
+          this.unitPrice = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #facility} (Facility where the services were provided.)
+         */
+        public Reference getFacility() { 
+          if (this.facility == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AuthorizationComponent.facility");
+            else if (Configuration.doAutoCreate())
+              this.facility = new Reference(); // cc
+          return this.facility;
+        }
+
+        public boolean hasFacility() { 
+          return this.facility != null && !this.facility.isEmpty();
+        }
+
+        /**
+         * @param value {@link #facility} (Facility where the services were provided.)
+         */
+        public AuthorizationComponent setFacility(Reference value) { 
+          this.facility = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #facility} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+         */
+        public Resource getFacilityTarget() { 
+          return this.facilityTarget;
+        }
+
+        /**
+         * @param value {@link #facility} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+         */
+        public AuthorizationComponent setFacilityTarget(Resource value) { 
+          this.facilityTarget = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequence", "positiveInt", "Sequence of procedures which serves to order and provide a link.", 0, 1, sequence));
+          children.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI).", 0, 1, service));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("unitPrice", "Money", "The fee for an addittional service or product or charge.", 0, 1, unitPrice));
+          children.add(new Property("facility", "Reference(Location|Organization)", "Facility where the services were provided.", 0, 1, facility));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1349547969: /*sequence*/  return new Property("sequence", "positiveInt", "Sequence of procedures which serves to order and provide a link.", 0, 1, sequence);
+          case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied (eg. CTP, HCPCS,USCLS,ICD10, NCPDP,DIN,ACHI,CCI).", 0, 1, service);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "The fee for an addittional service or product or charge.", 0, 1, unitPrice);
+          case 501116579: /*facility*/  return new Property("facility", "Reference(Location|Organization)", "Facility where the services were provided.", 0, 1, facility);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // CodeableConcept
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case 501116579: /*facility*/ return this.facility == null ? new Base[0] : new Base[] {this.facility}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          return value;
+        case 1984153269: // service
+          this.service = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -615513385: // modifier
+          this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          return value;
+        case 501116579: // facility
+          this.facility = castToReference(value); // Reference
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequence")) {
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("service")) {
+          this.service = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("modifier")) {
+          this.getModifier().add(castToCodeableConcept(value));
+        } else if (name.equals("unitPrice")) {
+          this.unitPrice = castToMoney(value); // Money
+        } else if (name.equals("facility")) {
+          this.facility = castToReference(value); // Reference
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969:  return getSequenceElement();
+        case 1984153269:  return getService(); 
+        case -615513385:  return addModifier(); 
+        case -486196699:  return getUnitPrice(); 
+        case 501116579:  return getFacility(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return new String[] {"positiveInt"};
+        case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
+        case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case 501116579: /*facility*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("sequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityRequest.sequence");
+        }
+        else if (name.equals("service")) {
+          this.service = new CodeableConcept();
+          return this.service;
+        }
+        else if (name.equals("modifier")) {
+          return addModifier();
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("facility")) {
+          this.facility = new Reference();
+          return this.facility;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public AuthorizationComponent copy() {
+        AuthorizationComponent dst = new AuthorizationComponent();
+        copyValues(dst);
+        dst.sequence = sequence == null ? null : sequence.copy();
+        dst.service = service == null ? null : service.copy();
+        if (modifier != null) {
+          dst.modifier = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : modifier)
+            dst.modifier.add(i.copy());
+        };
+        dst.unitPrice = unitPrice == null ? null : unitPrice.copy();
+        dst.facility = facility == null ? null : facility.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof AuthorizationComponent))
+          return false;
+        AuthorizationComponent o = (AuthorizationComponent) other_;
+        return compareDeep(sequence, o.sequence, true) && compareDeep(service, o.service, true) && compareDeep(modifier, o.modifier, true)
+           && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(facility, o.facility, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof AuthorizationComponent))
+          return false;
+        AuthorizationComponent o = (AuthorizationComponent) other_;
+        return compareValues(sequence, o.sequence, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, service, modifier
+          , unitPrice, facility);
+      }
+
+  public String fhirType() {
+    return "EligibilityRequest.authorization";
+
+  }
+
+  }
 
     /**
      * The Response business identifier.
@@ -316,7 +736,14 @@ public class EligibilityRequest extends DomainResource {
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/benefit-subcategory")
     protected CodeableConcept benefitSubCategory;
 
-    private static final long serialVersionUID = 899259023L;
+    /**
+     * A list of billable services for which an authorization prior to service delivery may be required by the payor.
+     */
+    @Child(name = "authorization", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Services which may require prior authorization", formalDefinition="A list of billable services for which an authorization prior to service delivery may be required by the payor." )
+    protected List<AuthorizationComponent> authorization;
+
+    private static final long serialVersionUID = 526063522L;
 
   /**
    * Constructor
@@ -950,6 +1377,59 @@ public class EligibilityRequest extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #authorization} (A list of billable services for which an authorization prior to service delivery may be required by the payor.)
+     */
+    public List<AuthorizationComponent> getAuthorization() { 
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      return this.authorization;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EligibilityRequest setAuthorization(List<AuthorizationComponent> theAuthorization) { 
+      this.authorization = theAuthorization;
+      return this;
+    }
+
+    public boolean hasAuthorization() { 
+      if (this.authorization == null)
+        return false;
+      for (AuthorizationComponent item : this.authorization)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public AuthorizationComponent addAuthorization() { //3
+      AuthorizationComponent t = new AuthorizationComponent();
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      this.authorization.add(t);
+      return t;
+    }
+
+    public EligibilityRequest addAuthorization(AuthorizationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.authorization == null)
+        this.authorization = new ArrayList<AuthorizationComponent>();
+      this.authorization.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #authorization}, creating it if it does not already exist
+     */
+    public AuthorizationComponent getAuthorizationFirstRep() { 
+      if (getAuthorization().isEmpty()) {
+        addAuthorization();
+      }
+      return getAuthorization().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -967,6 +1447,7 @@ public class EligibilityRequest extends DomainResource {
         children.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement));
         children.add(new Property("benefitCategory", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, benefitCategory));
         children.add(new Property("benefitSubCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, benefitSubCategory));
+        children.add(new Property("authorization", "", "A list of billable services for which an authorization prior to service delivery may be required by the payor.", 0, java.lang.Integer.MAX_VALUE, authorization));
       }
 
       @Override
@@ -990,6 +1471,7 @@ public class EligibilityRequest extends DomainResource {
         case 259920682: /*businessArrangement*/  return new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement);
         case -1023390027: /*benefitCategory*/  return new Property("benefitCategory", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, benefitCategory);
         case 1987878471: /*benefitSubCategory*/  return new Property("benefitSubCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, benefitSubCategory);
+        case -1385570183: /*authorization*/  return new Property("authorization", "", "A list of billable services for which an authorization prior to service delivery may be required by the payor.", 0, java.lang.Integer.MAX_VALUE, authorization);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1013,6 +1495,7 @@ public class EligibilityRequest extends DomainResource {
         case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
         case -1023390027: /*benefitCategory*/ return this.benefitCategory == null ? new Base[0] : new Base[] {this.benefitCategory}; // CodeableConcept
         case 1987878471: /*benefitSubCategory*/ return this.benefitSubCategory == null ? new Base[0] : new Base[] {this.benefitSubCategory}; // CodeableConcept
+        case -1385570183: /*authorization*/ return this.authorization == null ? new Base[0] : this.authorization.toArray(new Base[this.authorization.size()]); // AuthorizationComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1067,6 +1550,9 @@ public class EligibilityRequest extends DomainResource {
         case 1987878471: // benefitSubCategory
           this.benefitSubCategory = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case -1385570183: // authorization
+          this.getAuthorization().add((AuthorizationComponent) value); // AuthorizationComponent
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1105,6 +1591,8 @@ public class EligibilityRequest extends DomainResource {
           this.benefitCategory = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("benefitSubCategory")) {
           this.benefitSubCategory = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("authorization")) {
+          this.getAuthorization().add((AuthorizationComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1129,6 +1617,7 @@ public class EligibilityRequest extends DomainResource {
         case 259920682:  return getBusinessArrangementElement();
         case -1023390027:  return getBenefitCategory(); 
         case 1987878471:  return getBenefitSubCategory(); 
+        case -1385570183:  return addAuthorization(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1152,6 +1641,7 @@ public class EligibilityRequest extends DomainResource {
         case 259920682: /*businessArrangement*/ return new String[] {"string"};
         case -1023390027: /*benefitCategory*/ return new String[] {"CodeableConcept"};
         case 1987878471: /*benefitSubCategory*/ return new String[] {"CodeableConcept"};
+        case -1385570183: /*authorization*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1219,6 +1709,9 @@ public class EligibilityRequest extends DomainResource {
           this.benefitSubCategory = new CodeableConcept();
           return this.benefitSubCategory;
         }
+        else if (name.equals("authorization")) {
+          return addAuthorization();
+        }
         else
           return super.addChild(name);
       }
@@ -1250,6 +1743,11 @@ public class EligibilityRequest extends DomainResource {
         dst.businessArrangement = businessArrangement == null ? null : businessArrangement.copy();
         dst.benefitCategory = benefitCategory == null ? null : benefitCategory.copy();
         dst.benefitSubCategory = benefitSubCategory == null ? null : benefitSubCategory.copy();
+        if (authorization != null) {
+          dst.authorization = new ArrayList<AuthorizationComponent>();
+          for (AuthorizationComponent i : authorization)
+            dst.authorization.add(i.copy());
+        };
         return dst;
       }
 
@@ -1258,27 +1756,28 @@ public class EligibilityRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EligibilityRequest))
+        if (!(other_ instanceof EligibilityRequest))
           return false;
-        EligibilityRequest o = (EligibilityRequest) other;
+        EligibilityRequest o = (EligibilityRequest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(priority, o.priority, true)
            && compareDeep(patient, o.patient, true) && compareDeep(serviced, o.serviced, true) && compareDeep(created, o.created, true)
            && compareDeep(enterer, o.enterer, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
            && compareDeep(insurer, o.insurer, true) && compareDeep(facility, o.facility, true) && compareDeep(coverage, o.coverage, true)
            && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(benefitCategory, o.benefitCategory, true)
-           && compareDeep(benefitSubCategory, o.benefitSubCategory, true);
+           && compareDeep(benefitSubCategory, o.benefitSubCategory, true) && compareDeep(authorization, o.authorization, true)
+          ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EligibilityRequest))
+        if (!(other_ instanceof EligibilityRequest))
           return false;
-        EligibilityRequest o = (EligibilityRequest) other;
+        EligibilityRequest o = (EligibilityRequest) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(businessArrangement, o.businessArrangement, true)
           ;
       }
@@ -1286,7 +1785,8 @@ public class EligibilityRequest extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, priority
           , patient, serviced, created, enterer, provider, organization, insurer, facility
-          , coverage, businessArrangement, benefitCategory, benefitSubCategory);
+          , coverage, businessArrangement, benefitCategory, benefitSubCategory, authorization
+          );
       }
 
   @Override

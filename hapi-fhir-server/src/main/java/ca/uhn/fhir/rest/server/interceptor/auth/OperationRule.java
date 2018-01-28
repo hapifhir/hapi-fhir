@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,19 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.HashSet;
+import java.util.List;
 
 class OperationRule extends BaseRule implements IAuthRule {
 
-	public OperationRule(String theRuleName) {
-		super(theRuleName);
-	}
-
+	private RuleBuilder.ITenantApplicabilityChecker myTenentApplicabilityChecker;
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -44,70 +40,92 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
-
-	/**
-	 * Must include the leading $
-	 */
-	public void setOperationName(String theOperationName) {
-		myOperationName = theOperationName;
+	public OperationRule(String theRuleName) {
+		super(theRuleName);
 	}
 
-	public String getOperationName() {
-		return myOperationName;
+	public void appliesToAnyInstance() {
+		myAppliesToAnyInstance = true;
+	}
+
+	public void appliesToAnyType() {
+		myAppliesToAnyType = true;
+	}
+
+	public void appliesToInstances(List<IIdType> theAppliesToIds) {
+		myAppliesToIds = theAppliesToIds;
+	}
+
+	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+		myAppliesToInstancesOfType = theAppliesToTypes;
+	}
+
+	public void appliesToServer() {
+		myAppliesToServer = true;
+	}
+
+	public void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+		myAppliesToTypes = theAppliesToTypes;
 	}
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
+		if (myTenentApplicabilityChecker != null) {
+			if (!myTenentApplicabilityChecker.applies(theRequestDetails)) {
+				return null;
+			}
+		}
+
 		boolean applies = false;
 		switch (theOperation) {
-		case EXTENDED_OPERATION_SERVER:
-			if (myAppliesToServer) {
-				applies = true;
-			}
-			break;
-		case EXTENDED_OPERATION_TYPE:
-			if (myAppliesToAnyType) {
-				applies = true;
-			} else if (myAppliesToTypes != null) {
-				// TODO: Convert to a map of strings and keep the result
-				for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-					String resName = ctx.getResourceDefinition(next).getName();
-					if (resName.equals(theRequestDetails.getResourceName())) {
-						applies = true;
-						break;
-					}
+			case EXTENDED_OPERATION_SERVER:
+				if (myAppliesToServer) {
+					applies = true;
 				}
-			}
-			break;
-		case EXTENDED_OPERATION_INSTANCE:
-			if (myAppliesToAnyInstance) {
-				applies = true;
-			} else if (theInputResourceId != null) {
-				if (myAppliesToIds != null) {
-					String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
-					for (IIdType next : myAppliesToIds) {
-						if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
-							applies = true;
-							break;
-						}
-					}
-				}
-				if (myAppliesToInstancesOfType != null) {
+				break;
+			case EXTENDED_OPERATION_TYPE:
+				if (myAppliesToAnyType) {
+					applies = true;
+				} else if (myAppliesToTypes != null) {
 					// TODO: Convert to a map of strings and keep the result
-					for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
 						String resName = ctx.getResourceDefinition(next).getName();
-						if (resName.equals(theInputResourceId.getResourceType())) {
+						if (resName.equals(theRequestDetails.getResourceName())) {
 							applies = true;
 							break;
 						}
 					}
 				}
-			}
-			break;
-		default:
-			return null;
+				break;
+			case EXTENDED_OPERATION_INSTANCE:
+				if (myAppliesToAnyInstance) {
+					applies = true;
+				} else if (theInputResourceId != null) {
+					if (myAppliesToIds != null) {
+						String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
+						for (IIdType next : myAppliesToIds) {
+							if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
+								applies = true;
+								break;
+							}
+						}
+					}
+					if (myAppliesToInstancesOfType != null) {
+						// TODO: Convert to a map of strings and keep the result
+						for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+							String resName = ctx.getResourceDefinition(next).getName();
+							if (resName.equals(theInputResourceId.getResourceType())) {
+								applies = true;
+								break;
+							}
+						}
+					}
+				}
+				break;
+			default:
+				return null;
 		}
 
 		if (!applies) {
@@ -121,28 +139,19 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return newVerdict();
 	}
 
-	public void appliesToServer() {
-		myAppliesToServer = true;
+	public String getOperationName() {
+		return myOperationName;
 	}
 
-	public void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
-		myAppliesToTypes = theAppliesToTypes;
+	/**
+	 * Must include the leading $
+	 */
+	public void setOperationName(String theOperationName) {
+		myOperationName = theOperationName;
 	}
 
-	public void appliesToInstances(List<IIdType> theAppliesToIds) {
-		myAppliesToIds = theAppliesToIds;
-	}
-
-	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
-		myAppliesToInstancesOfType = theAppliesToTypes;
-	}
-
-	public void appliesToAnyInstance() {
-		myAppliesToAnyInstance = true;		
-	}
-
-	public void appliesToAnyType() {
-		myAppliesToAnyType = true;
+	public void setTenentApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenentApplicabilityChecker) {
+		myTenentApplicabilityChecker = theTenentApplicabilityChecker;
 	}
 
 }

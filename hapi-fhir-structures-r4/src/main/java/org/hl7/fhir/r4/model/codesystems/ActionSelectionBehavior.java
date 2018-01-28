@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum ActionSelectionBehavior {
          */
         ALLORNONE, 
         /**
-         * The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group
+         * The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group
          */
         EXACTLYONE, 
         /**
@@ -100,7 +100,7 @@ public enum ActionSelectionBehavior {
             case ANY: return "Any number of the actions in the group may be chosen, from zero to all";
             case ALL: return "All the actions in the group must be selected as a single unit";
             case ALLORNONE: return "All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected";
-            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group";
+            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group";
             case ATMOSTONE: return "The end user may choose zero or at most one of the actions in the group";
             case ONEORMORE: return "The end user must choose a minimum of one, and as many additional as desired";
             default: return "?";

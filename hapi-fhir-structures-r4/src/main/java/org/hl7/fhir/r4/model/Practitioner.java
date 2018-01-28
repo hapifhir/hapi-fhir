@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -374,23 +374,23 @@ public class Practitioner extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PractitionerQualificationComponent))
+        if (!(other_ instanceof PractitionerQualificationComponent))
           return false;
-        PractitionerQualificationComponent o = (PractitionerQualificationComponent) other;
+        PractitionerQualificationComponent o = (PractitionerQualificationComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(period, o.period, true)
            && compareDeep(issuer, o.issuer, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PractitionerQualificationComponent))
+        if (!(other_ instanceof PractitionerQualificationComponent))
           return false;
-        PractitionerQualificationComponent o = (PractitionerQualificationComponent) other;
+        PractitionerQualificationComponent o = (PractitionerQualificationComponent) other_;
         return true;
       }
 
@@ -1244,12 +1244,12 @@ public class Practitioner extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Practitioner))
+        if (!(other_ instanceof Practitioner))
           return false;
-        Practitioner o = (Practitioner) other;
+        Practitioner o = (Practitioner) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(name, o.name, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true)
            && compareDeep(birthDate, o.birthDate, true) && compareDeep(photo, o.photo, true) && compareDeep(qualification, o.qualification, true)
@@ -1257,12 +1257,12 @@ public class Practitioner extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Practitioner))
+        if (!(other_ instanceof Practitioner))
           return false;
-        Practitioner o = (Practitioner) other;
+        Practitioner o = (Practitioner) other_;
         return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
           ;
       }
@@ -1320,17 +1320,17 @@ public class Practitioner extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Practitioner.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
+  @SearchParamDefinition(name="address", path="Practitioner.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.address</b><br>
    * </p>

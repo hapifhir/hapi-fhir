@@ -22,8 +22,13 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidatorDstu3Test;
+import org.hl7.fhir.dstu3.hapi.validation.ResourceValidatorDstu3Test;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.*;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
@@ -35,6 +40,7 @@ import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -97,7 +103,7 @@ public class FhirInstanceValidatorR4Test {
 		 */
 		RelatedPerson rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
-		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("c");
+		rp.addRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("c");
 
 		ValidationResult results = myVal.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
@@ -108,7 +114,7 @@ public class FhirInstanceValidatorR4Test {
 		 */
 		rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
-		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("C");
+		rp.addRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("C");
 
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
@@ -119,7 +125,7 @@ public class FhirInstanceValidatorR4Test {
 		 */
 		rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
-		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("GAGAGAGA");
+		rp.addRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("GAGAGAGA");
 
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
@@ -136,7 +142,7 @@ public class FhirInstanceValidatorR4Test {
 		String vsContents;
 		vsContents = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), "UTF-8");
 
-		TreeSet<String> ids = new TreeSet<String>();
+		TreeSet<String> ids = new TreeSet<>();
 
 		bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
@@ -156,6 +162,15 @@ public class FhirInstanceValidatorR4Test {
 
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
+			// we can remove this
+			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-generate")) {
+				assertEquals(1, errors.size());
+				assertEquals("A search type can only be specified for parameters of type string [searchType implies type = 'string']", errors.get(0).getMessage());
+				continue;
+			}
+
 			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
 		}
 
@@ -189,6 +204,46 @@ public class FhirInstanceValidatorR4Test {
 		ValidationResult output = myVal.validateWithResult(inputString);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors, empty());
+
+	}
+
+
+	@Test
+	public void testBase64Invalid() {
+		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
+		Media med = new Media();
+		med.getContent().setContentType("LCws");
+		med.getContent().setDataElement(value);
+		med.getContent().setTitle("bbbb syst");
+		med.setStatus(Media.MediaStatus.ABORTED);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
+
+		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
+
+		ourLog.info("Encoded: {}", encoded);
+
+		ValidationResult output = myVal.validateWithResult(encoded);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(1, errors.size());
+		assertEquals("The value \"%%%2@()()\" is not a valid Base64 value", errors.get(0).getMessage());
+
+	}
+
+	@Test
+	public void testBase64Valid() {
+		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
+		Media med = new Media();
+		med.getContent().setContentType("LCws");
+		med.getContent().setDataElement(value);
+		med.getContent().setTitle("bbbb syst");
+		med.setStatus(Media.MediaStatus.ABORTED);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
+
+		ourLog.info("Encoded: {}", encoded);
+
+		ValidationResult output = myVal.validateWithResult(encoded);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, errors.size());
 
 	}
 
@@ -555,9 +610,11 @@ public class FhirInstanceValidatorR4Test {
 		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 2, output.getMessages().size());
-		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(output.getMessages().get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
+		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(output.toString(), 3, messages.size());
+		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
+		assertThat(messages.get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
+		assertThat(messages.get(2).getMessage(), containsString("All FHIR elements must have a @value or children [hasValue() | (children().count() > id.count())]"));
 	}
 
 	@Test
@@ -642,7 +699,7 @@ public class FhirInstanceValidatorR4Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.context: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}
@@ -844,5 +901,55 @@ public class FhirInstanceValidatorR4Test {
 		myDefaultValidationSupport = null;
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
+
+	@Test
+	public void testValidateProfileWithExtension() throws IOException, FHIRException {
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		ValidationSupportChain support = new ValidationSupportChain(valSupport, defaultSupport);
+
+		// Prepopulate SDs
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(support));
+
+		Consent input = ourCtx.newJsonParser().parseResource(Consent.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream("/dstu3/myconsent-resource.json")));
+		input.getPolicyRule().addCoding().setSystem("http://hl7.org/fhir/v3/ActCode").setCode("EMRGONLY");
+
+		input.setScope(Consent.ConsentScope.ADR);
+		input.addCategory().setText("FOO");
+		input.getProvision().addCode().setText("BAR");
+
+		// Should pass
+		ValidationResult output = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, all.size());
+		assertEquals(0, output.getMessages().size());
+
+		// Now with the wrong datatype
+		input.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/PruebaExtension").get(0).setValue(new CodeType("AAA"));
+
+		// Should fail
+		output = val.validateWithResult(input);
+		all = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(all.toString(), containsString("definition allows for the types [string] but found type code"));
+
+	}
+
+	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
+		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
+		StructureDefinition base = theDefaultValSupport.fetchStructureDefinition(ourCtx, derived.getBaseDefinition());
+		Validate.notNull(base);
+
+		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
+		List<ValidationMessage> issues = new ArrayList<>();
+		ProfileUtilities profileUtilities = new ProfileUtilities(worker, issues, null);
+		profileUtilities.generateSnapshot(base, derived, "", "");
+
+		return derived;
+	}
+
 
 }

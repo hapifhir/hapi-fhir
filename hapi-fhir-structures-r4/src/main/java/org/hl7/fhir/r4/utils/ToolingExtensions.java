@@ -30,8 +30,10 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -77,7 +79,7 @@ public class ToolingExtensions {
   public static final String EXT_JSON_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type"; 
   public static final String EXT_RDF_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-rdf-type"; 
   public static final String EXT_XML_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type"; 
-  public static final String EXT_REGEX = "http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"; 
+  public static final String EXT_REGEX = "http://hl7.org/fhir/StructureDefinition/regex"; 
   public static final String EXT_CONTROL = "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl"; 
   public static final String EXT_MINOCCURS = "http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs"; 
   public static final String EXT_MAXOCCURS = "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs";
@@ -543,6 +545,18 @@ public class ToolingExtensions {
     if (ex.getValue() instanceof IntegerType)
       return ((IntegerType) ex.getValue()).getValue();
     throw new Error("Unable to read extension "+uri+" as an integer");
+  }
+
+  public static Map<String, String> getLanguageTranslations(Element e) {
+    Map<String, String> res = new HashMap<String, String>();
+    for (Extension ext : e.getExtension()) {
+      if (ext.getUrl().equals(EXT_TRANSLATION)) {
+        String lang = readStringExtension(ext, "lang");
+        String value = readStringExtension(ext, "content");
+        res.put(lang,  value);
+      }
+    }
+    return res;
   }
 
 //  public static boolean hasOID(ValueSet vs) {

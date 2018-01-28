@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -93,10 +92,18 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getParamName(), obj.getParamName());
+
 		b.append(getResource(), obj.getResource());
-		b.append(getValueHigh(), obj.getValueHigh());
-		b.append(getValueLow(), obj.getValueLow());
+		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
+		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
 		return b.isEquals();
+	}
+
+	protected Long getTimeFromDate(Date date) {
+		if (date != null) {
+			return date.getTime();
+		}
+		return null;
 	}
 
 	@Override
@@ -125,8 +132,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getParamName());
 		b.append(getResource());
-		b.append(getValueHigh());
-		b.append(getValueLow());
+		b.append(getTimeFromDate(getValueHigh()));
+		b.append(getTimeFromDate(getValueLow()));
 		return b.toHashCode();
 	}
 

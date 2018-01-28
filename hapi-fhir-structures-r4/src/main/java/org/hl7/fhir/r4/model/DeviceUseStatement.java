@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -207,14 +207,26 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * An external identifier for this statement such as an IRI.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External identifier for this record", formalDefinition="An external identifier for this statement such as an IRI." )
     protected List<Identifier> identifier;
 
     /**
+     * A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement.
+     */
+    @Child(name = "basedOn", type = {ServiceRequest.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Fulfills plan, proposal or order", formalDefinition="A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement." )
+    protected List<Reference> basedOn;
+    /**
+     * The actual objects that are the target of the reference (A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement.)
+     */
+    protected List<ServiceRequest> basedOnTarget;
+
+
+    /**
      * A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | completed | entered-in-error +", formalDefinition="A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-statement-status")
     protected Enumeration<DeviceUseStatementStatus> status;
@@ -222,7 +234,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * The patient who used the device.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=2, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient using device", formalDefinition="The patient who used the device." )
     protected Reference subject;
 
@@ -232,30 +244,35 @@ public class DeviceUseStatement extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * The time period over which the device was used.
+     * Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement.
      */
-    @Child(name = "whenUsed", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Period device was used", formalDefinition="The time period over which the device was used." )
-    protected Period whenUsed;
+    @Child(name = "derivedFrom", type = {ServiceRequest.class, Procedure.class, Claim.class, Observation.class, QuestionnaireResponse.class, DocumentReference.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Supporting information", formalDefinition="Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement." )
+    protected List<Reference> derivedFrom;
+    /**
+     * The actual objects that are the target of the reference (Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement.)
+     */
+    protected List<Resource> derivedFromTarget;
+
 
     /**
      * How often the device was used.
      */
-    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How often  the device was used", formalDefinition="How often the device was used." )
     protected Type timing;
 
     /**
      * The time at which the statement was made/recorded.
      */
-    @Child(name = "recordedOn", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "recordedOn", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When statement was recorded", formalDefinition="The time at which the statement was made/recorded." )
     protected DateTimeType recordedOn;
 
     /**
      * Who reported the device was being used by the patient.
      */
-    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who made the statement", formalDefinition="Who reported the device was being used by the patient." )
     protected Reference source;
 
@@ -267,7 +284,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * The details of the device used.
      */
-    @Child(name = "device", type = {Device.class}, order=7, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "device", type = {Device.class}, order=8, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reference to device used", formalDefinition="The details of the device used." )
     protected Reference device;
 
@@ -279,26 +296,38 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * Reason or justification for the use of the device.
      */
-    @Child(name = "indication", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Why device was used", formalDefinition="Reason or justification for the use of the device." )
-    protected List<CodeableConcept> indication;
+    protected List<CodeableConcept> reasonCode;
 
     /**
-     * Indicates the site on the subject's body where the device was used ( i.e. the target site).
+     * Indicates another resource whose existence justifies this DeviceUseStatement.
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the device was used ( i.e. the target site)." )
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class, Media.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Why was DeviceUseStatement performed?", formalDefinition="Indicates another resource whose existence justifies this DeviceUseStatement." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Indicates another resource whose existence justifies this DeviceUseStatement.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
+
+    /**
+     * Indicates the anotomic location on the subject's body where the device was used ( i.e. the target).
+     */
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Target body site", formalDefinition="Indicates the anotomic location on the subject's body where the device was used ( i.e. the target)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected CodeableConcept bodySite;
 
     /**
      * Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
-    @Child(name = "note", type = {Annotation.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Addition details (comments, instructions)", formalDefinition="Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 2144163845L;
+    private static final long serialVersionUID = -968330048L;
 
   /**
    * Constructor
@@ -368,6 +397,81 @@ public class DeviceUseStatement extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #basedOn} (A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement.)
+     */
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseStatement setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
+      return this;
+    }
+
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
+        return false;
+      for (Reference item : this.basedOn)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addBasedOn() { //3
+      Reference t = new Reference();
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return t;
+    }
+
+    public DeviceUseStatement addBasedOn(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<ServiceRequest> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<ServiceRequest>();
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public ServiceRequest addBasedOnTarget() { 
+      ServiceRequest r = new ServiceRequest();
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<ServiceRequest>();
+      this.basedOnTarget.add(r);
+      return r;
     }
 
     /**
@@ -455,27 +559,66 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #whenUsed} (The time period over which the device was used.)
+     * @return {@link #derivedFrom} (Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement.)
      */
-    public Period getWhenUsed() { 
-      if (this.whenUsed == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DeviceUseStatement.whenUsed");
-        else if (Configuration.doAutoCreate())
-          this.whenUsed = new Period(); // cc
-      return this.whenUsed;
-    }
-
-    public boolean hasWhenUsed() { 
-      return this.whenUsed != null && !this.whenUsed.isEmpty();
+    public List<Reference> getDerivedFrom() { 
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      return this.derivedFrom;
     }
 
     /**
-     * @param value {@link #whenUsed} (The time period over which the device was used.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DeviceUseStatement setWhenUsed(Period value) { 
-      this.whenUsed = value;
+    public DeviceUseStatement setDerivedFrom(List<Reference> theDerivedFrom) { 
+      this.derivedFrom = theDerivedFrom;
       return this;
+    }
+
+    public boolean hasDerivedFrom() { 
+      if (this.derivedFrom == null)
+        return false;
+      for (Reference item : this.derivedFrom)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addDerivedFrom() { //3
+      Reference t = new Reference();
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      this.derivedFrom.add(t);
+      return t;
+    }
+
+    public DeviceUseStatement addDerivedFrom(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      this.derivedFrom.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #derivedFrom}, creating it if it does not already exist
+     */
+    public Reference getDerivedFromFirstRep() { 
+      if (getDerivedFrom().isEmpty()) {
+        addDerivedFrom();
+      }
+      return getDerivedFrom().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getDerivedFromTarget() { 
+      if (this.derivedFromTarget == null)
+        this.derivedFromTarget = new ArrayList<Resource>();
+      return this.derivedFromTarget;
     }
 
     /**
@@ -669,60 +812,123 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #indication} (Reason or justification for the use of the device.)
+     * @return {@link #reasonCode} (Reason or justification for the use of the device.)
      */
-    public List<CodeableConcept> getIndication() { 
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      return this.indication;
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DeviceUseStatement setIndication(List<CodeableConcept> theIndication) { 
-      this.indication = theIndication;
+    public DeviceUseStatement setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
       return this;
     }
 
-    public boolean hasIndication() { 
-      if (this.indication == null)
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
         return false;
-      for (CodeableConcept item : this.indication)
+      for (CodeableConcept item : this.reasonCode)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addIndication() { //3
+    public CodeableConcept addReasonCode() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      this.indication.add(t);
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
       return t;
     }
 
-    public DeviceUseStatement addIndication(CodeableConcept t) { //3
+    public DeviceUseStatement addReasonCode(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      this.indication.add(t);
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
      */
-    public CodeableConcept getIndicationFirstRep() { 
-      if (getIndication().isEmpty()) {
-        addIndication();
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
       }
-      return getIndication().get(0);
+      return getReasonCode().get(0);
     }
 
     /**
-     * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
+     * @return {@link #reasonReference} (Indicates another resource whose existence justifies this DeviceUseStatement.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseStatement setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
+      return this;
+    }
+
+    public boolean hasReasonReference() { 
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public DeviceUseStatement addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
+     */
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
+    }
+
+    /**
+     * @return {@link #bodySite} (Indicates the anotomic location on the subject's body where the device was used ( i.e. the target).)
      */
     public CodeableConcept getBodySite() { 
       if (this.bodySite == null)
@@ -738,7 +944,7 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
-     * @param value {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
+     * @param value {@link #bodySite} (Indicates the anotomic location on the subject's body where the device was used ( i.e. the target).)
      */
     public DeviceUseStatement setBodySite(CodeableConcept value) { 
       this.bodySite = value;
@@ -801,15 +1007,17 @@ public class DeviceUseStatement extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("basedOn", "Reference(ServiceRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("status", "code", "A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.", 0, 1, status));
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient who used the device.", 0, 1, subject));
-        children.add(new Property("whenUsed", "Period", "The time period over which the device was used.", 0, 1, whenUsed));
+        children.add(new Property("derivedFrom", "Reference(ServiceRequest|Procedure|Claim|Observation|QuestionnaireResponse|DocumentReference)", "Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
         children.add(new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing));
         children.add(new Property("recordedOn", "dateTime", "The time at which the statement was made/recorded.", 0, 1, recordedOn));
         children.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "Who reported the device was being used by the patient.", 0, 1, source));
         children.add(new Property("device", "Reference(Device)", "The details of the device used.", 0, 1, device));
-        children.add(new Property("indication", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, indication));
-        children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, 1, bodySite));
+        children.add(new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference|Media)", "Indicates another resource whose existence justifies this DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("bodySite", "CodeableConcept", "Indicates the anotomic location on the subject's body where the device was used ( i.e. the target).", 0, 1, bodySite));
         children.add(new Property("note", "Annotation", "Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
@@ -817,9 +1025,10 @@ public class DeviceUseStatement extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -892481550: /*status*/  return new Property("status", "code", "A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.", 0, 1, status);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient who used the device.", 0, 1, subject);
-        case 2042879511: /*whenUsed*/  return new Property("whenUsed", "Period", "The time period over which the device was used.", 0, 1, whenUsed);
+        case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "Reference(ServiceRequest|Procedure|Claim|Observation|QuestionnaireResponse|DocumentReference)", "Allows linking the DeviceUseStatement to the underlying Request, or to other information that supports or is used to derive the DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, derivedFrom);
         case 164632566: /*timing[x]*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
         case -873664438: /*timing*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
         case -497554124: /*timingTiming*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
@@ -828,8 +1037,9 @@ public class DeviceUseStatement extends DomainResource {
         case 735397551: /*recordedOn*/  return new Property("recordedOn", "dateTime", "The time at which the statement was made/recorded.", 0, 1, recordedOn);
         case -896505829: /*source*/  return new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "Who reported the device was being used by the patient.", 0, 1, source);
         case -1335157162: /*device*/  return new Property("device", "Reference(Device)", "The details of the device used.", 0, 1, device);
-        case -597168804: /*indication*/  return new Property("indication", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, indication);
-        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, 1, bodySite);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference|Media)", "Indicates another resource whose existence justifies this DeviceUseStatement.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the anotomic location on the subject's body where the device was used ( i.e. the target).", 0, 1, bodySite);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -840,14 +1050,16 @@ public class DeviceUseStatement extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DeviceUseStatementStatus>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 2042879511: /*whenUsed*/ return this.whenUsed == null ? new Base[0] : new Base[] {this.whenUsed}; // Period
+        case 1077922663: /*derivedFrom*/ return this.derivedFrom == null ? new Base[0] : this.derivedFrom.toArray(new Base[this.derivedFrom.size()]); // Reference
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 735397551: /*recordedOn*/ return this.recordedOn == null ? new Base[0] : new Base[] {this.recordedOn}; // DateTimeType
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
         case -1335157162: /*device*/ return this.device == null ? new Base[0] : new Base[] {this.device}; // Reference
-        case -597168804: /*indication*/ return this.indication == null ? new Base[0] : this.indication.toArray(new Base[this.indication.size()]); // CodeableConcept
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         default: return super.getProperty(hash, name, checkValid);
@@ -861,6 +1073,9 @@ public class DeviceUseStatement extends DomainResource {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
+          return value;
         case -892481550: // status
           value = new DeviceUseStatementStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<DeviceUseStatementStatus>
@@ -868,8 +1083,8 @@ public class DeviceUseStatement extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case 2042879511: // whenUsed
-          this.whenUsed = castToPeriod(value); // Period
+        case 1077922663: // derivedFrom
+          this.getDerivedFrom().add(castToReference(value)); // Reference
           return value;
         case -873664438: // timing
           this.timing = castToType(value); // Type
@@ -883,8 +1098,11 @@ public class DeviceUseStatement extends DomainResource {
         case -1335157162: // device
           this.device = castToReference(value); // Reference
           return value;
-        case -597168804: // indication
-          this.getIndication().add(castToCodeableConcept(value)); // CodeableConcept
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
           return value;
         case 1702620169: // bodySite
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
@@ -901,13 +1119,15 @@ public class DeviceUseStatement extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("basedOn")) {
+          this.getBasedOn().add(castToReference(value));
         } else if (name.equals("status")) {
           value = new DeviceUseStatementStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<DeviceUseStatementStatus>
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("whenUsed")) {
-          this.whenUsed = castToPeriod(value); // Period
+        } else if (name.equals("derivedFrom")) {
+          this.getDerivedFrom().add(castToReference(value));
         } else if (name.equals("timing[x]")) {
           this.timing = castToType(value); // Type
         } else if (name.equals("recordedOn")) {
@@ -916,8 +1136,10 @@ public class DeviceUseStatement extends DomainResource {
           this.source = castToReference(value); // Reference
         } else if (name.equals("device")) {
           this.device = castToReference(value); // Reference
-        } else if (name.equals("indication")) {
-          this.getIndication().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
         } else if (name.equals("bodySite")) {
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("note")) {
@@ -931,15 +1153,17 @@ public class DeviceUseStatement extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
+        case -332612366:  return addBasedOn(); 
         case -892481550:  return getStatusElement();
         case -1867885268:  return getSubject(); 
-        case 2042879511:  return getWhenUsed(); 
+        case 1077922663:  return addDerivedFrom(); 
         case 164632566:  return getTiming(); 
         case -873664438:  return getTiming(); 
         case 735397551:  return getRecordedOnElement();
         case -896505829:  return getSource(); 
         case -1335157162:  return getDevice(); 
-        case -597168804:  return addIndication(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
         case 1702620169:  return getBodySite(); 
         case 3387378:  return addNote(); 
         default: return super.makeProperty(hash, name);
@@ -951,14 +1175,16 @@ public class DeviceUseStatement extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 2042879511: /*whenUsed*/ return new String[] {"Period"};
+        case 1077922663: /*derivedFrom*/ return new String[] {"Reference"};
         case -873664438: /*timing*/ return new String[] {"Timing", "Period", "dateTime"};
         case 735397551: /*recordedOn*/ return new String[] {"dateTime"};
         case -896505829: /*source*/ return new String[] {"Reference"};
         case -1335157162: /*device*/ return new String[] {"Reference"};
-        case -597168804: /*indication*/ return new String[] {"CodeableConcept"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 1702620169: /*bodySite*/ return new String[] {"CodeableConcept"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         default: return super.getTypesForProperty(hash, name);
@@ -971,6 +1197,9 @@ public class DeviceUseStatement extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type DeviceUseStatement.status");
         }
@@ -978,9 +1207,8 @@ public class DeviceUseStatement extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("whenUsed")) {
-          this.whenUsed = new Period();
-          return this.whenUsed;
+        else if (name.equals("derivedFrom")) {
+          return addDerivedFrom();
         }
         else if (name.equals("timingTiming")) {
           this.timing = new Timing();
@@ -1005,8 +1233,11 @@ public class DeviceUseStatement extends DomainResource {
           this.device = new Reference();
           return this.device;
         }
-        else if (name.equals("indication")) {
-          return addIndication();
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
+        }
+        else if (name.equals("reasonReference")) {
+          return addReasonReference();
         }
         else if (name.equals("bodySite")) {
           this.bodySite = new CodeableConcept();
@@ -1032,17 +1263,31 @@ public class DeviceUseStatement extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
+        };
         dst.status = status == null ? null : status.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.whenUsed = whenUsed == null ? null : whenUsed.copy();
+        if (derivedFrom != null) {
+          dst.derivedFrom = new ArrayList<Reference>();
+          for (Reference i : derivedFrom)
+            dst.derivedFrom.add(i.copy());
+        };
         dst.timing = timing == null ? null : timing.copy();
         dst.recordedOn = recordedOn == null ? null : recordedOn.copy();
         dst.source = source == null ? null : source.copy();
         dst.device = device == null ? null : device.copy();
-        if (indication != null) {
-          dst.indication = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : indication)
-            dst.indication.add(i.copy());
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
         };
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         if (note != null) {
@@ -1058,31 +1303,33 @@ public class DeviceUseStatement extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceUseStatement))
+        if (!(other_ instanceof DeviceUseStatement))
           return false;
-        DeviceUseStatement o = (DeviceUseStatement) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(whenUsed, o.whenUsed, true) && compareDeep(timing, o.timing, true) && compareDeep(recordedOn, o.recordedOn, true)
-           && compareDeep(source, o.source, true) && compareDeep(device, o.device, true) && compareDeep(indication, o.indication, true)
+        DeviceUseStatement o = (DeviceUseStatement) other_;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(status, o.status, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(timing, o.timing, true)
+           && compareDeep(recordedOn, o.recordedOn, true) && compareDeep(source, o.source, true) && compareDeep(device, o.device, true)
+           && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
            && compareDeep(bodySite, o.bodySite, true) && compareDeep(note, o.note, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceUseStatement))
+        if (!(other_ instanceof DeviceUseStatement))
           return false;
-        DeviceUseStatement o = (DeviceUseStatement) other;
+        DeviceUseStatement o = (DeviceUseStatement) other_;
         return compareValues(status, o.status, true) && compareValues(recordedOn, o.recordedOn, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, subject
-          , whenUsed, timing, recordedOn, source, device, indication, bodySite, note);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, status
+          , subject, derivedFrom, timing, recordedOn, source, device, reasonCode, reasonReference
+          , bodySite, note);
       }
 
   @Override

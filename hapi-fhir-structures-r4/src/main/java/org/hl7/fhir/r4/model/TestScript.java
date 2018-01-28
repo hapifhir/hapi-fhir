@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -44,135 +44,11 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
+ * A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "rule", "ruleset", "setup", "test", "teardown"})
 public class TestScript extends MetadataResource {
-
-    public enum ContentType {
-        /**
-         * XML content-type corresponding to the application/fhir+xml mime-type.
-         */
-        XML, 
-        /**
-         * JSON content-type corresponding to the application/fhir+json mime-type.
-         */
-        JSON, 
-        /**
-         * RDF content-type corresponding to the text/turtle mime-type.
-         */
-        TTL, 
-        /**
-         * Prevent the use of the corresponding http header.
-         */
-        NONE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ContentType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("xml".equals(codeString))
-          return XML;
-        if ("json".equals(codeString))
-          return JSON;
-        if ("ttl".equals(codeString))
-          return TTL;
-        if ("none".equals(codeString))
-          return NONE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ContentType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case XML: return "xml";
-            case JSON: return "json";
-            case TTL: return "ttl";
-            case NONE: return "none";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case XML: return "http://hl7.org/fhir/content-type";
-            case JSON: return "http://hl7.org/fhir/content-type";
-            case TTL: return "http://hl7.org/fhir/content-type";
-            case NONE: return "http://hl7.org/fhir/content-type";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case XML: return "XML content-type corresponding to the application/fhir+xml mime-type.";
-            case JSON: return "JSON content-type corresponding to the application/fhir+json mime-type.";
-            case TTL: return "RDF content-type corresponding to the text/turtle mime-type.";
-            case NONE: return "Prevent the use of the corresponding http header.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case XML: return "xml";
-            case JSON: return "json";
-            case TTL: return "ttl";
-            case NONE: return "none";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ContentTypeEnumFactory implements EnumFactory<ContentType> {
-    public ContentType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("xml".equals(codeString))
-          return ContentType.XML;
-        if ("json".equals(codeString))
-          return ContentType.JSON;
-        if ("ttl".equals(codeString))
-          return ContentType.TTL;
-        if ("none".equals(codeString))
-          return ContentType.NONE;
-        throw new IllegalArgumentException("Unknown ContentType code '"+codeString+"'");
-        }
-        public Enumeration<ContentType> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<ContentType>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("xml".equals(codeString))
-          return new Enumeration<ContentType>(this, ContentType.XML);
-        if ("json".equals(codeString))
-          return new Enumeration<ContentType>(this, ContentType.JSON);
-        if ("ttl".equals(codeString))
-          return new Enumeration<ContentType>(this, ContentType.TTL);
-        if ("none".equals(codeString))
-          return new Enumeration<ContentType>(this, ContentType.NONE);
-        throw new FHIRException("Unknown ContentType code '"+codeString+"'");
-        }
-    public String toCode(ContentType code) {
-      if (code == ContentType.XML)
-        return "xml";
-      if (code == ContentType.JSON)
-        return "json";
-      if (code == ContentType.TTL)
-        return "ttl";
-      if (code == ContentType.NONE)
-        return "none";
-      return "?";
-      }
-    public String toSystem(ContentType code) {
-      return code.getSystem();
-      }
-    }
 
     public enum AssertionDirectionType {
         /**
@@ -1107,22 +983,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptOriginComponent))
+        if (!(other_ instanceof TestScriptOriginComponent))
           return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other_;
         return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptOriginComponent))
+        if (!(other_ instanceof TestScriptOriginComponent))
           return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other_;
         return compareValues(index, o.index, true);
       }
 
@@ -1334,22 +1210,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptDestinationComponent))
+        if (!(other_ instanceof TestScriptDestinationComponent))
           return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other_;
         return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptDestinationComponent))
+        if (!(other_ instanceof TestScriptDestinationComponent))
           return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other_;
         return compareValues(index, o.index, true);
       }
 
@@ -1595,22 +1471,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataComponent))
+        if (!(other_ instanceof TestScriptMetadataComponent))
           return false;
-        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other;
+        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other_;
         return compareDeep(link, o.link, true) && compareDeep(capability, o.capability, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataComponent))
+        if (!(other_ instanceof TestScriptMetadataComponent))
           return false;
-        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other;
+        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other_;
         return true;
       }
 
@@ -1844,22 +1720,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataLinkComponent))
+        if (!(other_ instanceof TestScriptMetadataLinkComponent))
           return false;
-        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other;
+        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other_;
         return compareDeep(url, o.url, true) && compareDeep(description, o.description, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataLinkComponent))
+        if (!(other_ instanceof TestScriptMetadataLinkComponent))
           return false;
-        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other;
+        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other_;
         return compareValues(url, o.url, true) && compareValues(description, o.description, true);
       }
 
@@ -2468,24 +2344,24 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilityComponent))
+        if (!(other_ instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other_;
         return compareDeep(required, o.required, true) && compareDeep(validated, o.validated, true) && compareDeep(description, o.description, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(link, o.link, true)
            && compareDeep(capabilities, o.capabilities, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilityComponent))
+        if (!(other_ instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other_;
         return compareValues(required, o.required, true) && compareValues(validated, o.validated, true) && compareValues(description, o.description, true)
            && compareValues(origin, o.origin, true) && compareValues(destination, o.destination, true) && compareValues(link, o.link, true)
           ;
@@ -2776,23 +2652,23 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptFixtureComponent))
+        if (!(other_ instanceof TestScriptFixtureComponent))
           return false;
-        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other;
+        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other_;
         return compareDeep(autocreate, o.autocreate, true) && compareDeep(autodelete, o.autodelete, true)
            && compareDeep(resource, o.resource, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptFixtureComponent))
+        if (!(other_ instanceof TestScriptFixtureComponent))
           return false;
-        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other;
+        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other_;
         return compareValues(autocreate, o.autocreate, true) && compareValues(autodelete, o.autodelete, true)
           ;
       }
@@ -3448,12 +3324,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptVariableComponent))
+        if (!(other_ instanceof TestScriptVariableComponent))
           return false;
-        TestScriptVariableComponent o = (TestScriptVariableComponent) other;
+        TestScriptVariableComponent o = (TestScriptVariableComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(defaultValue, o.defaultValue, true) && compareDeep(description, o.description, true)
            && compareDeep(expression, o.expression, true) && compareDeep(headerField, o.headerField, true)
            && compareDeep(hint, o.hint, true) && compareDeep(path, o.path, true) && compareDeep(sourceId, o.sourceId, true)
@@ -3461,12 +3337,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptVariableComponent))
+        if (!(other_ instanceof TestScriptVariableComponent))
           return false;
-        TestScriptVariableComponent o = (TestScriptVariableComponent) other;
+        TestScriptVariableComponent o = (TestScriptVariableComponent) other_;
         return compareValues(name, o.name, true) && compareValues(defaultValue, o.defaultValue, true) && compareValues(description, o.description, true)
            && compareValues(expression, o.expression, true) && compareValues(headerField, o.headerField, true)
            && compareValues(hint, o.hint, true) && compareValues(path, o.path, true) && compareValues(sourceId, o.sourceId, true)
@@ -3712,22 +3588,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptRuleComponent))
+        if (!(other_ instanceof TestScriptRuleComponent))
           return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
         return compareDeep(resource, o.resource, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptRuleComponent))
+        if (!(other_ instanceof TestScriptRuleComponent))
           return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
         return true;
       }
 
@@ -3961,22 +3837,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RuleParamComponent))
+        if (!(other_ instanceof RuleParamComponent))
           return false;
-        RuleParamComponent o = (RuleParamComponent) other;
+        RuleParamComponent o = (RuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RuleParamComponent))
+        if (!(other_ instanceof RuleParamComponent))
           return false;
-        RuleParamComponent o = (RuleParamComponent) other;
+        RuleParamComponent o = (RuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -4218,22 +4094,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptRulesetComponent))
+        if (!(other_ instanceof TestScriptRulesetComponent))
           return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
         return compareDeep(resource, o.resource, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptRulesetComponent))
+        if (!(other_ instanceof TestScriptRulesetComponent))
           return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
         return true;
       }
 
@@ -4475,22 +4351,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RulesetRuleComponent))
+        if (!(other_ instanceof RulesetRuleComponent))
           return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other;
+        RulesetRuleComponent o = (RulesetRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RulesetRuleComponent))
+        if (!(other_ instanceof RulesetRuleComponent))
           return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other;
+        RulesetRuleComponent o = (RulesetRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -4724,22 +4600,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RulesetRuleParamComponent))
+        if (!(other_ instanceof RulesetRuleParamComponent))
           return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other;
+        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RulesetRuleParamComponent))
+        if (!(other_ instanceof RulesetRuleParamComponent))
           return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other;
+        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -4907,22 +4783,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptSetupComponent))
+        if (!(other_ instanceof TestScriptSetupComponent))
           return false;
-        TestScriptSetupComponent o = (TestScriptSetupComponent) other;
+        TestScriptSetupComponent o = (TestScriptSetupComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptSetupComponent))
+        if (!(other_ instanceof TestScriptSetupComponent))
           return false;
-        TestScriptSetupComponent o = (TestScriptSetupComponent) other;
+        TestScriptSetupComponent o = (TestScriptSetupComponent) other_;
         return true;
       }
 
@@ -5104,22 +4980,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return true;
       }
 
@@ -5167,20 +5043,18 @@ public class TestScript extends MetadataResource {
         protected StringType description;
 
         /**
-         * The content-type or mime-type to use for RESTful operation in the 'Accept' header.
+         * The mime-type to use for RESTful operation in the 'Accept' header.
          */
         @Child(name = "accept", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="xml | json | ttl | none", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Accept' header." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/content-type")
-        protected Enumeration<ContentType> accept;
+        @Description(shortDefinition="Mime type to accept in the payload of the response, with charset etc.", formalDefinition="The mime-type to use for RESTful operation in the 'Accept' header." )
+        protected CodeType accept;
 
         /**
-         * The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * The mime-type to use for RESTful operation in the 'Content-Type' header.
          */
         @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="xml | json | ttl | none", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/content-type")
-        protected Enumeration<ContentType> contentType;
+        @Description(shortDefinition="Mime type of the request payload contents, with charset etc.", formalDefinition="The mime-type to use for RESTful operation in the 'Content-Type' header." )
+        protected CodeType contentType;
 
         /**
          * The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.
@@ -5252,7 +5126,7 @@ public class TestScript extends MetadataResource {
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
-        private static final long serialVersionUID = -488909648L;
+        private static final long serialVersionUID = 1998717374L;
 
     /**
      * Constructor
@@ -5433,14 +5307,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #accept} (The content-type or mime-type to use for RESTful operation in the 'Accept' header.). This is the underlying object with id, value and extensions. The accessor "getAccept" gives direct access to the value
+         * @return {@link #accept} (The mime-type to use for RESTful operation in the 'Accept' header.). This is the underlying object with id, value and extensions. The accessor "getAccept" gives direct access to the value
          */
-        public Enumeration<ContentType> getAcceptElement() { 
+        public CodeType getAcceptElement() { 
           if (this.accept == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SetupActionOperationComponent.accept");
             else if (Configuration.doAutoCreate())
-              this.accept = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
+              this.accept = new CodeType(); // bb
           return this.accept;
         }
 
@@ -5453,43 +5327,43 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #accept} (The content-type or mime-type to use for RESTful operation in the 'Accept' header.). This is the underlying object with id, value and extensions. The accessor "getAccept" gives direct access to the value
+         * @param value {@link #accept} (The mime-type to use for RESTful operation in the 'Accept' header.). This is the underlying object with id, value and extensions. The accessor "getAccept" gives direct access to the value
          */
-        public SetupActionOperationComponent setAcceptElement(Enumeration<ContentType> value) { 
+        public SetupActionOperationComponent setAcceptElement(CodeType value) { 
           this.accept = value;
           return this;
         }
 
         /**
-         * @return The content-type or mime-type to use for RESTful operation in the 'Accept' header.
+         * @return The mime-type to use for RESTful operation in the 'Accept' header.
          */
-        public ContentType getAccept() { 
+        public String getAccept() { 
           return this.accept == null ? null : this.accept.getValue();
         }
 
         /**
-         * @param value The content-type or mime-type to use for RESTful operation in the 'Accept' header.
+         * @param value The mime-type to use for RESTful operation in the 'Accept' header.
          */
-        public SetupActionOperationComponent setAccept(ContentType value) { 
-          if (value == null)
+        public SetupActionOperationComponent setAccept(String value) { 
+          if (Utilities.noString(value))
             this.accept = null;
           else {
             if (this.accept == null)
-              this.accept = new Enumeration<ContentType>(new ContentTypeEnumFactory());
+              this.accept = new CodeType();
             this.accept.setValue(value);
           }
           return this;
         }
 
         /**
-         * @return {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+         * @return {@link #contentType} (The mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public Enumeration<ContentType> getContentTypeElement() { 
+        public CodeType getContentTypeElement() { 
           if (this.contentType == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SetupActionOperationComponent.contentType");
             else if (Configuration.doAutoCreate())
-              this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
+              this.contentType = new CodeType(); // bb
           return this.contentType;
         }
 
@@ -5502,29 +5376,29 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+         * @param value {@link #contentType} (The mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public SetupActionOperationComponent setContentTypeElement(Enumeration<ContentType> value) { 
+        public SetupActionOperationComponent setContentTypeElement(CodeType value) { 
           this.contentType = value;
           return this;
         }
 
         /**
-         * @return The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * @return The mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        public ContentType getContentType() { 
+        public String getContentType() { 
           return this.contentType == null ? null : this.contentType.getValue();
         }
 
         /**
-         * @param value The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * @param value The mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        public SetupActionOperationComponent setContentType(ContentType value) { 
-          if (value == null)
+        public SetupActionOperationComponent setContentType(String value) { 
+          if (Utilities.noString(value))
             this.contentType = null;
           else {
             if (this.contentType == null)
-              this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory());
+              this.contentType = new CodeType();
             this.contentType.setValue(value);
           }
           return this;
@@ -6018,8 +5892,8 @@ public class TestScript extends MetadataResource {
           children.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource));
           children.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label));
           children.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description));
-          children.add(new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept));
-          children.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
+          children.add(new Property("accept", "code", "The mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept));
+          children.add(new Property("contentType", "code", "The mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
           children.add(new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination));
           children.add(new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl));
           children.add(new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin));
@@ -6039,8 +5913,8 @@ public class TestScript extends MetadataResource {
           case -341064690: /*resource*/  return new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource);
           case 102727412: /*label*/  return new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label);
           case -1724546052: /*description*/  return new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description);
-          case -1423461112: /*accept*/  return new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept);
-          case -389131437: /*contentType*/  return new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
+          case -1423461112: /*accept*/  return new Property("accept", "code", "The mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept);
+          case -389131437: /*contentType*/  return new Property("contentType", "code", "The mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
           case -1429847026: /*destination*/  return new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination);
           case -1760554218: /*encodeRequestUrl*/  return new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl);
           case -1008619738: /*origin*/  return new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin);
@@ -6063,8 +5937,8 @@ public class TestScript extends MetadataResource {
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CodeType
         case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -1423461112: /*accept*/ return this.accept == null ? new Base[0] : new Base[] {this.accept}; // Enumeration<ContentType>
-        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // Enumeration<ContentType>
+        case -1423461112: /*accept*/ return this.accept == null ? new Base[0] : new Base[] {this.accept}; // CodeType
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // CodeType
         case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // IntegerType
         case -1760554218: /*encodeRequestUrl*/ return this.encodeRequestUrl == null ? new Base[0] : new Base[] {this.encodeRequestUrl}; // BooleanType
         case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // IntegerType
@@ -6096,12 +5970,10 @@ public class TestScript extends MetadataResource {
           this.description = castToString(value); // StringType
           return value;
         case -1423461112: // accept
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.accept = (Enumeration) value; // Enumeration<ContentType>
+          this.accept = castToCode(value); // CodeType
           return value;
         case -389131437: // contentType
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.contentType = (Enumeration) value; // Enumeration<ContentType>
+          this.contentType = castToCode(value); // CodeType
           return value;
         case -1429847026: // destination
           this.destination = castToInteger(value); // IntegerType
@@ -6149,11 +6021,9 @@ public class TestScript extends MetadataResource {
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else if (name.equals("accept")) {
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.accept = (Enumeration) value; // Enumeration<ContentType>
+          this.accept = castToCode(value); // CodeType
         } else if (name.equals("contentType")) {
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.contentType = (Enumeration) value; // Enumeration<ContentType>
+          this.contentType = castToCode(value); // CodeType
         } else if (name.equals("destination")) {
           this.destination = castToInteger(value); // IntegerType
         } else if (name.equals("encodeRequestUrl")) {
@@ -6309,12 +6179,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(label, o.label, true)
            && compareDeep(description, o.description, true) && compareDeep(accept, o.accept, true) && compareDeep(contentType, o.contentType, true)
            && compareDeep(destination, o.destination, true) && compareDeep(encodeRequestUrl, o.encodeRequestUrl, true)
@@ -6324,12 +6194,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
            && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
            && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(origin, o.origin, true)
@@ -6567,22 +6437,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
+        if (!(other_ instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other_;
         return compareDeep(field, o.field, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
+        if (!(other_ instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other_;
         return compareValues(field, o.field, true) && compareValues(value, o.value, true);
       }
 
@@ -6643,12 +6513,11 @@ public class TestScript extends MetadataResource {
         protected StringType compareToSourcePath;
 
         /**
-         * The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * The mime-type contents to compare against the request or response message 'Content-Type' header.
          */
         @Child(name = "contentType", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="xml | json | ttl | none", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/content-type")
-        protected Enumeration<ContentType> contentType;
+        @Description(shortDefinition="Mime type to compare against the 'Content-Type' header", formalDefinition="The mime-type contents to compare against the request or response message 'Content-Type' header." )
+        protected CodeType contentType;
 
         /**
          * The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.
@@ -6773,7 +6642,7 @@ public class TestScript extends MetadataResource {
         @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
-        private static final long serialVersionUID = 171718507L;
+        private static final long serialVersionUID = -483432060L;
 
     /**
      * Constructor
@@ -7077,14 +6946,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+         * @return {@link #contentType} (The mime-type contents to compare against the request or response message 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public Enumeration<ContentType> getContentTypeElement() { 
+        public CodeType getContentTypeElement() { 
           if (this.contentType == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SetupActionAssertComponent.contentType");
             else if (Configuration.doAutoCreate())
-              this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
+              this.contentType = new CodeType(); // bb
           return this.contentType;
         }
 
@@ -7097,29 +6966,29 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+         * @param value {@link #contentType} (The mime-type contents to compare against the request or response message 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public SetupActionAssertComponent setContentTypeElement(Enumeration<ContentType> value) { 
+        public SetupActionAssertComponent setContentTypeElement(CodeType value) { 
           this.contentType = value;
           return this;
         }
 
         /**
-         * @return The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * @return The mime-type contents to compare against the request or response message 'Content-Type' header.
          */
-        public ContentType getContentType() { 
+        public String getContentType() { 
           return this.contentType == null ? null : this.contentType.getValue();
         }
 
         /**
-         * @param value The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
+         * @param value The mime-type contents to compare against the request or response message 'Content-Type' header.
          */
-        public SetupActionAssertComponent setContentType(ContentType value) { 
-          if (value == null)
+        public SetupActionAssertComponent setContentType(String value) { 
+          if (Utilities.noString(value))
             this.contentType = null;
           else {
             if (this.contentType == null)
-              this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory());
+              this.contentType = new CodeType();
             this.contentType.setValue(value);
           }
           return this;
@@ -7908,7 +7777,7 @@ public class TestScript extends MetadataResource {
           children.add(new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId));
           children.add(new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression));
           children.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath));
-          children.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
+          children.add(new Property("contentType", "code", "The mime-type contents to compare against the request or response message 'Content-Type' header.", 0, 1, contentType));
           children.add(new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression));
           children.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField));
           children.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId));
@@ -7937,7 +7806,7 @@ public class TestScript extends MetadataResource {
           case 2081856758: /*compareToSourceId*/  return new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId);
           case -1415702669: /*compareToSourceExpression*/  return new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression);
           case -790206144: /*compareToSourcePath*/  return new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath);
-          case -389131437: /*contentType*/  return new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
+          case -389131437: /*contentType*/  return new Property("contentType", "code", "The mime-type contents to compare against the request or response message 'Content-Type' header.", 0, 1, contentType);
           case -1795452264: /*expression*/  return new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression);
           case 1160732269: /*headerField*/  return new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField);
           case 818925001: /*minimumId*/  return new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId);
@@ -7969,7 +7838,7 @@ public class TestScript extends MetadataResource {
         case 2081856758: /*compareToSourceId*/ return this.compareToSourceId == null ? new Base[0] : new Base[] {this.compareToSourceId}; // StringType
         case -1415702669: /*compareToSourceExpression*/ return this.compareToSourceExpression == null ? new Base[0] : new Base[] {this.compareToSourceExpression}; // StringType
         case -790206144: /*compareToSourcePath*/ return this.compareToSourcePath == null ? new Base[0] : new Base[] {this.compareToSourcePath}; // StringType
-        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // Enumeration<ContentType>
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // CodeType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
         case 1160732269: /*headerField*/ return this.headerField == null ? new Base[0] : new Base[] {this.headerField}; // StringType
         case 818925001: /*minimumId*/ return this.minimumId == null ? new Base[0] : new Base[] {this.minimumId}; // StringType
@@ -8015,8 +7884,7 @@ public class TestScript extends MetadataResource {
           this.compareToSourcePath = castToString(value); // StringType
           return value;
         case -389131437: // contentType
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.contentType = (Enumeration) value; // Enumeration<ContentType>
+          this.contentType = castToCode(value); // CodeType
           return value;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
@@ -8093,8 +7961,7 @@ public class TestScript extends MetadataResource {
         } else if (name.equals("compareToSourcePath")) {
           this.compareToSourcePath = castToString(value); // StringType
         } else if (name.equals("contentType")) {
-          value = new ContentTypeEnumFactory().fromType(castToCode(value));
-          this.contentType = (Enumeration) value; // Enumeration<ContentType>
+          this.contentType = castToCode(value); // CodeType
         } else if (name.equals("expression")) {
           this.expression = castToString(value); // StringType
         } else if (name.equals("headerField")) {
@@ -8312,12 +8179,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareDeep(label, o.label, true) && compareDeep(description, o.description, true) && compareDeep(direction, o.direction, true)
            && compareDeep(compareToSourceId, o.compareToSourceId, true) && compareDeep(compareToSourceExpression, o.compareToSourceExpression, true)
            && compareDeep(compareToSourcePath, o.compareToSourcePath, true) && compareDeep(contentType, o.contentType, true)
@@ -8331,12 +8198,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareValues(label, o.label, true) && compareValues(description, o.description, true) && compareValues(direction, o.direction, true)
            && compareValues(compareToSourceId, o.compareToSourceId, true) && compareValues(compareToSourceExpression, o.compareToSourceExpression, true)
            && compareValues(compareToSourcePath, o.compareToSourcePath, true) && compareValues(contentType, o.contentType, true)
@@ -8590,22 +8457,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleComponent))
+        if (!(other_ instanceof ActionAssertRuleComponent))
           return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other;
+        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleComponent))
+        if (!(other_ instanceof ActionAssertRuleComponent))
           return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other;
+        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -8836,22 +8703,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRuleParamComponent))
           return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other;
+        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRuleParamComponent))
           return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other;
+        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -9093,22 +8960,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetComponent))
+        if (!(other_ instanceof ActionAssertRulesetComponent))
           return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other;
+        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
         return compareDeep(rulesetId, o.rulesetId, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetComponent))
+        if (!(other_ instanceof ActionAssertRulesetComponent))
           return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other;
+        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
         return compareValues(rulesetId, o.rulesetId, true);
       }
 
@@ -9350,22 +9217,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
           return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other;
+        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
           return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other;
+        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -9596,22 +9463,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
           return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other;
+        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
           return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other;
+        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -9919,23 +9786,23 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptTestComponent))
+        if (!(other_ instanceof TestScriptTestComponent))
           return false;
-        TestScriptTestComponent o = (TestScriptTestComponent) other;
+        TestScriptTestComponent o = (TestScriptTestComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(action, o.action, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptTestComponent))
+        if (!(other_ instanceof TestScriptTestComponent))
           return false;
-        TestScriptTestComponent o = (TestScriptTestComponent) other;
+        TestScriptTestComponent o = (TestScriptTestComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -10118,22 +9985,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return true;
       }
 
@@ -10301,22 +10168,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptTeardownComponent))
+        if (!(other_ instanceof TestScriptTeardownComponent))
           return false;
-        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other;
+        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptTeardownComponent))
+        if (!(other_ instanceof TestScriptTeardownComponent))
           return false;
-        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other;
+        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other_;
         return true;
       }
 
@@ -10460,22 +10327,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return compareDeep(operation, o.operation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return true;
       }
 
@@ -10613,7 +10480,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -10633,7 +10500,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public TestScript setUrlElement(UriType value) { 
       this.url = value;
@@ -10641,14 +10508,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.
      */
     public TestScript setUrl(String value) { 
         if (this.url == null)
@@ -11826,7 +11693,7 @@ public class TestScript extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -11857,7 +11724,7 @@ public class TestScript extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
@@ -12311,12 +12178,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScript))
+        if (!(other_ instanceof TestScript))
           return false;
-        TestScript o = (TestScript) other;
+        TestScript o = (TestScript) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(metadata, o.metadata, true)
            && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
@@ -12325,12 +12192,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScript))
+        if (!(other_ instanceof TestScript))
           return false;
-        TestScript o = (TestScript) other;
+        TestScript o = (TestScript) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true);
       }
 

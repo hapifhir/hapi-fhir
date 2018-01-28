@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,6 +21,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	
@@ -43,13 +48,13 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs1.setValue(new Quantity(123));
 		obs1.setComment("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Diastolic Blood Pressure");
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
 		
 		map = new SearchParameterMap();
@@ -137,9 +142,24 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
 
+		// Attached to patient
+		Observation obs1 = new Observation();
+		obs1.setSubject(new Reference(ptId));
+		obs1.getCode().setText("AAAAA");
+		obs1.setValue(new StringType("Systolic Blood Pressure"));
+		obs1.setStatus(ObservationStatus.FINAL);
+		myObservationDao.create(obs1, mockSrd()).getId().toUnqualifiedVersionless();
+
+		// Not attached to patient
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("AAAAA");
+		obs2.setValue(new StringType("Diastolic Blood Pressure"));
+		obs2.setStatus(ObservationStatus.FINAL);
+		myObservationDao.create(obs2, mockSrd()).getId().toUnqualifiedVersionless();
+
+
 		Media med = new Media();
 		med.getSubject().setReferenceElement(ptId);
-		med.getSubtype().setText("Systolic Blood Pressure");
 		med.getContent().setContentType("LCws");
 		med.getContent().setDataElement(new Base64BinaryType(new byte[] {44,44,44,44,44,44,44,44}));
 		med.getContent().setTitle("bbbb syst");
@@ -473,13 +493,14 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchDontReindexForUpdateWithIndexDisabled() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(true);
 		Patient patient;
 		SearchParameterMap map;
 
 		patient = new Patient();
 		patient.getText().setDivAsString("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
-		IIdType pId1 = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
+		final IIdType pId1 = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));

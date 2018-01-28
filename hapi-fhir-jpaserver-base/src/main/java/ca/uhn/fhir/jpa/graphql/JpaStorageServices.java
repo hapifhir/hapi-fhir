@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,52 +32,30 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.utilities.graphql.Argument;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.graphql.ReferenceResolution;
 import org.hl7.fhir.utilities.graphql.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices<IAnyResource, IBaseReference, IBaseBundle> {
+public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements GraphQLEngine.IGraphQLStorageServices {
 
-
-	@Transactional(propagation = Propagation.REQUIRED)
-	@Override
-	public ReferenceResolution<IAnyResource> lookup(Object theAppInfo, IAnyResource theContext, IBaseReference theReference) throws FHIRException {
-		IIdType refId = theReference.getReferenceElement();
-
-		String resourceType = refId.getResourceType();
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceType);
-		BaseHasResource id = dao.readEntity(refId);
-		IBaseResource resource = toResource(id, false);
-
-		return new ReferenceResolution<>(theContext, (IAnyResource) resource);
-	}
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
 		return getDao(typeDef.getImplementingClass());
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	@Override
-	public IAnyResource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
-		IIdType refId = getContext().getVersion().newIdType();
-		refId.setValue(theType + "/" + theId);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
-		BaseHasResource id = dao.readEntity(refId);
-
-		return (IAnyResource) toResource(id, false);
-	}
-
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
-	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IAnyResource> theMatches) throws FHIRException {
+	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<Resource> theMatches) throws FHIRException {
 
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
@@ -92,7 +70,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 				String value = nextValue.getValue();
 
 				IQueryParameterType param = null;
-				switch (searchParam.getParamType()){
+				switch (searchParam.getParamType()) {
 					case NUMBER:
 						param = new NumberParam(value);
 						break;
@@ -125,19 +103,35 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 		IBundleProvider response = dao.search(params);
 		int size = response.size();
-		if (response.preferredPageSize() != null && response.preferredPageSize() < size){
+		if (response.preferredPageSize() != null && response.preferredPageSize() < size) {
 			size = response.preferredPageSize();
 		}
 
-		for (IBaseResource next : response.getResources(0, size)){
+		for (IBaseResource next : response.getResources(0, size)) {
 			theMatches.add((Resource) next);
 		}
 
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Override
+	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
+		IIdType refId = getContext().getVersion().newIdType();
+		refId.setValue(theType + "/" + theId);
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
+		BaseHasResource id = dao.readEntity(refId);
+
+		return (Resource) toResource(id, false);
+	}
+
+	@Override
+	public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
+		return null;
+	}
+
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
-	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
+	public Bundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
 		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
 	}
 }

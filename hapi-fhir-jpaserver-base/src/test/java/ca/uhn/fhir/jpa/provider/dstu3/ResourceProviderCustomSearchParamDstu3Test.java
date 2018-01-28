@@ -32,6 +32,8 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProviderDstu3Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
+
 	@Override
 	@After
 	public void after() throws Exception {
@@ -43,6 +45,30 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	@Override
 	public void before() throws Exception {
 		super.before();
+	}
+
+	@Override
+	@Before
+	public void beforeResetConfig() {
+		super.beforeResetConfig();
+
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegsitry.forceRefresh();
+	}
+
+	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<>();
+		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
+				if (!resType.equals(nextResource.getType())) {
+					continue;
+				}
+				for (CapabilityStatementRestResourceSearchParamComponent nextParam : nextResource.getSearchParam()) {
+					map.put(nextParam.getName(), nextParam);
+				}
+			}
+		}
+		return map;
 	}
 
 	@Test
@@ -57,111 +83,8 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			ourClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid: null", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testIncludeExtensionReferenceAsRecurse() throws Exception, IOException {
-		SearchParameter attendingSp = new SearchParameter();
-		attendingSp.addBase("Patient");
-		attendingSp.setCode("attending");
-		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		attendingSp.setTitle("Attending");
-		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
-		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		attendingSp.getTarget().add(new CodeType("Practitioner"));
-		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Practitioner p1 = new Practitioner();
-		p1.addName().setFamily("P1");
-		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
-
-		Patient p2 = new Patient();
-		p2.addName().setFamily("P2");
-		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
-
-		Appointment app = new Appointment();
-		app.addParticipant().getActor().setReference(p2id.getValue());
-		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-		
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-
-		HttpGet get = new HttpGet(ourServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/fhir/context/Practitioner/"));
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-	}
-
-	
-	@Test
-	public void testSearchForExtension() {
-		SearchParameter eyeColourSp = new SearchParameter();
-		eyeColourSp.addBase("Patient");
-		eyeColourSp.setCode("eyecolour");
-		eyeColourSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		eyeColourSp.setTitle("Eye Colour");
-		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
-		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
-
-		ourClient
-				.create()
-				.resource(eyeColourSp)
-				.execute();
-
-		// mySearchParamRegsitry.forceRefresh();
-
-		Patient p1 = new Patient();
-		p1.setActive(true);
-		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
-		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
-
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
-
-		Patient p2 = new Patient();
-		p2.setActive(true);
-		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
-
-		Bundle bundle = ourClient
-				.search()
-				.forResource(Patient.class)
-				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
-				.returnBundle(Bundle.class)
-				.execute();
-
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-
-		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
-		assertThat(foundResources, contains(p1id.getValue()));
-
-	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
-
-	@Override
-	@Before
-	public void beforeResetConfig() {
-		super.beforeResetConfig();
-
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
-		mySearchParamRegsitry.forceRefresh();
 	}
 
 	@Test
@@ -288,62 +211,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	}
 
-	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<String, CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent>();
-		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
-			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
-				if (!resType.equals(nextResource.getType())) {
-					continue;
-				}
-				for (CapabilityStatementRestResourceSearchParamComponent nextParam : nextResource.getSearchParam()) {
-					map.put(nextParam.getName(), nextParam);
-				}
-			}
-		}
-		return map;
-	}
-
-	@SuppressWarnings("unused")
-	@Test
-	public void testSearchWithCustomParam() {
-
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Patient pat = new Patient();
-		pat.setGender(AdministrativeGender.MALE);
-		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient pat2 = new Patient();
-		pat2.setGender(AdministrativeGender.FEMALE);
-		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		Bundle result;
-
-		result = ourClient
-				.search()
-				.forResource(Patient.class)
-				.where(new TokenClientParam("foo").exactly().code("male"))
-				.returnBundle(Bundle.class)
-				.execute();
-
-		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
-
-	}
-
 	@Test
 	public void testCreatingParamMarksCorrectResourcesForReindexing() {
 		Patient pat = new Patient();
@@ -373,6 +240,97 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		assertEquals(null, res.getIndexStatus());
 		res = myResourceTableDao.findOne(obsId.getIdPartAsLong());
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+
+	}
+
+	@Test
+	public void testIncludeExtensionReferenceAsRecurse() throws Exception {
+		SearchParameter attendingSp = new SearchParameter();
+		attendingSp.addBase("Patient");
+		attendingSp.setCode("attending");
+		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		attendingSp.setTitle("Attending");
+		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
+		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		attendingSp.getTarget().add(new CodeType("Practitioner"));
+		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		HttpGet get = new HttpGet(ourServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/fhir/context/Practitioner/"));
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+	}
+
+	@Test
+	public void testSearchForExtension() {
+		SearchParameter eyeColourSp = new SearchParameter();
+		eyeColourSp.addBase("Patient");
+		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		eyeColourSp.setTitle("Eye Colour");
+		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
+		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+
+		ourClient
+				.create()
+				.resource(eyeColourSp)
+				.execute();
+
+		// mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Bundle bundle = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
+		assertThat(foundResources, contains(p1id.getValue()));
 
 	}
 
@@ -417,6 +375,47 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(obsId1.getValue()));
+
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithCustomParam() {
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient pat = new Patient();
+		pat.setGender(AdministrativeGender.MALE);
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pat2 = new Patient();
+		pat2.setGender(AdministrativeGender.FEMALE);
+		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		Bundle result;
+
+		result = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(new TokenClientParam("foo").exactly().code("male"))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		foundResources = toUnqualifiedVersionlessIdValues(result);
+		assertThat(foundResources, contains(patId.getValue()));
 
 	}
 

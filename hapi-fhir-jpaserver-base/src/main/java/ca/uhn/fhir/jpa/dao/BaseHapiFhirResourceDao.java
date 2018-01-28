@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,18 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
@@ -71,6 +76,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
@@ -80,7 +86,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	protected DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
@@ -88,7 +94,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
-
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -149,6 +156,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		if (myDaoConfig.getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
+			theResource.setId(UUID.randomUUID().toString());
+		}
+
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, new Date(), theRequestDetails);
 	}
 
@@ -182,11 +193,40 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
 
+		// Don't delete again if it's already deleted
+		if (entity.getDeleted() != null) {
+			DaoMethodOutcome outcome = new DaoMethodOutcome();
+			outcome.setEntity(entity);
+
+			IIdType id = getContext().getVersion().newIdType();
+			id.setValue(entity.getIdDt().getValue());
+			outcome.setId(id);
+
+			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, 0);
+			String severity = "information";
+			String code = "informational";
+			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+			outcome.setOperationOutcome(oo);
+
+			return outcome;
+		}
+
 		StopWatch w = new StopWatch();
 
 		T resourceToDelete = toResource(myResourceType, entity, false);
 
-		validateOkToDelete(theDeleteConflicts, entity);
+		// Notify IServerOperationInterceptors about pre-action call
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreDelete(resourceToDelete);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreDelete(theRequestDetails, resourceToDelete);
+			}
+		}
+
+		validateOkToDelete(theDeleteConflicts, entity, false);
 
 		preDelete(resourceToDelete, entity);
 
@@ -257,7 +297,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, false);
-			validateOkToDelete(deleteConflicts, entity);
+
+			// Notify IServerOperationInterceptors about pre-action call
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourcePreDelete(resourceToDelete);
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourcePreDelete(theRequestDetails, resourceToDelete);
+				}
+			}
+
+			validateOkToDelete(deleteConflicts, entity, false);
 
 			// Notify interceptors
 			IdDt idToDelete = entity.getIdDt();
@@ -269,7 +320,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Perform delete
 			Date updateTime = new Date();
 			updateEntity(null, entity, updateTime, updateTime);
-	        resourceToDelete.setId(entity.getIdDt());
+			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
 			if (theRequestDetails != null) {
@@ -368,12 +419,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 		}
 
+		// Notify JPA interceptors
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreCreate(theResource);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreCreate(theRequestDetails, theResource);
+			}
+		}
+
 		// Perform actual DB update
 		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
 		theResource.setId(entity.getIdDt());
 
-		
-		/* 
+
+		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
@@ -548,10 +609,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
 			return false;
 		}
-		if (theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider) {
-			return true;
+		return theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider;
+	}
+
+	protected void markResourcesMatchingExpressionAsNeedingReindexing(String theExpression) {
+		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
+			if (isNotBlank(theExpression)) {
+				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
+				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
+
+				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+				int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
+					@Override
+					public Integer doInTransaction(TransactionStatus theStatus) {
+						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+					}
+				});
+
+				ourLog.info("Marked {} resources for reindexing", updatedCount);
+			}
 		}
-		return false;
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Override
@@ -786,9 +865,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId) {
-		boolean checkForForcedId = true;
-
-		BaseHasResource entity = readEntity(theId, checkForForcedId);
+		BaseHasResource entity = readEntity(theId, true);
 
 		return entity;
 	}
@@ -1018,7 +1095,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theResource instanceof IResource) {
 				ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
 			} else {
-				IBaseMetaType meta = ((IAnyResource) theResource).getMeta();
+				IBaseMetaType meta = theResource.getMeta();
 				meta.setLastUpdated(theEntity.getUpdatedDate());
 			}
 		}
@@ -1153,16 +1230,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBaseResource oldResource = toResource(entity, false);
 
+		// Notify IServerOperationInterceptors about pre-action call
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(oldResource, theResource);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, oldResource, theResource);
+			}
+		}
+
 		// Perform update
-		StopWatch sw = new StopWatch();
 		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
-		/* 
+		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
 		 */
-		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation()) {
+		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation() && !ourDisableIncrementOnUpdateForUnitTest) {
 			if (resourceId.hasVersionIdPart() == false) {
 				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
@@ -1193,7 +1279,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.info(msg);
 		return outcome;
 	}
-
 
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
@@ -1238,7 +1323,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	protected void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity) {
+	protected void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(1);
@@ -1247,7 +1332,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
-		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false) {
+		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false && !theForValidate) {
 			ourLog.info("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
 			myResourceLinkDao.delete(resultList);
 			return;
@@ -1269,6 +1354,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
 			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
+	}
+
+	@VisibleForTesting
+	public static void setDisableIncrementOnUpdateForUnitTest(boolean theDisableIncrementOnUpdateForUnitTest) {
+		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
 	}
 
 }

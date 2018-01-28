@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
+ * Describes the event of a patient being administered a vaccine or a record of an immunization as reported by a patient, a clinician or another party.
  */
 @ResourceDef(name="Immunization", profile="http://hl7.org/fhir/Profile/Immunization")
 public class Immunization extends DomainResource {
@@ -58,6 +58,10 @@ public class Immunization extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
+         * null
+         */
+        NOTDONE, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -68,6 +72,8 @@ public class Immunization extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -77,13 +83,15 @@ public class Immunization extends DomainResource {
           switch (this) {
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
+            case NOTDONE: return "not-done";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case COMPLETED: return "http://hl7.org/fhir/medication-admin-status";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/medication-admin-status";
+            case COMPLETED: return "http://hl7.org/fhir/event-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/event-status";
+            case NOTDONE: return "http://hl7.org/fhir/event-status";
             default: return "?";
           }
         }
@@ -91,6 +99,7 @@ public class Immunization extends DomainResource {
           switch (this) {
             case COMPLETED: return "";
             case ENTEREDINERROR: return "";
+            case NOTDONE: return "";
             default: return "?";
           }
         }
@@ -98,6 +107,7 @@ public class Immunization extends DomainResource {
           switch (this) {
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
+            case NOTDONE: return "not-done";
             default: return "?";
           }
         }
@@ -112,6 +122,8 @@ public class Immunization extends DomainResource {
           return ImmunizationStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ImmunizationStatus.ENTEREDINERROR;
+        if ("not-done".equals(codeString))
+          return ImmunizationStatus.NOTDONE;
         throw new IllegalArgumentException("Unknown ImmunizationStatus code '"+codeString+"'");
         }
         public Enumeration<ImmunizationStatus> fromType(Base code) throws FHIRException {
@@ -126,6 +138,8 @@ public class Immunization extends DomainResource {
           return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.ENTEREDINERROR);
+        if ("not-done".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.NOTDONE);
         throw new FHIRException("Unknown ImmunizationStatus code '"+codeString+"'");
         }
     public String toCode(ImmunizationStatus code) {
@@ -133,6 +147,8 @@ public class Immunization extends DomainResource {
         return "completed";
       if (code == ImmunizationStatus.ENTEREDINERROR)
         return "entered-in-error";
+      if (code == ImmunizationStatus.NOTDONE)
+        return "not-done";
       return "?";
       }
     public String toSystem(ImmunizationStatus code) {
@@ -151,14 +167,14 @@ public class Immunization extends DomainResource {
         protected CodeableConcept role;
 
         /**
-         * The device, practitioner, etc. who performed the action.
+         * The practitioner who performed the action.
          */
         @Child(name = "actor", type = {Practitioner.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Individual who was performing", formalDefinition="The device, practitioner, etc. who performed the action." )
+        @Description(shortDefinition="Individual who was performing", formalDefinition="The practitioner who performed the action." )
         protected Reference actor;
 
         /**
-         * The actual object that is the target of the reference (The device, practitioner, etc. who performed the action.)
+         * The actual object that is the target of the reference (The practitioner who performed the action.)
          */
         protected Practitioner actorTarget;
 
@@ -204,7 +220,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} (The practitioner who performed the action.)
          */
         public Reference getActor() { 
           if (this.actor == null)
@@ -220,7 +236,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @param value {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} (The practitioner who performed the action.)
          */
         public ImmunizationPractitionerComponent setActor(Reference value) { 
           this.actor = value;
@@ -228,7 +244,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who performed the action.)
          */
         public Practitioner getActorTarget() { 
           if (this.actorTarget == null)
@@ -240,7 +256,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who performed the action.)
          */
         public ImmunizationPractitionerComponent setActorTarget(Practitioner value) { 
           this.actorTarget = value;
@@ -250,14 +266,14 @@ public class Immunization extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("role", "CodeableConcept", "Describes the type of performance (e.g. ordering provider, administering provider, etc.).", 0, 1, role));
-          children.add(new Property("actor", "Reference(Practitioner)", "The device, practitioner, etc. who performed the action.", 0, 1, actor));
+          children.add(new Property("actor", "Reference(Practitioner)", "The practitioner who performed the action.", 0, 1, actor));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Describes the type of performance (e.g. ordering provider, administering provider, etc.).", 0, 1, role);
-          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner)", "The device, practitioner, etc. who performed the action.", 0, 1, actor);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner)", "The practitioner who performed the action.", 0, 1, actor);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -341,22 +357,22 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationPractitionerComponent))
+        if (!(other_ instanceof ImmunizationPractitionerComponent))
           return false;
-        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other;
+        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationPractitionerComponent))
+        if (!(other_ instanceof ImmunizationPractitionerComponent))
           return false;
-        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other;
+        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other_;
         return true;
       }
 
@@ -372,457 +388,255 @@ public class Immunization extends DomainResource {
   }
 
     @Block()
-    public static class ImmunizationExplanationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ImmunizationEducationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Reasons why a vaccine was administered.
+         * Identifier of the material presented ot the patient.
          */
-        @Child(name = "reason", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Why immunization occurred", formalDefinition="Reasons why a vaccine was administered." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-reason")
-        protected List<CodeableConcept> reason;
+        @Child(name = "documentType", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Educational material document identifier", formalDefinition="Identifier of the material presented ot the patient." )
+        protected StringType documentType;
 
         /**
-         * Reason why a vaccine was not administered.
+         * Reference pointer to the educational material given to the patient if the information was on line.
          */
-        @Child(name = "reasonNotGiven", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Why immunization did not occur", formalDefinition="Reason why a vaccine was not administered." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/no-immunization-reason")
-        protected List<CodeableConcept> reasonNotGiven;
+        @Child(name = "reference", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Educational material reference pointer", formalDefinition="Reference pointer to the educational material given to the patient if the information was on line." )
+        protected UriType reference;
 
-        private static final long serialVersionUID = -539821866L;
+        /**
+         * Date the educational material was published.
+         */
+        @Child(name = "publicationDate", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Educational material publication date", formalDefinition="Date the educational material was published." )
+        protected DateTimeType publicationDate;
+
+        /**
+         * Date the educational material was given to the patient.
+         */
+        @Child(name = "presentationDate", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Educational material presentation date", formalDefinition="Date the educational material was given to the patient." )
+        protected DateTimeType presentationDate;
+
+        private static final long serialVersionUID = -1277654827L;
 
     /**
      * Constructor
      */
-      public ImmunizationExplanationComponent() {
+      public ImmunizationEducationComponent() {
         super();
       }
 
         /**
-         * @return {@link #reason} (Reasons why a vaccine was administered.)
+         * @return {@link #documentType} (Identifier of the material presented ot the patient.). This is the underlying object with id, value and extensions. The accessor "getDocumentType" gives direct access to the value
          */
-        public List<CodeableConcept> getReason() { 
-          if (this.reason == null)
-            this.reason = new ArrayList<CodeableConcept>();
-          return this.reason;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ImmunizationExplanationComponent setReason(List<CodeableConcept> theReason) { 
-          this.reason = theReason;
-          return this;
-        }
-
-        public boolean hasReason() { 
-          if (this.reason == null)
-            return false;
-          for (CodeableConcept item : this.reason)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeableConcept addReason() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.reason == null)
-            this.reason = new ArrayList<CodeableConcept>();
-          this.reason.add(t);
-          return t;
-        }
-
-        public ImmunizationExplanationComponent addReason(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.reason == null)
-            this.reason = new ArrayList<CodeableConcept>();
-          this.reason.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
-         */
-        public CodeableConcept getReasonFirstRep() { 
-          if (getReason().isEmpty()) {
-            addReason();
-          }
-          return getReason().get(0);
-        }
-
-        /**
-         * @return {@link #reasonNotGiven} (Reason why a vaccine was not administered.)
-         */
-        public List<CodeableConcept> getReasonNotGiven() { 
-          if (this.reasonNotGiven == null)
-            this.reasonNotGiven = new ArrayList<CodeableConcept>();
-          return this.reasonNotGiven;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ImmunizationExplanationComponent setReasonNotGiven(List<CodeableConcept> theReasonNotGiven) { 
-          this.reasonNotGiven = theReasonNotGiven;
-          return this;
-        }
-
-        public boolean hasReasonNotGiven() { 
-          if (this.reasonNotGiven == null)
-            return false;
-          for (CodeableConcept item : this.reasonNotGiven)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeableConcept addReasonNotGiven() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.reasonNotGiven == null)
-            this.reasonNotGiven = new ArrayList<CodeableConcept>();
-          this.reasonNotGiven.add(t);
-          return t;
-        }
-
-        public ImmunizationExplanationComponent addReasonNotGiven(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.reasonNotGiven == null)
-            this.reasonNotGiven = new ArrayList<CodeableConcept>();
-          this.reasonNotGiven.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #reasonNotGiven}, creating it if it does not already exist
-         */
-        public CodeableConcept getReasonNotGivenFirstRep() { 
-          if (getReasonNotGiven().isEmpty()) {
-            addReasonNotGiven();
-          }
-          return getReasonNotGiven().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("reason", "CodeableConcept", "Reasons why a vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, reason));
-          children.add(new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Reasons why a vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, reason);
-          case 2101123790: /*reasonNotGiven*/  return new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
-        case 2101123790: /*reasonNotGiven*/ return this.reasonNotGiven == null ? new Base[0] : this.reasonNotGiven.toArray(new Base[this.reasonNotGiven.size()]); // CodeableConcept
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -934964668: // reason
-          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
-        case 2101123790: // reasonNotGiven
-          this.getReasonNotGiven().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("reason")) {
-          this.getReason().add(castToCodeableConcept(value));
-        } else if (name.equals("reasonNotGiven")) {
-          this.getReasonNotGiven().add(castToCodeableConcept(value));
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -934964668:  return addReason(); 
-        case 2101123790:  return addReasonNotGiven(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
-        case 2101123790: /*reasonNotGiven*/ return new String[] {"CodeableConcept"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("reason")) {
-          return addReason();
-        }
-        else if (name.equals("reasonNotGiven")) {
-          return addReasonNotGiven();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ImmunizationExplanationComponent copy() {
-        ImmunizationExplanationComponent dst = new ImmunizationExplanationComponent();
-        copyValues(dst);
-        if (reason != null) {
-          dst.reason = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : reason)
-            dst.reason.add(i.copy());
-        };
-        if (reasonNotGiven != null) {
-          dst.reasonNotGiven = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : reasonNotGiven)
-            dst.reasonNotGiven.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ImmunizationExplanationComponent))
-          return false;
-        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other;
-        return compareDeep(reason, o.reason, true) && compareDeep(reasonNotGiven, o.reasonNotGiven, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ImmunizationExplanationComponent))
-          return false;
-        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(reason, reasonNotGiven);
-      }
-
-  public String fhirType() {
-    return "Immunization.explanation";
-
-  }
-
-  }
-
-    @Block()
-    public static class ImmunizationReactionComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Date of reaction to the immunization.
-         */
-        @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="When reaction started", formalDefinition="Date of reaction to the immunization." )
-        protected DateTimeType date;
-
-        /**
-         * Details of the reaction.
-         */
-        @Child(name = "detail", type = {Observation.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Additional information on reaction", formalDefinition="Details of the reaction." )
-        protected Reference detail;
-
-        /**
-         * The actual object that is the target of the reference (Details of the reaction.)
-         */
-        protected Observation detailTarget;
-
-        /**
-         * Self-reported indicator.
-         */
-        @Child(name = "reported", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Indicates self-reported reaction", formalDefinition="Self-reported indicator." )
-        protected BooleanType reported;
-
-        private static final long serialVersionUID = -1297668556L;
-
-    /**
-     * Constructor
-     */
-      public ImmunizationReactionComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #date} (Date of reaction to the immunization.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-         */
-        public DateTimeType getDateElement() { 
-          if (this.date == null)
+        public StringType getDocumentTypeElement() { 
+          if (this.documentType == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationReactionComponent.date");
+              throw new Error("Attempt to auto-create ImmunizationEducationComponent.documentType");
             else if (Configuration.doAutoCreate())
-              this.date = new DateTimeType(); // bb
-          return this.date;
+              this.documentType = new StringType(); // bb
+          return this.documentType;
         }
 
-        public boolean hasDateElement() { 
-          return this.date != null && !this.date.isEmpty();
+        public boolean hasDocumentTypeElement() { 
+          return this.documentType != null && !this.documentType.isEmpty();
         }
 
-        public boolean hasDate() { 
-          return this.date != null && !this.date.isEmpty();
+        public boolean hasDocumentType() { 
+          return this.documentType != null && !this.documentType.isEmpty();
         }
 
         /**
-         * @param value {@link #date} (Date of reaction to the immunization.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @param value {@link #documentType} (Identifier of the material presented ot the patient.). This is the underlying object with id, value and extensions. The accessor "getDocumentType" gives direct access to the value
          */
-        public ImmunizationReactionComponent setDateElement(DateTimeType value) { 
-          this.date = value;
+        public ImmunizationEducationComponent setDocumentTypeElement(StringType value) { 
+          this.documentType = value;
           return this;
         }
 
         /**
-         * @return Date of reaction to the immunization.
+         * @return Identifier of the material presented ot the patient.
          */
-        public Date getDate() { 
-          return this.date == null ? null : this.date.getValue();
+        public String getDocumentType() { 
+          return this.documentType == null ? null : this.documentType.getValue();
         }
 
         /**
-         * @param value Date of reaction to the immunization.
+         * @param value Identifier of the material presented ot the patient.
          */
-        public ImmunizationReactionComponent setDate(Date value) { 
+        public ImmunizationEducationComponent setDocumentType(String value) { 
+          if (Utilities.noString(value))
+            this.documentType = null;
+          else {
+            if (this.documentType == null)
+              this.documentType = new StringType();
+            this.documentType.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #reference} (Reference pointer to the educational material given to the patient if the information was on line.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
+         */
+        public UriType getReferenceElement() { 
+          if (this.reference == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImmunizationEducationComponent.reference");
+            else if (Configuration.doAutoCreate())
+              this.reference = new UriType(); // bb
+          return this.reference;
+        }
+
+        public boolean hasReferenceElement() { 
+          return this.reference != null && !this.reference.isEmpty();
+        }
+
+        public boolean hasReference() { 
+          return this.reference != null && !this.reference.isEmpty();
+        }
+
+        /**
+         * @param value {@link #reference} (Reference pointer to the educational material given to the patient if the information was on line.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
+         */
+        public ImmunizationEducationComponent setReferenceElement(UriType value) { 
+          this.reference = value;
+          return this;
+        }
+
+        /**
+         * @return Reference pointer to the educational material given to the patient if the information was on line.
+         */
+        public String getReference() { 
+          return this.reference == null ? null : this.reference.getValue();
+        }
+
+        /**
+         * @param value Reference pointer to the educational material given to the patient if the information was on line.
+         */
+        public ImmunizationEducationComponent setReference(String value) { 
+          if (Utilities.noString(value))
+            this.reference = null;
+          else {
+            if (this.reference == null)
+              this.reference = new UriType();
+            this.reference.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #publicationDate} (Date the educational material was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+         */
+        public DateTimeType getPublicationDateElement() { 
+          if (this.publicationDate == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImmunizationEducationComponent.publicationDate");
+            else if (Configuration.doAutoCreate())
+              this.publicationDate = new DateTimeType(); // bb
+          return this.publicationDate;
+        }
+
+        public boolean hasPublicationDateElement() { 
+          return this.publicationDate != null && !this.publicationDate.isEmpty();
+        }
+
+        public boolean hasPublicationDate() { 
+          return this.publicationDate != null && !this.publicationDate.isEmpty();
+        }
+
+        /**
+         * @param value {@link #publicationDate} (Date the educational material was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+         */
+        public ImmunizationEducationComponent setPublicationDateElement(DateTimeType value) { 
+          this.publicationDate = value;
+          return this;
+        }
+
+        /**
+         * @return Date the educational material was published.
+         */
+        public Date getPublicationDate() { 
+          return this.publicationDate == null ? null : this.publicationDate.getValue();
+        }
+
+        /**
+         * @param value Date the educational material was published.
+         */
+        public ImmunizationEducationComponent setPublicationDate(Date value) { 
           if (value == null)
-            this.date = null;
+            this.publicationDate = null;
           else {
-            if (this.date == null)
-              this.date = new DateTimeType();
-            this.date.setValue(value);
+            if (this.publicationDate == null)
+              this.publicationDate = new DateTimeType();
+            this.publicationDate.setValue(value);
           }
           return this;
         }
 
         /**
-         * @return {@link #detail} (Details of the reaction.)
+         * @return {@link #presentationDate} (Date the educational material was given to the patient.). This is the underlying object with id, value and extensions. The accessor "getPresentationDate" gives direct access to the value
          */
-        public Reference getDetail() { 
-          if (this.detail == null)
+        public DateTimeType getPresentationDateElement() { 
+          if (this.presentationDate == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationReactionComponent.detail");
+              throw new Error("Attempt to auto-create ImmunizationEducationComponent.presentationDate");
             else if (Configuration.doAutoCreate())
-              this.detail = new Reference(); // cc
-          return this.detail;
+              this.presentationDate = new DateTimeType(); // bb
+          return this.presentationDate;
         }
 
-        public boolean hasDetail() { 
-          return this.detail != null && !this.detail.isEmpty();
+        public boolean hasPresentationDateElement() { 
+          return this.presentationDate != null && !this.presentationDate.isEmpty();
+        }
+
+        public boolean hasPresentationDate() { 
+          return this.presentationDate != null && !this.presentationDate.isEmpty();
         }
 
         /**
-         * @param value {@link #detail} (Details of the reaction.)
+         * @param value {@link #presentationDate} (Date the educational material was given to the patient.). This is the underlying object with id, value and extensions. The accessor "getPresentationDate" gives direct access to the value
          */
-        public ImmunizationReactionComponent setDetail(Reference value) { 
-          this.detail = value;
+        public ImmunizationEducationComponent setPresentationDateElement(DateTimeType value) { 
+          this.presentationDate = value;
           return this;
         }
 
         /**
-         * @return {@link #detail} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Details of the reaction.)
+         * @return Date the educational material was given to the patient.
          */
-        public Observation getDetailTarget() { 
-          if (this.detailTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationReactionComponent.detail");
-            else if (Configuration.doAutoCreate())
-              this.detailTarget = new Observation(); // aa
-          return this.detailTarget;
+        public Date getPresentationDate() { 
+          return this.presentationDate == null ? null : this.presentationDate.getValue();
         }
 
         /**
-         * @param value {@link #detail} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Details of the reaction.)
+         * @param value Date the educational material was given to the patient.
          */
-        public ImmunizationReactionComponent setDetailTarget(Observation value) { 
-          this.detailTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #reported} (Self-reported indicator.). This is the underlying object with id, value and extensions. The accessor "getReported" gives direct access to the value
-         */
-        public BooleanType getReportedElement() { 
-          if (this.reported == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationReactionComponent.reported");
-            else if (Configuration.doAutoCreate())
-              this.reported = new BooleanType(); // bb
-          return this.reported;
-        }
-
-        public boolean hasReportedElement() { 
-          return this.reported != null && !this.reported.isEmpty();
-        }
-
-        public boolean hasReported() { 
-          return this.reported != null && !this.reported.isEmpty();
-        }
-
-        /**
-         * @param value {@link #reported} (Self-reported indicator.). This is the underlying object with id, value and extensions. The accessor "getReported" gives direct access to the value
-         */
-        public ImmunizationReactionComponent setReportedElement(BooleanType value) { 
-          this.reported = value;
-          return this;
-        }
-
-        /**
-         * @return Self-reported indicator.
-         */
-        public boolean getReported() { 
-          return this.reported == null || this.reported.isEmpty() ? false : this.reported.getValue();
-        }
-
-        /**
-         * @param value Self-reported indicator.
-         */
-        public ImmunizationReactionComponent setReported(boolean value) { 
-            if (this.reported == null)
-              this.reported = new BooleanType();
-            this.reported.setValue(value);
+        public ImmunizationEducationComponent setPresentationDate(Date value) { 
+          if (value == null)
+            this.presentationDate = null;
+          else {
+            if (this.presentationDate == null)
+              this.presentationDate = new DateTimeType();
+            this.presentationDate.setValue(value);
+          }
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("date", "dateTime", "Date of reaction to the immunization.", 0, 1, date));
-          children.add(new Property("detail", "Reference(Observation)", "Details of the reaction.", 0, 1, detail));
-          children.add(new Property("reported", "boolean", "Self-reported indicator.", 0, 1, reported));
+          children.add(new Property("documentType", "string", "Identifier of the material presented ot the patient.", 0, 1, documentType));
+          children.add(new Property("reference", "uri", "Reference pointer to the educational material given to the patient if the information was on line.", 0, 1, reference));
+          children.add(new Property("publicationDate", "dateTime", "Date the educational material was published.", 0, 1, publicationDate));
+          children.add(new Property("presentationDate", "dateTime", "Date the educational material was given to the patient.", 0, 1, presentationDate));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3076014: /*date*/  return new Property("date", "dateTime", "Date of reaction to the immunization.", 0, 1, date);
-          case -1335224239: /*detail*/  return new Property("detail", "Reference(Observation)", "Details of the reaction.", 0, 1, detail);
-          case -427039533: /*reported*/  return new Property("reported", "boolean", "Self-reported indicator.", 0, 1, reported);
+          case -1473196299: /*documentType*/  return new Property("documentType", "string", "Identifier of the material presented ot the patient.", 0, 1, documentType);
+          case -925155509: /*reference*/  return new Property("reference", "uri", "Reference pointer to the educational material given to the patient if the information was on line.", 0, 1, reference);
+          case 1470566394: /*publicationDate*/  return new Property("publicationDate", "dateTime", "Date the educational material was published.", 0, 1, publicationDate);
+          case 1602373096: /*presentationDate*/  return new Property("presentationDate", "dateTime", "Date the educational material was given to the patient.", 0, 1, presentationDate);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -831,9 +645,10 @@ public class Immunization extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : new Base[] {this.detail}; // Reference
-        case -427039533: /*reported*/ return this.reported == null ? new Base[0] : new Base[] {this.reported}; // BooleanType
+        case -1473196299: /*documentType*/ return this.documentType == null ? new Base[0] : new Base[] {this.documentType}; // StringType
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // UriType
+        case 1470566394: /*publicationDate*/ return this.publicationDate == null ? new Base[0] : new Base[] {this.publicationDate}; // DateTimeType
+        case 1602373096: /*presentationDate*/ return this.presentationDate == null ? new Base[0] : new Base[] {this.presentationDate}; // DateTimeType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -842,14 +657,17 @@ public class Immunization extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
+        case -1473196299: // documentType
+          this.documentType = castToString(value); // StringType
           return value;
-        case -1335224239: // detail
-          this.detail = castToReference(value); // Reference
+        case -925155509: // reference
+          this.reference = castToUri(value); // UriType
           return value;
-        case -427039533: // reported
-          this.reported = castToBoolean(value); // BooleanType
+        case 1470566394: // publicationDate
+          this.publicationDate = castToDateTime(value); // DateTimeType
+          return value;
+        case 1602373096: // presentationDate
+          this.presentationDate = castToDateTime(value); // DateTimeType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -858,12 +676,14 @@ public class Immunization extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("date")) {
-          this.date = castToDateTime(value); // DateTimeType
-        } else if (name.equals("detail")) {
-          this.detail = castToReference(value); // Reference
-        } else if (name.equals("reported")) {
-          this.reported = castToBoolean(value); // BooleanType
+        if (name.equals("documentType")) {
+          this.documentType = castToString(value); // StringType
+        } else if (name.equals("reference")) {
+          this.reference = castToUri(value); // UriType
+        } else if (name.equals("publicationDate")) {
+          this.publicationDate = castToDateTime(value); // DateTimeType
+        } else if (name.equals("presentationDate")) {
+          this.presentationDate = castToDateTime(value); // DateTimeType
         } else
           return super.setProperty(name, value);
         return value;
@@ -872,9 +692,10 @@ public class Immunization extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3076014:  return getDateElement();
-        case -1335224239:  return getDetail(); 
-        case -427039533:  return getReportedElement();
+        case -1473196299:  return getDocumentTypeElement();
+        case -925155509:  return getReferenceElement();
+        case 1470566394:  return getPublicationDateElement();
+        case 1602373096:  return getPresentationDateElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -883,9 +704,10 @@ public class Immunization extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3076014: /*date*/ return new String[] {"dateTime"};
-        case -1335224239: /*detail*/ return new String[] {"Reference"};
-        case -427039533: /*reported*/ return new String[] {"boolean"};
+        case -1473196299: /*documentType*/ return new String[] {"string"};
+        case -925155509: /*reference*/ return new String[] {"uri"};
+        case 1470566394: /*publicationDate*/ return new String[] {"dateTime"};
+        case 1602373096: /*presentationDate*/ return new String[] {"dateTime"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -893,690 +715,63 @@ public class Immunization extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.date");
+        if (name.equals("documentType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.documentType");
         }
-        else if (name.equals("detail")) {
-          this.detail = new Reference();
-          return this.detail;
+        else if (name.equals("reference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.reference");
         }
-        else if (name.equals("reported")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.reported");
+        else if (name.equals("publicationDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.publicationDate");
+        }
+        else if (name.equals("presentationDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.presentationDate");
         }
         else
           return super.addChild(name);
       }
 
-      public ImmunizationReactionComponent copy() {
-        ImmunizationReactionComponent dst = new ImmunizationReactionComponent();
+      public ImmunizationEducationComponent copy() {
+        ImmunizationEducationComponent dst = new ImmunizationEducationComponent();
         copyValues(dst);
-        dst.date = date == null ? null : date.copy();
-        dst.detail = detail == null ? null : detail.copy();
-        dst.reported = reported == null ? null : reported.copy();
+        dst.documentType = documentType == null ? null : documentType.copy();
+        dst.reference = reference == null ? null : reference.copy();
+        dst.publicationDate = publicationDate == null ? null : publicationDate.copy();
+        dst.presentationDate = presentationDate == null ? null : presentationDate.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationReactionComponent))
+        if (!(other_ instanceof ImmunizationEducationComponent))
           return false;
-        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other;
-        return compareDeep(date, o.date, true) && compareDeep(detail, o.detail, true) && compareDeep(reported, o.reported, true)
+        ImmunizationEducationComponent o = (ImmunizationEducationComponent) other_;
+        return compareDeep(documentType, o.documentType, true) && compareDeep(reference, o.reference, true)
+           && compareDeep(publicationDate, o.publicationDate, true) && compareDeep(presentationDate, o.presentationDate, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationReactionComponent))
+        if (!(other_ instanceof ImmunizationEducationComponent))
           return false;
-        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other;
-        return compareValues(date, o.date, true) && compareValues(reported, o.reported, true);
+        ImmunizationEducationComponent o = (ImmunizationEducationComponent) other_;
+        return compareValues(documentType, o.documentType, true) && compareValues(reference, o.reference, true)
+           && compareValues(publicationDate, o.publicationDate, true) && compareValues(presentationDate, o.presentationDate, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(date, detail, reported);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(documentType, reference, publicationDate
+          , presentationDate);
       }
 
   public String fhirType() {
-    return "Immunization.reaction";
-
-  }
-
-  }
-
-    @Block()
-    public static class ImmunizationVaccinationProtocolComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Nominal position in a series.
-         */
-        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Dose number within series", formalDefinition="Nominal position in a series." )
-        protected PositiveIntType doseSequence;
-
-        /**
-         * Contains the description about the protocol under which the vaccine was administered.
-         */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Details of vaccine protocol", formalDefinition="Contains the description about the protocol under which the vaccine was administered." )
-        protected StringType description;
-
-        /**
-         * Indicates the authority who published the protocol.  E.g. ACIP.
-         */
-        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol.  E.g. ACIP." )
-        protected Reference authority;
-
-        /**
-         * The actual object that is the target of the reference (Indicates the authority who published the protocol.  E.g. ACIP.)
-         */
-        protected Organization authorityTarget;
-
-        /**
-         * One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of vaccine series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
-        protected StringType series;
-
-        /**
-         * The recommended number of doses to achieve immunity.
-         */
-        @Child(name = "seriesDoses", type = {PositiveIntType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Recommended number of doses for immunity", formalDefinition="The recommended number of doses to achieve immunity." )
-        protected PositiveIntType seriesDoses;
-
-        /**
-         * The targeted disease.
-         */
-        @Child(name = "targetDisease", type = {CodeableConcept.class}, order=6, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Disease immunized against", formalDefinition="The targeted disease." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-target")
-        protected List<CodeableConcept> targetDisease;
-
-        /**
-         * Indicates if the immunization event should "count" against  the protocol.
-         */
-        @Child(name = "doseStatus", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Indicates if dose counts towards immunity", formalDefinition="Indicates if the immunization event should \"count\" against  the protocol." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-status")
-        protected CodeableConcept doseStatus;
-
-        /**
-         * Provides an explanation as to why an immunization event should or should not count against the protocol.
-         */
-        @Child(name = "doseStatusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Why dose does (not) count", formalDefinition="Provides an explanation as to why an immunization event should or should not count against the protocol." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-status-reason")
-        protected CodeableConcept doseStatusReason;
-
-        private static final long serialVersionUID = 386814037L;
-
-    /**
-     * Constructor
-     */
-      public ImmunizationVaccinationProtocolComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ImmunizationVaccinationProtocolComponent(CodeableConcept doseStatus) {
-        super();
-        this.doseStatus = doseStatus;
-      }
-
-        /**
-         * @return {@link #doseSequence} (Nominal position in a series.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
-         */
-        public PositiveIntType getDoseSequenceElement() { 
-          if (this.doseSequence == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.doseSequence");
-            else if (Configuration.doAutoCreate())
-              this.doseSequence = new PositiveIntType(); // bb
-          return this.doseSequence;
-        }
-
-        public boolean hasDoseSequenceElement() { 
-          return this.doseSequence != null && !this.doseSequence.isEmpty();
-        }
-
-        public boolean hasDoseSequence() { 
-          return this.doseSequence != null && !this.doseSequence.isEmpty();
-        }
-
-        /**
-         * @param value {@link #doseSequence} (Nominal position in a series.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
-         */
-        public ImmunizationVaccinationProtocolComponent setDoseSequenceElement(PositiveIntType value) { 
-          this.doseSequence = value;
-          return this;
-        }
-
-        /**
-         * @return Nominal position in a series.
-         */
-        public int getDoseSequence() { 
-          return this.doseSequence == null || this.doseSequence.isEmpty() ? 0 : this.doseSequence.getValue();
-        }
-
-        /**
-         * @param value Nominal position in a series.
-         */
-        public ImmunizationVaccinationProtocolComponent setDoseSequence(int value) { 
-            if (this.doseSequence == null)
-              this.doseSequence = new PositiveIntType();
-            this.doseSequence.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public StringType getDescriptionElement() { 
-          if (this.description == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.description");
-            else if (Configuration.doAutoCreate())
-              this.description = new StringType(); // bb
-          return this.description;
-        }
-
-        public boolean hasDescriptionElement() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        public boolean hasDescription() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        /**
-         * @param value {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public ImmunizationVaccinationProtocolComponent setDescriptionElement(StringType value) { 
-          this.description = value;
-          return this;
-        }
-
-        /**
-         * @return Contains the description about the protocol under which the vaccine was administered.
-         */
-        public String getDescription() { 
-          return this.description == null ? null : this.description.getValue();
-        }
-
-        /**
-         * @param value Contains the description about the protocol under which the vaccine was administered.
-         */
-        public ImmunizationVaccinationProtocolComponent setDescription(String value) { 
-          if (Utilities.noString(value))
-            this.description = null;
-          else {
-            if (this.description == null)
-              this.description = new StringType();
-            this.description.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #authority} (Indicates the authority who published the protocol.  E.g. ACIP.)
-         */
-        public Reference getAuthority() { 
-          if (this.authority == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.authority");
-            else if (Configuration.doAutoCreate())
-              this.authority = new Reference(); // cc
-          return this.authority;
-        }
-
-        public boolean hasAuthority() { 
-          return this.authority != null && !this.authority.isEmpty();
-        }
-
-        /**
-         * @param value {@link #authority} (Indicates the authority who published the protocol.  E.g. ACIP.)
-         */
-        public ImmunizationVaccinationProtocolComponent setAuthority(Reference value) { 
-          this.authority = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  E.g. ACIP.)
-         */
-        public Organization getAuthorityTarget() { 
-          if (this.authorityTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.authority");
-            else if (Configuration.doAutoCreate())
-              this.authorityTarget = new Organization(); // aa
-          return this.authorityTarget;
-        }
-
-        /**
-         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  E.g. ACIP.)
-         */
-        public ImmunizationVaccinationProtocolComponent setAuthorityTarget(Organization value) { 
-          this.authorityTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
-         */
-        public StringType getSeriesElement() { 
-          if (this.series == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.series");
-            else if (Configuration.doAutoCreate())
-              this.series = new StringType(); // bb
-          return this.series;
-        }
-
-        public boolean hasSeriesElement() { 
-          return this.series != null && !this.series.isEmpty();
-        }
-
-        public boolean hasSeries() { 
-          return this.series != null && !this.series.isEmpty();
-        }
-
-        /**
-         * @param value {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
-         */
-        public ImmunizationVaccinationProtocolComponent setSeriesElement(StringType value) { 
-          this.series = value;
-          return this;
-        }
-
-        /**
-         * @return One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        public String getSeries() { 
-          return this.series == null ? null : this.series.getValue();
-        }
-
-        /**
-         * @param value One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        public ImmunizationVaccinationProtocolComponent setSeries(String value) { 
-          if (Utilities.noString(value))
-            this.series = null;
-          else {
-            if (this.series == null)
-              this.series = new StringType();
-            this.series.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #seriesDoses} (The recommended number of doses to achieve immunity.). This is the underlying object with id, value and extensions. The accessor "getSeriesDoses" gives direct access to the value
-         */
-        public PositiveIntType getSeriesDosesElement() { 
-          if (this.seriesDoses == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.seriesDoses");
-            else if (Configuration.doAutoCreate())
-              this.seriesDoses = new PositiveIntType(); // bb
-          return this.seriesDoses;
-        }
-
-        public boolean hasSeriesDosesElement() { 
-          return this.seriesDoses != null && !this.seriesDoses.isEmpty();
-        }
-
-        public boolean hasSeriesDoses() { 
-          return this.seriesDoses != null && !this.seriesDoses.isEmpty();
-        }
-
-        /**
-         * @param value {@link #seriesDoses} (The recommended number of doses to achieve immunity.). This is the underlying object with id, value and extensions. The accessor "getSeriesDoses" gives direct access to the value
-         */
-        public ImmunizationVaccinationProtocolComponent setSeriesDosesElement(PositiveIntType value) { 
-          this.seriesDoses = value;
-          return this;
-        }
-
-        /**
-         * @return The recommended number of doses to achieve immunity.
-         */
-        public int getSeriesDoses() { 
-          return this.seriesDoses == null || this.seriesDoses.isEmpty() ? 0 : this.seriesDoses.getValue();
-        }
-
-        /**
-         * @param value The recommended number of doses to achieve immunity.
-         */
-        public ImmunizationVaccinationProtocolComponent setSeriesDoses(int value) { 
-            if (this.seriesDoses == null)
-              this.seriesDoses = new PositiveIntType();
-            this.seriesDoses.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #targetDisease} (The targeted disease.)
-         */
-        public List<CodeableConcept> getTargetDisease() { 
-          if (this.targetDisease == null)
-            this.targetDisease = new ArrayList<CodeableConcept>();
-          return this.targetDisease;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ImmunizationVaccinationProtocolComponent setTargetDisease(List<CodeableConcept> theTargetDisease) { 
-          this.targetDisease = theTargetDisease;
-          return this;
-        }
-
-        public boolean hasTargetDisease() { 
-          if (this.targetDisease == null)
-            return false;
-          for (CodeableConcept item : this.targetDisease)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeableConcept addTargetDisease() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.targetDisease == null)
-            this.targetDisease = new ArrayList<CodeableConcept>();
-          this.targetDisease.add(t);
-          return t;
-        }
-
-        public ImmunizationVaccinationProtocolComponent addTargetDisease(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.targetDisease == null)
-            this.targetDisease = new ArrayList<CodeableConcept>();
-          this.targetDisease.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #targetDisease}, creating it if it does not already exist
-         */
-        public CodeableConcept getTargetDiseaseFirstRep() { 
-          if (getTargetDisease().isEmpty()) {
-            addTargetDisease();
-          }
-          return getTargetDisease().get(0);
-        }
-
-        /**
-         * @return {@link #doseStatus} (Indicates if the immunization event should "count" against  the protocol.)
-         */
-        public CodeableConcept getDoseStatus() { 
-          if (this.doseStatus == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.doseStatus");
-            else if (Configuration.doAutoCreate())
-              this.doseStatus = new CodeableConcept(); // cc
-          return this.doseStatus;
-        }
-
-        public boolean hasDoseStatus() { 
-          return this.doseStatus != null && !this.doseStatus.isEmpty();
-        }
-
-        /**
-         * @param value {@link #doseStatus} (Indicates if the immunization event should "count" against  the protocol.)
-         */
-        public ImmunizationVaccinationProtocolComponent setDoseStatus(CodeableConcept value) { 
-          this.doseStatus = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #doseStatusReason} (Provides an explanation as to why an immunization event should or should not count against the protocol.)
-         */
-        public CodeableConcept getDoseStatusReason() { 
-          if (this.doseStatusReason == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationVaccinationProtocolComponent.doseStatusReason");
-            else if (Configuration.doAutoCreate())
-              this.doseStatusReason = new CodeableConcept(); // cc
-          return this.doseStatusReason;
-        }
-
-        public boolean hasDoseStatusReason() { 
-          return this.doseStatusReason != null && !this.doseStatusReason.isEmpty();
-        }
-
-        /**
-         * @param value {@link #doseStatusReason} (Provides an explanation as to why an immunization event should or should not count against the protocol.)
-         */
-        public ImmunizationVaccinationProtocolComponent setDoseStatusReason(CodeableConcept value) { 
-          this.doseStatusReason = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, 1, doseSequence));
-          children.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description));
-          children.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, 1, authority));
-          children.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series));
-          children.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses));
-          children.add(new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
-          children.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, 1, doseStatus));
-          children.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, 1, doseStatusReason));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 550933246: /*doseSequence*/  return new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, 1, doseSequence);
-          case -1724546052: /*description*/  return new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description);
-          case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, 1, authority);
-          case -905838985: /*series*/  return new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series);
-          case -1936727105: /*seriesDoses*/  return new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses);
-          case -319593813: /*targetDisease*/  return new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease);
-          case -745826705: /*doseStatus*/  return new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, 1, doseStatus);
-          case 662783379: /*doseStatusReason*/  return new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, 1, doseStatusReason);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 550933246: /*doseSequence*/ return this.doseSequence == null ? new Base[0] : new Base[] {this.doseSequence}; // PositiveIntType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : new Base[] {this.authority}; // Reference
-        case -905838985: /*series*/ return this.series == null ? new Base[0] : new Base[] {this.series}; // StringType
-        case -1936727105: /*seriesDoses*/ return this.seriesDoses == null ? new Base[0] : new Base[] {this.seriesDoses}; // PositiveIntType
-        case -319593813: /*targetDisease*/ return this.targetDisease == null ? new Base[0] : this.targetDisease.toArray(new Base[this.targetDisease.size()]); // CodeableConcept
-        case -745826705: /*doseStatus*/ return this.doseStatus == null ? new Base[0] : new Base[] {this.doseStatus}; // CodeableConcept
-        case 662783379: /*doseStatusReason*/ return this.doseStatusReason == null ? new Base[0] : new Base[] {this.doseStatusReason}; // CodeableConcept
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 550933246: // doseSequence
-          this.doseSequence = castToPositiveInt(value); // PositiveIntType
-          return value;
-        case -1724546052: // description
-          this.description = castToString(value); // StringType
-          return value;
-        case 1475610435: // authority
-          this.authority = castToReference(value); // Reference
-          return value;
-        case -905838985: // series
-          this.series = castToString(value); // StringType
-          return value;
-        case -1936727105: // seriesDoses
-          this.seriesDoses = castToPositiveInt(value); // PositiveIntType
-          return value;
-        case -319593813: // targetDisease
-          this.getTargetDisease().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
-        case -745826705: // doseStatus
-          this.doseStatus = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 662783379: // doseStatusReason
-          this.doseStatusReason = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("doseSequence")) {
-          this.doseSequence = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("description")) {
-          this.description = castToString(value); // StringType
-        } else if (name.equals("authority")) {
-          this.authority = castToReference(value); // Reference
-        } else if (name.equals("series")) {
-          this.series = castToString(value); // StringType
-        } else if (name.equals("seriesDoses")) {
-          this.seriesDoses = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("targetDisease")) {
-          this.getTargetDisease().add(castToCodeableConcept(value));
-        } else if (name.equals("doseStatus")) {
-          this.doseStatus = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("doseStatusReason")) {
-          this.doseStatusReason = castToCodeableConcept(value); // CodeableConcept
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 550933246:  return getDoseSequenceElement();
-        case -1724546052:  return getDescriptionElement();
-        case 1475610435:  return getAuthority(); 
-        case -905838985:  return getSeriesElement();
-        case -1936727105:  return getSeriesDosesElement();
-        case -319593813:  return addTargetDisease(); 
-        case -745826705:  return getDoseStatus(); 
-        case 662783379:  return getDoseStatusReason(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 550933246: /*doseSequence*/ return new String[] {"positiveInt"};
-        case -1724546052: /*description*/ return new String[] {"string"};
-        case 1475610435: /*authority*/ return new String[] {"Reference"};
-        case -905838985: /*series*/ return new String[] {"string"};
-        case -1936727105: /*seriesDoses*/ return new String[] {"positiveInt"};
-        case -319593813: /*targetDisease*/ return new String[] {"CodeableConcept"};
-        case -745826705: /*doseStatus*/ return new String[] {"CodeableConcept"};
-        case 662783379: /*doseStatusReason*/ return new String[] {"CodeableConcept"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("doseSequence")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.doseSequence");
-        }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.description");
-        }
-        else if (name.equals("authority")) {
-          this.authority = new Reference();
-          return this.authority;
-        }
-        else if (name.equals("series")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.series");
-        }
-        else if (name.equals("seriesDoses")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.seriesDoses");
-        }
-        else if (name.equals("targetDisease")) {
-          return addTargetDisease();
-        }
-        else if (name.equals("doseStatus")) {
-          this.doseStatus = new CodeableConcept();
-          return this.doseStatus;
-        }
-        else if (name.equals("doseStatusReason")) {
-          this.doseStatusReason = new CodeableConcept();
-          return this.doseStatusReason;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ImmunizationVaccinationProtocolComponent copy() {
-        ImmunizationVaccinationProtocolComponent dst = new ImmunizationVaccinationProtocolComponent();
-        copyValues(dst);
-        dst.doseSequence = doseSequence == null ? null : doseSequence.copy();
-        dst.description = description == null ? null : description.copy();
-        dst.authority = authority == null ? null : authority.copy();
-        dst.series = series == null ? null : series.copy();
-        dst.seriesDoses = seriesDoses == null ? null : seriesDoses.copy();
-        if (targetDisease != null) {
-          dst.targetDisease = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : targetDisease)
-            dst.targetDisease.add(i.copy());
-        };
-        dst.doseStatus = doseStatus == null ? null : doseStatus.copy();
-        dst.doseStatusReason = doseStatusReason == null ? null : doseStatusReason.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ImmunizationVaccinationProtocolComponent))
-          return false;
-        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other;
-        return compareDeep(doseSequence, o.doseSequence, true) && compareDeep(description, o.description, true)
-           && compareDeep(authority, o.authority, true) && compareDeep(series, o.series, true) && compareDeep(seriesDoses, o.seriesDoses, true)
-           && compareDeep(targetDisease, o.targetDisease, true) && compareDeep(doseStatus, o.doseStatus, true)
-           && compareDeep(doseStatusReason, o.doseStatusReason, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ImmunizationVaccinationProtocolComponent))
-          return false;
-        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other;
-        return compareValues(doseSequence, o.doseSequence, true) && compareValues(description, o.description, true)
-           && compareValues(series, o.series, true) && compareValues(seriesDoses, o.seriesDoses, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description
-          , authority, series, seriesDoses, targetDisease, doseStatus, doseStatusReason);
-      }
-
-  public String fhirType() {
-    return "Immunization.vaccinationProtocol";
+    return "Immunization.education";
 
   }
 
@@ -1590,24 +785,17 @@ public class Immunization extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Indicates the current status of the vaccination event.
+     * Indicates the current status of the immunization event.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="completed | entered-in-error", formalDefinition="Indicates the current status of the vaccination event." )
+    @Description(shortDefinition="completed | entered-in-error | not-done", formalDefinition="Indicates the current status of the immunization event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-status")
     protected Enumeration<ImmunizationStatus> status;
 
     /**
-     * Indicates if the vaccination was or was not given.
-     */
-    @Child(name = "notGiven", type = {BooleanType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Flag for whether immunization was given", formalDefinition="Indicates if the vaccination was or was not given." )
-    protected BooleanType notGiven;
-
-    /**
      * Vaccine that was administered or was to be administered.
      */
-    @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine product administered", formalDefinition="Vaccine that was administered or was to be administered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccine-code")
     protected CodeableConcept vaccineCode;
@@ -1615,7 +803,7 @@ public class Immunization extends DomainResource {
     /**
      * The patient who either received or did not receive the immunization.
      */
-    @Child(name = "patient", type = {Patient.class}, order=4, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "patient", type = {Patient.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who was immunized", formalDefinition="The patient who either received or did not receive the immunization." )
     protected Reference patient;
 
@@ -1627,8 +815,8 @@ public class Immunization extends DomainResource {
     /**
      * The visit or admission or other contact between patient and health care provider the immunization was performed as part of.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Encounter administered as part of", formalDefinition="The visit or admission or other contact between patient and health care provider the immunization was performed as part of." )
+    @Child(name = "encounter", type = {Encounter.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Encounter immunization was part of", formalDefinition="The visit or admission or other contact between patient and health care provider the immunization was performed as part of." )
     protected Reference encounter;
 
     /**
@@ -1639,21 +827,21 @@ public class Immunization extends DomainResource {
     /**
      * Date vaccine administered or was to be administered.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Vaccination administration date", formalDefinition="Date vaccine administered or was to be administered." )
+    @Child(name = "date", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Vaccine administration date", formalDefinition="Date vaccine administered or was to be administered." )
     protected DateTimeType date;
 
     /**
      * An indication that the content of the record is based on information from the person who administered the vaccine. This reflects the context under which the data was originally recorded.
      */
-    @Child(name = "primarySource", type = {BooleanType.class}, order=7, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "primarySource", type = {BooleanType.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Indicates context the data was recorded in", formalDefinition="An indication that the content of the record is based on information from the person who administered the vaccine. This reflects the context under which the data was originally recorded." )
     protected BooleanType primarySource;
 
     /**
      * The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine.
      */
-    @Child(name = "reportOrigin", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reportOrigin", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Indicates the source of a secondarily reported record", formalDefinition="The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-origin")
     protected CodeableConcept reportOrigin;
@@ -1661,8 +849,8 @@ public class Immunization extends DomainResource {
     /**
      * The service delivery location where the vaccine administration occurred.
      */
-    @Child(name = "location", type = {Location.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Where vaccination occurred", formalDefinition="The service delivery location where the vaccine administration occurred." )
+    @Child(name = "location", type = {Location.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Where immunization occurred", formalDefinition="The service delivery location where the vaccine administration occurred." )
     protected Reference location;
 
     /**
@@ -1673,7 +861,7 @@ public class Immunization extends DomainResource {
     /**
      * Name of vaccine manufacturer.
      */
-    @Child(name = "manufacturer", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "manufacturer", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Vaccine manufacturer", formalDefinition="Name of vaccine manufacturer." )
     protected Reference manufacturer;
 
@@ -1685,21 +873,21 @@ public class Immunization extends DomainResource {
     /**
      * Lot number of the  vaccine product.
      */
-    @Child(name = "lotNumber", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "lotNumber", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Vaccine lot number", formalDefinition="Lot number of the  vaccine product." )
     protected StringType lotNumber;
 
     /**
      * Date vaccine batch expires.
      */
-    @Child(name = "expirationDate", type = {DateType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expirationDate", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Vaccine expiration date", formalDefinition="Date vaccine batch expires." )
     protected DateType expirationDate;
 
     /**
      * Body site where vaccine was administered.
      */
-    @Child(name = "site", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "site", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Body site vaccine  was administered", formalDefinition="Body site where vaccine was administered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-site")
     protected CodeableConcept site;
@@ -1707,7 +895,7 @@ public class Immunization extends DomainResource {
     /**
      * The path by which the vaccine product is taken into the body.
      */
-    @Child(name = "route", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "route", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How vaccine entered body", formalDefinition="The path by which the vaccine product is taken into the body." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-route")
     protected CodeableConcept route;
@@ -1715,46 +903,56 @@ public class Immunization extends DomainResource {
     /**
      * The quantity of vaccine product that was administered.
      */
-    @Child(name = "doseQuantity", type = {SimpleQuantity.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "doseQuantity", type = {SimpleQuantity.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Amount of vaccine administered", formalDefinition="The quantity of vaccine product that was administered." )
     protected SimpleQuantity doseQuantity;
 
     /**
-     * Indicates who or what performed the event.
+     * Indicates who performed the immunization event.
      */
-    @Child(name = "practitioner", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who performed event", formalDefinition="Indicates who or what performed the event." )
+    @Child(name = "practitioner", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Who performed event", formalDefinition="Indicates who performed the immunization event." )
     protected List<ImmunizationPractitionerComponent> practitioner;
 
     /**
      * Extra information about the immunization that is not conveyed by the other attributes.
      */
-    @Child(name = "note", type = {Annotation.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Vaccination notes", formalDefinition="Extra information about the immunization that is not conveyed by the other attributes." )
+    @Child(name = "note", type = {Annotation.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional immunization notes", formalDefinition="Extra information about the immunization that is not conveyed by the other attributes." )
     protected List<Annotation> note;
 
     /**
      * Reasons why a vaccine was or was not administered.
      */
-    @Child(name = "explanation", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Administration/non-administration reasons", formalDefinition="Reasons why a vaccine was or was not administered." )
-    protected ImmunizationExplanationComponent explanation;
+    @Child(name = "reason", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why immunization did or did not occur", formalDefinition="Reasons why a vaccine was or was not administered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-reason")
+    protected List<CodeableConcept> reason;
 
     /**
-     * Categorical data indicating that an adverse event is associated in time to an immunization.
+     * Educational material presented to the patient (or guardian) at the time of vaccine administration.
      */
-    @Child(name = "reaction", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Details of a reaction that follows immunization", formalDefinition="Categorical data indicating that an adverse event is associated in time to an immunization." )
-    protected List<ImmunizationReactionComponent> reaction;
+    @Child(name = "education", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Educational material presented to patient", formalDefinition="Educational material presented to the patient (or guardian) at the time of vaccine administration." )
+    protected List<ImmunizationEducationComponent> education;
 
     /**
-     * Contains information about the protocol(s) under which the vaccine was administered.
+     * Indicates a patient's eligibility for a funding program.
      */
-    @Child(name = "vaccinationProtocol", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="What protocol was followed", formalDefinition="Contains information about the protocol(s) under which the vaccine was administered." )
-    protected List<ImmunizationVaccinationProtocolComponent> vaccinationProtocol;
+    @Child(name = "programEligibility", type = {CodeableConcept.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Patient eligibility for a vaccination program", formalDefinition="Indicates a patient's eligibility for a funding program." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-program-eligibility")
+    protected List<CodeableConcept> programEligibility;
 
-    private static final long serialVersionUID = 658058655L;
+    /**
+     * Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered).
+     */
+    @Child(name = "fundingSource", type = {CodeableConcept.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Funding source for the vaccine", formalDefinition="Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-funding-source")
+    protected CodeableConcept fundingSource;
+
+    private static final long serialVersionUID = 1684675873L;
 
   /**
    * Constructor
@@ -1766,10 +964,9 @@ public class Immunization extends DomainResource {
   /**
    * Constructor
    */
-    public Immunization(Enumeration<ImmunizationStatus> status, BooleanType notGiven, CodeableConcept vaccineCode, Reference patient, BooleanType primarySource) {
+    public Immunization(Enumeration<ImmunizationStatus> status, CodeableConcept vaccineCode, Reference patient, BooleanType primarySource) {
       super();
       this.status = status;
-      this.notGiven = notGiven;
       this.vaccineCode = vaccineCode;
       this.patient = patient;
       this.primarySource = primarySource;
@@ -1829,7 +1026,7 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Indicates the current status of the vaccination event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (Indicates the current status of the immunization event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<ImmunizationStatus> getStatusElement() { 
       if (this.status == null)
@@ -1849,7 +1046,7 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Indicates the current status of the vaccination event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (Indicates the current status of the immunization event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Immunization setStatusElement(Enumeration<ImmunizationStatus> value) { 
       this.status = value;
@@ -1857,64 +1054,19 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return Indicates the current status of the vaccination event.
+     * @return Indicates the current status of the immunization event.
      */
     public ImmunizationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Indicates the current status of the vaccination event.
+     * @param value Indicates the current status of the immunization event.
      */
     public Immunization setStatus(ImmunizationStatus value) { 
         if (this.status == null)
           this.status = new Enumeration<ImmunizationStatus>(new ImmunizationStatusEnumFactory());
         this.status.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #notGiven} (Indicates if the vaccination was or was not given.). This is the underlying object with id, value and extensions. The accessor "getNotGiven" gives direct access to the value
-     */
-    public BooleanType getNotGivenElement() { 
-      if (this.notGiven == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Immunization.notGiven");
-        else if (Configuration.doAutoCreate())
-          this.notGiven = new BooleanType(); // bb
-      return this.notGiven;
-    }
-
-    public boolean hasNotGivenElement() { 
-      return this.notGiven != null && !this.notGiven.isEmpty();
-    }
-
-    public boolean hasNotGiven() { 
-      return this.notGiven != null && !this.notGiven.isEmpty();
-    }
-
-    /**
-     * @param value {@link #notGiven} (Indicates if the vaccination was or was not given.). This is the underlying object with id, value and extensions. The accessor "getNotGiven" gives direct access to the value
-     */
-    public Immunization setNotGivenElement(BooleanType value) { 
-      this.notGiven = value;
-      return this;
-    }
-
-    /**
-     * @return Indicates if the vaccination was or was not given.
-     */
-    public boolean getNotGiven() { 
-      return this.notGiven == null || this.notGiven.isEmpty() ? false : this.notGiven.getValue();
-    }
-
-    /**
-     * @param value Indicates if the vaccination was or was not given.
-     */
-    public Immunization setNotGiven(boolean value) { 
-        if (this.notGiven == null)
-          this.notGiven = new BooleanType();
-        this.notGiven.setValue(value);
       return this;
     }
 
@@ -2407,7 +1559,7 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return {@link #practitioner} (Indicates who or what performed the event.)
+     * @return {@link #practitioner} (Indicates who performed the immunization event.)
      */
     public List<ImmunizationPractitionerComponent> getPractitioner() { 
       if (this.practitioner == null)
@@ -2513,140 +1665,192 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return {@link #explanation} (Reasons why a vaccine was or was not administered.)
+     * @return {@link #reason} (Reasons why a vaccine was or was not administered.)
      */
-    public ImmunizationExplanationComponent getExplanation() { 
-      if (this.explanation == null)
+    public List<CodeableConcept> getReason() { 
+      if (this.reason == null)
+        this.reason = new ArrayList<CodeableConcept>();
+      return this.reason;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Immunization setReason(List<CodeableConcept> theReason) { 
+      this.reason = theReason;
+      return this;
+    }
+
+    public boolean hasReason() { 
+      if (this.reason == null)
+        return false;
+      for (CodeableConcept item : this.reason)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addReason() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reason == null)
+        this.reason = new ArrayList<CodeableConcept>();
+      this.reason.add(t);
+      return t;
+    }
+
+    public Immunization addReason(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reason == null)
+        this.reason = new ArrayList<CodeableConcept>();
+      this.reason.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
+    }
+
+    /**
+     * @return {@link #education} (Educational material presented to the patient (or guardian) at the time of vaccine administration.)
+     */
+    public List<ImmunizationEducationComponent> getEducation() { 
+      if (this.education == null)
+        this.education = new ArrayList<ImmunizationEducationComponent>();
+      return this.education;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Immunization setEducation(List<ImmunizationEducationComponent> theEducation) { 
+      this.education = theEducation;
+      return this;
+    }
+
+    public boolean hasEducation() { 
+      if (this.education == null)
+        return false;
+      for (ImmunizationEducationComponent item : this.education)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ImmunizationEducationComponent addEducation() { //3
+      ImmunizationEducationComponent t = new ImmunizationEducationComponent();
+      if (this.education == null)
+        this.education = new ArrayList<ImmunizationEducationComponent>();
+      this.education.add(t);
+      return t;
+    }
+
+    public Immunization addEducation(ImmunizationEducationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.education == null)
+        this.education = new ArrayList<ImmunizationEducationComponent>();
+      this.education.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #education}, creating it if it does not already exist
+     */
+    public ImmunizationEducationComponent getEducationFirstRep() { 
+      if (getEducation().isEmpty()) {
+        addEducation();
+      }
+      return getEducation().get(0);
+    }
+
+    /**
+     * @return {@link #programEligibility} (Indicates a patient's eligibility for a funding program.)
+     */
+    public List<CodeableConcept> getProgramEligibility() { 
+      if (this.programEligibility == null)
+        this.programEligibility = new ArrayList<CodeableConcept>();
+      return this.programEligibility;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Immunization setProgramEligibility(List<CodeableConcept> theProgramEligibility) { 
+      this.programEligibility = theProgramEligibility;
+      return this;
+    }
+
+    public boolean hasProgramEligibility() { 
+      if (this.programEligibility == null)
+        return false;
+      for (CodeableConcept item : this.programEligibility)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addProgramEligibility() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.programEligibility == null)
+        this.programEligibility = new ArrayList<CodeableConcept>();
+      this.programEligibility.add(t);
+      return t;
+    }
+
+    public Immunization addProgramEligibility(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.programEligibility == null)
+        this.programEligibility = new ArrayList<CodeableConcept>();
+      this.programEligibility.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #programEligibility}, creating it if it does not already exist
+     */
+    public CodeableConcept getProgramEligibilityFirstRep() { 
+      if (getProgramEligibility().isEmpty()) {
+        addProgramEligibility();
+      }
+      return getProgramEligibility().get(0);
+    }
+
+    /**
+     * @return {@link #fundingSource} (Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered).)
+     */
+    public CodeableConcept getFundingSource() { 
+      if (this.fundingSource == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Immunization.explanation");
+          throw new Error("Attempt to auto-create Immunization.fundingSource");
         else if (Configuration.doAutoCreate())
-          this.explanation = new ImmunizationExplanationComponent(); // cc
-      return this.explanation;
+          this.fundingSource = new CodeableConcept(); // cc
+      return this.fundingSource;
     }
 
-    public boolean hasExplanation() { 
-      return this.explanation != null && !this.explanation.isEmpty();
+    public boolean hasFundingSource() { 
+      return this.fundingSource != null && !this.fundingSource.isEmpty();
     }
 
     /**
-     * @param value {@link #explanation} (Reasons why a vaccine was or was not administered.)
+     * @param value {@link #fundingSource} (Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered).)
      */
-    public Immunization setExplanation(ImmunizationExplanationComponent value) { 
-      this.explanation = value;
+    public Immunization setFundingSource(CodeableConcept value) { 
+      this.fundingSource = value;
       return this;
-    }
-
-    /**
-     * @return {@link #reaction} (Categorical data indicating that an adverse event is associated in time to an immunization.)
-     */
-    public List<ImmunizationReactionComponent> getReaction() { 
-      if (this.reaction == null)
-        this.reaction = new ArrayList<ImmunizationReactionComponent>();
-      return this.reaction;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Immunization setReaction(List<ImmunizationReactionComponent> theReaction) { 
-      this.reaction = theReaction;
-      return this;
-    }
-
-    public boolean hasReaction() { 
-      if (this.reaction == null)
-        return false;
-      for (ImmunizationReactionComponent item : this.reaction)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public ImmunizationReactionComponent addReaction() { //3
-      ImmunizationReactionComponent t = new ImmunizationReactionComponent();
-      if (this.reaction == null)
-        this.reaction = new ArrayList<ImmunizationReactionComponent>();
-      this.reaction.add(t);
-      return t;
-    }
-
-    public Immunization addReaction(ImmunizationReactionComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.reaction == null)
-        this.reaction = new ArrayList<ImmunizationReactionComponent>();
-      this.reaction.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #reaction}, creating it if it does not already exist
-     */
-    public ImmunizationReactionComponent getReactionFirstRep() { 
-      if (getReaction().isEmpty()) {
-        addReaction();
-      }
-      return getReaction().get(0);
-    }
-
-    /**
-     * @return {@link #vaccinationProtocol} (Contains information about the protocol(s) under which the vaccine was administered.)
-     */
-    public List<ImmunizationVaccinationProtocolComponent> getVaccinationProtocol() { 
-      if (this.vaccinationProtocol == null)
-        this.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
-      return this.vaccinationProtocol;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Immunization setVaccinationProtocol(List<ImmunizationVaccinationProtocolComponent> theVaccinationProtocol) { 
-      this.vaccinationProtocol = theVaccinationProtocol;
-      return this;
-    }
-
-    public boolean hasVaccinationProtocol() { 
-      if (this.vaccinationProtocol == null)
-        return false;
-      for (ImmunizationVaccinationProtocolComponent item : this.vaccinationProtocol)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public ImmunizationVaccinationProtocolComponent addVaccinationProtocol() { //3
-      ImmunizationVaccinationProtocolComponent t = new ImmunizationVaccinationProtocolComponent();
-      if (this.vaccinationProtocol == null)
-        this.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
-      this.vaccinationProtocol.add(t);
-      return t;
-    }
-
-    public Immunization addVaccinationProtocol(ImmunizationVaccinationProtocolComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.vaccinationProtocol == null)
-        this.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
-      this.vaccinationProtocol.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #vaccinationProtocol}, creating it if it does not already exist
-     */
-    public ImmunizationVaccinationProtocolComponent getVaccinationProtocolFirstRep() { 
-      if (getVaccinationProtocol().isEmpty()) {
-        addVaccinationProtocol();
-      }
-      return getVaccinationProtocol().get(0);
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this immunization record.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("status", "code", "Indicates the current status of the vaccination event.", 0, 1, status));
-        children.add(new Property("notGiven", "boolean", "Indicates if the vaccination was or was not given.", 0, 1, notGiven));
+        children.add(new Property("status", "code", "Indicates the current status of the immunization event.", 0, 1, status));
         children.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that was administered or was to be administered.", 0, 1, vaccineCode));
         children.add(new Property("patient", "Reference(Patient)", "The patient who either received or did not receive the immunization.", 0, 1, patient));
         children.add(new Property("encounter", "Reference(Encounter)", "The visit or admission or other contact between patient and health care provider the immunization was performed as part of.", 0, 1, encounter));
@@ -2660,19 +1864,19 @@ public class Immunization extends DomainResource {
         children.add(new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, 1, site));
         children.add(new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, 1, route));
         children.add(new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, 1, doseQuantity));
-        children.add(new Property("practitioner", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, practitioner));
+        children.add(new Property("practitioner", "", "Indicates who performed the immunization event.", 0, java.lang.Integer.MAX_VALUE, practitioner));
         children.add(new Property("note", "Annotation", "Extra information about the immunization that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
-        children.add(new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, 1, explanation));
-        children.add(new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction));
-        children.add(new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol));
+        children.add(new Property("reason", "CodeableConcept", "Reasons why a vaccine was or was not administered.", 0, java.lang.Integer.MAX_VALUE, reason));
+        children.add(new Property("education", "", "Educational material presented to the patient (or guardian) at the time of vaccine administration.", 0, java.lang.Integer.MAX_VALUE, education));
+        children.add(new Property("programEligibility", "CodeableConcept", "Indicates a patient's eligibility for a funding program.", 0, java.lang.Integer.MAX_VALUE, programEligibility));
+        children.add(new Property("fundingSource", "CodeableConcept", "Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered).", 0, 1, fundingSource));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this immunization record.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -892481550: /*status*/  return new Property("status", "code", "Indicates the current status of the vaccination event.", 0, 1, status);
-        case 1554065514: /*notGiven*/  return new Property("notGiven", "boolean", "Indicates if the vaccination was or was not given.", 0, 1, notGiven);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates the current status of the immunization event.", 0, 1, status);
         case 664556354: /*vaccineCode*/  return new Property("vaccineCode", "CodeableConcept", "Vaccine that was administered or was to be administered.", 0, 1, vaccineCode);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who either received or did not receive the immunization.", 0, 1, patient);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The visit or admission or other contact between patient and health care provider the immunization was performed as part of.", 0, 1, encounter);
@@ -2686,11 +1890,12 @@ public class Immunization extends DomainResource {
         case 3530567: /*site*/  return new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, 1, site);
         case 108704329: /*route*/  return new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, 1, route);
         case -2083618872: /*doseQuantity*/  return new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, 1, doseQuantity);
-        case 574573338: /*practitioner*/  return new Property("practitioner", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, practitioner);
+        case 574573338: /*practitioner*/  return new Property("practitioner", "", "Indicates who performed the immunization event.", 0, java.lang.Integer.MAX_VALUE, practitioner);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Extra information about the immunization that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note);
-        case -1105867239: /*explanation*/  return new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, 1, explanation);
-        case -867509719: /*reaction*/  return new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction);
-        case -179633155: /*vaccinationProtocol*/  return new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol);
+        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Reasons why a vaccine was or was not administered.", 0, java.lang.Integer.MAX_VALUE, reason);
+        case -290756696: /*education*/  return new Property("education", "", "Educational material presented to the patient (or guardian) at the time of vaccine administration.", 0, java.lang.Integer.MAX_VALUE, education);
+        case 1207530089: /*programEligibility*/  return new Property("programEligibility", "CodeableConcept", "Indicates a patient's eligibility for a funding program.", 0, java.lang.Integer.MAX_VALUE, programEligibility);
+        case 1120150904: /*fundingSource*/  return new Property("fundingSource", "CodeableConcept", "Indicates the source of the vaccine actually administered. This may be different than the patient eligbility (e.g. the patient may be eligibile for a publically purchased vaccine but due to inventory issues, vaccine purchased with private funds was actually administered).", 0, 1, fundingSource);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2701,7 +1906,6 @@ public class Immunization extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ImmunizationStatus>
-        case 1554065514: /*notGiven*/ return this.notGiven == null ? new Base[0] : new Base[] {this.notGiven}; // BooleanType
         case 664556354: /*vaccineCode*/ return this.vaccineCode == null ? new Base[0] : new Base[] {this.vaccineCode}; // CodeableConcept
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
@@ -2717,9 +1921,10 @@ public class Immunization extends DomainResource {
         case -2083618872: /*doseQuantity*/ return this.doseQuantity == null ? new Base[0] : new Base[] {this.doseQuantity}; // SimpleQuantity
         case 574573338: /*practitioner*/ return this.practitioner == null ? new Base[0] : this.practitioner.toArray(new Base[this.practitioner.size()]); // ImmunizationPractitionerComponent
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
-        case -1105867239: /*explanation*/ return this.explanation == null ? new Base[0] : new Base[] {this.explanation}; // ImmunizationExplanationComponent
-        case -867509719: /*reaction*/ return this.reaction == null ? new Base[0] : this.reaction.toArray(new Base[this.reaction.size()]); // ImmunizationReactionComponent
-        case -179633155: /*vaccinationProtocol*/ return this.vaccinationProtocol == null ? new Base[0] : this.vaccinationProtocol.toArray(new Base[this.vaccinationProtocol.size()]); // ImmunizationVaccinationProtocolComponent
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case -290756696: /*education*/ return this.education == null ? new Base[0] : this.education.toArray(new Base[this.education.size()]); // ImmunizationEducationComponent
+        case 1207530089: /*programEligibility*/ return this.programEligibility == null ? new Base[0] : this.programEligibility.toArray(new Base[this.programEligibility.size()]); // CodeableConcept
+        case 1120150904: /*fundingSource*/ return this.fundingSource == null ? new Base[0] : new Base[] {this.fundingSource}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2734,9 +1939,6 @@ public class Immunization extends DomainResource {
         case -892481550: // status
           value = new ImmunizationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ImmunizationStatus>
-          return value;
-        case 1554065514: // notGiven
-          this.notGiven = castToBoolean(value); // BooleanType
           return value;
         case 664556354: // vaccineCode
           this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
@@ -2783,14 +1985,17 @@ public class Immunization extends DomainResource {
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
           return value;
-        case -1105867239: // explanation
-          this.explanation = (ImmunizationExplanationComponent) value; // ImmunizationExplanationComponent
+        case -934964668: // reason
+          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case -867509719: // reaction
-          this.getReaction().add((ImmunizationReactionComponent) value); // ImmunizationReactionComponent
+        case -290756696: // education
+          this.getEducation().add((ImmunizationEducationComponent) value); // ImmunizationEducationComponent
           return value;
-        case -179633155: // vaccinationProtocol
-          this.getVaccinationProtocol().add((ImmunizationVaccinationProtocolComponent) value); // ImmunizationVaccinationProtocolComponent
+        case 1207530089: // programEligibility
+          this.getProgramEligibility().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 1120150904: // fundingSource
+          this.fundingSource = castToCodeableConcept(value); // CodeableConcept
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2804,8 +2009,6 @@ public class Immunization extends DomainResource {
         } else if (name.equals("status")) {
           value = new ImmunizationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ImmunizationStatus>
-        } else if (name.equals("notGiven")) {
-          this.notGiven = castToBoolean(value); // BooleanType
         } else if (name.equals("vaccineCode")) {
           this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("patient")) {
@@ -2836,12 +2039,14 @@ public class Immunization extends DomainResource {
           this.getPractitioner().add((ImmunizationPractitionerComponent) value);
         } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
-        } else if (name.equals("explanation")) {
-          this.explanation = (ImmunizationExplanationComponent) value; // ImmunizationExplanationComponent
-        } else if (name.equals("reaction")) {
-          this.getReaction().add((ImmunizationReactionComponent) value);
-        } else if (name.equals("vaccinationProtocol")) {
-          this.getVaccinationProtocol().add((ImmunizationVaccinationProtocolComponent) value);
+        } else if (name.equals("reason")) {
+          this.getReason().add(castToCodeableConcept(value));
+        } else if (name.equals("education")) {
+          this.getEducation().add((ImmunizationEducationComponent) value);
+        } else if (name.equals("programEligibility")) {
+          this.getProgramEligibility().add(castToCodeableConcept(value));
+        } else if (name.equals("fundingSource")) {
+          this.fundingSource = castToCodeableConcept(value); // CodeableConcept
         } else
           return super.setProperty(name, value);
         return value;
@@ -2852,7 +2057,6 @@ public class Immunization extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
         case -892481550:  return getStatusElement();
-        case 1554065514:  return getNotGivenElement();
         case 664556354:  return getVaccineCode(); 
         case -791418107:  return getPatient(); 
         case 1524132147:  return getEncounter(); 
@@ -2868,9 +2072,10 @@ public class Immunization extends DomainResource {
         case -2083618872:  return getDoseQuantity(); 
         case 574573338:  return addPractitioner(); 
         case 3387378:  return addNote(); 
-        case -1105867239:  return getExplanation(); 
-        case -867509719:  return addReaction(); 
-        case -179633155:  return addVaccinationProtocol(); 
+        case -934964668:  return addReason(); 
+        case -290756696:  return addEducation(); 
+        case 1207530089:  return addProgramEligibility(); 
+        case 1120150904:  return getFundingSource(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2881,7 +2086,6 @@ public class Immunization extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -892481550: /*status*/ return new String[] {"code"};
-        case 1554065514: /*notGiven*/ return new String[] {"boolean"};
         case 664556354: /*vaccineCode*/ return new String[] {"CodeableConcept"};
         case -791418107: /*patient*/ return new String[] {"Reference"};
         case 1524132147: /*encounter*/ return new String[] {"Reference"};
@@ -2897,9 +2101,10 @@ public class Immunization extends DomainResource {
         case -2083618872: /*doseQuantity*/ return new String[] {"SimpleQuantity"};
         case 574573338: /*practitioner*/ return new String[] {};
         case 3387378: /*note*/ return new String[] {"Annotation"};
-        case -1105867239: /*explanation*/ return new String[] {};
-        case -867509719: /*reaction*/ return new String[] {};
-        case -179633155: /*vaccinationProtocol*/ return new String[] {};
+        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
+        case -290756696: /*education*/ return new String[] {};
+        case 1207530089: /*programEligibility*/ return new String[] {"CodeableConcept"};
+        case 1120150904: /*fundingSource*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2912,9 +2117,6 @@ public class Immunization extends DomainResource {
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Immunization.status");
-        }
-        else if (name.equals("notGiven")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Immunization.notGiven");
         }
         else if (name.equals("vaccineCode")) {
           this.vaccineCode = new CodeableConcept();
@@ -2970,15 +2172,18 @@ public class Immunization extends DomainResource {
         else if (name.equals("note")) {
           return addNote();
         }
-        else if (name.equals("explanation")) {
-          this.explanation = new ImmunizationExplanationComponent();
-          return this.explanation;
+        else if (name.equals("reason")) {
+          return addReason();
         }
-        else if (name.equals("reaction")) {
-          return addReaction();
+        else if (name.equals("education")) {
+          return addEducation();
         }
-        else if (name.equals("vaccinationProtocol")) {
-          return addVaccinationProtocol();
+        else if (name.equals("programEligibility")) {
+          return addProgramEligibility();
+        }
+        else if (name.equals("fundingSource")) {
+          this.fundingSource = new CodeableConcept();
+          return this.fundingSource;
         }
         else
           return super.addChild(name);
@@ -2998,7 +2203,6 @@ public class Immunization extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
-        dst.notGiven = notGiven == null ? null : notGiven.copy();
         dst.vaccineCode = vaccineCode == null ? null : vaccineCode.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
@@ -3022,17 +2226,22 @@ public class Immunization extends DomainResource {
           for (Annotation i : note)
             dst.note.add(i.copy());
         };
-        dst.explanation = explanation == null ? null : explanation.copy();
-        if (reaction != null) {
-          dst.reaction = new ArrayList<ImmunizationReactionComponent>();
-          for (ImmunizationReactionComponent i : reaction)
-            dst.reaction.add(i.copy());
+        if (reason != null) {
+          dst.reason = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reason)
+            dst.reason.add(i.copy());
         };
-        if (vaccinationProtocol != null) {
-          dst.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
-          for (ImmunizationVaccinationProtocolComponent i : vaccinationProtocol)
-            dst.vaccinationProtocol.add(i.copy());
+        if (education != null) {
+          dst.education = new ArrayList<ImmunizationEducationComponent>();
+          for (ImmunizationEducationComponent i : education)
+            dst.education.add(i.copy());
         };
+        if (programEligibility != null) {
+          dst.programEligibility = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : programEligibility)
+            dst.programEligibility.add(i.copy());
+        };
+        dst.fundingSource = fundingSource == null ? null : fundingSource.copy();
         return dst;
       }
 
@@ -3041,39 +2250,40 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Immunization))
+        if (!(other_ instanceof Immunization))
           return false;
-        Immunization o = (Immunization) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(notGiven, o.notGiven, true)
-           && compareDeep(vaccineCode, o.vaccineCode, true) && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true)
-           && compareDeep(date, o.date, true) && compareDeep(primarySource, o.primarySource, true) && compareDeep(reportOrigin, o.reportOrigin, true)
+        Immunization o = (Immunization) other_;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(vaccineCode, o.vaccineCode, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true) && compareDeep(date, o.date, true)
+           && compareDeep(primarySource, o.primarySource, true) && compareDeep(reportOrigin, o.reportOrigin, true)
            && compareDeep(location, o.location, true) && compareDeep(manufacturer, o.manufacturer, true) && compareDeep(lotNumber, o.lotNumber, true)
            && compareDeep(expirationDate, o.expirationDate, true) && compareDeep(site, o.site, true) && compareDeep(route, o.route, true)
            && compareDeep(doseQuantity, o.doseQuantity, true) && compareDeep(practitioner, o.practitioner, true)
-           && compareDeep(note, o.note, true) && compareDeep(explanation, o.explanation, true) && compareDeep(reaction, o.reaction, true)
-           && compareDeep(vaccinationProtocol, o.vaccinationProtocol, true);
+           && compareDeep(note, o.note, true) && compareDeep(reason, o.reason, true) && compareDeep(education, o.education, true)
+           && compareDeep(programEligibility, o.programEligibility, true) && compareDeep(fundingSource, o.fundingSource, true)
+          ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Immunization))
+        if (!(other_ instanceof Immunization))
           return false;
-        Immunization o = (Immunization) other;
-        return compareValues(status, o.status, true) && compareValues(notGiven, o.notGiven, true) && compareValues(date, o.date, true)
-           && compareValues(primarySource, o.primarySource, true) && compareValues(lotNumber, o.lotNumber, true)
-           && compareValues(expirationDate, o.expirationDate, true);
+        Immunization o = (Immunization) other_;
+        return compareValues(status, o.status, true) && compareValues(date, o.date, true) && compareValues(primarySource, o.primarySource, true)
+           && compareValues(lotNumber, o.lotNumber, true) && compareValues(expirationDate, o.expirationDate, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, notGiven
-          , vaccineCode, patient, encounter, date, primarySource, reportOrigin, location
-          , manufacturer, lotNumber, expirationDate, site, route, doseQuantity, practitioner
-          , note, explanation, reaction, vaccinationProtocol);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, vaccineCode
+          , patient, encounter, date, primarySource, reportOrigin, location, manufacturer
+          , lotNumber, expirationDate, site, route, doseQuantity, practitioner, note, reason
+          , education, programEligibility, fundingSource);
       }
 
   @Override
@@ -3124,48 +2334,22 @@ public class Immunization extends DomainResource {
  /**
    * Search parameter: <b>reason</b>
    * <p>
-   * Description: <b>Why immunization occurred</b><br>
+   * Description: <b>Why immunization did or did not occur</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Immunization.explanation.reason</b><br>
+   * Path: <b>Immunization.reason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token" )
+  @SearchParamDefinition(name="reason", path="Immunization.reason", description="Why immunization did or did not occur", type="token" )
   public static final String SP_REASON = "reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason</b>
    * <p>
-   * Description: <b>Why immunization occurred</b><br>
+   * Description: <b>Why immunization did or did not occur</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Immunization.explanation.reason</b><br>
+   * Path: <b>Immunization.reason</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON);
-
- /**
-   * Search parameter: <b>reaction</b>
-   * <p>
-   * Description: <b>Additional information on reaction</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Immunization.reaction.detail</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference", target={Observation.class } )
-  public static final String SP_REACTION = "reaction";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>reaction</b>
-   * <p>
-   * Description: <b>Additional information on reaction</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Immunization.reaction.detail</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REACTION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REACTION);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Immunization:reaction</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REACTION = new ca.uhn.fhir.model.api.Include("Immunization:reaction").toLocked();
 
  /**
    * Search parameter: <b>lot-number</b>
@@ -3214,72 +2398,6 @@ public class Immunization extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Immunization:practitioner").toLocked();
 
  /**
-   * Search parameter: <b>notgiven</b>
-   * <p>
-   * Description: <b>Administrations which were not given</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Immunization.notGiven</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="notgiven", path="Immunization.notGiven", description="Administrations which were not given", type="token" )
-  public static final String SP_NOTGIVEN = "notgiven";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>notgiven</b>
-   * <p>
-   * Description: <b>Administrations which were not given</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Immunization.notGiven</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam NOTGIVEN = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_NOTGIVEN);
-
- /**
-   * Search parameter: <b>manufacturer</b>
-   * <p>
-   * Description: <b>Vaccine Manufacturer</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Immunization.manufacturer</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference", target={Organization.class } )
-  public static final String SP_MANUFACTURER = "manufacturer";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
-   * <p>
-   * Description: <b>Vaccine Manufacturer</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Immunization.manufacturer</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MANUFACTURER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MANUFACTURER);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Immunization:manufacturer</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_MANUFACTURER = new ca.uhn.fhir.model.api.Include("Immunization:manufacturer").toLocked();
-
- /**
-   * Search parameter: <b>dose-sequence</b>
-   * <p>
-   * Description: <b>Dose number within series</b><br>
-   * Type: <b>number</b><br>
-   * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number" )
-  public static final String SP_DOSE_SEQUENCE = "dose-sequence";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
-   * <p>
-   * Description: <b>Dose number within series</b><br>
-   * Type: <b>number</b><br>
-   * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.NumberClientParam DOSE_SEQUENCE = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_DOSE_SEQUENCE);
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The patient for the vaccination record</b><br>
@@ -3326,26 +2444,6 @@ public class Immunization extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam VACCINE_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VACCINE_CODE);
 
  /**
-   * Search parameter: <b>reason-not-given</b>
-   * <p>
-   * Description: <b>Explanation of reason vaccination was not administered</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Immunization.explanation.reasonNotGiven</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token" )
-  public static final String SP_REASON_NOT_GIVEN = "reason-not-given";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>reason-not-given</b>
-   * <p>
-   * Description: <b>Explanation of reason vaccination was not administered</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Immunization.explanation.reasonNotGiven</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON_NOT_GIVEN = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON_NOT_GIVEN);
-
- /**
    * Search parameter: <b>location</b>
    * <p>
    * Description: <b>The service delivery location or facility in which the vaccine was / was to be administered</b><br>
@@ -3372,24 +2470,30 @@ public class Immunization extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Immunization:location").toLocked();
 
  /**
-   * Search parameter: <b>reaction-date</b>
+   * Search parameter: <b>manufacturer</b>
    * <p>
-   * Description: <b>When reaction started</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Immunization.reaction.date</b><br>
+   * Description: <b>Vaccine Manufacturer</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Immunization.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date" )
-  public static final String SP_REACTION_DATE = "reaction-date";
+  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference", target={Organization.class } )
+  public static final String SP_MANUFACTURER = "manufacturer";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>reaction-date</b>
+   * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
    * <p>
-   * Description: <b>When reaction started</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Immunization.reaction.date</b><br>
+   * Description: <b>Vaccine Manufacturer</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Immunization.manufacturer</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam REACTION_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_REACTION_DATE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MANUFACTURER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MANUFACTURER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:manufacturer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MANUFACTURER = new ca.uhn.fhir.model.api.Include("Immunization:manufacturer").toLocked();
 
  /**
    * Search parameter: <b>status</b>

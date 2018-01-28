@@ -48,7 +48,7 @@ public class ResourceUtilities {
 	
 	public static String getErrorDescription(OperationOutcome error) {  
 		if (error.hasText() && error.getText().hasDiv())
-			return new XhtmlComposer().setXmlOnly(true).composePlainText(error.getText().getDiv());
+			return new XhtmlComposer(XhtmlComposer.XML).composePlainText(error.getText().getDiv());
 		
 		StringBuilder b = new StringBuilder();
 		for (OperationOutcomeIssueComponent t : error.getIssue())

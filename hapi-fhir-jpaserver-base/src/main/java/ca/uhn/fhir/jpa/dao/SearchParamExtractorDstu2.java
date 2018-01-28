@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,6 +225,15 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 					}
 
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, new BigDecimal(nextValue.getValue()));
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
+				} else if (nextObject instanceof DecimalDt) {
+					DecimalDt nextValue = (DecimalDt) nextObject;
+					if (nextValue.getValue() == null) {
+						continue;
+					}
+
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {

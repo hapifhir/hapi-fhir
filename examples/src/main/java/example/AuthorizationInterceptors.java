@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
 
+@SuppressWarnings("unused")
 public class AuthorizationInterceptors {
 
    public class PatientResourceProvider implements IResourceProvider
@@ -35,7 +36,8 @@ public class AuthorizationInterceptors {
    }
    
    //START SNIPPET: patientAndAdmin
-   public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
+   @SuppressWarnings("ConstantConditions")
+	public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
       
       @Override
       public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -127,5 +129,16 @@ public class AuthorizationInterceptors {
    }
    //END SNIPPET: conditionalUpdate
 
-   
+	public void authorizeTenantAction() {
+		//START SNIPPET: authorizeTenantAction
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().forTenantIds("TENANTA").andThen()
+					.build();
+			}
+		};
+		//END SNIPPET: authorizeTenantAction
+	}
 }

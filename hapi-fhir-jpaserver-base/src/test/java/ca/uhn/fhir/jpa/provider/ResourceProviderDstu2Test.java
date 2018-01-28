@@ -57,17 +57,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	@Before
-	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -75,92 +64,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
-	
-	@Test
-	public void testPagingOverEverythingSet() throws InterruptedException {
-		Patient p = new Patient();
-		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-		
-		for (int i = 0; i < 20; i++) {
-			Observation o = new Observation();
-			o.getSubject().setReference(pid);
-			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-			myObservationDao.create(o);
-		}
-		
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
-			.operation()
-			.onInstance(new IdDt(pid))
-			.named("everything")
-			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
-			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.useHttpGet()
-			.execute();
-		
-		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
-
-		// Load page 2
-
-		String nextUrl = response.getLink("next").getUrl();
-		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
-
-		assertEquals(10, response.getEntry().size());
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
-
-		// Load page 3
-		Thread.sleep(2000);
-		
-		nextUrl = response.getLink("next").getUrl();
-		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
-
-		assertEquals(1, response.getEntry().size());
-		assertEquals(21, response.getTotal().intValue());
-		assertEquals(null, response.getLink("next"));
-
-	}
-	
-	@Test
-	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
-		ourRestServer.setPagingProvider(null);
-		
-		Patient p = new Patient();
-		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-		
-		for (int i = 0; i < 20; i++) {
-			Observation o = new Observation();
-			o.getSubject().setReference(pid);
-			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-			myObservationDao.create(o);
-		}
-		
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
-			.operation()
-			.onInstance(new IdDt(pid))
-			.named("everything")
-			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
-			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.useHttpGet()
-			.execute();
-		
-		assertEquals(21, response.getEntry().size());
-		assertEquals(21, response.getTotalElement().getValue().intValue());
-		assertEquals(null, response.getLink("next"));
-
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
-	
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
@@ -174,15 +83,124 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void saveAndRetrieveBasicResource() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
-		
+
 		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
 		ourLog.info(respString);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, respString);
 		IdDt id = new IdDt(bundle.getEntry().get(0).getResponse().getLocation());
-		
+
 		Basic basic = ourClient.read().resource(Basic.class).withId(id).execute();
 		List<ExtensionDt> exts = basic.getUndeclaredExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
 		assertEquals(1, exts.size());
+	}
+
+	@Test
+	public void testBundleCreate() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"), StandardCharsets.UTF_8);
+		IIdType id = client.create().resource(resBody).execute().getId();
+
+		ourLog.info("Created: {}", id);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+	
+	@Test
+	public void testBundleCreateWithTypeTransaction() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"), StandardCharsets.UTF_8);
+		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
+		try {
+			client.create().resource(resBody).execute().getId();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type of: transaction"));
+		}
+	}
+
+	@Test
+	public void testCodeSearch() {
+		Subscription subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.setCriteria("Observation?");
+		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().code(SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+
+		//@formatter:off
+		resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().systemAndCode(SubscriptionStatusEnum.ACTIVE.getSystem(), SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+
+		//@formatter:off
+		resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().systemAndCode("foo", SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), empty());
+
+	}
+
+	@Test
+	public void testCountParam() throws Exception {
+		// NB this does not get used- The paging provider has its own limits built in
+		myDaoConfig.setHardSearchLimit(100);
+
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 100; i++) {
+			Organization org = new Organization();
+			org.setName("rpdstu2_testCountParam_01");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		Bundle found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(10)
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(10, found.getEntry().size());
+
+		found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(999)
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(50, found.getEntry().size());
+
 	}
 
 	/**
@@ -253,225 +271,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	/**
-	 * See #441
-	 */
-	@Test
-	public void testSearchMedicationChain() throws Exception {
-		Medication medication = new Medication();
-		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
-		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
-
-		MedicationAdministration ma = new MedicationAdministration();
-		ma.setMedication(new ResourceReferenceDt(medId));
-		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
-
-		HttpGet get = new HttpGet(ourServerBase + "/MedicationAdministration?medication.code=04823543");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString(moId.getIdPart()));
-		} finally {
-			response.close();
-		}
-
-	}
-
-	@Test
-	public void testEverythingInstanceWithContentFilter() {
-		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient pt2 = new Patient();
-		pt2.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
-
-		Device dev1 = new Device();
-		dev1.setManufacturer("Some Manufacturer");
-		IIdType devId1 = myDeviceDao.create(dev1, mySrd).getId().toUnqualifiedVersionless();
-
-		Device dev2 = new Device();
-		dev2.setManufacturer("Some Manufacturer 2");
-		myDeviceDao.create(dev2, mySrd).getId().toUnqualifiedVersionless();
-
-		Observation obs1 = new Observation();
-		obs1.getText().setDiv("<div>OBSTEXT1</div>");
-		obs1.getSubject().setReference(ptId1);
-		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringDt("obsvalue1"));
-		obs1.getDevice().setReference(devId1);
-		IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-
-		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId1);
-		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringDt("obsvalue2"));
-		IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-
-		Observation obs3 = new Observation();
-		obs3.getSubject().setReference(ptId2);
-		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringDt("obsvalue3"));
-		IIdType obsId3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
-
-		List<IIdType> actual;
-		StringAndListParam param;
-
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] { ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart() });
-
-		param = new StringAndListParam();
-		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-
-		//@formatter:off
-		Parameters response = ourClient
-			.operation()
-			.onInstance(ptId1)
-			.named("everything")
-			.withParameter(Parameters.class, Constants.PARAM_CONTENT, new StringDt("obsvalue1"))
-			.execute();
-		//@formatter:on
-
-		actual = toUnqualifiedVersionlessIds((ca.uhn.fhir.model.dstu2.resource.Bundle) response.getParameter().get(0).getResource());
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
-
-	}
-
-	@Test
-	public void testBundleCreate() throws Exception {
-		IGenericClient client = ourClient;
-
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"), StandardCharsets.UTF_8);
-		IIdType id = client.create().resource(resBody).execute().getId();
-
-		ourLog.info("Created: {}", id);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
-
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-	}
-
-	@Test
-	public void testBundleCreateWithTypeTransaction() throws Exception {
-		IGenericClient client = ourClient;
-
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"), StandardCharsets.UTF_8);
-		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
-		try {
-			client.create().resource(resBody).execute().getId();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type of: transaction"));
-		}
-	}
-
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// }
-
-	@Test
-	public void testCodeSearch() {
-		Subscription subs = new Subscription();
-		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
-		subs.setCriteria("Observation?");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
-
-		//@formatter:off
-		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient
-			.search()
-			.forResource(Subscription.class)
-			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
-			.and(Subscription.STATUS.exactly().code(SubscriptionStatusEnum.ACTIVE.getCode()))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:off
-
-		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
-		
-		//@formatter:off
-		resp = ourClient
-			.search()
-			.forResource(Subscription.class)
-			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
-			.and(Subscription.STATUS.exactly().systemAndCode(SubscriptionStatusEnum.ACTIVE.getSystem(), SubscriptionStatusEnum.ACTIVE.getCode()))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:off
-
-		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
-
-		//@formatter:off
-		resp = ourClient
-			.search()
-			.forResource(Subscription.class)
-			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
-			.and(Subscription.STATUS.exactly().systemAndCode("foo", SubscriptionStatusEnum.ACTIVE.getCode()))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:off
-
-		assertThat(toUnqualifiedVersionlessIds(resp), empty());
-
-	}
-
-	@Test
-	public void testCountParam() throws Exception {
-		// NB this does not get used- The paging provider has its own limits built in
-		myDaoConfig.setHardSearchLimit(100);
-
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		for (int i = 0; i < 100; i++) {
-			Organization org = new Organization();
-			org.setName("rpdstu2_testCountParam_01");
-			resources.add(org);
-		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
-
-		Bundle found = ourClient
-				.search()
-				.forResource(Organization.class)
-				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
-				.count(10)
-				.returnBundle(Bundle.class)
-				.execute();
-		assertEquals(100, found.getTotalElement().getValue().intValue());
-		assertEquals(10, found.getEntry().size());
-
-		found = ourClient
-				.search()
-				.forResource(Organization.class)
-				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
-				.count(999)
-				.returnBundle(Bundle.class)
-				.execute();
-		assertEquals(100, found.getTotalElement().getValue().intValue());
-		assertEquals(50, found.getEntry().size());
-
-	}
-
 	@Test
 	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
 		ValueSet options = new ValueSet();
@@ -502,91 +301,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
 		}
-	}
-	
-	@Test
-	public void testUpdateResourceConditionalComplex() throws IOException {
-		Patient pt = new Patient();
-		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		IdDt id;
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
-		
-		pt.addName().addFamily("FOO");
-		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
-		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
-		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		
-		IdDt id2;
-		response = ourHttpClient.execute(put);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id2 = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
-		
-		assertEquals(id.getIdPart(), id2.getIdPart());
-		assertEquals("1", id.getVersionIdPart());
-		assertEquals("2", id2.getVersionIdPart());
-	}
-
-	@Test
-	public void testCreateResourceConditionalComplex() throws IOException {
-		Patient pt = new Patient();
-		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		IdDt id;
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
-		
-		IdDt id2;
-		response = ourHttpClient.execute(post);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id2 = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
-		
-//		//@formatter:off
-//		IIdType id3 = ourClient
-//			.update()
-//			.resource(pt)
-//			.conditionalByUrl("Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
-//			.execute().getId();
-//		//@formatter:on
-
-		assertEquals(id.getValue(), id2.getValue());
 	}
 
 	@Test
@@ -626,6 +340,49 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testCreateResourceConditionalComplex() throws IOException {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		IdDt id;
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+		IdDt id2;
+		response = ourHttpClient.execute(post);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id2 = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+//		//@formatter:off
+//		IIdType id3 = ourClient
+//			.update()
+//			.resource(pt)
+//			.conditionalByUrl("Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
+//			.execute().getId();
+//		//@formatter:on
+
+		assertEquals(id.getValue(), id2.getValue());
+	}
+
+	@Test
 	public void testCreateResourceReturnsOperationOutcomeByDefault() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
@@ -644,6 +401,31 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testCreateResourceWithNumericId() throws IOException {
@@ -712,7 +494,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
-
+	
 	@Test
 	public void testDeleteConditionalMultiple() {
 		String methodName = "testDeleteConditionalMultiple";
@@ -1111,6 +893,66 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info(ids.toString());
 	}
 
+	@Test
+	public void testEverythingInstanceWithContentFilter() {
+		Patient pt1 = new Patient();
+		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pt2 = new Patient();
+		pt2.addName().addFamily("Everything").addGiven("Arthur");
+		IIdType ptId2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
+
+		Device dev1 = new Device();
+		dev1.setManufacturer("Some Manufacturer");
+		IIdType devId1 = myDeviceDao.create(dev1, mySrd).getId().toUnqualifiedVersionless();
+
+		Device dev2 = new Device();
+		dev2.setManufacturer("Some Manufacturer 2");
+		myDeviceDao.create(dev2, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs1 = new Observation();
+		obs1.getText().setDiv("<div>OBSTEXT1</div>");
+		obs1.getSubject().setReference(ptId1);
+		obs1.getCode().addCoding().setCode("CODE1");
+		obs1.setValue(new StringDt("obsvalue1"));
+		obs1.getDevice().setReference(devId1);
+		IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getSubject().setReference(ptId1);
+		obs2.getCode().addCoding().setCode("CODE2");
+		obs2.setValue(new StringDt("obsvalue2"));
+		IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs3 = new Observation();
+		obs3.getSubject().setReference(ptId2);
+		obs3.getCode().addCoding().setCode("CODE3");
+		obs3.setValue(new StringDt("obsvalue3"));
+		IIdType obsId3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+
+		List<IIdType> actual;
+		StringAndListParam param;
+
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] { ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart() });
+
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
+
+		//@formatter:off
+		Parameters response = ourClient
+			.operation()
+			.onInstance(ptId1)
+			.named("everything")
+			.withParameter(Parameters.class, Constants.PARAM_CONTENT, new StringDt("obsvalue1"))
+			.execute();
+		//@formatter:on
+
+		actual = toUnqualifiedVersionlessIds((ca.uhn.fhir.model.dstu2.resource.Bundle) response.getParameter().get(0).getResource());
+		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+
+	}
+
 	/**
 	 * See #147
 	 */
@@ -1376,7 +1218,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		/*
-		 * Sorting is not working since the performance enhancements in 2.4 but 
+		 * Sorting is not working since the performance enhancements in 2.4 but
 		 * sorting for lastupdated is non-standard anyhow.. Hopefully at some point
 		 * we can bring this back
 		 */
@@ -1408,6 +1250,64 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 //			response.close();
 //		}
 
+	}
+
+	@Test
+	public void testForResourcesWithProfile() {
+		Organization o1 = new Organization();
+		o1.setName("testSearchByResourceChainName01");
+		o1.getMeta().addProfile("http://profile1").addProfile("http://profile2");
+		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		Organization o2 = new Organization();
+		o2.setName("testSearchByResourceChainName02");
+		o2.getMeta().addProfile("http://profile1").addProfile("http://profile3");
+		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+
+		Bundle actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withProfile("http://profileX")
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntry());
+
+		actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withProfile("http://profile2")
+				.returnBundle(Bundle.class)
+				.encodedJson()
+				.prettyPrint()
+				.execute();
+
+		Set<String> expectedIds = new HashSet<String>();
+		expectedIds.add(o1id.getIdPart());
+		Set<String> actualIds = new HashSet<String>();
+		for (Entry ele : actual.getEntry()) {
+			actualIds.add(ele.getResource().getId().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
+
+		actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withAnyProfile(Arrays.asList("http://profile3", "http://profile2"))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+		expectedIds = new HashSet<String>();
+		expectedIds.add(o1id.getIdPart());
+		expectedIds.add(o2id.getIdPart());
+		actualIds = new HashSet<String>();
+		for (Entry ele : actual.getEntry()) {
+			actualIds.add(ele.getResource().getId().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
 	}
 
 	@Test
@@ -1487,58 +1387,20 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testMetadata() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-	}
-
-	@Test
-	public void testMetaOperations() throws Exception {
-		String methodName = "testMetaOperations";
-
-		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
-		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
-
-		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
-		assertEquals(0, meta.getTag().size());
-
-		MetaDt inMeta = new MetaDt();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
-		assertEquals(1, meta.getTag().size());
-
-		inMeta = new MetaDt();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertEquals(0, meta.getTag().size());
-
-	}
-
-	@Test
 	public void testMetaOperationWithNoMetaParameter() throws Exception {
 		Patient p = new Patient();
 		p.addName().addFamily("testMetaAddInvalid");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		//@formatter:off
-		String input = "<Parameters>\n" + 
-				"  <meta>\n" + 
-				"    <tag>\n" + 
-				"      <system value=\"http://example.org/codes/tags\"/>\n" + 
-				"      <code value=\"record-lost\"/>\n" + 
-				"      <display value=\"Patient File Lost\"/>\n" + 
-				"    </tag>\n" + 
-				"  </meta>\n" + 
+		String input = "<Parameters>\n" +
+				"  <meta>\n" +
+				"    <tag>\n" +
+				"      <system value=\"http://example.org/codes/tags\"/>\n" +
+				"      <code value=\"record-lost\"/>\n" +
+				"      <display value=\"Patient File Lost\"/>\n" +
+				"    </tag>\n" +
+				"  </meta>\n" +
 				"</Parameters>";
 		//@formatter:on
 
@@ -1565,6 +1427,128 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		} finally {
 			response.close();
 		}
+
+	}
+
+	@Test
+	public void testMetaOperations() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
+		assertEquals(0, meta.getTag().size());
+
+		MetaDt inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(0, meta.getTag().size());
+
+	}
+
+	@Test
+	public void testMetadata() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testPagingOverEverythingSet() throws InterruptedException {
+		Patient p = new Patient();
+		p.setActive(true);
+		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid);
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o);
+		}
+
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
+			.operation()
+			.onInstance(new IdDt(pid))
+			.named("everything")
+			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.useHttpGet()
+			.execute();
+
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValueAsString());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		// Load page 2
+
+		String nextUrl = response.getLink("next").getUrl();
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(10, response.getEntry().size());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		// Load page 3
+		Thread.sleep(2000);
+
+		nextUrl = response.getLink("next").getUrl();
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(1, response.getEntry().size());
+		assertEquals(21, response.getTotal().intValue());
+		assertEquals(null, response.getLink("next"));
+
+	}
+
+	@Test
+	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
+		ourRestServer.setPagingProvider(null);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid);
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o);
+		}
+
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
+			.operation()
+			.onInstance(new IdDt(pid))
+			.named("everything")
+			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.useHttpGet()
+			.execute();
+
+		assertEquals(21, response.getEntry().size());
+		assertEquals(21, response.getTotalElement().getValue().intValue());
+		assertEquals(null, response.getLink("next"));
 
 	}
 
@@ -1682,6 +1666,32 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testSearchByIdOr() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(BaseResource.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
+			.and(BaseResource.RES_ID.matches().value(id1.getIdPart()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertThat(toIdListUnqualifiedVersionless(found), containsInAnyOrder(id1));
+	}
+
+	@Test
 	public void testSearchByIdentifier() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
@@ -1731,29 +1741,42 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testSearchByIdOr() {
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		IIdType id2;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
+	public void testSearchByReferenceIds() {
+		Organization o1 = new Organization();
+		o1.setName("testSearchByResourceChainName01");
+		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		Organization o2 = new Organization();
+		o2.setName("testSearchByResourceChainName02");
+		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
 
-		Bundle found = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(BaseResource.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
-			.and(BaseResource.RES_ID.matches().value(id1.getIdPart()))
-			.returnBundle(Bundle.class)
-			.execute();
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
+		p1.addName().addFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
+		p1.setManagingOrganization(new ResourceReferenceDt(o1id.toUnqualifiedVersionless()));
+		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		assertThat(toIdListUnqualifiedVersionless(found), containsInAnyOrder(id1));
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
+		p2.addName().addFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
+		p2.setManagingOrganization(new ResourceReferenceDt(o2id.toUnqualifiedVersionless()));
+		IdDt p2Id = (IdDt) ourClient.create().resource(p2).execute().getId();
+
+		Bundle actual = ourClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+		Set<String> expectedIds = new HashSet<String>();
+		expectedIds.add(p1Id.getIdPart());
+		expectedIds.add(p2Id.getIdPart());
+		Set<String> actualIds = new HashSet<String>();
+		for (Entry ele : actual.getEntry()) {
+			actualIds.add(ele.getResource().getId().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
 	}
 
 	@Test
@@ -1792,103 +1815,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	@Test
-	public void testSearchByReferenceIds() {
-		Organization o1 = new Organization();
-		o1.setName("testSearchByResourceChainName01");
-		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
-		Organization o2 = new Organization();
-		o2.setName("testSearchByResourceChainName02");
-		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
-		p1.addName().addFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt(o1id.toUnqualifiedVersionless()));
-		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
-
-		Patient p2 = new Patient();
-		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
-		p2.addName().addFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
-		p2.setManagingOrganization(new ResourceReferenceDt(o2id.toUnqualifiedVersionless()));
-		IdDt p2Id = (IdDt) ourClient.create().resource(p2).execute().getId();
-
-		Bundle actual = ourClient.search()
-				.forResource(Patient.class)
-				.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
-				.encodedJson()
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
-
-		Set<String> expectedIds = new HashSet<String>();
-		expectedIds.add(p1Id.getIdPart());
-		expectedIds.add(p2Id.getIdPart());
-		Set<String> actualIds = new HashSet<String>();
-		for (Entry ele : actual.getEntry()) {
-			actualIds.add(ele.getResource().getId().getIdPart());
-		}
-		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
-	}
-	
-	@Test
-	public void testForResourcesWithProfile() {
-		Organization o1 = new Organization();
-		o1.setName("testSearchByResourceChainName01");
-		o1.getMeta().addProfile("http://profile1").addProfile("http://profile2");
-		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();	
-		Organization o2 = new Organization();
-		o2.setName("testSearchByResourceChainName02");
-		o2.getMeta().addProfile("http://profile1").addProfile("http://profile3");
-		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
-
-		Bundle actual = ourClient.search()
-				.forResource(Organization.class)
-				.withProfile("http://profile1")
-				.withProfile("http://profileX")
-				.encodedJson()
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
-
-		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntry());
-
-		actual = ourClient.search()
-				.forResource(Organization.class)
-				.withProfile("http://profile1")
-				.withProfile("http://profile2")
-				.returnBundle(Bundle.class)
-				.encodedJson()
-				.prettyPrint()
-				.execute();
-
-		Set<String> expectedIds = new HashSet<String>();
-		expectedIds.add(o1id.getIdPart());
-		Set<String> actualIds = new HashSet<String>();
-		for (Entry ele : actual.getEntry()) {
-			actualIds.add(ele.getResource().getId().getIdPart());
-		}
-		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
-
-		actual = ourClient.search()
-				.forResource(Organization.class)
-				.withProfile("http://profile1")
-				.withAnyProfile(Arrays.asList("http://profile3", "http://profile2"))
-				.encodedJson()
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
-
-		expectedIds = new HashSet<String>();
-		expectedIds.add(o1id.getIdPart());
-		expectedIds.add(o2id.getIdPart());
-		actualIds = new HashSet<String>();
-		for (Entry ele : actual.getEntry()) {
-			actualIds.add(ele.getResource().getId().getIdPart());
-		}
-		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
-	}
-	
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParamRp";
@@ -1985,6 +1911,31 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 	}
 
+	/**
+	 * See #441
+	 */
+	@Test
+	public void testSearchMedicationChain() throws Exception {
+		Medication medication = new Medication();
+		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
+		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
+
+		MedicationAdministration ma = new MedicationAdministration();
+		ma.setMedication(new ResourceReferenceDt(medId));
+		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/MedicationAdministration?medication.code=04823543");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString, containsString(moId.getIdPart()));
+		} finally {
+			response.close();
+		}
+
+	}
+
 	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
 		int matches;
 		HttpGet get = new HttpGet(ourServerBase + search);
@@ -1997,7 +1948,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(matches, greaterThan(0));
 	}
-
+	
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
 		ourLog.info("Starting testSearchReturnsSearchDate");
@@ -2024,7 +1975,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertTrue(value.after(before));
 		assertTrue(value.before(after));
 	}
-
+	
 	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
@@ -2052,7 +2003,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
 		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
-	
 
 	@Test(expected = InvalidRequestException.class)
 	public void testSearchWithInvalidSort() throws Exception {
@@ -2141,7 +2091,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		checkParamMissing(Observation.SP_ENCOUNTER);
 		checkParamMissing(Observation.SP_DATE);
 	}
-
+	
 	@Test
 	public void testSearchWithTextInexactMatch() throws Exception {
 		Observation obs = new Observation();
@@ -2154,6 +2104,32 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@Test
+	public void testSmallResultIncludes() {
+		Patient p = new Patient();
+		p.setId("p");
+		p.setActive(true);
+		ourClient.update().resource(p).execute();
+
+		CarePlan cp = new CarePlan();
+		cp.setId("cp");
+		cp.getSubject().setResource(p);
+		cp.addActivity().getDetail().getCode().addCoding().setSystem("FOO").setCode("BAR");
+		ourClient.update().resource(cp).execute();
+
+		Bundle b = ourClient
+			.search()
+			.forResource(CarePlan.class)
+			.where(CarePlan.ACTIVITYCODE.exactly().systemAndCode("FOO", "BAR"))
+			.sort().ascending(CarePlan.SP_ACTIVITYDATE)
+			.include(CarePlan.INCLUDE_SUBJECT)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, b.getEntry().size());
+
 	}
 
 	/**
@@ -2279,7 +2255,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			"Brian Gracia",
 			"Sarah Graham",
 			"Stephan Graham"));
-			
+
 	}
 
 	/**
@@ -2423,7 +2399,49 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 	}
-	
+
+	@Test
+	public void testUpdateResourceConditionalComplex() throws IOException {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		IdDt id;
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+		pt.addName().addFamily("FOO");
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		IdDt id2;
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id2 = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("1", id.getVersionIdPart());
+		assertEquals("2", id2.getVersionIdPart());
+	}
+
 	@Test
 	public void testUpdateResourceWithPrefer() throws IOException, Exception {
 		String methodName = "testUpdateResourceWithPrefer";
@@ -2451,7 +2469,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.setId(id);
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAAAAA");
 		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
-		
+
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -2472,7 +2490,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 	}
-
+	
 	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
 		Patient p1 = new Patient();
@@ -2491,9 +2509,117 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();
-		
+
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
+
+	}
+
+	/**
+	 * From example from david hay - moved to the hl7org_dstu2 project
+	 */
+	@Test
+	@Ignore
+	public void testValidateDavidsAllergyIntolerance() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		/*
+		 * Upload structurredef
+		 */
+
+		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+		HttpEntityEnclosingRequestBase post = new HttpPut(ourServerBase + "/StructureDefinition/ohAllergyIntolerance");
+		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+
+		/*
+		 * Validate
+		 */
+
+		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+
+		post = new HttpPost(ourServerBase + "/AllergyIntolerance/$validate?_pretty=true");
+		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, not(containsString("Resource has no id")));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testValidateOnNoId() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/$validate");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertThat(responseString, containsString("No resource supplied for $validate operation"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+
+	}
+	
+	/**
+	 * From a Skype message from Brian Postlethwaite
+	 */
+	@Test
+	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
+
+		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
+
+		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
+		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
+
+
+		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertThat(responseString, containsString("No issues detected"));
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+
+	}
+
+	/**
+	 * From a Skype message from Brian Postlethwaite
+	 */
+	@Test
+	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
+
+		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
+		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertThat(responseString, containsString("Resource has no ID"));
+			assertEquals(422, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
 
 	}
 
@@ -2524,53 +2650,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 	}
-	
-	/**
-	 * From example from david hay - moved to the hl7org_dstu2 project
-	 */
-	@Test
-	@Ignore
-	public void testValidateDavidsAllergyIntolerance() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
-		
-		/*
-		 * Upload structurredef 
-		 */
-		
-		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
-		HttpEntityEnclosingRequestBase post = new HttpPut(ourServerBase + "/StructureDefinition/ohAllergyIntolerance");
-		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-		
-		/*
-		 * Validate
-		 */
-		
-		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
-
-		post = new HttpPost(ourServerBase + "/AllergyIntolerance/$validate?_pretty=true");
-		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, not(containsString("Resource has no id")));
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-	}
-
 
 	@Test
 	public void testValidateResourceHuge() throws IOException {
@@ -2641,19 +2720,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			// @formatter:off
 			assertThat(resp,
-				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-					"<expansion>", 
-						"<contains>", 
+				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+					"<expansion>",
+						"<contains>",
 							"<system value=\"http://loinc.org\"/>",
 							"<code value=\"11378-7\"/>",
-							"<display value=\"Systolic blood pressure at First encounter\"/>", 
+							"<display value=\"Systolic blood pressure at First encounter\"/>",
 						"</contains>",
-						"<contains>", 
+						"<contains>",
 							"<system value=\"http://loinc.org\"/>",
-							"<code value=\"8450-9\"/>", 
-							"<display value=\"Systolic blood pressure--expiration\"/>", 
+							"<code value=\"8450-9\"/>",
+							"<display value=\"Systolic blood pressure--expiration\"/>",
 						"</contains>",
-					"</expansion>" 
+					"</expansion>"
 						));
 			//@formatter:on
 		} finally {
@@ -2673,7 +2752,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			//@formatter:off
 			assertThat(resp, stringContainsInOrder(
-					"<code value=\"11378-7\"/>", 
+					"<code value=\"11378-7\"/>",
 					"<display value=\"Systolic blood pressure at First encounter\"/>"));
 			//@formatter:on
 		} finally {
@@ -2693,7 +2772,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			//@formatter:off
 			assertThat(resp, stringContainsInOrder(
-					"<code value=\"11378-7\"/>", 
+					"<code value=\"11378-7\"/>",
 					"<display value=\"Systolic blood pressure at First encounter\"/>"
 					));
 			//@formatter:on
@@ -2703,67 +2782,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 	}
-
-	@Test
-	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/$validate");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("No resource supplied for $validate operation"));
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-		
-	}
-
-	/**
-	 * From a Skype message from Brian Postlethwaite
-	 */
-	@Test
-	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
-		
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
-		
-		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
-		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
-		
-		
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("No issues detected"));
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-		
-	}
 	
-	/**
-	 * From a Skype message from Brian Postlethwaite
-	 */
-	@Test
-	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
-		
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("Resource has no ID"));
-			assertEquals(422, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-		
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

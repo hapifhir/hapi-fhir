@@ -1745,9 +1745,7 @@ public class XmlParserHl7OrgDstu2Test {
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-    // The encoded escapes quote marks using XML escaping instead of JSON
-    // escaping, which is probably nicer anyhow...
-    String exp = fixDivNodeTextJson(expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;"));
+    String exp = fixDivNodeTextJson(expected.toString());
     String act = fixDivNodeTextJson(actual.toString());
 
     ourLog.info("Expected: {}", exp);

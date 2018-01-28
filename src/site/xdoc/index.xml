@@ -70,6 +70,50 @@
 
 		<section name="Announcements">
 			<p>
+				<b>Jan 13, 2018 - HAPI FHIR 3.2.0 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This is a fairly light release, with only a small number of
+				new features, and a few bugfixes. See the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes.
+			</p>
+
+			<ul>
+				<li>
+					Support for using SearchParameter resources to define custom parameters
+					in the JPA server has been backported to DSTU2, meaning that DSTU2 servers
+					can now user this functionality (previously only DSTU3/R4 supported this)
+				</li>
+				<li>
+					Several tweaks and enhancements to the server interceptor framework
+					have been added
+				</li>
+				<li>
+					Multitenancy support has been added to the server framework (note that
+					this is only the plain server framework at this point, not the JPA
+					server)
+				</li>
+				<li>
+					The R4 structures have been synced to the latest definitions in
+					anticipation of the January FHIR Connecathon (see <a href="http://hapifhir.io/download.html">Downloads</a> for version details)
+				</li>
+				<li>
+					Several bugfixes have been made
+				</li>
+			</ul>
+
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<p>
 				<b>November 23, 2017 - HAPI FHIR 3.1.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.

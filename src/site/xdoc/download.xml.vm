@@ -19,6 +19,15 @@
 				and support for draft pre-release versions of FHIR are shown in 
 				<span style="background: #EEB; padding: 3px;">YELLOW</span>.
 			</p>
+			<p>
+				Note also that after the release of the FHIR DSTU2 specification, the FHIR
+				standard itself stopped using the DSTUx naming scheme, in favour or naming
+				new releases STUx or simply Rx. Because HAPI FHIR already had draft support
+				for what was then called DSTU3 at this time, we did not update our naming
+				conventions until R4 in order to avoid breaking existing users' code.
+				From the perspective of a user of HAPI FHIR, consider the terms
+				DSTU3 / STU3 / R3 to be interchangeable.
+			</p>
 			<table>
 				<thead>
 					<tr>
@@ -134,7 +143,24 @@
 						<td style="background: #EEB;">Draft 1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">Draft 3.1.0-12370</td>
+						</tr>
+					<tr>
+						<td>HAPI FHIR 3.1.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">Draft 3.1.0-12370</td>
 					</tr>
+					<tr>
+						<td>HAPI FHIR 3.2.0</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">Draft 1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">Draft 3.2.0-12917</td>
+					</tr>
+
 				</tbody>
 			</table>
 

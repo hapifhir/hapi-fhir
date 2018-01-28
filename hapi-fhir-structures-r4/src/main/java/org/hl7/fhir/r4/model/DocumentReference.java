@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -493,22 +493,22 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReferenceAgentComponent))
+        if (!(other_ instanceof DocumentReferenceAgentComponent))
           return false;
-        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other;
+        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(who, o.who, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReferenceAgentComponent))
+        if (!(other_ instanceof DocumentReferenceAgentComponent))
           return false;
-        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other;
+        DocumentReferenceAgentComponent o = (DocumentReferenceAgentComponent) other_;
         return true;
       }
 
@@ -747,22 +747,22 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReferenceRelatesToComponent))
+        if (!(other_ instanceof DocumentReferenceRelatesToComponent))
           return false;
-        DocumentReferenceRelatesToComponent o = (DocumentReferenceRelatesToComponent) other;
+        DocumentReferenceRelatesToComponent o = (DocumentReferenceRelatesToComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(target, o.target, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReferenceRelatesToComponent))
+        if (!(other_ instanceof DocumentReferenceRelatesToComponent))
           return false;
-        DocumentReferenceRelatesToComponent o = (DocumentReferenceRelatesToComponent) other;
+        DocumentReferenceRelatesToComponent o = (DocumentReferenceRelatesToComponent) other_;
         return compareValues(code, o.code, true);
       }
 
@@ -953,22 +953,22 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContentComponent))
+        if (!(other_ instanceof DocumentReferenceContentComponent))
           return false;
-        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other;
+        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other_;
         return compareDeep(attachment, o.attachment, true) && compareDeep(format, o.format, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContentComponent))
+        if (!(other_ instanceof DocumentReferenceContentComponent))
           return false;
-        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other;
+        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other_;
         return true;
       }
 
@@ -1497,12 +1497,12 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContextComponent))
+        if (!(other_ instanceof DocumentReferenceContextComponent))
           return false;
-        DocumentReferenceContextComponent o = (DocumentReferenceContextComponent) other;
+        DocumentReferenceContextComponent o = (DocumentReferenceContextComponent) other_;
         return compareDeep(encounter, o.encounter, true) && compareDeep(event, o.event, true) && compareDeep(period, o.period, true)
            && compareDeep(facilityType, o.facilityType, true) && compareDeep(practiceSetting, o.practiceSetting, true)
            && compareDeep(sourcePatientInfo, o.sourcePatientInfo, true) && compareDeep(related, o.related, true)
@@ -1510,12 +1510,12 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContextComponent))
+        if (!(other_ instanceof DocumentReferenceContextComponent))
           return false;
-        DocumentReferenceContextComponent o = (DocumentReferenceContextComponent) other;
+        DocumentReferenceContextComponent o = (DocumentReferenceContextComponent) other_;
         return true;
       }
 
@@ -1718,22 +1718,22 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContextRelatedComponent))
+        if (!(other_ instanceof DocumentReferenceContextRelatedComponent))
           return false;
-        DocumentReferenceContextRelatedComponent o = (DocumentReferenceContextRelatedComponent) other;
+        DocumentReferenceContextRelatedComponent o = (DocumentReferenceContextRelatedComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(ref, o.ref, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReferenceContextRelatedComponent))
+        if (!(other_ instanceof DocumentReferenceContextRelatedComponent))
           return false;
-        DocumentReferenceContextRelatedComponent o = (DocumentReferenceContextRelatedComponent) other;
+        DocumentReferenceContextRelatedComponent o = (DocumentReferenceContextRelatedComponent) other_;
         return true;
       }
 
@@ -2970,12 +2970,12 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentReference))
+        if (!(other_ instanceof DocumentReference))
           return false;
-        DocumentReference o = (DocumentReference) other;
+        DocumentReference o = (DocumentReference) other_;
         return compareDeep(masterIdentifier, o.masterIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(status, o.status, true) && compareDeep(docStatus, o.docStatus, true) && compareDeep(type, o.type, true)
            && compareDeep(class_, o.class_, true) && compareDeep(subject, o.subject, true) && compareDeep(created, o.created, true)
@@ -2986,12 +2986,12 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentReference))
+        if (!(other_ instanceof DocumentReference))
           return false;
-        DocumentReference o = (DocumentReference) other;
+        DocumentReference o = (DocumentReference) other_;
         return compareValues(status, o.status, true) && compareValues(docStatus, o.docStatus, true) && compareValues(created, o.created, true)
            && compareValues(date, o.date, true) && compareValues(description, o.description, true);
       }

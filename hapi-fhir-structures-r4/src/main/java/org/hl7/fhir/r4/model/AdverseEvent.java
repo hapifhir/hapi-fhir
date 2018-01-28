@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -136,290 +136,6 @@ public class AdverseEvent extends DomainResource {
       return "?";
       }
     public String toSystem(AdverseEventActuality code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum AdverseEventCategory {
-        /**
-         * null
-         */
-        PRODUCTPROBLEM, 
-        /**
-         * null
-         */
-        PRODUCTQUALITY, 
-        /**
-         * null
-         */
-        PRODUCTUSEERROR, 
-        /**
-         * null
-         */
-        WRONGDOSE, 
-        /**
-         * null
-         */
-        INCORRECTPRESCRIBINGINFORMATION, 
-        /**
-         * null
-         */
-        WRONGTECHNIQUE, 
-        /**
-         * null
-         */
-        WRONGROUTEOFADMINISTRATION, 
-        /**
-         * null
-         */
-        WRONGRATE, 
-        /**
-         * null
-         */
-        WRONGDURATION, 
-        /**
-         * null
-         */
-        WRONGTIME, 
-        /**
-         * null
-         */
-        EXPIREDDRUG, 
-        /**
-         * null
-         */
-        MEDICALDEVICEUSEERROR, 
-        /**
-         * null
-         */
-        PROBLEMDIFFERENTMANUFACTURER, 
-        /**
-         * null
-         */
-        UNSAFEPHYSICALENVIRONMENT, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static AdverseEventCategory fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("ProductProblem".equals(codeString))
-          return PRODUCTPROBLEM;
-        if ("ProductQuality".equals(codeString))
-          return PRODUCTQUALITY;
-        if ("ProductUseError".equals(codeString))
-          return PRODUCTUSEERROR;
-        if ("WrongDose".equals(codeString))
-          return WRONGDOSE;
-        if ("IncorrectPrescribingInformation".equals(codeString))
-          return INCORRECTPRESCRIBINGINFORMATION;
-        if ("WrongTechnique".equals(codeString))
-          return WRONGTECHNIQUE;
-        if ("WrongRouteOfAdministration".equals(codeString))
-          return WRONGROUTEOFADMINISTRATION;
-        if ("WrongRate".equals(codeString))
-          return WRONGRATE;
-        if ("WrongDuration".equals(codeString))
-          return WRONGDURATION;
-        if ("WrongTime".equals(codeString))
-          return WRONGTIME;
-        if ("ExpiredDrug".equals(codeString))
-          return EXPIREDDRUG;
-        if ("MedicalDeviceUseError".equals(codeString))
-          return MEDICALDEVICEUSEERROR;
-        if ("ProblemDifferentManufacturer".equals(codeString))
-          return PROBLEMDIFFERENTMANUFACTURER;
-        if ("UnsafePhysicalEnvironment".equals(codeString))
-          return UNSAFEPHYSICALENVIRONMENT;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown AdverseEventCategory code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case PRODUCTPROBLEM: return "ProductProblem";
-            case PRODUCTQUALITY: return "ProductQuality";
-            case PRODUCTUSEERROR: return "ProductUseError";
-            case WRONGDOSE: return "WrongDose";
-            case INCORRECTPRESCRIBINGINFORMATION: return "IncorrectPrescribingInformation";
-            case WRONGTECHNIQUE: return "WrongTechnique";
-            case WRONGROUTEOFADMINISTRATION: return "WrongRouteOfAdministration";
-            case WRONGRATE: return "WrongRate";
-            case WRONGDURATION: return "WrongDuration";
-            case WRONGTIME: return "WrongTime";
-            case EXPIREDDRUG: return "ExpiredDrug";
-            case MEDICALDEVICEUSEERROR: return "MedicalDeviceUseError";
-            case PROBLEMDIFFERENTMANUFACTURER: return "ProblemDifferentManufacturer";
-            case UNSAFEPHYSICALENVIRONMENT: return "UnsafePhysicalEnvironment";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case PRODUCTPROBLEM: return "http://hl7.org/fhir/adverse-event-category";
-            case PRODUCTQUALITY: return "http://hl7.org/fhir/adverse-event-category";
-            case PRODUCTUSEERROR: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGDOSE: return "http://hl7.org/fhir/adverse-event-category";
-            case INCORRECTPRESCRIBINGINFORMATION: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGTECHNIQUE: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGROUTEOFADMINISTRATION: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGRATE: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGDURATION: return "http://hl7.org/fhir/adverse-event-category";
-            case WRONGTIME: return "http://hl7.org/fhir/adverse-event-category";
-            case EXPIREDDRUG: return "http://hl7.org/fhir/adverse-event-category";
-            case MEDICALDEVICEUSEERROR: return "http://hl7.org/fhir/adverse-event-category";
-            case PROBLEMDIFFERENTMANUFACTURER: return "http://hl7.org/fhir/adverse-event-category";
-            case UNSAFEPHYSICALENVIRONMENT: return "http://hl7.org/fhir/adverse-event-category";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case PRODUCTPROBLEM: return "";
-            case PRODUCTQUALITY: return "";
-            case PRODUCTUSEERROR: return "";
-            case WRONGDOSE: return "";
-            case INCORRECTPRESCRIBINGINFORMATION: return "";
-            case WRONGTECHNIQUE: return "";
-            case WRONGROUTEOFADMINISTRATION: return "";
-            case WRONGRATE: return "";
-            case WRONGDURATION: return "";
-            case WRONGTIME: return "";
-            case EXPIREDDRUG: return "";
-            case MEDICALDEVICEUSEERROR: return "";
-            case PROBLEMDIFFERENTMANUFACTURER: return "";
-            case UNSAFEPHYSICALENVIRONMENT: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case PRODUCTPROBLEM: return "Product Problem";
-            case PRODUCTQUALITY: return "Product Quality";
-            case PRODUCTUSEERROR: return "Product Use Error";
-            case WRONGDOSE: return "Wrong Dose";
-            case INCORRECTPRESCRIBINGINFORMATION: return "Incorrect Prescribing Information";
-            case WRONGTECHNIQUE: return "Wrong Technique";
-            case WRONGROUTEOFADMINISTRATION: return "Wrong Route of Administration";
-            case WRONGRATE: return "Wrong Rate";
-            case WRONGDURATION: return "Wrong Duration";
-            case WRONGTIME: return "Wrong Time";
-            case EXPIREDDRUG: return "Expired Drug";
-            case MEDICALDEVICEUSEERROR: return "Medical Device Use Error";
-            case PROBLEMDIFFERENTMANUFACTURER: return "Problem with Different Manufacturer of Same Medicine";
-            case UNSAFEPHYSICALENVIRONMENT: return "Unsafe Physical Environment";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class AdverseEventCategoryEnumFactory implements EnumFactory<AdverseEventCategory> {
-    public AdverseEventCategory fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("ProductProblem".equals(codeString))
-          return AdverseEventCategory.PRODUCTPROBLEM;
-        if ("ProductQuality".equals(codeString))
-          return AdverseEventCategory.PRODUCTQUALITY;
-        if ("ProductUseError".equals(codeString))
-          return AdverseEventCategory.PRODUCTUSEERROR;
-        if ("WrongDose".equals(codeString))
-          return AdverseEventCategory.WRONGDOSE;
-        if ("IncorrectPrescribingInformation".equals(codeString))
-          return AdverseEventCategory.INCORRECTPRESCRIBINGINFORMATION;
-        if ("WrongTechnique".equals(codeString))
-          return AdverseEventCategory.WRONGTECHNIQUE;
-        if ("WrongRouteOfAdministration".equals(codeString))
-          return AdverseEventCategory.WRONGROUTEOFADMINISTRATION;
-        if ("WrongRate".equals(codeString))
-          return AdverseEventCategory.WRONGRATE;
-        if ("WrongDuration".equals(codeString))
-          return AdverseEventCategory.WRONGDURATION;
-        if ("WrongTime".equals(codeString))
-          return AdverseEventCategory.WRONGTIME;
-        if ("ExpiredDrug".equals(codeString))
-          return AdverseEventCategory.EXPIREDDRUG;
-        if ("MedicalDeviceUseError".equals(codeString))
-          return AdverseEventCategory.MEDICALDEVICEUSEERROR;
-        if ("ProblemDifferentManufacturer".equals(codeString))
-          return AdverseEventCategory.PROBLEMDIFFERENTMANUFACTURER;
-        if ("UnsafePhysicalEnvironment".equals(codeString))
-          return AdverseEventCategory.UNSAFEPHYSICALENVIRONMENT;
-        throw new IllegalArgumentException("Unknown AdverseEventCategory code '"+codeString+"'");
-        }
-        public Enumeration<AdverseEventCategory> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<AdverseEventCategory>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("ProductProblem".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.PRODUCTPROBLEM);
-        if ("ProductQuality".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.PRODUCTQUALITY);
-        if ("ProductUseError".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.PRODUCTUSEERROR);
-        if ("WrongDose".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGDOSE);
-        if ("IncorrectPrescribingInformation".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.INCORRECTPRESCRIBINGINFORMATION);
-        if ("WrongTechnique".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGTECHNIQUE);
-        if ("WrongRouteOfAdministration".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGROUTEOFADMINISTRATION);
-        if ("WrongRate".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGRATE);
-        if ("WrongDuration".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGDURATION);
-        if ("WrongTime".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.WRONGTIME);
-        if ("ExpiredDrug".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.EXPIREDDRUG);
-        if ("MedicalDeviceUseError".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.MEDICALDEVICEUSEERROR);
-        if ("ProblemDifferentManufacturer".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.PROBLEMDIFFERENTMANUFACTURER);
-        if ("UnsafePhysicalEnvironment".equals(codeString))
-          return new Enumeration<AdverseEventCategory>(this, AdverseEventCategory.UNSAFEPHYSICALENVIRONMENT);
-        throw new FHIRException("Unknown AdverseEventCategory code '"+codeString+"'");
-        }
-    public String toCode(AdverseEventCategory code) {
-      if (code == AdverseEventCategory.PRODUCTPROBLEM)
-        return "ProductProblem";
-      if (code == AdverseEventCategory.PRODUCTQUALITY)
-        return "ProductQuality";
-      if (code == AdverseEventCategory.PRODUCTUSEERROR)
-        return "ProductUseError";
-      if (code == AdverseEventCategory.WRONGDOSE)
-        return "WrongDose";
-      if (code == AdverseEventCategory.INCORRECTPRESCRIBINGINFORMATION)
-        return "IncorrectPrescribingInformation";
-      if (code == AdverseEventCategory.WRONGTECHNIQUE)
-        return "WrongTechnique";
-      if (code == AdverseEventCategory.WRONGROUTEOFADMINISTRATION)
-        return "WrongRouteOfAdministration";
-      if (code == AdverseEventCategory.WRONGRATE)
-        return "WrongRate";
-      if (code == AdverseEventCategory.WRONGDURATION)
-        return "WrongDuration";
-      if (code == AdverseEventCategory.WRONGTIME)
-        return "WrongTime";
-      if (code == AdverseEventCategory.EXPIREDDRUG)
-        return "ExpiredDrug";
-      if (code == AdverseEventCategory.MEDICALDEVICEUSEERROR)
-        return "MedicalDeviceUseError";
-      if (code == AdverseEventCategory.PROBLEMDIFFERENTMANUFACTURER)
-        return "ProblemDifferentManufacturer";
-      if (code == AdverseEventCategory.UNSAFEPHYSICALENVIRONMENT)
-        return "UnsafePhysicalEnvironment";
-      return "?";
-      }
-    public String toSystem(AdverseEventCategory code) {
       return code.getSystem();
       }
     }
@@ -651,22 +367,22 @@ public class AdverseEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AdverseEventSuspectEntityComponent))
+        if (!(other_ instanceof AdverseEventSuspectEntityComponent))
           return false;
-        AdverseEventSuspectEntityComponent o = (AdverseEventSuspectEntityComponent) other;
+        AdverseEventSuspectEntityComponent o = (AdverseEventSuspectEntityComponent) other_;
         return compareDeep(instance, o.instance, true) && compareDeep(causality, o.causality, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AdverseEventSuspectEntityComponent))
+        if (!(other_ instanceof AdverseEventSuspectEntityComponent))
           return false;
-        AdverseEventSuspectEntityComponent o = (AdverseEventSuspectEntityComponent) other;
+        AdverseEventSuspectEntityComponent o = (AdverseEventSuspectEntityComponent) other_;
         return true;
       }
 
@@ -986,23 +702,23 @@ public class AdverseEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AdverseEventSuspectEntityCausalityComponent))
+        if (!(other_ instanceof AdverseEventSuspectEntityCausalityComponent))
           return false;
-        AdverseEventSuspectEntityCausalityComponent o = (AdverseEventSuspectEntityCausalityComponent) other;
+        AdverseEventSuspectEntityCausalityComponent o = (AdverseEventSuspectEntityCausalityComponent) other_;
         return compareDeep(assessment, o.assessment, true) && compareDeep(productRelatedness, o.productRelatedness, true)
            && compareDeep(author, o.author, true) && compareDeep(method, o.method, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AdverseEventSuspectEntityCausalityComponent))
+        if (!(other_ instanceof AdverseEventSuspectEntityCausalityComponent))
           return false;
-        AdverseEventSuspectEntityCausalityComponent o = (AdverseEventSuspectEntityCausalityComponent) other;
+        AdverseEventSuspectEntityCausalityComponent o = (AdverseEventSuspectEntityCausalityComponent) other_;
         return compareValues(productRelatedness, o.productRelatedness, true);
       }
 
@@ -1036,10 +752,10 @@ public class AdverseEvent extends DomainResource {
     /**
      * The overall type of event, intended for search and filtering purposes.
      */
-    @Child(name = "category", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="ProductProblem | ProductQuality | ProductUseError | WrongDose | IncorrectPrescribingInformation | WrongTechnique | WrongRouteOfAdministration | WrongRate | WrongDuration | WrongTime | ExpiredDrug | MedicalDeviceUseError | ProblemDifferentManufacturer | UnsafePhysicalEnvironment", formalDefinition="The overall type of event, intended for search and filtering purposes." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-category")
-    protected Enumeration<AdverseEventCategory> category;
+    protected List<CodeableConcept> category;
 
     /**
      * This element defines the specific type of event that occurred or that was prevented from occurring.
@@ -1052,7 +768,7 @@ public class AdverseEvent extends DomainResource {
     /**
      * This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.
      */
-    @Child(name = "subject", type = {Patient.class, ResearchSubject.class, Practitioner.class, RelatedPerson.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class, Practitioner.class, RelatedPerson.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Subject impacted by event", formalDefinition="This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented." )
     protected Reference subject;
 
@@ -1101,10 +817,10 @@ public class AdverseEvent extends DomainResource {
     protected CodeableConcept seriousness;
 
     /**
-     * Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.
+     * Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.
      */
     @Child(name = "severity", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Mild | Moderate | Severe", formalDefinition="Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is." )
+    @Description(shortDefinition="Mild | Moderate | Severe", formalDefinition="Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-severity")
     protected CodeableConcept severity;
 
@@ -1190,7 +906,7 @@ public class AdverseEvent extends DomainResource {
     protected List<ResearchStudy> studyTarget;
 
 
-    private static final long serialVersionUID = -1251491657L;
+    private static final long serialVersionUID = -570008273L;
 
   /**
    * Constructor
@@ -1277,52 +993,56 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (The overall type of event, intended for search and filtering purposes.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
+     * @return {@link #category} (The overall type of event, intended for search and filtering purposes.)
      */
-    public Enumeration<AdverseEventCategory> getCategoryElement() { 
+    public List<CodeableConcept> getCategory() { 
       if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AdverseEvent.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new Enumeration<AdverseEventCategory>(new AdverseEventCategoryEnumFactory()); // bb
+        this.category = new ArrayList<CodeableConcept>();
       return this.category;
     }
 
-    public boolean hasCategoryElement() { 
-      return this.category != null && !this.category.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public AdverseEvent setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
     }
 
     public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    /**
-     * @param value {@link #category} (The overall type of event, intended for search and filtering purposes.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
-     */
-    public AdverseEvent setCategoryElement(Enumeration<AdverseEventCategory> value) { 
-      this.category = value;
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public AdverseEvent addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
       return this;
     }
 
     /**
-     * @return The overall type of event, intended for search and filtering purposes.
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public AdverseEventCategory getCategory() { 
-      return this.category == null ? null : this.category.getValue();
-    }
-
-    /**
-     * @param value The overall type of event, intended for search and filtering purposes.
-     */
-    public AdverseEvent setCategory(AdverseEventCategory value) { 
-      if (value == null)
-        this.category = null;
-      else {
-        if (this.category == null)
-          this.category = new Enumeration<AdverseEventCategory>(new AdverseEventCategoryEnumFactory());
-        this.category.setValue(value);
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
       }
-      return this;
+      return getCategory().get(0);
     }
 
     /**
@@ -1581,7 +1301,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #severity} (Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.)
+     * @return {@link #severity} (Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.)
      */
     public CodeableConcept getSeverity() { 
       if (this.severity == null)
@@ -1597,7 +1317,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #severity} (Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.)
+     * @param value {@link #severity} (Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.)
      */
     public AdverseEvent setSeverity(CodeableConcept value) { 
       this.severity = value;
@@ -2025,14 +1745,14 @@ public class AdverseEvent extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, 1, identifier));
         children.add(new Property("actuality", "code", "Whether the event actually happened, or just had the potential to. Note that this is independent of whether anyone was affected or harmed or how severely.", 0, 1, actuality));
-        children.add(new Property("category", "code", "The overall type of event, intended for search and filtering purposes.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "The overall type of event, intended for search and filtering purposes.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("event", "CodeableConcept", "This element defines the specific type of event that occurred or that was prevented from occurring.", 0, 1, event));
-        children.add(new Property("subject", "Reference(Patient|ResearchSubject|Practitioner|RelatedPerson)", "This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Group|Practitioner|RelatedPerson)", "This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, 1, subject));
         children.add(new Property("date", "dateTime", "The date (and perhaps time) when the adverse event occurred.", 0, 1, date));
         children.add(new Property("resultingCondition", "Reference(Condition)", "Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).", 0, java.lang.Integer.MAX_VALUE, resultingCondition));
         children.add(new Property("location", "Reference(Location)", "The information about where the adverse event occurred.", 0, 1, location));
         children.add(new Property("seriousness", "CodeableConcept", "Assessment whether this event was of real importance.", 0, 1, seriousness));
-        children.add(new Property("severity", "CodeableConcept", "Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.", 0, 1, severity));
+        children.add(new Property("severity", "CodeableConcept", "Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.", 0, 1, severity));
         children.add(new Property("outcome", "CodeableConcept", "Describes the type of outcome from the adverse event.", 0, 1, outcome));
         children.add(new Property("recorder", "Reference(Patient|Practitioner|RelatedPerson)", "Information on who recorded the adverse event.  May be the patient or a practitioner.", 0, 1, recorder));
         children.add(new Property("eventParticipant", "Reference(Practitioner|Device)", "Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g. consultant), information that the Act itself seeks to reveal (e.g. informant of clinical history), or information about what Act was performed (e.g. informant witness).", 0, 1, eventParticipant));
@@ -2048,14 +1768,14 @@ public class AdverseEvent extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, 1, identifier);
         case 528866400: /*actuality*/  return new Property("actuality", "code", "Whether the event actually happened, or just had the potential to. Note that this is independent of whether anyone was affected or harmed or how severely.", 0, 1, actuality);
-        case 50511102: /*category*/  return new Property("category", "code", "The overall type of event, intended for search and filtering purposes.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "The overall type of event, intended for search and filtering purposes.", 0, java.lang.Integer.MAX_VALUE, category);
         case 96891546: /*event*/  return new Property("event", "CodeableConcept", "This element defines the specific type of event that occurred or that was prevented from occurring.", 0, 1, event);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|ResearchSubject|Practitioner|RelatedPerson)", "This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Practitioner|RelatedPerson)", "This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, 1, subject);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date (and perhaps time) when the adverse event occurred.", 0, 1, date);
         case -830261258: /*resultingCondition*/  return new Property("resultingCondition", "Reference(Condition)", "Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).", 0, java.lang.Integer.MAX_VALUE, resultingCondition);
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The information about where the adverse event occurred.", 0, 1, location);
         case -1551003909: /*seriousness*/  return new Property("seriousness", "CodeableConcept", "Assessment whether this event was of real importance.", 0, 1, seriousness);
-        case 1478300413: /*severity*/  return new Property("severity", "CodeableConcept", "Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash may not be serious, but a mild heart problem is.", 0, 1, severity);
+        case 1478300413: /*severity*/  return new Property("severity", "CodeableConcept", "Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.serious - a severe rash might not be serious, but a mild heart problem is.", 0, 1, severity);
         case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Describes the type of outcome from the adverse event.", 0, 1, outcome);
         case -799233858: /*recorder*/  return new Property("recorder", "Reference(Patient|Practitioner|RelatedPerson)", "Information on who recorded the adverse event.  May be the patient or a practitioner.", 0, 1, recorder);
         case 270753849: /*eventParticipant*/  return new Property("eventParticipant", "Reference(Practitioner|Device)", "Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g. consultant), information that the Act itself seeks to reveal (e.g. informant of clinical history), or information about what Act was performed (e.g. informant witness).", 0, 1, eventParticipant);
@@ -2074,7 +1794,7 @@ public class AdverseEvent extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 528866400: /*actuality*/ return this.actuality == null ? new Base[0] : new Base[] {this.actuality}; // Enumeration<AdverseEventActuality>
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<AdverseEventCategory>
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
@@ -2106,8 +1826,7 @@ public class AdverseEvent extends DomainResource {
           this.actuality = (Enumeration) value; // Enumeration<AdverseEventActuality>
           return value;
         case 50511102: // category
-          value = new AdverseEventCategoryEnumFactory().fromType(castToCode(value));
-          this.category = (Enumeration) value; // Enumeration<AdverseEventCategory>
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 96891546: // event
           this.event = castToCodeableConcept(value); // CodeableConcept
@@ -2167,8 +1886,7 @@ public class AdverseEvent extends DomainResource {
           value = new AdverseEventActualityEnumFactory().fromType(castToCode(value));
           this.actuality = (Enumeration) value; // Enumeration<AdverseEventActuality>
         } else if (name.equals("category")) {
-          value = new AdverseEventCategoryEnumFactory().fromType(castToCode(value));
-          this.category = (Enumeration) value; // Enumeration<AdverseEventCategory>
+          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("event")) {
           this.event = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subject")) {
@@ -2209,7 +1927,7 @@ public class AdverseEvent extends DomainResource {
         switch (hash) {
         case -1618432855:  return getIdentifier(); 
         case 528866400:  return getActualityElement();
-        case 50511102:  return getCategoryElement();
+        case 50511102:  return addCategory(); 
         case 96891546:  return getEvent(); 
         case -1867885268:  return getSubject(); 
         case 3076014:  return getDateElement();
@@ -2235,7 +1953,7 @@ public class AdverseEvent extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 528866400: /*actuality*/ return new String[] {"code"};
-        case 50511102: /*category*/ return new String[] {"code"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 96891546: /*event*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
@@ -2266,7 +1984,7 @@ public class AdverseEvent extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type AdverseEvent.actuality");
         }
         else if (name.equals("category")) {
-          throw new FHIRException("Cannot call addChild on a primitive type AdverseEvent.category");
+          return addCategory();
         }
         else if (name.equals("event")) {
           this.event = new CodeableConcept();
@@ -2335,7 +2053,11 @@ public class AdverseEvent extends DomainResource {
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.actuality = actuality == null ? null : actuality.copy();
-        dst.category = category == null ? null : category.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         dst.event = event == null ? null : event.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.date = date == null ? null : date.copy();
@@ -2379,12 +2101,12 @@ public class AdverseEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AdverseEvent))
+        if (!(other_ instanceof AdverseEvent))
           return false;
-        AdverseEvent o = (AdverseEvent) other;
+        AdverseEvent o = (AdverseEvent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(actuality, o.actuality, true)
            && compareDeep(category, o.category, true) && compareDeep(event, o.event, true) && compareDeep(subject, o.subject, true)
            && compareDeep(date, o.date, true) && compareDeep(resultingCondition, o.resultingCondition, true)
@@ -2396,14 +2118,14 @@ public class AdverseEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AdverseEvent))
+        if (!(other_ instanceof AdverseEvent))
           return false;
-        AdverseEvent o = (AdverseEvent) other;
-        return compareValues(actuality, o.actuality, true) && compareValues(category, o.category, true) && compareValues(date, o.date, true)
-           && compareValues(description, o.description, true);
+        AdverseEvent o = (AdverseEvent) other_;
+        return compareValues(actuality, o.actuality, true) && compareValues(date, o.date, true) && compareValues(description, o.description, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -2558,7 +2280,7 @@ public class AdverseEvent extends DomainResource {
    * Path: <b>AdverseEvent.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="AdverseEvent.subject", description="Subject impacted by event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class, Practitioner.class, RelatedPerson.class, ResearchSubject.class } )
+  @SearchParamDefinition(name="subject", path="AdverseEvent.subject", description="Subject impacted by event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

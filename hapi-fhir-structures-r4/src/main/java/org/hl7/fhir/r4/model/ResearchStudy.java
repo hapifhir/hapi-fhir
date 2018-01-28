@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -51,29 +51,51 @@ public class ResearchStudy extends DomainResource {
 
     public enum ResearchStudyStatus {
         /**
-         * The study is undergoing design but the process of selecting study subjects and capturing data has not yet begun.
+         * Study is opened for accrual.
          */
-        DRAFT, 
+        ACTIVE, 
         /**
-         * The study is currently being executed
+         * Study is completed prematurely and will not resume; patients are no longer examined nor treated.
+Tagged
          */
-        INPROGRESS, 
+        ADMINISTRATIVELYCOMPLETED, 
         /**
-         * Execution of the study has been temporarily paused
+         * Protocol is approved by the review board.
          */
-        SUSPENDED, 
+        APPROVED, 
         /**
-         * The study was terminated prior to the final determination of results
+         * Study is closed for accrual; patients can be examined and treated.
          */
-        STOPPED, 
+        CLOSEDTOACCRUAL, 
         /**
-         * The information sought by the study has been gathered and compiled and no further work is being performed
+         * Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.
+         */
+        CLOSEDTOACCRUALANDINTERVENTION, 
+        /**
+         * Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment
+or intervention but are still being followed according to the primary objective of the study.
          */
         COMPLETED, 
         /**
-         * This study never actually existed.  The record is retained for tracking purposes in the event decisions may have been made based on this erroneous information.
+         * Protocol was disapproved by the review board.
          */
-        ENTEREDINERROR, 
+        DISAPPROVED, 
+        /**
+         * Protocol is submitted to the review board for approval.
+         */
+        INREVIEW, 
+        /**
+         * Study is temporarily closed for accrual; can be potentially resumed in the future; patients can be examined and treated.
+         */
+        TEMPORARILYCLOSEDTOACCRUAL, 
+        /**
+         * Study is temporarily closed for accrual and intervention and potentially can be resumed in the future.
+         */
+        TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION, 
+        /**
+         * Protocol was withdrawn by the lead organization.
+         */
+        WITHDRAWN, 
         /**
          * added to help the parsers with the generic types
          */
@@ -81,18 +103,28 @@ public class ResearchStudy extends DomainResource {
         public static ResearchStudyStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("in-progress".equals(codeString))
-          return INPROGRESS;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("stopped".equals(codeString))
-          return STOPPED;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("administratively-completed".equals(codeString))
+          return ADMINISTRATIVELYCOMPLETED;
+        if ("approved".equals(codeString))
+          return APPROVED;
+        if ("closed-to-accrual".equals(codeString))
+          return CLOSEDTOACCRUAL;
+        if ("closed-to-accrual-and-intervention".equals(codeString))
+          return CLOSEDTOACCRUALANDINTERVENTION;
         if ("completed".equals(codeString))
           return COMPLETED;
-        if ("entered-in-error".equals(codeString))
-          return ENTEREDINERROR;
+        if ("disapproved".equals(codeString))
+          return DISAPPROVED;
+        if ("in-review".equals(codeString))
+          return INREVIEW;
+        if ("temporarily-closed-to-accrual".equals(codeString))
+          return TEMPORARILYCLOSEDTOACCRUAL;
+        if ("temporarily-closed-to-accrual-and-intervention".equals(codeString))
+          return TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION;
+        if ("withdrawn".equals(codeString))
+          return WITHDRAWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -100,45 +132,65 @@ public class ResearchStudy extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case DRAFT: return "draft";
-            case INPROGRESS: return "in-progress";
-            case SUSPENDED: return "suspended";
-            case STOPPED: return "stopped";
+            case ACTIVE: return "active";
+            case ADMINISTRATIVELYCOMPLETED: return "administratively-completed";
+            case APPROVED: return "approved";
+            case CLOSEDTOACCRUAL: return "closed-to-accrual";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "closed-to-accrual-and-intervention";
             case COMPLETED: return "completed";
-            case ENTEREDINERROR: return "entered-in-error";
+            case DISAPPROVED: return "disapproved";
+            case INREVIEW: return "in-review";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "temporarily-closed-to-accrual";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "temporarily-closed-to-accrual-and-intervention";
+            case WITHDRAWN: return "withdrawn";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org/fhir/research-study-status";
-            case INPROGRESS: return "http://hl7.org/fhir/research-study-status";
-            case SUSPENDED: return "http://hl7.org/fhir/research-study-status";
-            case STOPPED: return "http://hl7.org/fhir/research-study-status";
+            case ACTIVE: return "http://hl7.org/fhir/research-study-status";
+            case ADMINISTRATIVELYCOMPLETED: return "http://hl7.org/fhir/research-study-status";
+            case APPROVED: return "http://hl7.org/fhir/research-study-status";
+            case CLOSEDTOACCRUAL: return "http://hl7.org/fhir/research-study-status";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "http://hl7.org/fhir/research-study-status";
             case COMPLETED: return "http://hl7.org/fhir/research-study-status";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/research-study-status";
+            case DISAPPROVED: return "http://hl7.org/fhir/research-study-status";
+            case INREVIEW: return "http://hl7.org/fhir/research-study-status";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "http://hl7.org/fhir/research-study-status";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "http://hl7.org/fhir/research-study-status";
+            case WITHDRAWN: return "http://hl7.org/fhir/research-study-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The study is undergoing design but the process of selecting study subjects and capturing data has not yet begun.";
-            case INPROGRESS: return "The study is currently being executed";
-            case SUSPENDED: return "Execution of the study has been temporarily paused";
-            case STOPPED: return "The study was terminated prior to the final determination of results";
-            case COMPLETED: return "The information sought by the study has been gathered and compiled and no further work is being performed";
-            case ENTEREDINERROR: return "This study never actually existed.  The record is retained for tracking purposes in the event decisions may have been made based on this erroneous information.";
+            case ACTIVE: return "Study is opened for accrual.";
+            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged";
+            case APPROVED: return "Protocol is approved by the review board.";
+            case CLOSEDTOACCRUAL: return "Study is closed for accrual; patients can be examined and treated.";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.";
+            case COMPLETED: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment\nor intervention but are still being followed according to the primary objective of the study.";
+            case DISAPPROVED: return "Protocol was disapproved by the review board.";
+            case INREVIEW: return "Protocol is submitted to the review board for approval.";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "Study is temporarily closed for accrual; can be potentially resumed in the future; patients can be examined and treated.";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "Study is temporarily closed for accrual and intervention and potentially can be resumed in the future.";
+            case WITHDRAWN: return "Protocol was withdrawn by the lead organization.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DRAFT: return "Draft";
-            case INPROGRESS: return "In-progress";
-            case SUSPENDED: return "Suspended";
-            case STOPPED: return "Stopped";
+            case ACTIVE: return "Active";
+            case ADMINISTRATIVELYCOMPLETED: return "Administratively Completed";
+            case APPROVED: return "Approved";
+            case CLOSEDTOACCRUAL: return "Closed to Accrual";
+            case CLOSEDTOACCRUALANDINTERVENTION: return "Closed to Accrual and Intervention";
             case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered in error";
+            case DISAPPROVED: return "Disapproved";
+            case INREVIEW: return "In Review";
+            case TEMPORARILYCLOSEDTOACCRUAL: return "Temporarily Closed to Accrual";
+            case TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION: return "Temporarily Closed to Accrual and Intervention";
+            case WITHDRAWN: return "Withdrawn";
             default: return "?";
           }
         }
@@ -149,18 +201,28 @@ public class ResearchStudy extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("draft".equals(codeString))
-          return ResearchStudyStatus.DRAFT;
-        if ("in-progress".equals(codeString))
-          return ResearchStudyStatus.INPROGRESS;
-        if ("suspended".equals(codeString))
-          return ResearchStudyStatus.SUSPENDED;
-        if ("stopped".equals(codeString))
-          return ResearchStudyStatus.STOPPED;
+        if ("active".equals(codeString))
+          return ResearchStudyStatus.ACTIVE;
+        if ("administratively-completed".equals(codeString))
+          return ResearchStudyStatus.ADMINISTRATIVELYCOMPLETED;
+        if ("approved".equals(codeString))
+          return ResearchStudyStatus.APPROVED;
+        if ("closed-to-accrual".equals(codeString))
+          return ResearchStudyStatus.CLOSEDTOACCRUAL;
+        if ("closed-to-accrual-and-intervention".equals(codeString))
+          return ResearchStudyStatus.CLOSEDTOACCRUALANDINTERVENTION;
         if ("completed".equals(codeString))
           return ResearchStudyStatus.COMPLETED;
-        if ("entered-in-error".equals(codeString))
-          return ResearchStudyStatus.ENTEREDINERROR;
+        if ("disapproved".equals(codeString))
+          return ResearchStudyStatus.DISAPPROVED;
+        if ("in-review".equals(codeString))
+          return ResearchStudyStatus.INREVIEW;
+        if ("temporarily-closed-to-accrual".equals(codeString))
+          return ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUAL;
+        if ("temporarily-closed-to-accrual-and-intervention".equals(codeString))
+          return ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION;
+        if ("withdrawn".equals(codeString))
+          return ResearchStudyStatus.WITHDRAWN;
         throw new IllegalArgumentException("Unknown ResearchStudyStatus code '"+codeString+"'");
         }
         public Enumeration<ResearchStudyStatus> fromType(Base code) throws FHIRException {
@@ -171,33 +233,53 @@ public class ResearchStudy extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("draft".equals(codeString))
-          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.DRAFT);
-        if ("in-progress".equals(codeString))
-          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.INPROGRESS);
-        if ("suspended".equals(codeString))
-          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.SUSPENDED);
-        if ("stopped".equals(codeString))
-          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.STOPPED);
+        if ("active".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.ACTIVE);
+        if ("administratively-completed".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.ADMINISTRATIVELYCOMPLETED);
+        if ("approved".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.APPROVED);
+        if ("closed-to-accrual".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.CLOSEDTOACCRUAL);
+        if ("closed-to-accrual-and-intervention".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.CLOSEDTOACCRUALANDINTERVENTION);
         if ("completed".equals(codeString))
           return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.COMPLETED);
-        if ("entered-in-error".equals(codeString))
-          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.ENTEREDINERROR);
+        if ("disapproved".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.DISAPPROVED);
+        if ("in-review".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.INREVIEW);
+        if ("temporarily-closed-to-accrual".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUAL);
+        if ("temporarily-closed-to-accrual-and-intervention".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION);
+        if ("withdrawn".equals(codeString))
+          return new Enumeration<ResearchStudyStatus>(this, ResearchStudyStatus.WITHDRAWN);
         throw new FHIRException("Unknown ResearchStudyStatus code '"+codeString+"'");
         }
     public String toCode(ResearchStudyStatus code) {
-      if (code == ResearchStudyStatus.DRAFT)
-        return "draft";
-      if (code == ResearchStudyStatus.INPROGRESS)
-        return "in-progress";
-      if (code == ResearchStudyStatus.SUSPENDED)
-        return "suspended";
-      if (code == ResearchStudyStatus.STOPPED)
-        return "stopped";
+      if (code == ResearchStudyStatus.ACTIVE)
+        return "active";
+      if (code == ResearchStudyStatus.ADMINISTRATIVELYCOMPLETED)
+        return "administratively-completed";
+      if (code == ResearchStudyStatus.APPROVED)
+        return "approved";
+      if (code == ResearchStudyStatus.CLOSEDTOACCRUAL)
+        return "closed-to-accrual";
+      if (code == ResearchStudyStatus.CLOSEDTOACCRUALANDINTERVENTION)
+        return "closed-to-accrual-and-intervention";
       if (code == ResearchStudyStatus.COMPLETED)
         return "completed";
-      if (code == ResearchStudyStatus.ENTEREDINERROR)
-        return "entered-in-error";
+      if (code == ResearchStudyStatus.DISAPPROVED)
+        return "disapproved";
+      if (code == ResearchStudyStatus.INREVIEW)
+        return "in-review";
+      if (code == ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUAL)
+        return "temporarily-closed-to-accrual";
+      if (code == ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION)
+        return "temporarily-closed-to-accrual-and-intervention";
+      if (code == ResearchStudyStatus.WITHDRAWN)
+        return "withdrawn";
       return "?";
       }
     public String toSystem(ResearchStudyStatus code) {
@@ -217,9 +299,9 @@ public class ResearchStudy extends DomainResource {
         /**
          * Categorization of study arm, e.g. experimental, active comparator, placebo comparater.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Categorization of study arm", formalDefinition="Categorization of study arm, e.g. experimental, active comparator, placebo comparater." )
-        protected CodeableConcept code;
+        protected CodeableConcept type;
 
         /**
          * A succinct description of the path through the study that would be followed by a subject adhering to this arm.
@@ -228,7 +310,7 @@ public class ResearchStudy extends DomainResource {
         @Description(shortDefinition="Short explanation of study path", formalDefinition="A succinct description of the path through the study that would be followed by a subject adhering to this arm." )
         protected StringType description;
 
-        private static final long serialVersionUID = 1433183343L;
+        private static final long serialVersionUID = 311445244L;
 
     /**
      * Constructor
@@ -291,26 +373,26 @@ public class ResearchStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #code} (Categorization of study arm, e.g. experimental, active comparator, placebo comparater.)
+         * @return {@link #type} (Categorization of study arm, e.g. experimental, active comparator, placebo comparater.)
          */
-        public CodeableConcept getCode() { 
-          if (this.code == null)
+        public CodeableConcept getType() { 
+          if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ResearchStudyArmComponent.code");
+              throw new Error("Attempt to auto-create ResearchStudyArmComponent.type");
             else if (Configuration.doAutoCreate())
-              this.code = new CodeableConcept(); // cc
-          return this.code;
+              this.type = new CodeableConcept(); // cc
+          return this.type;
         }
 
-        public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
         }
 
         /**
-         * @param value {@link #code} (Categorization of study arm, e.g. experimental, active comparator, placebo comparater.)
+         * @param value {@link #type} (Categorization of study arm, e.g. experimental, active comparator, placebo comparater.)
          */
-        public ResearchStudyArmComponent setCode(CodeableConcept value) { 
-          this.code = value;
+        public ResearchStudyArmComponent setType(CodeableConcept value) { 
+          this.type = value;
           return this;
         }
 
@@ -366,7 +448,7 @@ public class ResearchStudy extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("name", "string", "Unique, human-readable label for this arm of the study.", 0, 1, name));
-          children.add(new Property("code", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, code));
+          children.add(new Property("type", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, type));
           children.add(new Property("description", "string", "A succinct description of the path through the study that would be followed by a subject adhering to this arm.", 0, 1, description));
         }
 
@@ -374,7 +456,7 @@ public class ResearchStudy extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3373707: /*name*/  return new Property("name", "string", "Unique, human-readable label for this arm of the study.", 0, 1, name);
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, code);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, type);
           case -1724546052: /*description*/  return new Property("description", "string", "A succinct description of the path through the study that would be followed by a subject adhering to this arm.", 0, 1, description);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -385,7 +467,7 @@ public class ResearchStudy extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -398,8 +480,8 @@ public class ResearchStudy extends DomainResource {
         case 3373707: // name
           this.name = castToString(value); // StringType
           return value;
-        case 3059181: // code
-          this.code = castToCodeableConcept(value); // CodeableConcept
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -413,8 +495,8 @@ public class ResearchStudy extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        } else if (name.equals("code")) {
-          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else
@@ -426,7 +508,7 @@ public class ResearchStudy extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3373707:  return getNameElement();
-        case 3059181:  return getCode(); 
+        case 3575610:  return getType(); 
         case -1724546052:  return getDescriptionElement();
         default: return super.makeProperty(hash, name);
         }
@@ -437,7 +519,7 @@ public class ResearchStudy extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3373707: /*name*/ return new String[] {"string"};
-        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1724546052: /*description*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -449,9 +531,9 @@ public class ResearchStudy extends DomainResource {
         if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type ResearchStudy.name");
         }
-        else if (name.equals("code")) {
-          this.code = new CodeableConcept();
-          return this.code;
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ResearchStudy.description");
@@ -464,39 +546,261 @@ public class ResearchStudy extends DomainResource {
         ResearchStudyArmComponent dst = new ResearchStudyArmComponent();
         copyValues(dst);
         dst.name = name == null ? null : name.copy();
-        dst.code = code == null ? null : code.copy();
+        dst.type = type == null ? null : type.copy();
         dst.description = description == null ? null : description.copy();
         return dst;
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ResearchStudyArmComponent))
+        if (!(other_ instanceof ResearchStudyArmComponent))
           return false;
-        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(code, o.code, true) && compareDeep(description, o.description, true)
+        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other_;
+        return compareDeep(name, o.name, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ResearchStudyArmComponent))
+        if (!(other_ instanceof ResearchStudyArmComponent))
           return false;
-        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other;
+        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, code, description
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, type, description
           );
       }
 
   public String fhirType() {
     return "ResearchStudy.arm";
+
+  }
+
+  }
+
+    @Block()
+    public static class ResearchStudyObjectiveComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Unique, human-readable label for this objective of the study.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Label for the objective", formalDefinition="Unique, human-readable label for this objective of the study." )
+        protected StringType name;
+
+        /**
+         * The kind of study objective.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="primary | secondary | exploratory", formalDefinition="The kind of study objective." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-study-objective-type")
+        protected CodeableConcept type;
+
+        private static final long serialVersionUID = -1935215997L;
+
+    /**
+     * Constructor
+     */
+      public ResearchStudyObjectiveComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #name} (Unique, human-readable label for this objective of the study.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ResearchStudyObjectiveComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Unique, human-readable label for this objective of the study.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public ResearchStudyObjectiveComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Unique, human-readable label for this objective of the study.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Unique, human-readable label for this objective of the study.
+         */
+        public ResearchStudyObjectiveComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #type} (The kind of study objective.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ResearchStudyObjectiveComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The kind of study objective.)
+         */
+        public ResearchStudyObjectiveComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Unique, human-readable label for this objective of the study.", 0, 1, name));
+          children.add(new Property("type", "CodeableConcept", "The kind of study objective.", 0, 1, type));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Unique, human-readable label for this objective of the study.", 0, 1, name);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind of study objective.", 0, 1, type);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          return value;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
+          this.name = castToString(value); // StringType
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707:  return getNameElement();
+        case 3575610:  return getType(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ResearchStudy.name");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ResearchStudyObjectiveComponent copy() {
+        ResearchStudyObjectiveComponent dst = new ResearchStudyObjectiveComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.type = type == null ? null : type.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ResearchStudyObjectiveComponent))
+          return false;
+        ResearchStudyObjectiveComponent o = (ResearchStudyObjectiveComponent) other_;
+        return compareDeep(name, o.name, true) && compareDeep(type, o.type, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ResearchStudyObjectiveComponent))
+          return false;
+        ResearchStudyObjectiveComponent o = (ResearchStudyObjectiveComponent) other_;
+        return compareValues(name, o.name, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, type);
+      }
+
+  public String fhirType() {
+    return "ResearchStudy.objective";
 
   }
 
@@ -544,64 +848,92 @@ public class ResearchStudy extends DomainResource {
      * The current state of the study.
      */
     @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | in-progress | suspended | stopped | completed | entered-in-error", formalDefinition="The current state of the study." )
+    @Description(shortDefinition="active | administratively-completed | approved | closed-to-accrual | closed-to-accrual-and-intervention | completed | disapproved | in-review | temporarily-closed-to-accrual | temporarily-closed-to-accrual-and-intervention | withdrawn", formalDefinition="The current state of the study." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-study-status")
     protected Enumeration<ResearchStudyStatus> status;
 
     /**
+     * The type of study based upon the intent of the study's activities. A classification of the intent of the study.
+     */
+    @Child(name = "primaryPurposeType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="treatment | prevention | diagnostic | supportive-care | screening | health-services-research | basic-science | device-feasibility", formalDefinition="The type of study based upon the intent of the study's activities. A classification of the intent of the study." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-study-prim-purp-type")
+    protected CodeableConcept primaryPurposeType;
+
+    /**
+     * The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.
+     */
+    @Child(name = "phase", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="n-a | early-phase-1 | phase-1 | phase-1-phase-2 | phase-2 | phase-2-phase-3 | phase-3 | phase-4", formalDefinition="The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-study-phase")
+    protected CodeableConcept phase;
+
+    /**
      * Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Classifications for the study", formalDefinition="Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc." )
     protected List<CodeableConcept> category;
 
     /**
-     * The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.
+     * The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.
      */
-    @Child(name = "focus", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Drugs, devices, conditions, etc. under study", formalDefinition="The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about." )
+    @Child(name = "focus", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Drugs, devices, etc. under study", formalDefinition="The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about." )
     protected List<CodeableConcept> focus;
+
+    /**
+     * The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.
+     */
+    @Child(name = "condition", type = {Condition.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Condition being studied", formalDefinition="The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code." )
+    protected List<Reference> condition;
+    /**
+     * The actual objects that are the target of the reference (The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.)
+     */
+    protected List<Condition> conditionTarget;
+
 
     /**
      * Contact details to assist a user in learning more about or engaging with the study.
      */
-    @Child(name = "contact", type = {ContactDetail.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {ContactDetail.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details for the study", formalDefinition="Contact details to assist a user in learning more about or engaging with the study." )
     protected List<ContactDetail> contact;
 
     /**
      * Citations, references and other related documents.
      */
-    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="References and dependencies", formalDefinition="Citations, references and other related documents." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * Key terms to aid in searching for or filtering the study.
      */
-    @Child(name = "keyword", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "keyword", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Used to search for the study", formalDefinition="Key terms to aid in searching for or filtering the study." )
     protected List<CodeableConcept> keyword;
 
     /**
      * Indicates a country, state or other region where the study is taking place.
      */
-    @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "location", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Geographic region(s) for study", formalDefinition="Indicates a country, state or other region where the study is taking place." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/jurisdiction")
-    protected List<CodeableConcept> jurisdiction;
+    protected List<CodeableConcept> location;
 
     /**
      * A full description of how the study is being conducted.
      */
-    @Child(name = "description", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "description", type = {MarkdownType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What this is study doing", formalDefinition="A full description of how the study is being conducted." )
     protected MarkdownType description;
 
     /**
      * Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. " 200 female Europeans between the ages of 20 and 45 with early onset diabetes".
      */
-    @Child(name = "enrollment", type = {Group.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "enrollment", type = {Group.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Inclusion & exclusion criteria", formalDefinition="Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\"." )
     protected List<Reference> enrollment;
     /**
@@ -613,42 +945,42 @@ public class ResearchStudy extends DomainResource {
     /**
      * Identifies the start date and the expected (or actual, depending on status) end date for the study.
      */
-    @Child(name = "period", type = {Period.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "period", type = {Period.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the study began and ended", formalDefinition="Identifies the start date and the expected (or actual, depending on status) end date for the study." )
     protected Period period;
 
     /**
-     * The organization responsible for the execution of the study.
+     * An organization that initiates the investigation and is legally responsible for the study.
      */
-    @Child(name = "sponsor", type = {Organization.class}, order=14, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Organization responsible for the study", formalDefinition="The organization responsible for the execution of the study." )
+    @Child(name = "sponsor", type = {Organization.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Organization that initiates and is legally responsible for the study", formalDefinition="An organization that initiates the investigation and is legally responsible for the study." )
     protected Reference sponsor;
 
     /**
-     * The actual object that is the target of the reference (The organization responsible for the execution of the study.)
+     * The actual object that is the target of the reference (An organization that initiates the investigation and is legally responsible for the study.)
      */
     protected Organization sponsorTarget;
 
     /**
-     * Indicates the individual who has primary oversite of the execution of the study.
+     * A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.
      */
-    @Child(name = "principalInvestigator", type = {Practitioner.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The individual responsible for the study", formalDefinition="Indicates the individual who has primary oversite of the execution of the study." )
+    @Child(name = "principalInvestigator", type = {Practitioner.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Researcher who oversees multiple aspects of the study", formalDefinition="A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation." )
     protected Reference principalInvestigator;
 
     /**
-     * The actual object that is the target of the reference (Indicates the individual who has primary oversite of the execution of the study.)
+     * The actual object that is the target of the reference (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
     protected Practitioner principalInvestigatorTarget;
 
     /**
-     * Clinic, hospital or other healthcare location that is participating in the study.
+     * A facility in which study activities are conducted.
      */
-    @Child(name = "site", type = {Location.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Location involved in study execution", formalDefinition="Clinic, hospital or other healthcare location that is participating in the study." )
+    @Child(name = "site", type = {Location.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Facility where study activities are conducted", formalDefinition="A facility in which study activities are conducted." )
     protected List<Reference> site;
     /**
-     * The actual objects that are the target of the reference (Clinic, hospital or other healthcare location that is participating in the study.)
+     * The actual objects that are the target of the reference (A facility in which study activities are conducted.)
      */
     protected List<Location> siteTarget;
 
@@ -656,25 +988,33 @@ public class ResearchStudy extends DomainResource {
     /**
      * A description and/or code explaining the premature termination of the study.
      */
-    @Child(name = "reasonStopped", type = {CodeableConcept.class}, order=17, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Reason for terminating study early", formalDefinition="A description and/or code explaining the premature termination of the study." )
+    @Child(name = "reasonStopped", type = {CodeableConcept.class}, order=20, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="accrual-goal-met | closed-due-to-toxicity | closed-due-to-lack-of-study-progress | temporarily-closed-per-study-design", formalDefinition="A description and/or code explaining the premature termination of the study." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-study-reason-stopped")
     protected CodeableConcept reasonStopped;
 
     /**
-     * Comments made about the event by the performer, subject or other participants.
+     * Comments made about the study by the performer, subject or other participants.
      */
-    @Child(name = "note", type = {Annotation.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Comments made about the event", formalDefinition="Comments made about the event by the performer, subject or other participants." )
+    @Child(name = "note", type = {Annotation.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Comments made about the study", formalDefinition="Comments made about the study by the performer, subject or other participants." )
     protected List<Annotation> note;
 
     /**
      * Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.
      */
-    @Child(name = "arm", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "arm", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Defined path through the study for a subject", formalDefinition="Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up." )
     protected List<ResearchStudyArmComponent> arm;
 
-    private static final long serialVersionUID = -1804662501L;
+    /**
+     * A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study.
+     */
+    @Child(name = "objective", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A goal for the study", formalDefinition="A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study." )
+    protected List<ResearchStudyObjectiveComponent> objective;
+
+    private static final long serialVersionUID = 220174930L;
 
   /**
    * Constructor
@@ -989,6 +1329,54 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
+     * @return {@link #primaryPurposeType} (The type of study based upon the intent of the study's activities. A classification of the intent of the study.)
+     */
+    public CodeableConcept getPrimaryPurposeType() { 
+      if (this.primaryPurposeType == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ResearchStudy.primaryPurposeType");
+        else if (Configuration.doAutoCreate())
+          this.primaryPurposeType = new CodeableConcept(); // cc
+      return this.primaryPurposeType;
+    }
+
+    public boolean hasPrimaryPurposeType() { 
+      return this.primaryPurposeType != null && !this.primaryPurposeType.isEmpty();
+    }
+
+    /**
+     * @param value {@link #primaryPurposeType} (The type of study based upon the intent of the study's activities. A classification of the intent of the study.)
+     */
+    public ResearchStudy setPrimaryPurposeType(CodeableConcept value) { 
+      this.primaryPurposeType = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #phase} (The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.)
+     */
+    public CodeableConcept getPhase() { 
+      if (this.phase == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ResearchStudy.phase");
+        else if (Configuration.doAutoCreate())
+          this.phase = new CodeableConcept(); // cc
+      return this.phase;
+    }
+
+    public boolean hasPhase() { 
+      return this.phase != null && !this.phase.isEmpty();
+    }
+
+    /**
+     * @param value {@link #phase} (The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.)
+     */
+    public ResearchStudy setPhase(CodeableConcept value) { 
+      this.phase = value;
+      return this;
+    }
+
+    /**
      * @return {@link #category} (Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.)
      */
     public List<CodeableConcept> getCategory() { 
@@ -1042,7 +1430,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #focus} (The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.)
+     * @return {@link #focus} (The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.)
      */
     public List<CodeableConcept> getFocus() { 
       if (this.focus == null)
@@ -1092,6 +1480,81 @@ public class ResearchStudy extends DomainResource {
         addFocus();
       }
       return getFocus().get(0);
+    }
+
+    /**
+     * @return {@link #condition} (The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.)
+     */
+    public List<Reference> getCondition() { 
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      return this.condition;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ResearchStudy setCondition(List<Reference> theCondition) { 
+      this.condition = theCondition;
+      return this;
+    }
+
+    public boolean hasCondition() { 
+      if (this.condition == null)
+        return false;
+      for (Reference item : this.condition)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addCondition() { //3
+      Reference t = new Reference();
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      this.condition.add(t);
+      return t;
+    }
+
+    public ResearchStudy addCondition(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      this.condition.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
+     */
+    public Reference getConditionFirstRep() { 
+      if (getCondition().isEmpty()) {
+        addCondition();
+      }
+      return getCondition().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Condition> getConditionTarget() { 
+      if (this.conditionTarget == null)
+        this.conditionTarget = new ArrayList<Condition>();
+      return this.conditionTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Condition addConditionTarget() { 
+      Condition r = new Condition();
+      if (this.conditionTarget == null)
+        this.conditionTarget = new ArrayList<Condition>();
+      this.conditionTarget.add(r);
+      return r;
     }
 
     /**
@@ -1254,56 +1717,56 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (Indicates a country, state or other region where the study is taking place.)
+     * @return {@link #location} (Indicates a country, state or other region where the study is taking place.)
      */
-    public List<CodeableConcept> getJurisdiction() { 
-      if (this.jurisdiction == null)
-        this.jurisdiction = new ArrayList<CodeableConcept>();
-      return this.jurisdiction;
+    public List<CodeableConcept> getLocation() { 
+      if (this.location == null)
+        this.location = new ArrayList<CodeableConcept>();
+      return this.location;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ResearchStudy setJurisdiction(List<CodeableConcept> theJurisdiction) { 
-      this.jurisdiction = theJurisdiction;
+    public ResearchStudy setLocation(List<CodeableConcept> theLocation) { 
+      this.location = theLocation;
       return this;
     }
 
-    public boolean hasJurisdiction() { 
-      if (this.jurisdiction == null)
+    public boolean hasLocation() { 
+      if (this.location == null)
         return false;
-      for (CodeableConcept item : this.jurisdiction)
+      for (CodeableConcept item : this.location)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addJurisdiction() { //3
+    public CodeableConcept addLocation() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.jurisdiction == null)
-        this.jurisdiction = new ArrayList<CodeableConcept>();
-      this.jurisdiction.add(t);
+      if (this.location == null)
+        this.location = new ArrayList<CodeableConcept>();
+      this.location.add(t);
       return t;
     }
 
-    public ResearchStudy addJurisdiction(CodeableConcept t) { //3
+    public ResearchStudy addLocation(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.jurisdiction == null)
-        this.jurisdiction = new ArrayList<CodeableConcept>();
-      this.jurisdiction.add(t);
+      if (this.location == null)
+        this.location = new ArrayList<CodeableConcept>();
+      this.location.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
      */
-    public CodeableConcept getJurisdictionFirstRep() { 
-      if (getJurisdiction().isEmpty()) {
-        addJurisdiction();
+    public CodeableConcept getLocationFirstRep() { 
+      if (getLocation().isEmpty()) {
+        addLocation();
       }
-      return getJurisdiction().get(0);
+      return getLocation().get(0);
     }
 
     /**
@@ -1455,7 +1918,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #sponsor} (The organization responsible for the execution of the study.)
+     * @return {@link #sponsor} (An organization that initiates the investigation and is legally responsible for the study.)
      */
     public Reference getSponsor() { 
       if (this.sponsor == null)
@@ -1471,7 +1934,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #sponsor} (The organization responsible for the execution of the study.)
+     * @param value {@link #sponsor} (An organization that initiates the investigation and is legally responsible for the study.)
      */
     public ResearchStudy setSponsor(Reference value) { 
       this.sponsor = value;
@@ -1479,7 +1942,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #sponsor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization responsible for the execution of the study.)
+     * @return {@link #sponsor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An organization that initiates the investigation and is legally responsible for the study.)
      */
     public Organization getSponsorTarget() { 
       if (this.sponsorTarget == null)
@@ -1491,7 +1954,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #sponsor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization responsible for the execution of the study.)
+     * @param value {@link #sponsor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An organization that initiates the investigation and is legally responsible for the study.)
      */
     public ResearchStudy setSponsorTarget(Organization value) { 
       this.sponsorTarget = value;
@@ -1499,7 +1962,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #principalInvestigator} (Indicates the individual who has primary oversite of the execution of the study.)
+     * @return {@link #principalInvestigator} (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
     public Reference getPrincipalInvestigator() { 
       if (this.principalInvestigator == null)
@@ -1515,7 +1978,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #principalInvestigator} (Indicates the individual who has primary oversite of the execution of the study.)
+     * @param value {@link #principalInvestigator} (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
     public ResearchStudy setPrincipalInvestigator(Reference value) { 
       this.principalInvestigator = value;
@@ -1523,7 +1986,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the individual who has primary oversite of the execution of the study.)
+     * @return {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
     public Practitioner getPrincipalInvestigatorTarget() { 
       if (this.principalInvestigatorTarget == null)
@@ -1535,7 +1998,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the individual who has primary oversite of the execution of the study.)
+     * @param value {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
     public ResearchStudy setPrincipalInvestigatorTarget(Practitioner value) { 
       this.principalInvestigatorTarget = value;
@@ -1543,7 +2006,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #site} (Clinic, hospital or other healthcare location that is participating in the study.)
+     * @return {@link #site} (A facility in which study activities are conducted.)
      */
     public List<Reference> getSite() { 
       if (this.site == null)
@@ -1642,7 +2105,7 @@ public class ResearchStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Comments made about the event by the performer, subject or other participants.)
+     * @return {@link #note} (Comments made about the study by the performer, subject or other participants.)
      */
     public List<Annotation> getNote() { 
       if (this.note == null)
@@ -1747,6 +2210,59 @@ public class ResearchStudy extends DomainResource {
       return getArm().get(0);
     }
 
+    /**
+     * @return {@link #objective} (A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study.)
+     */
+    public List<ResearchStudyObjectiveComponent> getObjective() { 
+      if (this.objective == null)
+        this.objective = new ArrayList<ResearchStudyObjectiveComponent>();
+      return this.objective;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ResearchStudy setObjective(List<ResearchStudyObjectiveComponent> theObjective) { 
+      this.objective = theObjective;
+      return this;
+    }
+
+    public boolean hasObjective() { 
+      if (this.objective == null)
+        return false;
+      for (ResearchStudyObjectiveComponent item : this.objective)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ResearchStudyObjectiveComponent addObjective() { //3
+      ResearchStudyObjectiveComponent t = new ResearchStudyObjectiveComponent();
+      if (this.objective == null)
+        this.objective = new ArrayList<ResearchStudyObjectiveComponent>();
+      this.objective.add(t);
+      return t;
+    }
+
+    public ResearchStudy addObjective(ResearchStudyObjectiveComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.objective == null)
+        this.objective = new ArrayList<ResearchStudyObjectiveComponent>();
+      this.objective.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #objective}, creating it if it does not already exist
+     */
+    public ResearchStudyObjectiveComponent getObjectiveFirstRep() { 
+      if (getObjective().isEmpty()) {
+        addObjective();
+      }
+      return getObjective().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -1754,21 +2270,25 @@ public class ResearchStudy extends DomainResource {
         children.add(new Property("protocol", "Reference(PlanDefinition)", "The set of steps expected to be performed as part of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, protocol));
         children.add(new Property("partOf", "Reference(ResearchStudy)", "A larger research study of which this particular study is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "The current state of the study.", 0, 1, status));
+        children.add(new Property("primaryPurposeType", "CodeableConcept", "The type of study based upon the intent of the study's activities. A classification of the intent of the study.", 0, 1, primaryPurposeType));
+        children.add(new Property("phase", "CodeableConcept", "The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.", 0, 1, phase));
         children.add(new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category));
-        children.add(new Property("focus", "CodeableConcept", "The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus));
+        children.add(new Property("focus", "CodeableConcept", "The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus));
+        children.add(new Property("condition", "Reference(Condition)", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         children.add(new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword));
-        children.add(new Property("jurisdiction", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("location", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, location));
         children.add(new Property("description", "markdown", "A full description of how the study is being conducted.", 0, 1, description));
         children.add(new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment));
         children.add(new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period));
-        children.add(new Property("sponsor", "Reference(Organization)", "The organization responsible for the execution of the study.", 0, 1, sponsor));
-        children.add(new Property("principalInvestigator", "Reference(Practitioner)", "Indicates the individual who has primary oversite of the execution of the study.", 0, 1, principalInvestigator));
-        children.add(new Property("site", "Reference(Location)", "Clinic, hospital or other healthcare location that is participating in the study.", 0, java.lang.Integer.MAX_VALUE, site));
+        children.add(new Property("sponsor", "Reference(Organization)", "An organization that initiates the investigation and is legally responsible for the study.", 0, 1, sponsor));
+        children.add(new Property("principalInvestigator", "Reference(Practitioner)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator));
+        children.add(new Property("site", "Reference(Location)", "A facility in which study activities are conducted.", 0, java.lang.Integer.MAX_VALUE, site));
         children.add(new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped));
-        children.add(new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("note", "Annotation", "Comments made about the study by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("arm", "", "Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.", 0, java.lang.Integer.MAX_VALUE, arm));
+        children.add(new Property("objective", "", "A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study.", 0, java.lang.Integer.MAX_VALUE, objective));
       }
 
       @Override
@@ -1779,21 +2299,25 @@ public class ResearchStudy extends DomainResource {
         case -989163880: /*protocol*/  return new Property("protocol", "Reference(PlanDefinition)", "The set of steps expected to be performed as part of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, protocol);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(ResearchStudy)", "A larger research study of which this particular study is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "The current state of the study.", 0, 1, status);
+        case -2132842986: /*primaryPurposeType*/  return new Property("primaryPurposeType", "CodeableConcept", "The type of study based upon the intent of the study's activities. A classification of the intent of the study.", 0, 1, primaryPurposeType);
+        case 106629499: /*phase*/  return new Property("phase", "CodeableConcept", "The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.", 0, 1, phase);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category);
-        case 97604824: /*focus*/  return new Property("focus", "CodeableConcept", "The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus);
+        case 97604824: /*focus*/  return new Property("focus", "CodeableConcept", "The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus);
+        case -861311717: /*condition*/  return new Property("condition", "Reference(Condition)", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
         case -814408215: /*keyword*/  return new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword);
-        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case 1901043637: /*location*/  return new Property("location", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, location);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A full description of how the study is being conducted.", 0, 1, description);
         case 116089604: /*enrollment*/  return new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment);
         case -991726143: /*period*/  return new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period);
-        case -1998892262: /*sponsor*/  return new Property("sponsor", "Reference(Organization)", "The organization responsible for the execution of the study.", 0, 1, sponsor);
-        case 1437117175: /*principalInvestigator*/  return new Property("principalInvestigator", "Reference(Practitioner)", "Indicates the individual who has primary oversite of the execution of the study.", 0, 1, principalInvestigator);
-        case 3530567: /*site*/  return new Property("site", "Reference(Location)", "Clinic, hospital or other healthcare location that is participating in the study.", 0, java.lang.Integer.MAX_VALUE, site);
+        case -1998892262: /*sponsor*/  return new Property("sponsor", "Reference(Organization)", "An organization that initiates the investigation and is legally responsible for the study.", 0, 1, sponsor);
+        case 1437117175: /*principalInvestigator*/  return new Property("principalInvestigator", "Reference(Practitioner)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator);
+        case 3530567: /*site*/  return new Property("site", "Reference(Location)", "A facility in which study activities are conducted.", 0, java.lang.Integer.MAX_VALUE, site);
         case 1181369065: /*reasonStopped*/  return new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped);
-        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the study by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
         case 96860: /*arm*/  return new Property("arm", "", "Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.", 0, java.lang.Integer.MAX_VALUE, arm);
+        case -1489585863: /*objective*/  return new Property("objective", "", "A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study.", 0, java.lang.Integer.MAX_VALUE, objective);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1807,12 +2331,15 @@ public class ResearchStudy extends DomainResource {
         case -989163880: /*protocol*/ return this.protocol == null ? new Base[0] : this.protocol.toArray(new Base[this.protocol.size()]); // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ResearchStudyStatus>
+        case -2132842986: /*primaryPurposeType*/ return this.primaryPurposeType == null ? new Base[0] : new Base[] {this.primaryPurposeType}; // CodeableConcept
+        case 106629499: /*phase*/ return this.phase == null ? new Base[0] : new Base[] {this.phase}; // CodeableConcept
         case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // CodeableConcept
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // Reference
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case -814408215: /*keyword*/ return this.keyword == null ? new Base[0] : this.keyword.toArray(new Base[this.keyword.size()]); // CodeableConcept
-        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case 116089604: /*enrollment*/ return this.enrollment == null ? new Base[0] : this.enrollment.toArray(new Base[this.enrollment.size()]); // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
@@ -1822,6 +2349,7 @@ public class ResearchStudy extends DomainResource {
         case 1181369065: /*reasonStopped*/ return this.reasonStopped == null ? new Base[0] : new Base[] {this.reasonStopped}; // CodeableConcept
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 96860: /*arm*/ return this.arm == null ? new Base[0] : this.arm.toArray(new Base[this.arm.size()]); // ResearchStudyArmComponent
+        case -1489585863: /*objective*/ return this.objective == null ? new Base[0] : this.objective.toArray(new Base[this.objective.size()]); // ResearchStudyObjectiveComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1846,11 +2374,20 @@ public class ResearchStudy extends DomainResource {
           value = new ResearchStudyStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ResearchStudyStatus>
           return value;
+        case -2132842986: // primaryPurposeType
+          this.primaryPurposeType = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 106629499: // phase
+          this.phase = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case 50511102: // category
           this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 97604824: // focus
           this.getFocus().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -861311717: // condition
+          this.getCondition().add(castToReference(value)); // Reference
           return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
@@ -1861,8 +2398,8 @@ public class ResearchStudy extends DomainResource {
         case -814408215: // keyword
           this.getKeyword().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case -507075711: // jurisdiction
-          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+        case 1901043637: // location
+          this.getLocation().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
@@ -1891,6 +2428,9 @@ public class ResearchStudy extends DomainResource {
         case 96860: // arm
           this.getArm().add((ResearchStudyArmComponent) value); // ResearchStudyArmComponent
           return value;
+        case -1489585863: // objective
+          this.getObjective().add((ResearchStudyObjectiveComponent) value); // ResearchStudyObjectiveComponent
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1909,18 +2449,24 @@ public class ResearchStudy extends DomainResource {
         } else if (name.equals("status")) {
           value = new ResearchStudyStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ResearchStudyStatus>
+        } else if (name.equals("primaryPurposeType")) {
+          this.primaryPurposeType = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("phase")) {
+          this.phase = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("category")) {
           this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("focus")) {
           this.getFocus().add(castToCodeableConcept(value));
+        } else if (name.equals("condition")) {
+          this.getCondition().add(castToReference(value));
         } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
         } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("keyword")) {
           this.getKeyword().add(castToCodeableConcept(value));
-        } else if (name.equals("jurisdiction")) {
-          this.getJurisdiction().add(castToCodeableConcept(value));
+        } else if (name.equals("location")) {
+          this.getLocation().add(castToCodeableConcept(value));
         } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
         } else if (name.equals("enrollment")) {
@@ -1939,6 +2485,8 @@ public class ResearchStudy extends DomainResource {
           this.getNote().add(castToAnnotation(value));
         } else if (name.equals("arm")) {
           this.getArm().add((ResearchStudyArmComponent) value);
+        } else if (name.equals("objective")) {
+          this.getObjective().add((ResearchStudyObjectiveComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1952,12 +2500,15 @@ public class ResearchStudy extends DomainResource {
         case -989163880:  return addProtocol(); 
         case -995410646:  return addPartOf(); 
         case -892481550:  return getStatusElement();
+        case -2132842986:  return getPrimaryPurposeType(); 
+        case 106629499:  return getPhase(); 
         case 50511102:  return addCategory(); 
         case 97604824:  return addFocus(); 
+        case -861311717:  return addCondition(); 
         case 951526432:  return addContact(); 
         case 666807069:  return addRelatedArtifact(); 
         case -814408215:  return addKeyword(); 
-        case -507075711:  return addJurisdiction(); 
+        case 1901043637:  return addLocation(); 
         case -1724546052:  return getDescriptionElement();
         case 116089604:  return addEnrollment(); 
         case -991726143:  return getPeriod(); 
@@ -1967,6 +2518,7 @@ public class ResearchStudy extends DomainResource {
         case 1181369065:  return getReasonStopped(); 
         case 3387378:  return addNote(); 
         case 96860:  return addArm(); 
+        case -1489585863:  return addObjective(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1980,12 +2532,15 @@ public class ResearchStudy extends DomainResource {
         case -989163880: /*protocol*/ return new String[] {"Reference"};
         case -995410646: /*partOf*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
+        case -2132842986: /*primaryPurposeType*/ return new String[] {"CodeableConcept"};
+        case 106629499: /*phase*/ return new String[] {"CodeableConcept"};
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 97604824: /*focus*/ return new String[] {"CodeableConcept"};
+        case -861311717: /*condition*/ return new String[] {"Reference"};
         case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
         case -814408215: /*keyword*/ return new String[] {"CodeableConcept"};
-        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case 1901043637: /*location*/ return new String[] {"CodeableConcept"};
         case -1724546052: /*description*/ return new String[] {"markdown"};
         case 116089604: /*enrollment*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
@@ -1995,6 +2550,7 @@ public class ResearchStudy extends DomainResource {
         case 1181369065: /*reasonStopped*/ return new String[] {"CodeableConcept"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         case 96860: /*arm*/ return new String[] {};
+        case -1489585863: /*objective*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2017,11 +2573,22 @@ public class ResearchStudy extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ResearchStudy.status");
         }
+        else if (name.equals("primaryPurposeType")) {
+          this.primaryPurposeType = new CodeableConcept();
+          return this.primaryPurposeType;
+        }
+        else if (name.equals("phase")) {
+          this.phase = new CodeableConcept();
+          return this.phase;
+        }
         else if (name.equals("category")) {
           return addCategory();
         }
         else if (name.equals("focus")) {
           return addFocus();
+        }
+        else if (name.equals("condition")) {
+          return addCondition();
         }
         else if (name.equals("contact")) {
           return addContact();
@@ -2032,8 +2599,8 @@ public class ResearchStudy extends DomainResource {
         else if (name.equals("keyword")) {
           return addKeyword();
         }
-        else if (name.equals("jurisdiction")) {
-          return addJurisdiction();
+        else if (name.equals("location")) {
+          return addLocation();
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ResearchStudy.description");
@@ -2066,6 +2633,9 @@ public class ResearchStudy extends DomainResource {
         else if (name.equals("arm")) {
           return addArm();
         }
+        else if (name.equals("objective")) {
+          return addObjective();
+        }
         else
           return super.addChild(name);
       }
@@ -2095,6 +2665,8 @@ public class ResearchStudy extends DomainResource {
             dst.partOf.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
+        dst.primaryPurposeType = primaryPurposeType == null ? null : primaryPurposeType.copy();
+        dst.phase = phase == null ? null : phase.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
@@ -2104,6 +2676,11 @@ public class ResearchStudy extends DomainResource {
           dst.focus = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : focus)
             dst.focus.add(i.copy());
+        };
+        if (condition != null) {
+          dst.condition = new ArrayList<Reference>();
+          for (Reference i : condition)
+            dst.condition.add(i.copy());
         };
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
@@ -2120,10 +2697,10 @@ public class ResearchStudy extends DomainResource {
           for (CodeableConcept i : keyword)
             dst.keyword.add(i.copy());
         };
-        if (jurisdiction != null) {
-          dst.jurisdiction = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : jurisdiction)
-            dst.jurisdiction.add(i.copy());
+        if (location != null) {
+          dst.location = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : location)
+            dst.location.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
         if (enrollment != null) {
@@ -2150,6 +2727,11 @@ public class ResearchStudy extends DomainResource {
           for (ResearchStudyArmComponent i : arm)
             dst.arm.add(i.copy());
         };
+        if (objective != null) {
+          dst.objective = new ArrayList<ResearchStudyObjectiveComponent>();
+          for (ResearchStudyObjectiveComponent i : objective)
+            dst.objective.add(i.copy());
+        };
         return dst;
       }
 
@@ -2158,38 +2740,39 @@ public class ResearchStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ResearchStudy))
+        if (!(other_ instanceof ResearchStudy))
           return false;
-        ResearchStudy o = (ResearchStudy) other;
+        ResearchStudy o = (ResearchStudy) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(title, o.title, true) && compareDeep(protocol, o.protocol, true)
-           && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
-           && compareDeep(focus, o.focus, true) && compareDeep(contact, o.contact, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
-           && compareDeep(keyword, o.keyword, true) && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(description, o.description, true)
+           && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true) && compareDeep(primaryPurposeType, o.primaryPurposeType, true)
+           && compareDeep(phase, o.phase, true) && compareDeep(category, o.category, true) && compareDeep(focus, o.focus, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(contact, o.contact, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
+           && compareDeep(keyword, o.keyword, true) && compareDeep(location, o.location, true) && compareDeep(description, o.description, true)
            && compareDeep(enrollment, o.enrollment, true) && compareDeep(period, o.period, true) && compareDeep(sponsor, o.sponsor, true)
            && compareDeep(principalInvestigator, o.principalInvestigator, true) && compareDeep(site, o.site, true)
            && compareDeep(reasonStopped, o.reasonStopped, true) && compareDeep(note, o.note, true) && compareDeep(arm, o.arm, true)
-          ;
+           && compareDeep(objective, o.objective, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ResearchStudy))
+        if (!(other_ instanceof ResearchStudy))
           return false;
-        ResearchStudy o = (ResearchStudy) other;
+        ResearchStudy o = (ResearchStudy) other_;
         return compareValues(title, o.title, true) && compareValues(status, o.status, true) && compareValues(description, o.description, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, title, protocol
-          , partOf, status, category, focus, contact, relatedArtifact, keyword, jurisdiction
-          , description, enrollment, period, sponsor, principalInvestigator, site, reasonStopped
-          , note, arm);
+          , partOf, status, primaryPurposeType, phase, category, focus, condition, contact
+          , relatedArtifact, keyword, location, description, enrollment, period, sponsor
+          , principalInvestigator, site, reasonStopped, note, arm, objective);
       }
 
   @Override
@@ -2266,17 +2849,17 @@ public class ResearchStudy extends DomainResource {
  /**
    * Search parameter: <b>sponsor</b>
    * <p>
-   * Description: <b>Organization responsible for the study</b><br>
+   * Description: <b>Organization that initiates and is legally responsible for the study</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.sponsor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sponsor", path="ResearchStudy.sponsor", description="Organization responsible for the study", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="sponsor", path="ResearchStudy.sponsor", description="Organization that initiates and is legally responsible for the study", type="reference", target={Organization.class } )
   public static final String SP_SPONSOR = "sponsor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sponsor</b>
    * <p>
-   * Description: <b>Organization responsible for the study</b><br>
+   * Description: <b>Organization that initiates and is legally responsible for the study</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.sponsor</b><br>
    * </p>
@@ -2290,39 +2873,19 @@ public class ResearchStudy extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SPONSOR = new ca.uhn.fhir.model.api.Include("ResearchStudy:sponsor").toLocked();
 
  /**
-   * Search parameter: <b>jurisdiction</b>
-   * <p>
-   * Description: <b>Geographic region(s) for study</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ResearchStudy.jurisdiction</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="jurisdiction", path="ResearchStudy.jurisdiction", description="Geographic region(s) for study", type="token" )
-  public static final String SP_JURISDICTION = "jurisdiction";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
-   * <p>
-   * Description: <b>Geographic region(s) for study</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ResearchStudy.jurisdiction</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
-
- /**
    * Search parameter: <b>focus</b>
    * <p>
-   * Description: <b>Drugs, devices, conditions, etc. under study</b><br>
+   * Description: <b>Drugs, devices, etc. under study</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchStudy.focus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="focus", path="ResearchStudy.focus", description="Drugs, devices, conditions, etc. under study", type="token" )
+  @SearchParamDefinition(name="focus", path="ResearchStudy.focus", description="Drugs, devices, etc. under study", type="token" )
   public static final String SP_FOCUS = "focus";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>focus</b>
    * <p>
-   * Description: <b>Drugs, devices, conditions, etc. under study</b><br>
+   * Description: <b>Drugs, devices, etc. under study</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchStudy.focus</b><br>
    * </p>
@@ -2332,17 +2895,17 @@ public class ResearchStudy extends DomainResource {
  /**
    * Search parameter: <b>principalinvestigator</b>
    * <p>
-   * Description: <b>The individual responsible for the study</b><br>
+   * Description: <b>Researcher who oversees multiple aspects of the study</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.principalInvestigator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="principalinvestigator", path="ResearchStudy.principalInvestigator", description="The individual responsible for the study", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="principalinvestigator", path="ResearchStudy.principalInvestigator", description="Researcher who oversees multiple aspects of the study", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_PRINCIPALINVESTIGATOR = "principalinvestigator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>principalinvestigator</b>
    * <p>
-   * Description: <b>The individual responsible for the study</b><br>
+   * Description: <b>Researcher who oversees multiple aspects of the study</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.principalInvestigator</b><br>
    * </p>
@@ -2404,17 +2967,17 @@ public class ResearchStudy extends DomainResource {
  /**
    * Search parameter: <b>site</b>
    * <p>
-   * Description: <b>Location involved in study execution</b><br>
+   * Description: <b>Facility where study activities are conducted</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.site</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="site", path="ResearchStudy.site", description="Location involved in study execution", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="site", path="ResearchStudy.site", description="Facility where study activities are conducted", type="reference", target={Location.class } )
   public static final String SP_SITE = "site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>site</b>
    * <p>
-   * Description: <b>Location involved in study execution</b><br>
+   * Description: <b>Facility where study activities are conducted</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ResearchStudy.site</b><br>
    * </p>
@@ -2426,6 +2989,26 @@ public class ResearchStudy extends DomainResource {
    * the path value of "<b>ResearchStudy:site</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SITE = new ca.uhn.fhir.model.api.Include("ResearchStudy:site").toLocked();
+
+ /**
+   * Search parameter: <b>location</b>
+   * <p>
+   * Description: <b>Geographic region(s) for study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ResearchStudy.location</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="location", path="ResearchStudy.location", description="Geographic region(s) for study", type="token" )
+  public static final String SP_LOCATION = "location";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>location</b>
+   * <p>
+   * Description: <b>Geographic region(s) for study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ResearchStudy.location</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam LOCATION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_LOCATION);
 
  /**
    * Search parameter: <b>category</b>
@@ -2470,17 +3053,17 @@ public class ResearchStudy extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>draft | in-progress | suspended | stopped | completed | entered-in-error</b><br>
+   * Description: <b>active | administratively-completed | approved | closed-to-accrual | closed-to-accrual-and-intervention | completed | disapproved | in-review | temporarily-closed-to-accrual | temporarily-closed-to-accrual-and-intervention | withdrawn</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchStudy.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ResearchStudy.status", description="draft | in-progress | suspended | stopped | completed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="ResearchStudy.status", description="active | administratively-completed | approved | closed-to-accrual | closed-to-accrual-and-intervention | completed | disapproved | in-review | temporarily-closed-to-accrual | temporarily-closed-to-accrual-and-intervention | withdrawn", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>draft | in-progress | suspended | stopped | completed | entered-in-error</b><br>
+   * Description: <b>active | administratively-completed | approved | closed-to-accrual | closed-to-accrual-and-intervention | completed | disapproved | in-review | temporarily-closed-to-accrual | temporarily-closed-to-accrual-and-intervention | withdrawn</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchStudy.status</b><br>
    * </p>

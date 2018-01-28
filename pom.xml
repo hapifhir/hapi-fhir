@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.2.0-SNAPSHOT</version>
+	<version>3.3.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>https://hapifhir.io</url>
 
@@ -219,7 +219,7 @@
 		</developer>
 		<developer>
 			<id>SRiviere</id>
-			<name>SÃ©bastien RiviÃ¨re</name>
+			<name>Sebastien Riviere</name>
 		</developer>
 		<developer>
 			<id>karlmdavis</id>
@@ -382,6 +382,11 @@
 			<id>jamesdaily</id>
 			<name>James Daily</name>
 		</developer>
+		<developer>
+			<id>darktyko</id>
+			<name>Kyle Meadows</name>
+		</developer>
+		
 	</developers>
 
 	<licenses>
@@ -402,10 +407,11 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
-		<derby_version>10.13.1.1</derby_version>
+		<derby_version>10.14.1.0</derby_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.6.v20170531</jetty_version>
-		<hibernate_version>5.2.10.Final</hibernate_version>
+		<jetty_version>9.4.8.v20171121</jetty_version>
+		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
+		<hibernate_version>5.2.12.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
@@ -414,9 +420,9 @@
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.11</phloc_commons_version>
-		<spring_version>5.0.0.RELEASE</spring_version>
+		<spring_version>5.0.3.RELEASE</spring_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
-		<thymeleaf-version>3.0.7.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
 		<slf4j_target_version>1.6.0</slf4j_target_version>
@@ -795,6 +801,21 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-io</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-continuation</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-security</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlet</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
@@ -811,6 +832,11 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-xml</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
@@ -1022,6 +1048,14 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.gemnasium</groupId>
+					<artifactId>gemnasium-maven-plugin</artifactId>
+					<version>0.2.0</version>
+					<configuration>
+						<projectSlug>github.com/jamesagnew/hapi-fhir</projectSlug>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
 					<version>1.2.1</version>
@@ -1101,7 +1135,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>3.0.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1187,16 +1221,17 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.12</version>
+					<version>1.14</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
+						<encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.2</version>
+					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>

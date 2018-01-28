@@ -4,13 +4,6 @@ import java.util.Date;
 
 public class TranslatingUtilities {
 
-  public interface TranslationServices {
-    String translate(String context, String value);
-    String translate(String context, String value, Object... args);
-    String toStr(int value);
-    String toStr(Date value);
-  }
-
   private TranslationServices translator;
 
   public TranslationServices getTranslator() {
@@ -25,10 +18,6 @@ public class TranslatingUtilities {
     return hasTranslator() ? translator.translate(context, value) : value;
   }
 
-  protected String translate(String context, String value, Object... args) {
-    return hasTranslator() ? translator.translate(context, value, args) : String.format(value, args);
-  }
-  
   protected boolean hasTranslator() {
     return translator != null;
   }
@@ -40,4 +29,15 @@ public class TranslatingUtilities {
   public String toStr(Date value) {
     return hasTranslator() ? translator.toStr(value) : value.toString();
   }
+  
+  protected String translate(String context, String value, Object... args) {
+    if (hasTranslator()) {
+      String alt = translator.translate(context, value);
+      if (alt != null)
+        value = alt;
+    }
+    return String.format(value, args);      
+  }
+  
+  
 }

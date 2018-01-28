@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -79,6 +79,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.HUMANNAME;
     if ("Identifier".equals(codeString))
       return DataTypes.IDENTIFIER;
+    if ("MarketingStatus".equals(codeString))
+      return DataTypes.MARKETINGSTATUS;
     if ("Meta".equals(codeString))
       return DataTypes.META;
     if ("Money".equals(codeString))
@@ -89,6 +91,10 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.PARAMETERDEFINITION;
     if ("Period".equals(codeString))
       return DataTypes.PERIOD;
+    if ("ProdCharacteristic".equals(codeString))
+      return DataTypes.PRODCHARACTERISTIC;
+    if ("ProductShelfLife".equals(codeString))
+      return DataTypes.PRODUCTSHELFLIFE;
     if ("Quantity".equals(codeString))
       return DataTypes.QUANTITY;
     if ("Range".equals(codeString))
@@ -105,6 +111,10 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.SIGNATURE;
     if ("SimpleQuantity".equals(codeString))
       return DataTypes.SIMPLEQUANTITY;
+    if ("SubstanceAmount".equals(codeString))
+      return DataTypes.SUBSTANCEAMOUNT;
+    if ("SubstanceMoiety".equals(codeString))
+      return DataTypes.SUBSTANCEMOIETY;
     if ("Timing".equals(codeString))
       return DataTypes.TIMING;
     if ("TriggerDefinition".equals(codeString))
@@ -191,6 +201,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "HumanName";
     if (code == DataTypes.IDENTIFIER)
       return "Identifier";
+    if (code == DataTypes.MARKETINGSTATUS)
+      return "MarketingStatus";
     if (code == DataTypes.META)
       return "Meta";
     if (code == DataTypes.MONEY)
@@ -201,6 +213,10 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "ParameterDefinition";
     if (code == DataTypes.PERIOD)
       return "Period";
+    if (code == DataTypes.PRODCHARACTERISTIC)
+      return "ProdCharacteristic";
+    if (code == DataTypes.PRODUCTSHELFLIFE)
+      return "ProductShelfLife";
     if (code == DataTypes.QUANTITY)
       return "Quantity";
     if (code == DataTypes.RANGE)
@@ -217,6 +233,10 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "Signature";
     if (code == DataTypes.SIMPLEQUANTITY)
       return "SimpleQuantity";
+    if (code == DataTypes.SUBSTANCEAMOUNT)
+      return "SubstanceAmount";
+    if (code == DataTypes.SUBSTANCEMOIETY)
+      return "SubstanceMoiety";
     if (code == DataTypes.TIMING)
       return "Timing";
     if (code == DataTypes.TRIGGERDEFINITION)

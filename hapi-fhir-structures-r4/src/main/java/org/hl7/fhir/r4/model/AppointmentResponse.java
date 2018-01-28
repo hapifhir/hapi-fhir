@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -836,12 +836,12 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AppointmentResponse))
+        if (!(other_ instanceof AppointmentResponse))
           return false;
-        AppointmentResponse o = (AppointmentResponse) other;
+        AppointmentResponse o = (AppointmentResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(appointment, o.appointment, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(participantType, o.participantType, true)
            && compareDeep(actor, o.actor, true) && compareDeep(participantStatus, o.participantStatus, true)
@@ -849,12 +849,12 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AppointmentResponse))
+        if (!(other_ instanceof AppointmentResponse))
           return false;
-        AppointmentResponse o = (AppointmentResponse) other;
+        AppointmentResponse o = (AppointmentResponse) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(participantStatus, o.participantStatus, true)
            && compareValues(comment, o.comment, true);
       }

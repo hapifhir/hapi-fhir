@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class Provenance extends DomainResource {
          */
         REVISION, 
         /**
-         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.
+         * The repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author.
          */
         QUOTATION, 
         /**
@@ -115,7 +115,7 @@ public class Provenance extends DomainResource {
           switch (this) {
             case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.";
             case REVISION: return "A derivation for which the resulting entity is a revised version of some original.";
-            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.";
+            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author.";
             case SOURCE: return "A primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic's study, without benefit from hindsight.";
             case REMOVAL: return "A derivation for which the entity is removed from accessibility usually through the use of the Delete operation.";
             default: return "?";
@@ -209,14 +209,14 @@ public class Provenance extends DomainResource {
         /**
          * The individual, device or organization that participated in the event.
          */
-        @Child(name = "who", type = {UriType.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "who", type = {Identifier.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who participated", formalDefinition="The individual, device or organization that participated in the event." )
         protected Type who;
 
         /**
          * The individual, device, or organization for whom the change was made.
          */
-        @Child(name = "onBehalfOf", type = {UriType.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "onBehalfOf", type = {Identifier.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who the agent is representing", formalDefinition="The individual, device, or organization for whom the change was made." )
         protected Type onBehalfOf;
 
@@ -324,14 +324,14 @@ public class Provenance extends DomainResource {
         /**
          * @return {@link #who} (The individual, device or organization that participated in the event.)
          */
-        public UriType getWhoUriType() throws FHIRException { 
-          if (!(this.who instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
-          return (UriType) this.who;
+        public Identifier getWhoIdentifier() throws FHIRException { 
+          if (!(this.who instanceof Identifier))
+            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.who.getClass().getName()+" was encountered");
+          return (Identifier) this.who;
         }
 
-        public boolean hasWhoUriType() { 
-          return this.who instanceof UriType;
+        public boolean hasWhoIdentifier() { 
+          return this.who instanceof Identifier;
         }
 
         /**
@@ -369,14 +369,14 @@ public class Provenance extends DomainResource {
         /**
          * @return {@link #onBehalfOf} (The individual, device, or organization for whom the change was made.)
          */
-        public UriType getOnBehalfOfUriType() throws FHIRException { 
-          if (!(this.onBehalfOf instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
-          return (UriType) this.onBehalfOf;
+        public Identifier getOnBehalfOfIdentifier() throws FHIRException { 
+          if (!(this.onBehalfOf instanceof Identifier))
+            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
+          return (Identifier) this.onBehalfOf;
         }
 
-        public boolean hasOnBehalfOfUriType() { 
-          return this.onBehalfOf instanceof UriType;
+        public boolean hasOnBehalfOfIdentifier() { 
+          return this.onBehalfOf instanceof Identifier;
         }
 
         /**
@@ -408,8 +408,8 @@ public class Provenance extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "The participation the agent had with respect to the activity.", 0, 1, type));
           children.add(new Property("role", "CodeableConcept", "The function of the agent with respect to the activity. The security role enabling the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
-          children.add(new Property("who[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who));
-          children.add(new Property("onBehalfOf[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf));
+          children.add(new Property("who[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who));
+          children.add(new Property("onBehalfOf[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf));
         }
 
         @Override
@@ -417,14 +417,14 @@ public class Provenance extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The participation the agent had with respect to the activity.", 0, 1, type);
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "The function of the agent with respect to the activity. The security role enabling the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role);
-          case -788654078: /*who[x]*/  return new Property("who[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
-          case 117694: /*who*/  return new Property("who[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
-          case -788660018: /*whoUri*/  return new Property("who[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
-          case 1017243949: /*whoReference*/  return new Property("who[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
-          case 418120340: /*onBehalfOf[x]*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
-          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
-          case 418114400: /*onBehalfOfUri*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
-          case -1136255425: /*onBehalfOfReference*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
+          case -788654078: /*who[x]*/  return new Property("who[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
+          case 117694: /*who*/  return new Property("who[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
+          case -1533591801: /*whoIdentifier*/  return new Property("who[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
+          case 1017243949: /*whoReference*/  return new Property("who[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, 1, who);
+          case 418120340: /*onBehalfOf[x]*/  return new Property("onBehalfOf[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
+          case 427404341: /*onBehalfOfIdentifier*/  return new Property("onBehalfOf[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
+          case -1136255425: /*onBehalfOfReference*/  return new Property("onBehalfOf[x]", "Identifier|Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "The individual, device, or organization for whom the change was made.", 0, 1, onBehalfOf);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -496,8 +496,8 @@ public class Provenance extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case 3506294: /*role*/ return new String[] {"CodeableConcept"};
-        case 117694: /*who*/ return new String[] {"uri", "Reference"};
-        case -14402964: /*onBehalfOf*/ return new String[] {"uri", "Reference"};
+        case 117694: /*who*/ return new String[] {"Identifier", "Reference"};
+        case -14402964: /*onBehalfOf*/ return new String[] {"Identifier", "Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -512,16 +512,16 @@ public class Provenance extends DomainResource {
         else if (name.equals("role")) {
           return addRole();
         }
-        else if (name.equals("whoUri")) {
-          this.who = new UriType();
+        else if (name.equals("whoIdentifier")) {
+          this.who = new Identifier();
           return this.who;
         }
         else if (name.equals("whoReference")) {
           this.who = new Reference();
           return this.who;
         }
-        else if (name.equals("onBehalfOfUri")) {
-          this.onBehalfOf = new UriType();
+        else if (name.equals("onBehalfOfIdentifier")) {
+          this.onBehalfOf = new Identifier();
           return this.onBehalfOf;
         }
         else if (name.equals("onBehalfOfReference")) {
@@ -547,23 +547,23 @@ public class Provenance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProvenanceAgentComponent))
+        if (!(other_ instanceof ProvenanceAgentComponent))
           return false;
-        ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
+        ProvenanceAgentComponent o = (ProvenanceAgentComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(role, o.role, true) && compareDeep(who, o.who, true)
            && compareDeep(onBehalfOf, o.onBehalfOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProvenanceAgentComponent))
+        if (!(other_ instanceof ProvenanceAgentComponent))
           return false;
-        ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
+        ProvenanceAgentComponent o = (ProvenanceAgentComponent) other_;
         return true;
       }
 
@@ -592,7 +592,7 @@ public class Provenance extends DomainResource {
         /**
          * Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.
          */
-        @Child(name = "what", type = {UriType.class, Reference.class, Identifier.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "what", type = {Identifier.class, Reference.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Identity of entity", formalDefinition="Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative." )
         protected Type what;
 
@@ -676,14 +676,14 @@ public class Provenance extends DomainResource {
         /**
          * @return {@link #what} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        public UriType getWhatUriType() throws FHIRException { 
-          if (!(this.what instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.what.getClass().getName()+" was encountered");
-          return (UriType) this.what;
+        public Identifier getWhatIdentifier() throws FHIRException { 
+          if (!(this.what instanceof Identifier))
+            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.what.getClass().getName()+" was encountered");
+          return (Identifier) this.what;
         }
 
-        public boolean hasWhatUriType() { 
-          return this.what instanceof UriType;
+        public boolean hasWhatIdentifier() { 
+          return this.what instanceof Identifier;
         }
 
         /**
@@ -697,19 +697,6 @@ public class Provenance extends DomainResource {
 
         public boolean hasWhatReference() { 
           return this.what instanceof Reference;
-        }
-
-        /**
-         * @return {@link #what} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
-         */
-        public Identifier getWhatIdentifier() throws FHIRException { 
-          if (!(this.what instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.what.getClass().getName()+" was encountered");
-          return (Identifier) this.what;
-        }
-
-        public boolean hasWhatIdentifier() { 
-          return this.what instanceof Identifier;
         }
 
         public boolean hasWhat() { 
@@ -780,7 +767,7 @@ public class Provenance extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("role", "code", "How the entity was used during the activity.", 0, 1, role));
-          children.add(new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what));
+          children.add(new Property("what[x]", "Identifier|Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what));
           children.add(new Property("agent", "@Provenance.agent", "The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.", 0, java.lang.Integer.MAX_VALUE, agent));
         }
 
@@ -788,11 +775,10 @@ public class Provenance extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3506294: /*role*/  return new Property("role", "code", "How the entity was used during the activity.", 0, 1, role);
-          case 1309315900: /*what[x]*/  return new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
-          case 3648196: /*what*/  return new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
-          case 1309309960: /*whatUri*/  return new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
-          case 1531941095: /*whatReference*/  return new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
-          case 1537117837: /*whatIdentifier*/  return new Property("what[x]", "uri|Reference(Any)|Identifier", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
+          case 1309315900: /*what[x]*/  return new Property("what[x]", "Identifier|Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
+          case 3648196: /*what*/  return new Property("what[x]", "Identifier|Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
+          case 1537117837: /*whatIdentifier*/  return new Property("what[x]", "Identifier|Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
+          case 1531941095: /*whatReference*/  return new Property("what[x]", "Identifier|Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, 1, what);
           case 92750597: /*agent*/  return new Property("agent", "@Provenance.agent", "The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.", 0, java.lang.Integer.MAX_VALUE, agent);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -858,7 +844,7 @@ public class Provenance extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3506294: /*role*/ return new String[] {"code"};
-        case 3648196: /*what*/ return new String[] {"uri", "Reference", "Identifier"};
+        case 3648196: /*what*/ return new String[] {"Identifier", "Reference"};
         case 92750597: /*agent*/ return new String[] {"@Provenance.agent"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -870,16 +856,12 @@ public class Provenance extends DomainResource {
         if (name.equals("role")) {
           throw new FHIRException("Cannot call addChild on a primitive type Provenance.role");
         }
-        else if (name.equals("whatUri")) {
-          this.what = new UriType();
+        else if (name.equals("whatIdentifier")) {
+          this.what = new Identifier();
           return this.what;
         }
         else if (name.equals("whatReference")) {
           this.what = new Reference();
-          return this.what;
-        }
-        else if (name.equals("whatIdentifier")) {
-          this.what = new Identifier();
           return this.what;
         }
         else if (name.equals("agent")) {
@@ -903,23 +885,23 @@ public class Provenance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProvenanceEntityComponent))
+        if (!(other_ instanceof ProvenanceEntityComponent))
           return false;
-        ProvenanceEntityComponent o = (ProvenanceEntityComponent) other;
+        ProvenanceEntityComponent o = (ProvenanceEntityComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(what, o.what, true) && compareDeep(agent, o.agent, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProvenanceEntityComponent))
+        if (!(other_ instanceof ProvenanceEntityComponent))
           return false;
-        ProvenanceEntityComponent o = (ProvenanceEntityComponent) other;
+        ProvenanceEntityComponent o = (ProvenanceEntityComponent) other_;
         return compareValues(role, o.role, true);
       }
 
@@ -949,9 +931,9 @@ public class Provenance extends DomainResource {
     /**
      * The period during which the activity occurred.
      */
-    @Child(name = "occured", type = {Period.class, DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "occurred", type = {Period.class, DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the activity occurred", formalDefinition="The period during which the activity occurred." )
-    protected Type occured;
+    protected Type occurred;
 
     /**
      * The instant of time at which the activity was recorded.
@@ -1016,7 +998,7 @@ public class Provenance extends DomainResource {
     @Description(shortDefinition="Signature on target", formalDefinition="A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated." )
     protected List<Signature> signature;
 
-    private static final long serialVersionUID = 1662030224L;
+    private static final long serialVersionUID = -1991881518L;
 
   /**
    * Constructor
@@ -1097,47 +1079,47 @@ public class Provenance extends DomainResource {
     }
 
     /**
-     * @return {@link #occured} (The period during which the activity occurred.)
+     * @return {@link #occurred} (The period during which the activity occurred.)
      */
-    public Type getOccured() { 
-      return this.occured;
+    public Type getOccurred() { 
+      return this.occurred;
     }
 
     /**
-     * @return {@link #occured} (The period during which the activity occurred.)
+     * @return {@link #occurred} (The period during which the activity occurred.)
      */
-    public Period getOccuredPeriod() throws FHIRException { 
-      if (!(this.occured instanceof Period))
-        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occured.getClass().getName()+" was encountered");
-      return (Period) this.occured;
+    public Period getOccurredPeriod() throws FHIRException { 
+      if (!(this.occurred instanceof Period))
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurred.getClass().getName()+" was encountered");
+      return (Period) this.occurred;
     }
 
-    public boolean hasOccuredPeriod() { 
-      return this.occured instanceof Period;
+    public boolean hasOccurredPeriod() { 
+      return this.occurred instanceof Period;
     }
 
     /**
-     * @return {@link #occured} (The period during which the activity occurred.)
+     * @return {@link #occurred} (The period during which the activity occurred.)
      */
-    public DateTimeType getOccuredDateTimeType() throws FHIRException { 
-      if (!(this.occured instanceof DateTimeType))
-        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occured.getClass().getName()+" was encountered");
-      return (DateTimeType) this.occured;
+    public DateTimeType getOccurredDateTimeType() throws FHIRException { 
+      if (!(this.occurred instanceof DateTimeType))
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurred.getClass().getName()+" was encountered");
+      return (DateTimeType) this.occurred;
     }
 
-    public boolean hasOccuredDateTimeType() { 
-      return this.occured instanceof DateTimeType;
+    public boolean hasOccurredDateTimeType() { 
+      return this.occurred instanceof DateTimeType;
     }
 
-    public boolean hasOccured() { 
-      return this.occured != null && !this.occured.isEmpty();
+    public boolean hasOccurred() { 
+      return this.occurred != null && !this.occurred.isEmpty();
     }
 
     /**
-     * @param value {@link #occured} (The period during which the activity occurred.)
+     * @param value {@link #occurred} (The period during which the activity occurred.)
      */
-    public Provenance setOccured(Type value) { 
-      this.occured = value;
+    public Provenance setOccurred(Type value) { 
+      this.occurred = value;
       return this;
     }
 
@@ -1530,7 +1512,7 @@ public class Provenance extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("target", "Reference(Any)", "The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.", 0, java.lang.Integer.MAX_VALUE, target));
-        children.add(new Property("occured[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occured));
+        children.add(new Property("occurred[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occurred));
         children.add(new Property("recorded", "instant", "The instant of time at which the activity was recorded.", 0, 1, recorded));
         children.add(new Property("policy", "uri", "Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.", 0, java.lang.Integer.MAX_VALUE, policy));
         children.add(new Property("location", "Reference(Location)", "Where the activity occurred, if relevant.", 0, 1, location));
@@ -1545,10 +1527,10 @@ public class Provenance extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -880905839: /*target*/  return new Property("target", "Reference(Any)", "The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.", 0, java.lang.Integer.MAX_VALUE, target);
-        case 1675820821: /*occured[x]*/  return new Property("occured[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occured);
-        case -1636993653: /*occured*/  return new Property("occured[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occured);
-        case -653507796: /*occuredPeriod*/  return new Property("occured[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occured);
-        case 403066438: /*occuredDateTime*/  return new Property("occured[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occured);
+        case 784181563: /*occurred[x]*/  return new Property("occurred[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occurred);
+        case 792816933: /*occurred*/  return new Property("occurred[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occurred);
+        case 894082886: /*occurredPeriod*/  return new Property("occurred[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occurred);
+        case 1579027424: /*occurredDateTime*/  return new Property("occurred[x]", "Period|dateTime", "The period during which the activity occurred.", 0, 1, occurred);
         case -799233872: /*recorded*/  return new Property("recorded", "instant", "The instant of time at which the activity was recorded.", 0, 1, recorded);
         case -982670030: /*policy*/  return new Property("policy", "uri", "Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.", 0, java.lang.Integer.MAX_VALUE, policy);
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "Where the activity occurred, if relevant.", 0, 1, location);
@@ -1566,7 +1548,7 @@ public class Provenance extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // Reference
-        case -1636993653: /*occured*/ return this.occured == null ? new Base[0] : new Base[] {this.occured}; // Type
+        case 792816933: /*occurred*/ return this.occurred == null ? new Base[0] : new Base[] {this.occurred}; // Type
         case -799233872: /*recorded*/ return this.recorded == null ? new Base[0] : new Base[] {this.recorded}; // InstantType
         case -982670030: /*policy*/ return this.policy == null ? new Base[0] : this.policy.toArray(new Base[this.policy.size()]); // UriType
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
@@ -1586,8 +1568,8 @@ public class Provenance extends DomainResource {
         case -880905839: // target
           this.getTarget().add(castToReference(value)); // Reference
           return value;
-        case -1636993653: // occured
-          this.occured = castToType(value); // Type
+        case 792816933: // occurred
+          this.occurred = castToType(value); // Type
           return value;
         case -799233872: // recorded
           this.recorded = castToInstant(value); // InstantType
@@ -1622,8 +1604,8 @@ public class Provenance extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("target")) {
           this.getTarget().add(castToReference(value));
-        } else if (name.equals("occured[x]")) {
-          this.occured = castToType(value); // Type
+        } else if (name.equals("occurred[x]")) {
+          this.occurred = castToType(value); // Type
         } else if (name.equals("recorded")) {
           this.recorded = castToInstant(value); // InstantType
         } else if (name.equals("policy")) {
@@ -1649,8 +1631,8 @@ public class Provenance extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -880905839:  return addTarget(); 
-        case 1675820821:  return getOccured(); 
-        case -1636993653:  return getOccured(); 
+        case 784181563:  return getOccurred(); 
+        case 792816933:  return getOccurred(); 
         case -799233872:  return getRecordedElement();
         case -982670030:  return addPolicyElement();
         case 1901043637:  return getLocation(); 
@@ -1668,7 +1650,7 @@ public class Provenance extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -880905839: /*target*/ return new String[] {"Reference"};
-        case -1636993653: /*occured*/ return new String[] {"Period", "dateTime"};
+        case 792816933: /*occurred*/ return new String[] {"Period", "dateTime"};
         case -799233872: /*recorded*/ return new String[] {"instant"};
         case -982670030: /*policy*/ return new String[] {"uri"};
         case 1901043637: /*location*/ return new String[] {"Reference"};
@@ -1687,13 +1669,13 @@ public class Provenance extends DomainResource {
         if (name.equals("target")) {
           return addTarget();
         }
-        else if (name.equals("occuredPeriod")) {
-          this.occured = new Period();
-          return this.occured;
+        else if (name.equals("occurredPeriod")) {
+          this.occurred = new Period();
+          return this.occurred;
         }
-        else if (name.equals("occuredDateTime")) {
-          this.occured = new DateTimeType();
-          return this.occured;
+        else if (name.equals("occurredDateTime")) {
+          this.occurred = new DateTimeType();
+          return this.occurred;
         }
         else if (name.equals("recorded")) {
           throw new FHIRException("Cannot call addChild on a primitive type Provenance.recorded");
@@ -1738,7 +1720,7 @@ public class Provenance extends DomainResource {
           for (Reference i : target)
             dst.target.add(i.copy());
         };
-        dst.occured = occured == null ? null : occured.copy();
+        dst.occurred = occurred == null ? null : occurred.copy();
         dst.recorded = recorded == null ? null : recorded.copy();
         if (policy != null) {
           dst.policy = new ArrayList<UriType>();
@@ -1775,30 +1757,30 @@ public class Provenance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Provenance))
+        if (!(other_ instanceof Provenance))
           return false;
-        Provenance o = (Provenance) other;
-        return compareDeep(target, o.target, true) && compareDeep(occured, o.occured, true) && compareDeep(recorded, o.recorded, true)
+        Provenance o = (Provenance) other_;
+        return compareDeep(target, o.target, true) && compareDeep(occurred, o.occurred, true) && compareDeep(recorded, o.recorded, true)
            && compareDeep(policy, o.policy, true) && compareDeep(location, o.location, true) && compareDeep(reason, o.reason, true)
            && compareDeep(activity, o.activity, true) && compareDeep(agent, o.agent, true) && compareDeep(entity, o.entity, true)
            && compareDeep(signature, o.signature, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Provenance))
+        if (!(other_ instanceof Provenance))
           return false;
-        Provenance o = (Provenance) other;
+        Provenance o = (Provenance) other_;
         return compareValues(recorded, o.recorded, true) && compareValues(policy, o.policy, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(target, occured, recorded
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(target, occurred, recorded
           , policy, location, reason, activity, agent, entity, signature);
       }
 
@@ -1858,17 +1840,17 @@ public class Provenance extends DomainResource {
    * <p>
    * Description: <b>Who participated</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Provenance.agent.who[x]</b><br>
+   * Path: <b>Provenance.agent.whoReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Provenance.agent.who", description="Who participated", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="agent", path="Provenance.agent.who.as(Reference)", description="Who participated", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
    * <p>
    * Description: <b>Who participated</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Provenance.agent.who[x]</b><br>
+   * Path: <b>Provenance.agent.whoReference</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AGENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AGENT);
@@ -1996,17 +1978,17 @@ public class Provenance extends DomainResource {
    * <p>
    * Description: <b>When the activity occurred</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Provenance.occuredDateTime</b><br>
+   * Path: <b>Provenance.occurredDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when", path="Provenance.occured.as(DateTime)", description="When the activity occurred", type="date" )
+  @SearchParamDefinition(name="when", path="Provenance.occurred.as(dateTime)", description="When the activity occurred", type="date" )
   public static final String SP_WHEN = "when";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when</b>
    * <p>
    * Description: <b>When the activity occurred</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Provenance.occuredDateTime</b><br>
+   * Path: <b>Provenance.occurredDateTime</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam WHEN = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_WHEN);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -71,7 +71,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
     /**
      * The actual content, base64 encoded.
      */
-    @Child(name = "content", type = {Base64BinaryType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "content", type = {Base64BinaryType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The actual content", formalDefinition="The actual content, base64 encoded." )
     protected Base64BinaryType content;
 
@@ -338,23 +338,23 @@ public class Binary extends BaseBinary implements IBaseBinary {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Binary))
+        if (!(other_ instanceof Binary))
           return false;
-        Binary o = (Binary) other;
+        Binary o = (Binary) other_;
         return compareDeep(contentType, o.contentType, true) && compareDeep(securityContext, o.securityContext, true)
            && compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Binary))
+        if (!(other_ instanceof Binary))
           return false;
-        Binary o = (Binary) other;
+        Binary o = (Binary) other_;
         return compareValues(contentType, o.contentType, true) && compareValues(content, o.content, true);
       }
 

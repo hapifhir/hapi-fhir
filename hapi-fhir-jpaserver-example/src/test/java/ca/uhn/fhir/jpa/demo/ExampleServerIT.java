@@ -18,10 +18,9 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class ExampleServerIT {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
-
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -57,7 +56,9 @@ public class ExampleServerIT {
 
 		ourLog.info("Project base path is: {}", path);
 
-		ourPort = RandomServerPortProvider.findFreePort();
+		if (ourPort == 0) {
+			ourPort = RandomServerPortProvider.findFreePort();
+		}
 		ourServer = new Server(ourPort);
 
 		WebAppContext webAppContext = new WebAppContext();
@@ -76,5 +77,11 @@ public class ExampleServerIT {
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}
+
+	public static void main(String[] theArgs) throws Exception {
+		ourPort = 8080;
+		beforeClass();
+	}
+
 
 }

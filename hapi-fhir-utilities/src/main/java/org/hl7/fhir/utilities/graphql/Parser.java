@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.graphql.Argument.ArgumentListStatus;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -243,7 +244,7 @@ public class Parser {
     result.setName(consumeName());
     consumePunctuation(":");
     if (hasPunctuation("[")) {
-      result.setList(true);
+      result.setListStatus(ArgumentListStatus.REPEATING);
       consumePunctuation("[");
       while (!hasPunctuation("]"))
         result.getValues().add(parseValue());

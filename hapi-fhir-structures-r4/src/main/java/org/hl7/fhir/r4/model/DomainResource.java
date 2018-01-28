@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -395,23 +395,23 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DomainResource))
+        if (!(other_ instanceof DomainResource))
           return false;
-        DomainResource o = (DomainResource) other;
+        DomainResource o = (DomainResource) other_;
         return compareDeep(text, o.text, true) && compareDeep(contained, o.contained, true) && compareDeep(extension, o.extension, true)
            && compareDeep(modifierExtension, o.modifierExtension, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DomainResource))
+        if (!(other_ instanceof DomainResource))
           return false;
-        DomainResource o = (DomainResource) other;
+        DomainResource o = (DomainResource) other_;
         return true;
       }
 
@@ -435,6 +435,17 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
     ex.setValue(value);
     getExtension().add(ex);    
   }
+  
+
+
+
+  public boolean hasExtension(String url) {
+    for (Extension e : getExtension())
+      if (url.equals(e.getUrl()))
+        return true;
+    return false;
+    }
+    
 
 // end addition
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum AddressUse {
          */
         OLD, 
         /**
+         * An address to be used to send bills, invoices, receipts etc
+         */
+        BILLING, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -67,6 +71,8 @@ public enum AddressUse {
           return TEMP;
         if ("old".equals(codeString))
           return OLD;
+        if ("billing".equals(codeString))
+          return BILLING;
         throw new FHIRException("Unknown AddressUse code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,6 +81,7 @@ public enum AddressUse {
             case WORK: return "work";
             case TEMP: return "temp";
             case OLD: return "old";
+            case BILLING: return "billing";
             default: return "?";
           }
         }
@@ -87,6 +94,7 @@ public enum AddressUse {
             case WORK: return "An office address. First choice for business related contacts during business hours.";
             case TEMP: return "A temporary address. The period can provide more detailed information.";
             case OLD: return "This address is no longer in use (or was never correct, but retained for records).";
+            case BILLING: return "An address to be used to send bills, invoices, receipts etc";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum AddressUse {
             case WORK: return "Work";
             case TEMP: return "Temporary";
             case OLD: return "Old / Incorrect";
+            case BILLING: return "Billing";
             default: return "?";
           }
     }

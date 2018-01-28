@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,6 @@ public abstract class BaseHasResource {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
 
-	@Column(name = "RES_ENCODING", nullable = false, length = 5)
-	@Enumerated(EnumType.STRING)
-	@OptimisticLock(excluded = true)
-	private ResourceEncodingEnum myEncoding;
-
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
@@ -60,11 +55,6 @@ public abstract class BaseHasResource {
 	@OptimisticLock(excluded = true)
 	private Date myPublished;
 
-	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = false)
-	@Lob()
-	@OptimisticLock(excluded = true)
-	private byte[] myResource;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED", nullable = false)
 	@OptimisticLock(excluded = true)
@@ -80,13 +70,6 @@ public abstract class BaseHasResource {
 		myDeleted = theDate;
 	}
 
-	public ResourceEncodingEnum getEncoding() {
-		return myEncoding;
-	}
-
-	public void setEncoding(ResourceEncodingEnum theEncoding) {
-		myEncoding = theEncoding;
-	}
 
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
@@ -116,16 +99,8 @@ public abstract class BaseHasResource {
 		}
 	}
 
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished.getValue();
-	}
-
-	public byte[] getResource() {
-		return myResource;
-	}
-
-	public void setResource(byte[] theResource) {
-		myResource = theResource;
+	public void setPublished(Date thePublished) {
+		myPublished = thePublished;
 	}
 
 	public abstract String getResourceType();
@@ -136,8 +111,8 @@ public abstract class BaseHasResource {
 		return new InstantDt(myUpdated);
 	}
 
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
+	public void setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
 	}
 
 	public Date getUpdatedDate() {
@@ -154,12 +129,12 @@ public abstract class BaseHasResource {
 		myHasTags = theHasTags;
 	}
 
-	public void setPublished(Date thePublished) {
-		myPublished = thePublished;
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished.getValue();
 	}
 
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
+	public void setUpdated(InstantDt theUpdated) {
+		myUpdated = theUpdated.getValue();
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -423,7 +423,7 @@ public class RestfulServerUtils {
 		if (theResource instanceof IResource) {
 			lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
 		} else if (theResource instanceof IAnyResource) {
-			lastUpdated = new InstantDt(((IAnyResource) theResource).getMeta().getLastUpdated());
+			lastUpdated = new InstantDt(theResource.getMeta().getLastUpdated());
 		}
 		return lastUpdated;
 	}
@@ -561,11 +561,7 @@ public class RestfulServerUtils {
 		String[] pretty = requestParams.get(Constants.PARAM_PRETTY);
 		boolean prettyPrint;
 		if (pretty != null && pretty.length > 0) {
-			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
-				prettyPrint = true;
-			} else {
-				prettyPrint = false;
-			}
+			prettyPrint = Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0]);
 		} else {
 			prettyPrint = theServer.isDefaultPrettyPrint();
 			List<String> acceptValues = theRequest.getHeaders(Constants.HEADER_ACCEPT);
@@ -614,6 +610,8 @@ public class RestfulServerUtils {
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (fullId != null && fullId.hasVersionIdPart()) {
 				response.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
+			} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
+				response.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getMeta().getVersionId() + '"');
 			}
 		}
 
@@ -730,7 +728,7 @@ public class RestfulServerUtils {
 		}
 	}
 
-	private static enum NarrativeModeEnum {
+	private enum NarrativeModeEnum {
 		NORMAL, ONLY, SUPPRESS;
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {

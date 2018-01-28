@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -835,23 +835,23 @@ public class SearchParameter extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SearchParameterComponentComponent))
+        if (!(other_ instanceof SearchParameterComponentComponent))
           return false;
-        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other;
+        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other_;
         return compareDeep(definition, o.definition, true) && compareDeep(expression, o.expression, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SearchParameterComponentComponent))
+        if (!(other_ instanceof SearchParameterComponentComponent))
           return false;
-        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other;
+        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other_;
         return compareValues(expression, o.expression, true);
       }
 
@@ -986,7 +986,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1006,7 +1006,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public SearchParameter setUrlElement(UriType value) { 
       this.url = value;
@@ -1014,14 +1014,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.
      */
     public SearchParameter setUrl(String value) { 
         if (this.url == null)
@@ -2211,7 +2211,7 @@ public class SearchParameter extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this search parameter. Enables tracking the life-cycle of the content.", 0, 1, status));
@@ -2240,7 +2240,7 @@ public class SearchParameter extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this search parameter. Enables tracking the life-cycle of the content.", 0, 1, status);
@@ -2664,12 +2664,12 @@ public class SearchParameter extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SearchParameter))
+        if (!(other_ instanceof SearchParameter))
           return false;
-        SearchParameter o = (SearchParameter) other;
+        SearchParameter o = (SearchParameter) other_;
         return compareDeep(purpose, o.purpose, true) && compareDeep(code, o.code, true) && compareDeep(base, o.base, true)
            && compareDeep(type, o.type, true) && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(expression, o.expression, true)
            && compareDeep(xpath, o.xpath, true) && compareDeep(xpathUsage, o.xpathUsage, true) && compareDeep(target, o.target, true)
@@ -2678,12 +2678,12 @@ public class SearchParameter extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SearchParameter))
+        if (!(other_ instanceof SearchParameter))
           return false;
-        SearchParameter o = (SearchParameter) other;
+        SearchParameter o = (SearchParameter) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(code, o.code, true) && compareValues(base, o.base, true)
            && compareValues(type, o.type, true) && compareValues(derivedFrom, o.derivedFrom, true) && compareValues(expression, o.expression, true)
            && compareValues(xpath, o.xpath, true) && compareValues(xpathUsage, o.xpathUsage, true) && compareValues(target, o.target, true)
@@ -2801,6 +2801,26 @@ public class SearchParameter extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam DERIVED_FROM = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_DERIVED_FROM);
+
+ /**
+   * Search parameter: <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.useContext.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type", path="SearchParameter.useContext.code", description="A type of use context assigned to the search parameter", type="token" )
+  public static final String SP_CONTEXT_TYPE = "context-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.useContext.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
 
  /**
    * Search parameter: <b>type</b>

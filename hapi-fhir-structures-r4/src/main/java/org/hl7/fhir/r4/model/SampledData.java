@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -93,7 +93,7 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value.
      */
-    @Child(name = "data", type = {StringType.class}, order=6, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "data", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Decimal values with spaces, or \"E\" | \"U\" | \"L\"", formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value." )
     protected StringType data;
 
@@ -109,12 +109,11 @@ public class SampledData extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public SampledData(SimpleQuantity origin, DecimalType period, PositiveIntType dimensions, StringType data) {
+    public SampledData(SimpleQuantity origin, DecimalType period, PositiveIntType dimensions) {
       super();
       this.origin = origin;
       this.period = period;
       this.dimensions = dimensions;
-      this.data = data;
     }
 
     /**
@@ -489,9 +488,13 @@ public class SampledData extends Type implements ICompositeType {
      * @param value A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value.
      */
     public SampledData setData(String value) { 
+      if (Utilities.noString(value))
+        this.data = null;
+      else {
         if (this.data == null)
           this.data = new StringType();
         this.data.setValue(value);
+      }
       return this;
     }
 
@@ -667,24 +670,24 @@ public class SampledData extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SampledData))
+        if (!(other_ instanceof SampledData))
           return false;
-        SampledData o = (SampledData) other;
+        SampledData o = (SampledData) other_;
         return compareDeep(origin, o.origin, true) && compareDeep(period, o.period, true) && compareDeep(factor, o.factor, true)
            && compareDeep(lowerLimit, o.lowerLimit, true) && compareDeep(upperLimit, o.upperLimit, true) && compareDeep(dimensions, o.dimensions, true)
            && compareDeep(data, o.data, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SampledData))
+        if (!(other_ instanceof SampledData))
           return false;
-        SampledData o = (SampledData) other;
+        SampledData o = (SampledData) other_;
         return compareValues(period, o.period, true) && compareValues(factor, o.factor, true) && compareValues(lowerLimit, o.lowerLimit, true)
            && compareValues(upperLimit, o.upperLimit, true) && compareValues(dimensions, o.dimensions, true) && compareValues(data, o.data, true)
           ;

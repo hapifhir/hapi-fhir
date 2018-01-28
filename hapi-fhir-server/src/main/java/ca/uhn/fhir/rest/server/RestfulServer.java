@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.*;
 
+import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -101,6 +102,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
+	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -603,14 +605,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
+	 * @param theRequest
 	 */
-	public String getServerBaseForRequest(HttpServletRequest theRequest) {
+	public String getServerBaseForRequest(ServletRequestDetails theRequest) {
 		String fhirServerBase;
-		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
+		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest.getServletRequest());
 
 		if (fhirServerBase.endsWith("/")) {
 			fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
 		}
+
+		if (myTenantIdentificationStrategy != null) {
+			fhirServerBase = myTenantIdentificationStrategy.massageServerBaseUrl(fhirServerBase, theRequest);
+		}
+
 		return fhirServerBase;
 	}
 
@@ -667,6 +675,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
 		}
 		myServerConformanceProvider = theServerConformanceProvider;
+	}
+
+	/**
+	 * If provided (default is <code>null</code>), the tenant identification
+	 * strategy provides a mechanism for a multitenant server to identify which tenant
+	 * a given request corresponds to.
+	 */
+	public void setTenantIdentificationStrategy(ITenantIdentificationStrategy theTenantIdentificationStrategy) {
+		myTenantIdentificationStrategy = theTenantIdentificationStrategy;
 	}
 
 	/**
@@ -788,11 +805,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				requestPath = requestPath.substring(1);
 			}
 
-			fhirServerBase = getServerBaseForRequest(theRequest);
-
-
 			IIdType id;
 			populateRequestDetailsFromRequestPath(requestDetails, requestPath);
+
+			fhirServerBase = getServerBaseForRequest(requestDetails);
 
 			if (theRequestType == RequestTypeEnum.PUT) {
 				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
@@ -859,12 +875,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				next.processingCompletedNormally(requestDetails);
+				try {
+					next.processingCompletedNormally(requestDetails);
+				} catch (Throwable t) {
+					ourLog.error("Failure in interceptor method", t);
+				}
 			}
 
-			if (outputStreamOrWriter != null) {
-				outputStreamOrWriter.close();
-			}
+			IOUtils.closeQuietly(outputStreamOrWriter);
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -1173,8 +1191,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
-		StringTokenizer tok = new UrlPathTokenizer(theRequestPath);
+		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);
 		String resourceName = null;
+
+		if (myTenantIdentificationStrategy != null) {
+			myTenantIdentificationStrategy.extractTenant(tok, theRequestDetails);
+		}
 
 		IIdType id = null;
 		String operation = null;

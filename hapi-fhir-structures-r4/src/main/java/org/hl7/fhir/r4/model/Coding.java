@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -55,10 +55,10 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     protected UriType system;
 
     /**
-     * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
+     * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
      */
     @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Version of the system - if relevant", formalDefinition="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged." )
+    @Description(shortDefinition="Version of the system - if relevant", formalDefinition="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged." )
     protected StringType version;
 
     /**
@@ -153,7 +153,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @return {@link #version} (The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -173,7 +173,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @param value {@link #version} (The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public Coding setVersionElement(StringType value) { 
       this.version = value;
@@ -181,14 +181,14 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @return The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
+     * @return The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
+     * @param value The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
      */
     public Coding setVersion(String value) { 
       if (Utilities.noString(value))
@@ -347,7 +347,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("system", "uri", "The identification of the code system that defines the meaning of the symbol in the code.", 0, 1, system));
-        children.add(new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version));
+        children.add(new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version));
         children.add(new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code));
         children.add(new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display));
         children.add(new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected));
@@ -357,7 +357,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -887328209: /*system*/  return new Property("system", "uri", "The identification of the code system that defines the meaning of the symbol in the code.", 0, 1, system);
-        case 351608024: /*version*/  return new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version);
+        case 351608024: /*version*/  return new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version);
         case 3059181: /*code*/  return new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code);
         case 1671764162: /*display*/  return new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display);
         case 423643014: /*userSelected*/  return new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected);
@@ -487,23 +487,23 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Coding))
+        if (!(other_ instanceof Coding))
           return false;
-        Coding o = (Coding) other;
+        Coding o = (Coding) other_;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(code, o.code, true)
            && compareDeep(display, o.display, true) && compareDeep(userSelected, o.userSelected, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Coding))
+        if (!(other_ instanceof Coding))
           return false;
-        Coding o = (Coding) other;
+        Coding o = (Coding) other_;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(code, o.code, true)
            && compareValues(display, o.display, true) && compareValues(userSelected, o.userSelected, true);
       }
@@ -524,6 +524,11 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
         return true;
       }
 
+
+      public boolean is(String system, String code) {
+        return hasSystem() && hasCode() &&  this.getSystem().equals(system) && this.getCode().equals(code);
+      }
+      
 
 // end addition
 

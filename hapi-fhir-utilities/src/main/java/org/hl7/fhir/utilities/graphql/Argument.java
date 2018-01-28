@@ -3,15 +3,18 @@ package org.hl7.fhir.utilities.graphql;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.utilities.graphql.Argument.ArgumentListStatus;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 public class Argument {
+  public enum ArgumentListStatus {NOT_SPECIFIED, SINGLETON, REPEATING}
   String name;
   private List<Value> values = new ArrayList<Value>();
-  boolean list;
+  ArgumentListStatus listStatus;
   public Argument() {
     super();
   }
@@ -31,11 +34,11 @@ public class Argument {
   public void setName(String name) {
     this.name = name;
   }
-  public boolean isList() {
-    return list;
+  public ArgumentListStatus getListStatus() {
+    return listStatus;
   }
-  public void setList(boolean list) {
-    this.list = list;
+  public void setListStatus(ArgumentListStatus listStatus) {
+    this.listStatus = listStatus;
   }
   public List<Value> getValues() {
     return values;
@@ -81,7 +84,7 @@ public class Argument {
         b.append(ch);
     }
     b.append("\":");
-    if (list) {
+    if (listStatus == ArgumentListStatus.REPEATING) {
       b.append("[");
       boolean first = true;
       for (Value v : values) {

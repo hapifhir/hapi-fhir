@@ -17,7 +17,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
 
 public interface IDao {
 
-	public static final ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
+	ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
 
 	FhirContext getContext();
 

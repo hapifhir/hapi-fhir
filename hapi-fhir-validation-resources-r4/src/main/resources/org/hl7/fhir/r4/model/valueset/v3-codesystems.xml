@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v3-valuesets"/>
  <meta>
-  <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+  <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -18,6 +18,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-CalendarType"/>
     <identifier>
@@ -61,6 +64,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ManagedParticipationStatus"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -94,11 +100,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentDirective"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -143,7 +149,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-InformationSensitivityPolicy"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -198,6 +204,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClass"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -231,11 +240,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ConfidentialityClassification"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="2"/>
@@ -293,11 +302,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ServiceDeliveryLocationRoleType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="3"/>
@@ -357,6 +366,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryResponse"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -390,7 +402,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityPolicy"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -445,6 +457,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TableCellHorizontalAlign"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -478,7 +493,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassOrganization"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -524,7 +539,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetDirect"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -570,7 +585,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipHasComponent"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -625,6 +640,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProbabilityDistributionType"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -662,7 +680,7 @@
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -708,6 +726,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-CommunicationFunctionType"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -750,6 +771,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ReligiousAffiliation"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ReligiousAffiliation"/>
@@ -787,6 +811,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ResponseMode"/>
     <identifier>
@@ -830,6 +857,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActMood"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -863,7 +893,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassSupply"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -909,7 +939,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityIntegrityObservationValue"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -970,6 +1000,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-substanceAdminSubstitution"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System substanceAdminSubstitution"/>
@@ -1007,6 +1040,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AmericanIndianAlaskaNativeLanguages"/>
     <version value="2017-07-31"/>
@@ -1046,6 +1082,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementCondition"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -1083,7 +1122,7 @@
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -1120,7 +1159,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassDocument"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1175,6 +1214,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TargetAwareness"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -1216,6 +1258,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNameUseR2"/>
     <identifier>
@@ -1259,6 +1304,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AdministrativeGender"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -1276,7 +1324,16 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <description value=" The gender of a person used for adminstrative purposes (as opposed to clinical gender)"/>
+    <description value=" The gender of a person used for adminstrative purposes (as opposed to clinical gender)">
+     <extension url="http://hl7.org/fhir/StructureDefinition/translation">
+      <extension url="lang">
+       <valueString value="nl"/>
+      </extension>
+      <extension url="content">
+       <valueString value=" Het geslacht van een persoon bedoeld voor administratieve doeleinden (in tegenstelling tot klinisch geslacht)"/>
+      </extension>
+     </extension>
+    </description>
     <immutable value="true"/>
     <compose>
      <include>
@@ -1300,6 +1357,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityRisk"/>
     <version value="2017-07-31"/>
@@ -1330,7 +1390,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RefrainPolicy"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1376,7 +1436,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetSubject"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1422,7 +1482,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipPertains"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1477,6 +1537,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActStatus"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -1519,6 +1582,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-DocumentStorage"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System DocumentStorage"/>
@@ -1556,6 +1622,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryPriority"/>
     <identifier>
@@ -1599,6 +1668,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TribalEntityUS"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System TribalEntityUS"/>
@@ -1636,6 +1708,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ResponseLevel"/>
     <identifier>
@@ -1679,6 +1754,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-IntegrityCheckAlgorithm"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -1712,7 +1790,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassManufacturedProduct"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1758,7 +1836,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassROI"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1810,7 +1888,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRelationshipFormal"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1871,6 +1949,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-SpecimenType"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System SpecimenType"/>
@@ -1900,11 +1981,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSubstanceAdminSubstitutionCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -1955,7 +2036,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-AS"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2023,6 +2104,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ResponseModality"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2056,7 +2140,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPartitive"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2108,7 +2192,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassDevice"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2163,6 +2247,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityStatus"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2205,6 +2292,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-DataOperation"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System DataOperation"/>
@@ -2242,6 +2332,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Race"/>
     <version value="2017-07-31"/>
@@ -2281,6 +2374,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-SubstitutionCondition"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System SubstitutionCondition"/>
@@ -2310,7 +2406,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-DC"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2375,6 +2471,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TelecommunicationCapabilities"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2417,6 +2516,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailCode"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System AcknowledgementDetailCode"/>
@@ -2446,11 +2548,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstanceAdminSubstitutionReason"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -2510,6 +2612,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipSubset"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2543,7 +2648,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPassive"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2604,6 +2709,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipSplit"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2637,7 +2745,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassClinicalDocument"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2692,6 +2800,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-IdentifierScope"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2725,7 +2836,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassObservation"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2780,6 +2891,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryRequestLimit"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System QueryRequestLimit"/>
@@ -2817,6 +2931,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActUncertainty"/>
     <identifier>
@@ -2860,6 +2977,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-HL7UpdateMode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2901,6 +3021,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EmployeeJobClass"/>
     <identifier>
@@ -2944,6 +3067,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EncounterAdmissionSource"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -2977,7 +3103,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationPhysicalPerformer"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3023,7 +3149,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HumanLanguage"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3064,7 +3190,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRoot"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3119,6 +3245,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActInvoiceElementModifier"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -3160,6 +3289,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TableRules"/>
     <identifier>
@@ -3203,6 +3335,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationValue"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ObservationValue"/>
@@ -3241,6 +3376,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-PersonDisabilityType"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System PersonDisabilityType"/>
@@ -3278,6 +3416,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartType"/>
     <identifier>
@@ -3321,6 +3462,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-MessageWaitingPriority"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System MessageWaitingPriority"/>
@@ -3358,6 +3502,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationFunction"/>
     <identifier>
@@ -3401,6 +3548,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TableFrame"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -3434,7 +3584,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassSpecimen"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3489,6 +3639,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Calendar"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -3522,7 +3675,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodIntent"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3568,7 +3721,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminerDetermined"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3623,6 +3776,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-hl7V3Conformance"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System hl7V3Conformance"/>
@@ -3652,7 +3808,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3710,6 +3866,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-LanguageAbilityProficiency"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -3747,7 +3906,7 @@
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -3784,7 +3943,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassPlace"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3830,7 +3989,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentSectionType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3880,6 +4039,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityCode"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System EntityCode"/>
@@ -3909,7 +4071,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassRoot"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3964,6 +4126,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipJoin"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -3997,7 +4162,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationTranscriber"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4052,6 +4217,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-LanguageAbilityMode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -4085,7 +4253,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4129,7 +4297,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCoverageTypeCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4184,6 +4352,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActExposureLevelCode"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ActExposureLevelCode"/>
@@ -4221,6 +4392,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProcessingID"/>
     <identifier>
@@ -4264,6 +4438,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContainerCap"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ContainerCap"/>
@@ -4301,6 +4478,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-DocumentCompletion"/>
     <identifier>
@@ -4344,6 +4524,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TableCellScope"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -4377,7 +4560,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationGenerator"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4438,6 +4621,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-DeviceAlertLevel"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -4480,6 +4666,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Confidentiality"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System Confidentiality"/>
@@ -4509,7 +4698,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-xBasicConfidentialityKind"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4568,6 +4757,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Ethnicity"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System Ethnicity"/>
@@ -4606,6 +4798,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleCode"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System RoleCode"/>
@@ -4635,7 +4830,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MilitaryRoleType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4681,7 +4876,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4736,6 +4931,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementType"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -4778,6 +4976,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-hl7Realm"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -4811,7 +5012,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAssociative"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4863,7 +5064,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Compartment"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4918,6 +5119,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ExposureMode"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ExposureMode"/>
@@ -4955,6 +5159,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EncounterSpecialCourtesy"/>
     <identifier>
@@ -4998,6 +5205,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryStatusCode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5039,6 +5249,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleStatus"/>
     <identifier>
@@ -5082,6 +5295,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClass"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5123,6 +5339,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-PatientImportance"/>
     <identifier>
@@ -5166,6 +5385,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-LocalRemoteControlState"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5199,7 +5421,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityControlObservationValue"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5252,7 +5474,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonalRelationshipRoleType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5313,6 +5535,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContextControl"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5354,6 +5579,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-PaymentTerms"/>
     <identifier>
@@ -5397,6 +5625,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-SetOperator"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5439,6 +5670,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartQualifier"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5472,7 +5706,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationVerifier"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5518,7 +5752,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodPredicate"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5574,7 +5808,7 @@
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -5620,6 +5854,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-LivingArrangement"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System LivingArrangement"/>
@@ -5649,7 +5886,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassLivingSubject"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5704,6 +5941,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailType"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5746,6 +5986,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActSite"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ActSite"/>
@@ -5784,6 +6027,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-VaccineManufacturer"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5817,7 +6063,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationIndirectTarget"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5872,6 +6118,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationMethod"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -5905,7 +6154,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SeverityObservation"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5966,6 +6215,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AddressUse"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6008,6 +6260,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-CalendarCycle"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System CalendarCycle"/>
@@ -6037,7 +6292,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAgent"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6092,6 +6347,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-GenderStatus"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6133,6 +6391,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipType"/>
     <identifier>
@@ -6176,6 +6437,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Charset"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6217,6 +6481,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-MapRelationship"/>
     <identifier>
@@ -6260,6 +6527,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-CodingRationale"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6301,6 +6571,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-AddressPartType"/>
     <identifier>
@@ -6344,6 +6617,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContainerSeparator"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6377,11 +6653,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActEncounterCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="2"/>
@@ -6441,6 +6717,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EquipmentAlertLevel"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6483,6 +6762,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryParameterValue"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System QueryParameterValue"/>
@@ -6520,6 +6802,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipCheckpoint"/>
     <identifier>
@@ -6563,6 +6848,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-GTSAbbreviation"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System GTSAbbreviation"/>
@@ -6600,6 +6888,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-NullFlavor"/>
     <identifier>
@@ -6643,6 +6934,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContentProcessingMode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6685,6 +6979,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNameUse"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6718,7 +7015,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipConditional"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6779,6 +7076,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RelationshipConjunction"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6812,11 +7112,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PurposeOfUse"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="3"/>
@@ -6870,6 +7170,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RouteOfAdministration"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System RouteOfAdministration"/>
@@ -6899,7 +7202,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassManufacturedMaterial"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6954,6 +7257,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RelationalOperator"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -6987,7 +7293,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipFulfills"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7033,11 +7339,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActIncidentCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Trial Use"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="2"/>
@@ -7097,6 +7403,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationType"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7139,6 +7448,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleLinkStatus"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7172,7 +7484,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceGroupCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7224,7 +7536,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassProcedure"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7270,7 +7582,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GeneralPurposeOfUse"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7338,7 +7650,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassInvestigation"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7384,7 +7696,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VerificationMethod"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7439,6 +7751,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EducationLevel"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7472,7 +7787,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActTaskCode"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7518,11 +7833,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-FamilyMember"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -7576,6 +7891,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationInterpretation"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7617,6 +7935,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-Sequencing"/>
     <identifier>
@@ -7660,6 +7981,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-CompressionAlgorithm"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7693,7 +8017,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassMutualRelationship"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7754,6 +8078,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-MaritalStatus"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System MaritalStatus"/>
@@ -7791,6 +8118,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TimingEvent"/>
     <identifier>
@@ -7834,6 +8164,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClass"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7875,6 +8208,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ModifyIndicator"/>
     <identifier>
@@ -7918,6 +8254,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TransmissionRelationshipTypeCode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -7959,6 +8298,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartQualifierR2"/>
     <identifier>
@@ -8002,6 +8344,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-orderableDrugForm"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System orderableDrugForm"/>
@@ -8031,7 +8376,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObligationPolicy"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8077,7 +8422,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetLocation"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8132,6 +8477,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-TableCellVerticalAlign"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -8173,6 +8521,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationSignature"/>
     <identifier>
@@ -8216,6 +8567,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityDeterminer"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -8257,6 +8611,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-HtmlLinkType"/>
     <identifier>
@@ -8300,6 +8657,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProcessingMode"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -8341,6 +8701,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartTypeR2"/>
     <identifier>
@@ -8384,6 +8747,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityHandling"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -8417,7 +8783,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassServiceDeliveryLocation"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8463,11 +8829,11 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPharmacySupplyType"/>
     <meta>
-     <lastUpdated value="2017-09-23T17:33:21.268-04:00"/>
+     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -8527,6 +8893,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-LocalMarkupIgnore"/>
     <identifier>
      <system value="urn:ietf:rfc:3986"/>
@@ -8568,6 +8937,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleLinkType"/>
     <identifier>
@@ -8611,6 +8983,9 @@
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
     </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
+    </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActUSPrivacyLaw"/>
     <version value="2017-07-31"/>
     <name value="v3 Code System ActUSPrivacyLaw"/>
@@ -8648,6 +9023,9 @@
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="0"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueString value="vocab"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-IdentifierReliability"/>
     <identifier>
@@ -12157,8 +12535,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -12578,7 +12956,7 @@
         <valueBoolean value="true"/>
        </property>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2011-12-01"/>
        </property>
       </concept>
@@ -25646,8 +26024,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -25766,7 +26144,7 @@
       <display value="criterion"/>
       <definition value="Deprecation Comment: &#xa;                           This concept This codes should no longer be used.  Instead, set attribute Act.isCriterionInd to &quot;true&quot; and use the desired mood for your criterion.&#xd;&#xa;&#xa;                        &#xa;                           Definition: A condition that must be true for the source act to be considered."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2010-07-12"/>
       </property>
       <concept>
@@ -25774,7 +26152,7 @@
        <display value="event criterion"/>
        <definition value="Deprecation Comment: &#xa;                           This concept This codes should no longer be used.  Instead, set attribute Act.isCriterionInd to &quot;true&quot; and use the desired mood for your criterion.&#xd;&#xa;&#xa;                        &#xa;                           Definition: A criterion (CRT) that has_match = an event (EVN)."/>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2010-07-12"/>
        </property>
       </concept>
@@ -26161,8 +26539,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -26492,7 +26870,7 @@
       <display value="emergency contact"/>
       <definition value="A contact designated for contact in emergent situations."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2008-12-19"/>
       </property>
      </concept>
@@ -26501,7 +26879,7 @@
       <display value="next of kin"/>
       <definition value="Played by an individual who is designated as the next of kin for another individual which scopes the role."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2008-12-19"/>
       </property>
      </concept>
@@ -28604,7 +28982,16 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <description value=" The gender of a person used for adminstrative purposes (as opposed to clinical gender)"/>
+    <description value=" The gender of a person used for adminstrative purposes (as opposed to clinical gender)">
+     <extension url="http://hl7.org/fhir/StructureDefinition/translation">
+      <extension url="lang">
+       <valueString value="nl"/>
+      </extension>
+      <extension url="content">
+       <valueString value=" Het geslacht van een persoon bedoeld voor administratieve doeleinden (in tegenstelling tot klinisch geslacht)"/>
+      </extension>
+     </extension>
+    </description>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AdministrativeGender"/>
     <hierarchyMeaning value="is-a"/>
@@ -28613,16 +29000,64 @@
      <code value="F"/>
      <display value="Female"/>
      <definition value="Female"/>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="display"/>
+      </use>
+      <value value="Vrouw"/>
+     </designation>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="definition"/>
+      </use>
+      <value value="Vrouwelijk"/>
+     </designation>
     </concept>
     <concept>
      <code value="M"/>
      <display value="Male"/>
      <definition value="Male"/>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="display"/>
+      </use>
+      <value value="Man"/>
+     </designation>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="definition"/>
+      </use>
+      <value value="Man"/>
+     </designation>
     </concept>
     <concept>
      <code value="UN"/>
      <display value="Undifferentiated"/>
      <definition value="The gender of a person could not be uniquely defined as male or female, such as hermaphrodite."/>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="display"/>
+      </use>
+      <value value="Ongedifferentieerd"/>
+     </designation>
+     <designation>
+      <language value="nl"/>
+      <use>
+       <system value="http://hl7.org/fhir/CodeSystem/designation-usage"/>
+       <code value="definition"/>
+      </use>
+      <value value="Het geslacht van een persoon kan niet uniek worden gedefinieerd als man of vrouw, zoals een hermafrodiet."/>
+     </designation>
     </concept>
    </CodeSystem>
   </resource>
@@ -29096,8 +29531,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -29110,7 +29545,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2013-06-29"/>
      </property>
      <concept>
@@ -29187,7 +29622,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2013-06-29"/>
      </property>
      <concept>
@@ -29342,8 +29777,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -29395,7 +29830,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2011-12-14"/>
      </property>
      <concept>
@@ -29407,7 +29842,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29420,7 +29855,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29433,7 +29868,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29451,7 +29886,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2011-12-14"/>
      </property>
      <concept>
@@ -29463,7 +29898,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29476,7 +29911,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29489,7 +29924,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29502,7 +29937,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29520,7 +29955,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2011-12-14"/>
      </property>
      <concept>
@@ -29532,7 +29967,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29545,7 +29980,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29558,7 +29993,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2011-12-14"/>
       </property>
      </concept>
@@ -29575,7 +30010,7 @@
      <lastUpdated value="2017-07-31T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -34046,8 +34481,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -34069,7 +34504,7 @@
       <display value="Carrier"/>
       <definition value="The patient is considered as carrier based on the testing results. A carrier is an individual who carries an altered form of a gene which can lead to having a child or offspring in future generations with a genetic disorder.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This code is currently the same string as the print name for this concept and is inconsistent with the conventions being used for the other codes in the coding system, as it is a full word with initial capitalization, rather than an all upper case mnemonic.  The recommendation from OO is to deprecate the code &quot;Carrier&quot; and to add &quot;CAR&quot; as the new active code representation for this concept."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-28"/>
       </property>
      </concept>
@@ -34126,7 +34561,7 @@
       <display value="Anti-complementary substances present"/>
       <definition value="A valid result cannot be obtained for the specified component / analyte due to the presence of anti-complementary substances in the sample.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This code is being deprecated to match the status in V2 Table 0078 &quot;Interpretation Codes."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-11-10"/>
       </property>
      </concept>
@@ -34140,7 +34575,7 @@
       <display value="Quality control failure"/>
       <definition value="A result cannot be considered valid for the specified component / analyte or organism due to failure in the quality control testing component.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This code is being deprecated to match the status in V2 Table 0078 &quot;Interpretation Codes."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-11-10"/>
       </property>
      </concept>
@@ -34149,7 +34584,7 @@
       <display value="Cytotoxic substance present"/>
       <definition value="A valid result cannot be obtained for the specified organism or cell line due to the presence of cytotoxic substances in the sample or culture.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This code is being deprecated to match the status in V2 Table 0078 &quot;Interpretation Codes."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-11-10"/>
       </property>
      </concept>
@@ -34193,7 +34628,7 @@
         <display value="Significantly high"/>
         <definition value="A test result that is significantly higher than the reference (normal) or therapeutic interval, but has not reached the critically high value and might need special attention, as defined by the laboratory or the clinician.[Note: This level is situated between 'H' and 'HH'.]&#xd;&#xa;&#xa;                        &#xa;                           Deprecation Comment: The code 'H>' is being deprecated in order to align with the use of the code 'HU' for &quot;Very high&quot; in V2 Table 0078 &quot;Interpretation Codes&quot;.&#xd;&#xa;&#xa;                        [Note: The use of code 'H>' is non-preferred, as this code is deprecated and on track to be retired; use code 'HU' instead."/>
         <property>
-         <code value="deprecated"/>
+         <code value="deprecationDate"/>
          <valueDateTime value="2015-03-23"/>
         </property>
        </concept>
@@ -34218,7 +34653,7 @@
         <display value="Significantly low"/>
         <definition value="A test result that is significantly lower than the reference (normal) or therapeutic interval, but has not reached the critically low value and might need special attention, as defined by the laboratory or the clinician.[Note: This level is situated between 'L' and 'LL'.]&#xd;&#xa;&#xa;                        &#xa;                           Deprecation Comment: The code 'L&lt;' is being deprecated in order to align with the use of the code 'LU' for &quot;Very low&quot; in V2 Table 0078 &quot;Interpretation Codes&quot;.&#xd;&#xa;&#xa;                        [Note: The use of code 'L&lt;' is non-preferred, as this code is deprecated and on track to be retired; use code 'LU' instead."/>
         <property>
-         <code value="deprecated"/>
+         <code value="deprecationDate"/>
          <valueDateTime value="2015-03-23"/>
         </property>
        </concept>
@@ -34259,7 +34694,7 @@
       <display value="moderately susceptible"/>
       <definition value="The patient is considered as carrier based on the testing results. A carrier is an individual who carries an altered form of a gene which can lead to having a child or offspring in future generations with a genetic disorder.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This antimicrobial susceptibility test interpretation concept is recommended by OO to be deprecated as it is no longer recommended for use in susceptibility testing by CLSI (reference CLSI document M100-S22; Vol. 32 No.3; CLSI Performance Standards for Antimicrobial Susceptibility Testing; Twenty-Second Informational Supplement. Jan 2012)."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-28"/>
       </property>
      </concept>
@@ -34298,7 +34733,7 @@
       <display value="very susceptible"/>
       <definition value="The patient is considered as carrier based on the testing results. A carrier is an individual who carries an altered form of a gene which can lead to having a child or offspring in future generations with a genetic disorder.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This antimicrobial susceptibility test interpretation concept is recommended by OO to be deprecated as it is no longer recommended for use in susceptibility testing by CLSI (reference CLSI document M100-S22; Vol. 32 No.3; CLSI Performance Standards for Antimicrobial Susceptibility Testing; Twenty-Second Informational Supplement. Jan 2012)."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-28"/>
       </property>
      </concept>
@@ -34323,7 +34758,7 @@
      <display value="Hold for Medical Review"/>
      <definition value="Hold for Medical Review&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 &quot;Interpretation Codes.&quot;"/>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2016-11-10"/>
      </property>
     </concept>
@@ -34390,7 +34825,7 @@
      <display value="Interpretation qualifiers in separate OBX segments"/>
      <definition value="Interpretation qualifiers in separate OBX segments&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 &quot;Interpretation Codes.&quot;"/>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2016-11-10"/>
      </property>
     </concept>
@@ -34651,8 +35086,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -34915,7 +35350,7 @@
          <valueBoolean value="true"/>
         </property>
         <property>
-         <code value="deprecated"/>
+         <code value="deprecationDate"/>
          <valueDateTime value="2009-07-12"/>
         </property>
         <concept>
@@ -34923,7 +35358,7 @@
          <display value="left lateral decubitus"/>
          <definition value="Lying on the left side.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34932,7 +35367,7 @@
          <display value="prone"/>
          <definition value="Lying with the front or ventral surface downward; lying face down.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34941,7 +35376,7 @@
          <display value="right lateral decubitus"/>
          <definition value="Lying on the right side.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34950,7 +35385,7 @@
          <display value="Semi-Fowler's"/>
          <definition value="A semi-sitting position in bed with the head of the bed elevated approximately 45 degrees.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34959,7 +35394,7 @@
          <display value="sitting"/>
          <definition value="Resting the body on the buttocks, typically with upper torso erect or semi erect.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34968,7 +35403,7 @@
          <display value="standing"/>
          <definition value="To be stationary, upright, vertical, on one's legs.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
         </concept>
@@ -34977,7 +35412,7 @@
          <display value="supine"/>
          <definition value="Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2009-07-12"/>
          </property>
          <concept>
@@ -34985,7 +35420,7 @@
           <display value="reverse trendelenburg"/>
           <definition value="Lying on the back, on an inclined plane, typically about 30-45 degrees with head raised and feet lowered.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
           <property>
-           <code value="deprecated"/>
+           <code value="deprecationDate"/>
            <valueDateTime value="2009-07-12"/>
           </property>
          </concept>
@@ -34994,7 +35429,7 @@
           <display value="trendelenburg"/>
           <definition value="Lying on the back, on an inclined plane, typically about 30-45 degrees, with  head lowered and feet raised.&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because it does not describe a type of Act (as it should in the ActClass code system), but rather encodes the result or value of an observation.  The same code has been added to the ObservationValue code system."/>
           <property>
-           <code value="deprecated"/>
+           <code value="deprecationDate"/>
            <valueDateTime value="2009-07-12"/>
           </property>
          </concept>
@@ -35021,7 +35456,7 @@
        <display value="Condition Node"/>
        <definition value="An instance of Observation of a Condition at a point in time that includes any Observations or Procedures associated with that Condition as well as links to previous instances of Condition Node for the same Condition&#xd;&#xa;&#xa;                        &#xa;                           &#xa;                              Deprecation Comment: &#xa;                           This concept has been deprecated because an alternative structure for tracking the evolution of a problem has been presented and adopted by the Care Provision Work Group."/>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2009-07-12"/>
        </property>
       </concept>
@@ -35030,7 +35465,7 @@
        <display value="Condition"/>
        <definition value="An observable finding or state that persists over time and tends to require intervention or management, and, therefore, distinguished from an Observation made at a point in time; may exist before an Observation of the Condition is made or after interventions to manage the Condition are undertaken. Examples: equipment repair status, device recall status, a health risk, a financial risk, public health risk, pregnancy, health maintenance, chronic illness"/>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2012-11-09"/>
        </property>
        <concept>
@@ -35038,7 +35473,7 @@
         <display value="public health case"/>
         <definition value="A public health case is an Observation representing a condition or event that has a specific significance for public health. Typically it involves an instance or instances of a reportable infectious disease or other condition. The public health case can include a health-related event concerning a single individual or it may refer to multiple health-related events that are occurrences of the same disease or condition of interest to public health. An outbreak involving multiple individuals may be considered as a type of public health case. A public health case definition (Act.moodCode = &quot;definition&quot;) includes the description of the clinical, laboratory, and epidemiologic indicators associated with a disease or condition of interest to public health. There are case definitions for conditions that are reportable, as well as for those that are not. There are also case definitions for outbreaks. A public health case definition is a construct used by public health for the purpose of counting cases, and should not be used as clinical indications for treatment. Examples include AIDS, toxic-shock syndrome, and salmonellosis and their associated indicators that are used to define a case."/>
         <property>
-         <code value="deprecated"/>
+         <code value="deprecationDate"/>
          <valueDateTime value="2012-11-09"/>
         </property>
         <concept>
@@ -35046,7 +35481,7 @@
          <display value="outbreak"/>
          <definition value="An outbreak represents a series of public health cases. The date on which an outbreak starts is the earliest date of onset among the cases assigned to the outbreak, and its ending date is the last date of onset among the cases assigned to the outbreak."/>
          <property>
-          <code value="deprecated"/>
+          <code value="deprecationDate"/>
           <valueDateTime value="2012-11-09"/>
          </property>
         </concept>
@@ -35217,7 +35652,7 @@
        <display value="diet"/>
        <definition value="Diet services are supply services, with some aspects resembling Medication services: the detail of the diet is given as a description of the Material associated via Participation.typeCode=&quot;product&quot;. Medically relevant diet types may be communicated in the Diet.code attribute using domain ActDietCode, however, the detail of the food supplied and the various combinations of dishes should be communicated as Material instances.&#xd;&#xa;&#xa;                        &#xa;                           Deprecation Note&#xa;                        &#xd;&#xa;&#xa;                        &#xa;                           Class: Use either the Supply class (if dealing with what should be given to the patient) or SubstanceAdministration class (if dealing with what the patient should consume)&#xd;&#xa;&#xa;                        &#xa;                           energyQuantity: This quantity can be conveyed by using a Content relationship with a quantity attribute expressing the calories&#xd;&#xa;&#xa;                        &#xa;                           carbohydrateQuantity:This quantity can be conveyed using a Content relationship to an Entity with a code of  carbohydrate and a quantity attribute on the content relationship."/>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2009-08-20"/>
        </property>
       </concept>
@@ -35737,7 +36172,7 @@
      <lastUpdated value="2017-07-31T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -36060,8 +36495,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -36651,7 +37086,7 @@
      <display value="ObservationPopulationInclusion"/>
      <definition value="Observation values used to assert various populations that a subject falls into."/>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2013-07-26"/>
      </property>
      <concept>
@@ -36659,7 +37094,7 @@
       <display value="denominator exclusions"/>
       <definition value="Patients who should be removed from the eMeasure population and denominator before determining if numerator criteria are met. Denominator exclusions are used in proportion and ratio measures to help narrow the denominator."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -36668,7 +37103,7 @@
       <display value="denominator exceptions"/>
       <definition value="Denominator exceptions are those conditions that should remove a patient, procedure or unit of measurement from the denominator only if the numerator criteria are not met. Denominator exceptions allow for adjustment of the calculated score for those providers with higher risk populations. Denominator exceptions are used only in proportion eMeasures. They are not appropriate for ratio or continuous variable eMeasures.  Denominator exceptions allow for the exercise of clinical judgment and should be specifically defined where capturing the information in a structured manner fits the clinical workflow. Generic denominator exception reasons used in proportion eMeasures fall into three general categories:&#xd;&#xa;&#xa;                        &#xa;                           Medical reasons&#xa;                           Patient reasons&#xa;                           System reasons"/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -36677,7 +37112,7 @@
       <display value="denominator"/>
       <definition value="It can be the same as the initial patient population or a subset of the initial patient population to further constrain the population for the purpose of the eMeasure. Different measures within an eMeasure set may have different Denominators. Continuous Variable eMeasures do not have a Denominator, but instead define a Measure Population."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -36686,7 +37121,7 @@
       <display value="initial population"/>
       <definition value="The initial population refers to all entities to be evaluated by a specific quality measure who share a common set of specified characteristics within a specific measurement set to which a given measure belongs."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
       <concept>
@@ -36694,7 +37129,7 @@
        <display value="initial patient population"/>
        <definition value="The initial patient population refers to all patients to be evaluated by a specific quality measure who share a common set of specified characteristics within a specific measurement set to which a given measure belongs. Details often include information based upon specific age groups, diagnoses, diagnostic and procedure codes, and enrollment periods."/>
        <property>
-        <code value="deprecated"/>
+        <code value="deprecationDate"/>
         <valueDateTime value="2013-07-26"/>
        </property>
       </concept>
@@ -36704,7 +37139,7 @@
       <display value="measure population"/>
       <definition value="Measure population is used only in continuous variable eMeasures. It is a narrative description of the eMeasure population. &#xa;(e.g., all patients seen in the Emergency Department during the measurement period)."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -36713,7 +37148,7 @@
       <display value="numerator"/>
       <definition value="Numerators are used in proportion and ratio eMeasures. In proportion measures the numerator criteria are the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator. In ratio measures the numerator is related, but not directly derived from the denominator (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period)."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -36722,7 +37157,7 @@
       <display value="numerator exclusions"/>
       <definition value="Numerator Exclusions are used only in ratio eMeasures to define instances that should not be included in the numerator data. (e.g., if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion.)"/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2013-07-26"/>
       </property>
      </concept>
@@ -37735,8 +38170,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -37768,7 +38203,7 @@
        <valueBoolean value="true"/>
       </property>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2008-11-14"/>
       </property>
      </concept>
@@ -41565,7 +42000,7 @@
      <lastUpdated value="2017-07-31T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -44546,8 +44981,8 @@
     <hierarchyMeaning value="is-a"/>
     <content value="complete"/>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -44556,7 +44991,7 @@
      <display value="ActUSPrivacyLaw"/>
      <definition value="Definition: A jurisdictional mandate in the U.S. relating to privacy.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: ActPrivacyLaw codes may be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialtyCode complies.  May be used to further specify rationale for assignment of other ActPrivacyPolicy codes in the US realm, e.g., ETH and 42CFRPart2 can be differentiated from ETH and Title38Part1."/>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2016-03-12"/>
      </property>
      <concept>
@@ -44564,7 +44999,7 @@
       <display value="42 CFR Part2"/>
       <definition value="42 CFR Part 2 stipulates the right of an individual who has applied for or been given diagnosis or treatment for alcohol or drug abuse at a federally assisted program.&#xd;&#xa;&#xa;                        &#xa;                           Definition: Non-disclosure of health information relating to health care paid for by a federally assisted substance abuse program without patient consent.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialityCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44573,7 +45008,7 @@
       <display value="Common Rule"/>
       <definition value="U.S. Federal regulations governing the protection of human subjects in research (codified at Subpart A of 45 CFR part 46) that has been adopted by 15 U.S. Federal departments and agencies in an effort to promote uniformity, understanding, and compliance with human subject protections. Existing regulations governing the protection of human subjects in Food and Drug Administration (FDA)-regulated research (21 CFR parts 50, 56, 312, and 812) are separate from the Common Rule but include similar requirements.&#xd;&#xa;&#xa;                        &#xa;                           Definition: U.S. federal laws governing research-related privacy policies.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialtyCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44582,7 +45017,7 @@
       <display value="HIPAA notice of privacy practices"/>
       <definition value="The U.S. Public Law 104-191 Health Insurance Portability and Accountability Act (HIPAA) Privacy Rule (45 CFR Part 164 Subpart E) permits access, use and disclosure of certain personal health information (PHI as defined under the law) for purposes of Treatment, Payment, and Operations, and requires that the provider ask that patients acknowledge the Provider's Notice of Privacy Practices as permitted conduct under the law.&#xd;&#xa;&#xa;                        &#xa;                           Definition: Notification of HIPAA Privacy Practices.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialtyCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44591,7 +45026,7 @@
       <display value="HIPAA psychotherapy notes"/>
       <definition value="The U.S. Public Law 104-191 Health Insurance Portability and Accountability Act (HIPAA) Privacy Rule (45 CFR Part 164 Section 164.508) requires authorization for certain uses and disclosure of psychotherapy notes.&#xd;&#xa;&#xa;                        &#xa;                           Definition: Authorization that must be obtained for disclosure of psychotherapy notes.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialityCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44600,7 +45035,7 @@
       <display value="HIPAA self-pay"/>
       <definition value="Section 13405(a) of the Health Information Technology for Economic and Clinical Health Act (HITECH) stipulates the right of an individual to have disclosures regarding certain health care items or services for which the individual pays out of pocket in full restricted from a health plan.&#xd;&#xa;&#xa;                        &#xa;                           Definition: Non-disclosure of health information to a health plan relating to health care items or services for which an individual pays out of pocket in full.&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialityCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44609,7 +45044,7 @@
       <display value="Title 38 Section 7332"/>
       <definition value="Title 38 Part 1-protected information may only be disclosed to a third party with the special written consent of the patient except where expressly authorized by 38 USC 7332. VA may disclose this information for specific purposes to: VA employees on a need to know basis - more restrictive than Privacy Act need to know; contractors who need the information in order to perform or fulfill the duties of the contract; and researchers who provide assurances that the information will not be identified in any report.  This information may also be disclosed without consent where patient lacks decision-making capacity; in a medical emergency for the purpose of treating a condition which poses an immediate threat to the health of any individual and which requires immediate medical intervention; for eye, tissue, or organ donation purposes; and disclosure of HIV information for public health purposes.&#xd;&#xa;&#xa;                        &#xa;                           Definition: Title 38 Part 1 - Â§1.462 Confidentiality restrictions.&#xd;&#xa;&#xa;                        &#xa;(a) General. The patient records to which Â§Â§1.460 through 1.499 of this part apply may be disclosed or used only as permitted by these regulations and may not otherwise be disclosed or used in any civil, criminal, administrative, or legislative proceedings conducted by any Federal, State, or local authority. Any disclosure made under these regulations must be limited to that information which is necessary to carry out the purpose of the disclosure. SUBCHAPTER III--PROTECTION OF PATIENT RIGHTS Sec. 7332. Confidentiality of certain medical records (a)(1) Records of the identity, diagnosis, prognosis, or treatment of any patient or subject which are maintained in connection with the performance of any program or activity (including education, training, treatment, rehabilitation, or research) relating to drug abuse, alcoholism or alcohol abuse, infection with the human immunodeficiency virus, or sickle cell anemia which is carried out by or for the Department under this title shall, except as provided in subsections (e) and (f), be confidential, and (section 5701 of this title to the contrary notwithstanding) such records may be disclosed only for the purposes and under the circumstances expressly authorized under subsection (b).&#xd;&#xa;&#xa;                        &#xa;                           Usage Note: May be associated with an Act or a Role to indicate the legal provision to which the assignment of an Act.confidentialityCode or Role.confidentialityCode complies."/>
       <property>
-       <code value="deprecated"/>
+       <code value="deprecationDate"/>
        <valueDateTime value="2016-03-12"/>
       </property>
      </concept>
@@ -44626,7 +45061,7 @@
      <lastUpdated value="2017-07-31T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Draft"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
      <valueInteger value="1"/>
@@ -44669,8 +45104,8 @@
      <type value="boolean"/>
     </property>
     <property>
-     <code value="deprecated"/>
-     <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+     <code value="deprecationDate"/>
+     <uri value="http://hl7.org/fhir/concept-properties#deprecationDate"/>
      <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged"/>
      <type value="dateTime"/>
     </property>
@@ -50850,7 +51285,7 @@
       <valueBoolean value="true"/>
      </property>
      <property>
-      <code value="deprecated"/>
+      <code value="deprecationDate"/>
       <valueDateTime value="2008-12-20"/>
      </property>
     </concept>

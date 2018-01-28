@@ -1,11 +1,11 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import java.util.List;
-
-import org.hl7.fhir.dstu2016may.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.validation.*;
+
+import java.util.List;
 
 /**
  * Base class for a bridge between the RI validation tools and HAPI

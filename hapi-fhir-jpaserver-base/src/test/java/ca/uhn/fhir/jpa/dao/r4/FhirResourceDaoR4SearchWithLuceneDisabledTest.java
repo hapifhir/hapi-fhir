@@ -27,9 +27,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 
-// @RunWith(SpringJUnit4ClassRunner.class)
-// @ContextConfiguration(classes= {TestR4WithoutLuceneConfig.class})
-// @SuppressWarnings("unchecked")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestR4WithoutLuceneConfig.class })
 public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
@@ -79,62 +76,8 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
-	@Qualifier("myImmunizationDaoR4")
-	private IFhirResourceDao<Immunization> myImmunizationDao;
-	@Autowired
-	@Qualifier("myLocationDaoR4")
-	private IFhirResourceDao<Location> myLocationDao;
-	@Autowired
-	@Qualifier("myMediaDaoR4")
-	private IFhirResourceDao<Media> myMediaDao;
-	@Autowired
-	@Qualifier("myMedicationDaoR4")
-	private IFhirResourceDao<Medication> myMedicationDao;
-	@Autowired
-	@Qualifier("myMedicationRequestDaoR4")
-	private IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
-	@Autowired
-	@Qualifier("myNamingSystemDaoR4")
-	private IFhirResourceDao<NamingSystem> myNamingSystemDao;
-	@Autowired
-	@Qualifier("myObservationDaoR4")
-	private IFhirResourceDao<Observation> myObservationDao;
-	@Autowired
-	@Qualifier("myOperationDefinitionDaoR4")
-	private IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
-	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
-	@Autowired
-	@Qualifier("myPatientDaoR4")
-	private IFhirResourceDaoPatient<Patient> myPatientDao;
-	@Autowired
-	@Qualifier("myPractitionerDaoR4")
-	private IFhirResourceDao<Practitioner> myPractitionerDao;
-	@Autowired
-	@Qualifier("myQuestionnaireDaoR4")
-	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-	@Autowired
-	@Qualifier("myQuestionnaireResponseDaoR4")
-	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-	@Autowired
-	@Qualifier("myResourceProvidersR4")
-	private Object myResourceProviders;
-	@Autowired
-	@Qualifier("myStructureDefinitionDaoR4")
-	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-	@Autowired
-	@Qualifier("mySubscriptionDaoR4")
-	private IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-	@Autowired
-	@Qualifier("mySubstanceDaoR4")
-	private IFhirResourceDao<Substance> mySubstanceDao;
-	@Autowired
-	@Qualifier("mySystemDaoR4")
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-	@Autowired
-	@Qualifier("mySystemProviderR4")
-	private JpaSystemProviderR4 mySystemProvider;
 
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
@@ -169,7 +112,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testSearchWithRegularParam() throws Exception {
+	public void testSearchWithRegularParam() {
 		String methodName = "testEverythingIncludesBackReferences";
 
 		Organization org = new Organization();
@@ -183,7 +126,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testSearchWithContent() throws Exception {
+	public void testSearchWithContent() {
 		String methodName = "testEverythingIncludesBackReferences";
 
 		Organization org = new Organization();
@@ -201,7 +144,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testSearchWithText() throws Exception {
+	public void testSearchWithText() {
 		String methodName = "testEverythingIncludesBackReferences";
 
 		Organization org = new Organization();

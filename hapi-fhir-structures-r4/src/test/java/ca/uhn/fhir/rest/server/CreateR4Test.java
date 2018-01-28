@@ -1,16 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,31 +20,57 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.junit.*;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class CreateR4Test {
-	private static CloseableHttpClient ourClient;
-
-	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateR4Test.class);
+	public static IBaseOperationOutcome ourReturnOo;
+	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
-	public static IBaseOperationOutcome ourReturnOo;
 
 	@Before
 	public void before() {
 		ourReturnOo = null;
 	}
-	
+
+	@Test
+	public void testCreateIgnoresIdInResourceBody() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(0, status.getHeaders("Content-Location").length);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+
+	}
+
 	/**
 	 * #472
 	 */
@@ -76,7 +97,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateReturnsOperationOutcome() throws Exception {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
@@ -89,28 +110,6 @@ public class CreateR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, containsString("DIAG"));
-	}
-
-	/**
-	 * #342
-	 */
-	@Test
-	public void testCreateWithInvalidContent() throws Exception {
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(400, status.getStatusLine().getStatusCode());
-
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
-
 	}
 
 	@Test
@@ -169,6 +168,28 @@ public class CreateR4Test {
 
 	}
 
+	/**
+	 * #342
+	 */
+	@Test
+	public void testCreateWithInvalidContent() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
+		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+
+	}
+
 	@Test
 	public void testSearch() throws Exception {
 
@@ -184,14 +205,14 @@ public class CreateR4Test {
 
 		//@formatter:off
 		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"0\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			"<id value=\"0\"/>",
+			"<meta>",
+			"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+			"</meta>",
+			"<modifierExtension url=\"http://example.com/ext/date\">",
+			"<valueDate value=\"2011-01-01\"/>",
+			"</modifierExtension>",
 			"</Patient>"));
 		//@formatter:on
 
@@ -231,6 +252,7 @@ public class CreateR4Test {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theIdParam) {
+			assertNull(theIdParam.getIdElement().getIdPart());
 			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo);
 		}
 

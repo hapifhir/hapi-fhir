@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -576,22 +576,22 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof StatusHistoryComponent))
+        if (!(other_ instanceof StatusHistoryComponent))
           return false;
-        StatusHistoryComponent o = (StatusHistoryComponent) other;
+        StatusHistoryComponent o = (StatusHistoryComponent) other_;
         return compareDeep(status, o.status, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof StatusHistoryComponent))
+        if (!(other_ instanceof StatusHistoryComponent))
           return false;
-        StatusHistoryComponent o = (StatusHistoryComponent) other;
+        StatusHistoryComponent o = (StatusHistoryComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -783,22 +783,22 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClassHistoryComponent))
+        if (!(other_ instanceof ClassHistoryComponent))
           return false;
-        ClassHistoryComponent o = (ClassHistoryComponent) other;
+        ClassHistoryComponent o = (ClassHistoryComponent) other_;
         return compareDeep(class_, o.class_, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClassHistoryComponent))
+        if (!(other_ instanceof ClassHistoryComponent))
           return false;
-        ClassHistoryComponent o = (ClassHistoryComponent) other;
+        ClassHistoryComponent o = (ClassHistoryComponent) other_;
         return true;
       }
 
@@ -1079,23 +1079,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterParticipantComponent))
+        if (!(other_ instanceof EncounterParticipantComponent))
           return false;
-        EncounterParticipantComponent o = (EncounterParticipantComponent) other;
+        EncounterParticipantComponent o = (EncounterParticipantComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(period, o.period, true) && compareDeep(individual, o.individual, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterParticipantComponent))
+        if (!(other_ instanceof EncounterParticipantComponent))
           return false;
-        EncounterParticipantComponent o = (EncounterParticipantComponent) other;
+        EncounterParticipantComponent o = (EncounterParticipantComponent) other_;
         return true;
       }
 
@@ -1116,7 +1116,7 @@ public class Encounter extends DomainResource {
         /**
          * Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.
          */
-        @Child(name = "condition", type = {Condition.class, Procedure.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "condition", type = {Condition.class, Procedure.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Reason the encounter takes place (resource)", formalDefinition="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure." )
         protected Reference condition;
 
@@ -1373,23 +1373,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareValues(rank, o.rank, true);
       }
 
@@ -2045,12 +2045,12 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterHospitalizationComponent))
+        if (!(other_ instanceof EncounterHospitalizationComponent))
           return false;
-        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other;
+        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other_;
         return compareDeep(preAdmissionIdentifier, o.preAdmissionIdentifier, true) && compareDeep(origin, o.origin, true)
            && compareDeep(admitSource, o.admitSource, true) && compareDeep(reAdmission, o.reAdmission, true)
            && compareDeep(dietPreference, o.dietPreference, true) && compareDeep(specialCourtesy, o.specialCourtesy, true)
@@ -2059,12 +2059,12 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterHospitalizationComponent))
+        if (!(other_ instanceof EncounterHospitalizationComponent))
           return false;
-        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other;
+        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other_;
         return true;
       }
 
@@ -2354,23 +2354,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterLocationComponent))
+        if (!(other_ instanceof EncounterLocationComponent))
           return false;
-        EncounterLocationComponent o = (EncounterLocationComponent) other;
+        EncounterLocationComponent o = (EncounterLocationComponent) other_;
         return compareDeep(location, o.location, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterLocationComponent))
+        if (!(other_ instanceof EncounterLocationComponent))
           return false;
-        EncounterLocationComponent o = (EncounterLocationComponent) other;
+        EncounterLocationComponent o = (EncounterLocationComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -2434,29 +2434,37 @@ This would be used for a case where an admission starts of as an emergency encou
     protected List<CodeableConcept> type;
 
     /**
+     * Broad categorization of the service that is to be provided (e.g. cardiology).
+     */
+    @Child(name = "serviceType", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Specific type of service", formalDefinition="Broad categorization of the service that is to be provided (e.g. cardiology)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
+    protected CodeableConcept serviceType;
+
+    /**
      * Indicates the urgency of the encounter.
      */
-    @Child(name = "priority", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "priority", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Indicates the urgency of the encounter", formalDefinition="Indicates the urgency of the encounter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActPriority")
     protected CodeableConcept priority;
 
     /**
-     * The patient ro group present at the encounter.
+     * The patient or group present at the encounter.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The patient ro group present at the encounter", formalDefinition="The patient ro group present at the encounter." )
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The patient or group present at the encounter", formalDefinition="The patient or group present at the encounter." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The patient ro group present at the encounter.)
+     * The actual object that is the target of the reference (The patient or group present at the encounter.)
      */
     protected Resource subjectTarget;
 
     /**
      * Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).
      */
-    @Child(name = "episodeOfCare", type = {EpisodeOfCare.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "episodeOfCare", type = {EpisodeOfCare.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Episode(s) of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)." )
     protected List<Reference> episodeOfCare;
     /**
@@ -2468,26 +2476,26 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * The referral request this encounter satisfies (incoming referral).
      */
-    @Child(name = "incomingReferral", type = {ProcedureRequest.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The ProcedureRequest that initiated this encounter", formalDefinition="The referral request this encounter satisfies (incoming referral)." )
+    @Child(name = "incomingReferral", type = {ServiceRequest.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="The ServiceRequest that initiated this encounter", formalDefinition="The referral request this encounter satisfies (incoming referral)." )
     protected List<Reference> incomingReferral;
     /**
      * The actual objects that are the target of the reference (The referral request this encounter satisfies (incoming referral).)
      */
-    protected List<ProcedureRequest> incomingReferralTarget;
+    protected List<ServiceRequest> incomingReferralTarget;
 
 
     /**
      * The list of people responsible for providing the service.
      */
-    @Child(name = "participant", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "participant", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="List of participants involved in the encounter", formalDefinition="The list of people responsible for providing the service." )
     protected List<EncounterParticipantComponent> participant;
 
     /**
      * The appointment that scheduled this encounter.
      */
-    @Child(name = "appointment", type = {Appointment.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "appointment", type = {Appointment.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The appointment that scheduled this encounter", formalDefinition="The appointment that scheduled this encounter." )
     protected Reference appointment;
 
@@ -2499,21 +2507,21 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * The start and end time of the encounter.
      */
-    @Child(name = "period", type = {Period.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "period", type = {Period.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The start and end time of the encounter", formalDefinition="The start and end time of the encounter." )
     protected Period period;
 
     /**
      * Quantity of time the encounter lasted. This excludes the time during leaves of absence.
      */
-    @Child(name = "length", type = {Duration.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "length", type = {Duration.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Quantity of time the encounter lasted (less time absent)", formalDefinition="Quantity of time the encounter lasted. This excludes the time during leaves of absence." )
     protected Duration length;
 
     /**
      * Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Reason the encounter takes place (code)", formalDefinition="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-reason")
     protected List<CodeableConcept> reason;
@@ -2521,14 +2529,14 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * The list of diagnosis relevant to this encounter.
      */
-    @Child(name = "diagnosis", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "diagnosis", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The list of diagnosis relevant to this encounter", formalDefinition="The list of diagnosis relevant to this encounter." )
     protected List<DiagnosisComponent> diagnosis;
 
     /**
      * The set of accounts that may be used for billing for this Encounter.
      */
-    @Child(name = "account", type = {Account.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "account", type = {Account.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The set of accounts that may be used for billing for this Encounter", formalDefinition="The set of accounts that may be used for billing for this Encounter." )
     protected List<Reference> account;
     /**
@@ -2540,33 +2548,37 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * Details about the admission to a healthcare service.
      */
-    @Child(name = "hospitalization", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "hospitalization", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Details about the admission to a healthcare service", formalDefinition="Details about the admission to a healthcare service." )
     protected EncounterHospitalizationComponent hospitalization;
 
     /**
      * List of locations where  the patient has been during this encounter.
      */
-    @Child(name = "location", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "location", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of locations where the patient has been", formalDefinition="List of locations where  the patient has been during this encounter." )
     protected List<EncounterLocationComponent> location;
 
     /**
-     * An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.
+     * The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.
      */
-    @Child(name = "serviceProvider", type = {Organization.class}, order=19, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The custodian organization of this Encounter record", formalDefinition="An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization." )
+    @Child(name = "serviceProvider", type = {Organization.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="The organization (facility) responsible for this encounter", formalDefinition="The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy." )
     protected Reference serviceProvider;
 
     /**
-     * The actual object that is the target of the reference (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * The actual object that is the target of the reference (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     protected Organization serviceProviderTarget;
 
     /**
      * Another Encounter of which this encounter is a part of (administratively or in time).
      */
-    @Child(name = "partOf", type = {Encounter.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "partOf", type = {Encounter.class}, order=21, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Another Encounter this encounter is part of", formalDefinition="Another Encounter of which this encounter is a part of (administratively or in time)." )
     protected Reference partOf;
 
@@ -2575,7 +2587,7 @@ This would be used for a case where an admission starts of as an emergency encou
      */
     protected Encounter partOfTarget;
 
-    private static final long serialVersionUID = 1760628408L;
+    private static final long serialVersionUID = 55607408L;
 
   /**
    * Constructor
@@ -2876,6 +2888,30 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
+     * @return {@link #serviceType} (Broad categorization of the service that is to be provided (e.g. cardiology).)
+     */
+    public CodeableConcept getServiceType() { 
+      if (this.serviceType == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Encounter.serviceType");
+        else if (Configuration.doAutoCreate())
+          this.serviceType = new CodeableConcept(); // cc
+      return this.serviceType;
+    }
+
+    public boolean hasServiceType() { 
+      return this.serviceType != null && !this.serviceType.isEmpty();
+    }
+
+    /**
+     * @param value {@link #serviceType} (Broad categorization of the service that is to be provided (e.g. cardiology).)
+     */
+    public Encounter setServiceType(CodeableConcept value) { 
+      this.serviceType = value;
+      return this;
+    }
+
+    /**
      * @return {@link #priority} (Indicates the urgency of the encounter.)
      */
     public CodeableConcept getPriority() { 
@@ -2900,7 +2936,7 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @return {@link #subject} (The patient ro group present at the encounter.)
+     * @return {@link #subject} (The patient or group present at the encounter.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -2916,7 +2952,7 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @param value {@link #subject} (The patient ro group present at the encounter.)
+     * @param value {@link #subject} (The patient or group present at the encounter.)
      */
     public Encounter setSubject(Reference value) { 
       this.subject = value;
@@ -2924,14 +2960,14 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient ro group present at the encounter.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient or group present at the encounter.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient ro group present at the encounter.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient or group present at the encounter.)
      */
     public Encounter setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -3070,9 +3106,9 @@ This would be used for a case where an admission starts of as an emergency encou
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<ProcedureRequest> getIncomingReferralTarget() { 
+    public List<ServiceRequest> getIncomingReferralTarget() { 
       if (this.incomingReferralTarget == null)
-        this.incomingReferralTarget = new ArrayList<ProcedureRequest>();
+        this.incomingReferralTarget = new ArrayList<ServiceRequest>();
       return this.incomingReferralTarget;
     }
 
@@ -3080,10 +3116,10 @@ This would be used for a case where an admission starts of as an emergency encou
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public ProcedureRequest addIncomingReferralTarget() { 
-      ProcedureRequest r = new ProcedureRequest();
+    public ServiceRequest addIncomingReferralTarget() { 
+      ServiceRequest r = new ServiceRequest();
       if (this.incomingReferralTarget == null)
-        this.incomingReferralTarget = new ArrayList<ProcedureRequest>();
+        this.incomingReferralTarget = new ArrayList<ServiceRequest>();
       this.incomingReferralTarget.add(r);
       return r;
     }
@@ -3492,7 +3528,9 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @return {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @return {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Reference getServiceProvider() { 
       if (this.serviceProvider == null)
@@ -3508,7 +3546,9 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @param value {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @param value {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Encounter setServiceProvider(Reference value) { 
       this.serviceProvider = value;
@@ -3516,7 +3556,9 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Organization getServiceProviderTarget() { 
       if (this.serviceProviderTarget == null)
@@ -3528,7 +3570,9 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
+
+Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Encounter setServiceProviderTarget(Organization value) { 
       this.serviceProviderTarget = value;
@@ -3587,10 +3631,11 @@ This would be used for a case where an admission starts of as an emergency encou
         children.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_));
         children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
         children.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType));
         children.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority));
-        children.add(new Property("subject", "Reference(Patient|Group)", "The patient ro group present at the encounter.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject));
         children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
-        children.add(new Property("incomingReferral", "Reference(ProcedureRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
+        children.add(new Property("incomingReferral", "Reference(ServiceRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
         children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment));
         children.add(new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period));
@@ -3600,7 +3645,7 @@ This would be used for a case where an admission starts of as an emergency encou
         children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account));
         children.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization));
         children.add(new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
-        children.add(new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, 1, serviceProvider));
+        children.add(new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider));
         children.add(new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf));
       }
 
@@ -3613,10 +3658,11 @@ This would be used for a case where an admission starts of as an emergency encou
         case 94742904: /*class*/  return new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_);
         case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type);
+        case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType);
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient ro group present at the encounter.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject);
         case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
-        case -1258204701: /*incomingReferral*/  return new Property("incomingReferral", "Reference(ProcedureRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral);
+        case -1258204701: /*incomingReferral*/  return new Property("incomingReferral", "Reference(ServiceRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral);
         case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
         case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment);
         case -991726143: /*period*/  return new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period);
@@ -3626,7 +3672,7 @@ This would be used for a case where an admission starts of as an emergency encou
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account);
         case 1057894634: /*hospitalization*/  return new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization);
         case 1901043637: /*location*/  return new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location);
-        case 243182534: /*serviceProvider*/  return new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, 1, serviceProvider);
+        case 243182534: /*serviceProvider*/  return new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -3642,6 +3688,7 @@ This would be used for a case where an admission starts of as an emergency encou
         case 94742904: /*class*/ return this.class_ == null ? new Base[0] : new Base[] {this.class_}; // Coding
         case 962575356: /*classHistory*/ return this.classHistory == null ? new Base[0] : this.classHistory.toArray(new Base[this.classHistory.size()]); // ClassHistoryComponent
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : new Base[] {this.serviceType}; // CodeableConcept
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -1892140189: /*episodeOfCare*/ return this.episodeOfCare == null ? new Base[0] : this.episodeOfCare.toArray(new Base[this.episodeOfCare.size()]); // Reference
@@ -3683,6 +3730,9 @@ This would be used for a case where an admission starts of as an emergency encou
           return value;
         case 3575610: // type
           this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1928370289: // serviceType
+          this.serviceType = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1165461084: // priority
           this.priority = castToCodeableConcept(value); // CodeableConcept
@@ -3749,6 +3799,8 @@ This would be used for a case where an admission starts of as an emergency encou
           this.getClassHistory().add((ClassHistoryComponent) value);
         } else if (name.equals("type")) {
           this.getType().add(castToCodeableConcept(value));
+        } else if (name.equals("serviceType")) {
+          this.serviceType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("priority")) {
           this.priority = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subject")) {
@@ -3793,6 +3845,7 @@ This would be used for a case where an admission starts of as an emergency encou
         case 94742904:  return getClass_(); 
         case 962575356:  return addClassHistory(); 
         case 3575610:  return addType(); 
+        case -1928370289:  return getServiceType(); 
         case -1165461084:  return getPriority(); 
         case -1867885268:  return getSubject(); 
         case -1892140189:  return addEpisodeOfCare(); 
@@ -3822,6 +3875,7 @@ This would be used for a case where an admission starts of as an emergency encou
         case 94742904: /*class*/ return new String[] {"Coding"};
         case 962575356: /*classHistory*/ return new String[] {};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1928370289: /*serviceType*/ return new String[] {"CodeableConcept"};
         case -1165461084: /*priority*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case -1892140189: /*episodeOfCare*/ return new String[] {"Reference"};
@@ -3862,6 +3916,10 @@ This would be used for a case where an admission starts of as an emergency encou
         }
         else if (name.equals("type")) {
           return addType();
+        }
+        else if (name.equals("serviceType")) {
+          this.serviceType = new CodeableConcept();
+          return this.serviceType;
         }
         else if (name.equals("priority")) {
           this.priority = new CodeableConcept();
@@ -3950,6 +4008,7 @@ This would be used for a case where an admission starts of as an emergency encou
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
         };
+        dst.serviceType = serviceType == null ? null : serviceType.copy();
         dst.priority = priority == null ? null : priority.copy();
         dst.subject = subject == null ? null : subject.copy();
         if (episodeOfCare != null) {
@@ -4001,36 +4060,36 @@ This would be used for a case where an admission starts of as an emergency encou
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Encounter))
+        if (!(other_ instanceof Encounter))
           return false;
-        Encounter o = (Encounter) other;
+        Encounter o = (Encounter) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
            && compareDeep(class_, o.class_, true) && compareDeep(classHistory, o.classHistory, true) && compareDeep(type, o.type, true)
-           && compareDeep(priority, o.priority, true) && compareDeep(subject, o.subject, true) && compareDeep(episodeOfCare, o.episodeOfCare, true)
-           && compareDeep(incomingReferral, o.incomingReferral, true) && compareDeep(participant, o.participant, true)
-           && compareDeep(appointment, o.appointment, true) && compareDeep(period, o.period, true) && compareDeep(length, o.length, true)
-           && compareDeep(reason, o.reason, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true)
-           && compareDeep(hospitalization, o.hospitalization, true) && compareDeep(location, o.location, true)
-           && compareDeep(serviceProvider, o.serviceProvider, true) && compareDeep(partOf, o.partOf, true)
-          ;
+           && compareDeep(serviceType, o.serviceType, true) && compareDeep(priority, o.priority, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(episodeOfCare, o.episodeOfCare, true) && compareDeep(incomingReferral, o.incomingReferral, true)
+           && compareDeep(participant, o.participant, true) && compareDeep(appointment, o.appointment, true)
+           && compareDeep(period, o.period, true) && compareDeep(length, o.length, true) && compareDeep(reason, o.reason, true)
+           && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true) && compareDeep(hospitalization, o.hospitalization, true)
+           && compareDeep(location, o.location, true) && compareDeep(serviceProvider, o.serviceProvider, true)
+           && compareDeep(partOf, o.partOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Encounter))
+        if (!(other_ instanceof Encounter))
           return false;
-        Encounter o = (Encounter) other;
+        Encounter o = (Encounter) other_;
         return compareValues(status, o.status, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
-          , class_, classHistory, type, priority, subject, episodeOfCare, incomingReferral
+          , class_, classHistory, type, serviceType, priority, subject, episodeOfCare, incomingReferral
           , participant, appointment, period, length, reason, diagnosis, account, hospitalization
           , location, serviceProvider, partOf);
       }
@@ -4149,17 +4208,17 @@ This would be used for a case where an admission starts of as an emergency encou
  /**
    * Search parameter: <b>incomingreferral</b>
    * <p>
-   * Description: <b>The ProcedureRequest that initiated this encounter</b><br>
+   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.incomingReferral</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ProcedureRequest that initiated this encounter", type="reference", target={ProcedureRequest.class } )
+  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
    * <p>
-   * Description: <b>The ProcedureRequest that initiated this encounter</b><br>
+   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.incomingReferral</b><br>
    * </p>
@@ -4201,17 +4260,17 @@ This would be used for a case where an admission starts of as an emergency encou
  /**
    * Search parameter: <b>subject</b>
    * <p>
-   * Description: <b>The patient ro group present at the encounter</b><br>
+   * Description: <b>The patient or group present at the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Encounter.subject", description="The patient ro group present at the encounter", type="reference", target={Group.class, Patient.class } )
+  @SearchParamDefinition(name="subject", path="Encounter.subject", description="The patient or group present at the encounter", type="reference", target={Group.class, Patient.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
    * <p>
-   * Description: <b>The patient ro group present at the encounter</b><br>
+   * Description: <b>The patient or group present at the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.subject</b><br>
    * </p>
@@ -4228,21 +4287,21 @@ This would be used for a case where an admission starts of as an emergency encou
    * Search parameter: <b>length</b>
    * <p>
    * Description: <b>Length of encounter in days</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Encounter.length</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number" )
+  @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="quantity" )
   public static final String SP_LENGTH = "length";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>length</b>
    * <p>
    * Description: <b>Length of encounter in days</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Encounter.length</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.NumberClientParam LENGTH = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_LENGTH);
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam LENGTH = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_LENGTH);
 
  /**
    * Search parameter: <b>diagnosis</b>
@@ -4371,17 +4430,17 @@ This would be used for a case where an admission starts of as an emergency encou
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>The patient ro group present at the encounter</b><br>
+   * Description: <b>The patient or group present at the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Encounter.subject", description="The patient ro group present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Encounter.subject", description="The patient or group present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>The patient ro group present at the encounter</b><br>
+   * Description: <b>The patient or group present at the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.subject</b><br>
    * </p>
@@ -4443,17 +4502,17 @@ This would be used for a case where an admission starts of as an emergency encou
  /**
    * Search parameter: <b>service-provider</b>
    * <p>
-   * Description: <b>The custodian organization of this Encounter record</b><br>
+   * Description: <b>The organization (facility) responsible for this encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.serviceProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider", description="The custodian organization of this Encounter record", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider", description="The organization (facility) responsible for this encounter", type="reference", target={Organization.class } )
   public static final String SP_SERVICE_PROVIDER = "service-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-provider</b>
    * <p>
-   * Description: <b>The custodian organization of this Encounter record</b><br>
+   * Description: <b>The organization (facility) responsible for this encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.serviceProvider</b><br>
    * </p>

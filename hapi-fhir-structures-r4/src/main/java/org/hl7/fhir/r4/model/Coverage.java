@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -171,6 +171,304 @@ public class Coverage extends DomainResource {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class ClassComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.
+         */
+        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Type of class such as 'group' or 'plan'", formalDefinition="The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/coverage-level")
+        protected Coding type;
+
+        /**
+         * For example the Group or Plan number.
+         */
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The tag or value under the classification", formalDefinition="For example the Group or Plan number." )
+        protected StringType value;
+
+        /**
+         * A short description for the class.
+         */
+        @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Display text for an identifier for the group", formalDefinition="A short description for the class." )
+        protected StringType name;
+
+        private static final long serialVersionUID = -351277350L;
+
+    /**
+     * Constructor
+     */
+      public ClassComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ClassComponent(Coding type, StringType value) {
+        super();
+        this.type = type;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #type} (The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+         */
+        public Coding getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ClassComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Coding(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+         */
+        public ClassComponent setType(Coding value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (For example the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ClassComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (For example the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public ClassComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return For example the Group or Plan number.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value For example the Group or Plan number.
+         */
+        public ClassComponent setValue(String value) { 
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #name} (A short description for the class.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ClassComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (A short description for the class.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public ClassComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return A short description for the class.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value A short description for the class.
+         */
+        public ClassComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "Coding", "The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, type));
+          children.add(new Property("value", "string", "For example the Group or Plan number.", 0, 1, value));
+          children.add(new Property("name", "string", "A short description for the class.", 0, 1, name));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "Coding", "The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, type);
+          case 111972721: /*value*/  return new Property("value", "string", "For example the Group or Plan number.", 0, 1, value);
+          case 3373707: /*name*/  return new Property("name", "string", "A short description for the class.", 0, 1, name);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          return value;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          return value;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = castToCoding(value); // Coding
+        } else if (name.equals("value")) {
+          this.value = castToString(value); // StringType
+        } else if (name.equals("name")) {
+          this.name = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); 
+        case 111972721:  return getValueElement();
+        case 3373707:  return getNameElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 111972721: /*value*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.value");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.name");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ClassComponent copy() {
+        ClassComponent dst = new ClassComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.value = value == null ? null : value.copy();
+        dst.name = name == null ? null : name.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ClassComponent))
+          return false;
+        ClassComponent o = (ClassComponent) other_;
+        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true) && compareDeep(name, o.name, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ClassComponent))
+          return false;
+        ClassComponent o = (ClassComponent) other_;
+        return compareValues(value, o.value, true) && compareValues(name, o.name, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value, name);
+      }
+
+  public String fhirType() {
+    return "Coverage.class";
+
+  }
+
+  }
 
     @Block()
     public static class GroupComponent extends BackboneElement implements IBaseBackboneElement {
@@ -1087,12 +1385,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GroupComponent))
+        if (!(other_ instanceof GroupComponent))
           return false;
-        GroupComponent o = (GroupComponent) other;
+        GroupComponent o = (GroupComponent) other_;
         return compareDeep(group, o.group, true) && compareDeep(groupDisplay, o.groupDisplay, true) && compareDeep(subGroup, o.subGroup, true)
            && compareDeep(subGroupDisplay, o.subGroupDisplay, true) && compareDeep(plan, o.plan, true) && compareDeep(planDisplay, o.planDisplay, true)
            && compareDeep(subPlan, o.subPlan, true) && compareDeep(subPlanDisplay, o.subPlanDisplay, true)
@@ -1101,12 +1399,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GroupComponent))
+        if (!(other_ instanceof GroupComponent))
           return false;
-        GroupComponent o = (GroupComponent) other;
+        GroupComponent o = (GroupComponent) other_;
         return compareValues(group, o.group, true) && compareValues(groupDisplay, o.groupDisplay, true) && compareValues(subGroup, o.subGroup, true)
            && compareValues(subGroupDisplay, o.subGroupDisplay, true) && compareValues(plan, o.plan, true) && compareValues(planDisplay, o.planDisplay, true)
            && compareValues(subPlan, o.subPlan, true) && compareValues(subPlanDisplay, o.subPlanDisplay, true)
@@ -1122,6 +1420,212 @@ public class Coverage extends DomainResource {
 
   public String fhirType() {
     return "Coverage.grouping";
+
+  }
+
+  }
+
+    @Block()
+    public static class CoPayComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.
+         */
+        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The type of service or product", formalDefinition="Types of products or services such as visit, specialist vists, emergency, inpatient care, etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/coverage-copay-type")
+        protected Coding type;
+
+        /**
+         * The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.
+         */
+        @Child(name = "value", type = {Quantity.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The amount or percentage of the copayment", formalDefinition="The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,." )
+        protected Quantity value;
+
+        private static final long serialVersionUID = -410759184L;
+
+    /**
+     * Constructor
+     */
+      public CoPayComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public CoPayComponent(Quantity value) {
+        super();
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #type} (Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.)
+         */
+        public Coding getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoPayComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Coding(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.)
+         */
+        public CoPayComponent setType(Coding value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.)
+         */
+        public Quantity getValue() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoPayComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new Quantity(); // cc
+          return this.value;
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.)
+         */
+        public CoPayComponent setValue(Quantity value) { 
+          this.value = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "Coding", "Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.", 0, 1, type));
+          children.add(new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "Coding", "Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.", 0, 1, type);
+          case 111972721: /*value*/  return new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Quantity
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          return value;
+        case 111972721: // value
+          this.value = castToQuantity(value); // Quantity
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = castToCoding(value); // Coding
+        } else if (name.equals("value")) {
+          this.value = castToQuantity(value); // Quantity
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); 
+        case 111972721:  return getValue(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 111972721: /*value*/ return new String[] {"Quantity"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("value")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public CoPayComponent copy() {
+        CoPayComponent dst = new CoPayComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof CoPayComponent))
+          return false;
+        CoPayComponent o = (CoPayComponent) other_;
+        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof CoPayComponent))
+          return false;
+        CoPayComponent o = (CoPayComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
+      }
+
+  public String fhirType() {
+    return "Coverage.copay";
 
   }
 
@@ -1194,9 +1698,16 @@ public class Coverage extends DomainResource {
     protected Patient beneficiaryTarget;
 
     /**
+     * A unique identifier for a dependent under the coverage.
+     */
+    @Child(name = "dependent", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
+    protected StringType dependent;
+
+    /**
      * The relationship of beneficiary (patient) to the subscriber.
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Beneficiary relationship to the Subscriber", formalDefinition="The relationship of beneficiary (patient) to the subscriber." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/policyholder-relationship")
     protected CodeableConcept relationship;
@@ -1204,14 +1715,14 @@ public class Coverage extends DomainResource {
     /**
      * Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.
      */
-    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Coverage start and end dates", formalDefinition="Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force." )
     protected Period period;
 
     /**
      * The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).
      */
-    @Child(name = "payor", type = {Organization.class, Patient.class, RelatedPerson.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "payor", type = {Organization.class, Patient.class, RelatedPerson.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifier for the plan or agreement issuer", formalDefinition="The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number)." )
     protected List<Reference> payor;
     /**
@@ -1223,42 +1734,49 @@ public class Coverage extends DomainResource {
     /**
      * A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.
      */
-    @Child(name = "grouping", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "class", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Additional coverage classifications", formalDefinition="A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan." )
+    protected List<ClassComponent> class_;
+
+    /**
+     * A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.
+     */
+    @Child(name = "grouping", type = {}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional coverage classifications", formalDefinition="A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan." )
     protected GroupComponent grouping;
 
     /**
-     * A unique identifier for a dependent under the coverage.
-     */
-    @Child(name = "dependent", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
-    protected StringType dependent;
-
-    /**
      * An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
-    @Child(name = "sequence", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "sequence", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The plan instance or sequence counter", formalDefinition="An optional counter for a particular instance of the identified coverage which increments upon each renewal." )
     protected StringType sequence;
 
     /**
      * The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.
      */
-    @Child(name = "order", type = {PositiveIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "order", type = {PositiveIntType.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Relative order of the coverage", formalDefinition="The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care." )
     protected PositiveIntType order;
 
     /**
      * The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.
      */
-    @Child(name = "network", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "network", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Insurer network", formalDefinition="The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply." )
     protected StringType network;
 
     /**
+     * A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.
+     */
+    @Child(name = "copay", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Patient payments for services/products", formalDefinition="A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan." )
+    protected List<CoPayComponent> copay;
+
+    /**
      * The policy(s) which constitute this insurance coverage.
      */
-    @Child(name = "contract", type = {Contract.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contract", type = {Contract.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract details", formalDefinition="The policy(s) which constitute this insurance coverage." )
     protected List<Reference> contract;
     /**
@@ -1267,7 +1785,7 @@ public class Coverage extends DomainResource {
     protected List<Contract> contractTarget;
 
 
-    private static final long serialVersionUID = -1719168406L;
+    private static final long serialVersionUID = 1287721365L;
 
   /**
    * Constructor
@@ -1574,6 +2092,55 @@ public class Coverage extends DomainResource {
     }
 
     /**
+     * @return {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
+     */
+    public StringType getDependentElement() { 
+      if (this.dependent == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Coverage.dependent");
+        else if (Configuration.doAutoCreate())
+          this.dependent = new StringType(); // bb
+      return this.dependent;
+    }
+
+    public boolean hasDependentElement() { 
+      return this.dependent != null && !this.dependent.isEmpty();
+    }
+
+    public boolean hasDependent() { 
+      return this.dependent != null && !this.dependent.isEmpty();
+    }
+
+    /**
+     * @param value {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
+     */
+    public Coverage setDependentElement(StringType value) { 
+      this.dependent = value;
+      return this;
+    }
+
+    /**
+     * @return A unique identifier for a dependent under the coverage.
+     */
+    public String getDependent() { 
+      return this.dependent == null ? null : this.dependent.getValue();
+    }
+
+    /**
+     * @param value A unique identifier for a dependent under the coverage.
+     */
+    public Coverage setDependent(String value) { 
+      if (Utilities.noString(value))
+        this.dependent = null;
+      else {
+        if (this.dependent == null)
+          this.dependent = new StringType();
+        this.dependent.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #relationship} (The relationship of beneficiary (patient) to the subscriber.)
      */
     public CodeableConcept getRelationship() { 
@@ -1685,6 +2252,59 @@ public class Coverage extends DomainResource {
     }
 
     /**
+     * @return {@link #class_} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+     */
+    public List<ClassComponent> getClass_() { 
+      if (this.class_ == null)
+        this.class_ = new ArrayList<ClassComponent>();
+      return this.class_;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Coverage setClass_(List<ClassComponent> theClass_) { 
+      this.class_ = theClass_;
+      return this;
+    }
+
+    public boolean hasClass_() { 
+      if (this.class_ == null)
+        return false;
+      for (ClassComponent item : this.class_)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ClassComponent addClass_() { //3
+      ClassComponent t = new ClassComponent();
+      if (this.class_ == null)
+        this.class_ = new ArrayList<ClassComponent>();
+      this.class_.add(t);
+      return t;
+    }
+
+    public Coverage addClass_(ClassComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.class_ == null)
+        this.class_ = new ArrayList<ClassComponent>();
+      this.class_.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #class_}, creating it if it does not already exist
+     */
+    public ClassComponent getClass_FirstRep() { 
+      if (getClass_().isEmpty()) {
+        addClass_();
+      }
+      return getClass_().get(0);
+    }
+
+    /**
      * @return {@link #grouping} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
      */
     public GroupComponent getGrouping() { 
@@ -1705,55 +2325,6 @@ public class Coverage extends DomainResource {
      */
     public Coverage setGrouping(GroupComponent value) { 
       this.grouping = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
-     */
-    public StringType getDependentElement() { 
-      if (this.dependent == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Coverage.dependent");
-        else if (Configuration.doAutoCreate())
-          this.dependent = new StringType(); // bb
-      return this.dependent;
-    }
-
-    public boolean hasDependentElement() { 
-      return this.dependent != null && !this.dependent.isEmpty();
-    }
-
-    public boolean hasDependent() { 
-      return this.dependent != null && !this.dependent.isEmpty();
-    }
-
-    /**
-     * @param value {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
-     */
-    public Coverage setDependentElement(StringType value) { 
-      this.dependent = value;
-      return this;
-    }
-
-    /**
-     * @return A unique identifier for a dependent under the coverage.
-     */
-    public String getDependent() { 
-      return this.dependent == null ? null : this.dependent.getValue();
-    }
-
-    /**
-     * @param value A unique identifier for a dependent under the coverage.
-     */
-    public Coverage setDependent(String value) { 
-      if (Utilities.noString(value))
-        this.dependent = null;
-      else {
-        if (this.dependent == null)
-          this.dependent = new StringType();
-        this.dependent.setValue(value);
-      }
       return this;
     }
 
@@ -1901,6 +2472,59 @@ public class Coverage extends DomainResource {
     }
 
     /**
+     * @return {@link #copay} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+     */
+    public List<CoPayComponent> getCopay() { 
+      if (this.copay == null)
+        this.copay = new ArrayList<CoPayComponent>();
+      return this.copay;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Coverage setCopay(List<CoPayComponent> theCopay) { 
+      this.copay = theCopay;
+      return this;
+    }
+
+    public boolean hasCopay() { 
+      if (this.copay == null)
+        return false;
+      for (CoPayComponent item : this.copay)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CoPayComponent addCopay() { //3
+      CoPayComponent t = new CoPayComponent();
+      if (this.copay == null)
+        this.copay = new ArrayList<CoPayComponent>();
+      this.copay.add(t);
+      return t;
+    }
+
+    public Coverage addCopay(CoPayComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.copay == null)
+        this.copay = new ArrayList<CoPayComponent>();
+      this.copay.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #copay}, creating it if it does not already exist
+     */
+    public CoPayComponent getCopayFirstRep() { 
+      if (getCopay().isEmpty()) {
+        addCopay();
+      }
+      return getCopay().get(0);
+    }
+
+    /**
      * @return {@link #contract} (The policy(s) which constitute this insurance coverage.)
      */
     public List<Reference> getContract() { 
@@ -1984,14 +2608,16 @@ public class Coverage extends DomainResource {
         children.add(new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber));
         children.add(new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId));
         children.add(new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary));
+        children.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent));
         children.add(new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship));
         children.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period));
         children.add(new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor));
+        children.add(new Property("class", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, class_));
         children.add(new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, grouping));
-        children.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent));
         children.add(new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, 1, sequence));
         children.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order));
         children.add(new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network));
+        children.add(new Property("copay", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, copay));
         children.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
       }
 
@@ -2005,14 +2631,16 @@ public class Coverage extends DomainResource {
         case -1219769240: /*subscriber*/  return new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber);
         case 327834531: /*subscriberId*/  return new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId);
         case -565102875: /*beneficiary*/  return new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary);
+        case -1109226753: /*dependent*/  return new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent);
         case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship);
         case -991726143: /*period*/  return new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period);
         case 106443915: /*payor*/  return new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor);
+        case 94742904: /*class*/  return new Property("class", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, class_);
         case 506371331: /*grouping*/  return new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, grouping);
-        case -1109226753: /*dependent*/  return new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent);
         case 1349547969: /*sequence*/  return new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, 1, sequence);
         case 106006350: /*order*/  return new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order);
         case 1843485230: /*network*/  return new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network);
+        case 94846140: /*copay*/  return new Property("copay", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, copay);
         case -566947566: /*contract*/  return new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2029,14 +2657,16 @@ public class Coverage extends DomainResource {
         case -1219769240: /*subscriber*/ return this.subscriber == null ? new Base[0] : new Base[] {this.subscriber}; // Reference
         case 327834531: /*subscriberId*/ return this.subscriberId == null ? new Base[0] : new Base[] {this.subscriberId}; // StringType
         case -565102875: /*beneficiary*/ return this.beneficiary == null ? new Base[0] : new Base[] {this.beneficiary}; // Reference
+        case -1109226753: /*dependent*/ return this.dependent == null ? new Base[0] : new Base[] {this.dependent}; // StringType
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 106443915: /*payor*/ return this.payor == null ? new Base[0] : this.payor.toArray(new Base[this.payor.size()]); // Reference
+        case 94742904: /*class*/ return this.class_ == null ? new Base[0] : this.class_.toArray(new Base[this.class_.size()]); // ClassComponent
         case 506371331: /*grouping*/ return this.grouping == null ? new Base[0] : new Base[] {this.grouping}; // GroupComponent
-        case -1109226753: /*dependent*/ return this.dependent == null ? new Base[0] : new Base[] {this.dependent}; // StringType
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // StringType
         case 106006350: /*order*/ return this.order == null ? new Base[0] : new Base[] {this.order}; // PositiveIntType
         case 1843485230: /*network*/ return this.network == null ? new Base[0] : new Base[] {this.network}; // StringType
+        case 94846140: /*copay*/ return this.copay == null ? new Base[0] : this.copay.toArray(new Base[this.copay.size()]); // CoPayComponent
         case -566947566: /*contract*/ return this.contract == null ? new Base[0] : this.contract.toArray(new Base[this.contract.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2068,6 +2698,9 @@ public class Coverage extends DomainResource {
         case -565102875: // beneficiary
           this.beneficiary = castToReference(value); // Reference
           return value;
+        case -1109226753: // dependent
+          this.dependent = castToString(value); // StringType
+          return value;
         case -261851592: // relationship
           this.relationship = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -2077,11 +2710,11 @@ public class Coverage extends DomainResource {
         case 106443915: // payor
           this.getPayor().add(castToReference(value)); // Reference
           return value;
+        case 94742904: // class
+          this.getClass_().add((ClassComponent) value); // ClassComponent
+          return value;
         case 506371331: // grouping
           this.grouping = (GroupComponent) value; // GroupComponent
-          return value;
-        case -1109226753: // dependent
-          this.dependent = castToString(value); // StringType
           return value;
         case 1349547969: // sequence
           this.sequence = castToString(value); // StringType
@@ -2091,6 +2724,9 @@ public class Coverage extends DomainResource {
           return value;
         case 1843485230: // network
           this.network = castToString(value); // StringType
+          return value;
+        case 94846140: // copay
+          this.getCopay().add((CoPayComponent) value); // CoPayComponent
           return value;
         case -566947566: // contract
           this.getContract().add(castToReference(value)); // Reference
@@ -2117,22 +2753,26 @@ public class Coverage extends DomainResource {
           this.subscriberId = castToString(value); // StringType
         } else if (name.equals("beneficiary")) {
           this.beneficiary = castToReference(value); // Reference
+        } else if (name.equals("dependent")) {
+          this.dependent = castToString(value); // StringType
         } else if (name.equals("relationship")) {
           this.relationship = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
         } else if (name.equals("payor")) {
           this.getPayor().add(castToReference(value));
+        } else if (name.equals("class")) {
+          this.getClass_().add((ClassComponent) value);
         } else if (name.equals("grouping")) {
           this.grouping = (GroupComponent) value; // GroupComponent
-        } else if (name.equals("dependent")) {
-          this.dependent = castToString(value); // StringType
         } else if (name.equals("sequence")) {
           this.sequence = castToString(value); // StringType
         } else if (name.equals("order")) {
           this.order = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("network")) {
           this.network = castToString(value); // StringType
+        } else if (name.equals("copay")) {
+          this.getCopay().add((CoPayComponent) value);
         } else if (name.equals("contract")) {
           this.getContract().add(castToReference(value));
         } else
@@ -2150,14 +2790,16 @@ public class Coverage extends DomainResource {
         case -1219769240:  return getSubscriber(); 
         case 327834531:  return getSubscriberIdElement();
         case -565102875:  return getBeneficiary(); 
+        case -1109226753:  return getDependentElement();
         case -261851592:  return getRelationship(); 
         case -991726143:  return getPeriod(); 
         case 106443915:  return addPayor(); 
+        case 94742904:  return addClass_(); 
         case 506371331:  return getGrouping(); 
-        case -1109226753:  return getDependentElement();
         case 1349547969:  return getSequenceElement();
         case 106006350:  return getOrderElement();
         case 1843485230:  return getNetworkElement();
+        case 94846140:  return addCopay(); 
         case -566947566:  return addContract(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2174,14 +2816,16 @@ public class Coverage extends DomainResource {
         case -1219769240: /*subscriber*/ return new String[] {"Reference"};
         case 327834531: /*subscriberId*/ return new String[] {"string"};
         case -565102875: /*beneficiary*/ return new String[] {"Reference"};
+        case -1109226753: /*dependent*/ return new String[] {"string"};
         case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
         case -991726143: /*period*/ return new String[] {"Period"};
         case 106443915: /*payor*/ return new String[] {"Reference"};
+        case 94742904: /*class*/ return new String[] {};
         case 506371331: /*grouping*/ return new String[] {};
-        case -1109226753: /*dependent*/ return new String[] {"string"};
         case 1349547969: /*sequence*/ return new String[] {"string"};
         case 106006350: /*order*/ return new String[] {"positiveInt"};
         case 1843485230: /*network*/ return new String[] {"string"};
+        case 94846140: /*copay*/ return new String[] {};
         case -566947566: /*contract*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2215,6 +2859,9 @@ public class Coverage extends DomainResource {
           this.beneficiary = new Reference();
           return this.beneficiary;
         }
+        else if (name.equals("dependent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.dependent");
+        }
         else if (name.equals("relationship")) {
           this.relationship = new CodeableConcept();
           return this.relationship;
@@ -2226,12 +2873,12 @@ public class Coverage extends DomainResource {
         else if (name.equals("payor")) {
           return addPayor();
         }
+        else if (name.equals("class")) {
+          return addClass_();
+        }
         else if (name.equals("grouping")) {
           this.grouping = new GroupComponent();
           return this.grouping;
-        }
-        else if (name.equals("dependent")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Coverage.dependent");
         }
         else if (name.equals("sequence")) {
           throw new FHIRException("Cannot call addChild on a primitive type Coverage.sequence");
@@ -2241,6 +2888,9 @@ public class Coverage extends DomainResource {
         }
         else if (name.equals("network")) {
           throw new FHIRException("Cannot call addChild on a primitive type Coverage.network");
+        }
+        else if (name.equals("copay")) {
+          return addCopay();
         }
         else if (name.equals("contract")) {
           return addContract();
@@ -2268,6 +2918,7 @@ public class Coverage extends DomainResource {
         dst.subscriber = subscriber == null ? null : subscriber.copy();
         dst.subscriberId = subscriberId == null ? null : subscriberId.copy();
         dst.beneficiary = beneficiary == null ? null : beneficiary.copy();
+        dst.dependent = dependent == null ? null : dependent.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
         dst.period = period == null ? null : period.copy();
         if (payor != null) {
@@ -2275,11 +2926,20 @@ public class Coverage extends DomainResource {
           for (Reference i : payor)
             dst.payor.add(i.copy());
         };
+        if (class_ != null) {
+          dst.class_ = new ArrayList<ClassComponent>();
+          for (ClassComponent i : class_)
+            dst.class_.add(i.copy());
+        };
         dst.grouping = grouping == null ? null : grouping.copy();
-        dst.dependent = dependent == null ? null : dependent.copy();
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.order = order == null ? null : order.copy();
         dst.network = network == null ? null : network.copy();
+        if (copay != null) {
+          dst.copay = new ArrayList<CoPayComponent>();
+          for (CoPayComponent i : copay)
+            dst.copay.add(i.copy());
+        };
         if (contract != null) {
           dst.contract = new ArrayList<Reference>();
           for (Reference i : contract)
@@ -2293,28 +2953,29 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Coverage))
+        if (!(other_ instanceof Coverage))
           return false;
-        Coverage o = (Coverage) other;
+        Coverage o = (Coverage) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(policyHolder, o.policyHolder, true) && compareDeep(subscriber, o.subscriber, true)
            && compareDeep(subscriberId, o.subscriberId, true) && compareDeep(beneficiary, o.beneficiary, true)
-           && compareDeep(relationship, o.relationship, true) && compareDeep(period, o.period, true) && compareDeep(payor, o.payor, true)
-           && compareDeep(grouping, o.grouping, true) && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true)
-           && compareDeep(order, o.order, true) && compareDeep(network, o.network, true) && compareDeep(contract, o.contract, true)
+           && compareDeep(dependent, o.dependent, true) && compareDeep(relationship, o.relationship, true)
+           && compareDeep(period, o.period, true) && compareDeep(payor, o.payor, true) && compareDeep(class_, o.class_, true)
+           && compareDeep(grouping, o.grouping, true) && compareDeep(sequence, o.sequence, true) && compareDeep(order, o.order, true)
+           && compareDeep(network, o.network, true) && compareDeep(copay, o.copay, true) && compareDeep(contract, o.contract, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Coverage))
+        if (!(other_ instanceof Coverage))
           return false;
-        Coverage o = (Coverage) other;
+        Coverage o = (Coverage) other_;
         return compareValues(status, o.status, true) && compareValues(subscriberId, o.subscriberId, true) && compareValues(dependent, o.dependent, true)
            && compareValues(sequence, o.sequence, true) && compareValues(order, o.order, true) && compareValues(network, o.network, true)
           ;
@@ -2322,8 +2983,8 @@ public class Coverage extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
-          , policyHolder, subscriber, subscriberId, beneficiary, relationship, period, payor
-          , grouping, dependent, sequence, order, network, contract);
+          , policyHolder, subscriber, subscriberId, beneficiary, dependent, relationship, period
+          , payor, class_, grouping, sequence, order, network, copay, contract);
       }
 
   @Override
@@ -2508,6 +3169,32 @@ public class Coverage extends DomainResource {
    * the path value of "<b>Coverage:beneficiary</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_BENEFICIARY = new ca.uhn.fhir.model.api.Include("Coverage:beneficiary").toLocked();
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Retrieve coverages for a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Coverage.beneficiary</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="Coverage.beneficiary", description="Retrieve coverages for a patient", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Retrieve coverages for a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Coverage.beneficiary</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Coverage:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Coverage:patient").toLocked();
 
  /**
    * Search parameter: <b>subclass</b>

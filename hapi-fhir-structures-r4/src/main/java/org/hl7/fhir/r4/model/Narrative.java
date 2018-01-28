@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -292,7 +292,7 @@ public class Narrative extends BaseNarrative implements INarrative {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NarrativeStatus>
-        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer().setXmlOnly(true).composeEx(this.div))}; // XhtmlNode
+        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer(true).composeEx(this.div))}; // XhtmlNode
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -371,22 +371,22 @@ public class Narrative extends BaseNarrative implements INarrative {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Narrative))
+        if (!(other_ instanceof Narrative))
           return false;
-        Narrative o = (Narrative) other;
+        Narrative o = (Narrative) other_;
         return compareDeep(status, o.status, true) && compareDeep(div, o.div, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Narrative))
+        if (!(other_ instanceof Narrative))
           return false;
-        Narrative o = (Narrative) other;
+        Narrative o = (Narrative) other_;
         return compareValues(status, o.status, true);
       }
 

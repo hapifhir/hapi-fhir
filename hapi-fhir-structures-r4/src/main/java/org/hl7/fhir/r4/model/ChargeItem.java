@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -417,22 +417,22 @@ public class ChargeItem extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ChargeItemParticipantComponent))
+        if (!(other_ instanceof ChargeItemParticipantComponent))
           return false;
-        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other;
+        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ChargeItemParticipantComponent))
+        if (!(other_ instanceof ChargeItemParticipantComponent))
           return false;
-        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other;
+        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other_;
         return true;
       }
 
@@ -2250,12 +2250,12 @@ public class ChargeItem extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ChargeItem))
+        if (!(other_ instanceof ChargeItem))
           return false;
-        ChargeItem o = (ChargeItem) other;
+        ChargeItem o = (ChargeItem) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(status, o.status, true) && compareDeep(partOf, o.partOf, true) && compareDeep(code, o.code, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
@@ -2269,12 +2269,12 @@ public class ChargeItem extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ChargeItem))
+        if (!(other_ instanceof ChargeItem))
           return false;
-        ChargeItem o = (ChargeItem) other;
+        ChargeItem o = (ChargeItem) other_;
         return compareValues(definition, o.definition, true) && compareValues(status, o.status, true) && compareValues(factorOverride, o.factorOverride, true)
            && compareValues(overrideReason, o.overrideReason, true) && compareValues(enteredDate, o.enteredDate, true)
           ;

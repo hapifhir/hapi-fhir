@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,20 @@ package ca.uhn.fhir.util;
 
 import java.util.StringTokenizer;
 
-public class UrlPathTokenizer extends StringTokenizer {
+public class UrlPathTokenizer {
+
+	private final StringTokenizer myTok;
 
 	public UrlPathTokenizer(String theRequestPath) {
-		super(theRequestPath, "/");
+		myTok = new StringTokenizer(theRequestPath, "/");
 	}
 
-	@Override
+	public boolean hasMoreTokens() {
+		return myTok.hasMoreTokens();
+	}
+
 	public String nextToken() {
-		return UrlUtil.unescape(super.nextToken());
-	}
-
-	@CoverageIgnore
-	@Override
-	public String nextToken(String theDelim) {
-		throw new UnsupportedOperationException();
-	}
-
-	@CoverageIgnore
-	@Override
-	public Object nextElement() {
-		return super.nextElement();
+		return UrlUtil.unescape(myTok.nextToken());
 	}
 
 }

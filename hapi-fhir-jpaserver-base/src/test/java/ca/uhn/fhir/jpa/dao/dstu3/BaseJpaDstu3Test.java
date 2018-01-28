@@ -48,10 +48,8 @@ import ca.uhn.fhir.rest.server.method.MethodUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
-//@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes= {TestDstu3Config.class})
-//@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;

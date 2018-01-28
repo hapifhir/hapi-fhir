@@ -57,6 +57,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
 	protected ISearchParamDao mySearchParamDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
@@ -164,8 +166,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myPractitionerDaoR4")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
-	@Qualifier("myProcedureRequestDaoR4")
-	protected IFhirResourceDao<ProcedureRequest> myProcedureRequestDao;
+	@Qualifier("myServiceRequestDaoR4")
+	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR4")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
@@ -177,6 +179,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected Object myResourceProviders;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -232,6 +236,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@After()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,11 +45,15 @@ public enum EventStatus {
          */
         INPROGRESS, 
         /**
+         * The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         */
+        NOTDONE, 
+        /**
          * The event has been temporarily stopped but is expected to resume in the future
          */
         SUSPENDED, 
         /**
-         * The event was  prior to the full completion of the intended actions
+         * The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.
          */
         ABORTED, 
         /**
@@ -75,6 +79,8 @@ public enum EventStatus {
           return PREPARATION;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
         if ("suspended".equals(codeString))
           return SUSPENDED;
         if ("aborted".equals(codeString))
@@ -91,6 +97,7 @@ public enum EventStatus {
           switch (this) {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
+            case NOTDONE: return "not-done";
             case SUSPENDED: return "suspended";
             case ABORTED: return "aborted";
             case COMPLETED: return "completed";
@@ -106,8 +113,9 @@ public enum EventStatus {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
             case INPROGRESS: return "The event is currently occurring";
+            case NOTDONE: return "The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
             case SUSPENDED: return "The event has been temporarily stopped but is expected to resume in the future";
-            case ABORTED: return "The event was  prior to the full completion of the intended actions";
+            case ABORTED: return "The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.";
             case COMPLETED: return "The event has now concluded";
             case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
@@ -118,6 +126,7 @@ public enum EventStatus {
           switch (this) {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
+            case NOTDONE: return "Not Done";
             case SUSPENDED: return "Suspended";
             case ABORTED: return "Aborted";
             case COMPLETED: return "Completed";

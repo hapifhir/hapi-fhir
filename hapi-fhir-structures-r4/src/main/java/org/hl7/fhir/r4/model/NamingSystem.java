@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
  */
 @ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/Profile/NamingSystem")
-@ChildOrder(names={"name", "status", "kind", "date", "publisher", "contact", "responsible", "type", "description", "useContext", "jurisdiction", "usage", "uniqueId", "replacedBy"})
+@ChildOrder(names={"name", "status", "kind", "date", "publisher", "contact", "responsible", "type", "description", "useContext", "jurisdiction", "usage", "uniqueId"})
 public class NamingSystem extends MetadataResource {
 
     public enum NamingSystemType {
@@ -287,7 +287,7 @@ public class NamingSystem extends MetadataResource {
         /**
          * Identifies the unique identifier scheme used for this particular identifier.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="oid | uuid | uri | other", formalDefinition="Identifies the unique identifier scheme used for this particular identifier." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/namingsystem-identifier-type")
         protected Enumeration<NamingSystemIdentifierType> type;
@@ -295,7 +295,7 @@ public class NamingSystem extends MetadataResource {
         /**
          * The string that should be sent over the wire to identify the code system or identifier system.
          */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The unique identifier", formalDefinition="The string that should be sent over the wire to identify the code system or identifier system." )
         protected StringType value;
 
@@ -683,23 +683,23 @@ public class NamingSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NamingSystemUniqueIdComponent))
+        if (!(other_ instanceof NamingSystemUniqueIdComponent))
           return false;
-        NamingSystemUniqueIdComponent o = (NamingSystemUniqueIdComponent) other;
+        NamingSystemUniqueIdComponent o = (NamingSystemUniqueIdComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(value, o.value, true) && compareDeep(preferred, o.preferred, true)
            && compareDeep(comment, o.comment, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NamingSystemUniqueIdComponent))
+        if (!(other_ instanceof NamingSystemUniqueIdComponent))
           return false;
-        NamingSystemUniqueIdComponent o = (NamingSystemUniqueIdComponent) other;
+        NamingSystemUniqueIdComponent o = (NamingSystemUniqueIdComponent) other_;
         return compareValues(type, o.type, true) && compareValues(value, o.value, true) && compareValues(preferred, o.preferred, true)
            && compareValues(comment, o.comment, true);
       }
@@ -719,7 +719,7 @@ public class NamingSystem extends MetadataResource {
     /**
      * Indicates the purpose for the naming system - what kinds of things does it make unique?
      */
-    @Child(name = "kind", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "kind", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the naming system - what kinds of things does it make unique?" )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/namingsystem-type")
     protected Enumeration<NamingSystemType> kind;
@@ -749,23 +749,11 @@ public class NamingSystem extends MetadataResource {
     /**
      * Indicates how the system may be identified when referenced in electronic exchange.
      */
-    @Child(name = "uniqueId", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "uniqueId", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
     protected List<NamingSystemUniqueIdComponent> uniqueId;
 
-    /**
-     * For naming systems that are retired, indicates the naming system that should be used in their place (if any).
-     */
-    @Child(name = "replacedBy", type = {NamingSystem.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use this instead", formalDefinition="For naming systems that are retired, indicates the naming system that should be used in their place (if any)." )
-    protected Reference replacedBy;
-
-    /**
-     * The actual object that is the target of the reference (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
-     */
-    protected NamingSystem replacedByTarget;
-
-    private static final long serialVersionUID = -743416513L;
+    private static final long serialVersionUID = 1686086580L;
 
   /**
    * Constructor
@@ -1397,50 +1385,6 @@ public class NamingSystem extends MetadataResource {
       return getUniqueId().get(0);
     }
 
-    /**
-     * @return {@link #replacedBy} (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
-     */
-    public Reference getReplacedBy() { 
-      if (this.replacedBy == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.replacedBy");
-        else if (Configuration.doAutoCreate())
-          this.replacedBy = new Reference(); // cc
-      return this.replacedBy;
-    }
-
-    public boolean hasReplacedBy() { 
-      return this.replacedBy != null && !this.replacedBy.isEmpty();
-    }
-
-    /**
-     * @param value {@link #replacedBy} (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
-     */
-    public NamingSystem setReplacedBy(Reference value) { 
-      this.replacedBy = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
-     */
-    public NamingSystem getReplacedByTarget() { 
-      if (this.replacedByTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.replacedBy");
-        else if (Configuration.doAutoCreate())
-          this.replacedByTarget = new NamingSystem(); // aa
-      return this.replacedByTarget;
-    }
-
-    /**
-     * @param value {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
-     */
-    public NamingSystem setReplacedByTarget(NamingSystem value) { 
-      this.replacedByTarget = value;
-      return this;
-    }
-
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("name", "string", "A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -1456,7 +1400,6 @@ public class NamingSystem extends MetadataResource {
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the naming system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, 1, usage));
         children.add(new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId));
-        children.add(new Property("replacedBy", "Reference(NamingSystem)", "For naming systems that are retired, indicates the naming system that should be used in their place (if any).", 0, 1, replacedBy));
       }
 
       @Override
@@ -1475,7 +1418,6 @@ public class NamingSystem extends MetadataResource {
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the naming system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 111574433: /*usage*/  return new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, 1, usage);
         case -294460212: /*uniqueId*/  return new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId);
-        case -1233035097: /*replacedBy*/  return new Property("replacedBy", "Reference(NamingSystem)", "For naming systems that are retired, indicates the naming system that should be used in their place (if any).", 0, 1, replacedBy);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1497,7 +1439,6 @@ public class NamingSystem extends MetadataResource {
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
         case -294460212: /*uniqueId*/ return this.uniqueId == null ? new Base[0] : this.uniqueId.toArray(new Base[this.uniqueId.size()]); // NamingSystemUniqueIdComponent
-        case -1233035097: /*replacedBy*/ return this.replacedBy == null ? new Base[0] : new Base[] {this.replacedBy}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1547,9 +1488,6 @@ public class NamingSystem extends MetadataResource {
         case -294460212: // uniqueId
           this.getUniqueId().add((NamingSystemUniqueIdComponent) value); // NamingSystemUniqueIdComponent
           return value;
-        case -1233035097: // replacedBy
-          this.replacedBy = castToReference(value); // Reference
-          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1585,8 +1523,6 @@ public class NamingSystem extends MetadataResource {
           this.usage = castToString(value); // StringType
         } else if (name.equals("uniqueId")) {
           this.getUniqueId().add((NamingSystemUniqueIdComponent) value);
-        } else if (name.equals("replacedBy")) {
-          this.replacedBy = castToReference(value); // Reference
         } else
           return super.setProperty(name, value);
         return value;
@@ -1608,7 +1544,6 @@ public class NamingSystem extends MetadataResource {
         case -507075711:  return addJurisdiction(); 
         case 111574433:  return getUsageElement();
         case -294460212:  return addUniqueId(); 
-        case -1233035097:  return getReplacedBy(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1630,7 +1565,6 @@ public class NamingSystem extends MetadataResource {
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case 111574433: /*usage*/ return new String[] {"string"};
         case -294460212: /*uniqueId*/ return new String[] {};
-        case -1233035097: /*replacedBy*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1678,10 +1612,6 @@ public class NamingSystem extends MetadataResource {
         else if (name.equals("uniqueId")) {
           return addUniqueId();
         }
-        else if (name.equals("replacedBy")) {
-          this.replacedBy = new Reference();
-          return this.replacedBy;
-        }
         else
           return super.addChild(name);
       }
@@ -1723,7 +1653,6 @@ public class NamingSystem extends MetadataResource {
           for (NamingSystemUniqueIdComponent i : uniqueId)
             dst.uniqueId.add(i.copy());
         };
-        dst.replacedBy = replacedBy == null ? null : replacedBy.copy();
         return dst;
       }
 
@@ -1732,31 +1661,30 @@ public class NamingSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NamingSystem))
+        if (!(other_ instanceof NamingSystem))
           return false;
-        NamingSystem o = (NamingSystem) other;
+        NamingSystem o = (NamingSystem) other_;
         return compareDeep(kind, o.kind, true) && compareDeep(responsible, o.responsible, true) && compareDeep(type, o.type, true)
-           && compareDeep(usage, o.usage, true) && compareDeep(uniqueId, o.uniqueId, true) && compareDeep(replacedBy, o.replacedBy, true)
-          ;
+           && compareDeep(usage, o.usage, true) && compareDeep(uniqueId, o.uniqueId, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NamingSystem))
+        if (!(other_ instanceof NamingSystem))
           return false;
-        NamingSystem o = (NamingSystem) other;
+        NamingSystem o = (NamingSystem) other_;
         return compareValues(kind, o.kind, true) && compareValues(responsible, o.responsible, true) && compareValues(usage, o.usage, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, responsible, type
-          , usage, uniqueId, replacedBy);
+          , usage, uniqueId);
       }
 
   @Override
@@ -2023,32 +1951,6 @@ public class NamingSystem extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam VALUE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VALUE);
-
- /**
-   * Search parameter: <b>replaced-by</b>
-   * <p>
-   * Description: <b>Use this instead</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>NamingSystem.replacedBy</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference", target={NamingSystem.class } )
-  public static final String SP_REPLACED_BY = "replaced-by";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>replaced-by</b>
-   * <p>
-   * Description: <b>Use this instead</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>NamingSystem.replacedBy</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REPLACED_BY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REPLACED_BY);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>NamingSystem:replaced-by</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REPLACED_BY = new ca.uhn.fhir.model.api.Include("NamingSystem:replaced-by").toLocked();
 
  /**
    * Search parameter: <b>status</b>

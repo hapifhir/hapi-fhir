@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -173,7 +173,12 @@ public class Linkage extends DomainResource {
         @Description(shortDefinition="Resource being linked", formalDefinition="The resource instance being linked as part of the group." )
         protected Reference resource;
 
-        private static final long serialVersionUID = 527428511L;
+        /**
+         * The actual object that is the target of the reference (The resource instance being linked as part of the group.)
+         */
+        protected Resource resourceTarget;
+
+        private static final long serialVersionUID = -209332008L;
 
     /**
      * Constructor
@@ -260,17 +265,32 @@ public class Linkage extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource instance being linked as part of the group.)
+         */
+        public Resource getResourceTarget() { 
+          return this.resourceTarget;
+        }
+
+        /**
+         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource instance being linked as part of the group.)
+         */
+        public LinkageItemComponent setResourceTarget(Resource value) { 
+          this.resourceTarget = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "code", "Distinguishes which item is \"source of truth\" (if any) and which items are no longer considered to be current representations.", 0, 1, type));
-          children.add(new Property("resource", "Reference", "The resource instance being linked as part of the group.", 0, 1, resource));
+          children.add(new Property("resource", "Reference(Any)", "The resource instance being linked as part of the group.", 0, 1, resource));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "Distinguishes which item is \"source of truth\" (if any) and which items are no longer considered to be current representations.", 0, 1, type);
-          case -341064690: /*resource*/  return new Property("resource", "Reference", "The resource instance being linked as part of the group.", 0, 1, resource);
+          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "The resource instance being linked as part of the group.", 0, 1, resource);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -355,22 +375,22 @@ public class Linkage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof LinkageItemComponent))
+        if (!(other_ instanceof LinkageItemComponent))
           return false;
-        LinkageItemComponent o = (LinkageItemComponent) other;
+        LinkageItemComponent o = (LinkageItemComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof LinkageItemComponent))
+        if (!(other_ instanceof LinkageItemComponent))
           return false;
-        LinkageItemComponent o = (LinkageItemComponent) other;
+        LinkageItemComponent o = (LinkageItemComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -677,23 +697,23 @@ public class Linkage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Linkage))
+        if (!(other_ instanceof Linkage))
           return false;
-        Linkage o = (Linkage) other;
+        Linkage o = (Linkage) other_;
         return compareDeep(active, o.active, true) && compareDeep(author, o.author, true) && compareDeep(item, o.item, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Linkage))
+        if (!(other_ instanceof Linkage))
           return false;
-        Linkage o = (Linkage) other;
+        Linkage o = (Linkage) other_;
         return compareValues(active, o.active, true);
       }
 

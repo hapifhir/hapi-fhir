@@ -86,5 +86,5 @@ public interface ValueSetExpander {
 
   }
 
-  public ValueSetExpansionOutcome expand(ValueSet source) throws ETooCostly, Exception;
+  public ValueSetExpansionOutcome expand(ValueSet source) throws Exception;
 }

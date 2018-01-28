@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,6 +65,10 @@ public enum MedicationStatementStatus {
          */
         UNKNOWN, 
         /**
+         * The medication was not consumed by the patient
+         */
+        NOTTAKEN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -85,6 +89,8 @@ public enum MedicationStatementStatus {
           return ONHOLD;
         if ("unknown".equals(codeString))
           return UNKNOWN;
+        if ("not-taken".equals(codeString))
+          return NOTTAKEN;
         throw new FHIRException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -96,6 +102,7 @@ public enum MedicationStatementStatus {
             case STOPPED: return "stopped";
             case ONHOLD: return "on-hold";
             case UNKNOWN: return "unknown";
+            case NOTTAKEN: return "not-taken";
             default: return "?";
           }
         }
@@ -111,6 +118,7 @@ public enum MedicationStatementStatus {
             case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred.";
             case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case UNKNOWN: return "The state of the medication use is not currently known.";
+            case NOTTAKEN: return "The medication was not consumed by the patient";
             default: return "?";
           }
         }
@@ -123,6 +131,7 @@ public enum MedicationStatementStatus {
             case STOPPED: return "Stopped";
             case ONHOLD: return "On Hold";
             case UNKNOWN: return "Unknown";
+            case NOTTAKEN: return "Not Taken";
             default: return "?";
           }
     }

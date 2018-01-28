@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionRequiredBehavior {
 
         /**
-         * An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action
+         * An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action
          */
         MUST, 
         /**
@@ -76,7 +76,7 @@ public enum ActionRequiredBehavior {
         }
         public String getDefinition() {
           switch (this) {
-            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action";
+            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action";
             case COULD: return "An action with this behavior may be included in the set of actions processed by the end user";
             case MUSTUNLESSDOCUMENTED: return "An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included";
             default: return "?";

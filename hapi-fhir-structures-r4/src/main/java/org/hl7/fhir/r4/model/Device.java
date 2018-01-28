@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -936,12 +936,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceUdiComponent))
+        if (!(other_ instanceof DeviceUdiComponent))
           return false;
-        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        DeviceUdiComponent o = (DeviceUdiComponent) other_;
         return compareDeep(deviceIdentifier, o.deviceIdentifier, true) && compareDeep(name, o.name, true)
            && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(carrierHRF, o.carrierHRF, true)
            && compareDeep(carrierAIDC, o.carrierAIDC, true) && compareDeep(issuer, o.issuer, true) && compareDeep(entryType, o.entryType, true)
@@ -949,12 +949,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceUdiComponent))
+        if (!(other_ instanceof DeviceUdiComponent))
           return false;
-        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        DeviceUdiComponent o = (DeviceUdiComponent) other_;
         return compareValues(deviceIdentifier, o.deviceIdentifier, true) && compareValues(name, o.name, true)
            && compareValues(jurisdiction, o.jurisdiction, true) && compareValues(carrierHRF, o.carrierHRF, true)
            && compareValues(carrierAIDC, o.carrierAIDC, true) && compareValues(issuer, o.issuer, true) && compareValues(entryType, o.entryType, true)
@@ -2237,12 +2237,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Device))
+        if (!(other_ instanceof Device))
           return false;
-        Device o = (Device) other;
+        Device o = (Device) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(udi, o.udi, true) && compareDeep(status, o.status, true)
            && compareDeep(type, o.type, true) && compareDeep(lotNumber, o.lotNumber, true) && compareDeep(manufacturer, o.manufacturer, true)
            && compareDeep(manufactureDate, o.manufactureDate, true) && compareDeep(expirationDate, o.expirationDate, true)
@@ -2253,12 +2253,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Device))
+        if (!(other_ instanceof Device))
           return false;
-        Device o = (Device) other;
+        Device o = (Device) other_;
         return compareValues(status, o.status, true) && compareValues(lotNumber, o.lotNumber, true) && compareValues(manufacturer, o.manufacturer, true)
            && compareValues(manufactureDate, o.manufactureDate, true) && compareValues(expirationDate, o.expirationDate, true)
            && compareValues(model, o.model, true) && compareValues(version, o.version, true) && compareValues(url, o.url, true)

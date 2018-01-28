@@ -1,19 +1,40 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,28 +42,8 @@ import java.lang.reflect.Method;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.TagListParam;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
-import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlUtil;
 
 public class ParameterUtil {
-
-	private static final String LABEL = "label=\"";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParameterUtil.class);
-	private static final String SCHEME = "scheme=\"";
 
 	@SuppressWarnings("unchecked")
 	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
@@ -149,6 +150,13 @@ public class ParameterUtil {
 		return escape(theValue.toString());
 	}
 
+	/**
+	 * Applies {@link #escapeWithDefault(Object)} followed by {@link UrlUtil#escapeUrlParam(String)}
+	 */
+	public static String escapeAndUrlEncode(String theInput) {
+		return UrlUtil.escapeUrlParam(escapeWithDefault(theInput));
+	}
+
 	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
 		Integer index = findParamAnnotationIndex(theMethod, IdParam.class);
 		if (index != null) {
@@ -172,8 +180,7 @@ public class ParameterUtil {
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
 		int paramIndex = 0;
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
-				Annotation nextAnnotation = annotations[annotationIndex];
+			for (Annotation nextAnnotation : annotations) {
 				Class<? extends Annotation> class1 = nextAnnotation.annotationType();
 				if (toFind.isAssignableFrom(class1)) {
 					return paramIndex;
@@ -182,10 +189,6 @@ public class ParameterUtil {
 			paramIndex++;
 		}
 		return null;
-	}
-
-	public static Integer findTagListParameterIndex(Method theMethod) {
-		return findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
@@ -264,12 +267,8 @@ public class ParameterUtil {
 		};
 	}
 
-	static List<String> splitParameterString(String theInput, boolean theUnescapeComponents) {
-		return splitParameterString(theInput, ',', theUnescapeComponents);
-	}
-
 	static List<String> splitParameterString(String theInput, char theDelimiter, boolean theUnescapeComponents) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		if (theInput != null) {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < theInput.length(); i++) {
@@ -328,7 +327,7 @@ public class ParameterUtil {
 	 */
 	public static String unescape(String theValue) {
 		if (theValue == null) {
-			return theValue;
+			return null;
 		}
 		if (theValue.indexOf('\\') == -1) {
 			return theValue;

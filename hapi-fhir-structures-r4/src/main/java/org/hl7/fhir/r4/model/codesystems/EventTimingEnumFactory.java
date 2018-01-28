@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,10 +41,24 @@ public class EventTimingEnumFactory implements EnumFactory<EventTiming> {
       return null;
     if ("MORN".equals(codeString))
       return EventTiming.MORN;
+    if ("MORN.early".equals(codeString))
+      return EventTiming.MORN_EARLY;
+    if ("MORN.late".equals(codeString))
+      return EventTiming.MORN_LATE;
+    if ("NOON".equals(codeString))
+      return EventTiming.NOON;
     if ("AFT".equals(codeString))
       return EventTiming.AFT;
+    if ("AFT.early".equals(codeString))
+      return EventTiming.AFT_EARLY;
+    if ("AFT.late".equals(codeString))
+      return EventTiming.AFT_LATE;
     if ("EVE".equals(codeString))
       return EventTiming.EVE;
+    if ("EVE.early".equals(codeString))
+      return EventTiming.EVE_EARLY;
+    if ("EVE.late".equals(codeString))
+      return EventTiming.EVE_LATE;
     if ("NIGHT".equals(codeString))
       return EventTiming.NIGHT;
     if ("PHS".equals(codeString))
@@ -55,10 +69,24 @@ public class EventTimingEnumFactory implements EnumFactory<EventTiming> {
   public String toCode(EventTiming code) {
     if (code == EventTiming.MORN)
       return "MORN";
+    if (code == EventTiming.MORN_EARLY)
+      return "MORN.early";
+    if (code == EventTiming.MORN_LATE)
+      return "MORN.late";
+    if (code == EventTiming.NOON)
+      return "NOON";
     if (code == EventTiming.AFT)
       return "AFT";
+    if (code == EventTiming.AFT_EARLY)
+      return "AFT.early";
+    if (code == EventTiming.AFT_LATE)
+      return "AFT.late";
     if (code == EventTiming.EVE)
       return "EVE";
+    if (code == EventTiming.EVE_EARLY)
+      return "EVE.early";
+    if (code == EventTiming.EVE_LATE)
+      return "EVE.late";
     if (code == EventTiming.NIGHT)
       return "NIGHT";
     if (code == EventTiming.PHS)

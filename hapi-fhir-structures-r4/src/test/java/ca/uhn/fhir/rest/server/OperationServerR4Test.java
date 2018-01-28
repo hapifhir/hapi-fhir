@@ -1,21 +1,21 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -26,18 +26,19 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestOperationComponent;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class OperationServerR4Test {
 	private static CloseableHttpClient ourClient;
@@ -77,8 +78,8 @@ public class OperationServerR4Test {
 
 		CapabilityStatement p = myFhirClient.fetchConformance().ofType(CapabilityStatement.class).prettyPrint().execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
-		
-		List<CapabilityStatementRestOperationComponent> ops = p.getRest().get(0).getOperation();
+
+		List<CapabilityStatement.CapabilityStatementRestResourceOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 
 		List<String> opNames = toOpNames(ops);
@@ -126,9 +127,9 @@ public class OperationServerR4Test {
 		
 	}
 
-	private List<String> toOpNames(List<CapabilityStatementRestOperationComponent> theOps) {
+	private List<String> toOpNames(List<CapabilityStatement.CapabilityStatementRestResourceOperationComponent> theOps) {
 		ArrayList<String> retVal = new ArrayList<String>();
-		for (CapabilityStatementRestOperationComponent next : theOps) {
+		for (CapabilityStatement.CapabilityStatementRestResourceOperationComponent next : theOps) {
 			retVal.add(next.getName());
 		}
 		return retVal;

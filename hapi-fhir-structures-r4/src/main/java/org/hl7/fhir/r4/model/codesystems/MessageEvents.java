@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum MessageEvents {
          */
         MEDICATIONADMINISTRATIONUPDATE, 
         /**
-         * Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.
+         * Notification.
          */
         ADMINNOTIFY, 
         /**
@@ -143,7 +143,7 @@ public enum MessageEvents {
             case MEDICATIONADMINISTRATIONNULLIFICATION: return "Someone wishes to record that the record of administration of a medication is in error and should be ignored.";
             case MEDICATIONADMINISTRATIONRECORDING: return "Indicates that a medication has been recorded against the patient's record.";
             case MEDICATIONADMINISTRATIONUPDATE: return "Update a Medication Administration record.";
-            case ADMINNOTIFY: return "Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.";
+            case ADMINNOTIFY: return "Notification.";
             case CODESYSTEMEXPAND: return "The definition of a code system is used to create a simple collection of codes suitable for use for data entry or validation. An expanded code system will be returned, or an error message.";
             case COMMUNICATIONREQUEST: return "Notification to convey information.";
             case DIAGNOSTICREPORTPROVIDE: return "Provide a diagnostic report, or update a previously provided diagnostic report.";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
+ * A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.
  */
 @ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/Profile/ImmunizationRecommendation")
 public class ImmunizationRecommendation extends DomainResource {
@@ -51,42 +51,44 @@ public class ImmunizationRecommendation extends DomainResource {
     @Block()
     public static class ImmunizationRecommendationRecommendationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The date the immunization recommendation was created.
+         * Vaccine(s) or vaccine group that pertain to the recommendation.
          */
-        @Child(name = "date", type = {DateTimeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Date recommendation created", formalDefinition="The date the immunization recommendation was created." )
-        protected DateTimeType date;
-
-        /**
-         * Vaccine that pertains to the recommendation.
-         */
-        @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Vaccine recommendation applies to", formalDefinition="Vaccine that pertains to the recommendation." )
+        @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Vaccine  or vaccine group recommendation applies to", formalDefinition="Vaccine(s) or vaccine group that pertain to the recommendation." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccine-code")
-        protected CodeableConcept vaccineCode;
+        protected List<CodeableConcept> vaccineCode;
 
         /**
          * The targeted disease for the recommendation.
          */
-        @Child(name = "targetDisease", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "targetDisease", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Disease to be immunized against", formalDefinition="The targeted disease for the recommendation." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-recommendation-target-disease")
         protected CodeableConcept targetDisease;
 
         /**
-         * The next recommended dose number (e.g. dose 2 is the next recommended dose).
+         * Vaccine(s) which should not be used to fulfill the recommendation.
          */
-        @Child(name = "doseNumber", type = {PositiveIntType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Recommended dose number", formalDefinition="The next recommended dose number (e.g. dose 2 is the next recommended dose)." )
-        protected PositiveIntType doseNumber;
+        @Child(name = "contraindicatedVaccineCode", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Vaccine which is contraindicated to fulfill the recommendation", formalDefinition="Vaccine(s) which should not be used to fulfill the recommendation." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccine-code")
+        protected List<CodeableConcept> contraindicatedVaccineCode;
 
         /**
-         * Vaccine administration status.
+         * Indicates the patient status with respect to the path to immunity for the target disease.
          */
-        @Child(name = "forecastStatus", type = {CodeableConcept.class}, order=5, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Vaccine administration status", formalDefinition="Vaccine administration status." )
+        @Child(name = "forecastStatus", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Vaccine recommendation status", formalDefinition="Indicates the patient status with respect to the path to immunity for the target disease." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-recommendation-status")
         protected CodeableConcept forecastStatus;
+
+        /**
+         * The reason for the assigned forecast status.
+         */
+        @Child(name = "forecastReason", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Vaccine administration status reason", formalDefinition="The reason for the assigned forecast status." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-recommendation-reason")
+        protected List<CodeableConcept> forecastReason;
 
         /**
          * Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.
@@ -96,28 +98,49 @@ public class ImmunizationRecommendation extends DomainResource {
         protected List<ImmunizationRecommendationRecommendationDateCriterionComponent> dateCriterion;
 
         /**
-         * Contains information about the protocol under which the vaccine was administered.
+         * Contains the description about the protocol under which the vaccine was administered.
          */
-        @Child(name = "protocol", type = {}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Protocol used by recommendation", formalDefinition="Contains information about the protocol under which the vaccine was administered." )
-        protected ImmunizationRecommendationRecommendationProtocolComponent protocol;
+        @Child(name = "description", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Protocol details", formalDefinition="Contains the description about the protocol under which the vaccine was administered." )
+        protected StringType description;
 
         /**
-         * Immunization event history that supports the status and recommendation.
+         * One possible path to achieve presumed immunity against a disease - within the context of an authority.
          */
-        @Child(name = "supportingImmunization", type = {Immunization.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Past immunizations supporting recommendation", formalDefinition="Immunization event history that supports the status and recommendation." )
+        @Child(name = "series", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Name of vaccination series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
+        protected StringType series;
+
+        /**
+         * Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).
+         */
+        @Child(name = "doseNumber", type = {PositiveIntType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Recommended dose number within series", formalDefinition="Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose)." )
+        protected PositiveIntType doseNumber;
+
+        /**
+         * The recommended number of doses to achieve immunity.
+         */
+        @Child(name = "seriesDoses", type = {PositiveIntType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Recommended number of doses for immunity", formalDefinition="The recommended number of doses to achieve immunity." )
+        protected PositiveIntType seriesDoses;
+
+        /**
+         * Immunization event history and/or evaluation that supports the status and recommendation.
+         */
+        @Child(name = "supportingImmunization", type = {Immunization.class, ImmunizationEvaluation.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Past immunizations supporting recommendation", formalDefinition="Immunization event history and/or evaluation that supports the status and recommendation." )
         protected List<Reference> supportingImmunization;
         /**
-         * The actual objects that are the target of the reference (Immunization event history that supports the status and recommendation.)
+         * The actual objects that are the target of the reference (Immunization event history and/or evaluation that supports the status and recommendation.)
          */
-        protected List<Immunization> supportingImmunizationTarget;
+        protected List<Resource> supportingImmunizationTarget;
 
 
         /**
          * Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.
          */
-        @Child(name = "supportingPatientInformation", type = {Observation.class, AllergyIntolerance.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "supportingPatientInformation", type = {Reference.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Patient observations supporting recommendation", formalDefinition="Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information." )
         protected List<Reference> supportingPatientInformation;
         /**
@@ -126,7 +149,7 @@ public class ImmunizationRecommendation extends DomainResource {
         protected List<Resource> supportingPatientInformationTarget;
 
 
-        private static final long serialVersionUID = 1279700888L;
+        private static final long serialVersionUID = -192017649L;
 
     /**
      * Constructor
@@ -138,79 +161,62 @@ public class ImmunizationRecommendation extends DomainResource {
     /**
      * Constructor
      */
-      public ImmunizationRecommendationRecommendationComponent(DateTimeType date, CodeableConcept forecastStatus) {
+      public ImmunizationRecommendationRecommendationComponent(CodeableConcept forecastStatus) {
         super();
-        this.date = date;
         this.forecastStatus = forecastStatus;
       }
 
         /**
-         * @return {@link #date} (The date the immunization recommendation was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @return {@link #vaccineCode} (Vaccine(s) or vaccine group that pertain to the recommendation.)
          */
-        public DateTimeType getDateElement() { 
-          if (this.date == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.date");
-            else if (Configuration.doAutoCreate())
-              this.date = new DateTimeType(); // bb
-          return this.date;
-        }
-
-        public boolean hasDateElement() { 
-          return this.date != null && !this.date.isEmpty();
-        }
-
-        public boolean hasDate() { 
-          return this.date != null && !this.date.isEmpty();
-        }
-
-        /**
-         * @param value {@link #date} (The date the immunization recommendation was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-         */
-        public ImmunizationRecommendationRecommendationComponent setDateElement(DateTimeType value) { 
-          this.date = value;
-          return this;
-        }
-
-        /**
-         * @return The date the immunization recommendation was created.
-         */
-        public Date getDate() { 
-          return this.date == null ? null : this.date.getValue();
-        }
-
-        /**
-         * @param value The date the immunization recommendation was created.
-         */
-        public ImmunizationRecommendationRecommendationComponent setDate(Date value) { 
-            if (this.date == null)
-              this.date = new DateTimeType();
-            this.date.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #vaccineCode} (Vaccine that pertains to the recommendation.)
-         */
-        public CodeableConcept getVaccineCode() { 
+        public List<CodeableConcept> getVaccineCode() { 
           if (this.vaccineCode == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.vaccineCode");
-            else if (Configuration.doAutoCreate())
-              this.vaccineCode = new CodeableConcept(); // cc
+            this.vaccineCode = new ArrayList<CodeableConcept>();
           return this.vaccineCode;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImmunizationRecommendationRecommendationComponent setVaccineCode(List<CodeableConcept> theVaccineCode) { 
+          this.vaccineCode = theVaccineCode;
+          return this;
+        }
+
         public boolean hasVaccineCode() { 
-          return this.vaccineCode != null && !this.vaccineCode.isEmpty();
+          if (this.vaccineCode == null)
+            return false;
+          for (CodeableConcept item : this.vaccineCode)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addVaccineCode() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.vaccineCode == null)
+            this.vaccineCode = new ArrayList<CodeableConcept>();
+          this.vaccineCode.add(t);
+          return t;
+        }
+
+        public ImmunizationRecommendationRecommendationComponent addVaccineCode(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.vaccineCode == null)
+            this.vaccineCode = new ArrayList<CodeableConcept>();
+          this.vaccineCode.add(t);
+          return this;
         }
 
         /**
-         * @param value {@link #vaccineCode} (Vaccine that pertains to the recommendation.)
+         * @return The first repetition of repeating field {@link #vaccineCode}, creating it if it does not already exist
          */
-        public ImmunizationRecommendationRecommendationComponent setVaccineCode(CodeableConcept value) { 
-          this.vaccineCode = value;
-          return this;
+        public CodeableConcept getVaccineCodeFirstRep() { 
+          if (getVaccineCode().isEmpty()) {
+            addVaccineCode();
+          }
+          return getVaccineCode().get(0);
         }
 
         /**
@@ -238,52 +244,60 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #doseNumber} (The next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         * @return {@link #contraindicatedVaccineCode} (Vaccine(s) which should not be used to fulfill the recommendation.)
          */
-        public PositiveIntType getDoseNumberElement() { 
-          if (this.doseNumber == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.doseNumber");
-            else if (Configuration.doAutoCreate())
-              this.doseNumber = new PositiveIntType(); // bb
-          return this.doseNumber;
-        }
-
-        public boolean hasDoseNumberElement() { 
-          return this.doseNumber != null && !this.doseNumber.isEmpty();
-        }
-
-        public boolean hasDoseNumber() { 
-          return this.doseNumber != null && !this.doseNumber.isEmpty();
+        public List<CodeableConcept> getContraindicatedVaccineCode() { 
+          if (this.contraindicatedVaccineCode == null)
+            this.contraindicatedVaccineCode = new ArrayList<CodeableConcept>();
+          return this.contraindicatedVaccineCode;
         }
 
         /**
-         * @param value {@link #doseNumber} (The next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ImmunizationRecommendationRecommendationComponent setDoseNumberElement(PositiveIntType value) { 
-          this.doseNumber = value;
+        public ImmunizationRecommendationRecommendationComponent setContraindicatedVaccineCode(List<CodeableConcept> theContraindicatedVaccineCode) { 
+          this.contraindicatedVaccineCode = theContraindicatedVaccineCode;
+          return this;
+        }
+
+        public boolean hasContraindicatedVaccineCode() { 
+          if (this.contraindicatedVaccineCode == null)
+            return false;
+          for (CodeableConcept item : this.contraindicatedVaccineCode)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addContraindicatedVaccineCode() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.contraindicatedVaccineCode == null)
+            this.contraindicatedVaccineCode = new ArrayList<CodeableConcept>();
+          this.contraindicatedVaccineCode.add(t);
+          return t;
+        }
+
+        public ImmunizationRecommendationRecommendationComponent addContraindicatedVaccineCode(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.contraindicatedVaccineCode == null)
+            this.contraindicatedVaccineCode = new ArrayList<CodeableConcept>();
+          this.contraindicatedVaccineCode.add(t);
           return this;
         }
 
         /**
-         * @return The next recommended dose number (e.g. dose 2 is the next recommended dose).
+         * @return The first repetition of repeating field {@link #contraindicatedVaccineCode}, creating it if it does not already exist
          */
-        public int getDoseNumber() { 
-          return this.doseNumber == null || this.doseNumber.isEmpty() ? 0 : this.doseNumber.getValue();
+        public CodeableConcept getContraindicatedVaccineCodeFirstRep() { 
+          if (getContraindicatedVaccineCode().isEmpty()) {
+            addContraindicatedVaccineCode();
+          }
+          return getContraindicatedVaccineCode().get(0);
         }
 
         /**
-         * @param value The next recommended dose number (e.g. dose 2 is the next recommended dose).
-         */
-        public ImmunizationRecommendationRecommendationComponent setDoseNumber(int value) { 
-            if (this.doseNumber == null)
-              this.doseNumber = new PositiveIntType();
-            this.doseNumber.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #forecastStatus} (Vaccine administration status.)
+         * @return {@link #forecastStatus} (Indicates the patient status with respect to the path to immunity for the target disease.)
          */
         public CodeableConcept getForecastStatus() { 
           if (this.forecastStatus == null)
@@ -299,11 +313,64 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #forecastStatus} (Vaccine administration status.)
+         * @param value {@link #forecastStatus} (Indicates the patient status with respect to the path to immunity for the target disease.)
          */
         public ImmunizationRecommendationRecommendationComponent setForecastStatus(CodeableConcept value) { 
           this.forecastStatus = value;
           return this;
+        }
+
+        /**
+         * @return {@link #forecastReason} (The reason for the assigned forecast status.)
+         */
+        public List<CodeableConcept> getForecastReason() { 
+          if (this.forecastReason == null)
+            this.forecastReason = new ArrayList<CodeableConcept>();
+          return this.forecastReason;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImmunizationRecommendationRecommendationComponent setForecastReason(List<CodeableConcept> theForecastReason) { 
+          this.forecastReason = theForecastReason;
+          return this;
+        }
+
+        public boolean hasForecastReason() { 
+          if (this.forecastReason == null)
+            return false;
+          for (CodeableConcept item : this.forecastReason)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addForecastReason() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.forecastReason == null)
+            this.forecastReason = new ArrayList<CodeableConcept>();
+          this.forecastReason.add(t);
+          return t;
+        }
+
+        public ImmunizationRecommendationRecommendationComponent addForecastReason(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.forecastReason == null)
+            this.forecastReason = new ArrayList<CodeableConcept>();
+          this.forecastReason.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #forecastReason}, creating it if it does not already exist
+         */
+        public CodeableConcept getForecastReasonFirstRep() { 
+          if (getForecastReason().isEmpty()) {
+            addForecastReason();
+          }
+          return getForecastReason().get(0);
         }
 
         /**
@@ -360,31 +427,195 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #protocol} (Contains information about the protocol under which the vaccine was administered.)
+         * @return {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public ImmunizationRecommendationRecommendationProtocolComponent getProtocol() { 
-          if (this.protocol == null)
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.protocol");
+              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.description");
             else if (Configuration.doAutoCreate())
-              this.protocol = new ImmunizationRecommendationRecommendationProtocolComponent(); // cc
-          return this.protocol;
+              this.description = new StringType(); // bb
+          return this.description;
         }
 
-        public boolean hasProtocol() { 
-          return this.protocol != null && !this.protocol.isEmpty();
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
         }
 
         /**
-         * @param value {@link #protocol} (Contains information about the protocol under which the vaccine was administered.)
+         * @param value {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public ImmunizationRecommendationRecommendationComponent setProtocol(ImmunizationRecommendationRecommendationProtocolComponent value) { 
-          this.protocol = value;
+        public ImmunizationRecommendationRecommendationComponent setDescriptionElement(StringType value) { 
+          this.description = value;
           return this;
         }
 
         /**
-         * @return {@link #supportingImmunization} (Immunization event history that supports the status and recommendation.)
+         * @return Contains the description about the protocol under which the vaccine was administered.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value Contains the description about the protocol under which the vaccine was administered.
+         */
+        public ImmunizationRecommendationRecommendationComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
+         */
+        public StringType getSeriesElement() { 
+          if (this.series == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.series");
+            else if (Configuration.doAutoCreate())
+              this.series = new StringType(); // bb
+          return this.series;
+        }
+
+        public boolean hasSeriesElement() { 
+          return this.series != null && !this.series.isEmpty();
+        }
+
+        public boolean hasSeries() { 
+          return this.series != null && !this.series.isEmpty();
+        }
+
+        /**
+         * @param value {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
+         */
+        public ImmunizationRecommendationRecommendationComponent setSeriesElement(StringType value) { 
+          this.series = value;
+          return this;
+        }
+
+        /**
+         * @return One possible path to achieve presumed immunity against a disease - within the context of an authority.
+         */
+        public String getSeries() { 
+          return this.series == null ? null : this.series.getValue();
+        }
+
+        /**
+         * @param value One possible path to achieve presumed immunity against a disease - within the context of an authority.
+         */
+        public ImmunizationRecommendationRecommendationComponent setSeries(String value) { 
+          if (Utilities.noString(value))
+            this.series = null;
+          else {
+            if (this.series == null)
+              this.series = new StringType();
+            this.series.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #doseNumber} (Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         */
+        public PositiveIntType getDoseNumberElement() { 
+          if (this.doseNumber == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.doseNumber");
+            else if (Configuration.doAutoCreate())
+              this.doseNumber = new PositiveIntType(); // bb
+          return this.doseNumber;
+        }
+
+        public boolean hasDoseNumberElement() { 
+          return this.doseNumber != null && !this.doseNumber.isEmpty();
+        }
+
+        public boolean hasDoseNumber() { 
+          return this.doseNumber != null && !this.doseNumber.isEmpty();
+        }
+
+        /**
+         * @param value {@link #doseNumber} (Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         */
+        public ImmunizationRecommendationRecommendationComponent setDoseNumberElement(PositiveIntType value) { 
+          this.doseNumber = value;
+          return this;
+        }
+
+        /**
+         * @return Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).
+         */
+        public int getDoseNumber() { 
+          return this.doseNumber == null || this.doseNumber.isEmpty() ? 0 : this.doseNumber.getValue();
+        }
+
+        /**
+         * @param value Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).
+         */
+        public ImmunizationRecommendationRecommendationComponent setDoseNumber(int value) { 
+            if (this.doseNumber == null)
+              this.doseNumber = new PositiveIntType();
+            this.doseNumber.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #seriesDoses} (The recommended number of doses to achieve immunity.). This is the underlying object with id, value and extensions. The accessor "getSeriesDoses" gives direct access to the value
+         */
+        public PositiveIntType getSeriesDosesElement() { 
+          if (this.seriesDoses == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.seriesDoses");
+            else if (Configuration.doAutoCreate())
+              this.seriesDoses = new PositiveIntType(); // bb
+          return this.seriesDoses;
+        }
+
+        public boolean hasSeriesDosesElement() { 
+          return this.seriesDoses != null && !this.seriesDoses.isEmpty();
+        }
+
+        public boolean hasSeriesDoses() { 
+          return this.seriesDoses != null && !this.seriesDoses.isEmpty();
+        }
+
+        /**
+         * @param value {@link #seriesDoses} (The recommended number of doses to achieve immunity.). This is the underlying object with id, value and extensions. The accessor "getSeriesDoses" gives direct access to the value
+         */
+        public ImmunizationRecommendationRecommendationComponent setSeriesDosesElement(PositiveIntType value) { 
+          this.seriesDoses = value;
+          return this;
+        }
+
+        /**
+         * @return The recommended number of doses to achieve immunity.
+         */
+        public int getSeriesDoses() { 
+          return this.seriesDoses == null || this.seriesDoses.isEmpty() ? 0 : this.seriesDoses.getValue();
+        }
+
+        /**
+         * @param value The recommended number of doses to achieve immunity.
+         */
+        public ImmunizationRecommendationRecommendationComponent setSeriesDoses(int value) { 
+            if (this.seriesDoses == null)
+              this.seriesDoses = new PositiveIntType();
+            this.seriesDoses.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #supportingImmunization} (Immunization event history and/or evaluation that supports the status and recommendation.)
          */
         public List<Reference> getSupportingImmunization() { 
           if (this.supportingImmunization == null)
@@ -440,22 +671,10 @@ public class ImmunizationRecommendation extends DomainResource {
          * @deprecated Use Reference#setResource(IBaseResource) instead
          */
         @Deprecated
-        public List<Immunization> getSupportingImmunizationTarget() { 
+        public List<Resource> getSupportingImmunizationTarget() { 
           if (this.supportingImmunizationTarget == null)
-            this.supportingImmunizationTarget = new ArrayList<Immunization>();
+            this.supportingImmunizationTarget = new ArrayList<Resource>();
           return this.supportingImmunizationTarget;
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public Immunization addSupportingImmunizationTarget() { 
-          Immunization r = new Immunization();
-          if (this.supportingImmunizationTarget == null)
-            this.supportingImmunizationTarget = new ArrayList<Immunization>();
-          this.supportingImmunizationTarget.add(r);
-          return r;
         }
 
         /**
@@ -523,29 +742,35 @@ public class ImmunizationRecommendation extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("date", "dateTime", "The date the immunization recommendation was created.", 0, 1, date));
-          children.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, 1, vaccineCode));
+          children.add(new Property("vaccineCode", "CodeableConcept", "Vaccine(s) or vaccine group that pertain to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineCode));
           children.add(new Property("targetDisease", "CodeableConcept", "The targeted disease for the recommendation.", 0, 1, targetDisease));
-          children.add(new Property("doseNumber", "positiveInt", "The next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, 1, doseNumber));
-          children.add(new Property("forecastStatus", "CodeableConcept", "Vaccine administration status.", 0, 1, forecastStatus));
+          children.add(new Property("contraindicatedVaccineCode", "CodeableConcept", "Vaccine(s) which should not be used to fulfill the recommendation.", 0, java.lang.Integer.MAX_VALUE, contraindicatedVaccineCode));
+          children.add(new Property("forecastStatus", "CodeableConcept", "Indicates the patient status with respect to the path to immunity for the target disease.", 0, 1, forecastStatus));
+          children.add(new Property("forecastReason", "CodeableConcept", "The reason for the assigned forecast status.", 0, java.lang.Integer.MAX_VALUE, forecastReason));
           children.add(new Property("dateCriterion", "", "Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion));
-          children.add(new Property("protocol", "", "Contains information about the protocol under which the vaccine was administered.", 0, 1, protocol));
-          children.add(new Property("supportingImmunization", "Reference(Immunization)", "Immunization event history that supports the status and recommendation.", 0, java.lang.Integer.MAX_VALUE, supportingImmunization));
-          children.add(new Property("supportingPatientInformation", "Reference(Observation|AllergyIntolerance)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation));
+          children.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description));
+          children.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series));
+          children.add(new Property("doseNumber", "positiveInt", "Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).", 0, 1, doseNumber));
+          children.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses));
+          children.add(new Property("supportingImmunization", "Reference(Immunization|ImmunizationEvaluation)", "Immunization event history and/or evaluation that supports the status and recommendation.", 0, java.lang.Integer.MAX_VALUE, supportingImmunization));
+          children.add(new Property("supportingPatientInformation", "Reference(Any)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3076014: /*date*/  return new Property("date", "dateTime", "The date the immunization recommendation was created.", 0, 1, date);
-          case 664556354: /*vaccineCode*/  return new Property("vaccineCode", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, 1, vaccineCode);
+          case 664556354: /*vaccineCode*/  return new Property("vaccineCode", "CodeableConcept", "Vaccine(s) or vaccine group that pertain to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineCode);
           case -319593813: /*targetDisease*/  return new Property("targetDisease", "CodeableConcept", "The targeted disease for the recommendation.", 0, 1, targetDisease);
-          case -887709242: /*doseNumber*/  return new Property("doseNumber", "positiveInt", "The next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, 1, doseNumber);
-          case 1904598477: /*forecastStatus*/  return new Property("forecastStatus", "CodeableConcept", "Vaccine administration status.", 0, 1, forecastStatus);
+          case 571105240: /*contraindicatedVaccineCode*/  return new Property("contraindicatedVaccineCode", "CodeableConcept", "Vaccine(s) which should not be used to fulfill the recommendation.", 0, java.lang.Integer.MAX_VALUE, contraindicatedVaccineCode);
+          case 1904598477: /*forecastStatus*/  return new Property("forecastStatus", "CodeableConcept", "Indicates the patient status with respect to the path to immunity for the target disease.", 0, 1, forecastStatus);
+          case 1862115359: /*forecastReason*/  return new Property("forecastReason", "CodeableConcept", "The reason for the assigned forecast status.", 0, java.lang.Integer.MAX_VALUE, forecastReason);
           case 2087518867: /*dateCriterion*/  return new Property("dateCriterion", "", "Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion);
-          case -989163880: /*protocol*/  return new Property("protocol", "", "Contains information about the protocol under which the vaccine was administered.", 0, 1, protocol);
-          case 1171592021: /*supportingImmunization*/  return new Property("supportingImmunization", "Reference(Immunization)", "Immunization event history that supports the status and recommendation.", 0, java.lang.Integer.MAX_VALUE, supportingImmunization);
-          case -1234160646: /*supportingPatientInformation*/  return new Property("supportingPatientInformation", "Reference(Observation|AllergyIntolerance)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation);
+          case -1724546052: /*description*/  return new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description);
+          case -905838985: /*series*/  return new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series);
+          case -887709242: /*doseNumber*/  return new Property("doseNumber", "positiveInt", "Nominal position of the recommended dose in a series (e.g. dose 2 is the next recommended dose).", 0, 1, doseNumber);
+          case -1936727105: /*seriesDoses*/  return new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses);
+          case 1171592021: /*supportingImmunization*/  return new Property("supportingImmunization", "Reference(Immunization|ImmunizationEvaluation)", "Immunization event history and/or evaluation that supports the status and recommendation.", 0, java.lang.Integer.MAX_VALUE, supportingImmunization);
+          case -1234160646: /*supportingPatientInformation*/  return new Property("supportingPatientInformation", "Reference(Any)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -554,13 +779,16 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case 664556354: /*vaccineCode*/ return this.vaccineCode == null ? new Base[0] : new Base[] {this.vaccineCode}; // CodeableConcept
+        case 664556354: /*vaccineCode*/ return this.vaccineCode == null ? new Base[0] : this.vaccineCode.toArray(new Base[this.vaccineCode.size()]); // CodeableConcept
         case -319593813: /*targetDisease*/ return this.targetDisease == null ? new Base[0] : new Base[] {this.targetDisease}; // CodeableConcept
-        case -887709242: /*doseNumber*/ return this.doseNumber == null ? new Base[0] : new Base[] {this.doseNumber}; // PositiveIntType
+        case 571105240: /*contraindicatedVaccineCode*/ return this.contraindicatedVaccineCode == null ? new Base[0] : this.contraindicatedVaccineCode.toArray(new Base[this.contraindicatedVaccineCode.size()]); // CodeableConcept
         case 1904598477: /*forecastStatus*/ return this.forecastStatus == null ? new Base[0] : new Base[] {this.forecastStatus}; // CodeableConcept
+        case 1862115359: /*forecastReason*/ return this.forecastReason == null ? new Base[0] : this.forecastReason.toArray(new Base[this.forecastReason.size()]); // CodeableConcept
         case 2087518867: /*dateCriterion*/ return this.dateCriterion == null ? new Base[0] : this.dateCriterion.toArray(new Base[this.dateCriterion.size()]); // ImmunizationRecommendationRecommendationDateCriterionComponent
-        case -989163880: /*protocol*/ return this.protocol == null ? new Base[0] : new Base[] {this.protocol}; // ImmunizationRecommendationRecommendationProtocolComponent
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -905838985: /*series*/ return this.series == null ? new Base[0] : new Base[] {this.series}; // StringType
+        case -887709242: /*doseNumber*/ return this.doseNumber == null ? new Base[0] : new Base[] {this.doseNumber}; // PositiveIntType
+        case -1936727105: /*seriesDoses*/ return this.seriesDoses == null ? new Base[0] : new Base[] {this.seriesDoses}; // PositiveIntType
         case 1171592021: /*supportingImmunization*/ return this.supportingImmunization == null ? new Base[0] : this.supportingImmunization.toArray(new Base[this.supportingImmunization.size()]); // Reference
         case -1234160646: /*supportingPatientInformation*/ return this.supportingPatientInformation == null ? new Base[0] : this.supportingPatientInformation.toArray(new Base[this.supportingPatientInformation.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
@@ -571,26 +799,35 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
-          return value;
         case 664556354: // vaccineCode
-          this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
+          this.getVaccineCode().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -319593813: // targetDisease
           this.targetDisease = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case -887709242: // doseNumber
-          this.doseNumber = castToPositiveInt(value); // PositiveIntType
+        case 571105240: // contraindicatedVaccineCode
+          this.getContraindicatedVaccineCode().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 1904598477: // forecastStatus
           this.forecastStatus = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case 1862115359: // forecastReason
+          this.getForecastReason().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
         case 2087518867: // dateCriterion
           this.getDateCriterion().add((ImmunizationRecommendationRecommendationDateCriterionComponent) value); // ImmunizationRecommendationRecommendationDateCriterionComponent
           return value;
-        case -989163880: // protocol
-          this.protocol = (ImmunizationRecommendationRecommendationProtocolComponent) value; // ImmunizationRecommendationRecommendationProtocolComponent
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          return value;
+        case -905838985: // series
+          this.series = castToString(value); // StringType
+          return value;
+        case -887709242: // doseNumber
+          this.doseNumber = castToPositiveInt(value); // PositiveIntType
+          return value;
+        case -1936727105: // seriesDoses
+          this.seriesDoses = castToPositiveInt(value); // PositiveIntType
           return value;
         case 1171592021: // supportingImmunization
           this.getSupportingImmunization().add(castToReference(value)); // Reference
@@ -605,20 +842,26 @@ public class ImmunizationRecommendation extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("date")) {
-          this.date = castToDateTime(value); // DateTimeType
-        } else if (name.equals("vaccineCode")) {
-          this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("vaccineCode")) {
+          this.getVaccineCode().add(castToCodeableConcept(value));
         } else if (name.equals("targetDisease")) {
           this.targetDisease = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("doseNumber")) {
-          this.doseNumber = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("contraindicatedVaccineCode")) {
+          this.getContraindicatedVaccineCode().add(castToCodeableConcept(value));
         } else if (name.equals("forecastStatus")) {
           this.forecastStatus = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("forecastReason")) {
+          this.getForecastReason().add(castToCodeableConcept(value));
         } else if (name.equals("dateCriterion")) {
           this.getDateCriterion().add((ImmunizationRecommendationRecommendationDateCriterionComponent) value);
-        } else if (name.equals("protocol")) {
-          this.protocol = (ImmunizationRecommendationRecommendationProtocolComponent) value; // ImmunizationRecommendationRecommendationProtocolComponent
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
+        } else if (name.equals("series")) {
+          this.series = castToString(value); // StringType
+        } else if (name.equals("doseNumber")) {
+          this.doseNumber = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("seriesDoses")) {
+          this.seriesDoses = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("supportingImmunization")) {
           this.getSupportingImmunization().add(castToReference(value));
         } else if (name.equals("supportingPatientInformation")) {
@@ -631,13 +874,16 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3076014:  return getDateElement();
-        case 664556354:  return getVaccineCode(); 
+        case 664556354:  return addVaccineCode(); 
         case -319593813:  return getTargetDisease(); 
-        case -887709242:  return getDoseNumberElement();
+        case 571105240:  return addContraindicatedVaccineCode(); 
         case 1904598477:  return getForecastStatus(); 
+        case 1862115359:  return addForecastReason(); 
         case 2087518867:  return addDateCriterion(); 
-        case -989163880:  return getProtocol(); 
+        case -1724546052:  return getDescriptionElement();
+        case -905838985:  return getSeriesElement();
+        case -887709242:  return getDoseNumberElement();
+        case -1936727105:  return getSeriesDosesElement();
         case 1171592021:  return addSupportingImmunization(); 
         case -1234160646:  return addSupportingPatientInformation(); 
         default: return super.makeProperty(hash, name);
@@ -648,13 +894,16 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3076014: /*date*/ return new String[] {"dateTime"};
         case 664556354: /*vaccineCode*/ return new String[] {"CodeableConcept"};
         case -319593813: /*targetDisease*/ return new String[] {"CodeableConcept"};
-        case -887709242: /*doseNumber*/ return new String[] {"positiveInt"};
+        case 571105240: /*contraindicatedVaccineCode*/ return new String[] {"CodeableConcept"};
         case 1904598477: /*forecastStatus*/ return new String[] {"CodeableConcept"};
+        case 1862115359: /*forecastReason*/ return new String[] {"CodeableConcept"};
         case 2087518867: /*dateCriterion*/ return new String[] {};
-        case -989163880: /*protocol*/ return new String[] {};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -905838985: /*series*/ return new String[] {"string"};
+        case -887709242: /*doseNumber*/ return new String[] {"positiveInt"};
+        case -1936727105: /*seriesDoses*/ return new String[] {"positiveInt"};
         case 1171592021: /*supportingImmunization*/ return new String[] {"Reference"};
         case -1234160646: /*supportingPatientInformation*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
@@ -664,30 +913,37 @@ public class ImmunizationRecommendation extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.date");
-        }
-        else if (name.equals("vaccineCode")) {
-          this.vaccineCode = new CodeableConcept();
-          return this.vaccineCode;
+        if (name.equals("vaccineCode")) {
+          return addVaccineCode();
         }
         else if (name.equals("targetDisease")) {
           this.targetDisease = new CodeableConcept();
           return this.targetDisease;
         }
-        else if (name.equals("doseNumber")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.doseNumber");
+        else if (name.equals("contraindicatedVaccineCode")) {
+          return addContraindicatedVaccineCode();
         }
         else if (name.equals("forecastStatus")) {
           this.forecastStatus = new CodeableConcept();
           return this.forecastStatus;
         }
+        else if (name.equals("forecastReason")) {
+          return addForecastReason();
+        }
         else if (name.equals("dateCriterion")) {
           return addDateCriterion();
         }
-        else if (name.equals("protocol")) {
-          this.protocol = new ImmunizationRecommendationRecommendationProtocolComponent();
-          return this.protocol;
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.description");
+        }
+        else if (name.equals("series")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.series");
+        }
+        else if (name.equals("doseNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.doseNumber");
+        }
+        else if (name.equals("seriesDoses")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.seriesDoses");
         }
         else if (name.equals("supportingImmunization")) {
           return addSupportingImmunization();
@@ -702,17 +958,32 @@ public class ImmunizationRecommendation extends DomainResource {
       public ImmunizationRecommendationRecommendationComponent copy() {
         ImmunizationRecommendationRecommendationComponent dst = new ImmunizationRecommendationRecommendationComponent();
         copyValues(dst);
-        dst.date = date == null ? null : date.copy();
-        dst.vaccineCode = vaccineCode == null ? null : vaccineCode.copy();
+        if (vaccineCode != null) {
+          dst.vaccineCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : vaccineCode)
+            dst.vaccineCode.add(i.copy());
+        };
         dst.targetDisease = targetDisease == null ? null : targetDisease.copy();
-        dst.doseNumber = doseNumber == null ? null : doseNumber.copy();
+        if (contraindicatedVaccineCode != null) {
+          dst.contraindicatedVaccineCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : contraindicatedVaccineCode)
+            dst.contraindicatedVaccineCode.add(i.copy());
+        };
         dst.forecastStatus = forecastStatus == null ? null : forecastStatus.copy();
+        if (forecastReason != null) {
+          dst.forecastReason = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : forecastReason)
+            dst.forecastReason.add(i.copy());
+        };
         if (dateCriterion != null) {
           dst.dateCriterion = new ArrayList<ImmunizationRecommendationRecommendationDateCriterionComponent>();
           for (ImmunizationRecommendationRecommendationDateCriterionComponent i : dateCriterion)
             dst.dateCriterion.add(i.copy());
         };
-        dst.protocol = protocol == null ? null : protocol.copy();
+        dst.description = description == null ? null : description.copy();
+        dst.series = series == null ? null : series.copy();
+        dst.doseNumber = doseNumber == null ? null : doseNumber.copy();
+        dst.seriesDoses = seriesDoses == null ? null : seriesDoses.copy();
         if (supportingImmunization != null) {
           dst.supportingImmunization = new ArrayList<Reference>();
           for (Reference i : supportingImmunization)
@@ -727,32 +998,35 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationComponent))
+        if (!(other_ instanceof ImmunizationRecommendationRecommendationComponent))
           return false;
-        ImmunizationRecommendationRecommendationComponent o = (ImmunizationRecommendationRecommendationComponent) other;
-        return compareDeep(date, o.date, true) && compareDeep(vaccineCode, o.vaccineCode, true) && compareDeep(targetDisease, o.targetDisease, true)
-           && compareDeep(doseNumber, o.doseNumber, true) && compareDeep(forecastStatus, o.forecastStatus, true)
-           && compareDeep(dateCriterion, o.dateCriterion, true) && compareDeep(protocol, o.protocol, true)
-           && compareDeep(supportingImmunization, o.supportingImmunization, true) && compareDeep(supportingPatientInformation, o.supportingPatientInformation, true)
-          ;
+        ImmunizationRecommendationRecommendationComponent o = (ImmunizationRecommendationRecommendationComponent) other_;
+        return compareDeep(vaccineCode, o.vaccineCode, true) && compareDeep(targetDisease, o.targetDisease, true)
+           && compareDeep(contraindicatedVaccineCode, o.contraindicatedVaccineCode, true) && compareDeep(forecastStatus, o.forecastStatus, true)
+           && compareDeep(forecastReason, o.forecastReason, true) && compareDeep(dateCriterion, o.dateCriterion, true)
+           && compareDeep(description, o.description, true) && compareDeep(series, o.series, true) && compareDeep(doseNumber, o.doseNumber, true)
+           && compareDeep(seriesDoses, o.seriesDoses, true) && compareDeep(supportingImmunization, o.supportingImmunization, true)
+           && compareDeep(supportingPatientInformation, o.supportingPatientInformation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationComponent))
+        if (!(other_ instanceof ImmunizationRecommendationRecommendationComponent))
           return false;
-        ImmunizationRecommendationRecommendationComponent o = (ImmunizationRecommendationRecommendationComponent) other;
-        return compareValues(date, o.date, true) && compareValues(doseNumber, o.doseNumber, true);
+        ImmunizationRecommendationRecommendationComponent o = (ImmunizationRecommendationRecommendationComponent) other_;
+        return compareValues(description, o.description, true) && compareValues(series, o.series, true) && compareValues(doseNumber, o.doseNumber, true)
+           && compareValues(seriesDoses, o.seriesDoses, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(date, vaccineCode, targetDisease
-          , doseNumber, forecastStatus, dateCriterion, protocol, supportingImmunization, supportingPatientInformation
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(vaccineCode, targetDisease
+          , contraindicatedVaccineCode, forecastStatus, forecastReason, dateCriterion, description
+          , series, doseNumber, seriesDoses, supportingImmunization, supportingPatientInformation
           );
       }
 
@@ -960,22 +1234,22 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationDateCriterionComponent))
+        if (!(other_ instanceof ImmunizationRecommendationRecommendationDateCriterionComponent))
           return false;
-        ImmunizationRecommendationRecommendationDateCriterionComponent o = (ImmunizationRecommendationRecommendationDateCriterionComponent) other;
+        ImmunizationRecommendationRecommendationDateCriterionComponent o = (ImmunizationRecommendationRecommendationDateCriterionComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationDateCriterionComponent))
+        if (!(other_ instanceof ImmunizationRecommendationRecommendationDateCriterionComponent))
           return false;
-        ImmunizationRecommendationRecommendationDateCriterionComponent o = (ImmunizationRecommendationRecommendationDateCriterionComponent) other;
+        ImmunizationRecommendationRecommendationDateCriterionComponent o = (ImmunizationRecommendationRecommendationDateCriterionComponent) other_;
         return compareValues(value, o.value, true);
       }
 
@@ -990,391 +1264,6 @@ public class ImmunizationRecommendation extends DomainResource {
 
   }
 
-    @Block()
-    public static class ImmunizationRecommendationRecommendationProtocolComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
-         */
-        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Dose number within sequence", formalDefinition="Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol." )
-        protected PositiveIntType doseSequence;
-
-        /**
-         * Contains the description about the protocol under which the vaccine was administered.
-         */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Protocol details", formalDefinition="Contains the description about the protocol under which the vaccine was administered." )
-        protected StringType description;
-
-        /**
-         * Indicates the authority who published the protocol.  For example, ACIP.
-         */
-        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol.  For example, ACIP." )
-        protected Reference authority;
-
-        /**
-         * The actual object that is the target of the reference (Indicates the authority who published the protocol.  For example, ACIP.)
-         */
-        protected Organization authorityTarget;
-
-        /**
-         * One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of vaccination series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
-        protected StringType series;
-
-        private static final long serialVersionUID = 215094970L;
-
-    /**
-     * Constructor
-     */
-      public ImmunizationRecommendationRecommendationProtocolComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #doseSequence} (Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
-         */
-        public PositiveIntType getDoseSequenceElement() { 
-          if (this.doseSequence == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.doseSequence");
-            else if (Configuration.doAutoCreate())
-              this.doseSequence = new PositiveIntType(); // bb
-          return this.doseSequence;
-        }
-
-        public boolean hasDoseSequenceElement() { 
-          return this.doseSequence != null && !this.doseSequence.isEmpty();
-        }
-
-        public boolean hasDoseSequence() { 
-          return this.doseSequence != null && !this.doseSequence.isEmpty();
-        }
-
-        /**
-         * @param value {@link #doseSequence} (Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setDoseSequenceElement(PositiveIntType value) { 
-          this.doseSequence = value;
-          return this;
-        }
-
-        /**
-         * @return Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
-         */
-        public int getDoseSequence() { 
-          return this.doseSequence == null || this.doseSequence.isEmpty() ? 0 : this.doseSequence.getValue();
-        }
-
-        /**
-         * @param value Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setDoseSequence(int value) { 
-            if (this.doseSequence == null)
-              this.doseSequence = new PositiveIntType();
-            this.doseSequence.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public StringType getDescriptionElement() { 
-          if (this.description == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.description");
-            else if (Configuration.doAutoCreate())
-              this.description = new StringType(); // bb
-          return this.description;
-        }
-
-        public boolean hasDescriptionElement() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        public boolean hasDescription() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        /**
-         * @param value {@link #description} (Contains the description about the protocol under which the vaccine was administered.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setDescriptionElement(StringType value) { 
-          this.description = value;
-          return this;
-        }
-
-        /**
-         * @return Contains the description about the protocol under which the vaccine was administered.
-         */
-        public String getDescription() { 
-          return this.description == null ? null : this.description.getValue();
-        }
-
-        /**
-         * @param value Contains the description about the protocol under which the vaccine was administered.
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setDescription(String value) { 
-          if (Utilities.noString(value))
-            this.description = null;
-          else {
-            if (this.description == null)
-              this.description = new StringType();
-            this.description.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #authority} (Indicates the authority who published the protocol.  For example, ACIP.)
-         */
-        public Reference getAuthority() { 
-          if (this.authority == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.authority");
-            else if (Configuration.doAutoCreate())
-              this.authority = new Reference(); // cc
-          return this.authority;
-        }
-
-        public boolean hasAuthority() { 
-          return this.authority != null && !this.authority.isEmpty();
-        }
-
-        /**
-         * @param value {@link #authority} (Indicates the authority who published the protocol.  For example, ACIP.)
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setAuthority(Reference value) { 
-          this.authority = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  For example, ACIP.)
-         */
-        public Organization getAuthorityTarget() { 
-          if (this.authorityTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.authority");
-            else if (Configuration.doAutoCreate())
-              this.authorityTarget = new Organization(); // aa
-          return this.authorityTarget;
-        }
-
-        /**
-         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  For example, ACIP.)
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setAuthorityTarget(Organization value) { 
-          this.authorityTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
-         */
-        public StringType getSeriesElement() { 
-          if (this.series == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.series");
-            else if (Configuration.doAutoCreate())
-              this.series = new StringType(); // bb
-          return this.series;
-        }
-
-        public boolean hasSeriesElement() { 
-          return this.series != null && !this.series.isEmpty();
-        }
-
-        public boolean hasSeries() { 
-          return this.series != null && !this.series.isEmpty();
-        }
-
-        /**
-         * @param value {@link #series} (One possible path to achieve presumed immunity against a disease - within the context of an authority.). This is the underlying object with id, value and extensions. The accessor "getSeries" gives direct access to the value
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setSeriesElement(StringType value) { 
-          this.series = value;
-          return this;
-        }
-
-        /**
-         * @return One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        public String getSeries() { 
-          return this.series == null ? null : this.series.getValue();
-        }
-
-        /**
-         * @param value One possible path to achieve presumed immunity against a disease - within the context of an authority.
-         */
-        public ImmunizationRecommendationRecommendationProtocolComponent setSeries(String value) { 
-          if (Utilities.noString(value))
-            this.series = null;
-          else {
-            if (this.series == null)
-              this.series = new StringType();
-            this.series.setValue(value);
-          }
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("doseSequence", "positiveInt", "Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.", 0, 1, doseSequence));
-          children.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description));
-          children.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  For example, ACIP.", 0, 1, authority));
-          children.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 550933246: /*doseSequence*/  return new Property("doseSequence", "positiveInt", "Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.", 0, 1, doseSequence);
-          case -1724546052: /*description*/  return new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description);
-          case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  For example, ACIP.", 0, 1, authority);
-          case -905838985: /*series*/  return new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 550933246: /*doseSequence*/ return this.doseSequence == null ? new Base[0] : new Base[] {this.doseSequence}; // PositiveIntType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : new Base[] {this.authority}; // Reference
-        case -905838985: /*series*/ return this.series == null ? new Base[0] : new Base[] {this.series}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 550933246: // doseSequence
-          this.doseSequence = castToPositiveInt(value); // PositiveIntType
-          return value;
-        case -1724546052: // description
-          this.description = castToString(value); // StringType
-          return value;
-        case 1475610435: // authority
-          this.authority = castToReference(value); // Reference
-          return value;
-        case -905838985: // series
-          this.series = castToString(value); // StringType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("doseSequence")) {
-          this.doseSequence = castToPositiveInt(value); // PositiveIntType
-        } else if (name.equals("description")) {
-          this.description = castToString(value); // StringType
-        } else if (name.equals("authority")) {
-          this.authority = castToReference(value); // Reference
-        } else if (name.equals("series")) {
-          this.series = castToString(value); // StringType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 550933246:  return getDoseSequenceElement();
-        case -1724546052:  return getDescriptionElement();
-        case 1475610435:  return getAuthority(); 
-        case -905838985:  return getSeriesElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 550933246: /*doseSequence*/ return new String[] {"positiveInt"};
-        case -1724546052: /*description*/ return new String[] {"string"};
-        case 1475610435: /*authority*/ return new String[] {"Reference"};
-        case -905838985: /*series*/ return new String[] {"string"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("doseSequence")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.doseSequence");
-        }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.description");
-        }
-        else if (name.equals("authority")) {
-          this.authority = new Reference();
-          return this.authority;
-        }
-        else if (name.equals("series")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.series");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ImmunizationRecommendationRecommendationProtocolComponent copy() {
-        ImmunizationRecommendationRecommendationProtocolComponent dst = new ImmunizationRecommendationRecommendationProtocolComponent();
-        copyValues(dst);
-        dst.doseSequence = doseSequence == null ? null : doseSequence.copy();
-        dst.description = description == null ? null : description.copy();
-        dst.authority = authority == null ? null : authority.copy();
-        dst.series = series == null ? null : series.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationProtocolComponent))
-          return false;
-        ImmunizationRecommendationRecommendationProtocolComponent o = (ImmunizationRecommendationRecommendationProtocolComponent) other;
-        return compareDeep(doseSequence, o.doseSequence, true) && compareDeep(description, o.description, true)
-           && compareDeep(authority, o.authority, true) && compareDeep(series, o.series, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ImmunizationRecommendationRecommendationProtocolComponent))
-          return false;
-        ImmunizationRecommendationRecommendationProtocolComponent o = (ImmunizationRecommendationRecommendationProtocolComponent) other;
-        return compareValues(doseSequence, o.doseSequence, true) && compareValues(description, o.description, true)
-           && compareValues(series, o.series, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description
-          , authority, series);
-      }
-
-  public String fhirType() {
-    return "ImmunizationRecommendation.recommendation.protocol";
-
-  }
-
-  }
-
     /**
      * A unique identifier assigned to this particular recommendation record.
      */
@@ -1383,25 +1272,44 @@ public class ImmunizationRecommendation extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * The patient the recommendations are for.
+     * The patient the recommendation(s) are for.
      */
     @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who this profile is for", formalDefinition="The patient the recommendations are for." )
+    @Description(shortDefinition="Who this profile is for", formalDefinition="The patient the recommendation(s) are for." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient the recommendations are for.)
+     * The actual object that is the target of the reference (The patient the recommendation(s) are for.)
      */
     protected Patient patientTarget;
 
     /**
+     * The date the immunization recommendation(s) were created.
+     */
+    @Child(name = "date", type = {DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Date recommendation(s) created", formalDefinition="The date the immunization recommendation(s) were created." )
+    protected DateTimeType date;
+
+    /**
+     * Indicates the authority who published the protocol (e.g. ACIP).
+     */
+    @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol (e.g. ACIP)." )
+    protected Reference authority;
+
+    /**
+     * The actual object that is the target of the reference (Indicates the authority who published the protocol (e.g. ACIP).)
+     */
+    protected Organization authorityTarget;
+
+    /**
      * Vaccine administration recommendations.
      */
-    @Child(name = "recommendation", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "recommendation", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine administration recommendations", formalDefinition="Vaccine administration recommendations." )
     protected List<ImmunizationRecommendationRecommendationComponent> recommendation;
 
-    private static final long serialVersionUID = 641058495L;
+    private static final long serialVersionUID = -2031711761L;
 
   /**
    * Constructor
@@ -1413,9 +1321,10 @@ public class ImmunizationRecommendation extends DomainResource {
   /**
    * Constructor
    */
-    public ImmunizationRecommendation(Reference patient) {
+    public ImmunizationRecommendation(Reference patient, DateTimeType date) {
       super();
       this.patient = patient;
+      this.date = date;
     }
 
     /**
@@ -1472,7 +1381,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (The patient the recommendations are for.)
+     * @return {@link #patient} (The patient the recommendation(s) are for.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -1488,7 +1397,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient the recommendations are for.)
+     * @param value {@link #patient} (The patient the recommendation(s) are for.)
      */
     public ImmunizationRecommendation setPatient(Reference value) { 
       this.patient = value;
@@ -1496,7 +1405,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient the recommendations are for.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient the recommendation(s) are for.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -1508,10 +1417,99 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient the recommendations are for.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient the recommendation(s) are for.)
      */
     public ImmunizationRecommendation setPatientTarget(Patient value) { 
       this.patientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date the immunization recommendation(s) were created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImmunizationRecommendation.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date the immunization recommendation(s) were created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ImmunizationRecommendation setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date the immunization recommendation(s) were created.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date the immunization recommendation(s) were created.
+     */
+    public ImmunizationRecommendation setDate(Date value) { 
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #authority} (Indicates the authority who published the protocol (e.g. ACIP).)
+     */
+    public Reference getAuthority() { 
+      if (this.authority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImmunizationRecommendation.authority");
+        else if (Configuration.doAutoCreate())
+          this.authority = new Reference(); // cc
+      return this.authority;
+    }
+
+    public boolean hasAuthority() { 
+      return this.authority != null && !this.authority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #authority} (Indicates the authority who published the protocol (e.g. ACIP).)
+     */
+    public ImmunizationRecommendation setAuthority(Reference value) { 
+      this.authority = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol (e.g. ACIP).)
+     */
+    public Organization getAuthorityTarget() { 
+      if (this.authorityTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImmunizationRecommendation.authority");
+        else if (Configuration.doAutoCreate())
+          this.authorityTarget = new Organization(); // aa
+      return this.authorityTarget;
+    }
+
+    /**
+     * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol (e.g. ACIP).)
+     */
+    public ImmunizationRecommendation setAuthorityTarget(Organization value) { 
+      this.authorityTarget = value;
       return this;
     }
 
@@ -1571,7 +1569,9 @@ public class ImmunizationRecommendation extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this particular recommendation record.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("patient", "Reference(Patient)", "The patient the recommendations are for.", 0, 1, patient));
+        children.add(new Property("patient", "Reference(Patient)", "The patient the recommendation(s) are for.", 0, 1, patient));
+        children.add(new Property("date", "dateTime", "The date the immunization recommendation(s) were created.", 0, 1, date));
+        children.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol (e.g. ACIP).", 0, 1, authority));
         children.add(new Property("recommendation", "", "Vaccine administration recommendations.", 0, java.lang.Integer.MAX_VALUE, recommendation));
       }
 
@@ -1579,7 +1579,9 @@ public class ImmunizationRecommendation extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this particular recommendation record.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient the recommendations are for.", 0, 1, patient);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient the recommendation(s) are for.", 0, 1, patient);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date the immunization recommendation(s) were created.", 0, 1, date);
+        case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol (e.g. ACIP).", 0, 1, authority);
         case -1028636743: /*recommendation*/  return new Property("recommendation", "", "Vaccine administration recommendations.", 0, java.lang.Integer.MAX_VALUE, recommendation);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -1591,6 +1593,8 @@ public class ImmunizationRecommendation extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : new Base[] {this.authority}; // Reference
         case -1028636743: /*recommendation*/ return this.recommendation == null ? new Base[0] : this.recommendation.toArray(new Base[this.recommendation.size()]); // ImmunizationRecommendationRecommendationComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1606,6 +1610,12 @@ public class ImmunizationRecommendation extends DomainResource {
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
           return value;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          return value;
+        case 1475610435: // authority
+          this.authority = castToReference(value); // Reference
+          return value;
         case -1028636743: // recommendation
           this.getRecommendation().add((ImmunizationRecommendationRecommendationComponent) value); // ImmunizationRecommendationRecommendationComponent
           return value;
@@ -1620,6 +1630,10 @@ public class ImmunizationRecommendation extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
+        } else if (name.equals("date")) {
+          this.date = castToDateTime(value); // DateTimeType
+        } else if (name.equals("authority")) {
+          this.authority = castToReference(value); // Reference
         } else if (name.equals("recommendation")) {
           this.getRecommendation().add((ImmunizationRecommendationRecommendationComponent) value);
         } else
@@ -1632,6 +1646,8 @@ public class ImmunizationRecommendation extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
         case -791418107:  return getPatient(); 
+        case 3076014:  return getDateElement();
+        case 1475610435:  return getAuthority(); 
         case -1028636743:  return addRecommendation(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1643,6 +1659,8 @@ public class ImmunizationRecommendation extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -791418107: /*patient*/ return new String[] {"Reference"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1475610435: /*authority*/ return new String[] {"Reference"};
         case -1028636743: /*recommendation*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1657,6 +1675,13 @@ public class ImmunizationRecommendation extends DomainResource {
         else if (name.equals("patient")) {
           this.patient = new Reference();
           return this.patient;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.date");
+        }
+        else if (name.equals("authority")) {
+          this.authority = new Reference();
+          return this.authority;
         }
         else if (name.equals("recommendation")) {
           return addRecommendation();
@@ -1679,6 +1704,8 @@ public class ImmunizationRecommendation extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.patient = patient == null ? null : patient.copy();
+        dst.date = date == null ? null : date.copy();
+        dst.authority = authority == null ? null : authority.copy();
         if (recommendation != null) {
           dst.recommendation = new ArrayList<ImmunizationRecommendationRecommendationComponent>();
           for (ImmunizationRecommendationRecommendationComponent i : recommendation)
@@ -1692,29 +1719,30 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendation))
+        if (!(other_ instanceof ImmunizationRecommendation))
           return false;
-        ImmunizationRecommendation o = (ImmunizationRecommendation) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(recommendation, o.recommendation, true)
+        ImmunizationRecommendation o = (ImmunizationRecommendation) other_;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(date, o.date, true)
+           && compareDeep(authority, o.authority, true) && compareDeep(recommendation, o.recommendation, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationRecommendation))
+        if (!(other_ instanceof ImmunizationRecommendation))
           return false;
-        ImmunizationRecommendation o = (ImmunizationRecommendation) other;
-        return true;
+        ImmunizationRecommendation o = (ImmunizationRecommendation) other_;
+        return compareValues(date, o.date, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, recommendation
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, date
+          , authority, recommendation);
       }
 
   @Override
@@ -1725,19 +1753,19 @@ public class ImmunizationRecommendation extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>Date recommendation created</b><br>
+   * Description: <b>Date recommendation(s) created</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
+   * Path: <b>ImmunizationRecommendation.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="Date recommendation created", type="date" )
+  @SearchParamDefinition(name="date", path="ImmunizationRecommendation.date", description="Date recommendation(s) created", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>Date recommendation created</b><br>
+   * Description: <b>Date recommendation(s) created</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
+   * Path: <b>ImmunizationRecommendation.date</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
@@ -1765,19 +1793,19 @@ public class ImmunizationRecommendation extends DomainResource {
  /**
    * Search parameter: <b>dose-sequence</b>
    * <p>
-   * Description: <b>Dose number within sequence</b><br>
+   * Description: <b>Recommended number of doses for immunity</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
+   * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number" )
+  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.seriesDoses", description="Recommended number of doses for immunity", type="number" )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
    * <p>
-   * Description: <b>Dose number within sequence</b><br>
+   * Description: <b>Recommended number of doses for immunity</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
+   * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.NumberClientParam DOSE_SEQUENCE = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_DOSE_SEQUENCE);
@@ -1831,17 +1859,17 @@ public class ImmunizationRecommendation extends DomainResource {
  /**
    * Search parameter: <b>vaccine-type</b>
    * <p>
-   * Description: <b>Vaccine recommendation applies to</b><br>
+   * Description: <b>Vaccine  or vaccine group recommendation applies to</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.vaccineCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token" )
+  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine  or vaccine group recommendation applies to", type="token" )
   public static final String SP_VACCINE_TYPE = "vaccine-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>vaccine-type</b>
    * <p>
-   * Description: <b>Vaccine recommendation applies to</b><br>
+   * Description: <b>Vaccine  or vaccine group recommendation applies to</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.vaccineCode</b><br>
    * </p>
@@ -1851,17 +1879,17 @@ public class ImmunizationRecommendation extends DomainResource {
  /**
    * Search parameter: <b>dose-number</b>
    * <p>
-   * Description: <b>Recommended dose number</b><br>
+   * Description: <b>Recommended dose number within series</b><br>
    * Type: <b>number</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number" )
+  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number within series", type="number" )
   public static final String SP_DOSE_NUMBER = "dose-number";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
    * <p>
-   * Description: <b>Recommended dose number</b><br>
+   * Description: <b>Recommended dose number within series</b><br>
    * Type: <b>number</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
    * </p>
@@ -1876,7 +1904,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference", target={AllergyIntolerance.class, Observation.class } )
+  @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference" )
   public static final String SP_INFORMATION = "information";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>information</b>
@@ -1902,7 +1930,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference", target={Immunization.class } )
+  @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference", target={Immunization.class, ImmunizationEvaluation.class } )
   public static final String SP_SUPPORT = "support";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>support</b>
@@ -1923,17 +1951,17 @@ public class ImmunizationRecommendation extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>Vaccine administration status</b><br>
+   * Description: <b>Vaccine recommendation status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token" )
+  @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine recommendation status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>Vaccine administration status</b><br>
+   * Description: <b>Vaccine recommendation status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
    * </p>

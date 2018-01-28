@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,7 +69,7 @@ public enum W3cProvenanceActivityType {
          */
         REVISION, 
         /**
-         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author. A quotation relation is a kind of derivation relation, for which an entity was derived from a preceding entity by copying, or 'quoting', some or all of it.
+         * The repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author. A quotation relation is a kind of derivation relation, for which an entity was derived from a preceding entity by copying, or 'quoting', some or all of it.
          */
         QUOTATION, 
         /**
@@ -147,7 +147,7 @@ public enum W3cProvenanceActivityType {
             case INVALIDATION: return "The start of the destruction, cessation, or expiry of an existing entity by an activity. The entity is no longer available for use (or further invalidation) after invalidation. Any generation or usage of an entity precedes its invalidation. Given that an invalidation is the start of destruction, cessation, or expiry, it is instantaneous.";
             case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity. For an entity to be transformed from, created from, or resulting from an update to another, there must be some underpinning activity or activities performing the necessary action(s) resulting in such a derivation. A derivation can be described at various levels of precision. In its simplest form, derivation relates two entities. Optionally, attributes can be added to represent further information about the derivation. If the derivation is the result of a single known activity, then this activity can also be optionally expressed. To provide a completely accurate description of the derivation, the generation and usage of the generated and used entities, respectively, can be provided, so as to make the derivation path, through usage, activity, and generation, explicit. Optional information such as activity, generation, and usage can be linked to derivations to aid analysis of provenance and to facilitate provenance-based reproducibility.";
             case REVISION: return "A derivation for which the resulting entity is a revised version of some original. The implication here is that the resulting entity contains substantial content from the original. A revision relation is a kind of derivation relation from a revised entity to a preceding entity.";
-            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author. A quotation relation is a kind of derivation relation, for which an entity was derived from a preceding entity by copying, or 'quoting', some or all of it.";
+            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author. A quotation relation is a kind of derivation relation, for which an entity was derived from a preceding entity by copying, or 'quoting', some or all of it.";
             case PRIMARYSOURCE: return "Refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic's study, without benefit from hindsight. Because of the directness of primary sources, they 'speak for themselves' in ways that cannot be captured through the filter of secondary sources. As such, it is important for secondary sources to reference those primary sources from which they were derived, so that their reliability can be investigated. It is also important to note that a given entity might be a primary source for one entity but not another. It is the reason why Primary Source is defined as a relation as opposed to a subtype of Entity.";
             case ATTRIBUTION: return "Ascribing of an entity (object/document) to an agent.";
             case COLLECTION: return " An aggregating activity that results in composition of an entity, which provides a structure to some constituents that must themselves be entities. These constituents are said to be member of the collections.";

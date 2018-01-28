@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -26,15 +24,12 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -442,79 +437,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-	}
-
-	@Test
-	public void testReindexing() {
-		Patient p = new Patient();
-		p.addName().setFamily("family");
-		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://foo");
-		myValueSetDao.create(vs, mySrd);
-
-		ResourceTable entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
-		assertEquals(Long.valueOf(1), entity.getIndexStatus());
-
-		mySystemDao.markAllResourcesForReindexing();
-
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
-		assertEquals(null, entity.getIndexStatus());
-
-		mySystemDao.performReindexingPass(null);
-
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
-		assertEquals(Long.valueOf(1), entity.getIndexStatus());
-
-		// Just make sure this doesn't cause a choke
-		mySystemDao.performReindexingPass(100000);
-
-		// Try making the resource unparseable
-
-		TransactionTemplate template = new TransactionTemplate(myTxManager);
-		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				ResourceTable table = myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-				table.setEncoding(ResourceEncodingEnum.JSON);
-				table.setIndexStatus(null);
-				try {
-					table.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new Error(e);
-				}
-				myEntityManager.merge(table);
-				return null;
-			}
-		});
-
-		mySystemDao.performReindexingPass(null);
-
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
-		assertEquals(Long.valueOf(2), entity.getIndexStatus());
-
 	}
 
 	@Test

@@ -216,19 +216,24 @@ public class StructureMapUtilities {
     this.worker = worker;
     fpe = new FHIRPathEngine(worker);
     fpe.setHostServices(new FFHIRPathHostServices());
+    loadLibrary(worker);
   }
 
   public StructureMapUtilities(IWorkerContext worker, ITransformerServices services) {
     super();
     this.worker = worker;
+    loadLibrary(worker);
+    this.services = services;
+    fpe = new FHIRPathEngine(worker);
+    fpe.setHostServices(new FFHIRPathHostServices());
+  }
+
+  public void loadLibrary(IWorkerContext worker) {
     this.library = new HashMap<String, StructureMap>();
     for (org.hl7.fhir.r4.model.MetadataResource bc : worker.allConformanceResources()) {
       if (bc instanceof StructureMap)
         library.put(bc.getUrl(), (StructureMap) bc);
     }
-    this.services = services;
-    fpe = new FHIRPathEngine(worker);
-    fpe.setHostServices(new FFHIRPathHostServices());
   }
 
 	public static String render(StructureMap map) {

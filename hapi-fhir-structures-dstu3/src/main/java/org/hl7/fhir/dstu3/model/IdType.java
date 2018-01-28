@@ -44,9 +44,9 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity is known. In FHIR, every resource must have a "logical ID" which is
  * defined by the FHIR specification as:
  * <p>
- * <code>A whole number in the range 0 to 2^64-1 (optionally represented in hex), 
- * a uuid, an oid, or any other combination of lowercase letters, numerals, "-" 
- * and ".", with a length limit of 36 characters</code>
+ * <code>
+ * Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.)
+ * </code>
  * </p>
  * <p>
  * This class contains that logical ID, and can optionally also contain a
@@ -66,6 +66,10 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * </li>
  * </ul>
  * <p>
+ * Note that the 64 character
+ * limit applies only to the ID portion ("123" in the examples above).
+ * </p>
+ * <p>
  * In most situations, you only need to populate the resource's ID (e.g.
  * <code>123</code>) in resources you are constructing and the encoder will
  * infer the rest from the context in which the object is being used. On the
@@ -73,7 +77,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity on objects it creates as a convenience.
  * </p>
  * <p>
- * Regex for ID: [a-z0-9\-\.]{1,36}
+ * Regex for ID: [a-z0-9\-\.]{1,64}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf=StringType.class)

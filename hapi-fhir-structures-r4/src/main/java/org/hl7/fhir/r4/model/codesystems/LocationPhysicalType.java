@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum LocationPhysicalType {
          */
         SI, 
         /**
-         * Any Building or structure. This may contain rooms, corridors, wings, etc. It may not have walls, or a roof, but is considered a defined/allocated space.
+         * Any Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space.
          */
         BU, 
         /**
@@ -154,7 +154,7 @@ public enum LocationPhysicalType {
         public String getDefinition() {
           switch (this) {
             case SI: return "A collection of buildings or other locations such as a site or a campus.";
-            case BU: return "Any Building or structure. This may contain rooms, corridors, wings, etc. It may not have walls, or a roof, but is considered a defined/allocated space.";
+            case BU: return "Any Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space.";
             case WI: return "A Wing within a Building, this often contains levels, rooms and corridors.";
             case WA: return "A Ward is a section of a medical facility that may contain rooms and other types of location.";
             case LVL: return "A Level in a multi-level Building/Structure.";

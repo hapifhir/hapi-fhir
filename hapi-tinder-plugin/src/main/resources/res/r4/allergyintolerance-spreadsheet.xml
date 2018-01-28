@@ -9,15 +9,15 @@
   <Author>Grahame</Author>
   <LastAuthor>Miller,Michelle M</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-11-05T02:22:25Z</LastSaved>
+  <LastSaved>2017-11-13T14:50:50Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>5955</WindowHeight>
-  <WindowWidth>17970</WindowWidth>
+  <WindowHeight>8910</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>884</TabRatio>
@@ -1103,7 +1103,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">AllergyIntolerance.verificationStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">1,2</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1165,7 +1165,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of the underlying physiological mechanism for the reaction risk.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians might not be in a position to distinguish the mechanism of a particular reaction. Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts might not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">code</Data><NamedCell
@@ -1385,16 +1385,17 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The assertedDate represents the date when this particular Allergy record was created in the EHR, not the date of the most recent update in terms of when severity, abatement, etc. were specified. The date of the last record modification can be retrieved from the resource metadata.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.participation[typeCode=AUT].time</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-20</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-13</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">GF#11089</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">GF#11089, GF#14007</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
@@ -1405,7 +1406,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner|Patient)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner|Patient|RelatedPerson)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3863,7 +3864,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>8</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>10</LeftColumnRightPane>
+   <LeftColumnRightPane>15</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3879,7 +3880,9 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>16</ActiveCol>
+     <ActiveRow>12</ActiveRow>
+     <ActiveCol>18</ActiveCol>
+     <RangeSelection>R13C19:R14C19</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

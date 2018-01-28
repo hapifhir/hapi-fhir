@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -621,23 +621,23 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValueSetComposeComponent))
+        if (!(other_ instanceof ValueSetComposeComponent))
           return false;
-        ValueSetComposeComponent o = (ValueSetComposeComponent) other;
+        ValueSetComposeComponent o = (ValueSetComposeComponent) other_;
         return compareDeep(lockedDate, o.lockedDate, true) && compareDeep(inactive, o.inactive, true) && compareDeep(include, o.include, true)
            && compareDeep(exclude, o.exclude, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValueSetComposeComponent))
+        if (!(other_ instanceof ValueSetComposeComponent))
           return false;
-        ValueSetComposeComponent o = (ValueSetComposeComponent) other;
+        ValueSetComposeComponent o = (ValueSetComposeComponent) other_;
         return compareValues(lockedDate, o.lockedDate, true) && compareValues(inactive, o.inactive, true);
       }
 
@@ -1110,23 +1110,23 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptSetComponent))
+        if (!(other_ instanceof ConceptSetComponent))
           return false;
-        ConceptSetComponent o = (ConceptSetComponent) other;
+        ConceptSetComponent o = (ConceptSetComponent) other_;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(concept, o.concept, true)
            && compareDeep(filter, o.filter, true) && compareDeep(valueSet, o.valueSet, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptSetComponent))
+        if (!(other_ instanceof ConceptSetComponent))
           return false;
-        ConceptSetComponent o = (ConceptSetComponent) other;
+        ConceptSetComponent o = (ConceptSetComponent) other_;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(valueSet, o.valueSet, true)
           ;
       }
@@ -1440,23 +1440,23 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptReferenceComponent))
+        if (!(other_ instanceof ConceptReferenceComponent))
           return false;
-        ConceptReferenceComponent o = (ConceptReferenceComponent) other;
+        ConceptReferenceComponent o = (ConceptReferenceComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(designation, o.designation, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptReferenceComponent))
+        if (!(other_ instanceof ConceptReferenceComponent))
           return false;
-        ConceptReferenceComponent o = (ConceptReferenceComponent) other;
+        ConceptReferenceComponent o = (ConceptReferenceComponent) other_;
         return compareValues(code, o.code, true) && compareValues(display, o.display, true);
       }
 
@@ -1739,23 +1739,23 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptReferenceDesignationComponent))
+        if (!(other_ instanceof ConceptReferenceDesignationComponent))
           return false;
-        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other;
+        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(use, o.use, true) && compareDeep(value, o.value, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptReferenceDesignationComponent))
+        if (!(other_ instanceof ConceptReferenceDesignationComponent))
           return false;
-        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other;
+        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other_;
         return compareValues(language, o.language, true) && compareValues(value, o.value, true);
       }
 
@@ -2056,23 +2056,23 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptSetFilterComponent))
+        if (!(other_ instanceof ConceptSetFilterComponent))
           return false;
-        ConceptSetFilterComponent o = (ConceptSetFilterComponent) other;
+        ConceptSetFilterComponent o = (ConceptSetFilterComponent) other_;
         return compareDeep(property, o.property, true) && compareDeep(op, o.op, true) && compareDeep(value, o.value, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptSetFilterComponent))
+        if (!(other_ instanceof ConceptSetFilterComponent))
           return false;
-        ConceptSetFilterComponent o = (ConceptSetFilterComponent) other;
+        ConceptSetFilterComponent o = (ConceptSetFilterComponent) other_;
         return compareValues(property, o.property, true) && compareValues(op, o.op, true) && compareValues(value, o.value, true)
           ;
       }
@@ -2592,24 +2592,24 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionComponent))
+        if (!(other_ instanceof ValueSetExpansionComponent))
           return false;
-        ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
+        ValueSetExpansionComponent o = (ValueSetExpansionComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(timestamp, o.timestamp, true)
            && compareDeep(total, o.total, true) && compareDeep(offset, o.offset, true) && compareDeep(parameter, o.parameter, true)
            && compareDeep(contains, o.contains, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionComponent))
+        if (!(other_ instanceof ValueSetExpansionComponent))
           return false;
-        ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
+        ValueSetExpansionComponent o = (ValueSetExpansionComponent) other_;
         return compareValues(identifier, o.identifier, true) && compareValues(timestamp, o.timestamp, true)
            && compareValues(total, o.total, true) && compareValues(offset, o.offset, true);
       }
@@ -2922,22 +2922,22 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionParameterComponent))
+        if (!(other_ instanceof ValueSetExpansionParameterComponent))
           return false;
-        ValueSetExpansionParameterComponent o = (ValueSetExpansionParameterComponent) other;
+        ValueSetExpansionParameterComponent o = (ValueSetExpansionParameterComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionParameterComponent))
+        if (!(other_ instanceof ValueSetExpansionParameterComponent))
           return false;
-        ValueSetExpansionParameterComponent o = (ValueSetExpansionParameterComponent) other;
+        ValueSetExpansionParameterComponent o = (ValueSetExpansionParameterComponent) other_;
         return compareValues(name, o.name, true);
       }
 
@@ -3595,24 +3595,24 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionContainsComponent))
+        if (!(other_ instanceof ValueSetExpansionContainsComponent))
           return false;
-        ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other;
+        ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other_;
         return compareDeep(system, o.system, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(inactive, o.inactive, true)
            && compareDeep(version, o.version, true) && compareDeep(code, o.code, true) && compareDeep(display, o.display, true)
            && compareDeep(designation, o.designation, true) && compareDeep(contains, o.contains, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValueSetExpansionContainsComponent))
+        if (!(other_ instanceof ValueSetExpansionContainsComponent))
           return false;
-        ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other;
+        ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other_;
         return compareValues(system, o.system, true) && compareValues(abstract_, o.abstract_, true) && compareValues(inactive, o.inactive, true)
            && compareValues(version, o.version, true) && compareValues(code, o.code, true) && compareValues(display, o.display, true)
           ;
@@ -3697,7 +3697,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -3717,7 +3717,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ValueSet setUrlElement(UriType value) { 
       this.url = value;
@@ -3725,14 +3725,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.
      */
     public ValueSet setUrl(String value) { 
       if (Utilities.noString(value))
@@ -4579,7 +4579,7 @@ public class ValueSet extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the value set. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
@@ -4603,7 +4603,7 @@ public class ValueSet extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this value set is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the value set. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
@@ -4936,24 +4936,24 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValueSet))
+        if (!(other_ instanceof ValueSet))
           return false;
-        ValueSet o = (ValueSet) other;
+        ValueSet o = (ValueSet) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(immutable, o.immutable, true)
            && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true) && compareDeep(extensible, o.extensible, true)
            && compareDeep(compose, o.compose, true) && compareDeep(expansion, o.expansion, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValueSet))
+        if (!(other_ instanceof ValueSet))
           return false;
-        ValueSet o = (ValueSet) other;
+        ValueSet o = (ValueSet) other_;
         return compareValues(immutable, o.immutable, true) && compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true)
            && compareValues(extensible, o.extensible, true);
       }
@@ -4989,26 +4989,6 @@ public class ValueSet extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
-   * Search parameter: <b>reference</b>
-   * <p>
-   * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.compose.include.system</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
-  public static final String SP_REFERENCE = "reference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>reference</b>
-   * <p>
-   * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.compose.include.system</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam REFERENCE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_REFERENCE);
-
- /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>External identifier for the value set</b><br>
@@ -5027,6 +5007,26 @@ public class ValueSet extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>This special parameter searches for codes in the value set. See additional notes on the ValueSet resource</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.expansion.contains.code, ValueSet.compose.include.concept.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="code", path="ValueSet.expansion.contains.code | ValueSet.compose.include.concept.code", description="This special parameter searches for codes in the value set. See additional notes on the ValueSet resource", type="token" )
+  public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>This special parameter searches for codes in the value set. See additional notes on the ValueSet resource</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.expansion.contains.code, ValueSet.compose.include.concept.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
    * Search parameter: <b>jurisdiction</b>
@@ -5049,26 +5049,6 @@ public class ValueSet extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
 
  /**
-   * Search parameter: <b>name</b>
-   * <p>
-   * Description: <b>Computationally friendly name of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.name</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="Computationally friendly name of the value set", type="string" )
-  public static final String SP_NAME = "name";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>name</b>
-   * <p>
-   * Description: <b>Computationally friendly name of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.name</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
-
- /**
    * Search parameter: <b>description</b>
    * <p>
    * Description: <b>The description of the value set</b><br>
@@ -5087,26 +5067,6 @@ public class ValueSet extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
-   * Search parameter: <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.publisher</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.publisher</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
    * Search parameter: <b>title</b>
@@ -5169,26 +5129,6 @@ public class ValueSet extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
-   * Search parameter: <b>status</b>
-   * <p>
-   * Description: <b>The current status of the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.status</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="status", path="ValueSet.status", description="The current status of the value set", type="token" )
-  public static final String SP_STATUS = "status";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>status</b>
-   * <p>
-   * Description: <b>The current status of the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.status</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
-
- /**
    * Search parameter: <b>expansion</b>
    * <p>
    * Description: <b>Uniquely identifies this expansion</b><br>
@@ -5207,6 +5147,86 @@ public class ValueSet extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam EXPANSION = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_EXPANSION);
+
+ /**
+   * Search parameter: <b>reference</b>
+   * <p>
+   * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.compose.include.system</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
+  public static final String SP_REFERENCE = "reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>reference</b>
+   * <p>
+   * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.compose.include.system</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam REFERENCE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_REFERENCE);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="ValueSet.name", description="Computationally friendly name of the value set", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The current status of the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="ValueSet.status", description="The current status of the value set", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The current status of the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

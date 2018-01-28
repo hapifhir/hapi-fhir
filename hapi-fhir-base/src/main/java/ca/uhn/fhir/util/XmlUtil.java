@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,22 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-import java.io.*;
-import java.util.*;
 
-import javax.xml.stream.*;
-import javax.xml.stream.events.XMLEvent;
-
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.jar.DependencyLogFactory;
+import ca.uhn.fhir.util.jar.IDependencyLog;
+import com.ctc.wstx.api.WstxInputProperties;
+import com.ctc.wstx.stax.WstxOutputFactory;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 
-import com.ctc.wstx.api.WstxInputProperties;
-import com.ctc.wstx.stax.WstxOutputFactory;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.util.jar.DependencyLogFactory;
-import ca.uhn.fhir.util.jar.IDependencyLog;
+import javax.xml.stream.*;
+import javax.xml.stream.events.XMLEvent;
+import java.io.*;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -1531,6 +1529,7 @@ public class XmlUtil {
 		try {
 			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
 			if (outputFactory instanceof WstxOutputFactory) {
+//				((WstxOutputFactory)outputFactory).getConfig().setAttrValueEscaperFactory(new MyEscaper());
 				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
 			}
 		} catch (ClassNotFoundException e) {
@@ -1539,10 +1538,9 @@ public class XmlUtil {
 		return outputFactory;
 	}
 
-	public static XMLEventWriter createXmlFragmentWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+	private static XMLEventWriter createXmlFragmentWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		XMLOutputFactory outputFactory = getOrCreateFragmentOutputFactory();
-		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
-		return retVal;
+		return outputFactory.createXMLEventWriter(theWriter);
 	}
 
 	public static XMLEventReader createXmlReader(Reader reader) throws FactoryConfigurationError, XMLStreamException {
@@ -1551,22 +1549,19 @@ public class XmlUtil {
 		XMLInputFactory inputFactory = getOrCreateInputFactory();
 
 		// Now.. create the reader and return it
-		XMLEventReader er = inputFactory.createXMLEventReader(reader);
-		return er;
+		return inputFactory.createXMLEventReader(reader);
 	}
 
 	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		throwUnitTestExceptionIfConfiguredToDoSo();
 
 		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
-		XMLStreamWriter retVal = outputFactory.createXMLStreamWriter(theWriter);
-		return retVal;
+		return outputFactory.createXMLStreamWriter(theWriter);
 	}
 
 	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
-		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
-		return retVal;
+		return outputFactory.createXMLEventWriter(theWriter);
 	}
 
 	/**
@@ -1771,7 +1766,7 @@ public class XmlUtil {
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
 		@Override
-		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) throws XMLStreamException {
+		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
 			if (thePublicID == null && theSystemID == null) {
 				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
 					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
@@ -1790,7 +1785,7 @@ public class XmlUtil {
 		}
 
 		@Override
-		public Writer createEscapingWriterFor(final Writer theW, String theEnc) throws UnsupportedEncodingException {
+		public Writer createEscapingWriterFor(final Writer theW, String theEnc) {
 			return new Writer() {
 
 				@Override

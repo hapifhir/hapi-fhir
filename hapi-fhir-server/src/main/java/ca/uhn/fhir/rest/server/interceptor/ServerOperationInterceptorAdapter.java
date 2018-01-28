@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,21 @@ public class ServerOperationInterceptorAdapter extends InterceptorAdapter implem
 
 	@Override
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		// nothing
 	}
 

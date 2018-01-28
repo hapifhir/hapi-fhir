@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -245,22 +245,22 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentManifestAgentComponent))
+        if (!(other_ instanceof DocumentManifestAgentComponent))
           return false;
-        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other;
+        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(who, o.who, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentManifestAgentComponent))
+        if (!(other_ instanceof DocumentManifestAgentComponent))
           return false;
-        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other;
+        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other_;
         return true;
       }
 
@@ -285,14 +285,14 @@ public class DocumentManifest extends DomainResource {
         protected Identifier identifier;
 
         /**
-         * Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.
+         * Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.
          */
         @Child(name = "ref", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc." )
+        @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc." )
         protected Reference ref;
 
         /**
-         * The actual object that is the target of the reference (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * The actual object that is the target of the reference (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         protected Resource refTarget;
 
@@ -330,7 +330,7 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @return {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public Reference getRef() { 
           if (this.ref == null)
@@ -346,7 +346,7 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @param value {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @param value {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public DocumentManifestRelatedComponent setRef(Reference value) { 
           this.ref = value;
@@ -354,14 +354,14 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #ref} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @return {@link #ref} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public Resource getRefTarget() { 
           return this.refTarget;
         }
 
         /**
-         * @param value {@link #ref} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @param value {@link #ref} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public DocumentManifestRelatedComponent setRefTarget(Resource value) { 
           this.refTarget = value;
@@ -371,14 +371,14 @@ public class DocumentManifest extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("identifier", "Identifier", "Related identifier to this DocumentManifest.  For example, Order numbers, accession numbers, XDW workflow numbers.", 0, 1, identifier));
-          children.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref));
+          children.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Related identifier to this DocumentManifest.  For example, Order numbers, accession numbers, XDW workflow numbers.", 0, 1, identifier);
-          case 112787: /*ref*/  return new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref);
+          case 112787: /*ref*/  return new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -462,22 +462,22 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentManifestRelatedComponent))
+        if (!(other_ instanceof DocumentManifestRelatedComponent))
           return false;
-        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other;
+        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(ref, o.ref, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentManifestRelatedComponent))
+        if (!(other_ instanceof DocumentManifestRelatedComponent))
           return false;
-        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other;
+        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other_;
         return true;
       }
 
@@ -577,7 +577,7 @@ public class DocumentManifest extends DomainResource {
     /**
      * The list of Resources that consist of the parts of this manifest.
      */
-    @Child(name = "content", type = {Reference.class}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "content", type = {Reference.class}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Items in manifest", formalDefinition="The list of Resources that consist of the parts of this manifest." )
     protected List<Reference> content;
     /**
@@ -1440,12 +1440,12 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentManifest))
+        if (!(other_ instanceof DocumentManifest))
           return false;
-        DocumentManifest o = (DocumentManifest) other;
+        DocumentManifest o = (DocumentManifest) other_;
         return compareDeep(masterIdentifier, o.masterIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(subject, o.subject, true)
            && compareDeep(created, o.created, true) && compareDeep(agent, o.agent, true) && compareDeep(recipient, o.recipient, true)
@@ -1454,12 +1454,12 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentManifest))
+        if (!(other_ instanceof DocumentManifest))
           return false;
-        DocumentManifest o = (DocumentManifest) other;
+        DocumentManifest o = (DocumentManifest) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(source, o.source, true)
            && compareValues(description, o.description, true);
       }

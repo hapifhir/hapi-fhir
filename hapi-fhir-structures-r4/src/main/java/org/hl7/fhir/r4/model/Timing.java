@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -394,23 +394,51 @@ public class Timing extends Type implements ICompositeType {
 
     public enum EventTiming {
         /**
-         * event occurs during the morning
+         * Event occurs during the morning. The exact time is unspecified and established by instition convention or patient interpretation
          */
         MORN, 
         /**
-         * event occurs during the afternoon
+         * Event occurs during the early morning. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        MORN_EARLY, 
+        /**
+         * Event occurs during the late morning. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        MORN_LATE, 
+        /**
+         * Event occurs around 12:00pm. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        NOON, 
+        /**
+         * Event occurs during the afternoon. The exact time is unspecified and established by instition convention or patient interpretation
          */
         AFT, 
         /**
-         * event occurs during the evening
+         * Event occurs during the early afternoon. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        AFT_EARLY, 
+        /**
+         * Event occurs during the late afternoon. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        AFT_LATE, 
+        /**
+         * Event occurs during the evening. The exact time is unspecified and established by instition convention or patient interpretation
          */
         EVE, 
         /**
-         * event occurs during the night
+         * Event occurs during the early evening. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        EVE_EARLY, 
+        /**
+         * Event occurs during the late evening. The exact time is unspecified and established by instition convention or patient interpretation
+         */
+        EVE_LATE, 
+        /**
+         * Event occurs during the night. The exact time is unspecified and established by instition convention or patient interpretation
          */
         NIGHT, 
         /**
-         * event occurs [offset] after subject goes to sleep
+         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by instition convention or patient interpretation
          */
         PHS, 
         /**
@@ -478,10 +506,24 @@ public class Timing extends Type implements ICompositeType {
                 return null;
         if ("MORN".equals(codeString))
           return MORN;
+        if ("MORN.early".equals(codeString))
+          return MORN_EARLY;
+        if ("MORN.late".equals(codeString))
+          return MORN_LATE;
+        if ("NOON".equals(codeString))
+          return NOON;
         if ("AFT".equals(codeString))
           return AFT;
+        if ("AFT.early".equals(codeString))
+          return AFT_EARLY;
+        if ("AFT.late".equals(codeString))
+          return AFT_LATE;
         if ("EVE".equals(codeString))
           return EVE;
+        if ("EVE.early".equals(codeString))
+          return EVE_EARLY;
+        if ("EVE.late".equals(codeString))
+          return EVE_LATE;
         if ("NIGHT".equals(codeString))
           return NIGHT;
         if ("PHS".equals(codeString))
@@ -522,8 +564,15 @@ public class Timing extends Type implements ICompositeType {
         public String toCode() {
           switch (this) {
             case MORN: return "MORN";
+            case MORN_EARLY: return "MORN.early";
+            case MORN_LATE: return "MORN.late";
+            case NOON: return "NOON";
             case AFT: return "AFT";
+            case AFT_EARLY: return "AFT.early";
+            case AFT_LATE: return "AFT.late";
             case EVE: return "EVE";
+            case EVE_EARLY: return "EVE.early";
+            case EVE_LATE: return "EVE.late";
             case NIGHT: return "NIGHT";
             case PHS: return "PHS";
             case HS: return "HS";
@@ -546,8 +595,15 @@ public class Timing extends Type implements ICompositeType {
         public String getSystem() {
           switch (this) {
             case MORN: return "http://hl7.org/fhir/event-timing";
+            case MORN_EARLY: return "http://hl7.org/fhir/event-timing";
+            case MORN_LATE: return "http://hl7.org/fhir/event-timing";
+            case NOON: return "http://hl7.org/fhir/event-timing";
             case AFT: return "http://hl7.org/fhir/event-timing";
+            case AFT_EARLY: return "http://hl7.org/fhir/event-timing";
+            case AFT_LATE: return "http://hl7.org/fhir/event-timing";
             case EVE: return "http://hl7.org/fhir/event-timing";
+            case EVE_EARLY: return "http://hl7.org/fhir/event-timing";
+            case EVE_LATE: return "http://hl7.org/fhir/event-timing";
             case NIGHT: return "http://hl7.org/fhir/event-timing";
             case PHS: return "http://hl7.org/fhir/event-timing";
             case HS: return "http://hl7.org/fhir/v3/TimingEvent";
@@ -569,11 +625,18 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case MORN: return "event occurs during the morning";
-            case AFT: return "event occurs during the afternoon";
-            case EVE: return "event occurs during the evening";
-            case NIGHT: return "event occurs during the night";
-            case PHS: return "event occurs [offset] after subject goes to sleep";
+            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by instition convention or patient interpretation";
+            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by instition convention or patient interpretation";
+            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by instition convention or patient interpretation";
+            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by instition convention or patient interpretation";
+            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
+            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
+            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
+            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by instition convention or patient interpretation";
+            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by instition convention or patient interpretation";
+            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by instition convention or patient interpretation";
+            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by instition convention or patient interpretation";
+            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by instition convention or patient interpretation";
             case HS: return "";
             case WAKE: return "";
             case C: return "";
@@ -594,8 +657,15 @@ public class Timing extends Type implements ICompositeType {
         public String getDisplay() {
           switch (this) {
             case MORN: return "Morning";
+            case MORN_EARLY: return "Early Morning";
+            case MORN_LATE: return "Late Morning";
+            case NOON: return "Noon";
             case AFT: return "Afternoon";
+            case AFT_EARLY: return "Early Afternoon";
+            case AFT_LATE: return "Late Afternoon";
             case EVE: return "Evening";
+            case EVE_EARLY: return "Early Evening";
+            case EVE_LATE: return "Late Evening";
             case NIGHT: return "Night";
             case PHS: return "After Sleep";
             case HS: return "HS";
@@ -624,10 +694,24 @@ public class Timing extends Type implements ICompositeType {
                 return null;
         if ("MORN".equals(codeString))
           return EventTiming.MORN;
+        if ("MORN.early".equals(codeString))
+          return EventTiming.MORN_EARLY;
+        if ("MORN.late".equals(codeString))
+          return EventTiming.MORN_LATE;
+        if ("NOON".equals(codeString))
+          return EventTiming.NOON;
         if ("AFT".equals(codeString))
           return EventTiming.AFT;
+        if ("AFT.early".equals(codeString))
+          return EventTiming.AFT_EARLY;
+        if ("AFT.late".equals(codeString))
+          return EventTiming.AFT_LATE;
         if ("EVE".equals(codeString))
           return EventTiming.EVE;
+        if ("EVE.early".equals(codeString))
+          return EventTiming.EVE_EARLY;
+        if ("EVE.late".equals(codeString))
+          return EventTiming.EVE_LATE;
         if ("NIGHT".equals(codeString))
           return EventTiming.NIGHT;
         if ("PHS".equals(codeString))
@@ -672,10 +756,24 @@ public class Timing extends Type implements ICompositeType {
             return null;
         if ("MORN".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.MORN);
+        if ("MORN.early".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.MORN_EARLY);
+        if ("MORN.late".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.MORN_LATE);
+        if ("NOON".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.NOON);
         if ("AFT".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.AFT);
+        if ("AFT.early".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.AFT_EARLY);
+        if ("AFT.late".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.AFT_LATE);
         if ("EVE".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.EVE);
+        if ("EVE.early".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.EVE_EARLY);
+        if ("EVE.late".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.EVE_LATE);
         if ("NIGHT".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.NIGHT);
         if ("PHS".equals(codeString))
@@ -713,10 +811,24 @@ public class Timing extends Type implements ICompositeType {
     public String toCode(EventTiming code) {
       if (code == EventTiming.MORN)
         return "MORN";
+      if (code == EventTiming.MORN_EARLY)
+        return "MORN.early";
+      if (code == EventTiming.MORN_LATE)
+        return "MORN.late";
+      if (code == EventTiming.NOON)
+        return "NOON";
       if (code == EventTiming.AFT)
         return "AFT";
+      if (code == EventTiming.AFT_EARLY)
+        return "AFT.early";
+      if (code == EventTiming.AFT_LATE)
+        return "AFT.late";
       if (code == EventTiming.EVE)
         return "EVE";
+      if (code == EventTiming.EVE_EARLY)
+        return "EVE.early";
+      if (code == EventTiming.EVE_LATE)
+        return "EVE.late";
       if (code == EventTiming.NIGHT)
         return "NIGHT";
       if (code == EventTiming.PHS)
@@ -766,10 +878,10 @@ public class Timing extends Type implements ICompositeType {
         protected Type bounds;
 
         /**
-         * A total count of the desired number of repetitions.
+         * A total count of the desired number of repetitions across the duration of the entire timing specification.
          */
         @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Number of times to repeat", formalDefinition="A total count of the desired number of repetitions." )
+        @Description(shortDefinition="Number of times to repeat", formalDefinition="A total count of the desired number of repetitions across the duration of the entire timing specification." )
         protected IntegerType count;
 
         /**
@@ -853,10 +965,10 @@ public class Timing extends Type implements ICompositeType {
         protected List<TimeType> timeOfDay;
 
         /**
-         * Real world events that the occurrence of the event should be tied to.
+         * An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.
          */
         @Child(name = "when", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="Real world events that the occurrence of the event should be tied to." )
+        @Description(shortDefinition="Code for time period of occurrence", formalDefinition="An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-timing")
         protected List<Enumeration<EventTiming>> when;
 
@@ -935,7 +1047,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #count} (A total count of the desired number of repetitions.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @return {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
          */
         public IntegerType getCountElement() { 
           if (this.count == null)
@@ -955,7 +1067,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #count} (A total count of the desired number of repetitions.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @param value {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
          */
         public TimingRepeatComponent setCountElement(IntegerType value) { 
           this.count = value;
@@ -963,14 +1075,14 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return A total count of the desired number of repetitions.
+         * @return A total count of the desired number of repetitions across the duration of the entire timing specification.
          */
         public int getCount() { 
           return this.count == null || this.count.isEmpty() ? 0 : this.count.getValue();
         }
 
         /**
-         * @param value A total count of the desired number of repetitions.
+         * @param value A total count of the desired number of repetitions across the duration of the entire timing specification.
          */
         public TimingRepeatComponent setCount(int value) { 
             if (this.count == null)
@@ -1603,7 +1715,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #when} (Real world events that the occurrence of the event should be tied to.)
+         * @return {@link #when} (An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.)
          */
         public List<Enumeration<EventTiming>> getWhen() { 
           if (this.when == null)
@@ -1629,7 +1741,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #when} (Real world events that the occurrence of the event should be tied to.)
+         * @return {@link #when} (An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.)
          */
         public Enumeration<EventTiming> addWhenElement() {//2 
           Enumeration<EventTiming> t = new Enumeration<EventTiming>(new EventTimingEnumFactory());
@@ -1640,7 +1752,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #when} (Real world events that the occurrence of the event should be tied to.)
+         * @param value {@link #when} (An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.)
          */
         public TimingRepeatComponent addWhen(EventTiming value) { //1
           Enumeration<EventTiming> t = new Enumeration<EventTiming>(new EventTimingEnumFactory());
@@ -1652,7 +1764,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #when} (Real world events that the occurrence of the event should be tied to.)
+         * @param value {@link #when} (An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.)
          */
         public boolean hasWhen(EventTiming value) { 
           if (this.when == null)
@@ -1711,7 +1823,7 @@ public class Timing extends Type implements ICompositeType {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds));
-          children.add(new Property("count", "integer", "A total count of the desired number of repetitions.", 0, 1, count));
+          children.add(new Property("count", "integer", "A total count of the desired number of repetitions across the duration of the entire timing specification.", 0, 1, count));
           children.add(new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax));
           children.add(new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration));
           children.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax));
@@ -1723,7 +1835,7 @@ public class Timing extends Type implements ICompositeType {
           children.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit));
           children.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
           children.add(new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay));
-          children.add(new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
+          children.add(new Property("when", "code", "An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.", 0, java.lang.Integer.MAX_VALUE, when));
           children.add(new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, 1, offset));
         }
 
@@ -1735,7 +1847,7 @@ public class Timing extends Type implements ICompositeType {
           case -189193367: /*boundsDuration*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
           case -1001768056: /*boundsRange*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
           case -1043481386: /*boundsPeriod*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
-          case 94851343: /*count*/  return new Property("count", "integer", "A total count of the desired number of repetitions.", 0, 1, count);
+          case 94851343: /*count*/  return new Property("count", "integer", "A total count of the desired number of repetitions across the duration of the entire timing specification.", 0, 1, count);
           case -372044331: /*countMax*/  return new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax);
           case -1992012396: /*duration*/  return new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration);
           case -478083280: /*durationMax*/  return new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax);
@@ -1747,7 +1859,7 @@ public class Timing extends Type implements ICompositeType {
           case 384367333: /*periodUnit*/  return new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit);
           case -730552025: /*dayOfWeek*/  return new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek);
           case 21434232: /*timeOfDay*/  return new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay);
-          case 3648314: /*when*/  return new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when);
+          case 3648314: /*when*/  return new Property("when", "code", "An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.", 0, java.lang.Integer.MAX_VALUE, when);
           case -1019779949: /*offset*/  return new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, 1, offset);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -2016,12 +2128,12 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TimingRepeatComponent))
+        if (!(other_ instanceof TimingRepeatComponent))
           return false;
-        TimingRepeatComponent o = (TimingRepeatComponent) other;
+        TimingRepeatComponent o = (TimingRepeatComponent) other_;
         return compareDeep(bounds, o.bounds, true) && compareDeep(count, o.count, true) && compareDeep(countMax, o.countMax, true)
            && compareDeep(duration, o.duration, true) && compareDeep(durationMax, o.durationMax, true) && compareDeep(durationUnit, o.durationUnit, true)
            && compareDeep(frequency, o.frequency, true) && compareDeep(frequencyMax, o.frequencyMax, true)
@@ -2031,12 +2143,12 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TimingRepeatComponent))
+        if (!(other_ instanceof TimingRepeatComponent))
           return false;
-        TimingRepeatComponent o = (TimingRepeatComponent) other;
+        TimingRepeatComponent o = (TimingRepeatComponent) other_;
         return compareValues(count, o.count, true) && compareValues(countMax, o.countMax, true) && compareValues(duration, o.duration, true)
            && compareValues(durationMax, o.durationMax, true) && compareValues(durationUnit, o.durationUnit, true)
            && compareValues(frequency, o.frequency, true) && compareValues(frequencyMax, o.frequencyMax, true)
@@ -2073,10 +2185,10 @@ public class Timing extends Type implements ICompositeType {
     protected TimingRepeatComponent repeat;
 
     /**
-     * A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).
+     * A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code)." )
+    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/timing-abbreviation")
     protected CodeableConcept code;
 
@@ -2175,7 +2287,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #code} (A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
+     * @return {@link #code} (A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -2191,7 +2303,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #code} (A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
+     * @param value {@link #code} (A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
      */
     public Timing setCode(CodeableConcept value) { 
       this.code = value;
@@ -2202,7 +2314,7 @@ public class Timing extends Type implements ICompositeType {
         super.listChildren(children);
         children.add(new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event));
         children.add(new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, 1, repeat));
-        children.add(new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code));
+        children.add(new Property("code", "CodeableConcept", "A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code));
       }
 
       @Override
@@ -2210,7 +2322,7 @@ public class Timing extends Type implements ICompositeType {
         switch (_hash) {
         case 96891546: /*event*/  return new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event);
         case -934531685: /*repeat*/  return new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, 1, repeat);
-        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2319,23 +2431,23 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Timing))
+        if (!(other_ instanceof Timing))
           return false;
-        Timing o = (Timing) other;
+        Timing o = (Timing) other_;
         return compareDeep(event, o.event, true) && compareDeep(repeat, o.repeat, true) && compareDeep(code, o.code, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Timing))
+        if (!(other_ instanceof Timing))
           return false;
-        Timing o = (Timing) other;
+        Timing o = (Timing) other_;
         return compareValues(event, o.event, true);
       }
 

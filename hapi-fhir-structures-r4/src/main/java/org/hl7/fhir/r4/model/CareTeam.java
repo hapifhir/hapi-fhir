@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -493,23 +493,23 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CareTeamParticipantComponent))
+        if (!(other_ instanceof CareTeamParticipantComponent))
           return false;
-        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other;
+        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(member, o.member, true) && compareDeep(onBehalfOf, o.onBehalfOf, true)
            && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CareTeamParticipantComponent))
+        if (!(other_ instanceof CareTeamParticipantComponent))
           return false;
-        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other;
+        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other_;
         return true;
       }
 
@@ -1608,12 +1608,12 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CareTeam))
+        if (!(other_ instanceof CareTeam))
           return false;
-        CareTeam o = (CareTeam) other;
+        CareTeam o = (CareTeam) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(period, o.period, true) && compareDeep(participant, o.participant, true) && compareDeep(reasonCode, o.reasonCode, true)
@@ -1622,12 +1622,12 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CareTeam))
+        if (!(other_ instanceof CareTeam))
           return false;
-        CareTeam o = (CareTeam) other;
+        CareTeam o = (CareTeam) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true);
       }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,34 +39,54 @@ public class ResearchStudyStatusEnumFactory implements EnumFactory<ResearchStudy
   public ResearchStudyStatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("draft".equals(codeString))
-      return ResearchStudyStatus.DRAFT;
-    if ("in-progress".equals(codeString))
-      return ResearchStudyStatus.INPROGRESS;
-    if ("suspended".equals(codeString))
-      return ResearchStudyStatus.SUSPENDED;
-    if ("stopped".equals(codeString))
-      return ResearchStudyStatus.STOPPED;
+    if ("active".equals(codeString))
+      return ResearchStudyStatus.ACTIVE;
+    if ("administratively-completed".equals(codeString))
+      return ResearchStudyStatus.ADMINISTRATIVELYCOMPLETED;
+    if ("approved".equals(codeString))
+      return ResearchStudyStatus.APPROVED;
+    if ("closed-to-accrual".equals(codeString))
+      return ResearchStudyStatus.CLOSEDTOACCRUAL;
+    if ("closed-to-accrual-and-intervention".equals(codeString))
+      return ResearchStudyStatus.CLOSEDTOACCRUALANDINTERVENTION;
     if ("completed".equals(codeString))
       return ResearchStudyStatus.COMPLETED;
-    if ("entered-in-error".equals(codeString))
-      return ResearchStudyStatus.ENTEREDINERROR;
+    if ("disapproved".equals(codeString))
+      return ResearchStudyStatus.DISAPPROVED;
+    if ("in-review".equals(codeString))
+      return ResearchStudyStatus.INREVIEW;
+    if ("temporarily-closed-to-accrual".equals(codeString))
+      return ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUAL;
+    if ("temporarily-closed-to-accrual-and-intervention".equals(codeString))
+      return ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION;
+    if ("withdrawn".equals(codeString))
+      return ResearchStudyStatus.WITHDRAWN;
     throw new IllegalArgumentException("Unknown ResearchStudyStatus code '"+codeString+"'");
   }
 
   public String toCode(ResearchStudyStatus code) {
-    if (code == ResearchStudyStatus.DRAFT)
-      return "draft";
-    if (code == ResearchStudyStatus.INPROGRESS)
-      return "in-progress";
-    if (code == ResearchStudyStatus.SUSPENDED)
-      return "suspended";
-    if (code == ResearchStudyStatus.STOPPED)
-      return "stopped";
+    if (code == ResearchStudyStatus.ACTIVE)
+      return "active";
+    if (code == ResearchStudyStatus.ADMINISTRATIVELYCOMPLETED)
+      return "administratively-completed";
+    if (code == ResearchStudyStatus.APPROVED)
+      return "approved";
+    if (code == ResearchStudyStatus.CLOSEDTOACCRUAL)
+      return "closed-to-accrual";
+    if (code == ResearchStudyStatus.CLOSEDTOACCRUALANDINTERVENTION)
+      return "closed-to-accrual-and-intervention";
     if (code == ResearchStudyStatus.COMPLETED)
       return "completed";
-    if (code == ResearchStudyStatus.ENTEREDINERROR)
-      return "entered-in-error";
+    if (code == ResearchStudyStatus.DISAPPROVED)
+      return "disapproved";
+    if (code == ResearchStudyStatus.INREVIEW)
+      return "in-review";
+    if (code == ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUAL)
+      return "temporarily-closed-to-accrual";
+    if (code == ResearchStudyStatus.TEMPORARILYCLOSEDTOACCRUALANDINTERVENTION)
+      return "temporarily-closed-to-accrual-and-intervention";
+    if (code == ResearchStudyStatus.WITHDRAWN)
+      return "withdrawn";
     return "?";
   }
 

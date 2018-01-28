@@ -501,7 +501,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo\"", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test

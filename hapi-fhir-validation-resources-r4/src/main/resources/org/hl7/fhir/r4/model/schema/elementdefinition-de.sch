@@ -35,7 +35,7 @@
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))">Pattern and value are mutually exclusive (inherited)</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">Constraints must be unique by key (inherited)</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">Types must be unique by the combination of code and profile (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\/\\-\\_]+$')">sliceName must be composed of proper tokens separated by &quot;/&quot; (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\/\\-_\\[\\]]+$')">sliceName must be composed of proper tokens separated by &quot;/&quot; (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">default value and meaningWhenMissing are mutually exclusive (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -89,7 +89,8 @@
     <sch:title>ElementDefinition.type</sch:title>
     <sch:rule context="f:ElementDefinition/f:type">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])">Aggregation may only be specified if one of the allowed types for the element is a resource (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])">Aggregation may only be specified if one of the allowed types for the element is a reference (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:targetProfile)) or (f:code/@value = 'Reference')">targetProfie is only allowed if the type is reference (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
@@ -108,7 +109,6 @@
     <sch:title>ElementDefinition.binding</sch:title>
     <sch:rule context="f:ElementDefinition/f:binding">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)">provide either a reference or a description (or both) (inherited)</sch:assert>
       <sch:assert test="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))">ValueSet as a URI SHALL start with http:// or https:// or urn: (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>

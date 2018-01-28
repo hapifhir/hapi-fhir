@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -523,23 +523,23 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceComponentProductionSpecificationComponent))
+        if (!(other_ instanceof DeviceComponentProductionSpecificationComponent))
           return false;
-        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other;
+        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other_;
         return compareDeep(specType, o.specType, true) && compareDeep(componentId, o.componentId, true)
            && compareDeep(productionSpec, o.productionSpec, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceComponentProductionSpecificationComponent))
+        if (!(other_ instanceof DeviceComponentProductionSpecificationComponent))
           return false;
-        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other;
+        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other_;
         return compareValues(productionSpec, o.productionSpec, true);
       }
 
@@ -841,23 +841,23 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceComponentPropertyComponent))
+        if (!(other_ instanceof DeviceComponentPropertyComponent))
           return false;
-        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other;
+        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(valueQuantity, o.valueQuantity, true) && compareDeep(valueCode, o.valueCode, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceComponentPropertyComponent))
+        if (!(other_ instanceof DeviceComponentPropertyComponent))
           return false;
-        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other;
+        DeviceComponentPropertyComponent o = (DeviceComponentPropertyComponent) other_;
         return true;
       }
 
@@ -1702,12 +1702,12 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceComponent))
+        if (!(other_ instanceof DeviceComponent))
           return false;
-        DeviceComponent o = (DeviceComponent) other;
+        DeviceComponent o = (DeviceComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(lastSystemChange, o.lastSystemChange, true)
            && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(parameterGroup, o.parameterGroup, true) && compareDeep(measurementPrinciple, o.measurementPrinciple, true)
@@ -1716,12 +1716,12 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceComponent))
+        if (!(other_ instanceof DeviceComponent))
           return false;
-        DeviceComponent o = (DeviceComponent) other;
+        DeviceComponent o = (DeviceComponent) other_;
         return compareValues(lastSystemChange, o.lastSystemChange, true) && compareValues(measurementPrinciple, o.measurementPrinciple, true)
           ;
       }
