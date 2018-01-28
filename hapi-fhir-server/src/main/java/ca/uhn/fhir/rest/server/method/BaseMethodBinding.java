@@ -494,10 +494,6 @@ public abstract class BaseMethodBinding<T> {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
-		} else if (addTags != null) {
-			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
-		} else if (deleteTags != null) {
-			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else if (operation != null) {

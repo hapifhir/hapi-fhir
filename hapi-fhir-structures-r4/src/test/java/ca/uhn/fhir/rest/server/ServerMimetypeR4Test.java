@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -272,8 +273,31 @@ public class ServerMimetypeR4Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
+	/**
+	 * See #837
+	 */
+	@Test
+	public void testResponseContentTypes() throws IOException {
+		assertEquals("application/fhir+json", readAndReturnContentType("application/fhir+json"));
+		assertEquals("application/fhir+xml", readAndReturnContentType(null));
+		assertEquals("application/json+fhir", readAndReturnContentType("application/json+fhir"));
+		assertEquals("application/json+fhir", readAndReturnContentType("application/json"));
+		assertEquals("application/fhir+json", readAndReturnContentType("application/fhir+json,application/json;q=0.9"));
+	}
 
-	
+	private String readAndReturnContentType(String theAccept) throws IOException {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		if (theAccept != null) {
+			httpGet.addHeader(Constants.HEADER_ACCEPT, theAccept);
+		}
+		HttpResponse status = ourClient.execute(httpGet);
+		String contentType = status.getEntity().getContentType().getValue();
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		contentType = contentType.replaceAll(";.*","");
+		return contentType;
+	}
+
+
 	@Test
 	public void testSearchWithFormatJsonSimple() throws Exception {
 

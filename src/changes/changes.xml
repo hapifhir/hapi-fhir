@@ -8,6 +8,17 @@
 	<body>
 		<release version="3.3.0" date="TBD">
 			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA): 5.2.10.Final -&gt; 5.2.12.Final</li>
+						<li>Spring (JPA): 5.0.0 -&gt; 5.0.3</li>
+						<li>Thymeleaf (Web Tespage Overlay): 3.0.7.RELEASE -&gt; 3.0.9.RELEASE</li>
+					</ul>
+				]]>
+			</action>
+		<action type="add">
 				This release corrects an inefficiency in the JPA Server, but requires a schema
 				change in order to update. Prior to this version of HAPI FHIR, a CLOB column
 				containing the complete resource body was stored in two 
@@ -31,6 +42,17 @@
 			<action type="fix" issue="832">
 				Fix an issue where the JPA server crashed while attempting to normalize string values
 				containing Korean text. Thanks to GitHub user @JoonggeonLee for reporting!
+			</action>
+			<action type="fix">
+				An issue was solved where it was possible for server interceptors
+				to have both processingCompletedNormally and handleException called
+				if the stream.close() method threw an exception. Thanks to Carlos
+				Eduardo Lara Augusto for investigating!
+			</action>
+			<action type="remove" issue="831">
+				The <![CDATA[<code>@TagListParam</code>]]> annotation has been removed. This
+				annotation had no use after DSTU1 but never got deleted and was misleading. Thanks
+				to Angelo Kastroulis for reporting!
 			</action>
 			<action type="add">
 				A new method overload has been added to IServerInterceptor:
