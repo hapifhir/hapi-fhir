@@ -204,7 +204,8 @@
 		
 			<p>
 				The HAPI FHIR RESTful Server will automatically export a 
-				<a href="http://hl7.org/implement/standards/fhir/conformance.html">conformance statement</a>, 
+				<a href="http://hl7.org/implement/standards/fhir/capabilitystatement.html">capability statement</a> (or a
+				<a href="https://www.hl7.org/fhir/DSTU2/conformance.html">conformance statement</a> for DSTU2 and prior), 
 				as required by the
 				<a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR Specification</a>.
 			</p>
