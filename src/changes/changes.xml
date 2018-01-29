@@ -74,6 +74,11 @@
 				it is possible to perform Schematron validation on Java 9. Thanks to
 				Mark Grimes for reporting and suggesting a fix!
 			</action>
+			<action type="add">
+				An experimental interceptor called VersionedApiConverterInterceptor has been added,
+				which automaticaly converts response payloads to a client-specified version
+				according to transforms built into FHIR.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
