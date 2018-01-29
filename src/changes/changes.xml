@@ -67,6 +67,13 @@
 				accommodate future needs which means that this should be the last
 				time we have to change it.
 			</action>
+			<action type="fix" issue="838">
+				The HAPI-FHIR-CLI now explicitly includes JAXB dependencies in its combined JAR
+				file. These were not neccesary prior to Java 9, but the JDK (mercifully) does
+				not include JAXB in the default classpath as of Java 9. This means that
+				it is possible to perform Schematron validation on Java 9. Thanks to
+				Mark Grimes for reporting and suggesting a fix!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
