@@ -291,7 +291,7 @@ public class ResourceValidatorDstu3Test {
 		String input = "{\n" +
 			"  \"resourceType\": \"Questionnaire\",\n" +
 			"  \"url\": \"http://some.example.url\",\n" +
-			"  \"status\": \"published\",\n" +
+			"  \"status\": \"active\",\n" +
 			"  \"subjectType\": [\n" +
 			"    \"Patient\"\n" +
 			"  ],\n" +
