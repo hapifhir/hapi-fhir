@@ -506,12 +506,11 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateRawXmlResourceWithEmptyPrimitive() {
-		// @formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><name><given/></name></Patient>";
-		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 2, output.getMessages().size());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output.toOperationOutcome()));
+		assertEquals(output.toString(), 3, output.getMessages().size());
 		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(output.getMessages().get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
 	}
@@ -677,7 +676,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.context: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}

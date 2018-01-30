@@ -170,7 +170,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("minimum required = 1, but only found 0 - QuestionnaireResponse.item"));
+		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
 	}
 
 	@Test

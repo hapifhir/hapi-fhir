@@ -1,29 +1,20 @@
 package org.hl7.fhir.dstu3.context;
 
-import java.util.List;
-import java.util.Set;
-
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.ExpansionProfile;
-import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.TerminologyServiceErrorClass;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -101,14 +92,6 @@ public interface IWorkerContext {
    */
   public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath);
 
-  /**
-   * Get a validator that can check whether a resource is valid 
-   * 
-   * @return a prepared generator
-   * @throws FHIRException 
-   * @
-   */
-  public IResourceValidator newValidator() throws FHIRException;
 
   // -- resource fetchers ---------------------------------------------------
 
@@ -130,8 +113,6 @@ public interface IWorkerContext {
    * It's an error if the second form doesn't agree with class_. It's an 
    * error if class_ is null for the last form
    * 
-   * @param resource
-   * @param Reference
    * @return
    * @throws FHIRException 
    * @throws Exception

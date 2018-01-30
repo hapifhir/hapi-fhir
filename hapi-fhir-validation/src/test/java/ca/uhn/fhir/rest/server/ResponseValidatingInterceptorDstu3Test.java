@@ -286,7 +286,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchJsonInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -305,7 +304,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
-		Assert.assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
 		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
@@ -384,7 +382,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchXmlInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -403,7 +400,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
-		Assert.assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
+		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test

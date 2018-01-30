@@ -8,20 +8,9 @@
 	<body>
 		<release version="3.3.0" date="TBD">
 			<action type="add">
-				The version of a few dependencies have been bumped to the
-				latest versions (dependent HAPI modules listed in brackets):
-				<![CDATA[
-					<ul>
-						<li>Hibernate (JPA): 5.2.10.Final -&gt; 5.2.12.Final</li>
-						<li>Spring (JPA): 5.0.0 -&gt; 5.0.3</li>
-						<li>Thymeleaf (Web Tespage Overlay): 3.0.7.RELEASE -&gt; 3.0.9.RELEASE</li>
-					</ul>
-				]]>
-			</action>
-		<action type="add">
 				This release corrects an inefficiency in the JPA Server, but requires a schema
 				change in order to update. Prior to this version of HAPI FHIR, a CLOB column
-				containing the complete resource body was stored in two 
+				containing the complete resource body was stored in two
 				tables: HFJ_RESOURCE and HFJ_RES_VER. Because the same content was stored in two
 				places, the database consumed more space than is needed to.
 				<![CDATA[<br/><br/>]]>
@@ -31,6 +20,26 @@
 				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]> (or
 				set them to nullable if you want an easy means of rolling back). Naturally
 				you should back your database up prior to making this change.
+			</action>
+			<action type="fix">
+				The validation module has been refactored to use the R4 (currently maintained)
+				validator even for DSTU3 validation. This is done by using an automatic
+				converter which converts StructureDefinition/ValueSet/CodeSystem resources
+				which are used as inputs to the validator. This change should fix a number
+				of known issues with the validator, as they have been fixed in R4 but
+				not in DSTU3. This also makes our validator much more maintainable
+				since it is now one codebase.
+			</action>
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA): 5.2.10.Final -&gt; 5.2.12.Final</li>
+						<li>Spring (JPA): 5.0.0 -&gt; 5.0.3</li>
+						<li>Thymeleaf (Web Tespage Overlay): 3.0.7.RELEASE -&gt; 3.0.9.RELEASE</li>
+					</ul>
+				]]>
 			</action>
 			<action type="fix">
 				Fix a crash in the JSON parser when parsing extensions on repeatable
