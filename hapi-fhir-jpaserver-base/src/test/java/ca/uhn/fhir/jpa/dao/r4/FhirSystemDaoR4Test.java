@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -12,11 +11,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -25,7 +24,6 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -55,46 +53,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-	}
-
-	/**
-	 * See #811
-	 */
-	@Test
-	public void testUpdatePreviouslyDeletedResourceInBatch() {
-		AllergyIntolerance ai = new AllergyIntolerance();
-		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
-		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
-		assertEquals("1", id.getVersionIdPart());
-
-		id = myAllergyIntoleranceDao.delete(ai.getIdElement().toUnqualifiedVersionless()).getId();
-		assertEquals("2", id.getVersionIdPart());
-
-		try {
-			myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless());
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-
-		Bundle batch = new Bundle();
-		batch.setType(BundleType.BATCH);
-		ai = new AllergyIntolerance();
-		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
-		batch
-			.addEntry()
-			.setFullUrl("AllergyIntolerance/AIA1914009")
-			.setResource(ai)
-			.getRequest()
-			.setUrl("AllergyIntolerance/AIA1914009")
-			.setMethod(HTTPVerb.PUT);
-		mySystemDao.transaction(mySrd, batch);
-
-		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
-		assertEquals("3", id.getVersionIdPart());
-
 	}
 
 	@Before
@@ -2489,7 +2447,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	/*
 	 * Make sure we are able to handle placeholder IDs in match URLs, e.g.
-	 * 
+	 *
 	 * "request": {
 	 * "method": "PUT",
 	 * "url": "Observation?subject=urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00"
@@ -2519,7 +2477,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	/*
 	 * Make sure we are able to handle placeholder IDs in match URLs, e.g.
-	 * 
+	 *
 	 * "request": {
 	 * "method": "PUT",
 	 * "url": "Observation?subject=urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00"
@@ -2583,7 +2541,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
 	}
 
-
 	@Test
 	public void testTransactionWithReferenceResource() {
 		Bundle request = new Bundle();
@@ -2611,7 +2568,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, found.size().intValue());
 	}
 
-
 	@Test
 	public void testTransactionWithReferenceToCreateIfNoneExist() {
 		Bundle bundle = new Bundle();
@@ -2635,9 +2591,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType medId1 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 
-        /*
-			* Again!
-         */
+		/*
+		 * Again!
+		 */
 
 		bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -2663,6 +2619,33 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals(medId1, medId2);
 		assertNotEquals(medOrderId1, medOrderId2);
+	}
+
+	@Test
+	public void testTransactionWithReferenceUuid() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
 	}
 
 	//
@@ -2766,34 +2749,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	// assertEquals(existing2.get(0).getId(), existing.get(2).getId());
 	//
 	// }
-
-
-	@Test
-	public void testTransactionWithReferenceUuid() {
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
-
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference(p.getId());
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-
-		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("subject", new ReferenceParam(patientId));
-		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
-	}
 
 	@Test
 	public void testTransactionWithRelativeOidIds() throws Exception {
@@ -2956,6 +2911,46 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		res = myOrganizationDao.search(map);
 		assertEquals(1, res.size().intValue());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+	}
+
+	/**
+	 * See #811
+	 */
+	@Test
+	public void testUpdatePreviouslyDeletedResourceInBatch() {
+		AllergyIntolerance ai = new AllergyIntolerance();
+		ai.setId("AIA1914009");
+		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		id = myAllergyIntoleranceDao.delete(ai.getIdElement().toUnqualifiedVersionless()).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		try {
+			myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		Bundle batch = new Bundle();
+		batch.setType(BundleType.BATCH);
+		ai = new AllergyIntolerance();
+		ai.setId("AIA1914009");
+		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		batch
+			.addEntry()
+			.setFullUrl("AllergyIntolerance/AIA1914009")
+			.setResource(ai)
+			.getRequest()
+			.setUrl("AllergyIntolerance/AIA1914009")
+			.setMethod(HTTPVerb.PUT);
+		mySystemDao.transaction(mySrd, batch);
+
+		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
+		assertEquals("3", id.getVersionIdPart());
 
 	}
 

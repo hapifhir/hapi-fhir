@@ -88,6 +88,11 @@
 				which automaticaly converts response payloads to a client-specified version
 				according to transforms built into FHIR.
 			</action>
+			<action type="fix" issue="822">
+				Searches which were embedded in a Bundle as a transaction or batch operation did
+				not respect any chained method parameters (e.g. MedicationRequest?medication.code=123).
+				Thanks to @manjusampath for reporting!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

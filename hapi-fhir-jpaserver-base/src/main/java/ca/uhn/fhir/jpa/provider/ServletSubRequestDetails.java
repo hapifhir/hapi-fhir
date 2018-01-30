@@ -29,13 +29,13 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
-	private Map<String, ArrayList<String>> myHeaders = new HashMap<String, ArrayList<String>>();
+	private Map<String, ArrayList<String>> myHeaders = new HashMap<>();
 
 	public void addHeader(String theName, String theValue) {
 		String lowerCase = theName.toLowerCase();
 		ArrayList<String> list = myHeaders.get(lowerCase);
 		if (list == null) {
-			list = new ArrayList<String>();
+			list = new ArrayList<>();
 			myHeaders.put(lowerCase, list);
 		}
 		list.add(theValue);

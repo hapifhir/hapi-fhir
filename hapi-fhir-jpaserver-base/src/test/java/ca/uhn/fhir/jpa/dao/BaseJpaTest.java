@@ -158,7 +158,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		Integer size = theFound.size();
 		StopWatch sw = new StopWatch();
 		while (size == null) {
@@ -171,6 +171,7 @@ public abstract class BaseJpaTest {
 			} catch (InterruptedException theE) {
 				//ignore
 			}
+			size = theFound.size();
 		}
 
 		ourLog.info("Found {} results", size);

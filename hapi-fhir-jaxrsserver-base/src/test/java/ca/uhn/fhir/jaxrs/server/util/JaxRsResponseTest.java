@@ -88,7 +88,7 @@ public class JaxRsResponseTest {
 
 	@Test
 	public void testReturnResponseAsXml() throws IOException {
-		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
+		response.getRequestDetails().addParameter(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
@@ -100,7 +100,7 @@ public class JaxRsResponseTest {
 
 	@Test
 	public void testNoOutcomeXml() throws IOException {
-		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
+		response.getRequestDetails().addParameter(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);

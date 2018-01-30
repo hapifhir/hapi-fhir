@@ -323,10 +323,10 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				force = true;
 			} else if (Constants.FORMATS_HTML_XML.equals(formatParam)) {
 				force = true;
-				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_XML);
+				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_XML);
 			} else if (Constants.FORMATS_HTML_JSON.equals(formatParam)) {
 				force = true;
-				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
+				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
 			} else {
 				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 			}
