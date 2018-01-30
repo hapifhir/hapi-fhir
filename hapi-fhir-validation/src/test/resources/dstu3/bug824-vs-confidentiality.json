@@ -1,0 +1,82 @@
+{
+	"resourceType": "ValueSet",
+	"id": "fiphr-vs-confidentiality",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2017-03-02T13:56:51.448+00:00",
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">!-- Snipped for Brevity --&gt;</div>"
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/valueset-oid",
+			"valueUri": "urn:oid:2.16.840.1.113883.4.642.2.37"
+		}
+	],
+	"url": "http://phr.kanta.fi/ValueSet/fiphr-vs-confidentiality",
+	"version": "0.01",
+	"name": "Value Set Finnish PHR Confidentiality",
+	"status": "draft",
+	"experimental": true,
+	"date": "2016-11-23T06:00:00+00:00",
+	"publisher": "Kela",
+	"contact": [
+		{
+			"telecom": [
+				{
+					"system": "email",
+					"value": "kantakehitys@kanta.fi"
+				},
+				{
+					"system": "other",
+					"value": "http://www.kanta.fi/en/web/ammattilaisille/omakannan-omatietovarannon-maarittelyt"
+				}
+			]
+		}
+	],
+	"description": "Value set for confidentiality codes used in finnish PHR",
+	"immutable": false,
+	"extensible": false,
+	"compose": {
+		"include": [
+			{
+				"system": "http://hl7.org/fhir/v3/Confidentiality",
+				"concept": [
+					{
+						"code": "R",
+						"display": "Restricted",
+						"designation": [
+							{
+								"language": "fi",
+								"value": "Yksityinen"
+							},
+							{
+								"language": "en",
+								"value": "Restricted"
+							}
+						]
+					},
+					{
+						"code": "U",
+						"display": "Unrestricted",
+						"designation": [
+							{
+								"language": "en",
+								"value": "Unrestricted"
+							},
+							{
+								"language": "fi",
+								"value": "Suojaamaton"
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"resourceType":"CodeSystem",
+	"id":"fiphr-cs-observationmethod",
+	"meta":{
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+		]
+	},
+	"url":"http://phr.kanta.fi/fiphr-cs-observationmethod",
+	"version":"0.01",
+	"name":"Code System Finnish PHR Observation Method ",
+	"status":"draft",
+	"experimental":true,
+	"date":"2017-05-22T06:00:00+00:00",
+	"publisher":"Kela ",
+	"description":"Finnish PHR Observation Method codes.",
+	"caseSensitive":true,
+	"content":"complete",
+	"concept": [
+		{
+			"code":"1",
+			"display":"Method 1",
+			"definition":"Method 1",
+			"designation": [
+				{
+					"language":"fi",
+					"value":"Metodi 1"
+				},
+				{
+					"language":"sv",
+					"value":"Metod 1"
+				}
+			]
+		}
+	]
+}

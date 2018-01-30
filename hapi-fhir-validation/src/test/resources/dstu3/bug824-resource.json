@@ -1,0 +1,177 @@
+{
+	"resourceType": "Observation",
+	"meta": {
+		"profile": [
+			"http://phr.kanta.fi/StructureDefinition/fiphr-pef-stu3"
+		],
+		"security": [
+			{
+				"system": "http://hl7.org/fhir/v3/Confidentiality",
+				"code": "U",
+				"display": "unrestricted"
+			}
+		]
+	},
+	"language": "fi",
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> Mittaustulos<b>Boldattuu </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>Patient/7cf4b0bd-cfb3-493b-a6ee-b290f1a2a72e</td></tr></tbody></table></div>"
+	},
+	"identifier": [
+		{
+			"system": "urn:ietf:rfc:3986",
+			"value": "urn:uuid:187e0c12-8dd2-67e2-99b2-bf273a9549222"
+		}
+	],
+	"contained": [
+		{
+			"resourceType": "Device",
+			"id": "dev1",
+			"meta": {
+				"profile": [
+					"http://phr.kanta.fi/StructureDefinition/fiphr-device"
+				]
+			},
+			"identifier": [
+				{
+					"system": "urn:ietf:rfc:3986",
+					"value": "urn:uuid:187e0c12-8dd2-67e2-99b2-bf273a9549222"
+				}
+			],
+			"udi": {
+				"deviceIdentifier": "Device123",
+				"name": "Scalpel, single-use"
+			}
+		}
+	],
+	"status": "final",
+	"category": [
+		{
+			"coding": [
+				{
+					"system": "http://hl7.org/fhir/observation-category",
+					"code": "vital-signs",
+					"display": "Vital Signs"
+				}
+			]
+		}
+	],
+	"code": {
+		"coding": [
+			{
+				"system": "http://loinc.org",
+				"code": "19935-6",
+				"display": "Maximum expiratory gas flow Respiratory system airway by Peak flow meter"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/7cf4b0bd-cfb3-493b-a6ee-b290f1a2a72e"
+	},
+	"effectiveDateTime": "2017-11-22",
+	"issued": "2017-11-22T16:52:00.943+03:00",
+	"performer": [
+		{
+			"reference": "Patient/7cf4b0bd-cfb3-493b-a6ee-b290f1a2a72e"
+		}
+	],
+	"valueQuantity": {
+		"value": 134,
+		"unit": "L/min",
+		"system": "http://unitsofmeasure.org",
+		"code": "L/min"
+	},
+	"interpretation": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/v2/0078",
+				"code": "<",
+				"display": "Off scale low"
+			}
+		]
+	},
+	"comment": "tÃ¤ssÃ¤ on kommentteja",
+	"method": {
+		"coding": [
+			{
+				"system": "http://phr.kanta.fi/fiphr-cs-observationmethod",
+				"code": "1",
+				"display": "maxima"
+			}
+		],
+		"text": "tÃ¤ssÃ¤ tÃ¤ssÃ¤ mehhod"
+	},
+	"device": {
+		"reference": "#dev1"
+	},
+	"referenceRange": [
+		{
+			"low":
+				{
+					"value": 10,
+					"unit": "L/min",
+					"system": "http://hl7.org/fhir/v2/0078",
+					"code": "LU"
+				}
+			,
+			"high":
+				{
+					"value": 16,
+					"unit": "L/min",
+					"system": "http://hl7.org/fhir/v2/0078",
+					"code": "LU"
+				}
+			,
+			"appliesTo": [
+				{
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/referencerange-meaning",
+							"code": "normal",
+							"display": "Normal Range"
+						}
+					],
+					"text": "TÃ¯Â¿Â½ssÃ¯Â¿Â½ tekstiÃ¯Â¿Â½"
+				}
+			],
+			"age": {
+				"low":
+					{
+						"value": 1,
+						"unit": "years",
+						"system": "http://unitsofmeasure.org",
+						"code": "21612-7"
+					}
+				,
+				"high":
+					{
+						"value": 1,
+						"unit": "years",
+						"system": "http://unitsofmeasure.org",
+						"code": "21612-7"
+					}
+
+			},
+			"text": "Sopiva ikÃ¤"
+		}
+	],
+	"extension": [
+		{
+			"url": "http://phr.kanta.fi/StructureDefinition/fiphr-medicationcontext",
+			"valueCodeableConcept": {
+				"coding":[
+					{
+						"system": "http://phr.kanta.fi/fiphr-cs-medicationcontext",
+						"code": "13",
+						"display": "Before medication"
+					}
+				],
+				"text": "mun teksti"
+			}
+		},
+		{
+			"url": "http://phr.kanta.fi/StructureDefinition/fiphr-boolean",
+			"valueBoolean": true
+		}
+	]
+}
