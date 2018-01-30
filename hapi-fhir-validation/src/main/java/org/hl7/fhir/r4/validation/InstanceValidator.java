@@ -1340,15 +1340,27 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		String encoded = e.primitiveValue();
 		if (isNotBlank(encoded)) {
 			/*
-			 * Note: Regex comes from: https://stackoverflow.com/questions/8571501/how-to-check-whether-the-string-is-base64-encoded-or-not
-			 *
 			 * Technically this is not bulletproof as some invalid base64 won't be caught,
 			 * but I think it's good enough. The original code used Java8 Base64 decoder
 			 * but I've replaced it with a regex for 2 reasons:
 			 * 1. This code will run on any version of Java
 			 * 2. This code doesn't actually decode, which is much easier on memory use for big payloads
 			 */
-			if (!encoded.matches("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$")) {
+			int charCount = 0;
+			for (int i = 0; i < encoded.length(); i++) {
+				char nextChar = encoded.charAt(i);
+				if (Character.isWhitespace(nextChar)) {
+					continue;
+				}
+				if (Character.isLetterOrDigit(nextChar)) {
+					charCount++;
+				}
+				if (nextChar == '/' || nextChar == '=' || nextChar == '+') {
+					charCount++;
+				}
+			}
+
+			if (charCount > 0 && charCount % 4 != 0) {
 				String value = encoded.length() < 100 ? encoded : "(snip)";
 				rule(errors, IssueType.INVALID, e.line(), e.col(), path, false, "The value \"{0}\" is not a valid Base64 value", value);
 			}

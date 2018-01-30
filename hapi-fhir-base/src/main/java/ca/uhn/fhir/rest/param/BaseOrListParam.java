@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.param;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,23 +20,35 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType> implements IQueryParameterOr<PT> {
 
-	private List<PT> myList=new ArrayList<PT>();
+	private List<PT> myList = new ArrayList<>();
 
-//	public void addToken(T theParam) {
-//		Validate.notNull(theParam,"Param can not be null");
-//		myList.add(theParam);
-//	}
-	
+	@SuppressWarnings("unchecked")
+	public MT add(PT theParameter) {
+		if (theParameter != null) {
+			myList.add(theParameter);
+		}
+		return (MT) this;
+	}
+
+	public abstract MT addOr(PT theParameter);
+
+	@Override
+	public List<PT> getValuesAsQueryTokens() {
+		return myList;
+	}
+
+	abstract PT newInstance();
+
 	@Override
 	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 		myList.clear();
@@ -47,21 +59,9 @@ abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQue
 		}
 	}
 
-	abstract PT newInstance();
-
-	public abstract MT addOr(PT theParameter);
-	
-	@SuppressWarnings("unchecked")
-	public MT add(PT theParameter) {
-		if (theParameter != null) {
-			myList.add(theParameter);
-		}
-		return (MT) this;
-	}
-	
 	@Override
-	public List<PT> getValuesAsQueryTokens() {
-		return myList;
+	public String toString() {
+		return myList.toString();
 	}
 
 }

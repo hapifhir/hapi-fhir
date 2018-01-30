@@ -279,21 +279,23 @@ public abstract class RequestDetails {
 	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
-		for (String next : myParameters.keySet()) {
-			for (int i = 0; i < next.length(); i++) {
-				char nextChar = next.charAt(i);
-				if (nextChar == ':' || nextChar == '.') {
-					if (myUnqualifiedToQualifiedNames == null) {
-						myUnqualifiedToQualifiedNames = new HashMap<>();
+		if (myUnqualifiedToQualifiedNames == null) {
+			for (String next : myParameters.keySet()) {
+				for (int i = 0; i < next.length(); i++) {
+					char nextChar = next.charAt(i);
+					if (nextChar == ':' || nextChar == '.') {
+						if (myUnqualifiedToQualifiedNames == null) {
+							myUnqualifiedToQualifiedNames = new HashMap<>();
+						}
+						String unqualified = next.substring(0, i);
+						List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
+						if (list == null) {
+							list = new ArrayList<>(4);
+							myUnqualifiedToQualifiedNames.put(unqualified, list);
+						}
+						list.add(next);
+						break;
 					}
-					String unqualified = next.substring(0, i);
-					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
-					if (list == null) {
-						list = new ArrayList<>(4);
-						myUnqualifiedToQualifiedNames.put(unqualified, list);
-					}
-					list.add(next);
-					break;
 				}
 			}
 		}
