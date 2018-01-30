@@ -1,20 +1,24 @@
 package org.hl7.fhir.r4.validation;
 
-import ca.uhn.fhir.util.ObjectUtil;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import org.apache.commons.codec.binary.Base64;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.*;
+
+import javax.rmi.CORBA.Util;
+
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.exceptions.DefinitionException;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.exceptions.*;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
+import org.hl7.fhir.r4.elementmodel.*;
 import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.elementmodel.Element.SpecialElement;
-import org.hl7.fhir.r4.elementmodel.*;
 import org.hl7.fhir.r4.elementmodel.Manager.FhirFormat;
 import org.hl7.fhir.r4.elementmodel.ParserBase.ValidationPolicy;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -24,38 +28,26 @@ import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.*;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemOptionComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionSnapshotComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r4.model.Questionnaire.*;
+import org.hl7.fhir.r4.model.StructureDefinition.*;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.r4.utils.*;
 import org.hl7.fhir.r4.utils.FHIRLexer.FHIRLexerException;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.utils.FHIRPathEngine.IEvaluationContext;
-import org.hl7.fhir.r4.utils.IResourceValidator;
-import org.hl7.fhir.r4.utils.ToolingExtensions;
-import org.hl7.fhir.r4.utils.ValidationProfileSet;
 import org.hl7.fhir.r4.utils.ValidationProfileSet.ProfileRegistration;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
+import org.hl7.fhir.utilities.validation.ValidationMessage.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.util.ObjectUtil;
 
 
 /**
@@ -149,7 +141,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private IWorkerContext context;
-  private FHIRPathEngine fpe;
+  private FHIRPathEngine fpe; 
 
   // configuration items
   private CheckDisplayOption checkDisplay;
@@ -1193,7 +1185,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       List<Element> extensions = new ArrayList<Element>();
       focus.getNamedChildren("extension", extensions);
       if (fixed.getExtension().size() == 0) {
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed");
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed, as the specified fixed value doesn't contain any extensions");
       } else if (rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == fixed.getExtension().size(),
           "Extensions count mismatch: expected " + Integer.toString(fixed.getExtension().size()) + " but found " + Integer.toString(extensions.size()))) {
         for (Extension e : fixed.getExtension()) {
@@ -1345,22 +1337,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         }
     }
     if (type.equals("base64Binary")) {
-		String encoded = e.primitiveValue();
-		if (isNotBlank(encoded)) {
-			/*
-			 * Note: Regex comes from: https://stackoverflow.com/questions/8571501/how-to-check-whether-the-string-is-base64-encoded-or-not
-			 *
-			 * Technically this is not bulletproof as some invalid base64 won't be caught,
-			 * but I think it's good enough. The original code used Java8 Base64 decoder
-			 * but I've replaced it with a regex for 2 reasons:
-			 * 1. This code will run on any version of Java
-			 * 2. This code doesn't actually decode, which is much easier on memory use for big payloads
-			 */
-			if (!encoded.matches("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$")) {
-				String value = encoded.length() < 100 ? encoded : "(snip)";
-				rule(errors, IssueType.INVALID, e.line(), e.col(), path, false, "The value \"{0}\" is not a valid Base64 value", value);
-			}
-		}
+      try {
+        byte[] b = Base64.getDecoder().decode(StringUtils.deleteWhitespace(e.primitiveValue()));
+      } catch (IllegalArgumentException ex) {
+        rule(errors, IssueType.INVALID, e.line(), e.col(), path, false, "The value (snip) is not a valid Base64 value: "+ex.getMessage());
+      }
+
     }
     if (type.equals("integer") || type.equals("unsignedInt") || type.equals("positiveInt")) {
       if (rule(errors, IssueType.INVALID, e.line(), e.col(), path, Utilities.isInteger(e.primitiveValue()), "The value '" + e.primitiveValue() + "' is not a valid integer")) {
@@ -2976,8 +2958,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
 
     List<Element> unusedResources = new ArrayList<Element>();
-    boolean reverseLinksFound = false;
+    boolean reverseLinksFound;
     do {
+      reverseLinksFound = false;
       followResourceLinks(entries.get(0), visitedResources, candidateEntries, candidateResources, errors, stack);
       unusedResources.clear();
       unusedResources.addAll(candidateResources);
@@ -3206,7 +3189,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
             rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, false, "This element does not match any known slice" + (profile == null ? "" : " for profile " + profile.getUrl() + " and slicing is CLOSED"));
           }
         } else {
-          hint(errors, IssueType.NOTSUPPORTED, ei.line(), ei.col(), ei.path, (ei.definition != null), "Could not verify slice for profile " + profile.getUrl());
+          // Don't raise this if we're in an abstract profile, like Resource
+          if (!profile.getAbstract())
+            hint(errors, IssueType.NOTSUPPORTED, ei.line(), ei.col(), ei.path, (ei.definition != null), "Could not verify slice for profile " + profile.getUrl());
         }
       // TODO: Should get the order of elements correct when parsing elements that are XML attributes vs. elements
       boolean isXmlAttr = false;
@@ -3251,7 +3236,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         if (ed.getMin() > 0) {
           if (problematicPaths.contains(ed.getPath()))
             hint(errors, IssueType.NOTSUPPORTED, element.line(), element.col(), stack.getLiteralPath(), count >= ed.getMin(),
-            location + "': Unable to check minimum required (" + Integer.toString(ed.getMin()) + ") due to lack of slicing validation");
+            location + ": Unable to check minimum required (" + Integer.toString(ed.getMin()) + ") due to lack of slicing validation");
           else
             rule(errors, IssueType.STRUCTURE, element.line(), element.col(), stack.getLiteralPath(), count >= ed.getMin(),
             location + ": minimum required = " + Integer.toString(ed.getMin()) + ", but only found " + Integer.toString(count));
