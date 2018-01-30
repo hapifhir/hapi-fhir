@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -54,6 +55,46 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+	}
+
+	/**
+	 * See #811
+	 */
+	@Test
+	public void testUpdatePreviouslyDeletedResourceInBatch() {
+		AllergyIntolerance ai = new AllergyIntolerance();
+		ai.setId("AIA1914009");
+		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		id = myAllergyIntoleranceDao.delete(ai.getIdElement().toUnqualifiedVersionless()).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		try {
+			myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		Bundle batch = new Bundle();
+		batch.setType(BundleType.BATCH);
+		ai = new AllergyIntolerance();
+		ai.setId("AIA1914009");
+		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		batch
+			.addEntry()
+			.setFullUrl("AllergyIntolerance/AIA1914009")
+			.setResource(ai)
+			.getRequest()
+			.setUrl("AllergyIntolerance/AIA1914009")
+			.setMethod(HTTPVerb.PUT);
+		mySystemDao.transaction(mySrd, batch);
+
+		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
+		assertEquals("3", id.getVersionIdPart());
+
 	}
 
 	@Before
