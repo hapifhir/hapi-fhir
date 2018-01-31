@@ -93,6 +93,11 @@
 				not respect any chained method parameters (e.g. MedicationRequest?medication.code=123).
 				Thanks to @manjusampath for reporting!
 			</action>
+			<action type="fix">
+				A few fixes went into the build which should now allow HAPI FHIR
+				to build correctly on JDK 9.0. Currently building is supported on
+				JDK 8.x and 9.x only.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
