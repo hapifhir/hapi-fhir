@@ -15,6 +15,12 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
+
+import java.util.Set;
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);
@@ -37,13 +43,15 @@ public class ExceptionPropertiesTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testExceptionsAreGood() throws Exception {
-		ImmutableSet<ClassInfo> classes = ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClasses(BaseServerResponseException.class.getPackage().getName());
-		assertTrue(classes.size() > 5);
+		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+		scanner.addIncludeFilter(new AssignableTypeFilter(BaseServerResponseException.class));
+		Set<BeanDefinition> classes = scanner.findCandidateComponents(BaseServerResponseException.class.getPackage().getName());
+		assertTrue(classes.toString(), classes.size() > 5);
 
-		for (ClassInfo classInfo : classes) {
-			ourLog.info("Scanning {}", classInfo.getName());
+		for (BeanDefinition classInfo : classes) {
+			ourLog.info("Scanning {}", classInfo.getBeanClassName());
 
-			Class<?> next = Class.forName(classInfo.getName());
+			Class<?> next = Class.forName(classInfo.getBeanClassName());
 			assertNotNull(next);
 
 			if (next == getClass()) {
@@ -69,7 +77,7 @@ public class ExceptionPropertiesTest {
 			try {
 				next.getConstructor(String.class, IBaseOperationOutcome.class);
 			} catch (NoSuchMethodException e) {
-				fail(classInfo.getName() + " has no constructor with params: (String, IBaseOperationOutcome)");
+				fail(classInfo.getBeanClassName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}
 		}
 

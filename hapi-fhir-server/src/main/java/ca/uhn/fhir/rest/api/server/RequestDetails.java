@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -30,9 +31,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,6 +63,11 @@ public abstract class RequestDetails {
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
+
+	public void addParameter(String theName, String[] theValues) {
+		getParameters();
+		myParameters.put(theName, theValues);
+	}
 
 	protected abstract byte[] getByteStreamRequestContents();
 
@@ -170,37 +176,14 @@ public abstract class RequestDetails {
 
 	public Map<String, String[]> getParameters() {
 		if (myParameters == null) {
-			return Collections.emptyMap();
+			myParameters = new HashMap<>();
 		}
-		return myParameters;
+		return Collections.unmodifiableMap(myParameters);
 	}
 
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
-
-		for (String next : theParams.keySet()) {
-			for (int i = 0; i < next.length(); i++) {
-				char nextChar = next.charAt(i);
-				if (nextChar == ':' || nextChar == '.') {
-					if (myUnqualifiedToQualifiedNames == null) {
-						myUnqualifiedToQualifiedNames = new HashMap<>();
-					}
-					String unqualified = next.substring(0, i);
-					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
-					if (list == null) {
-						list = new ArrayList<>(4);
-						myUnqualifiedToQualifiedNames.put(unqualified, list);
-					}
-					list.add(next);
-					break;
-				}
-			}
-		}
-
-		if (myUnqualifiedToQualifiedNames == null) {
-			myUnqualifiedToQualifiedNames = Collections.emptyMap();
-		}
-
+		myUnqualifiedToQualifiedNames = null;
 	}
 
 	/**
@@ -296,6 +279,31 @@ public abstract class RequestDetails {
 	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
+		if (myUnqualifiedToQualifiedNames == null) {
+			for (String next : myParameters.keySet()) {
+				for (int i = 0; i < next.length(); i++) {
+					char nextChar = next.charAt(i);
+					if (nextChar == ':' || nextChar == '.') {
+						if (myUnqualifiedToQualifiedNames == null) {
+							myUnqualifiedToQualifiedNames = new HashMap<>();
+						}
+						String unqualified = next.substring(0, i);
+						List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
+						if (list == null) {
+							list = new ArrayList<>(4);
+							myUnqualifiedToQualifiedNames.put(unqualified, list);
+						}
+						list.add(next);
+						break;
+					}
+				}
+			}
+		}
+
+		if (myUnqualifiedToQualifiedNames == null) {
+			myUnqualifiedToQualifiedNames = Collections.emptyMap();
+		}
+
 		return myUnqualifiedToQualifiedNames;
 	}
 
@@ -357,6 +365,12 @@ public abstract class RequestDetails {
 			myRequestContents = getByteStreamRequestContents();
 		}
 		return myRequestContents;
+	}
+
+	public void removeParameter(String theName) {
+		Validate.notNull(theName, "theName must not be null");
+		getParameters();
+		myParameters.remove(theName);
 	}
 
 	/**

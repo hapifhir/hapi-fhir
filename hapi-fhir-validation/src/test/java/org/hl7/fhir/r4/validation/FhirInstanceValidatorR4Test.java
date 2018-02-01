@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -246,6 +247,15 @@ public class FhirInstanceValidatorR4Test {
 		assertEquals(0, errors.size());
 
 	}
+
+	@Test
+	public void testLargeBase64() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, errors.size());
+	}
+
 
 	@Test @Ignore
 	public void testValidateDocument() throws Exception {

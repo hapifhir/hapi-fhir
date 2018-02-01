@@ -46,6 +46,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -411,6 +412,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
+		myDaoConfig.setSchedulingDisabled(true);
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
@@ -449,7 +451,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		myResourceIndexedCompositeStringUniqueDao.deleteAll();
 
-		mySystemDao.markAllResourcesForReindexing();
+		assertEquals(1, mySearchParamRegsitry.getActiveUniqueSearchParams("Observation").size());
+
+		assertEquals(7, mySystemDao.markAllResourcesForReindexing());
 		mySystemDao.performReindexingPass(1000);
 		mySystemDao.performReindexingPass(1000);
 

@@ -165,7 +165,7 @@ public class SearchDefaultMethodDstu3Test {
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
 			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
-			assertThat(ourLastParam2.getValuesAsQueryTokens(), hasSize(2));
+			assertThat(ourLastParam2.toString(), ourLastParam2.getValuesAsQueryTokens(), hasSize(2));
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
 			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 			assertEquals("val2e", ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());

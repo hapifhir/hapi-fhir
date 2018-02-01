@@ -191,6 +191,23 @@
 			<artifactId>phloc-commons</artifactId>
 		</dependency>
 
+		<!--
+		These have been added as explicit dependencies
+		as JDK9 no longer includes them by default
+		-->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.fusesource.jansi</groupId>
 			<artifactId>jansi</artifactId>

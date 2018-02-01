@@ -266,7 +266,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				}
 				for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
 					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
-					requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
+					requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
 				}
 				url = url.substring(0, qIndex);
 			}
@@ -290,7 +290,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextReqEntry.getRequest().getIfNoneMatch());
 			}
 
-			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
+			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {0}", url);
 			try {
 				IBaseResource resource = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
 				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {

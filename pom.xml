@@ -408,6 +408,8 @@
 
 		<!-- Dependency Versions -->
 		<derby_version>10.14.1.0</derby_version>
+		<jaxb_api_version>2.3.0</jaxb_api_version>
+		<jaxb_core_version>2.3.0</jaxb_core_version>
 		<jersey_version>2.25.1</jersey_version>
 		<jetty_version>9.4.8.v20171121</jetty_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
@@ -581,9 +583,24 @@
 				<version>1.1</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb_api_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>2.8.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-core</artifactId>
+				<version>${jaxb_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.mail</groupId>
@@ -1063,9 +1080,9 @@
 				<plugin>
 					<groupId>de.juplo</groupId>
 					<artifactId>hibernate-maven-plugin</artifactId>
-					<version>2.0.0</version>
+					<version>2.1.1</version>
 					<configuration>
-						<export>false</export>
+						<execute>false</execute>
 						<skip>false</skip>
 						<scanDependencies>false</scanDependencies>
 						<scanTestClasses>false</scanTestClasses>
@@ -1972,10 +1989,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>ERRORPRONE</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+			<id>ERRORPRONE_JDK8</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -1984,6 +1998,27 @@
 						<configuration>
 							<compilerId>javac-with-errorprone</compilerId>
 						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>ERRORPRONE_JDK9</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<compilerId>javac-with-errorprone</compilerId>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>com.google.errorprone</groupId>
+								<artifactId>error_prone_core</artifactId>
+								<version>2.2.0</version>
+							</dependency>
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>

@@ -938,8 +938,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			/*
 			 * If we're handling an exception, no summary mode should be applied
 			 */
-			requestDetails.getParameters().remove(Constants.PARAM_SUMMARY);
-			requestDetails.getParameters().remove(Constants.PARAM_ELEMENTS);
+			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
+			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
 
 			/*
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.

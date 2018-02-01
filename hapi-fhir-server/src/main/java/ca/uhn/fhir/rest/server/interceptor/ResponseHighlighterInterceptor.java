@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -322,10 +323,10 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				force = true;
 			} else if (Constants.FORMATS_HTML_XML.equals(formatParam)) {
 				force = true;
-				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_XML);
+				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_XML);
 			} else if (Constants.FORMATS_HTML_JSON.equals(formatParam)) {
 				force = true;
-				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
+				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
 			} else {
 				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 			}
@@ -392,7 +393,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		}
 	}
 
-	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource, ServletRequest theServletRequest, int theStatusCode) {
+	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource theResource, ServletRequest theServletRequest, int theStatusCode) {
 
 		if (theRequestDetails.getServer() instanceof RestfulServer) {
 			RestfulServer rs = (RestfulServer) theRequestDetails.getServer();
@@ -402,7 +403,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		IParser p;
 		Map<String, String[]> parameters = theRequestDetails.getParameters();
 		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
-			p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), theRequestDetails);
+			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
+			p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
 		} else {
 			EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
 			p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
@@ -423,7 +425,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		}
 
 		EncodingEnum encoding = p.getEncoding();
-		String encoded = p.encodeResourceToString(resource);
+		String encoded = p.encodeResourceToString(theResource);
 
 		try {
 
@@ -615,7 +617,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("\n");
 
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
-			String jsStr = jsStream != null ? IOUtils.toString(jsStream, "UTF-8") : "console.log('ResponseHighlighterInterceptor: javascript resource not found')";
+			String jsStr = jsStream != null ? IOUtils.toString(jsStream, "UTF-8") : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
 			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
 			b.append("<script type=\"text/javascript\">");
 			b.append(jsStr);

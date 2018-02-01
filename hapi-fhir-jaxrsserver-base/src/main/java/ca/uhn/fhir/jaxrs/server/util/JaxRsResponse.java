@@ -91,7 +91,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 		StringWriter writer = new StringWriter();
 		if (outcome != null) {
 			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();
-			IParser parser = RestfulServerUtils.getNewParser(fhirContext, getRequestDetails());
+			IParser parser = RestfulServerUtils.getNewParser(fhirContext, fhirContext.getVersion().getVersion(), getRequestDetails());
 			outcome.execute(parser, writer);
 		}
 		return sendWriterResponse(operationStatus, getParserType(), null, writer);

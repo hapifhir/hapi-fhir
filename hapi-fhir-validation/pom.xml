@@ -25,6 +25,11 @@
 			<artifactId>hapi-fhir-utilities</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-converter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- 
 		Optional dependencies from RI codebase
@@ -105,12 +110,6 @@
          <artifactId>woodstox-core-asl</artifactId>
          <scope>test</scope>
       </dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-converter</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
