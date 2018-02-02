@@ -192,10 +192,10 @@ public class ParameterUtil {
 	}
 
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
+		if (theArgument == null) {
+			return null;
+		}
 		if (theType.equals(Integer.class)) {
-			if (theArgument == null) {
-				return null;
-			}
 			return theArgument.getValue();
 		}
 		IPrimitiveType<?> retVal = (IPrimitiveType<?>) ReflectionUtil.newInstance(theType);

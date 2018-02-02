@@ -728,6 +728,7 @@ public class JsonParserDstu3Test {
 		Observation obs = new Observation();
 		obs.setId("1");
 		obs.getMeta().addProfile("http://profile");
+		obs.setStatus(ObservationStatus.FINAL);
 		Extension ext = obs.addExtension();
 		ext.setUrl("http://exturl").setValue(new StringType("ext_url_value"));
 
@@ -758,6 +759,9 @@ public class JsonParserDstu3Test {
 		assertEquals(1, obs.getExtension().size());
 		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
 		assertEquals("ext_url_value", ((StringType) obs.getExtension().get(0).getValue()).getValue());
+		assertEquals("final", obs.getStatusElement().getValueAsString());
+		assertEquals(ObservationStatus.FINAL, obs.getStatusElement().getValue());
+
 	}
 
 	@Test

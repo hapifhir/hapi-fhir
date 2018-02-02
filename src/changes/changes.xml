@@ -98,6 +98,12 @@
 				to build correctly on JDK 9.0. Currently building is supported on
 				JDK 8.x and 9.x only.
 			</action>
+			<action type="fix">
+				Fixed a regression in server where a count parameter in the form
+				<![CDATA[<code>@Count IntegerType theCount</code>]]>
+				caused an exception if the client made a request with
+				no count parameter included. Thanks to Viviana Sanz for reporting!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
