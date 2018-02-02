@@ -98,6 +98,17 @@
 				to build correctly on JDK 9.0. Currently building is supported on
 				JDK 8.x and 9.x only.
 			</action>
+			<action type="fix" issue="837">
+				Client requests with an
+				<![CDATA[<code>Accept</code>]]>
+				header value of
+				<![CDATA[<code>application/json</code>]]>
+				will now be served with the non-legacy content type of
+				<![CDATA[<code>application/fhir+json</code>]]>
+				instead of the legacy
+				<![CDATA[<code>application/json+fhir</code>]]>.
+				Thanks to John Grimes for reporting!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
