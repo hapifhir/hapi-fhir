@@ -119,7 +119,7 @@ public class JaxRsResponseDstu3Test {
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/fhir+xml; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("<Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
