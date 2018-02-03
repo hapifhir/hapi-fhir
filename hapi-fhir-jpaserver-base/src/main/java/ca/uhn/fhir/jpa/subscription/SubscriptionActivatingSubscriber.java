@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.SubscriptionUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -30,12 +33,14 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.*;
+
+import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 @SuppressWarnings("unchecked")
 public class SubscriptionActivatingSubscriber {
@@ -92,11 +97,18 @@ public class SubscriptionActivatingSubscriber {
 		}
 	}
 
-	private void activateSubscription(IPrimitiveType<?> theStatus, String theActiveStatus, IBaseResource theSubscription, String theRequestedStatus) {
+	private void activateSubscription(IPrimitiveType<?> theStatus, String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		theStatus.setValueAsString(theActiveStatus);
 		ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
-		mySubscriptionDao.update(theSubscription);
-		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+		try {
+			mySubscriptionDao.update(theSubscription);
+		} catch (final UnprocessableEntityException e) {
+			ourLog.info("Changing status of {} to ERROR", theSubscription.getIdElement());
+			IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
+			SubscriptionUtil.setStatus(myCtx, subscription, "error");
+			SubscriptionUtil.setReason(myCtx, subscription, e.getMessage());
+			mySubscriptionDao.update(subscription);
+		}
 	}
 
 

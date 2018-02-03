@@ -104,6 +104,16 @@
 				caused an exception if the client made a request with
 				no count parameter included. Thanks to Viviana Sanz for reporting!
 			</action>
+			<action type="fix">
+				A bug in the JPA server was fixed where a Subscription incorrectly created 
+				without a status or with invalid criteria would cause a crash during 
+				startup.
+			</action>
+			<action type="add">
+				ResponseHighlightingInterceptor now properly parses _format 
+				parameters that include additional content (e.g.
+				<![CDATA[<code>_format=html/json;fhirVersion=1.0</code>]]>)
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

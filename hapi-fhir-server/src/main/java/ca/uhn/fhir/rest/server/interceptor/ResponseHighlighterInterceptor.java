@@ -318,7 +318,13 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		boolean force = false;
 		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
 		if (formatParams != null && formatParams.length > 0) {
-			String formatParam = formatParams[0];
+			String formatParam = defaultString(formatParams[0]);
+			int semiColonIdx = formatParam.indexOf(';');
+			if (semiColonIdx != -1) {
+				formatParam = formatParam.substring(0, semiColonIdx);
+			}
+			formatParam = trim(formatParam);
+
 			if (Constants.FORMATS_HTML.contains(formatParam)) { // this is a set
 				force = true;
 			} else if (Constants.FORMATS_HTML_XML.equals(formatParam)) {

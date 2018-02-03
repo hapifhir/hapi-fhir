@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -37,19 +38,15 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSubscriptionR4.class);
-
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
-
-	@Autowired
-	private PlatformTransactionManager myTxManager;
 
 	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
 		SubscriptionTable subscriptionEntity = new SubscriptionTable();
@@ -108,7 +105,18 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		}
 	}
 
+	@Nullable
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), Subscription.SubscriptionStatus.OFF)) {
+			case REQUESTED:
+			case ACTIVE:
+				break;
+			case ERROR:
+			case OFF:
+			case NULL:
+				return null;
+		}
+
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
@@ -145,6 +153,9 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+		if (resDef == null) {
+			return;
+		}
 
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
 		if (dao == null) {

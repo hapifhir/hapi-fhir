@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
@@ -75,8 +76,6 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.io.CharArrayWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
@@ -104,6 +103,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
+	private static boolean ourValidationDisabledForUnitTest;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
@@ -1213,6 +1213,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		retVal.removeAll(theToRemove);
 		return retVal;
 	}
+
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
 		for (BaseResourceIndexedSearchParam nextSearchParam : theParams) {
 			nextSearchParam.setUpdated(theUpdateTime);
@@ -1377,7 +1378,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 */
 		if (theResource != null) {
 			if (thePerformIndexing) {
-				validateResourceForStorage((T) theResource, theEntity);
+				if (!ourValidationDisabledForUnitTest) {
+					validateResourceForStorage((T) theResource, theEntity);
+				}
 			}
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
@@ -2103,6 +2106,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		}
 		return b.toString();
+	}
+
+	/**
+	 * Do not call this method outside of unit tests
+	 */
+	@VisibleForTesting
+	public static void setValidationDisabledForUnitTest(boolean theValidationDisabledForUnitTest) {
+		ourValidationDisabledForUnitTest = theValidationDisabledForUnitTest;
 	}
 
 	private static List<BaseCodingDt> toBaseCodingList(List<IBaseCoding> theSecurityLabels) {

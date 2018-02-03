@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
@@ -108,6 +109,16 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), SubscriptionStatus.OFF)) {
+			case REQUESTED:
+			case ACTIVE:
+				break;
+			case ERROR:
+			case OFF:
+			case NULL:
+				return null;
+		}
+
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
@@ -144,6 +155,9 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+		if (resDef == null) {
+			return;
+		}
 
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
 		if (dao == null) {
