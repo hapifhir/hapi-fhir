@@ -334,7 +334,7 @@ public class Controller extends BaseController {
 
 		if (client.getEncoding() != null) {
 			clientCodeJsonWriter.name("format");
-			clientCodeJsonWriter.value(client.getEncoding().getRequestContentType());
+			clientCodeJsonWriter.value(client.getEncoding().getFormatContentType());
 		} else {
 			clientCodeJsonWriter.name("format");
 			clientCodeJsonWriter.nullValue();

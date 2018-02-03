@@ -19,12 +19,14 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.apache.commons.lang3.ObjectUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import org.apache.commons.lang3.ObjectUtils;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum EncodingEnum {
 
@@ -40,39 +42,40 @@ public enum EncodingEnum {
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
-	}
+	};
 
-	;
-
-	/** "json" */
-	public  static final String JSON_PLAIN_STRING = "json";
-	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
-	
-	private static Map<String, EncodingEnum> ourContentTypeToEncodingNonLegacy;
-	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
-	/** "xml" */
+	/**
+	 * "json"
+	 */
+	public static final String JSON_PLAIN_STRING = "json";
+	/**
+	 * "xml"
+	 */
 	public static final String XML_PLAIN_STRING = "xml";
+	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
+	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
+	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
 
 	static {
-		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
-		ourContentTypeToEncodingNonLegacy = new HashMap<String, EncodingEnum>();
-		
+		ourContentTypeToEncoding = new HashMap<>();
+		ourContentTypeToEncodingLegacy = new HashMap<>();
+
 		for (EncodingEnum next : values()) {
 			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy, next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy, next);
-			ourContentTypeToEncodingNonLegacy.put(next.myResourceContentTypeNonLegacy, next);
+			ourContentTypeToEncodingLegacy.put(next.myResourceContentTypeLegacy, next);
 
 			/*
 			 * See #346
 			 */
 			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
-			ourContentTypeToEncodingNonLegacy.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
+			ourContentTypeToEncodingLegacy.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
 
 		}
 
 		// Add before we add the lenient ones
-		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<String, EncodingEnum>(ourContentTypeToEncoding));
+		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<>(ourContentTypeToEncoding));
 
 		/*
 		 * These are wrong, but we add them just to be tolerant of other
@@ -89,7 +92,7 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put(JSON_PLAIN_STRING, JSON);
 		ourContentTypeToEncoding.put(XML_PLAIN_STRING, XML);
 
-		ourContentTypeToEncodingNonLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingNonLegacy);
+		ourContentTypeToEncodingLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingLegacy);
 
 	}
 
@@ -104,10 +107,6 @@ public enum EncodingEnum {
 	}
 
 	public String getFormatContentType() {
-		return myFormatContentType;
-	}
-
-	public String getRequestContentType() {
 		return myFormatContentType;
 	}
 
@@ -150,7 +149,7 @@ public enum EncodingEnum {
 
 	/**
 	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
-	 * is found. 
+	 * is found.
 	 * <p>
 	 * <b>This method is lenient!</b> Things like "application/xml" will return {@link EncodingEnum#XML}
 	 * even if the "+fhir" part is missing from the expected content type.
@@ -163,19 +162,23 @@ public enum EncodingEnum {
 
 	/**
 	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
-	 * is found. 
+	 * is found.
 	 * <p>
 	 * <b>This method is NOT lenient!</b> Things like "application/xml" will return <code>null</code>
 	 * </p>
+	 *
 	 * @see #forContentType(String)
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
 		return ourContentTypeToEncodingStrict.get(theContentType);
 	}
 
-	public static boolean isNonLegacy(String theFormat) {
-		return ourContentTypeToEncodingNonLegacy.containsKey(theFormat);
+	/**
+	 * Is the given type a FHIR legacy (pre-DSTU3) content type?
+	 */
+	public static boolean isLegacy(String theFormat) {
+		return ourContentTypeToEncodingLegacy.containsKey(theFormat);
 	}
 
-	
+
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -764,17 +764,15 @@ public class RestfulServerUtils {
 			super();
 			myEncoding = theEncoding;
 			if (theContentType != null) {
+				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
 				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
-					FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU3)
-						|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()));
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1);
 				} else {
-					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
 				}
 			} else {
 				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)
-					|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && "1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()))) {
+				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
 					myNonLegacy = null;
 				} else {
 					myNonLegacy = Boolean.TRUE;
