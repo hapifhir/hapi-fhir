@@ -81,7 +81,7 @@
 				file. These were not neccesary prior to Java 9, but the JDK (mercifully) does
 				not include JAXB in the default classpath as of Java 9. This means that
 				it is possible to perform Schematron validation on Java 9. Thanks to
-				Mark Grimes for reporting and suggesting a fix!
+				John Grimes for reporting and suggesting a fix!
 			</action>
 			<action type="add">
 				An experimental interceptor called VersionedApiConverterInterceptor has been added,
