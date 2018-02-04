@@ -22,6 +22,7 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -42,6 +43,8 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
+	@Autowired
+	private AsyncTaskExecutor myAsyncTaskExecutor;
 
 	@After
 	public void after() throws Exception {
@@ -70,6 +73,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriber.setResourceDaos(myResourceDaos);
 		mySubscriber.setFhirContext(myFhirCtx);
 		mySubscriber.setTxManager(ourTxManager);
+		mySubscriber.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
 		mySubscriber.start();
 		ourRestServer.registerInterceptor(mySubscriber);
 

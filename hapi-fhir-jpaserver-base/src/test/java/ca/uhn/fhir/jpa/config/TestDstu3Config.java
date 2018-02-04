@@ -47,7 +47,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 
 			@Override
-			public Connection getConnection() throws SQLException {
+			public Connection getConnection() {
 				ConnectionWrapper retVal;
 				try {
 					retVal = new ConnectionWrapper(super.getConnection());

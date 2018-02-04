@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -45,11 +46,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	public void before() {
 		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
+		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 	}
 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setCountSearchResultsUpTo(10000);
 	}
 
 	@Test

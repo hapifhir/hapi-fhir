@@ -1,21 +1,35 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu3Config;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,29 +41,16 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.TestDstu3Config;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.search.*;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.method.MethodUtil;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu3Config.class})
+@ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
@@ -254,6 +255,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
+
 		final EntityManager entityManager = this.myEntityManager;
 		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}

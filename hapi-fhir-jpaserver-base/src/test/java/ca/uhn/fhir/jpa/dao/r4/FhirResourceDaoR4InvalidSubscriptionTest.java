@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -9,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -26,8 +28,14 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
 	@After
 	public void afterResetDao() {
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
+	}
+
+	@Before
+	public void before() {
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 
 	@Test
@@ -45,7 +53,7 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 			mySubscriptionDao.update(s);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Subscription.criteria must be in the form \"{Resource Type}?[params]", e.getMessage());
+			assertEquals("Subscription.criteria must be in the form \"{Resource Type}?[params]\"", e.getMessage());
 		}
 	}
 

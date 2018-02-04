@@ -1,35 +1,21 @@
-
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +39,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	public void afterUnregisterEmailListener() {
 		ourLog.info("**** Starting @After *****");
 
-		for (IIdType next : mySubscriptionIds){
+		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
@@ -71,7 +57,8 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
-		ourTestSmtp.purgeEmailFromAllMailboxes();;
+		ourTestSmtp.purgeEmailFromAllMailboxes();
+		;
 		ourRestServer.registerInterceptor(ourEmailSubscriptionInterceptor);
 
 		JavaMailEmailSender emailSender = new JavaMailEmailSender();
@@ -82,24 +69,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourEmailSubscriptionInterceptor.setEmailSender(emailSender);
 		ourEmailSubscriptionInterceptor.setDefaultFromAddress("123@hapifhir.io");
 	}
-
-	@AfterClass
-	public static void afterClass() {
-		ourTestSmtp.stop();
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
-		smtp.setServerStartupTimeout(2000);
-		smtp.setReadTimeout(2000);
-		smtp.setConnectionTimeout(2000);
-		ourTestSmtp = new GreenMail(smtp);
-		ourTestSmtp.start();
-	}
-
-
 
 	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
 		Subscription subscription = new Subscription();
@@ -161,14 +130,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 		assertEquals(1, received.get(0).getFrom().length);
-		assertEquals("123@hapifhir.io", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
+		assertEquals("123@hapifhir.io", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
-		assertEquals("foo@example.com", ((InternetAddress)received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 	}
-
 
 	@Test
 	public void testEmailSubscriptionWithCustom() throws Exception {
@@ -180,6 +148,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
 		Assert.assertNotNull(subscriptionTemp);
+
 		subscriptionTemp.getChannel().addExtension()
 			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("mailto:myfrom@from.com"));
@@ -208,9 +177,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 		assertEquals(1, received.size());
 		assertEquals(1, received.get(0).getFrom().length);
-		assertEquals("myfrom@from.com", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
+		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
-		assertEquals("foo@example.com", ((InternetAddress)received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
 		assertEquals("This is the body", received.get(0).getContent().toString().trim());
@@ -235,13 +204,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
+		IIdType id = ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute().getId();
+		ourLog.info("Subscription ID is: {}", id.getValue());
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
-
-
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
-
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -256,17 +222,39 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 		assertEquals(1, received.size());
 		assertEquals(1, received.get(0).getFrom().length);
-		assertEquals("myfrom@from.com", ((InternetAddress)received.get(0).getFrom()[0]).getAddress());
+		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
-		assertEquals("foo@example.com", ((InternetAddress)received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
 		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+
+		ourLog.info("Subscription: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ourClient.history().onInstance(id).andReturnBundle(Bundle.class).execute()));
+
+		Subscription subscription = ourClient.read().resource(Subscription.class).withId(id.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
+		assertEquals("3", subscription.getIdElement().getVersionIdPart());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		RestHookTestDstu2Test.waitForQueueToDrain(ourEmailSubscriptionInterceptor);
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		ourTestSmtp.stop();
+	}
+
+	@BeforeClass
+	public static void beforeClass() {
+		ourListenerPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		smtp.setServerStartupTimeout(2000);
+		smtp.setReadTimeout(2000);
+		smtp.setConnectionTimeout(2000);
+		ourTestSmtp = new GreenMail(smtp);
+		ourTestSmtp.start();
 	}
 
 }

@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -92,8 +93,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired(required = false)
 	@Qualifier("myEventDefinitionDaoR4")
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
-	@Autowired
+	@Autowired()
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private AsyncTaskExecutor myAsyncTaskExecutor;
 
 	/**
 	 * Constructor
@@ -364,6 +367,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		});
 	}
 
+	@VisibleForTesting
+	public void setAsyncTaskExecutorForUnitTest(AsyncTaskExecutor theAsyncTaskExecutor) {
+		myAsyncTaskExecutor = theAsyncTaskExecutor;
+	}
+
 	public void setFhirContext(FhirContext theCtx) {
 		myCtx = theCtx;
 	}
@@ -455,7 +463,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();

@@ -74,7 +74,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
@@ -108,7 +108,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated");
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
 		}
 
 		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
