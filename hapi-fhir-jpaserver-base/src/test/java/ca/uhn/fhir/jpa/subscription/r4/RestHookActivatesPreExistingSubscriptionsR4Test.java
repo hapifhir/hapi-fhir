@@ -105,6 +105,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		assertFalse(hasRestHookSubscriptionInterceptor());
 
 		ourRestServer.registerInterceptor(getRestHookSubscriptionInterceptor());
+		getRestHookSubscriptionInterceptor().initSubscriptions();
 
 		assertTrue(hasRestHookSubscriptionInterceptor());
 
