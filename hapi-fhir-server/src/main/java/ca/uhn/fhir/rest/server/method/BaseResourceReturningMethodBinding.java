@@ -250,9 +250,14 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				String linkSelf;
 				StringBuilder b = new StringBuilder();
 				b.append(serverBase);
+
 				if (isNotBlank(theRequest.getRequestPath())) {
 					b.append('/');
-					b.append(theRequest.getRequestPath());
+					if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+						b.append(theRequest.getRequestPath().substring(theRequest.getTenantId().length() + 1));
+					} else {
+						b.append(theRequest.getRequestPath());
+					}
 				}
 				// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
 				if (theRequest.getRequestType() == RequestTypeEnum.GET) {
