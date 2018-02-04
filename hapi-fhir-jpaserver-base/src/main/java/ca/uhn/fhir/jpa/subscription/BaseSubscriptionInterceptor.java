@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -96,6 +97,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired()
 	private PlatformTransactionManager myTxManager;
 	@Autowired
+	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 
 	/**
