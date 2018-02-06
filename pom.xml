@@ -483,12 +483,12 @@
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
-				<version>1.5.5</version>
+				<version>1.5.6</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail-spring</artifactId>
-				<version>1.5.5</version>
+				<version>1.5.6</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.bkiers</groupId>
