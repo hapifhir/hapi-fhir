@@ -125,6 +125,12 @@
 				parameters that include additional content (e.g.
 				<![CDATA[<code>_format=html/json;fhirVersion=1.0</code>]]>)
 			</action>
+			<action type="add">
+				Stale search deleting routine on JPA server has been adjusted
+				to delete one search per transaction instead of batching 1000
+				searches per transaction. This should make the deletion logic
+				more tolerant of deleting very large search result sets.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
