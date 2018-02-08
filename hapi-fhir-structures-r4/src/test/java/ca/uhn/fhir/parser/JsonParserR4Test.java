@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
@@ -25,17 +26,17 @@ public class JsonParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 
-	@Test
-	public void testParseExtensionOnPrimitive() throws IOException {
-		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"));
-		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		Patient pt = parser.parseResource(Patient.class, input);
+	private Bundle createBundleWithPatient() {
+		Bundle b = new Bundle();
+		b.setId("BUNDLEID");
+		b.getMeta().addProfile("http://FOO");
 
-		StringType line0 = pt.getAddressFirstRep().getLine().get(0);
-		assertEquals("535 Sheppard Avenue West, Unit 1907", line0.getValue());
-		Extension houseNumberExt = line0.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber");
-		assertEquals("535", ((StringType)houseNumberExt.getValue()).getValue());
-
+		Patient p = new Patient();
+		p.setId("PATIENTID");
+		p.getMeta().addProfile("http://BAR");
+		p.addName().addGiven("GIVEN");
+		b.addEntry().setResource(p);
+		return b;
 	}
 
 	@Test
@@ -59,6 +60,32 @@ public class JsonParserR4Test {
 		b = parser.parseResource(Bundle.class, encoded);
 
 		assertEquals("BUNDLEID", b.getIdElement().getIdPart());
+		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
+		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
+	}
+
+	@Test
+	public void testExcludeRootStuff() {
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		Set<String> excludes = new HashSet<>();
+		excludes.add("id");
+		excludes.add("meta");
+		parser.setDontEncodeElements(excludes);
+
+		Bundle b = createBundleWithPatient();
+
+		String encoded = parser.encodeResourceToString(b);
+		ourLog.info(encoded);
+
+		assertThat(encoded, not(containsString("BUNDLEID")));
+		assertThat(encoded, not(containsString("http://FOO")));
+		assertThat(encoded, (containsString("PATIENTID")));
+		assertThat(encoded, (containsString("http://BAR")));
+		assertThat(encoded, containsString("GIVEN"));
+
+		b = parser.parseResource(Bundle.class, encoded);
+
+		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
 		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
@@ -89,45 +116,19 @@ public class JsonParserR4Test {
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
+	/**
+	 * Test that long JSON strings don't get broken up
+	 */
 	@Test
-	public void testExcludeRootStuff() {
-		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("id");
-		excludes.add("meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	}
-
-	private Bundle createBundleWithPatient() {
-		Bundle b = new Bundle();
-		b.setId("BUNDLEID");
-		b.getMeta().addProfile("http://FOO");
+	public void testNoBreakInLongString() {
+		String longString = StringUtils.leftPad("", 100000, 'A');
 
 		Patient p = new Patient();
-		p.setId("PATIENTID");
-		p.getMeta().addProfile("http://BAR");
-		p.addName().addGiven("GIVEN");
-		b.addEntry().setResource(p);
-		return b;
-	}
+		p.addName().setFamily(longString);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
+		assertThat(encoded, containsString(longString));
+	}
 
 	@Test
 	public void testParseAndEncodeExtensionWithValueWithExtension() {
@@ -172,6 +173,18 @@ public class JsonParserR4Test {
 
 	}
 
+	@Test
+	public void testParseExtensionOnPrimitive() throws IOException {
+		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"));
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		Patient pt = parser.parseResource(Patient.class, input);
+
+		StringType line0 = pt.getAddressFirstRep().getLine().get(0);
+		assertEquals("535 Sheppard Avenue West, Unit 1907", line0.getValue());
+		Extension houseNumberExt = line0.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber");
+		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
