@@ -618,8 +618,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		write(theEventWriter, "resourceType", resDef.getName());
 		if (theResourceId != null && theResourceId.hasIdPart()) {
 			write(theEventWriter, "id", theResourceId.getIdPart());
-			final List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
-			final List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
+			final List<HeldExtension> extensions = new ArrayList<>(0);
+			final List<HeldExtension> modifierExtensions = new ArrayList<>(0);
 			// Undeclared extensions
 			extractUndeclaredExtensions(theResourceId, extensions, modifierExtensions, null, null);
 			boolean haveExtension = false;
@@ -707,14 +707,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	/**
 	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
 	 * called _name): resource extensions, and extension extensions
-	 *
-	 * @param theChildElem
-	 * @param theParent
 	 */
 	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonLikeWriter theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
 																		 IBaseResource theResource, CompositeChildElement theChildElem, CompositeChildElement theParent) throws IOException {
-		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
-		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
+		List<HeldExtension> extensions = new ArrayList<>(0);
+		List<HeldExtension> modifierExtensions = new ArrayList<>(0);
 
 		// Undeclared extensions
 		extractUndeclaredExtensions(theElement, extensions, modifierExtensions, theChildElem, theParent);

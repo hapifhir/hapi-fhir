@@ -132,6 +132,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myMedicationRequestDaoDstu3")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
 	@Autowired
+	@Qualifier("myMedicationStatementDaoDstu3")
+	protected IFhirResourceDao<MedicationStatement> myMedicationStatementDao;
+	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
 	@Autowired

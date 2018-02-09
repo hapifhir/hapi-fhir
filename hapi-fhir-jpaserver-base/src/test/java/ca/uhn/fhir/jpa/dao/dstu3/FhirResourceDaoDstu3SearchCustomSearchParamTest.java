@@ -8,6 +8,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
@@ -153,6 +154,38 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		p1.setActive(true);
 		p1.addExtension().setUrl("http://acme.org/eyecolour").addExtension().setUrl("http://foo").setValue(new StringType("VAL"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+	}
+
+	@Test
+	public void testSearchOnMultivalue() throws FHIRException {
+		SearchParameter displaySp = new SearchParameter();
+		displaySp.addBase("MedicationStatement");
+		displaySp.setCode("display");
+		displaySp.setType(Enumerations.SearchParamType.STRING);
+		displaySp.setTitle("Display");
+		displaySp.setExpression("MedicationStatement.medication.as(CodeableConcept).coding.display");
+		displaySp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		displaySp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(displaySp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		MedicationStatement ms1 = new MedicationStatement();
+		ms1.setMedication(new CodeableConcept());
+		ms1.getMedicationCodeableConcept().addCoding().setDisplay("AAA");
+		String id1 = myMedicationStatementDao.create(ms1).getId().toUnqualifiedVersionless().getValue();
+
+		MedicationStatement ms2 = new MedicationStatement();
+		ms2.setMedication(new CodeableConcept());
+		ms2.getMedicationCodeableConcept().addCoding().setDisplay("BBB");
+		myMedicationStatementDao.create(ms2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("display", new StringParam("AAA"));
+		IBundleProvider results = myMedicationStatementDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(results), contains(id1));
 
 	}
 
