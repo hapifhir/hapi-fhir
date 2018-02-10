@@ -107,8 +107,12 @@ public class StopWatch {
 		tgt.append(val);
 	}
 
+	/**
+	 * @param theNumOperations Ok for this to be 0, it will be treated as 1
+	 */
 	public int getMillisPerOperation(int theNumOperations) {
-		return (int)(((double) getMillis()) / Math.max(1.0, theNumOperations));
+		int numOperations = Math.min(1, theNumOperations);
+		return (int)(((double) getMillis()) / Math.max(1.0, numOperations));
 	}
 
 }

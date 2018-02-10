@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -108,19 +108,16 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				continue;
 			}
 
-			// should just be one resource as it was filtered by the id
-			for (IBaseResource nextBase : results.getResources(0, results.size())) {
-				ourLog.info("Found match: queueing rest-hook notification for resource: {}", nextBase.getIdElement());
+			ourLog.info("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
-				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-				deliveryMsg.setPayload(getContext(), nextBase);
-				deliveryMsg.setSubscription(nextSubscription);
-				deliveryMsg.setOperationType(msg.getOperationType());
-				deliveryMsg.setPayloadId(msg.getId(getContext()));
+			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPayload(getContext(), msg.getNewPayload(getContext()));
+			deliveryMsg.setSubscription(nextSubscription);
+			deliveryMsg.setOperationType(msg.getOperationType());
+			deliveryMsg.setPayloadId(msg.getId(getContext()));
 
-				ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-				getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
-			}
+			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+			getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
 		}
 
 
