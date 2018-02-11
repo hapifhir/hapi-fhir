@@ -1,0 +1,73 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="urn:uuid:65b011a6-3ae6-4798-a1f9-9e9de51b02fd"/>
+		<resource>
+			<Patient xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="urn:HSC:MSC:patientid"/>
+					<value value="005674363"/>
+				</identifier>
+			</Patient>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="/Patient"/>
+			<ifNoneExist value="Patient?identifier=urn%3AHSC%3AMSC%3Apatientid|005674363"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:7aae0024-9cff-441b-9a21-6826cadaf75c"/>
+		<resource>
+			<Encounter xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="urn:HSC:MSC:encounterid"/>
+					<value value="1064115858"/>
+				</identifier>
+				<subject>
+					<reference value="urn:uuid:65b011a6-3ae6-4798-a1f9-9e9de51b02fd"/>
+				</subject>
+				<diagnosis>
+					<condition>
+						<reference value="urn:uuid:e2f72935-58a2-4a11-a600-0bcae7ea9fb5"/>
+					</condition>
+				</diagnosis>
+			</Encounter>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="/Encounter"/>
+			<ifNoneExist value="Encounter?identifier=urn%3AHSC%3AMSC%3Aencounterid|1064115858"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:e2f72935-58a2-4a11-a600-0bcae7ea9fb5"/>
+		<resource>
+			<Condition xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="urn:HSC:MSC:conditionid"/>
+					<value value="1064115858.1.5"/>
+				</identifier>
+				<code>
+					<coding>
+						<system value="http://www.icd10data.com/icd10pcs"/>
+						<code value="Z96.653"/>
+						<display value="Presence of artificial knee joint, bilateral"/>
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:65b011a6-3ae6-4798-a1f9-9e9de51b02fd"/>
+				</subject>
+				<context>
+					<reference value="urn:uuid:7aae0024-9cff-441b-9a21-6826cadaf75c"/>
+				</context>
+				<onsetDateTime value="2016-05-23T17:56:33-04:00"/>
+				<abatementDateTime value="2016-05-23T17:56:33-04:00"/>
+			</Condition>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="/Condition?identifier=urn%3AHSC%3AMSC%3Aconditionid|1064115858.1.5"/>
+		</request>
+	</entry>
+</Bundle>
