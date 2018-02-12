@@ -83,7 +83,7 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -4));
 		String throughput = sw.formatThroughput(60, TimeUnit.MINUTES);
 		ourLog.info("{} operations in {}ms = {} ops / second", 60, sw.getMillis(), throughput);
-		assertThat(throughput, oneOf("14.9", "15.0", "15.1"));
+		assertThat(throughput, oneOf("14.9", "15.0", "15.1", "14,9", "15,0", "15,1"));
 	}
 
 	private double calculateThroughput(int theMinutesElapsed, int theNumOperations) {
