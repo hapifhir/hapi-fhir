@@ -30,7 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
@@ -130,68 +129,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 		}
 		return retVal;
-	}
-
-	@Test
-	public void testSelfReferentialInclude() {
-		Location loc1 = new Location();
-		loc1.setName("loc1");
-		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
-
-		Location loc2 = new Location();
-		loc2.setName("loc2");
-		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
-
-		loc1 = new Location();
-		loc1.setId(loc1id);
-		loc1.setName("loc1");
-		loc1.getPartOf().setReference(loc2id.getValue());
-		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
-
-		loc2 = new Location();
-		loc2.setId(loc2id);
-		loc2.setName("loc2");
-		loc2.getPartOf().setReference(loc1id.getValue());
-		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
-
-		IBaseBundle result = myClient
-			.search()
-			.forResource(Location.class)
-			.where(Location.NAME.matches().value("loc1"))
-			.include(Location.INCLUDE_PARTOF.asRecursive())
-			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
-	}
-
-	@Test
-	public void testSelfReferentialRevInclude() {
-		Location loc1 = new Location();
-		loc1.setName("loc1");
-		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
-
-		Location loc2 = new Location();
-		loc2.setName("loc2");
-		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
-
-		loc1 = new Location();
-		loc1.setId(loc1id);
-		loc1.setName("loc1");
-		loc1.getPartOf().setReference(loc2id.getValue());
-		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
-
-		loc2 = new Location();
-		loc2.setId(loc2id);
-		loc2.setName("loc2");
-		loc2.getPartOf().setReference(loc1id.getValue());
-		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
-
-		IBaseBundle result = myClient
-			.search()
-			.forResource(Location.class)
-			.where(Location.NAME.matches().value("loc1"))
-			.revInclude(Location.INCLUDE_PARTOF.asRecursive())
-			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
 	}
 
 	/**
@@ -1745,31 +1682,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(ids, contains(pid0.getValue()));
 	}
 
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = myClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// myClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = myClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// myClient.delete().resource(next).execute();
-	// }
-	// }
-
 	@Test
 	public void testHasParameterNoResults() throws Exception {
 
@@ -1859,6 +1771,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			throw e;
 		}
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = myClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// myClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = myClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// myClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testIdAndVersionInBodyForCreate() throws IOException {
@@ -1965,6 +1902,39 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, newSize - initialSize);
 
+	}
+
+	/**
+	 * See #793
+	 */
+	@Test
+	public void testIncludeCountDoesntIncludeIncludes() {
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		for (int i = 0; i < 10; i++) {
+			Patient pt = new Patient();
+			pt.getManagingOrganization().setReference(orgId.getValue());
+			pt.addName().setFamily("FAM" + i);
+			myPatientDao.create(pt);
+		}
+
+		Bundle bundle = myClient
+			.search()
+			.forResource(Patient.class)
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.count(2)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(3, bundle.getEntry().size());
+		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
+		assertEquals("Patient", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
+		assertEquals("Organization", bundle.getEntry().get(2).getResource().getIdElement().getResourceType());
+		assertEquals(10, bundle.getTotal());
 	}
 
 	@Test
@@ -2414,30 +2384,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testRetrieveMissingVersionsDoesntCrashSearch() {
-		Patient p1 = new Patient();
-		p1.setActive(true);
-		final IIdType id1 = myClient.create().resource(p1).execute().getId();
-
-		Patient p2 = new Patient();
-		p2.setActive(false);
-		IIdType id2 = myClient.create().resource(p2).execute().getId();
-
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
-				myResourceHistoryTableDao.delete(version);
-			}
-		});
-
-		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
-		assertEquals(2, bundle.getTotal());
-		assertEquals(1, bundle.getEntry().size());
-		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
-	}
-
-	@Test
 	public void testRetrieveMissingVersionsDoesntCrashHistory() {
 		Patient p1 = new Patient();
 		p1.setActive(true);
@@ -2457,6 +2403,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = myClient.history().onServer().andReturnBundle(Bundle.class).execute();
 		assertEquals(1, bundle.getTotal());
+		assertEquals(1, bundle.getEntry().size());
+		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testRetrieveMissingVersionsDoesntCrashSearch() {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		final IIdType id1 = myClient.create().resource(p1).execute().getId();
+
+		Patient p2 = new Patient();
+		p2.setActive(false);
+		IIdType id2 = myClient.create().resource(p2).execute().getId();
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
+				myResourceHistoryTableDao.delete(version);
+			}
+		});
+
+		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		assertEquals(2, bundle.getTotal());
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
@@ -3755,6 +3725,68 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@Test
+	public void testSelfReferentialInclude() {
+		Location loc1 = new Location();
+		loc1.setName("loc1");
+		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		Location loc2 = new Location();
+		loc2.setName("loc2");
+		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		loc1 = new Location();
+		loc1.setId(loc1id);
+		loc1.setName("loc1");
+		loc1.getPartOf().setReference(loc2id.getValue());
+		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		loc2 = new Location();
+		loc2.setId(loc2id);
+		loc2.setName("loc2");
+		loc2.getPartOf().setReference(loc1id.getValue());
+		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		IBaseBundle result = myClient
+			.search()
+			.forResource(Location.class)
+			.where(Location.NAME.matches().value("loc1"))
+			.include(Location.INCLUDE_PARTOF.asRecursive())
+			.execute();
+		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
+	}
+
+	@Test
+	public void testSelfReferentialRevInclude() {
+		Location loc1 = new Location();
+		loc1.setName("loc1");
+		IIdType loc1id = myClient.create().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		Location loc2 = new Location();
+		loc2.setName("loc2");
+		IIdType loc2id = myClient.create().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		loc1 = new Location();
+		loc1.setId(loc1id);
+		loc1.setName("loc1");
+		loc1.getPartOf().setReference(loc2id.getValue());
+		myClient.update().resource(loc1).execute().getId().toUnqualifiedVersionless();
+
+		loc2 = new Location();
+		loc2.setId(loc2id);
+		loc2.setName("loc2");
+		loc2.getPartOf().setReference(loc1id.getValue());
+		myClient.update().resource(loc2).execute().getId().toUnqualifiedVersionless();
+
+		IBaseBundle result = myClient
+			.search()
+			.forResource(Location.class)
+			.where(Location.NAME.matches().value("loc1"))
+			.revInclude(Location.INCLUDE_PARTOF.asRecursive())
+			.execute();
+		assertThat(toUnqualifiedVersionlessIdValues(result), contains(loc1id.getValue(), loc2id.getValue()));
 	}
 
 	@Test

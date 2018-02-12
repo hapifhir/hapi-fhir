@@ -5,10 +5,7 @@ import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,6 +34,58 @@ public class JsonParserR4Test {
 		p.addName().addGiven("GIVEN");
 		b.addEntry().setResource(p);
 		return b;
+	}
+
+	/**
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwice() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		md.setMedication(new Reference(med));
+		mr.setMedication(new Reference(med));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
+	}
+
+	/**
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.setId("#MR");
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		med.setId("#MED");
+		md.setMedication(new Reference(med));
+		mr.setMedication(new Reference(med));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
 	}
 
 	@Test
