@@ -56,6 +56,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -620,9 +621,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
+				Integer updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
 					@Override
-					public Integer doInTransaction(TransactionStatus theStatus) {
+					public @NonNull Integer doInTransaction(TransactionStatus theStatus) {
 						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 					}
 				});
@@ -630,6 +631,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				ourLog.info("Marked {} resources for reindexing", updatedCount);
 			}
 		}
+
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -707,7 +709,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 		}
 
-		Set<TagDefinition> tagDefs = new HashSet<TagDefinition>();
+		Set<TagDefinition> tagDefs = new HashSet<>();
 		BaseHasResource entity = readEntity(theId);
 		for (BaseTag next : entity.getTags()) {
 			tagDefs.add(next.getTag());
@@ -733,9 +735,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		q.setParameter("res_type", myResourceName);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
-		MT retVal = toMetaDt(theType, tagDefinitions);
-
-		return retVal;
+		return toMetaDt(theType, tagDefinitions);
 	}
 
 	@Override
@@ -865,9 +865,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId) {
-		BaseHasResource entity = readEntity(theId, true);
 
-		return entity;
+		return readEntity(theId, true);
 	}
 
 	@Override
@@ -885,7 +884,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theId.isVersionIdPartValidLong() == false) {
 				throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 			}
-			if (entity.getVersion() != theId.getVersionIdPartAsLong().longValue()) {
+			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}

@@ -43,4 +43,6 @@ public interface ISearchParamRegistry {
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
 
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
+
+	void refreshCacheIfNecessary();
 }
