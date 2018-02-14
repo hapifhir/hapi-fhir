@@ -131,6 +131,10 @@
 				searches per transaction. This should make the deletion logic
 				more tolerant of deleting very large search result sets.
 			</action>
+			<action type="add">
+				Avoid refreshing the search parameter cache from an incoming client 
+				request thread, which caused unneccesary delays for clients.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

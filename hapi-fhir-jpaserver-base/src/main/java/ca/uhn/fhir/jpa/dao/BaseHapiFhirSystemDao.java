@@ -66,13 +66,21 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
-
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 
 	private int doPerformReindexingPass(final Integer theCount) {
+		/*
+		 * If any search parameters have been recently added or changed,
+		 * this makes sure that the cache has been reloaded to reflect
+		 * them.
+		 */
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		return doPerformReindexingPassForResources(theCount, txTemplate);
