@@ -409,6 +409,25 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	/**
+	 * See #851
+	 */
+	@Test
+	public void testValidateCoding() {
+		ImagingStudy is = new ImagingStudy();
+		is.setUid(IdType.newRandomUuid().getValue());
+		is.getPatient().setReference("Patient/1");
+
+		is.getModalityListFirstRep().setSystem("http://foo");
+		is.getModalityListFirstRep().setCode("BAR");
+		is.getModalityListFirstRep().setDisplay("Hello");
+
+		ValidationResult results = myVal.validateWithResult(is);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+
+	}
+
+	/**
 	 * FHIRPathEngine was throwing Error...
 	 */
 	@Test
