@@ -156,6 +156,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
 
+		mySearchParamRegsitry.forceRefresh();
+
 		org.hl7.fhir.r4.model.Practitioner pract = new org.hl7.fhir.r4.model.Practitioner();
 		pract.setId("A");
 		pract.addName().setFamily("PRACT");

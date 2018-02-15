@@ -632,7 +632,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		mySearchParamRegistry.forceRefresh();
+		mySearchParamRegistry.requestRefresh();
 	}
 
 	@Override
