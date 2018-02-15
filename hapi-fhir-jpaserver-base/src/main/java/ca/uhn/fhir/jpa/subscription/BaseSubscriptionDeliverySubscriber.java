@@ -58,7 +58,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			// useful for resources created in a transaction, since they
 			// can have placeholder IDs in them.
 			IIdType payloadId = msg.getPayloadId(getContext());
-			Class type = Class.forName(payloadId.getResourceType());
+			Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
 			IFhirResourceDao dao = getSubscriptionDao().getDao(type);
 			IBaseResource loadedPayload = dao.read(payloadId);
 			msg.setPayload(getContext(), loadedPayload);
