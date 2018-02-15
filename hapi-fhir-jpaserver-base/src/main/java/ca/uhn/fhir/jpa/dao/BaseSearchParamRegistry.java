@@ -61,10 +61,16 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	@Override
-	public void forceRefresh() {
+	public void requestRefresh() {
 		synchronized (this) {
 			myLastRefresh = 0;
 		}
+	}
+
+	@Override
+	public void forceRefresh() {
+		requestRefresh();
+		refreshCacheIfNecessary();
 	}
 
 	@Override

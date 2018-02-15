@@ -29,6 +29,23 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
+	public void testCreateInvalidNoBase() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		try {
+			mySearchParameterDao.create(fooSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter.base is missing", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testCreateInvalidParamInvalidResourceName() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -43,23 +60,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"DSTU3\")", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testCreateInvalidNoBase() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("SearchParameter.base is missing", e.getMessage());
 		}
 	}
 
@@ -137,6 +137,36 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
+	public void testCustomReferenceParameter() throws Exception {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setCode("myDoctor");
+		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setTitle("My Doctor");
+		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor')");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		org.hl7.fhir.dstu3.model.Practitioner pract = new org.hl7.fhir.dstu3.model.Practitioner();
+		pract.setId("A");
+		pract.addName().setFamily("PRACT");
+		myPractitionerDao.update(pract);
+
+		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/dstu3_custom_resource_patient.json"));
+		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("myDoctor", new ReferenceParam("A"));
+		IBundleProvider outcome = myPatientDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, contains(pid.getValue()));
+	}
+
+	@Test
 	public void testExtensionWithNoValueIndexesWithoutFailure() {
 		SearchParameter eyeColourSp = new SearchParameter();
 		eyeColourSp.addBase("Patient");
@@ -158,34 +188,197 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testSearchOnMultivalue() throws FHIRException {
-		SearchParameter displaySp = new SearchParameter();
-		displaySp.addBase("MedicationStatement");
-		displaySp.setCode("display");
-		displaySp.setType(Enumerations.SearchParamType.STRING);
-		displaySp.setTitle("Display");
-		displaySp.setExpression("MedicationStatement.medication.as(CodeableConcept).coding.display");
-		displaySp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		displaySp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(displaySp, mySrd);
+	public void testIncludeExtensionReferenceAsRecurse() {
+		SearchParameter attendingSp = new SearchParameter();
+		attendingSp.addBase("Patient");
+		attendingSp.setCode("attending");
+		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		attendingSp.setTitle("Attending");
+		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
+		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		attendingSp.getTarget().add(new CodeType("Practitioner"));
+		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
 
 		mySearchParamRegsitry.forceRefresh();
 
-		MedicationStatement ms1 = new MedicationStatement();
-		ms1.setMedication(new CodeableConcept());
-		ms1.getMedicationCodeableConcept().addCoding().setDisplay("AAA");
-		String id1 = myMedicationStatementDao.create(ms1).getId().toUnqualifiedVersionless().getValue();
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
 
-		MedicationStatement ms2 = new MedicationStatement();
-		ms2.setMedication(new CodeableConcept());
-		ms2.getMedicationCodeableConcept().addCoding().setDisplay("BBB");
-		myMedicationStatementDao.create(ms2).getId().toUnqualifiedVersionless().getValue();
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add("display", new StringParam("AAA"));
-		IBundleProvider results = myMedicationStatementDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(results), contains(id1));
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		map = new SearchParameterMap();
+		map.addInclude(new Include("Appointment:patient", true));
+		map.addInclude(new Include("Patient:attending", true));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
+
+	}
+
+	@Test
+	public void testSearchForExtensionReferenceWithNonMatchingTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Organization"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
+	}
+	
+	@Test
+	public void testSearchForExtensionReferenceWithTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Patient"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by two level chain
+		map = new SearchParameterMap();
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+
+	}
+
+	@Test
+	public void testSearchForExtensionReferenceWithoutTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by two level chain
+		map = new SearchParameterMap();
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+
 
 	}
 
@@ -221,44 +414,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(p1id.getValue()));
 
 	}
-
-	@Test
-	public void testSearchForExtensionTwoDeepCoding() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("foobar");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		siblingSp.setTitle("FooBar");
-		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		siblingSp.getTarget().add(new CodeType("Organization"));
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Patient patient = new Patient();
-		patient.addName().setFamily("P2");
-		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		extParent
-				.addExtension()
-				.setUrl("http://acme.org/bar")
-				.setValue(new Coding().setSystem("foo").setCode("bar"));
-		
-		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		map = new SearchParameterMap();
-		map.add("foobar", new TokenParam("foo", "bar"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-	}
 	
 	@Test
 	public void testSearchForExtensionTwoDeepCodeableConcept() {
@@ -284,13 +439,13 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new CodeableConcept().addCoding(new Coding().setSystem("foo").setCode("bar")));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
@@ -299,128 +454,38 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testSearchForExtensionTwoDeepReferenceWrongType() {
+	public void testSearchForExtensionTwoDeepCoding() {
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
 		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		siblingSp.getTarget().add(new CodeType("Observation"));
+		siblingSp.getTarget().add(new CodeType("Organization"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
 
-		Appointment apt = new Appointment();
-		apt.setStatus(AppointmentStatus.ARRIVED);
-		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
 			.addExtension()
 			.setUrl("http://acme.org/foo");
-		
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
-				.setValue(new Reference(aptId.getValue()));
-		
+				.setValue(new Coding().setSystem("foo").setCode("bar"));
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
-		map.add("foobar", new ReferenceParam(aptId.getValue()));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
-	}
-
-	@Test
-	public void testSearchForExtensionTwoDeepReferenceWithoutType() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("foobar");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		siblingSp.setTitle("FooBar");
-		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Appointment apt = new Appointment();
-		apt.setStatus(AppointmentStatus.ARRIVED);
-		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
-		Patient patient = new Patient();
-		patient.addName().setFamily("P2");
-		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
-		extParent
-				.addExtension()
-				.setUrl("http://acme.org/bar")
-				.setValue(new Reference(aptId.getValue()));
-		
-		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		map = new SearchParameterMap();
-		map.add("foobar", new ReferenceParam(aptId.getValue()));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-	}
-	
-	@Test
-	public void testSearchForExtensionTwoDeepReference() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("foobar");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		siblingSp.setTitle("FooBar");
-		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		siblingSp.getTarget().add(new CodeType("Appointment"));
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Appointment apt = new Appointment();
-		apt.setStatus(AppointmentStatus.ARRIVED);
-		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
-		Patient patient = new Patient();
-		patient.addName().setFamily("P2");
-		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
-		extParent
-				.addExtension()
-				.setUrl("http://acme.org/bar")
-				.setValue(new Reference(aptId.getValue()));
-		
-		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		map = new SearchParameterMap();
-		map.add("foobar", new ReferenceParam(aptId.getValue()));
+		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
@@ -443,63 +508,26 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
 		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
 			.addExtension()
 			.setUrl("http://acme.org/foo");
-		
+
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new DateType("2012-01-02"));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new DateParam("2012-01-02"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-	}
-
-	@Test
-	public void testSearchForExtensionTwoDeepNumber() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("foobar");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.NUMBER);
-		siblingSp.setTitle("FooBar");
-		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Patient patient = new Patient();
-		patient.addName().setFamily("P2");
-		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		extParent
-				.addExtension()
-				.setUrl("http://acme.org/bar")
-				.setValue(new IntegerType(5));
-		
-		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		map = new SearchParameterMap();
-		map.add("foobar", new NumberParam("5"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
@@ -543,6 +571,171 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
+	public void testSearchForExtensionTwoDeepNumber() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.NUMBER);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new IntegerType(5));
+
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		map = new SearchParameterMap();
+		map.add("foobar", new NumberParam("5"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+	}
+
+	@Test
+	public void testSearchForExtensionTwoDeepReference() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Appointment"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Appointment apt = new Appointment();
+		apt.setStatus(AppointmentStatus.ARRIVED);
+		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new Reference(aptId.getValue()));
+
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		map = new SearchParameterMap();
+		map.add("foobar", new ReferenceParam(aptId.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+	}
+
+	@Test
+	public void testSearchForExtensionTwoDeepReferenceWithoutType() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Appointment apt = new Appointment();
+		apt.setStatus(AppointmentStatus.ARRIVED);
+		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new Reference(aptId.getValue()));
+
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		map = new SearchParameterMap();
+		map.add("foobar", new ReferenceParam(aptId.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+	}
+
+	@Test
+	public void testSearchForExtensionTwoDeepReferenceWrongType() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Observation"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Appointment apt = new Appointment();
+		apt.setStatus(AppointmentStatus.ARRIVED);
+		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new Reference(aptId.getValue()));
+
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		map = new SearchParameterMap();
+		map.add("foobar", new ReferenceParam(aptId.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+	}
+
+	@Test
 	public void testSearchForExtensionTwoDeepString() {
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
@@ -565,13 +758,13 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new StringType("HELLOHELLO"));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new StringParam("hello"));
 		results = myPatientDao.search(map);
@@ -580,199 +773,34 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testSearchForExtensionReferenceWithNonMatchingTarget() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("sibling");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		siblingSp.setTitle("Sibling");
-		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		siblingSp.getTarget().add(new CodeType("Organization"));
-		mySearchParameterDao.create(siblingSp, mySrd);
+	public void testSearchOnMultivalue() throws FHIRException {
+		SearchParameter displaySp = new SearchParameter();
+		displaySp.addBase("MedicationStatement");
+		displaySp.setCode("display");
+		displaySp.setType(Enumerations.SearchParamType.STRING);
+		displaySp.setTitle("Display");
+		displaySp.setExpression("MedicationStatement.medication.as(CodeableConcept).coding.display");
+		displaySp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		displaySp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(displaySp, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
 
-		Patient p1 = new Patient();
-		p1.addName().setFamily("P1");
-		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+		MedicationStatement ms1 = new MedicationStatement();
+		ms1.setMedication(new CodeableConcept());
+		ms1.getMedicationCodeableConcept().addCoding().setDisplay("AAA");
+		String id1 = myMedicationStatementDao.create(ms1).getId().toUnqualifiedVersionless().getValue();
 
-		Patient p2 = new Patient();
-		p2.addName().setFamily("P2");
-		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+		MedicationStatement ms2 = new MedicationStatement();
+		ms2.setMedication(new CodeableConcept());
+		ms2.getMedicationCodeableConcept().addCoding().setDisplay("BBB");
+		myMedicationStatementDao.create(ms2).getId().toUnqualifiedVersionless().getValue();
 
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		// Search by ref
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam(p1id.getValue()));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
-
-		// Search by chain
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam("name", "P1"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
-
-	}
-
-	
-	
-	@Test
-	public void testSearchForExtensionReferenceWithoutTarget() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("sibling");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		siblingSp.setTitle("Sibling");
-		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Patient p1 = new Patient();
-		p1.addName().setFamily("P1");
-		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
-
-		Patient p2 = new Patient();
-		p2.addName().setFamily("P2");
-		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
-
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
-		Appointment app = new Appointment();
-		app.addParticipant().getActor().setReference(p2id.getValue());
-		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		// Search by ref
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam(p1id.getValue()));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-
-		// Search by chain
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam("name", "P1"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-
-		// Search by two level chain
-		map = new SearchParameterMap();
-		map.add("patient", new ReferenceParam("sibling.name", "P1"));
-		results = myAppointmentDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
-
-
-	}
-
-	@Test
-	public void testSearchForExtensionReferenceWithTarget() {
-		SearchParameter siblingSp = new SearchParameter();
-		siblingSp.addBase("Patient");
-		siblingSp.setCode("sibling");
-		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		siblingSp.setTitle("Sibling");
-		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
-		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		siblingSp.getTarget().add(new CodeType("Patient"));
-		mySearchParameterDao.create(siblingSp, mySrd);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Patient p1 = new Patient();
-		p1.addName().setFamily("P1");
-		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
-
-		Patient p2 = new Patient();
-		p2.addName().setFamily("P2");
-		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
-
-		Appointment app = new Appointment();
-		app.addParticipant().getActor().setReference(p2id.getValue());
-		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-		
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		// Search by ref
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam(p1id.getValue()));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-
-		// Search by chain
-		map = new SearchParameterMap();
-		map.add("sibling", new ReferenceParam("name", "P1"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
-
-		// Search by two level chain
-		map = new SearchParameterMap();
-		map.add("patient", new ReferenceParam("sibling.name", "P1"));
-		results = myAppointmentDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
-
-	}
-
-	@Test
-	public void testIncludeExtensionReferenceAsRecurse() {
-		SearchParameter attendingSp = new SearchParameter();
-		attendingSp.addBase("Patient");
-		attendingSp.setCode("attending");
-		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		attendingSp.setTitle("Attending");
-		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
-		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		attendingSp.getTarget().add(new CodeType("Practitioner"));
-		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Practitioner p1 = new Practitioner();
-		p1.addName().setFamily("P1");
-		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
-
-		Patient p2 = new Patient();
-		p2.addName().setFamily("P2");
-		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
-		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
-
-		Appointment app = new Appointment();
-		app.addParticipant().getActor().setReference(p2id.getValue());
-		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-		
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
-		
-		map = new SearchParameterMap();
-		map.addInclude(new Include("Appointment:patient", true));
-		map.addInclude(new Include("Patient:attending", true));
-		results = myAppointmentDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("display", new StringParam("AAA"));
+		IBundleProvider results = myMedicationStatementDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(results), contains(id1));
 
 	}
 
@@ -833,7 +861,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
 		}
 	}
-
+	
 	@Test
 	public void testSearchWithCustomParamDraft() {
 
@@ -878,34 +906,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(patId.getValue()));
 
-	}
-	
-	@Test
-	public void testCustomReferenceParameter() throws Exception {
-		SearchParameter sp = new SearchParameter();
-		sp.addBase("Patient");
-		sp.setCode("myDoctor");
-		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		sp.setTitle("My Doctor");
-		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor')");
-		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(sp);
-		
-		org.hl7.fhir.dstu3.model.Practitioner pract = new org.hl7.fhir.dstu3.model.Practitioner();
-		pract.setId("A");
-		pract.addName().setFamily("PRACT");
-		myPractitionerDao.update(pract);
-		
-		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/dstu3_custom_resource_patient.json"));
-		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
-		
-		SearchParameterMap params = new SearchParameterMap();
-		params.add("myDoctor", new ReferenceParam("A"));
-		IBundleProvider outcome = myPatientDao.search(params);
-		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains(pid.getValue()));
 	}
 
 	@AfterClass
