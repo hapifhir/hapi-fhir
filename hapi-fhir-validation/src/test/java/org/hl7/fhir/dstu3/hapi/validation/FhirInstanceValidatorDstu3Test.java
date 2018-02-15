@@ -414,7 +414,7 @@ public class FhirInstanceValidatorDstu3Test {
 	@Test
 	public void testValidateCoding() {
 		ImagingStudy is = new ImagingStudy();
-		is.setUid(IdType.newRandomUuid().getValue());
+		is.setUid("urn:oid:1.2.3.4");
 		is.getPatient().setReference("Patient/1");
 
 		is.getModalityListFirstRep().setSystem("http://foo");
@@ -423,7 +423,8 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, empty());
+		assertEquals(1, outcome.size());
+		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29 (http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code) (error message = Code http://foo/BAR was not validated because the code system is not present)", outcome.get(0).getMessage());
 
 	}
 
