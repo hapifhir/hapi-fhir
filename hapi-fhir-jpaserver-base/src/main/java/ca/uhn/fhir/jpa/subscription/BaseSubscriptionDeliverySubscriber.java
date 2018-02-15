@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,16 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
 			}
+
+			// Reload the payload just in case any interceptors modified
+			// it before it was saved to the database. This is also
+			// useful for resources created in a transaction, since they
+			// can have placeholder IDs in them.
+			IIdType payloadId = msg.getPayloadId(getContext());
+			Class type = Class.forName(payloadId.getResourceType());
+			IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+			IBaseResource loadedPayload = dao.read(payloadId);
+			msg.setPayload(getContext(), loadedPayload);
 
 			handleMessage(msg);
 		} catch (Exception e) {
