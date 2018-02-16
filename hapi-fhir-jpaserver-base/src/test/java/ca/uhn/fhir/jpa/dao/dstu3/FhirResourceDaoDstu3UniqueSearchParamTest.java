@@ -338,6 +338,42 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 	}
 
 	@Test
+	public void testReplaceOneWithAnother() {
+		createUniqueBirthdateAndGenderSps();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualified();
+		assertNotNull(id1);
+
+		ourLog.info("** Replacing");
+
+		pt1 = new Patient();
+		pt1.setId(id1);
+		pt1.setGender(Enumerations.AdministrativeGender.FEMALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		id1 = myPatientDao.update(pt1).getId().toUnqualified();
+		assertNotNull(id1);
+		assertEquals("2", id1.getVersionIdPart());
+
+		Patient pt2 = new Patient();
+		pt2.setGender(Enumerations.AdministrativeGender.MALE);
+		pt2.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+
+		SearchBuilder.resetLastHandlerMechanismForUnitTest();
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
+		params.add("birthdate", new DateParam("2011-01-01"));
+		IBundleProvider results = myPatientDao.search(params);
+		String searchId = results.getUuid();
+		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id2.getValue()));
+		assertEquals(SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+
+	}
+
+	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
 		createUniqueBirthdateAndGenderSps();
 
