@@ -135,6 +135,11 @@
 				Avoid refreshing the search parameter cache from an incoming client 
 				request thread, which caused unneccesary delays for clients.
 			</action>
+			<action type="fix">
+				An occasional crash in the JPA was fixed when using unique search
+				parameters and updating a resource to no longer match
+				one of these search parameters.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

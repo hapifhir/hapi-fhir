@@ -1694,6 +1694,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			for (ResourceIndexedSearchParamString next : removeCommon(existingStringParams, stringParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsString().remove(next);
 			}
 			for (ResourceIndexedSearchParamString next : removeCommon(stringParams, existingStringParams)) {
 				myEntityManager.persist(next);
@@ -1701,6 +1702,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			for (ResourceIndexedSearchParamToken next : removeCommon(existingTokenParams, tokenParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsToken().remove(next);
 			}
 			for (ResourceIndexedSearchParamToken next : removeCommon(tokenParams, existingTokenParams)) {
 				myEntityManager.persist(next);
@@ -1708,6 +1710,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			for (ResourceIndexedSearchParamNumber next : removeCommon(existingNumberParams, numberParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsNumber().remove(next);
 			}
 			for (ResourceIndexedSearchParamNumber next : removeCommon(numberParams, existingNumberParams)) {
 				myEntityManager.persist(next);
@@ -1715,6 +1718,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			for (ResourceIndexedSearchParamQuantity next : removeCommon(existingQuantityParams, quantityParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsQuantity().remove(next);
 			}
 			for (ResourceIndexedSearchParamQuantity next : removeCommon(quantityParams, existingQuantityParams)) {
 				myEntityManager.persist(next);
@@ -1723,6 +1727,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			// Store date SP's
 			for (ResourceIndexedSearchParamDate next : removeCommon(existingDateParams, dateParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsDate().remove(next);
 			}
 			for (ResourceIndexedSearchParamDate next : removeCommon(dateParams, existingDateParams)) {
 				myEntityManager.persist(next);
@@ -1731,6 +1736,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			// Store URI SP's
 			for (ResourceIndexedSearchParamUri next : removeCommon(existingUriParams, uriParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsUri().remove(next);
 			}
 			for (ResourceIndexedSearchParamUri next : removeCommon(uriParams, existingUriParams)) {
 				myEntityManager.persist(next);
@@ -1739,6 +1745,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			// Store Coords SP's
 			for (ResourceIndexedSearchParamCoords next : removeCommon(existingCoordsParams, coordsParams)) {
 				myEntityManager.remove(next);
+				theEntity.getParamsCoords().remove(next);
 			}
 			for (ResourceIndexedSearchParamCoords next : removeCommon(coordsParams, existingCoordsParams)) {
 				myEntityManager.persist(next);
@@ -1747,6 +1754,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			// Store resource links
 			for (ResourceLink next : removeCommon(existingResourceLinks, links)) {
 				myEntityManager.remove(next);
+				theEntity.getResourceLinks().remove(next);
 			}
 			for (ResourceLink next : removeCommon(links, existingResourceLinks)) {
 				myEntityManager.persist(next);
@@ -1756,23 +1764,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			// Store composite string uniques
 			if (getConfig().isUniqueIndexesEnabled()) {
-				for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
-					if (!compositeStringUniques.contains(next)) {
-						ourLog.debug("Removing unique index: {}", next);
-						myEntityManager.remove(next);
-					}
+				for (ResourceIndexedCompositeStringUnique next : removeCommon(existingCompositeStringUniques, compositeStringUniques)) {
+					ourLog.info("Removing unique index: {}", next);
+					myEntityManager.remove(next);
+					theEntity.getParamsCompositeStringUnique().remove(next);
 				}
-				for (ResourceIndexedCompositeStringUnique next : compositeStringUniques) {
-					if (!existingCompositeStringUniques.contains(next)) {
-						if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
-							ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
-							if (existing != null) {
-								throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
-							}
+				for (ResourceIndexedCompositeStringUnique next : removeCommon(compositeStringUniques, existingCompositeStringUniques)) {
+					if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
+						ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
+						if (existing != null) {
+							throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
 						}
-						ourLog.debug("Persisting unique index: {}", next);
-						myEntityManager.persist(next);
 					}
+					ourLog.info("Persisting unique index: {}", next);
+					myEntityManager.persist(next);
 				}
 			}
 
