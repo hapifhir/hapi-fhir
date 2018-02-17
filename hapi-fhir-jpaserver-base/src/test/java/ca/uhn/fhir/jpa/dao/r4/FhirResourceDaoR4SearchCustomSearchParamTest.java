@@ -145,6 +145,24 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
+	public void testCreateSearchParameterOnSearchParameterDoesntCauseEndlessReindexLoop() throws InterruptedException {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("SearchParameter");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("SearchParameter.code");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		assertEquals(1, mySystemDao.performReindexingPass(100).intValue());
+		assertEquals(0, mySystemDao.performReindexingPass(100).intValue());
+
+	}
+
+	@Test
 	public void testCustomReferenceParameter() throws Exception {
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");

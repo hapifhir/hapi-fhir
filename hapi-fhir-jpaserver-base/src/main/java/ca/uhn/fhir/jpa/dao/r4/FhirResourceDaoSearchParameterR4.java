@@ -47,7 +47,9 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	protected void markAffectedResources(SearchParameter theResource) {
-		markResourcesMatchingExpressionAsNeedingReindexing(theResource != null ? theResource.getExpression() : null);
+		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
+		String expression = theResource != null ? theResource.getExpression() : null;
+		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
 	}
 
 	/**
