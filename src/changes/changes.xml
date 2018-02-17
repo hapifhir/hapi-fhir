@@ -140,6 +140,10 @@
 				parameters and updating a resource to no longer match
 				one of these search parameters.
 			</action>
+			<action type="fix">
+				Avoid an endless loop of reindexing in JPA if a SearchParameter is
+				created which indexed the SearchParameter resource itself
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

@@ -1,17 +1,15 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.Collection;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.Collection;
+import java.util.Set;
 
 /*
  * #%L
@@ -35,7 +33,9 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
 
 public interface IDao {
 
-	ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
+	MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
+
+	MetadataKeyCurrentlyReindexing CURRENTLY_REINDEXING = new MetadataKeyCurrentlyReindexing("CURRENTLY_REINDEXING");
 
 	FhirContext getContext();
 

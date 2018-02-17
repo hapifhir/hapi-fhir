@@ -127,7 +127,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId, w.getMillisAndRestart()});
+		ourLog.info("Processed addTag {}/{} on {} in {}ms", theScheme, theTerm, theId, w.getMillisAndRestart());
 	}
 
 	@Override
@@ -350,7 +350,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
 		}
 
-		ourLog.info("Processed delete on {} (matched {} resource(s)) in {}ms", new Object[]{theUrl, deletedResources.size(), w.getMillis()});
+		ourLog.info("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);
@@ -613,7 +613,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider;
 	}
 
-	protected void markResourcesMatchingExpressionAsNeedingReindexing(String theExpression) {
+	protected void markResourcesMatchingExpressionAsNeedingReindexing(Boolean theCurrentlyReindexing, String theExpression) {
+		// Avoid endless loops
+		if (Boolean.TRUE.equals(theCurrentlyReindexing)) {
+			return;
+		}
+
 		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
 			if (isNotBlank(theExpression)) {
 				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
@@ -924,7 +929,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public void reindex(T theResource, ResourceTable theEntity) {
 		ourLog.debug("Indexing resource {} - PID {}", theResource.getIdElement().getValue(), theEntity.getId());
+		CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), true, false);
+		CURRENTLY_REINDEXING.put(theResource, null);
 	}
 
 	@Override
@@ -961,7 +968,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.merge(entity);
 
-		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId.getValue(), w.getMillisAndRestart()});
+		ourLog.info("Processed remove tag {}/{} on {} in {}ms", theScheme, theTerm, theId.getValue(), w.getMillisAndRestart());
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
