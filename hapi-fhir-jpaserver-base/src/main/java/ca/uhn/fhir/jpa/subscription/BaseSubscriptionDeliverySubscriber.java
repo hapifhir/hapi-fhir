@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import org.springframework.messaging.MessagingException;
 
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
+	private boolean myReloadResourceBeforeDelivery = true;
 
 	public BaseSubscriptionDeliverySubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
@@ -48,20 +49,22 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 				return;
 			}
 
-			CanonicalSubscription updatedSubscription = (CanonicalSubscription)getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
+			CanonicalSubscription updatedSubscription = (CanonicalSubscription) getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
 			}
 
-			// Reload the payload just in case any interceptors modified
-			// it before it was saved to the database. This is also
-			// useful for resources created in a transaction, since they
-			// can have placeholder IDs in them.
-			IIdType payloadId = msg.getPayloadId(getContext());
-			Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-			IFhirResourceDao dao = getSubscriptionDao().getDao(type);
-			IBaseResource loadedPayload = dao.read(payloadId);
-			msg.setPayload(getContext(), loadedPayload);
+			if (myReloadResourceBeforeDelivery) {
+				// Reload the payload just in case any interceptors modified
+				// it before it was saved to the database. This is also
+				// useful for resources created in a transaction, since they
+				// can have placeholder IDs in them.
+				IIdType payloadId = msg.getPayloadId(getContext());
+				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
+				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+				IBaseResource loadedPayload = dao.read(payloadId);
+				msg.setPayload(getContext(), loadedPayload);
+			}
 
 			handleMessage(msg);
 		} catch (Exception e) {
@@ -71,5 +74,9 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 	}
 
 	public abstract void handleMessage(ResourceDeliveryMessage theMessage) throws Exception;
+
+	public void setReloadResourceBeforeDelivery(boolean theReloadResourceBeforeDelivery) {
+		myReloadResourceBeforeDelivery = theReloadResourceBeforeDelivery;
+	}
 
 }
