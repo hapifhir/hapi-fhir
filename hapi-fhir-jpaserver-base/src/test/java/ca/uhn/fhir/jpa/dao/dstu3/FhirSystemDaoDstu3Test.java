@@ -2520,7 +2520,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
 	}
 
-
 	@Test
 	public void testTransactionWithReferenceResource() {
 		Bundle request = new Bundle();
@@ -2547,7 +2546,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IBundleProvider found = myObservationDao.search(params);
 		assertEquals(1, found.size().intValue());
 	}
-
 
 	@Test
 	public void testTransactionWithReferenceToCreateIfNoneExist() {
@@ -2600,6 +2598,33 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		assertEquals(medId1, medId2);
 		assertNotEquals(medOrderId1, medOrderId2);
+	}
+
+	@Test
+	public void testTransactionWithReferenceUuid() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
 	}
 
 	//
@@ -2704,34 +2729,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	//
 	// }
 
-
-	@Test
-	public void testTransactionWithReferenceUuid() {
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
-
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference(p.getId());
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-
-		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("subject", new ReferenceParam(patientId));
-		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
-	}
-
 	@Test
 	public void testTransactionWithRelativeOidIds() throws Exception {
 		Bundle res = new Bundle();
@@ -2809,6 +2806,52 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
 		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
 
+	}
+
+	@Test
+	public void testTransactionWithReplacement() {
+		byte[] bytes = new byte[] {0, 1, 2, 3, 4};
+
+		Binary binary = new Binary();
+		binary.setId(IdType.newRandomUuid());
+		binary.setContent(bytes);
+		binary.setContentType("application/pdf");
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(IdDt.newRandomUuid());
+
+		Attachment attachment = new Attachment();
+		attachment.setContentType("application/pdf");
+		attachment.setUrl(binary.getId()); // this one has substitution
+		dr.addPresentedForm(attachment);
+
+		Attachment attachment2 = new Attachment();
+		attachment2.setUrl(IdType.newRandomUuid().getValue()); // this one has no subscitution
+		dr.addPresentedForm(attachment2);
+
+		Bundle transactionBundle = new Bundle();
+		transactionBundle.setType(BundleType.TRANSACTION);
+
+		Bundle.BundleEntryComponent binaryEntry = new Bundle.BundleEntryComponent();
+		binaryEntry.setResource(binary).setFullUrl(binary.getId()).getRequest().setUrl("Binary").setMethod(Bundle.HTTPVerb.POST);
+		transactionBundle.addEntry(binaryEntry);
+
+		Bundle.BundleEntryComponent drEntry = new Bundle.BundleEntryComponent();
+		drEntry.setResource(dr).setFullUrl(dr.getId()).getRequest().setUrl("DiagnosticReport").setMethod(Bundle.HTTPVerb.POST);
+		transactionBundle.addEntry(drEntry);
+
+		Bundle transactionResp = mySystemDao.transaction(mySrd, transactionBundle);
+
+		assertEquals(2, transactionResp.getEntry().size());
+
+		// Validate Binary
+		binary = myBinaryDao.read(new IdType(transactionResp.getEntry().get(0).getResponse().getLocation()));
+		assertArrayEquals(bytes, binary.getContent());
+
+		// Validate DiagnosticReport
+		dr = myDiagnosticReportDao.read(new IdType(transactionResp.getEntry().get(1).getResponse().getLocation()));
+		assertEquals(binary.getIdElement().toUnqualifiedVersionless().getValue(), dr.getPresentedForm().get(0).getUrl());
+		assertEquals(attachment2.getUrl(), dr.getPresentedForm().get(1).getUrl());
 	}
 
 	/**
