@@ -265,7 +265,7 @@
 					</tr>
 					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Validation</td></tr>
 					<tr>
-						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validator</td>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation</td>
 						<td>
 							This module contains the FHIR Profile Validator, which is used to 
 							validate resource instances against FHIR Profiles (StructureDefinitions,
