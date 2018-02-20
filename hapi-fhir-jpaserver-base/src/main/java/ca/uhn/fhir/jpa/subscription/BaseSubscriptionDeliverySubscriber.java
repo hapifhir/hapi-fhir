@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -62,7 +63,15 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 				IIdType payloadId = msg.getPayloadId(getContext());
 				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
 				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
-				IBaseResource loadedPayload = dao.read(payloadId);
+				IBaseResource loadedPayload;
+				try {
+					loadedPayload = dao.read(payloadId);
+				} catch (ResourceNotFoundException e) {
+					// This can happen if a last minute failure happens when saving a resource,
+					// eg a constraint causes the transaction to roll back on commit
+					ourLog.warn("Unable to find resource {} - Aborting delivery", payloadId.getValue());
+					return;
+				}
 				msg.setPayload(getContext(), loadedPayload);
 			}
 

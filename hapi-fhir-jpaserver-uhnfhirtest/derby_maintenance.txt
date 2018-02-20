@@ -92,6 +92,18 @@ delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource);
 delete from hfj_res_tag where res_id in (select res_id from hfj_resource);
 delete from hfj_search_result where resource_pid in (select res_id from hfj_resource);
 delete from hfj_res_param_present where res_id in (select res_id from hfj_resource);
+delete from hfj_idx_cmp_string_uniq where res_id in (select res_id from hfj_resource);
+delete from hfj_subscription_stats where res_id in (select res_id from hfj_resource);
 delete from hfj_resource where res_id in (select res_id from hfj_resource);
+
+# Correct Version issues
+update hfj_resource
+set res_ver = res_ver + 1
+where res_id in (
+   select distinct res.res_id from hfj_resource res
+	inner join hfj_res_ver rv on (rv.res_id = res.res_id)
+	where ((res.res_ver + 1) = (rv.res_ver))
+)
+
 
 
