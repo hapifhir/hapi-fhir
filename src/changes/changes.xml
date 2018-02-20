@@ -144,6 +144,12 @@
 				Avoid an endless loop of reindexing in JPA if a SearchParameter is
 				created which indexed the SearchParameter resource itself
 			</action>
+			<action type="add" issue="854">
+				JPA server now performs temporary/placeholder ID substitution processing on elements in
+				resources which are of type "URI" in addition to the current substitution for
+				elements of type "Reference". Thanks to GitHub user @t4deon for supplying
+				a testcase!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

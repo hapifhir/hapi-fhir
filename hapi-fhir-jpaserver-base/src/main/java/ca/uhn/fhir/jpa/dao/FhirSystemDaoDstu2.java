@@ -25,6 +25,7 @@ import java.util.*;
 
 import javax.persistence.TypedQuery;
 
+import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -453,6 +454,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				continue;
 			}
 
+			// References
 			List<BaseResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, BaseResourceReferenceDt.class);
 			for (BaseResourceReferenceDt nextRef : allRefs) {
 				IdDt nextId = nextRef.getReference();
@@ -467,6 +469,23 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
 				}
 			}
+
+			// URIs
+			List<UriDt> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, UriDt.class);
+			for (UriDt nextRef : allUris) {
+				if (nextRef instanceof IIdType) {
+					continue; // No substitution on the resource ID itself!
+				}
+				IdDt nextUriString = new IdDt(nextRef.getValueAsString());
+				if (idSubstitutions.containsKey(nextUriString)) {
+					IdDt newId = idSubstitutions.get(nextUriString);
+					ourLog.info(" * Replacing resource ref {} with {}", nextUriString, newId);
+					nextRef.setValue(newId.getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
+			}
+
 
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
