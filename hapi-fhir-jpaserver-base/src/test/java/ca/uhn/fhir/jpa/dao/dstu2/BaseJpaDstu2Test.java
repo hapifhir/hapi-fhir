@@ -75,6 +75,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myDiagnosticReportDaoDstu2")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
 	@Autowired
+	@Qualifier("myBinaryDaoDstu2")
+	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
 	@Qualifier("myEncounterDaoDstu2")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
 	//	@PersistenceContext()
