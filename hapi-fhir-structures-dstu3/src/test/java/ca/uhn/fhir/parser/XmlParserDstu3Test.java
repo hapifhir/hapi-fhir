@@ -51,6 +51,8 @@ import java.util.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -3242,6 +3244,26 @@ public class XmlParserDstu3Test {
 		}
 	}
 
+	/**
+	 * See #11
+	 */
+	@Test
+	public void testDuplicateContainedResources() {
+
+		Observation resA = new Observation();
+		resA.setComment("A");
+
+		Observation resB = new Observation();
+		resB.setComment("B");
+		resB.addBasedOn(new Reference(resA));
+		resB.addBasedOn(new Reference(resA));
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
+		ourLog.info(encoded);
+
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "<Observation", "</contained>"))));
+	}
 	/**
 	 * See #551
 	 */
