@@ -208,6 +208,23 @@ public class FhirInstanceValidatorR4Test {
 
 	}
 
+	/**
+	 * See #853
+	 */
+	@Test
+	public void testObservationsWithMultiplePerformers() {
+		Observation observation = new Observation();
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://system").setCode("code")));
+		Practitioner p1 = new Practitioner();
+		Practitioner p2 = new Practitioner();
+		observation.addPerformer(new Reference(p1));
+		observation.addPerformer(new Reference(p2));
+
+		ValidationResult output = myVal.validateWithResult(observation);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(errors, empty());
+	}
 
 	@Test
 	public void testBase64Invalid() {
