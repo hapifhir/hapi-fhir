@@ -139,7 +139,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								getErrorHandler().missingRequiredElement(new ParseLocation("extension"), "url");
+								getErrorHandler().missingRequiredElement(new ParseLocation().setParentElementName("extension"), "url");
 								url = null;
 							} else {
 								url = urlAttr.getValue();
@@ -149,7 +149,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								getErrorHandler().missingRequiredElement(new ParseLocation("modifierExtension"), "url");
+								getErrorHandler().missingRequiredElement(new ParseLocation().setParentElementName("modifierExtension"), "url");
 								url = null;
 							} else {
 								url = urlAttr.getValue();
