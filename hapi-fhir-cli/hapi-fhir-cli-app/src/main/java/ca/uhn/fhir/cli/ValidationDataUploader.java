@@ -522,7 +522,11 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 
 			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {name, count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
