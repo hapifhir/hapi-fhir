@@ -36,6 +36,7 @@ public abstract class BaseHasResource {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
 
+	// TODO: move to resource history table
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)

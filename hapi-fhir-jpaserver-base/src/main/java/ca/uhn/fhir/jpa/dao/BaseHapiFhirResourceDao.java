@@ -127,7 +127,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		ourLog.info("Processed addTag {}/{} on {} in {}ms", theScheme, theTerm, theId, w.getMillisAndRestart());
+		ourLog.debug("Processed addTag {}/{} on {} in {}ms", theScheme, theTerm, theId, w.getMillisAndRestart());
 	}
 
 	@Override
@@ -273,7 +273,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
-		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+		ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -350,7 +350,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
 		}
 
-		ourLog.info("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
+		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);
@@ -462,7 +462,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-		ourLog.info(msg);
+		ourLog.debug(msg);
 		return outcome;
 	}
 
@@ -530,7 +530,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 		TagList tags = super.getTags(myResourceType, null);
-		ourLog.info("Processed getTags on {} in {}ms", myResourceName, w.getMillisAndRestart());
+		ourLog.debug("Processed getTags on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return tags;
 	}
 
@@ -557,7 +557,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 		TagList retVal = super.getTags(myResourceType, theResourceId);
-		ourLog.info("Processed getTags on {} in {}ms", theResourceId, w.getMillisAndRestart());
+		ourLog.debug("Processed getTags on {} in {}ms", theResourceId, w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -569,7 +569,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(myResourceName, null, theSince, theUntil);
-		ourLog.info("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
+		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -586,7 +586,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBundleProvider retVal = super.history(myResourceName, entity.getId(), theSince, theUntil);
 
-		ourLog.info("Processed history on {} in {}ms", id, w.getMillisAndRestart());
+		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -622,7 +622,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
 			if (isNotBlank(theExpression)) {
 				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
-				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
+				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -633,7 +633,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				});
 
-				ourLog.info("Marked {} resources for reindexing", updatedCount);
+				ourLog.debug("Marked {} resources for reindexing", updatedCount);
 			}
 		}
 
@@ -665,7 +665,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, history);
 		}
 
-		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
+		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
@@ -699,7 +699,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.flush();
 
-		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
+		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
@@ -864,7 +864,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceGoneException("Resource was deleted at " + deleted.getValueAsString());
 		}
 
-		ourLog.info("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -968,7 +968,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.merge(entity);
 
-		ourLog.info("Processed remove tag {}/{} on {} in {}ms", theScheme, theTerm, theId.getValue(), w.getMillisAndRestart());
+		ourLog.debug("Processed remove tag {}/{} on {} in {}ms", theScheme, theTerm, theId.getValue(), w.getMillisAndRestart());
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
@@ -1282,7 +1282,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-		ourLog.info(msg);
+		ourLog.debug(msg);
 		return outcome;
 	}
 
@@ -1339,7 +1339,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false && !theForValidate) {
-			ourLog.info("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
+			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
 			myResourceLinkDao.delete(resultList);
 			return;
 		}

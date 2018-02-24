@@ -150,6 +150,14 @@
 				elements of type "Reference". Thanks to GitHub user @t4deon for supplying
 				a testcase!
 			</action>
+			<action type="fix">
+				Deleting a resource from the testpage overlay resulted in an error page after 
+				clicking "delete", even though the delete succeeded.
+			</action>
+			<action type="remove">
+				A number of info level log lines have been reduced to debug level in the JPA server, in 
+				order to reduce contention during heavy loads.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
