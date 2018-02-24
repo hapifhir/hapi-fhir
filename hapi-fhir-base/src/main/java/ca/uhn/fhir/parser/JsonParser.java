@@ -1033,7 +1033,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				} else {
 					parentElementName = "extension";
 				}
-				getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
+				getErrorHandler().missingRequiredElement(new ParseLocation().setParentElementName(parentElementName), "url");
 				url = null;
 			} else {
 				url = getExtensionUrl(jsonElement.getAsString());
