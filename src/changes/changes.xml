@@ -158,6 +158,13 @@
 				A number of info level log lines have been reduced to debug level in the JPA server, in 
 				order to reduce contention during heavy loads.
 			</action>
+			<action type="fix" issue="863">
+				JPA server now correctly indexes custom search parameters which
+				have multiple base resource types. Previously, the indexing could
+				cause resources of the wrong type to be returned in a search
+				if a parameter being used also matched that type. Thanks
+				to Dave Carlson for reporting!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

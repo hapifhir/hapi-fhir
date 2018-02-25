@@ -334,6 +334,77 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		}), empty());
 	}
 
+	/**
+	 * See #863
+	 */
+	@Test
+	public void testParamWithMultipleBases() {
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://clinicalcloud.solutions/fhir/SearchParameter/request-reason");
+		sp.setName("reason");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("reason");
+		sp.addBase("MedicationRequest");
+		sp.addBase("ServiceRequest");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("MedicationRequest.reasonReference | ServiceRequest.reasonReference");
+		sp.addTarget("Condition");
+		sp.addTarget("Observation");
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
+
+		Condition condition = new Condition();
+		condition.getCode().setText("A condition");
+		String conditionId = myConditionDao.create(condition).getId().toUnqualifiedVersionless().getValue();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.addReasonReference().setReference(conditionId);
+		String mrId = myMedicationRequestDao.create(mr).getId().toUnqualifiedVersionless().getValue();
+
+		ServiceRequest pr = new ServiceRequest();
+		pr.addReasonReference().setReference(conditionId);
+		myServiceRequestDao.create(pr);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("reason", new ReferenceParam(conditionId));
+		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
+		assertThat(results, contains(mrId));
+	}
+
+
+	/**
+	 * See #863
+	 */
+	@Test
+	public void testParamWithMultipleBasesToken() {
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://clinicalcloud.solutions/fhir/SearchParameter/request-reason");
+		sp.setName("reason");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("reason");
+		sp.addBase("MedicationRequest");
+		sp.addBase("ServiceRequest");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("MedicationRequest.reasonCode | ServiceRequest.reasonCode");
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.addReasonCode().addCoding().setSystem("foo").setCode("bar");
+		String mrId = myMedicationRequestDao.create(mr).getId().toUnqualifiedVersionless().getValue();
+
+		ServiceRequest pr = new ServiceRequest();
+		pr.addReasonCode().addCoding().setSystem("foo").setCode("bar");
+		myServiceRequestDao.create(pr);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("reason", new TokenParam("foo", "bar"));
+		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
+		assertThat(results, contains(mrId));
+	}
+
 	@Test
 	public void testSearchForExtensionReferenceWithNonMatchingTarget() {
 		SearchParameter siblingSp = new SearchParameter();

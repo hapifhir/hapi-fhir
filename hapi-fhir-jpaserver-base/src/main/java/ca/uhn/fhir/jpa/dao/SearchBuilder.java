@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,7 +83,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<Long>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
-	private static Long NO_MORE = Long.valueOf(-1);
+	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
@@ -331,10 +331,9 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
 
-			if (params instanceof ReferenceParam) {
-				ReferenceParam ref = (ReferenceParam) params;
+			if (nextOr instanceof ReferenceParam) {
+				ReferenceParam ref = (ReferenceParam) nextOr;
 
 				if (isBlank(ref.getChain())) {
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
@@ -471,7 +470,7 @@ public class SearchBuilder implements ISearchBuilder {
 						IQueryParameterType chainValue;
 						if (remainingChain != null) {
 							if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", new Object[]{nextType.getSimpleName(), chain, remainingChain});
+								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", new Object[] {nextType.getSimpleName(), chain, remainingChain});
 								continue;
 							}
 
@@ -533,7 +532,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + params.getClass());
+				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
 
 		}
@@ -1475,37 +1474,37 @@ public class SearchBuilder implements ISearchBuilder {
 		switch (param.getParamType()) {
 			case STRING:
 				joinAttrName = "myParamsString";
-				sortAttrName = new String[]{"myValueExact"};
+				sortAttrName = new String[] {"myValueExact"};
 				joinType = JoinEnum.STRING;
 				break;
 			case DATE:
 				joinAttrName = "myParamsDate";
-				sortAttrName = new String[]{"myValueLow"};
+				sortAttrName = new String[] {"myValueLow"};
 				joinType = JoinEnum.DATE;
 				break;
 			case REFERENCE:
 				joinAttrName = "myResourceLinks";
-				sortAttrName = new String[]{"myTargetResourcePid"};
+				sortAttrName = new String[] {"myTargetResourcePid"};
 				joinType = JoinEnum.REFERENCE;
 				break;
 			case TOKEN:
 				joinAttrName = "myParamsToken";
-				sortAttrName = new String[]{"mySystem", "myValue"};
+				sortAttrName = new String[] {"mySystem", "myValue"};
 				joinType = JoinEnum.TOKEN;
 				break;
 			case NUMBER:
 				joinAttrName = "myParamsNumber";
-				sortAttrName = new String[]{"myValue"};
+				sortAttrName = new String[] {"myValue"};
 				joinType = JoinEnum.NUMBER;
 				break;
 			case URI:
 				joinAttrName = "myParamsUri";
-				sortAttrName = new String[]{"myUri"};
+				sortAttrName = new String[] {"myUri"};
 				joinType = JoinEnum.URI;
 				break;
 			case QUANTITY:
 				joinAttrName = "myParamsQuantity";
-				sortAttrName = new String[]{"myValue"};
+				sortAttrName = new String[] {"myValue"};
 				joinType = JoinEnum.QUANTITY;
 				break;
 			default:
@@ -1780,7 +1779,7 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[]{allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart()});
+		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] {allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart()});
 
 		return allAdded;
 	}
@@ -2006,8 +2005,17 @@ public class SearchBuilder implements ISearchBuilder {
 		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
 		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
-		Predicate type = theFrom.get("mySourcePath").in(path);
-		return type;
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		for (Iterator<String> iter = path.iterator(); iter.hasNext(); ) {
+			if (!iter.next().startsWith(theResourceType + ".")) {
+				iter.remove();
+			}
+		}
+		return theFrom.get("mySourcePath").in(path);
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
