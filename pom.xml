@@ -1118,8 +1118,8 @@
 						<encoding>UTF-8</encoding>
 
 						<fork>true</fork>
-						<meminitial>128m</meminitial>
-						<maxmem>1600m</maxmem>
+						<meminitial>500m</meminitial>
+						<maxmem>2000m</maxmem>
 					</configuration>
 					<dependencies>
 						<dependency>

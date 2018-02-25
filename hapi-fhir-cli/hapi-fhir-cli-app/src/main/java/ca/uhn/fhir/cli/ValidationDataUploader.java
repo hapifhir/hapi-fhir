@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -163,7 +164,7 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
@@ -182,7 +183,7 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
@@ -200,7 +201,7 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
@@ -225,7 +226,7 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
 			} catch (Exception e) {
@@ -268,12 +269,14 @@ public class ValidationDataUploader extends BaseCommand {
 
 			int bytes = ctx.newXmlParser().encodeResourceToString(next).length();
 
-			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[]{count, total, next.getIdElement().getValue(), bytes});
+			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] {count, total, next.getIdElement().getValue(), bytes});
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
 			} catch (UnprocessableEntityException e) {
 				ourLog.warn("UnprocessableEntityException: " + e.toString());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -293,7 +296,7 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
 			} catch (Exception e) {
@@ -318,7 +321,7 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
@@ -364,7 +367,7 @@ public class ValidationDataUploader extends BaseCommand {
 
 			int bytes = theCtx.newXmlParser().encodeResourceToString(next).length();
 
-			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[]{count, total, next.getIdElement().getValue(), bytes});
+			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] {count, total, next.getIdElement().getValue(), bytes});
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
@@ -388,7 +391,7 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.r4.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
@@ -410,7 +413,7 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
@@ -470,7 +473,7 @@ public class ValidationDataUploader extends BaseCommand {
 				continue;
 			}
 
-			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[]{name, count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {name, count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
@@ -518,8 +521,12 @@ public class ValidationDataUploader extends BaseCommand {
 				continue;
 			}
 
-			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[]{name, count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {name, count, total, next.getIdElement().getValue()});
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}

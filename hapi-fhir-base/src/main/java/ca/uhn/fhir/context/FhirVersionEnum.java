@@ -181,7 +181,7 @@ public enum FhirVersionEnum {
 
 		private String myVersion;
 
-		public Dstu3Version() {
+		Dstu3Version() {
 			try {
 				Class<?> c = Class.forName("org.hl7.fhir.dstu3.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
@@ -201,7 +201,7 @@ public enum FhirVersionEnum {
 
 		private String myVersion;
 
-		public R4Version() {
+		R4Version() {
 			try {
 				Class<?> c = Class.forName("org.hl7.fhir.r4.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
