@@ -138,6 +138,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart) {
 		IIdType id = myFhirContext.getVersion().newIdType();
 		id.setParts(null, myResourceName, theIdPart, Long.toString(theVersionIdPart));
+		if (theResource != null) {
+			theResource.setId(id);
+		}
 
 		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
 		versionToResource.put(theVersionIdPart, theResource);

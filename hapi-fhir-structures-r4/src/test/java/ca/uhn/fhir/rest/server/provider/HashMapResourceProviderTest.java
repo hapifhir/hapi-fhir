@@ -53,6 +53,21 @@ public class HashMapResourceProviderTest {
 	}
 
 	@Test
+	public void testCreateWithClientAssignedIdAndRead() {
+		// Create
+		Patient p = new Patient();
+		p.setId("ABC");
+		p.setActive(true);
+		IIdType id = ourClient.update().resource(p).execute().getId();
+		assertEquals("ABC", id.getIdPart());
+		assertEquals("1", id.getVersionIdPart());
+
+		// Read
+		p = (Patient) ourClient.read().resource("Patient").withId(id).execute();
+		assertEquals(true, p.getActive());
+	}
+
+	@Test
 	public void testDelete() {
 		// Create
 		Patient p = new Patient();
