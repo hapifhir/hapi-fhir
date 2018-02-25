@@ -71,23 +71,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		}
 	}
 
-	@Test
-	public void testCreateInvalidParamMismatchedResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender or Observation.code");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"Observation.code\". All paths in a single SearchParameter must match the same resource type", e.getMessage());
-		}
-	}
 
 	@Test
 	public void testCreateInvalidParamNoPath() {
