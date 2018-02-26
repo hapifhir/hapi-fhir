@@ -28,7 +28,6 @@ import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import javassist.Modifier;
 
 public class ReflectionUtil {
 
