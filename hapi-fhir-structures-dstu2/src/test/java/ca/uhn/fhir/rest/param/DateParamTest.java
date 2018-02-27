@@ -1,17 +1,24 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.Date;
-import java.util.TimeZone;
-
-import org.junit.Test;
-
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import org.junit.Test;
+
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.APPROXIMATE;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
@@ -105,6 +112,27 @@ public class DateParamTest {
 		assertEquals(ParamPrefixEnum.LESSTHAN, new DateParam("lt2012").getPrefix());
 		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, new DateParam("le2012").getPrefix());
 	}
-	
 
+	@Test()
+	public void testEqualsAndHashCode() {
+		List<DateParam> uniqueSamples = newArrayList(
+			new DateParam(),
+			new DateParam(NOT_EQUAL, new Date()),
+			new DateParam(EQUAL, new Date().getTime()),
+			new DateParam(APPROXIMATE, "2017-10-17T11:11:11.111-11:11"));
+		DateParam previous = null;
+		for (DateParam current : uniqueSamples) {
+			ourLog.info("Equals test samples: [previous=" + previous + ", current=" + current + "]");
+			assertThat(current, is(equalTo(copyOf(current))));
+			assertThat(current.hashCode(), is(equalTo(copyOf(current).hashCode())));
+
+			assertThat(current, is(not(equalTo(previous))));
+			assertThat(current.hashCode(), is(not(equalTo(previous != null ? previous.hashCode() : null))));
+			previous = current;
+		}
+	}
+
+	private DateParam copyOf(DateParam param) {
+		return new DateParam(param.getPrefix(), param.getValue());
+	}
 }

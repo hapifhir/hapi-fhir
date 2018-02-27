@@ -107,5 +107,4 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		myPrefix = thePrefix;
 		return (T) this;
 	}
-
 }
