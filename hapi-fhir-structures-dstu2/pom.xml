@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-structures-dstu2</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)</name>
 
@@ -356,6 +356,22 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+						<Import-Package>
+							javax.servlet*;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>

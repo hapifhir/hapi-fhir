@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-client</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR - Client Framework</name>
 
@@ -68,6 +68,11 @@
 				<configuration>
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 			</plugin>
 		</plugins>
 	</build>

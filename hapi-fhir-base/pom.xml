@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-base</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
@@ -150,6 +150,21 @@
 				</executions>
 			</plugin>
 			-->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							<!--required when using servers-->
+							ca.uhn.fhir.rest.api.server;resolution:=optional,
+							ca.uhn.fhir.model.api;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>

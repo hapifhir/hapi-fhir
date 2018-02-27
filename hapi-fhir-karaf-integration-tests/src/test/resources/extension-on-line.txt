@@ -1,0 +1,58 @@
+{
+  "resourceType": "Patient",
+  "name": [
+    {
+      "family": "Doe",
+      "given": [
+        "John",
+        "W."
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "2012-02-14",
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "535 Sheppard Avenue West, Unit 1907",
+        "RR 66, Station A, RPO 123"
+      ],
+      "_line": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+              "valueString": "535"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+              "valueString": "Sheppard"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetNameType",
+              "valueString": "Avenue"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-direction",
+              "valueString": "West"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-unitID",
+              "valueString": "1907"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-postBox",
+              "valueString": "1234"
+            }
+          ]
+        }
+      ],
+      "city": "Toronto",
+      "state": "ON",
+      "postalCode": "M3H4X8"
+    }
+  ]
+}
+
+
