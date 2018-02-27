@@ -5187,7 +5187,7 @@
       <sch:assert test="not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]|)">que-11: If one or more option is present, initial[x] must be missing</sch:assert>
     </sch:rule>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen">
-      <sch:assert test="count(f:*[starts-with(local-name(.), 'answer')]|self::f:hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
+      <sch:assert test="count(f:*[starts-with(local-name(.), 'answer')]|f:hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
     </sch:rule>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen/f:answerAttachment">
       <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: If the Attachment has data, it SHALL have a contentType</sch:assert>
