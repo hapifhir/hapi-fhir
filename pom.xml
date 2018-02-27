@@ -511,6 +511,11 @@
 				<version>23.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-testlib</artifactId>
+				<version>23.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.phloc</groupId>
 				<artifactId>phloc-schematron</artifactId>
 				<version>${phloc_schematron_version}</version>

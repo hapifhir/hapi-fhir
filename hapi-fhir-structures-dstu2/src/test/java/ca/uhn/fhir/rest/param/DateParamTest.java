@@ -2,21 +2,19 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.APPROXIMATE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -115,24 +113,18 @@ public class DateParamTest {
 
 	@Test()
 	public void testEqualsAndHashCode() {
-		List<DateParam> uniqueSamples = newArrayList(
-			new DateParam(),
-			new DateParam(NOT_EQUAL, new Date()),
-			new DateParam(EQUAL, new Date().getTime()),
-			new DateParam(APPROXIMATE, "2017-10-17T11:11:11.111-11:11"));
-		DateParam previous = null;
-		for (DateParam current : uniqueSamples) {
-			ourLog.info("Equals test samples: [previous=" + previous + ", current=" + current + "]");
-			assertThat(current, is(equalTo(copyOf(current))));
-			assertThat(current.hashCode(), is(equalTo(copyOf(current).hashCode())));
-
-			assertThat(current, is(not(equalTo(previous))));
-			assertThat(current.hashCode(), is(not(equalTo(previous != null ? previous.hashCode() : null))));
-			previous = current;
-		}
-	}
-
-	private DateParam copyOf(DateParam param) {
-		return new DateParam(param.getPrefix(), param.getValue());
+		Date now = new Date();
+		Date later = new Date(now.getTime() + SECONDS.toMillis(666));
+		new EqualsTester()
+			.addEqualityGroup(new DateParam(),
+				               new DateParam(null))
+			.addEqualityGroup(new DateParam(NOT_EQUAL, now),
+				               new DateParam(NOT_EQUAL, now.getTime()))
+			.addEqualityGroup(new DateParam(EQUAL, now),
+				               new DateParam(EQUAL, now.getTime()))
+			.addEqualityGroup(new DateParam(EQUAL, later),
+				               new DateParam(EQUAL, later.getTime()))
+			.addEqualityGroup(new DateParam(APPROXIMATE, "2011-11-11T11:11:11.111-11:11"))
+			.testEquals();
 	}
 }

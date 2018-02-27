@@ -229,6 +229,9 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
 		if (!(obj instanceof DateParam)) {
 			return false;
 		}

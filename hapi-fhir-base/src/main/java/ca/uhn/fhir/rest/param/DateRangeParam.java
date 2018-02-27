@@ -414,6 +414,24 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof DateRangeParam)) {
+			return false;
+		}
+		DateRangeParam other = (DateRangeParam) obj;
+		return	Objects.equals(myLowerBound, other.myLowerBound) &&
+					Objects.equals(myUpperBound, other.myUpperBound);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myLowerBound, myUpperBound);
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(getClass().getSimpleName());
@@ -484,7 +502,5 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				throw new DataFormatException("Upper bound comparator must be < or <=, can not be " + myUpperBound.getPrefix().getValue());
 			}
 		}
-
 	}
-
 }
