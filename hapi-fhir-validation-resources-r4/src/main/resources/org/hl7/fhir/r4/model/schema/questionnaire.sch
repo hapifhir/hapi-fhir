@@ -71,7 +71,7 @@
       <sch:assert test="not(f:type/@value='display' and f:code)">que-3: Display items cannot have a &quot;code&quot; asserted</sch:assert>
       <sch:assert test="f:type/@value=('boolean', 'decimal', 'integer', 'open-choice', 'string', 'text', 'url') or not(f:maxLength)">que-10: Maximum length can only be declared for simple question types</sch:assert>
       <sch:assert test="not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))">que-1: Group items must have nested items, display items cannot have nested items</sch:assert>
-      <sch:assert test="not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]|)">que-11: If one or more option is present, initial[x] must be missing</sch:assert>
+      <sch:assert test="not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]))">que-11: If one or more option is present, initial[x] must be missing</sch:assert>
     </sch:rule>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen">
       <sch:assert test="count(f:*[starts-with(local-name(.), 'answer')]|self::f:hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
