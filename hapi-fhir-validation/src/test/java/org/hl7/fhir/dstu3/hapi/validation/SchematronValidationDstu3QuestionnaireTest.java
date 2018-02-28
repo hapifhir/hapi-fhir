@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenCompone
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StringType;
 
-import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
