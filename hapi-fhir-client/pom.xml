@@ -73,6 +73,13 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

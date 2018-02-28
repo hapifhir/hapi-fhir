@@ -32,6 +32,13 @@
 	  <bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-base/${project.version}</bundle>
   </feature>
 
+	<feature name='hapi-fhir-client' version='${project.version}' start-level='50'>
+		<feature version='${project.version}'>hapi-fhir</feature>
+		<bundle dependency='true'>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore_version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient_version}</bundle>
+		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-client/${project.version}</bundle>
+	</feature>
+
 	<feature name='hapi-fhir-utilities' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir</feature>
 		<bundle dependency='true'>mvn:com.google.code.gson/gson/${gson_version}</bundle>
