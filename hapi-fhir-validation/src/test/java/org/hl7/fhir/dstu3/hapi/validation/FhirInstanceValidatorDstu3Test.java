@@ -17,12 +17,16 @@ import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -735,6 +739,25 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
+	}
+
+	/**
+	 * An invalid local reference should not cause a ServiceException.
+	 */
+	@Test
+	public void testInvalidLocalReference() {
+		Questionnaire resource = new Questionnaire();
+		resource.setStatus(PublicationStatus.ACTIVE);
+
+		QuestionnaireItemComponent item = new QuestionnaireItemComponent();
+		item.setLinkId("linkId-1");
+		item.setType(QuestionnaireItemType.CHOICE);
+		item.setOptions(new Reference("#invalid-ref"));
+		resource.addItem(item);
+
+		ValidationResult output = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, hasSize(2));
 	}
 
 	/**
