@@ -22,6 +22,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidatorDstu3Test;
@@ -289,6 +290,17 @@ public class FhirInstanceValidatorR4Test {
 		p.getManagingOrganization().setDisplay("HELLO");
 		
 		ValidationResult output = myVal.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	/**
+	 * See #872
+	 */
+	@Test
+	public void testExtensionUrlWithHl7Url() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
+		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
 	}
