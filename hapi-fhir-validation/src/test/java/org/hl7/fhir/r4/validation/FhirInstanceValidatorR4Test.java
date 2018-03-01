@@ -68,6 +68,21 @@ public class FhirInstanceValidatorR4Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
+	/**
+	 * An invalid local reference should not cause a ServiceException.
+	 */
+	@Test
+	public void testInvalidLocalReference() {
+		QuestionnaireResponse resource = new QuestionnaireResponse();
+		resource.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+
+		resource.setSubject(new Reference("#invalid-ref"));
+
+		ValidationResult output = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, hasSize(2));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
