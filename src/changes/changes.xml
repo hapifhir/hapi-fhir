@@ -176,6 +176,15 @@
 				cam be useful for tests or for static servers with small amounts
 				of data.
 			</action>
+			<action type="fix" issue="872">
+				An issue in the JPA server was corrected where searching using
+				URI search parameters would sometimes not include the resource type in the
+				criteria. This meant, for example, that a search for
+				<![CDATA[<code>ValueSet?url=http://foo</code>]]> would also
+				match any CodeSystem resource that happened to also have
+				that URL as the value for the "url" search parameter. Thanks
+				to Josh Mandel for reporting and supplying a test case!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

@@ -1569,7 +1569,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 * See #872
 	 */
 	@Test
-	public void testExtensionUrlWithHl7UrlPost() throws IOException {
+	public void testValidateExtensionUrlWithHl7UrlPost() throws IOException {
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		interceptor.addValidatorModule(val);
@@ -1577,8 +1577,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourRestServer.registerInterceptor(interceptor);
 		try {
 			String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
+			assertThat(input, containsString("Unknown extension http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode"));
 
-			HttpPost post = new HttpPost(ourServerBase + "/Patient/aaa");
+			HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 			post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 			CloseableHttpResponse resp = ourHttpClient.execute(post);
@@ -1611,14 +1612,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?_content=systolic&_pretty=true");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
 			assertThat(responseString, containsString(id1.getIdPart()));
-		} finally {
-			response.close();
 		}
 	}
 
