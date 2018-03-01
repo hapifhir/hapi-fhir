@@ -111,7 +111,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return myResourceType;
 	}
 
-	private TreeMap<Long, T> getVersionToResource(String theIdPart) {
+	private synchronized TreeMap<Long, T> getVersionToResource(String theIdPart) {
 		if (!myIdToVersionToResourceMap.containsKey(theIdPart)) {
 			myIdToVersionToResourceMap.put(theIdPart, new TreeMap<Long, T>());
 		}

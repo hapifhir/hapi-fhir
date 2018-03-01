@@ -89,7 +89,7 @@ public class FhirInstanceValidatorDstu3Test {
 				if (retVal == null) {
 					retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
 				}
-				ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
+				ourLog.debug("expandValueSet({}) : {}", new Object[] {theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
 		});
@@ -97,7 +97,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
 				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
-				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] {theInvocation.getArguments()[1], retVal});
 				return retVal;
 			}
 		});
@@ -126,7 +126,7 @@ public class FhirInstanceValidatorDstu3Test {
 					}
 				}
 				if (retVal == null) {
-					ourLog.info("fetchResource({}, {}) : {}", new Object[]{type, id, retVal});
+					ourLog.info("fetchResource({}, {}) : {}", new Object[] {type, id, retVal});
 				}
 				return retVal;
 			}
@@ -143,7 +143,7 @@ public class FhirInstanceValidatorDstu3Test {
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
 				}
-				ourLog.debug("validateCode({}, {}, {}) : {}", new Object[]{system, code, theInvocation.getArguments()[2], retVal});
+				ourLog.debug("validateCode({}, {}, {}) : {}", new Object[] {system, code, theInvocation.getArguments()[2], retVal});
 				return retVal;
 			}
 		});
@@ -151,7 +151,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
-				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
+				ourLog.debug("fetchCodeSystem({}) : {}", new Object[] {theInvocation.getArguments()[1], retVal});
 				return retVal;
 			}
 		});
@@ -166,7 +166,7 @@ public class FhirInstanceValidatorDstu3Test {
 				if (retVal == null) {
 					retVal = myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], url);
 				}
-				ourLog.info("fetchStructureDefinition({}) : {}", new Object[]{url, retVal});
+				ourLog.info("fetchStructureDefinition({}) : {}", new Object[] {url, retVal});
 				return retVal;
 			}
 		});
@@ -174,7 +174,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0]);
-				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
+				ourLog.debug("fetchAllStructureDefinitions()", new Object[] {});
 				return retVal;
 			}
 		});
@@ -195,7 +195,7 @@ public class FhirInstanceValidatorDstu3Test {
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
 			ourLog.info("Result {}: {} - {}:{} {} - {}",
-				new Object[]{index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage()});
+				new Object[] {index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage()});
 			index++;
 
 			retVal.add(next);
@@ -209,7 +209,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}", new Object[]{index, next.getSeverity(), next.getLocationString(), next.getMessage()});
+			ourLog.info("Result {}: {} - {} - {}", new Object[] {index, next.getSeverity(), next.getLocationString(), next.getMessage()});
 			index++;
 
 			if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
@@ -247,6 +247,17 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 
+	}
+
+	/**
+	 * See #872
+	 */
+	@Test
+	public void testExtensionUrlWithHl7Url() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
 	}
 
 	@Test
