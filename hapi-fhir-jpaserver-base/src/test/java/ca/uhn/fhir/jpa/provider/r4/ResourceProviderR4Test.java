@@ -1577,7 +1577,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourRestServer.registerInterceptor(interceptor);
 		try {
 			String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
-			assertThat(input, containsString("Unknown extension http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode"));
 
 			HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 			post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
@@ -1586,7 +1585,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			try {
 				String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(respString);
-				assertEquals(400, resp.getStatusLine().getStatusCode());
+				assertThat(respString, containsString("Unknown extension http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode"));
+				assertEquals(200, resp.getStatusLine().getStatusCode());
 			} finally {
 				IOUtils.closeQuietly(resp);
 			}
