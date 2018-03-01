@@ -25,8 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -44,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
@@ -133,27 +132,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		return retVal;
 	}
-
-	/**
-	 * See #872
-	 */
-	@Test
-	public void testExtensionUrlWithHl7Url() throws IOException {
-		String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-
-		CloseableHttpResponse resp = ourHttpClient.execute(post);
-		try {
-			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
-	}
-
 
 	/**
 	 * See #484
@@ -313,7 +291,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Binary fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("1", fromDB.getIdElement().getVersionIdPart());
 
-		arr[0] = 2;
+		arr[ 0 ] = 2;
 		HttpPut putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
@@ -327,7 +305,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
 
-		arr[0] = 3;
+		arr[ 0 ] = 3;
 		fromDB.setContent(arr);
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
@@ -345,7 +323,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Now an update with the wrong ID in the body
 
-		arr[0] = 4;
+		arr[ 0 ] = 4;
 		binary.setId("");
 		encoded = myFhirCtx.newJsonParser().encodeResourceToString(binary);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
@@ -844,7 +822,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			// String response = "";
 			StringBuilder b = new StringBuilder();
-			char[] buf = new char[1000];
+			char[] buf = new char[ 1000 ];
 			while (socketInput.read(buf) != -1) {
 				b.append(buf);
 			}
@@ -1565,6 +1543,55 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals(1, response.getEntry().size());
+	}
+
+	/**
+	 * See #872
+	 */
+	@Test
+	public void testExtensionUrlWithHl7Url() throws IOException {
+		String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+
+		CloseableHttpResponse resp = ourHttpClient.execute(post);
+		try {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+	}
+
+	/**
+	 * See #872
+	 */
+	@Test
+	public void testExtensionUrlWithHl7UrlPost() throws IOException {
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
+		interceptor.addValidatorModule(val);
+
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+			String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
+
+			HttpPost post = new HttpPost(ourServerBase + "/Patient/aaa");
+			post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+
+			CloseableHttpResponse resp = ourHttpClient.execute(post);
+			try {
+				String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+				ourLog.info(respString);
+				assertEquals(400, resp.getStatusLine().getStatusCode());
+			} finally {
+				IOUtils.closeQuietly(resp);
+			}
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@SuppressWarnings("unused")
