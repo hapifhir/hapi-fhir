@@ -5,7 +5,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.map.LazyMap;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -28,6 +33,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.thymeleaf.messageresolver.StandardMessageResolver;
+import org.thymeleaf.templateresource.ITemplateResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -77,6 +84,52 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 	}
 
+	@Test
+	public void testTranslations() throws DataFormatException {
+		CustomThymeleafNarrativeGenerator customGen = new CustomThymeleafNarrativeGenerator("classpath:/testnarrative.properties");
+		customGen.setIgnoreFailures(false);
+		customGen.setIgnoreMissingTemplates(false);
+
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.setNarrativeGenerator(customGen);
+
+		Patient value = new Patient();
+
+		value.addIdentifier().setSystem("urn:names").setValue("123456");
+		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
+		//@formatter:off
+		value.addAddress()
+			.addLine("123 Fake Street").addLine("Unit 1")
+			.setCity("Toronto").setState("ON").setCountry("Canada");
+		//@formatter:on
+
+		value.setBirthDate(new Date());
+
+		Transformer transformer = new Transformer() {
+
+			@Override
+			public Object transform(Object input) {
+				return "UNTRANSLATED:" + input;
+			}};
+
+		Map translations = new HashMap<>();
+		translations.put("some_text", "Some beautiful proze");
+
+		customGen.setMessageResolver(new StandardMessageResolver() {
+			@Override
+			protected Map<String, String> resolveMessagesForTemplate(String template,
+			                                                         ITemplateResource templateResource, Locale locale) {
+				return LazyMap.decorate(translations, transformer);
+			}
+		});
+
+		Narrative narrative = new Narrative();
+		customGen.generateNarrative(ctx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
+		ourLog.info(output);
+		assertThat(output, StringContains.containsString("Some beautiful proze"));
+		assertThat(output, StringContains.containsString("UNTRANSLATED:other_text"));
+	}
 
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
