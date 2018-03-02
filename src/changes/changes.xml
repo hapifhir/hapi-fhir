@@ -185,6 +185,10 @@
 				that URL as the value for the "url" search parameter. Thanks
 				to Josh Mandel for reporting and supplying a test case!
 			</action>
+			<action type="add" issue="868">
+				DateParam class now has equals() and hashCode() implementations. Thanks
+				to Gaetano Gallo for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
