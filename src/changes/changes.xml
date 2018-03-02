@@ -189,6 +189,11 @@
 				DateParam class now has equals() and hashCode() implementations. Thanks
 				to Gaetano Gallo for the pull request!
 			</action>
+			<action type="fix" issue="814">
+				Fix a bug where under certain circumstances, duplicate contained resources
+				could be output by the parser's encode methods. Thanks to
+				Frank Tao for supplying a test case!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
