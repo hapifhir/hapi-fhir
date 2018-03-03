@@ -1,6 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -63,6 +66,34 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
+
+	/**
+	 * See #873
+	 */
+	@Test
+	public void testCompareTimesWithDifferentTimezones() {
+		Procedure procedure = new Procedure();
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.getSubject().setReference("Patient/1");
+		procedure.getCode().setText("Some proc");
+
+		Period period = new Period();
+		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
+		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
+		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		procedure.setPerformed(period);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(procedure);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(encoded);
+
+		assertTrue(result.isSuccessful());
+	}
+
 
 	@SuppressWarnings("unchecked")
 	@Before

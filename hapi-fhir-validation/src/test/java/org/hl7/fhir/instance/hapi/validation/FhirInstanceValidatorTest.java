@@ -1,9 +1,13 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Procedure;
+import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -23,6 +27,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
@@ -49,34 +54,6 @@ public class FhirInstanceValidatorTest {
 		assertTrue(result.isSuccessful());
 	}
 
-	/*
-	 * {
-  "resourceType": "Observation",
-  "meta": {
-    "profile": [
-      "http://example.com/foo/bar/testValidateResourceContainingProfileDeclarationJson"
-    ]
-  },
-  "identifier": [
-    {
-      "system": "http://acme",
-      "value": "12345"
-    }
-  ],
-  "status": "final",
-  "code": {
-    "coding": [
-      {
-        "system": "http://loinc.org",
-        "code": "12345"
-      }
-    ]
-  },
-  "encounter": {
-    "reference": "http://foo.com/Encounter/9"
-  }
-}
-	 */
 	@Test
 	public void testObservation() {
 		Observation o = new Observation();
@@ -92,6 +69,34 @@ public class FhirInstanceValidatorTest {
 		ValidationResult result = val.validateWithResult(o);
 
 		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(encoded);
+
+		assertTrue(result.isSuccessful());
+	}
+
+	/**
+	 * See #873
+	 */
+	@Test
+	public void testCompareTimesWithDifferentTimezones() {
+		Procedure procedure = new Procedure();
+		procedure.setStatus(ProcedureStatusEnum.COMPLETED);
+		procedure.getSubject().setReference("Patient/1");
+		procedure.getCode().setText("Some proc");
+
+		PeriodDt period = new PeriodDt();
+		period.setStart(new DateTimeDt("2000-01-01T00:00:01+05:00"));
+		period.setEnd(new DateTimeDt("2000-01-01T00:00:00+04:00"));
+		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		procedure.setPerformed(period);
+
+		FhirValidator val = ourCtxDstu2.newValidator();
+
+		val.registerValidatorModule(ourValidator);
+
+		ValidationResult result = val.validateWithResult(procedure);
+
+		String encoded = ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
