@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -38,13 +40,14 @@ import okhttp3.Response;
  *
  * @author Matthew Clarke | matthew.clarke@orionhealth.com | Orion Health
  */
-public class OkHttpRestfulResponse implements IHttpResponse {
+public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResponse {
 
 	private boolean myEntityBuffered = false;
 	private byte[] myEntityBytes;
 	private Response myResponse;
 
-	public OkHttpRestfulResponse(Response theResponse) {
+	public OkHttpRestfulResponse(Response theResponse, StopWatch theResponseStopWatch) {
+		super(theResponseStopWatch);
 		this.myResponse = theResponse;
 	}
 

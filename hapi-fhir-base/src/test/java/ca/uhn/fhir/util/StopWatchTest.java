@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.util;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
@@ -33,7 +33,7 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch();
 
 		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertEquals("00:00:00.600", sw.getEstimatedTimeRemaining(0.99, 1.0));
+		assertEquals("600ms", sw.getEstimatedTimeRemaining(0.99, 1.0));
 
 		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:10:00", sw.getEstimatedTimeRemaining(0.1, 1.0));
@@ -53,7 +53,7 @@ public class StopWatchTest {
 
 	@Test
 	public void testFormatMillis() {
-		assertEquals("00:00:01.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
+		assertEquals("1000ms", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
 		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
 		assertEquals("01:00:00", StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR));
@@ -143,7 +143,7 @@ public class StopWatchTest {
 
 		String string = sw.toString();
 		ourLog.info(string);
-		assertThat(string, startsWith("00:00"));
+		assertThat(string, matchesPattern("^[0-9]{3,4}ms$"));
 	}
 
 }
