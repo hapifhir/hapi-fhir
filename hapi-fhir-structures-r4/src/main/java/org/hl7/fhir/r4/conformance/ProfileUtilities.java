@@ -23,13 +23,7 @@ import org.hl7.fhir.r4.elementmodel.Property;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
 import org.hl7.fhir.r4.formats.XmlParser;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ElementDefinition.AggregationMode;
 import org.hl7.fhir.r4.model.ElementDefinition.DiscriminatorType;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBaseComponent;
@@ -41,25 +35,13 @@ import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.SlicingRules;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionDifferentialComponent;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionMappingComponent;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
@@ -83,6 +65,8 @@ import org.hl7.fhir.utilities.xml.SchematronWriter;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Rule;
 import org.hl7.fhir.utilities.xml.SchematronWriter.SchematronType;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Section;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * This class provides a set of utility operations for working with Profiles.
@@ -925,7 +909,7 @@ public class ProfileUtilities extends TranslatingUtilities {
           } else if (t.hasTargetProfile() && u.getValue().startsWith("#"))
             c.addPiece(checkForNoChange(t, gen.new Piece(corePath+profileBaseFileName+"."+u.getValue().substring(1).toLowerCase()+".html", u.getValue(), null)));
         }
-      } else if (t.hasProfile() && (!t.getCode().equals("Extension") || t.getProfile().contains(":"))) { // a profiled type
+      } else if (t.hasProfile() && (!t.getCode().equals("Extension") || isProfiledType(t.getProfile()))) { // a profiled type
         String ref;
         ref = pkp.getLinkForProfile(profile, t.getProfile().get(0).getValue());
         if (ref != null) {
@@ -945,6 +929,15 @@ public class ProfileUtilities extends TranslatingUtilities {
         c.addPiece(checkForNoChange(t, gen.new Piece(null, t.getCode(), null)));
     }
     return c;
+  }
+
+  private boolean isProfiledType(List<CanonicalType> theProfile) {
+    for (CanonicalType next : theProfile){
+      if (StringUtils.defaultString(next.getValueAsString()).contains(":")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // generate a CSV representation of the structure definition
