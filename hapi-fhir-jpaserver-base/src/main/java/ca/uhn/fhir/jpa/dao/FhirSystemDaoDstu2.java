@@ -463,7 +463,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				}
 				if (idSubstitutions.containsKey(nextId)) {
 					IdDt newId = idSubstitutions.get(nextId);
-					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 					nextRef.setReference(newId);
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
@@ -479,7 +479,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				IdDt nextUriString = new IdDt(nextRef.getValueAsString());
 				if (idSubstitutions.containsKey(nextUriString)) {
 					IdDt newId = idSubstitutions.get(nextUriString);
-					ourLog.info(" * Replacing resource ref {} with {}", nextUriString, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 					nextRef.setValue(newId.getValue());
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
@@ -522,7 +522,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			if (replacement.equals(next)) {
 				continue;
 			}
-			ourLog.info("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
+			ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 		}
 
 		/*

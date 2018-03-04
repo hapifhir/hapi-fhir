@@ -514,7 +514,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				}
 				if (theIdSubstitutions.containsKey(nextId)) {
 					IdType newId = theIdSubstitutions.get(nextId);
-					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 					nextRef.setReference(newId.getValue());
 				} else if (nextId.getValue().startsWith("urn:")) {
 					throw new InvalidRequestException("Unable to satisfy placeholder ID: " + nextId.getValue());
@@ -532,7 +532,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				IdType nextUriString = new IdType(nextRef.getValueAsString());
 				if (theIdSubstitutions.containsKey(nextUriString)) {
 					IdType newId = theIdSubstitutions.get(nextUriString);
-					ourLog.info(" * Replacing resource ref {} with {}", nextUriString, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 					nextRef.setValue(newId.getValue());
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
@@ -548,6 +548,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		myEntityManager.flush();
+		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
@@ -573,7 +574,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			if (replacement.equals(next)) {
 				continue;
 			}
-			ourLog.info("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
+			ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 		}
 		return entriesToProcess;
 	}
