@@ -312,6 +312,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public List<StructureMap> listTransforms() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public StructureMap getTransform(String url) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public List<String> getTypeNames() {
     throw new UnsupportedOperationException();
   }

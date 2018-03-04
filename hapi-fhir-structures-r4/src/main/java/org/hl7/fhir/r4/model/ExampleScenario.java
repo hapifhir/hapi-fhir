@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -221,7 +221,7 @@ into another (possibly the same) biological entity.
          */
         CLINICALIMPRESSION, 
         /**
-         * A code system resource specifies a set of codes drawn from one or more code systems.
+         * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
          */
         CODESYSTEM, 
         /**
@@ -237,7 +237,7 @@ into another (possibly the same) biological entity.
          */
         COMPARTMENTDEFINITION, 
         /**
-         * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
+         * A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).
          */
         COMPOSITION, 
         /**
@@ -513,7 +513,7 @@ into another (possibly the same) biological entity.
          */
         OBSERVATIONDEFINITION, 
         /**
-         * Patient’s or family member's work information.
+         * A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.
          */
         OCCUPATIONALDATA, 
         /**
@@ -1331,11 +1331,11 @@ into another (possibly the same) biological entity.
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
-            case CODESYSTEM: return "A code system resource specifies a set of codes drawn from one or more code systems.";
+            case CODESYSTEM: return "The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPARTMENTDEFINITION: return "A compartment definition that defines how resources are accessed on a server.";
-            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
+            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
             case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
@@ -1404,7 +1404,7 @@ into another (possibly the same) biological entity.
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
-            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
+            case OCCUPATIONALDATA: return "A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
@@ -5951,7 +5951,7 @@ into another (possibly the same) biological entity.
           if (this.pause == null)
             return false;
           for (BooleanType v : this.pause)
-            if (v.equals(value)) // boolean
+            if (v.getValue().equals(value)) // boolean
               return true;
           return false;
         }
@@ -6147,16 +6147,11 @@ into another (possibly the same) biological entity.
     /**
      * Another nested workflow.
      */
-    @Child(name = "workflow", type = {ExampleScenario.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "workflow", type = {CanonicalType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Another nested workflow", formalDefinition="Another nested workflow." )
-    protected List<Reference> workflow;
-    /**
-     * The actual objects that are the target of the reference (Another nested workflow.)
-     */
-    protected List<ExampleScenario> workflowTarget;
+    protected List<CanonicalType> workflow;
 
-
-    private static final long serialVersionUID = 1418844010L;
+    private static final long serialVersionUID = 758248907L;
 
   /**
    * Constructor
@@ -6980,16 +6975,16 @@ into another (possibly the same) biological entity.
     /**
      * @return {@link #workflow} (Another nested workflow.)
      */
-    public List<Reference> getWorkflow() { 
+    public List<CanonicalType> getWorkflow() { 
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       return this.workflow;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ExampleScenario setWorkflow(List<Reference> theWorkflow) { 
+    public ExampleScenario setWorkflow(List<CanonicalType> theWorkflow) { 
       this.workflow = theWorkflow;
       return this;
     }
@@ -6997,59 +6992,45 @@ into another (possibly the same) biological entity.
     public boolean hasWorkflow() { 
       if (this.workflow == null)
         return false;
-      for (Reference item : this.workflow)
+      for (CanonicalType item : this.workflow)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addWorkflow() { //3
-      Reference t = new Reference();
+    /**
+     * @return {@link #workflow} (Another nested workflow.)
+     */
+    public CanonicalType addWorkflowElement() {//2 
+      CanonicalType t = new CanonicalType();
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       this.workflow.add(t);
       return t;
     }
 
-    public ExampleScenario addWorkflow(Reference t) { //3
-      if (t == null)
-        return this;
+    /**
+     * @param value {@link #workflow} (Another nested workflow.)
+     */
+    public ExampleScenario addWorkflow(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       this.workflow.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #workflow}, creating it if it does not already exist
+     * @param value {@link #workflow} (Another nested workflow.)
      */
-    public Reference getWorkflowFirstRep() { 
-      if (getWorkflow().isEmpty()) {
-        addWorkflow();
-      }
-      return getWorkflow().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<ExampleScenario> getWorkflowTarget() { 
-      if (this.workflowTarget == null)
-        this.workflowTarget = new ArrayList<ExampleScenario>();
-      return this.workflowTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public ExampleScenario addWorkflowTarget() { 
-      ExampleScenario r = new ExampleScenario();
-      if (this.workflowTarget == null)
-        this.workflowTarget = new ArrayList<ExampleScenario>();
-      this.workflowTarget.add(r);
-      return r;
+    public boolean hasWorkflow(String value) { 
+      if (this.workflow == null)
+        return false;
+      for (CanonicalType v : this.workflow)
+        if (v.getValue().equals(value)) // canonical(ExampleScenario)
+          return true;
+      return false;
     }
 
       protected void listChildren(List<Property> children) {
@@ -7070,7 +7051,7 @@ into another (possibly the same) biological entity.
         children.add(new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor));
         children.add(new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance));
         children.add(new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process));
-        children.add(new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow));
+        children.add(new Property("workflow", "canonical(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow));
       }
 
       @Override
@@ -7092,7 +7073,7 @@ into another (possibly the same) biological entity.
         case 92645877: /*actor*/  return new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor);
         case 555127957: /*instance*/  return new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance);
         case -309518737: /*process*/  return new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process);
-        case 35379135: /*workflow*/  return new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow);
+        case 35379135: /*workflow*/  return new Property("workflow", "canonical(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -7117,7 +7098,7 @@ into another (possibly the same) biological entity.
         case 92645877: /*actor*/ return this.actor == null ? new Base[0] : this.actor.toArray(new Base[this.actor.size()]); // ExampleScenarioActorComponent
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // ExampleScenarioInstanceComponent
         case -309518737: /*process*/ return this.process == null ? new Base[0] : this.process.toArray(new Base[this.process.size()]); // ExampleScenarioProcessComponent
-        case 35379135: /*workflow*/ return this.workflow == null ? new Base[0] : this.workflow.toArray(new Base[this.workflow.size()]); // Reference
+        case 35379135: /*workflow*/ return this.workflow == null ? new Base[0] : this.workflow.toArray(new Base[this.workflow.size()]); // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -7176,7 +7157,7 @@ into another (possibly the same) biological entity.
           this.getProcess().add((ExampleScenarioProcessComponent) value); // ExampleScenarioProcessComponent
           return value;
         case 35379135: // workflow
-          this.getWorkflow().add(castToReference(value)); // Reference
+          this.getWorkflow().add(castToCanonical(value)); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -7219,7 +7200,7 @@ into another (possibly the same) biological entity.
         } else if (name.equals("process")) {
           this.getProcess().add((ExampleScenarioProcessComponent) value);
         } else if (name.equals("workflow")) {
-          this.getWorkflow().add(castToReference(value));
+          this.getWorkflow().add(castToCanonical(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -7244,7 +7225,7 @@ into another (possibly the same) biological entity.
         case 92645877:  return addActor(); 
         case 555127957:  return addInstance(); 
         case -309518737:  return addProcess(); 
-        case 35379135:  return addWorkflow(); 
+        case 35379135:  return addWorkflowElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -7269,7 +7250,7 @@ into another (possibly the same) biological entity.
         case 92645877: /*actor*/ return new String[] {};
         case 555127957: /*instance*/ return new String[] {};
         case -309518737: /*process*/ return new String[] {};
-        case 35379135: /*workflow*/ return new String[] {"Reference"};
+        case 35379135: /*workflow*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -7326,7 +7307,7 @@ into another (possibly the same) biological entity.
           return addProcess();
         }
         else if (name.equals("workflow")) {
-          return addWorkflow();
+          throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.workflow");
         }
         else
           return super.addChild(name);
@@ -7385,8 +7366,8 @@ into another (possibly the same) biological entity.
             dst.process.add(i.copy());
         };
         if (workflow != null) {
-          dst.workflow = new ArrayList<Reference>();
-          for (Reference i : workflow)
+          dst.workflow = new ArrayList<CanonicalType>();
+          for (CanonicalType i : workflow)
             dst.workflow.add(i.copy());
         };
         return dst;

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,6 +39,8 @@ public class RemittanceOutcomeEnumFactory implements EnumFactory<RemittanceOutco
   public RemittanceOutcome fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
+    if ("queued".equals(codeString))
+      return RemittanceOutcome.QUEUED;
     if ("complete".equals(codeString))
       return RemittanceOutcome.COMPLETE;
     if ("error".equals(codeString))
@@ -49,6 +51,8 @@ public class RemittanceOutcomeEnumFactory implements EnumFactory<RemittanceOutco
   }
 
   public String toCode(RemittanceOutcome code) {
+    if (code == RemittanceOutcome.QUEUED)
+      return "queued";
     if (code == RemittanceOutcome.COMPLETE)
       return "complete";
     if (code == RemittanceOutcome.ERROR)

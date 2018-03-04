@@ -89,6 +89,17 @@ public class JsonParserR4Test {
 	}
 
 	@Test
+	public void testEncodeAndParseUnicodeCharacterInNarrative() {
+		Patient p = new Patient();
+		p.getText().getDiv().setValueAsString("<div>Copy © 1999</div>");
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy &copy; 1999</div>", p.getText().getDivAsString());
+	}
+
+	@Test
 	public void testExcludeNothing() {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -223,22 +223,22 @@ public class MedicationAdministration extends DomainResource {
     @Block()
     public static class MedicationAdministrationPerformerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Distinguishes the type of performer in the administration.
+         * Distinguishes the type of involvement of the performer in the medication administration.
          */
         @Child(name = "function", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who performed the administration and what they did", formalDefinition="Distinguishes the type of performer in the administration." )
+        @Description(shortDefinition="Type of performance", formalDefinition="Distinguishes the type of involvement of the performer in the medication administration." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/med-admin-perform-function")
         protected CodeableConcept function;
 
         /**
-         * The device, practitioner, etc. who performed the action.
+         * Indicates who or what performed the medication administration.
          */
         @Child(name = "actor", type = {Practitioner.class, PractitionerRole.class, Patient.class, RelatedPerson.class, Device.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Individual who was performing", formalDefinition="The device, practitioner, etc. who performed the action." )
+        @Description(shortDefinition="Who performed the medication administration", formalDefinition="Indicates who or what performed the medication administration." )
         protected Reference actor;
 
         /**
-         * The actual object that is the target of the reference (The device, practitioner, etc. who performed the action.)
+         * The actual object that is the target of the reference (Indicates who or what performed the medication administration.)
          */
         protected Resource actorTarget;
 
@@ -260,7 +260,7 @@ public class MedicationAdministration extends DomainResource {
       }
 
         /**
-         * @return {@link #function} (Distinguishes the type of performer in the administration.)
+         * @return {@link #function} (Distinguishes the type of involvement of the performer in the medication administration.)
          */
         public CodeableConcept getFunction() { 
           if (this.function == null)
@@ -276,7 +276,7 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @param value {@link #function} (Distinguishes the type of performer in the administration.)
+         * @param value {@link #function} (Distinguishes the type of involvement of the performer in the medication administration.)
          */
         public MedicationAdministrationPerformerComponent setFunction(CodeableConcept value) { 
           this.function = value;
@@ -284,7 +284,7 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} (Indicates who or what performed the medication administration.)
          */
         public Reference getActor() { 
           if (this.actor == null)
@@ -300,7 +300,7 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @param value {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} (Indicates who or what performed the medication administration.)
          */
         public MedicationAdministrationPerformerComponent setActor(Reference value) { 
           this.actor = value;
@@ -308,14 +308,14 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates who or what performed the medication administration.)
          */
         public Resource getActorTarget() { 
           return this.actorTarget;
         }
 
         /**
-         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates who or what performed the medication administration.)
          */
         public MedicationAdministrationPerformerComponent setActorTarget(Resource value) { 
           this.actorTarget = value;
@@ -324,15 +324,15 @@ public class MedicationAdministration extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("function", "CodeableConcept", "Distinguishes the type of performer in the administration.", 0, 1, function));
-          children.add(new Property("actor", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who performed the action.", 0, 1, actor));
+          children.add(new Property("function", "CodeableConcept", "Distinguishes the type of involvement of the performer in the medication administration.", 0, 1, function));
+          children.add(new Property("actor", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Device)", "Indicates who or what performed the medication administration.", 0, 1, actor));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 1380938712: /*function*/  return new Property("function", "CodeableConcept", "Distinguishes the type of performer in the administration.", 0, 1, function);
-          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who performed the action.", 0, 1, actor);
+          case 1380938712: /*function*/  return new Property("function", "CodeableConcept", "Distinguishes the type of involvement of the performer in the medication administration.", 0, 1, function);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Device)", "Indicates who or what performed the medication administration.", 0, 1, actor);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -980,10 +980,10 @@ public class MedicationAdministration extends DomainResource {
     protected Type effective;
 
     /**
-     * The individual who was responsible for giving the medication to the patient.
+     * Indicates who or what performed the medication administration and how they were involved.
      */
     @Child(name = "performer", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who administered substance", formalDefinition="The individual who was responsible for giving the medication to the patient." )
+    @Description(shortDefinition="Who performed the medication administration and what they did", formalDefinition="Indicates who or what performed the medication administration and how they were involved." )
     protected List<MedicationAdministrationPerformerComponent> performer;
 
     /**
@@ -1193,7 +1193,7 @@ public class MedicationAdministration extends DomainResource {
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1562,7 +1562,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #performer} (The individual who was responsible for giving the medication to the patient.)
+     * @return {@link #performer} (Indicates who or what performed the medication administration and how they were involved.)
      */
     public List<MedicationAdministrationPerformerComponent> getPerformer() { 
       if (this.performer == null)
@@ -2066,7 +2066,7 @@ public class MedicationAdministration extends DomainResource {
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.", 0, 1, context));
         children.add(new Property("supportingInformation", "Reference(Any)", "Additional information (for example, patient height and weight) that supports the administration of the medication.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         children.add(new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective));
-        children.add(new Property("performer", "", "The individual who was responsible for giving the medication to the patient.", 0, java.lang.Integer.MAX_VALUE, performer));
+        children.add(new Property("performer", "", "Indicates who or what performed the medication administration and how they were involved.", 0, java.lang.Integer.MAX_VALUE, performer));
         children.add(new Property("statusReason", "CodeableConcept", "A code indicating why the administration was not performed.", 0, java.lang.Integer.MAX_VALUE, statusReason));
         children.add(new Property("reasonCode", "CodeableConcept", "A code indicating why the medication was given.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport)", "Condition or observation that supports why the medication was administered.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
@@ -2096,7 +2096,7 @@ public class MedicationAdministration extends DomainResource {
         case -1468651097: /*effective*/  return new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective);
         case -275306910: /*effectiveDateTime*/  return new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective);
         case -403934648: /*effectivePeriod*/  return new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective);
-        case 481140686: /*performer*/  return new Property("performer", "", "The individual who was responsible for giving the medication to the patient.", 0, java.lang.Integer.MAX_VALUE, performer);
+        case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what performed the medication administration and how they were involved.", 0, java.lang.Integer.MAX_VALUE, performer);
         case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "A code indicating why the administration was not performed.", 0, java.lang.Integer.MAX_VALUE, statusReason);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "A code indicating why the medication was given.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport)", "Condition or observation that supports why the medication was administered.", 0, java.lang.Integer.MAX_VALUE, reasonReference);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -147,9 +147,9 @@ public class TerminologyCapabilities extends MetadataResource {
         /**
          * URI for the Code System.
          */
-        @Child(name = "uri", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "uri", type = {CanonicalType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="URI for the Code System", formalDefinition="URI for the Code System." )
-        protected UriType uri;
+        protected CanonicalType uri;
 
         /**
          * For the code system, a list of versions that are supported by the server.
@@ -158,7 +158,7 @@ public class TerminologyCapabilities extends MetadataResource {
         @Description(shortDefinition="Version of Code System supported", formalDefinition="For the code system, a list of versions that are supported by the server." )
         protected List<TerminologyCapabilitiesCodeSystemVersionComponent> version;
 
-        private static final long serialVersionUID = -2135746920L;
+        private static final long serialVersionUID = 1023500432L;
 
     /**
      * Constructor
@@ -170,12 +170,12 @@ public class TerminologyCapabilities extends MetadataResource {
         /**
          * @return {@link #uri} (URI for the Code System.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
-        public UriType getUriElement() { 
+        public CanonicalType getUriElement() { 
           if (this.uri == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TerminologyCapabilitiesCodeSystemComponent.uri");
             else if (Configuration.doAutoCreate())
-              this.uri = new UriType(); // bb
+              this.uri = new CanonicalType(); // bb
           return this.uri;
         }
 
@@ -190,7 +190,7 @@ public class TerminologyCapabilities extends MetadataResource {
         /**
          * @param value {@link #uri} (URI for the Code System.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
-        public TerminologyCapabilitiesCodeSystemComponent setUriElement(UriType value) { 
+        public TerminologyCapabilitiesCodeSystemComponent setUriElement(CanonicalType value) { 
           this.uri = value;
           return this;
         }
@@ -210,7 +210,7 @@ public class TerminologyCapabilities extends MetadataResource {
             this.uri = null;
           else {
             if (this.uri == null)
-              this.uri = new UriType();
+              this.uri = new CanonicalType();
             this.uri.setValue(value);
           }
           return this;
@@ -271,14 +271,14 @@ public class TerminologyCapabilities extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("uri", "uri", "URI for the Code System.", 0, 1, uri));
+          children.add(new Property("uri", "canonical(CodeSystem)", "URI for the Code System.", 0, 1, uri));
           children.add(new Property("version", "", "For the code system, a list of versions that are supported by the server.", 0, java.lang.Integer.MAX_VALUE, version));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 116076: /*uri*/  return new Property("uri", "uri", "URI for the Code System.", 0, 1, uri);
+          case 116076: /*uri*/  return new Property("uri", "canonical(CodeSystem)", "URI for the Code System.", 0, 1, uri);
           case 351608024: /*version*/  return new Property("version", "", "For the code system, a list of versions that are supported by the server.", 0, java.lang.Integer.MAX_VALUE, version);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -288,7 +288,7 @@ public class TerminologyCapabilities extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // UriType
+        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // CanonicalType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : this.version.toArray(new Base[this.version.size()]); // TerminologyCapabilitiesCodeSystemVersionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -299,7 +299,7 @@ public class TerminologyCapabilities extends MetadataResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116076: // uri
-          this.uri = castToUri(value); // UriType
+          this.uri = castToCanonical(value); // CanonicalType
           return value;
         case 351608024: // version
           this.getVersion().add((TerminologyCapabilitiesCodeSystemVersionComponent) value); // TerminologyCapabilitiesCodeSystemVersionComponent
@@ -312,7 +312,7 @@ public class TerminologyCapabilities extends MetadataResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uri")) {
-          this.uri = castToUri(value); // UriType
+          this.uri = castToCanonical(value); // CanonicalType
         } else if (name.equals("version")) {
           this.getVersion().add((TerminologyCapabilitiesCodeSystemVersionComponent) value);
         } else
@@ -333,7 +333,7 @@ public class TerminologyCapabilities extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116076: /*uri*/ return new String[] {"uri"};
+        case 116076: /*uri*/ return new String[] {"canonical"};
         case 351608024: /*version*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -381,7 +381,7 @@ public class TerminologyCapabilities extends MetadataResource {
         if (!(other_ instanceof TerminologyCapabilitiesCodeSystemComponent))
           return false;
         TerminologyCapabilitiesCodeSystemComponent o = (TerminologyCapabilitiesCodeSystemComponent) other_;
-        return compareValues(uri, o.uri, true);
+        return true;
       }
 
       public boolean isEmpty() {
@@ -643,7 +643,7 @@ public class TerminologyCapabilities extends MetadataResource {
           if (this.language == null)
             return false;
           for (CodeType v : this.language)
-            if (v.equals(value)) // code
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -757,7 +757,7 @@ public class TerminologyCapabilities extends MetadataResource {
           if (this.property == null)
             return false;
           for (CodeType v : this.property)
-            if (v.equals(value)) // code
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -1090,7 +1090,7 @@ public class TerminologyCapabilities extends MetadataResource {
           if (this.op == null)
             return false;
           for (CodeType v : this.op)
-            if (v.equals(value)) // code
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -1247,26 +1247,16 @@ public class TerminologyCapabilities extends MetadataResource {
         /**
          * Supported fields on ExpansionProfile.
          */
-        @Child(name = "definition", type = {StructureDefinition.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "definition", type = {CanonicalType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Supported fields on ExpansionProfile", formalDefinition="Supported fields on ExpansionProfile." )
-        protected Reference definition;
-
-        /**
-         * The actual object that is the target of the reference (Supported fields on ExpansionProfile.)
-         */
-        protected StructureDefinition definitionTarget;
+        protected CanonicalType definition;
 
         /**
          * Supported expansion profiles.
          */
-        @Child(name = "profile", type = {ExpansionProfile.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "profile", type = {CanonicalType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supported expansion profiles", formalDefinition="Supported expansion profiles." )
-        protected List<Reference> profile;
-        /**
-         * The actual objects that are the target of the reference (Supported expansion profiles.)
-         */
-        protected List<ExpansionProfile> profileTarget;
-
+        protected List<CanonicalType> profile;
 
         /**
          * Documentation about text searching works.
@@ -1275,7 +1265,7 @@ public class TerminologyCapabilities extends MetadataResource {
         @Description(shortDefinition="Documentation about text searching works", formalDefinition="Documentation about text searching works." )
         protected MarkdownType textFilter;
 
-        private static final long serialVersionUID = 1242477437L;
+        private static final long serialVersionUID = 1275156533L;
 
     /**
      * Constructor
@@ -1420,15 +1410,19 @@ public class TerminologyCapabilities extends MetadataResource {
         }
 
         /**
-         * @return {@link #definition} (Supported fields on ExpansionProfile.)
+         * @return {@link #definition} (Supported fields on ExpansionProfile.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
-        public Reference getDefinition() { 
+        public CanonicalType getDefinitionElement() { 
           if (this.definition == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TerminologyCapabilitiesExpansionComponent.definition");
             else if (Configuration.doAutoCreate())
-              this.definition = new Reference(); // cc
+              this.definition = new CanonicalType(); // bb
           return this.definition;
+        }
+
+        public boolean hasDefinitionElement() { 
+          return this.definition != null && !this.definition.isEmpty();
         }
 
         public boolean hasDefinition() { 
@@ -1436,46 +1430,47 @@ public class TerminologyCapabilities extends MetadataResource {
         }
 
         /**
-         * @param value {@link #definition} (Supported fields on ExpansionProfile.)
+         * @param value {@link #definition} (Supported fields on ExpansionProfile.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
-        public TerminologyCapabilitiesExpansionComponent setDefinition(Reference value) { 
+        public TerminologyCapabilitiesExpansionComponent setDefinitionElement(CanonicalType value) { 
           this.definition = value;
           return this;
         }
 
         /**
-         * @return {@link #definition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Supported fields on ExpansionProfile.)
+         * @return Supported fields on ExpansionProfile.
          */
-        public StructureDefinition getDefinitionTarget() { 
-          if (this.definitionTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TerminologyCapabilitiesExpansionComponent.definition");
-            else if (Configuration.doAutoCreate())
-              this.definitionTarget = new StructureDefinition(); // aa
-          return this.definitionTarget;
+        public String getDefinition() { 
+          return this.definition == null ? null : this.definition.getValue();
         }
 
         /**
-         * @param value {@link #definition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Supported fields on ExpansionProfile.)
+         * @param value Supported fields on ExpansionProfile.
          */
-        public TerminologyCapabilitiesExpansionComponent setDefinitionTarget(StructureDefinition value) { 
-          this.definitionTarget = value;
+        public TerminologyCapabilitiesExpansionComponent setDefinition(String value) { 
+          if (Utilities.noString(value))
+            this.definition = null;
+          else {
+            if (this.definition == null)
+              this.definition = new CanonicalType();
+            this.definition.setValue(value);
+          }
           return this;
         }
 
         /**
          * @return {@link #profile} (Supported expansion profiles.)
          */
-        public List<Reference> getProfile() { 
+        public List<CanonicalType> getProfile() { 
           if (this.profile == null)
-            this.profile = new ArrayList<Reference>();
+            this.profile = new ArrayList<CanonicalType>();
           return this.profile;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public TerminologyCapabilitiesExpansionComponent setProfile(List<Reference> theProfile) { 
+        public TerminologyCapabilitiesExpansionComponent setProfile(List<CanonicalType> theProfile) { 
           this.profile = theProfile;
           return this;
         }
@@ -1483,59 +1478,45 @@ public class TerminologyCapabilities extends MetadataResource {
         public boolean hasProfile() { 
           if (this.profile == null)
             return false;
-          for (Reference item : this.profile)
+          for (CanonicalType item : this.profile)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Reference addProfile() { //3
-          Reference t = new Reference();
+        /**
+         * @return {@link #profile} (Supported expansion profiles.)
+         */
+        public CanonicalType addProfileElement() {//2 
+          CanonicalType t = new CanonicalType();
           if (this.profile == null)
-            this.profile = new ArrayList<Reference>();
+            this.profile = new ArrayList<CanonicalType>();
           this.profile.add(t);
           return t;
         }
 
-        public TerminologyCapabilitiesExpansionComponent addProfile(Reference t) { //3
-          if (t == null)
-            return this;
+        /**
+         * @param value {@link #profile} (Supported expansion profiles.)
+         */
+        public TerminologyCapabilitiesExpansionComponent addProfile(String value) { //1
+          CanonicalType t = new CanonicalType();
+          t.setValue(value);
           if (this.profile == null)
-            this.profile = new ArrayList<Reference>();
+            this.profile = new ArrayList<CanonicalType>();
           this.profile.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #profile}, creating it if it does not already exist
+         * @param value {@link #profile} (Supported expansion profiles.)
          */
-        public Reference getProfileFirstRep() { 
-          if (getProfile().isEmpty()) {
-            addProfile();
-          }
-          return getProfile().get(0);
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public List<ExpansionProfile> getProfileTarget() { 
-          if (this.profileTarget == null)
-            this.profileTarget = new ArrayList<ExpansionProfile>();
-          return this.profileTarget;
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public ExpansionProfile addProfileTarget() { 
-          ExpansionProfile r = new ExpansionProfile();
-          if (this.profileTarget == null)
-            this.profileTarget = new ArrayList<ExpansionProfile>();
-          this.profileTarget.add(r);
-          return r;
+        public boolean hasProfile(String value) { 
+          if (this.profile == null)
+            return false;
+          for (CanonicalType v : this.profile)
+            if (v.getValue().equals(value)) // canonical(ExpansionProfile)
+              return true;
+          return false;
         }
 
         /**
@@ -1592,8 +1573,8 @@ public class TerminologyCapabilities extends MetadataResource {
           children.add(new Property("hierarchical", "boolean", "Whether the server can return nested value sets.", 0, 1, hierarchical));
           children.add(new Property("paging", "boolean", "Whether the server supports paging on expansion.", 0, 1, paging));
           children.add(new Property("incomplete", "boolean", "Allow request for incomplete expansions?", 0, 1, incomplete));
-          children.add(new Property("definition", "Reference(StructureDefinition)", "Supported fields on ExpansionProfile.", 0, 1, definition));
-          children.add(new Property("profile", "Reference(ExpansionProfile)", "Supported expansion profiles.", 0, java.lang.Integer.MAX_VALUE, profile));
+          children.add(new Property("definition", "canonical(StructureDefinition)", "Supported fields on ExpansionProfile.", 0, 1, definition));
+          children.add(new Property("profile", "canonical(ExpansionProfile)", "Supported expansion profiles.", 0, java.lang.Integer.MAX_VALUE, profile));
           children.add(new Property("textFilter", "markdown", "Documentation about text searching works.", 0, 1, textFilter));
         }
 
@@ -1603,8 +1584,8 @@ public class TerminologyCapabilities extends MetadataResource {
           case 857636745: /*hierarchical*/  return new Property("hierarchical", "boolean", "Whether the server can return nested value sets.", 0, 1, hierarchical);
           case -995747956: /*paging*/  return new Property("paging", "boolean", "Whether the server supports paging on expansion.", 0, 1, paging);
           case -1010022050: /*incomplete*/  return new Property("incomplete", "boolean", "Allow request for incomplete expansions?", 0, 1, incomplete);
-          case -1014418093: /*definition*/  return new Property("definition", "Reference(StructureDefinition)", "Supported fields on ExpansionProfile.", 0, 1, definition);
-          case -309425751: /*profile*/  return new Property("profile", "Reference(ExpansionProfile)", "Supported expansion profiles.", 0, java.lang.Integer.MAX_VALUE, profile);
+          case -1014418093: /*definition*/  return new Property("definition", "canonical(StructureDefinition)", "Supported fields on ExpansionProfile.", 0, 1, definition);
+          case -309425751: /*profile*/  return new Property("profile", "canonical(ExpansionProfile)", "Supported expansion profiles.", 0, java.lang.Integer.MAX_VALUE, profile);
           case 1469359877: /*textFilter*/  return new Property("textFilter", "markdown", "Documentation about text searching works.", 0, 1, textFilter);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1617,8 +1598,8 @@ public class TerminologyCapabilities extends MetadataResource {
         case 857636745: /*hierarchical*/ return this.hierarchical == null ? new Base[0] : new Base[] {this.hierarchical}; // BooleanType
         case -995747956: /*paging*/ return this.paging == null ? new Base[0] : new Base[] {this.paging}; // BooleanType
         case -1010022050: /*incomplete*/ return this.incomplete == null ? new Base[0] : new Base[] {this.incomplete}; // BooleanType
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // Reference
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // CanonicalType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // CanonicalType
         case 1469359877: /*textFilter*/ return this.textFilter == null ? new Base[0] : new Base[] {this.textFilter}; // MarkdownType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1638,10 +1619,10 @@ public class TerminologyCapabilities extends MetadataResource {
           this.incomplete = castToBoolean(value); // BooleanType
           return value;
         case -1014418093: // definition
-          this.definition = castToReference(value); // Reference
+          this.definition = castToCanonical(value); // CanonicalType
           return value;
         case -309425751: // profile
-          this.getProfile().add(castToReference(value)); // Reference
+          this.getProfile().add(castToCanonical(value)); // CanonicalType
           return value;
         case 1469359877: // textFilter
           this.textFilter = castToMarkdown(value); // MarkdownType
@@ -1660,9 +1641,9 @@ public class TerminologyCapabilities extends MetadataResource {
         } else if (name.equals("incomplete")) {
           this.incomplete = castToBoolean(value); // BooleanType
         } else if (name.equals("definition")) {
-          this.definition = castToReference(value); // Reference
+          this.definition = castToCanonical(value); // CanonicalType
         } else if (name.equals("profile")) {
-          this.getProfile().add(castToReference(value));
+          this.getProfile().add(castToCanonical(value));
         } else if (name.equals("textFilter")) {
           this.textFilter = castToMarkdown(value); // MarkdownType
         } else
@@ -1676,8 +1657,8 @@ public class TerminologyCapabilities extends MetadataResource {
         case 857636745:  return getHierarchicalElement();
         case -995747956:  return getPagingElement();
         case -1010022050:  return getIncompleteElement();
-        case -1014418093:  return getDefinition(); 
-        case -309425751:  return addProfile(); 
+        case -1014418093:  return getDefinitionElement();
+        case -309425751:  return addProfileElement();
         case 1469359877:  return getTextFilterElement();
         default: return super.makeProperty(hash, name);
         }
@@ -1690,8 +1671,8 @@ public class TerminologyCapabilities extends MetadataResource {
         case 857636745: /*hierarchical*/ return new String[] {"boolean"};
         case -995747956: /*paging*/ return new String[] {"boolean"};
         case -1010022050: /*incomplete*/ return new String[] {"boolean"};
-        case -1014418093: /*definition*/ return new String[] {"Reference"};
-        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case -1014418093: /*definition*/ return new String[] {"canonical"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
         case 1469359877: /*textFilter*/ return new String[] {"markdown"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1710,11 +1691,10 @@ public class TerminologyCapabilities extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type TerminologyCapabilities.incomplete");
         }
         else if (name.equals("definition")) {
-          this.definition = new Reference();
-          return this.definition;
+          throw new FHIRException("Cannot call addChild on a primitive type TerminologyCapabilities.definition");
         }
         else if (name.equals("profile")) {
-          return addProfile();
+          throw new FHIRException("Cannot call addChild on a primitive type TerminologyCapabilities.profile");
         }
         else if (name.equals("textFilter")) {
           throw new FHIRException("Cannot call addChild on a primitive type TerminologyCapabilities.textFilter");
@@ -1731,8 +1711,8 @@ public class TerminologyCapabilities extends MetadataResource {
         dst.incomplete = incomplete == null ? null : incomplete.copy();
         dst.definition = definition == null ? null : definition.copy();
         if (profile != null) {
-          dst.profile = new ArrayList<Reference>();
-          for (Reference i : profile)
+          dst.profile = new ArrayList<CanonicalType>();
+          for (CanonicalType i : profile)
             dst.profile.add(i.copy());
         };
         dst.textFilter = textFilter == null ? null : textFilter.copy();
@@ -2339,10 +2319,10 @@ public class TerminologyCapabilities extends MetadataResource {
     protected TerminologyCapabilitiesExpansionComponent expansion;
 
     /**
-     * The degree to which the the server supports the code search parameter on ValueSet, if it is supported.
+     * The degree to which the server supports the code search parameter on ValueSet, if it is supported.
      */
     @Child(name = "codeSearch", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="explicit | all", formalDefinition="The degree to which the the server supports the code search parameter on ValueSet, if it is supported." )
+    @Description(shortDefinition="explicit | all", formalDefinition="The degree to which the server supports the code search parameter on ValueSet, if it is supported." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/code-search-support")
     protected Enumeration<CodeSearchSupport> codeSearch;
 
@@ -3194,7 +3174,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #codeSearch} (The degree to which the the server supports the code search parameter on ValueSet, if it is supported.). This is the underlying object with id, value and extensions. The accessor "getCodeSearch" gives direct access to the value
+     * @return {@link #codeSearch} (The degree to which the server supports the code search parameter on ValueSet, if it is supported.). This is the underlying object with id, value and extensions. The accessor "getCodeSearch" gives direct access to the value
      */
     public Enumeration<CodeSearchSupport> getCodeSearchElement() { 
       if (this.codeSearch == null)
@@ -3214,7 +3194,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #codeSearch} (The degree to which the the server supports the code search parameter on ValueSet, if it is supported.). This is the underlying object with id, value and extensions. The accessor "getCodeSearch" gives direct access to the value
+     * @param value {@link #codeSearch} (The degree to which the server supports the code search parameter on ValueSet, if it is supported.). This is the underlying object with id, value and extensions. The accessor "getCodeSearch" gives direct access to the value
      */
     public TerminologyCapabilities setCodeSearchElement(Enumeration<CodeSearchSupport> value) { 
       this.codeSearch = value;
@@ -3222,14 +3202,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return The degree to which the the server supports the code search parameter on ValueSet, if it is supported.
+     * @return The degree to which the server supports the code search parameter on ValueSet, if it is supported.
      */
     public CodeSearchSupport getCodeSearch() { 
       return this.codeSearch == null ? null : this.codeSearch.getValue();
     }
 
     /**
-     * @param value The degree to which the the server supports the code search parameter on ValueSet, if it is supported.
+     * @param value The degree to which the server supports the code search parameter on ValueSet, if it is supported.
      */
     public TerminologyCapabilities setCodeSearch(CodeSearchSupport value) { 
       if (value == null)
@@ -3333,7 +3313,7 @@ public class TerminologyCapabilities extends MetadataResource {
         children.add(new Property("lockedDate", "boolean", "Whether the server supports lockedDate.", 0, 1, lockedDate));
         children.add(new Property("codeSystem", "", "Identifies a code system that is supported by the server. If there is a no code system URL, then this declares the general assumptions a client can make about support for any CodeSystem resource.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
         children.add(new Property("expansion", "", "Information about the $expansion operation.", 0, 1, expansion));
-        children.add(new Property("codeSearch", "code", "The degree to which the the server supports the code search parameter on ValueSet, if it is supported.", 0, 1, codeSearch));
+        children.add(new Property("codeSearch", "code", "The degree to which the server supports the code search parameter on ValueSet, if it is supported.", 0, 1, codeSearch));
         children.add(new Property("validateCode", "", "Information about the $validation operation.", 0, 1, validateCode));
         children.add(new Property("translation", "", "Information about the $translation operation.", 0, 1, translation));
         children.add(new Property("closure", "", "Whether the $closure operation is supported.", 0, 1, closure));
@@ -3359,7 +3339,7 @@ public class TerminologyCapabilities extends MetadataResource {
         case 1391591896: /*lockedDate*/  return new Property("lockedDate", "boolean", "Whether the server supports lockedDate.", 0, 1, lockedDate);
         case -916511108: /*codeSystem*/  return new Property("codeSystem", "", "Identifies a code system that is supported by the server. If there is a no code system URL, then this declares the general assumptions a client can make about support for any CodeSystem resource.", 0, java.lang.Integer.MAX_VALUE, codeSystem);
         case 17878207: /*expansion*/  return new Property("expansion", "", "Information about the $expansion operation.", 0, 1, expansion);
-        case -935519755: /*codeSearch*/  return new Property("codeSearch", "code", "The degree to which the the server supports the code search parameter on ValueSet, if it is supported.", 0, 1, codeSearch);
+        case -935519755: /*codeSearch*/  return new Property("codeSearch", "code", "The degree to which the server supports the code search parameter on ValueSet, if it is supported.", 0, 1, codeSearch);
         case 1080737827: /*validateCode*/  return new Property("validateCode", "", "Information about the $validation operation.", 0, 1, validateCode);
         case -1840647503: /*translation*/  return new Property("translation", "", "Information about the $translation operation.", 0, 1, translation);
         case 866552379: /*closure*/  return new Property("closure", "", "Whether the $closure operation is supported.", 0, 1, closure);

@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v3-valuesets"/>
  <meta>
-  <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+  <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -100,7 +100,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentDirective"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -110,7 +110,7 @@
      <valueInteger value="1"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
-     <valueCode value="cbcc"/>
+     <valueCode value="fm"/>
     </extension>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActConsentDirective"/>
     <identifier>
@@ -149,7 +149,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-InformationSensitivityPolicy"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -240,7 +240,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ConfidentialityClassification"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -302,7 +302,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ServiceDeliveryLocationRoleType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -402,7 +402,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityPolicy"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -493,7 +493,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassOrganization"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -539,7 +539,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetDirect"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -585,7 +585,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipHasComponent"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -893,7 +893,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassSupply"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -939,7 +939,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityIntegrityObservationValue"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1159,7 +1159,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassDocument"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1390,7 +1390,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RefrainPolicy"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1436,7 +1436,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetSubject"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1482,7 +1482,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipPertains"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1790,7 +1790,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassManufacturedProduct"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1836,7 +1836,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassROI"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1888,7 +1888,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRelationshipFormal"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -1981,7 +1981,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSubstanceAdminSubstitutionCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2036,7 +2036,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-AS"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2140,7 +2140,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPartitive"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2192,7 +2192,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassDevice"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2406,7 +2406,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-DC"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2548,7 +2548,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstanceAdminSubstitutionReason"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2648,7 +2648,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPassive"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2745,7 +2745,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassClinicalDocument"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -2836,7 +2836,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassObservation"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3103,7 +3103,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationPhysicalPerformer"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3149,7 +3149,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HumanLanguage"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3190,7 +3190,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRoot"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3584,7 +3584,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassSpecimen"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3675,7 +3675,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodIntent"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3721,7 +3721,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminerDetermined"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3808,7 +3808,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3943,7 +3943,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassPlace"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -3989,7 +3989,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentSectionType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4071,7 +4071,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassRoot"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4162,7 +4162,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationTranscriber"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4253,7 +4253,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4297,7 +4297,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCoverageTypeCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4560,7 +4560,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationGenerator"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4698,7 +4698,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-xBasicConfidentialityKind"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4830,7 +4830,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MilitaryRoleType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -4876,7 +4876,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5012,7 +5012,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAssociative"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5064,7 +5064,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Compartment"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5421,7 +5421,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityControlObservationValue"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5474,7 +5474,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonalRelationshipRoleType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5706,7 +5706,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationVerifier"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5752,7 +5752,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodPredicate"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -5886,7 +5886,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassLivingSubject"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6063,7 +6063,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationIndirectTarget"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6154,7 +6154,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SeverityObservation"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6292,7 +6292,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAgent"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -6653,7 +6653,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActEncounterCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7015,7 +7015,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipConditional"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7112,7 +7112,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PurposeOfUse"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7202,7 +7202,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassManufacturedMaterial"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7293,7 +7293,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipFulfills"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7339,7 +7339,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActIncidentCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7484,7 +7484,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceGroupCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7536,7 +7536,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassProcedure"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7582,7 +7582,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GeneralPurposeOfUse"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7650,7 +7650,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassInvestigation"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7696,7 +7696,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VerificationMethod"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7787,7 +7787,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActTaskCode"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -7833,7 +7833,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-FamilyMember"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8017,7 +8017,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassMutualRelationship"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8376,7 +8376,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObligationPolicy"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8422,7 +8422,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetLocation"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8783,7 +8783,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassServiceDeliveryLocation"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
@@ -8829,7 +8829,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPharmacySupplyType"/>
     <meta>
-     <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+     <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">

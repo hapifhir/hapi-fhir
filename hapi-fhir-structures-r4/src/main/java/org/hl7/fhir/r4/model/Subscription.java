@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -323,11 +323,11 @@ public class Subscription extends DomainResource {
         protected Enumeration<SubscriptionChannelType> type;
 
         /**
-         * The uri that describes the actual end-point to send messages to.
+         * The url that describes the actual end-point to send messages to.
          */
-        @Child(name = "endpoint", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Where the channel points to", formalDefinition="The uri that describes the actual end-point to send messages to." )
-        protected UriType endpoint;
+        @Child(name = "endpoint", type = {UrlType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Where the channel points to", formalDefinition="The url that describes the actual end-point to send messages to." )
+        protected UrlType endpoint;
 
         /**
          * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
@@ -343,7 +343,7 @@ public class Subscription extends DomainResource {
         @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Additional headers / information to send as part of the notification." )
         protected List<StringType> header;
 
-        private static final long serialVersionUID = -854610293L;
+        private static final long serialVersionUID = -155848792L;
 
     /**
      * Constructor
@@ -406,14 +406,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #endpoint} (The uri that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
+         * @return {@link #endpoint} (The url that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public UriType getEndpointElement() { 
+        public UrlType getEndpointElement() { 
           if (this.endpoint == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SubscriptionChannelComponent.endpoint");
             else if (Configuration.doAutoCreate())
-              this.endpoint = new UriType(); // bb
+              this.endpoint = new UrlType(); // bb
           return this.endpoint;
         }
 
@@ -426,29 +426,29 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #endpoint} (The uri that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
+         * @param value {@link #endpoint} (The url that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public SubscriptionChannelComponent setEndpointElement(UriType value) { 
+        public SubscriptionChannelComponent setEndpointElement(UrlType value) { 
           this.endpoint = value;
           return this;
         }
 
         /**
-         * @return The uri that describes the actual end-point to send messages to.
+         * @return The url that describes the actual end-point to send messages to.
          */
         public String getEndpoint() { 
           return this.endpoint == null ? null : this.endpoint.getValue();
         }
 
         /**
-         * @param value The uri that describes the actual end-point to send messages to.
+         * @param value The url that describes the actual end-point to send messages to.
          */
         public SubscriptionChannelComponent setEndpoint(String value) { 
           if (Utilities.noString(value))
             this.endpoint = null;
           else {
             if (this.endpoint == null)
-              this.endpoint = new UriType();
+              this.endpoint = new UrlType();
             this.endpoint.setValue(value);
           }
           return this;
@@ -559,7 +559,7 @@ public class Subscription extends DomainResource {
           if (this.header == null)
             return false;
           for (StringType v : this.header)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -567,7 +567,7 @@ public class Subscription extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type));
-          children.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, 1, endpoint));
+          children.add(new Property("endpoint", "url", "The url that describes the actual end-point to send messages to.", 0, 1, endpoint));
           children.add(new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload));
           children.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
@@ -576,7 +576,7 @@ public class Subscription extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type);
-          case 1741102485: /*endpoint*/  return new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, 1, endpoint);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "url", "The url that describes the actual end-point to send messages to.", 0, 1, endpoint);
           case -786701938: /*payload*/  return new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload);
           case -1221270899: /*header*/  return new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -588,7 +588,7 @@ public class Subscription extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SubscriptionChannelType>
-        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UriType
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UrlType
         case -786701938: /*payload*/ return this.payload == null ? new Base[0] : new Base[] {this.payload}; // StringType
         case -1221270899: /*header*/ return this.header == null ? new Base[0] : this.header.toArray(new Base[this.header.size()]); // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -604,7 +604,7 @@ public class Subscription extends DomainResource {
           this.type = (Enumeration) value; // Enumeration<SubscriptionChannelType>
           return value;
         case 1741102485: // endpoint
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
           return value;
         case -786701938: // payload
           this.payload = castToString(value); // StringType
@@ -623,7 +623,7 @@ public class Subscription extends DomainResource {
           value = new SubscriptionChannelTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<SubscriptionChannelType>
         } else if (name.equals("endpoint")) {
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
         } else if (name.equals("payload")) {
           this.payload = castToString(value); // StringType
         } else if (name.equals("header")) {
@@ -649,7 +649,7 @@ public class Subscription extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
-        case 1741102485: /*endpoint*/ return new String[] {"uri"};
+        case 1741102485: /*endpoint*/ return new String[] {"url"};
         case -786701938: /*payload*/ return new String[] {"string"};
         case -1221270899: /*header*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);

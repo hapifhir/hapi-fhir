@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.elementmodel.Property;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -179,61 +180,32 @@ public class StructureMapUtilities {
 	}
 	private IWorkerContext worker;
 	private FHIRPathEngine fpe;
-	private Map<String, StructureMap> library;
 	private ITransformerServices services;
   private ProfileKnowledgeProvider pkp;
   private Map<String, Integer> ids = new HashMap<String, Integer>(); 
 
-	public StructureMapUtilities(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services, ProfileKnowledgeProvider pkp) {
+	public StructureMapUtilities(IWorkerContext worker, ITransformerServices services, ProfileKnowledgeProvider pkp) {
 		super();
 		this.worker = worker;
-		this.library = library;
 		this.services = services;
 		this.pkp = pkp;
 		fpe = new FHIRPathEngine(worker);
 		fpe.setHostServices(new FFHIRPathHostServices());
 	}
 
-	public StructureMapUtilities(IWorkerContext worker, Map<String, StructureMap> library, ITransformerServices services) {
+	public StructureMapUtilities(IWorkerContext worker, ITransformerServices services) {
 		super();
 		this.worker = worker;
-		this.library = library;
 		this.services = services;
 		fpe = new FHIRPathEngine(worker);
     fpe.setHostServices(new FFHIRPathHostServices());
 	}
-
-  public StructureMapUtilities(IWorkerContext worker, Map<String, StructureMap> library) {
-    super();
-    this.worker = worker;
-    this.library = library;
-    fpe = new FHIRPathEngine(worker);
-    fpe.setHostServices(new FFHIRPathHostServices());
-  }
 
   public StructureMapUtilities(IWorkerContext worker) {
     super();
     this.worker = worker;
     fpe = new FHIRPathEngine(worker);
     fpe.setHostServices(new FFHIRPathHostServices());
-    loadLibrary(worker);
-  }
-
-  public StructureMapUtilities(IWorkerContext worker, ITransformerServices services) {
-    super();
-    this.worker = worker;
-    loadLibrary(worker);
-    this.services = services;
-    fpe = new FHIRPathEngine(worker);
-    fpe.setHostServices(new FFHIRPathHostServices());
-  }
-
-  public void loadLibrary(IWorkerContext worker) {
-    this.library = new HashMap<String, StructureMap>();
-    for (org.hl7.fhir.r4.model.MetadataResource bc : worker.allConformanceResources()) {
-      if (bc instanceof StructureMap)
-        library.put(bc.getUrl(), (StructureMap) bc);
-    }
   }
 
 	public static String render(StructureMap map) {
@@ -1346,13 +1318,13 @@ public class StructureMapUtilities {
   private List<StructureMap> findMatchingMaps(String value) {
     List<StructureMap> res = new ArrayList<StructureMap>();
     if (value.contains("*")) {
-      for (StructureMap sm : library.values()) {
+      for (StructureMap sm : worker.listTransforms()) {
         if (urlMatches(value, sm.getUrl())) {
           res.add(sm); 
         }
       }
     } else {
-      StructureMap sm = library.get(value);
+      StructureMap sm = worker.getTransform(value);
       if (sm != null)
         res.add(sm); 
     }
@@ -1917,10 +1889,6 @@ public class StructureMapUtilities {
 	}
 
 
-	public Map<String, StructureMap> getLibrary() {
-	  return library;
-	}
-
 	public class PropertyWithType {
     private String path;
     private Property baseProperty;
@@ -2232,7 +2200,7 @@ public class StructureMapUtilities {
           throw new Error("Rule \""+ruleId+"\": Element has no type");
         ProfiledType pt = new ProfiledType(tr.getCode());
         if (tr.hasProfile())
-          pt.addProfile(tr.getProfile());
+          pt.addProfiles(tr.getProfile());
         if (element.getDefinition().hasBinding())
           pt.addBinding(element.getDefinition().getBinding());
         type.addType(pt);
@@ -2472,11 +2440,11 @@ public class StructureMapUtilities {
             if (pt.hasProfiles()) {
               for (String p : pt.getProfiles())
                 if (t.equals("Reference"))
-                  ednew.addType().setCode(t).setTargetProfile(p);
+                  ednew.getType(t).addTargetProfile(p);
                 else
-                  ednew.addType().setCode(t).setProfile(p);
+                  ednew.getType(t).addProfile(p);
             } else 
-            ednew.addType().setCode(t);
+            ednew.getType(t);
       }
         }
       }
@@ -2497,8 +2465,8 @@ public class StructureMapUtilities {
     throw new FHIRException("The type "+t+" is not compatible with the allowed types for "+pvb.getDefinition().getPath());
   }
 
-  private boolean profilesMatch(List<String> profiles, String profile) {
-    return profiles == null || profiles.size() == 0 || (profiles.size() == 1 && profiles.get(0).equals(profile));
+  private boolean profilesMatch(List<String> profiles, List<CanonicalType> profile) {
+    return profiles == null || profiles.size() == 0 || (profiles.size() == 1 && profiles.get(0).equals(profile.get(0).getValue()));
   }
 
   private boolean isCompatibleType(String t, String code) {

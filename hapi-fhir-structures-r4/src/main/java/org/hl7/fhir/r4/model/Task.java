@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -330,9 +330,7 @@ public class Task extends DomainResource {
          */
         INSTANCEORDER, 
         /**
-         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.
-
-Refer to [[[RequestGroup]]] for additional information on how this status is used
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used
          */
         OPTION, 
         /**
@@ -398,7 +396,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization";
             case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order";
             case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
-            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.\n\nRefer to [[[RequestGroup]]] for additional information on how this status is used";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used";
             default: return "?";
           }
         }
@@ -1015,47 +1013,42 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A code or description indicating how the input is intended to be used as part of the task execution.", 0, 1, type);
           case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 111972721: /*value*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -766192449: /*valueDate*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 231604844: /*valueId*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -765920490: /*valueMeta*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case -1125200224: /*valueContactDetail*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 1281021610: /*valueContributor*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 1710554248: /*valueDataRequirement*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 1387478187: /*valueParameterDefinition*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 1748214124: /*valueRelatedArtifact*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 976830394: /*valueTriggerDefinition*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
-          case 588000479: /*valueUsageContext*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1123,32 +1116,20 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("valueBoolean")) {
-          this.value = new BooleanType();
-          return this.value;
-        }
-        else if (name.equals("valueInteger")) {
-          this.value = new IntegerType();
-          return this.value;
-        }
-        else if (name.equals("valueDecimal")) {
-          this.value = new DecimalType();
-          return this.value;
-        }
         else if (name.equals("valueBase64Binary")) {
           this.value = new Base64BinaryType();
           return this.value;
         }
-        else if (name.equals("valueInstant")) {
-          this.value = new InstantType();
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
           return this.value;
         }
-        else if (name.equals("valueString")) {
-          this.value = new StringType();
+        else if (name.equals("valueCanonical")) {
+          this.value = new CanonicalType();
           return this.value;
         }
-        else if (name.equals("valueUri")) {
-          this.value = new UriType();
+        else if (name.equals("valueCode")) {
+          this.value = new CodeType();
           return this.value;
         }
         else if (name.equals("valueDate")) {
@@ -1159,32 +1140,64 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new DateTimeType();
           return this.value;
         }
-        else if (name.equals("valueTime")) {
-          this.value = new TimeType();
-          return this.value;
-        }
-        else if (name.equals("valueCode")) {
-          this.value = new CodeType();
-          return this.value;
-        }
-        else if (name.equals("valueOid")) {
-          this.value = new OidType();
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
           return this.value;
         }
         else if (name.equals("valueId")) {
           this.value = new IdType();
           return this.value;
         }
-        else if (name.equals("valueUnsignedInt")) {
-          this.value = new UnsignedIntType();
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueMarkdown")) {
+          this.value = new MarkdownType();
+          return this.value;
+        }
+        else if (name.equals("valueOid")) {
+          this.value = new OidType();
           return this.value;
         }
         else if (name.equals("valuePositiveInt")) {
           this.value = new PositiveIntType();
           return this.value;
         }
-        else if (name.equals("valueMarkdown")) {
-          this.value = new MarkdownType();
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueUnsignedInt")) {
+          this.value = new UnsignedIntType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueUrl")) {
+          this.value = new UrlType();
+          return this.value;
+        }
+        else if (name.equals("valueUuid")) {
+          this.value = new UuidType();
+          return this.value;
+        }
+        else if (name.equals("valueAddress")) {
+          this.value = new Address();
+          return this.value;
+        }
+        else if (name.equals("valueAge")) {
+          this.value = new Age();
           return this.value;
         }
         else if (name.equals("valueAnnotation")) {
@@ -1195,16 +1208,44 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Attachment();
           return this.value;
         }
-        else if (name.equals("valueIdentifier")) {
-          this.value = new Identifier();
-          return this.value;
-        }
         else if (name.equals("valueCodeableConcept")) {
           this.value = new CodeableConcept();
           return this.value;
         }
         else if (name.equals("valueCoding")) {
           this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueContactPoint")) {
+          this.value = new ContactPoint();
+          return this.value;
+        }
+        else if (name.equals("valueCount")) {
+          this.value = new Count();
+          return this.value;
+        }
+        else if (name.equals("valueDistance")) {
+          this.value = new Distance();
+          return this.value;
+        }
+        else if (name.equals("valueDuration")) {
+          this.value = new Duration();
+          return this.value;
+        }
+        else if (name.equals("valueHumanName")) {
+          this.value = new HumanName();
+          return this.value;
+        }
+        else if (name.equals("valueIdentifier")) {
+          this.value = new Identifier();
+          return this.value;
+        }
+        else if (name.equals("valueMoney")) {
+          this.value = new Money();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
           return this.value;
         }
         else if (name.equals("valueQuantity")) {
@@ -1215,12 +1256,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Range();
           return this.value;
         }
-        else if (name.equals("valuePeriod")) {
-          this.value = new Period();
-          return this.value;
-        }
         else if (name.equals("valueRatio")) {
           this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
           return this.value;
         }
         else if (name.equals("valueSampledData")) {
@@ -1231,60 +1272,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Signature();
           return this.value;
         }
-        else if (name.equals("valueHumanName")) {
-          this.value = new HumanName();
-          return this.value;
-        }
-        else if (name.equals("valueAddress")) {
-          this.value = new Address();
-          return this.value;
-        }
-        else if (name.equals("valueContactPoint")) {
-          this.value = new ContactPoint();
-          return this.value;
-        }
         else if (name.equals("valueTiming")) {
           this.value = new Timing();
           return this.value;
         }
-        else if (name.equals("valueReference")) {
-          this.value = new Reference();
-          return this.value;
-        }
-        else if (name.equals("valueMeta")) {
-          this.value = new Meta();
-          return this.value;
-        }
         else if (name.equals("valueDosage")) {
           this.value = new Dosage();
-          return this.value;
-        }
-        else if (name.equals("valueContactDetail")) {
-          this.value = new ContactDetail();
-          return this.value;
-        }
-        else if (name.equals("valueContributor")) {
-          this.value = new Contributor();
-          return this.value;
-        }
-        else if (name.equals("valueDataRequirement")) {
-          this.value = new DataRequirement();
-          return this.value;
-        }
-        else if (name.equals("valueParameterDefinition")) {
-          this.value = new ParameterDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueRelatedArtifact")) {
-          this.value = new RelatedArtifact();
-          return this.value;
-        }
-        else if (name.equals("valueTriggerDefinition")) {
-          this.value = new TriggerDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueUsageContext")) {
-          this.value = new UsageContext();
           return this.value;
         }
         else
@@ -1419,47 +1412,42 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The name of the Output parameter.", 0, 1, type);
           case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 111972721: /*value*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -766192449: /*valueDate*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 231604844: /*valueId*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -765920490: /*valueMeta*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case -1125200224: /*valueContactDetail*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 1281021610: /*valueContributor*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 1710554248: /*valueDataRequirement*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 1387478187: /*valueParameterDefinition*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 1748214124: /*valueRelatedArtifact*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 976830394: /*valueTriggerDefinition*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
-          case 588000479: /*valueUsageContext*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1527,32 +1515,20 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("valueBoolean")) {
-          this.value = new BooleanType();
-          return this.value;
-        }
-        else if (name.equals("valueInteger")) {
-          this.value = new IntegerType();
-          return this.value;
-        }
-        else if (name.equals("valueDecimal")) {
-          this.value = new DecimalType();
-          return this.value;
-        }
         else if (name.equals("valueBase64Binary")) {
           this.value = new Base64BinaryType();
           return this.value;
         }
-        else if (name.equals("valueInstant")) {
-          this.value = new InstantType();
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
           return this.value;
         }
-        else if (name.equals("valueString")) {
-          this.value = new StringType();
+        else if (name.equals("valueCanonical")) {
+          this.value = new CanonicalType();
           return this.value;
         }
-        else if (name.equals("valueUri")) {
-          this.value = new UriType();
+        else if (name.equals("valueCode")) {
+          this.value = new CodeType();
           return this.value;
         }
         else if (name.equals("valueDate")) {
@@ -1563,32 +1539,64 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new DateTimeType();
           return this.value;
         }
-        else if (name.equals("valueTime")) {
-          this.value = new TimeType();
-          return this.value;
-        }
-        else if (name.equals("valueCode")) {
-          this.value = new CodeType();
-          return this.value;
-        }
-        else if (name.equals("valueOid")) {
-          this.value = new OidType();
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
           return this.value;
         }
         else if (name.equals("valueId")) {
           this.value = new IdType();
           return this.value;
         }
-        else if (name.equals("valueUnsignedInt")) {
-          this.value = new UnsignedIntType();
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueMarkdown")) {
+          this.value = new MarkdownType();
+          return this.value;
+        }
+        else if (name.equals("valueOid")) {
+          this.value = new OidType();
           return this.value;
         }
         else if (name.equals("valuePositiveInt")) {
           this.value = new PositiveIntType();
           return this.value;
         }
-        else if (name.equals("valueMarkdown")) {
-          this.value = new MarkdownType();
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueUnsignedInt")) {
+          this.value = new UnsignedIntType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueUrl")) {
+          this.value = new UrlType();
+          return this.value;
+        }
+        else if (name.equals("valueUuid")) {
+          this.value = new UuidType();
+          return this.value;
+        }
+        else if (name.equals("valueAddress")) {
+          this.value = new Address();
+          return this.value;
+        }
+        else if (name.equals("valueAge")) {
+          this.value = new Age();
           return this.value;
         }
         else if (name.equals("valueAnnotation")) {
@@ -1599,16 +1607,44 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Attachment();
           return this.value;
         }
-        else if (name.equals("valueIdentifier")) {
-          this.value = new Identifier();
-          return this.value;
-        }
         else if (name.equals("valueCodeableConcept")) {
           this.value = new CodeableConcept();
           return this.value;
         }
         else if (name.equals("valueCoding")) {
           this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueContactPoint")) {
+          this.value = new ContactPoint();
+          return this.value;
+        }
+        else if (name.equals("valueCount")) {
+          this.value = new Count();
+          return this.value;
+        }
+        else if (name.equals("valueDistance")) {
+          this.value = new Distance();
+          return this.value;
+        }
+        else if (name.equals("valueDuration")) {
+          this.value = new Duration();
+          return this.value;
+        }
+        else if (name.equals("valueHumanName")) {
+          this.value = new HumanName();
+          return this.value;
+        }
+        else if (name.equals("valueIdentifier")) {
+          this.value = new Identifier();
+          return this.value;
+        }
+        else if (name.equals("valueMoney")) {
+          this.value = new Money();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
           return this.value;
         }
         else if (name.equals("valueQuantity")) {
@@ -1619,12 +1655,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Range();
           return this.value;
         }
-        else if (name.equals("valuePeriod")) {
-          this.value = new Period();
-          return this.value;
-        }
         else if (name.equals("valueRatio")) {
           this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
           return this.value;
         }
         else if (name.equals("valueSampledData")) {
@@ -1635,60 +1671,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.value = new Signature();
           return this.value;
         }
-        else if (name.equals("valueHumanName")) {
-          this.value = new HumanName();
-          return this.value;
-        }
-        else if (name.equals("valueAddress")) {
-          this.value = new Address();
-          return this.value;
-        }
-        else if (name.equals("valueContactPoint")) {
-          this.value = new ContactPoint();
-          return this.value;
-        }
         else if (name.equals("valueTiming")) {
           this.value = new Timing();
           return this.value;
         }
-        else if (name.equals("valueReference")) {
-          this.value = new Reference();
-          return this.value;
-        }
-        else if (name.equals("valueMeta")) {
-          this.value = new Meta();
-          return this.value;
-        }
         else if (name.equals("valueDosage")) {
           this.value = new Dosage();
-          return this.value;
-        }
-        else if (name.equals("valueContactDetail")) {
-          this.value = new ContactDetail();
-          return this.value;
-        }
-        else if (name.equals("valueContributor")) {
-          this.value = new Contributor();
-          return this.value;
-        }
-        else if (name.equals("valueDataRequirement")) {
-          this.value = new DataRequirement();
-          return this.value;
-        }
-        else if (name.equals("valueParameterDefinition")) {
-          this.value = new ParameterDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueRelatedArtifact")) {
-          this.value = new RelatedArtifact();
-          return this.value;
-        }
-        else if (name.equals("valueTriggerDefinition")) {
-          this.value = new TriggerDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueUsageContext")) {
-          this.value = new UsageContext();
           return this.value;
         }
         else

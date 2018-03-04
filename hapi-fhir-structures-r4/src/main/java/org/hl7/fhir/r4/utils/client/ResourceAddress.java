@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.fhir.ucum.Canonical;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.utilities.Utilities;
@@ -111,6 +112,13 @@ public class ResourceAddress {
 		return baseServiceUri.resolve(nameForClass(resourceClass) +"/"+id+"/_history/"+version);
 	}
 	
+  public <T extends Resource> URI resolveGetUriFromResourceClassAndCanonical(Class<T> resourceClass, String canonicalUrl) {
+    if (canonicalUrl.contains("|"))
+      return baseServiceUri.resolve(nameForClass(resourceClass)+"?url="+canonicalUrl.substring(0, canonicalUrl.indexOf("|"))+"&version="+canonicalUrl.substring(canonicalUrl.indexOf("|")+1));      
+    else
+      return baseServiceUri.resolve(nameForClass(resourceClass)+"?url="+canonicalUrl);
+  }
+  
 	public URI resolveGetHistoryForAllResources(int count) {
 		if(count > 0) {
 			return appendHttpParameter(baseServiceUri.resolve("_history"), "_count", ""+count);

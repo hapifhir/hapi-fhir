@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -450,9 +450,9 @@ public class ChargeItem extends DomainResource {
     /**
      * Identifiers assigned to this event performer or other systems.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Business Identifier for item", formalDefinition="Identifiers assigned to this event performer or other systems." )
-    protected Identifier identifier;
+    protected List<Identifier> identifier;
 
     /**
      * References the source of pricing information, rules of application for the code this ChargeItem uses.
@@ -552,16 +552,28 @@ public class ChargeItem extends DomainResource {
     protected Organization requestingOrganizationTarget;
 
     /**
+     * The financial cost center permits the tracking of charge attribution.
+     */
+    @Child(name = "costCenter", type = {Organization.class, OrganizationRole.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Organization that has ownership of the (potential, future) revenue", formalDefinition="The financial cost center permits the tracking of charge attribution." )
+    protected Reference costCenter;
+
+    /**
+     * The actual object that is the target of the reference (The financial cost center permits the tracking of charge attribution.)
+     */
+    protected Resource costCenterTarget;
+
+    /**
      * Quantity of which the charge item has been serviced.
      */
-    @Child(name = "quantity", type = {Quantity.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "quantity", type = {Quantity.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Quantity of which the charge item has been serviced", formalDefinition="Quantity of which the charge item has been serviced." )
     protected Quantity quantity;
 
     /**
      * The anatomical location where the related service has been applied.
      */
-    @Child(name = "bodysite", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "bodysite", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Anatomical location, if relevant", formalDefinition="The anatomical location where the related service has been applied." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodysite;
@@ -569,28 +581,28 @@ public class ChargeItem extends DomainResource {
     /**
      * Factor overriding the factor determined by the rules associated with the code.
      */
-    @Child(name = "factorOverride", type = {DecimalType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "factorOverride", type = {DecimalType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Factor overriding the associated rules", formalDefinition="Factor overriding the factor determined by the rules associated with the code." )
     protected DecimalType factorOverride;
 
     /**
      * Total price of the charge overriding the list price associated with the code.
      */
-    @Child(name = "priceOverride", type = {Money.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "priceOverride", type = {Money.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Price overriding the associated rules", formalDefinition="Total price of the charge overriding the list price associated with the code." )
     protected Money priceOverride;
 
     /**
      * If the list price or the rule based factor associated with the code is overridden, this attribute can capture a text to indicate the  reason for this action.
      */
-    @Child(name = "overrideReason", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "overrideReason", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reason for overriding the list price/factor", formalDefinition="If the list price or the rule based factor associated with the code is overridden, this attribute can capture a text to indicate the  reason for this action." )
     protected StringType overrideReason;
 
     /**
      * The device, practitioner, etc. who entered the charge item.
      */
-    @Child(name = "enterer", type = {Practitioner.class, Organization.class, Patient.class, Device.class, RelatedPerson.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "enterer", type = {Practitioner.class, Organization.class, Patient.class, Device.class, RelatedPerson.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Individual who was entering", formalDefinition="The device, practitioner, etc. who entered the charge item." )
     protected Reference enterer;
 
@@ -602,14 +614,14 @@ public class ChargeItem extends DomainResource {
     /**
      * Date the charge item was entered.
      */
-    @Child(name = "enteredDate", type = {DateTimeType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "enteredDate", type = {DateTimeType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date the charge item was entered", formalDefinition="Date the charge item was entered." )
     protected DateTimeType enteredDate;
 
     /**
      * Describes why the event occurred in coded or textual form.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Why was the charged  service rendered?", formalDefinition="Describes why the event occurred in coded or textual form." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/icd-10")
     protected List<CodeableConcept> reason;
@@ -617,7 +629,7 @@ public class ChargeItem extends DomainResource {
     /**
      * Indicated the rendered service that caused this charge.
      */
-    @Child(name = "service", type = {DiagnosticReport.class, ImagingStudy.class, Immunization.class, MedicationAdministration.class, MedicationDispense.class, Observation.class, Procedure.class, SupplyDelivery.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "service", type = {DiagnosticReport.class, ImagingStudy.class, Immunization.class, MedicationAdministration.class, MedicationDispense.class, Observation.class, Procedure.class, SupplyDelivery.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Which rendered service is being charged?", formalDefinition="Indicated the rendered service that caused this charge." )
     protected List<Reference> service;
     /**
@@ -629,7 +641,7 @@ public class ChargeItem extends DomainResource {
     /**
      * Account into which this ChargeItems belongs.
      */
-    @Child(name = "account", type = {Account.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "account", type = {Account.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Account to place this charge", formalDefinition="Account into which this ChargeItems belongs." )
     protected List<Reference> account;
     /**
@@ -641,14 +653,14 @@ public class ChargeItem extends DomainResource {
     /**
      * Comments made about the event by the performer, subject or other participants.
      */
-    @Child(name = "note", type = {Annotation.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments made about the ChargeItem", formalDefinition="Comments made about the event by the performer, subject or other participants." )
     protected List<Annotation> note;
 
     /**
      * Further information supporting the this charge.
      */
-    @Child(name = "supportingInformation", type = {Reference.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInformation", type = {Reference.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Further information supporting the this charge", formalDefinition="Further information supporting the this charge." )
     protected List<Reference> supportingInformation;
     /**
@@ -657,7 +669,7 @@ public class ChargeItem extends DomainResource {
     protected List<Resource> supportingInformationTarget;
 
 
-    private static final long serialVersionUID = 1421123938L;
+    private static final long serialVersionUID = -28479866L;
 
   /**
    * Constructor
@@ -679,25 +691,54 @@ public class ChargeItem extends DomainResource {
     /**
      * @return {@link #identifier} (Identifiers assigned to this event performer or other systems.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ChargeItem.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ChargeItem setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public ChargeItem addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Identifiers assigned to this event performer or other systems.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public ChargeItem setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -756,7 +797,7 @@ public class ChargeItem extends DomainResource {
       if (this.definition == null)
         return false;
       for (UriType v : this.definition)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1179,6 +1220,45 @@ public class ChargeItem extends DomainResource {
      */
     public ChargeItem setRequestingOrganizationTarget(Organization value) { 
       this.requestingOrganizationTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #costCenter} (The financial cost center permits the tracking of charge attribution.)
+     */
+    public Reference getCostCenter() { 
+      if (this.costCenter == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ChargeItem.costCenter");
+        else if (Configuration.doAutoCreate())
+          this.costCenter = new Reference(); // cc
+      return this.costCenter;
+    }
+
+    public boolean hasCostCenter() { 
+      return this.costCenter != null && !this.costCenter.isEmpty();
+    }
+
+    /**
+     * @param value {@link #costCenter} (The financial cost center permits the tracking of charge attribution.)
+     */
+    public ChargeItem setCostCenter(Reference value) { 
+      this.costCenter = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #costCenter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The financial cost center permits the tracking of charge attribution.)
+     */
+    public Resource getCostCenterTarget() { 
+      return this.costCenterTarget;
+    }
+
+    /**
+     * @param value {@link #costCenter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The financial cost center permits the tracking of charge attribution.)
+     */
+    public ChargeItem setCostCenterTarget(Resource value) { 
+      this.costCenterTarget = value;
       return this;
     }
 
@@ -1796,7 +1876,7 @@ public class ChargeItem extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this event performer or other systems.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this event performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("definition", "uri", "References the source of pricing information, rules of application for the code this ChargeItem uses.", 0, java.lang.Integer.MAX_VALUE, definition));
         children.add(new Property("status", "code", "The current state of the ChargeItem.", 0, 1, status));
         children.add(new Property("partOf", "Reference(ChargeItem)", "ChargeItems can be grouped to larger ChargeItems covering the whole set.", 0, java.lang.Integer.MAX_VALUE, partOf));
@@ -1807,6 +1887,7 @@ public class ChargeItem extends DomainResource {
         children.add(new Property("participant", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("performingOrganization", "Reference(Organization)", "The organization requesting the service.", 0, 1, performingOrganization));
         children.add(new Property("requestingOrganization", "Reference(Organization)", "The organization performing the service.", 0, 1, requestingOrganization));
+        children.add(new Property("costCenter", "Reference(Organization|OrganizationRole)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter));
         children.add(new Property("quantity", "Quantity", "Quantity of which the charge item has been serviced.", 0, 1, quantity));
         children.add(new Property("bodysite", "CodeableConcept", "The anatomical location where the related service has been applied.", 0, java.lang.Integer.MAX_VALUE, bodysite));
         children.add(new Property("factorOverride", "decimal", "Factor overriding the factor determined by the rules associated with the code.", 0, 1, factorOverride));
@@ -1824,7 +1905,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this event performer or other systems.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this event performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -1014418093: /*definition*/  return new Property("definition", "uri", "References the source of pricing information, rules of application for the code this ChargeItem uses.", 0, java.lang.Integer.MAX_VALUE, definition);
         case -892481550: /*status*/  return new Property("status", "code", "The current state of the ChargeItem.", 0, 1, status);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(ChargeItem)", "ChargeItems can be grouped to larger ChargeItems covering the whole set.", 0, java.lang.Integer.MAX_VALUE, partOf);
@@ -1839,6 +1920,7 @@ public class ChargeItem extends DomainResource {
         case 767422259: /*participant*/  return new Property("participant", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, participant);
         case 1273192628: /*performingOrganization*/  return new Property("performingOrganization", "Reference(Organization)", "The organization requesting the service.", 0, 1, performingOrganization);
         case 1279054790: /*requestingOrganization*/  return new Property("requestingOrganization", "Reference(Organization)", "The organization performing the service.", 0, 1, requestingOrganization);
+        case -593192318: /*costCenter*/  return new Property("costCenter", "Reference(Organization|OrganizationRole)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter);
         case -1285004149: /*quantity*/  return new Property("quantity", "Quantity", "Quantity of which the charge item has been serviced.", 0, 1, quantity);
         case 1703573481: /*bodysite*/  return new Property("bodysite", "CodeableConcept", "The anatomical location where the related service has been applied.", 0, java.lang.Integer.MAX_VALUE, bodysite);
         case -451233221: /*factorOverride*/  return new Property("factorOverride", "decimal", "Factor overriding the factor determined by the rules associated with the code.", 0, 1, factorOverride);
@@ -1859,7 +1941,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : this.definition.toArray(new Base[this.definition.size()]); // UriType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ChargeItemStatus>
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
@@ -1870,6 +1952,7 @@ public class ChargeItem extends DomainResource {
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // ChargeItemParticipantComponent
         case 1273192628: /*performingOrganization*/ return this.performingOrganization == null ? new Base[0] : new Base[] {this.performingOrganization}; // Reference
         case 1279054790: /*requestingOrganization*/ return this.requestingOrganization == null ? new Base[0] : new Base[] {this.requestingOrganization}; // Reference
+        case -593192318: /*costCenter*/ return this.costCenter == null ? new Base[0] : new Base[] {this.costCenter}; // Reference
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
         case 1703573481: /*bodysite*/ return this.bodysite == null ? new Base[0] : this.bodysite.toArray(new Base[this.bodysite.size()]); // CodeableConcept
         case -451233221: /*factorOverride*/ return this.factorOverride == null ? new Base[0] : new Base[] {this.factorOverride}; // DecimalType
@@ -1891,7 +1974,7 @@ public class ChargeItem extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -1014418093: // definition
           this.getDefinition().add(castToUri(value)); // UriType
@@ -1923,6 +2006,9 @@ public class ChargeItem extends DomainResource {
           return value;
         case 1279054790: // requestingOrganization
           this.requestingOrganization = castToReference(value); // Reference
+          return value;
+        case -593192318: // costCenter
+          this.costCenter = castToReference(value); // Reference
           return value;
         case -1285004149: // quantity
           this.quantity = castToQuantity(value); // Quantity
@@ -1968,7 +2054,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("definition")) {
           this.getDefinition().add(castToUri(value));
         } else if (name.equals("status")) {
@@ -1990,6 +2076,8 @@ public class ChargeItem extends DomainResource {
           this.performingOrganization = castToReference(value); // Reference
         } else if (name.equals("requestingOrganization")) {
           this.requestingOrganization = castToReference(value); // Reference
+        } else if (name.equals("costCenter")) {
+          this.costCenter = castToReference(value); // Reference
         } else if (name.equals("quantity")) {
           this.quantity = castToQuantity(value); // Quantity
         } else if (name.equals("bodysite")) {
@@ -2022,7 +2110,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case -1014418093:  return addDefinitionElement();
         case -892481550:  return getStatusElement();
         case -995410646:  return addPartOf(); 
@@ -2034,6 +2122,7 @@ public class ChargeItem extends DomainResource {
         case 767422259:  return addParticipant(); 
         case 1273192628:  return getPerformingOrganization(); 
         case 1279054790:  return getRequestingOrganization(); 
+        case -593192318:  return getCostCenter(); 
         case -1285004149:  return getQuantity(); 
         case 1703573481:  return addBodysite(); 
         case -451233221:  return getFactorOverrideElement();
@@ -2065,6 +2154,7 @@ public class ChargeItem extends DomainResource {
         case 767422259: /*participant*/ return new String[] {};
         case 1273192628: /*performingOrganization*/ return new String[] {"Reference"};
         case 1279054790: /*requestingOrganization*/ return new String[] {"Reference"};
+        case -593192318: /*costCenter*/ return new String[] {"Reference"};
         case -1285004149: /*quantity*/ return new String[] {"Quantity"};
         case 1703573481: /*bodysite*/ return new String[] {"CodeableConcept"};
         case -451233221: /*factorOverride*/ return new String[] {"decimal"};
@@ -2085,8 +2175,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("definition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ChargeItem.definition");
@@ -2131,6 +2220,10 @@ public class ChargeItem extends DomainResource {
         else if (name.equals("requestingOrganization")) {
           this.requestingOrganization = new Reference();
           return this.requestingOrganization;
+        }
+        else if (name.equals("costCenter")) {
+          this.costCenter = new Reference();
+          return this.costCenter;
         }
         else if (name.equals("quantity")) {
           this.quantity = new Quantity();
@@ -2183,7 +2276,11 @@ public class ChargeItem extends DomainResource {
       public ChargeItem copy() {
         ChargeItem dst = new ChargeItem();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         if (definition != null) {
           dst.definition = new ArrayList<UriType>();
           for (UriType i : definition)
@@ -2206,6 +2303,7 @@ public class ChargeItem extends DomainResource {
         };
         dst.performingOrganization = performingOrganization == null ? null : performingOrganization.copy();
         dst.requestingOrganization = requestingOrganization == null ? null : requestingOrganization.copy();
+        dst.costCenter = costCenter == null ? null : costCenter.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
         if (bodysite != null) {
           dst.bodysite = new ArrayList<CodeableConcept>();
@@ -2260,8 +2358,8 @@ public class ChargeItem extends DomainResource {
            && compareDeep(status, o.status, true) && compareDeep(partOf, o.partOf, true) && compareDeep(code, o.code, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
            && compareDeep(participant, o.participant, true) && compareDeep(performingOrganization, o.performingOrganization, true)
-           && compareDeep(requestingOrganization, o.requestingOrganization, true) && compareDeep(quantity, o.quantity, true)
-           && compareDeep(bodysite, o.bodysite, true) && compareDeep(factorOverride, o.factorOverride, true)
+           && compareDeep(requestingOrganization, o.requestingOrganization, true) && compareDeep(costCenter, o.costCenter, true)
+           && compareDeep(quantity, o.quantity, true) && compareDeep(bodysite, o.bodysite, true) && compareDeep(factorOverride, o.factorOverride, true)
            && compareDeep(priceOverride, o.priceOverride, true) && compareDeep(overrideReason, o.overrideReason, true)
            && compareDeep(enterer, o.enterer, true) && compareDeep(enteredDate, o.enteredDate, true) && compareDeep(reason, o.reason, true)
            && compareDeep(service, o.service, true) && compareDeep(account, o.account, true) && compareDeep(note, o.note, true)
@@ -2283,8 +2381,8 @@ public class ChargeItem extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, status
           , partOf, code, subject, context, occurrence, participant, performingOrganization
-          , requestingOrganization, quantity, bodysite, factorOverride, priceOverride, overrideReason
-          , enterer, enteredDate, reason, service, account, note, supportingInformation
+          , requestingOrganization, costCenter, quantity, bodysite, factorOverride, priceOverride
+          , overrideReason, enterer, enteredDate, reason, service, account, note, supportingInformation
           );
       }
 

@@ -339,12 +339,14 @@
                 }
               ]
             },
-            "doseQuantity": {
-              "value": 1,
-              "unit": "tablet",
-              "system": "http://unitsofmeasure.org",
-              "code": "tbl"
-            }
+				 "doseAndRate": [{
+					 "doseQuantity": {
+						 "value": 1,
+						 "unit": "tablet",
+						 "system": "http://unitsofmeasure.org",
+						 "code": "tbl"
+					 }
+				 }]
           }
         ]
       }

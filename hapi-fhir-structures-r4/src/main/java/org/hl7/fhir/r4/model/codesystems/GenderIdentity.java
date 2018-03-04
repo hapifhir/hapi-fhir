@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,11 +57,11 @@ public enum GenderIdentity {
          */
         FEMALE, 
         /**
-         * other gender identitiy
+         * other gender identity
          */
         OTHER, 
         /**
-         * the patient does not whish to disclose his gender identity
+         * the patient does not wish to disclose his gender identity
          */
         NONDISCLOSE, 
         /**
@@ -109,8 +109,8 @@ public enum GenderIdentity {
             case NONBINARY: return "the patient identifies with neither/both female and male";
             case MALE: return "the patient identifies as male";
             case FEMALE: return "the patient identifies as female";
-            case OTHER: return "other gender identitiy";
-            case NONDISCLOSE: return "the patient does not whish to disclose his gender identity";
+            case OTHER: return "other gender identity";
+            case NONDISCLOSE: return "the patient does not wish to disclose his gender identity";
             default: return "?";
           }
         }
@@ -122,7 +122,7 @@ public enum GenderIdentity {
             case MALE: return "male";
             case FEMALE: return "female";
             case OTHER: return "other";
-            case NONDISCLOSE: return "does not whish to disclose";
+            case NONDISCLOSE: return "does not wish to disclose";
             default: return "?";
           }
     }

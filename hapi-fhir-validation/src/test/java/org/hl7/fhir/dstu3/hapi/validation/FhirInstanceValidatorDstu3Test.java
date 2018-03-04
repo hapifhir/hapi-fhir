@@ -507,15 +507,6 @@ public class FhirInstanceValidatorDstu3Test {
 
 	}
 
-	@Test
-	public void testValidateQuestionnaireResponse() throws IOException {
-		String input = loadResource("/qr_jon.xml");
-
-		ValidationResult output = myVal.validateWithResult(input);
-		logResultsAndReturnAll(output);
-
-		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
-	}
 
 	@Test
 	public void testValidateRawJsonResource() {

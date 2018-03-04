@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1554,7 +1554,7 @@ public class Patient extends DomainResource {
     /**
      * Patient's nominated care provider.
      */
-    @Child(name = "generalPractitioner", type = {Organization.class, Practitioner.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "generalPractitioner", type = {Organization.class, Practitioner.class, PractitionerRole.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Patient's nominated primary care provider", formalDefinition="Patient's nominated care provider." )
     protected List<Reference> generalPractitioner;
     /**
@@ -2419,7 +2419,7 @@ public class Patient extends DomainResource {
         children.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal));
         children.add(new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
-        children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
+        children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner|PractitionerRole)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
         children.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization));
         children.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
       }
@@ -2447,7 +2447,7 @@ public class Patient extends DomainResource {
         case 951526432: /*contact*/  return new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1413116420: /*animal*/  return new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal);
         case -1035284522: /*communication*/  return new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
-        case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
+        case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner|PractitionerRole)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization);
         case 3321850: /*link*/  return new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -3165,7 +3165,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.generalPractitioner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="general-practitioner", path="Patient.generalPractitioner", description="Patient's nominated general practitioner, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="general-practitioner", path="Patient.generalPractitioner", description="Patient's nominated general practitioner, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_GENERAL_PRACTITIONER = "general-practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>general-practitioner</b>

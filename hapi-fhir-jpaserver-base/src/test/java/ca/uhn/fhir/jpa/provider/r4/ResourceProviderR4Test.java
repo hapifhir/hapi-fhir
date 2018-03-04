@@ -410,7 +410,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType optId = myClient.create().resource(options).execute().getId();
 
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference(optId));
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions((optId.getValue()));
 		IIdType qId = myClient.create().resource(q).execute().getId();
 
 		QuestionnaireResponse qa;
@@ -418,14 +418,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Good code
 
 		qa = new QuestionnaireResponse();
-		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.setQuestionnaire(qId.toUnqualifiedVersionless().getValue());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code0"));
 		myClient.create().resource(qa).execute();
 
 		// Bad code
 
 		qa = new QuestionnaireResponse();
-		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.setQuestionnaire(qId.toUnqualifiedVersionless().getValue());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
 		try {
 			myClient.create().resource(qa).execute();
@@ -1946,7 +1946,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		int initialSize = client.search().forResource(ImagingStudy.class).returnBundle(Bundle.class).execute().getEntry().size();
 
-		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/imagingstudy.json"), StandardCharsets.UTF_8);
+		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/r4/imagingstudy.json"), StandardCharsets.UTF_8);
 		client.create().resource(resBody).execute();
 
 		int newSize = client.search().forResource(ImagingStudy.class).returnBundle(Bundle.class).execute().getEntry().size();

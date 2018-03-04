@@ -68,7 +68,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		IIdType qId = myQuestionnaireDao.create(q1, mySrd).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
-		qr1.getQuestionnaire().setReferenceElement(qId);
+		qr1.setQuestionnaire(qId.getValue());
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
@@ -91,7 +91,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		IIdType qId = myQuestionnaireDao.create(q1, mySrd).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
-		qr1.getQuestionnaire().setReferenceElement(qId.withServerBase("http://example.com", "Questionnaire"));
+		qr1.setQuestionnaire(qId.withServerBase("http://example.com", "Questionnaire").getValue());
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
@@ -195,7 +195,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 		
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
+		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
 		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -215,7 +215,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 		
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
+		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
 		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);

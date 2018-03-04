@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -2409,20 +2409,18 @@ public class Encounter extends DomainResource {
     protected List<StatusHistoryComponent> statusHistory;
 
     /**
-     * inpatient | outpatient | ambulatory | emergency +.
+     * Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.
      */
-    @Child(name = "class", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="inpatient | outpatient | ambulatory | emergency +", formalDefinition="inpatient | outpatient | ambulatory | emergency +." )
+    @Child(name = "class", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Classification of patient encounter", formalDefinition="Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActEncounterCode")
     protected Coding class_;
 
     /**
-     * The class history permits the tracking of the encounters transitions without needing to go  through the resource history.
-
-This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.
+     * The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.
      */
     @Child(name = "classHistory", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of past encounter classes", formalDefinition="The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient." )
+    @Description(shortDefinition="List of past encounter classes", formalDefinition="The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient." )
     protected List<ClassHistoryComponent> classHistory;
 
     /**
@@ -2560,18 +2558,14 @@ This would be used for a case where an admission starts of as an emergency encou
     protected List<EncounterLocationComponent> location;
 
     /**
-     * The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.
+     * The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.
      */
     @Child(name = "serviceProvider", type = {Organization.class}, order=20, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The organization (facility) responsible for this encounter", formalDefinition="The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy." )
+    @Description(shortDefinition="The organization (facility) responsible for this encounter", formalDefinition="The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy." )
     protected Reference serviceProvider;
 
     /**
-     * The actual object that is the target of the reference (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
+     * The actual object that is the target of the reference (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     protected Organization serviceProviderTarget;
 
@@ -2599,9 +2593,10 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
   /**
    * Constructor
    */
-    public Encounter(Enumeration<EncounterStatus> status) {
+    public Encounter(Enumeration<EncounterStatus> status, Coding class_) {
       super();
       this.status = status;
+      this.class_ = class_;
     }
 
     /**
@@ -2756,7 +2751,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @return {@link #class_} (inpatient | outpatient | ambulatory | emergency +.)
+     * @return {@link #class_} (Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.)
      */
     public Coding getClass_() { 
       if (this.class_ == null)
@@ -2772,7 +2767,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @param value {@link #class_} (inpatient | outpatient | ambulatory | emergency +.)
+     * @param value {@link #class_} (Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.)
      */
     public Encounter setClass_(Coding value) { 
       this.class_ = value;
@@ -2780,9 +2775,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @return {@link #classHistory} (The class history permits the tracking of the encounters transitions without needing to go  through the resource history.
-
-This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.)
+     * @return {@link #classHistory} (The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.)
      */
     public List<ClassHistoryComponent> getClassHistory() { 
       if (this.classHistory == null)
@@ -3528,9 +3521,7 @@ This would be used for a case where an admission starts of as an emergency encou
     }
 
     /**
-     * @return {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
+     * @return {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Reference getServiceProvider() { 
       if (this.serviceProvider == null)
@@ -3546,9 +3537,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @param value {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
+     * @param value {@link #serviceProvider} (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Encounter setServiceProvider(Reference value) { 
       this.serviceProvider = value;
@@ -3556,9 +3545,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
+     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Organization getServiceProviderTarget() { 
       if (this.serviceProviderTarget == null)
@@ -3570,9 +3557,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
     }
 
     /**
-     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.
-
-Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
+     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.)
      */
     public Encounter setServiceProviderTarget(Organization value) { 
       this.serviceProviderTarget = value;
@@ -3628,8 +3613,8 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
         children.add(new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status));
         children.add(new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
-        children.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_));
-        children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
+        children.add(new Property("class", "Coding", "Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.", 0, 1, class_));
+        children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
         children.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType));
         children.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority));
@@ -3645,7 +3630,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
         children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account));
         children.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization));
         children.add(new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
-        children.add(new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider));
+        children.add(new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider));
         children.add(new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf));
       }
 
@@ -3655,8 +3640,8 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status);
         case -986695614: /*statusHistory*/  return new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory);
-        case 94742904: /*class*/  return new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_);
-        case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
+        case 94742904: /*class*/  return new Property("class", "Coding", "Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.", 0, 1, class_);
+        case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType);
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority);
@@ -3672,7 +3657,7 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account);
         case 1057894634: /*hospitalization*/  return new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization);
         case 1901043637: /*location*/  return new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location);
-        case 243182534: /*serviceProvider*/  return new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.\n\nRefer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider);
+        case 243182534: /*serviceProvider*/  return new Property("serviceProvider", "Reference(Organization)", "The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.", 0, 1, serviceProvider);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -4548,22 +4533,48 @@ Refer to the example bundle showing an abbreviated set of Encounters for a colon
  /**
    * Search parameter: <b>class</b>
    * <p>
-   * Description: <b>inpatient | outpatient | ambulatory | emergency +</b><br>
+   * Description: <b>Classification of patient encounter</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Encounter.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="Encounter.class", description="inpatient | outpatient | ambulatory | emergency +", type="token" )
+  @SearchParamDefinition(name="class", path="Encounter.class", description="Classification of patient encounter", type="token" )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
    * <p>
-   * Description: <b>inpatient | outpatient | ambulatory | emergency +</b><br>
+   * Description: <b>Classification of patient encounter</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Encounter.class</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CLASS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CLASS);
+
+ /**
+   * Search parameter: <b>account</b>
+   * <p>
+   * Description: <b>The set of accounts that may be used for billing for this Encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.account</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="account", path="Encounter.account", description="The set of accounts that may be used for billing for this Encounter", type="reference", target={Account.class } )
+  public static final String SP_ACCOUNT = "account";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>account</b>
+   * <p>
+   * Description: <b>The set of accounts that may be used for billing for this Encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.account</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ACCOUNT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ACCOUNT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:account</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACCOUNT = new ca.uhn.fhir.model.api.Include("Encounter:account").toLocked();
 
  /**
    * Search parameter: <b>status</b>

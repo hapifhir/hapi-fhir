@@ -64,6 +64,9 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -309,6 +312,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				 */
 				if (nextObject instanceof IBaseExtension<?, ?>) {
 					nextObject = ((IBaseExtension<?, ?>) nextObject).getValue();
+				}
+
+				if (nextObject instanceof CanonicalType) {
+					nextObject = new Reference(((CanonicalType) nextObject).getValueAsString());
 				}
 
 				IIdType nextId;

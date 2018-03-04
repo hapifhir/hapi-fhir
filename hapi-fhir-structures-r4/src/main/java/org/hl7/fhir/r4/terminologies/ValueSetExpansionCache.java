@@ -40,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
 import org.hl7.fhir.r4.model.ExpansionProfile;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -65,10 +66,10 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 	  	  // well, we'll see if the designated server can expand it, and if it can, we'll cache it locally
 	  		vso = context.expandVS(source, false, profile == null || !profile.getExcludeNested());
 	  		if (cacheFolder != null) {
-	  		FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFile(source.getUrl())));
-	  		context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, vso.getValueset());
-	  		s.close();
-	  	}
+	  		  FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFileName(source.getUrl())));
+	  		  context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, vso.getValueset());
+	  		  s.close();
+	  		}
 	  	}
 	  	if (vso.getValueset() != null)
 	  	  expansions.put(cacheKey, vso);
@@ -79,14 +80,12 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
       return profile == null ? source.getUrl() : source.getUrl() + " " + profile.getUrl()+" "+profile.getExcludeNested(); 
     }
 
-    private String makeFile(String url) {
-      return url.replace("$", "").replace(":", "").replace("//", "/").replace("/", "_")+".xml";
-    }
   }
 
   private static final String VS_ID_EXT = "http://tools/cache";
 
   private final Map<String, ValueSetExpansionOutcome> expansions = new HashMap<String, ValueSetExpansionOutcome>();
+  private final Map<String, MetadataResource> canonicals = new HashMap<String, MetadataResource>();
   private final IWorkerContext context;
   private final String cacheFolder;
 	
@@ -104,21 +103,36 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
       loadCache();
   }
   
-	private void loadCache() throws FHIRFormatError, IOException {
-	  File[] files = new File(cacheFolder).listFiles();
+  private String makeFileName(String url) {
+    return url.replace("$", "").replace(":", "").replace("|", ".").replace("//", "/").replace("/", "_")+".xml";
+  }
+  
+  private void loadCache() throws FHIRFormatError, IOException {
+    File[] files = new File(cacheFolder).listFiles();
     for (File f : files) {
       if (f.getName().endsWith(".xml")) {
         final FileInputStream is = new FileInputStream(f);
         try {	   
-        Resource r = context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).parse(is);
-        if (r instanceof OperationOutcome) {
-          OperationOutcome oo = (OperationOutcome) r;
-          expansions.put(ToolingExtensions.getExtension(oo,VS_ID_EXT).getValue().toString(),
-            new ValueSetExpansionOutcome(new XhtmlComposer(XhtmlComposer.XML, false).composePlainText(oo.getText().getDiv()), TerminologyServiceErrorClass.UNKNOWN));
-        } else {
-          ValueSet vs = (ValueSet) r; 
-          expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs));
-        }
+          Resource r = context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).parse(is);
+          if (r instanceof OperationOutcome) {
+            OperationOutcome oo = (OperationOutcome) r;
+            expansions.put(ToolingExtensions.getExtension(oo,VS_ID_EXT).getValue().toString(),
+                new ValueSetExpansionOutcome(new XhtmlComposer(XhtmlComposer.XML, false).composePlainText(oo.getText().getDiv()), TerminologyServiceErrorClass.UNKNOWN));
+          } else if (r instanceof ValueSet) {
+            ValueSet vs = (ValueSet) r;
+            if (vs.hasExpansion())
+              expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs));
+            else {
+              canonicals.put(vs.getUrl(), vs);
+              if (vs.hasVersion())
+                canonicals.put(vs.getUrl()+"|"+vs.getVersion(), vs);
+            }
+          } else if (r instanceof MetadataResource) {
+            MetadataResource md = (MetadataResource) r;
+            canonicals.put(md.getUrl(), md);
+            if (md.hasVersion())
+              canonicals.put(md.getUrl()+"|"+md.getVersion(), md);
+          }
         } finally {
           IOUtils.closeQuietly(is);
         }
@@ -131,5 +145,20 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 		return new CacheAwareExpander();
 		// return new ValueSetExpander(valuesets, codesystems);
 	}
+
+  public MetadataResource getStoredResource(String canonicalUri) {
+    return canonicals.get(canonicalUri);
+  }
+
+  public void storeResource(MetadataResource md) throws IOException {
+    canonicals.put(md.getUrl(), md);
+    if (md.hasVersion())
+      canonicals.put(md.getUrl()+"|"+md.getVersion(), md);    
+    if (cacheFolder != null) {
+      FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFileName(md.getUrl()+"|"+md.getVersion())));
+      context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, md);
+      s.close();
+    }
+  }
 
 }

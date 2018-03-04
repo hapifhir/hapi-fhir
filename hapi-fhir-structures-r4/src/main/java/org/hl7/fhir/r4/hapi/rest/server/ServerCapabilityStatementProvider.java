@@ -174,9 +174,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		retVal.setPublisher(myPublisher);
 		retVal.setDateElement(conformanceDate());
 		retVal.setFhirVersion(FhirVersionEnum.R4.getFhirVersionString());
-		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
-																					// effort since the parser
-		// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
 		retVal.setKind(CapabilityStatementKind.INSTANCE);
@@ -203,7 +200,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				resource.getTypeElement().setValue(def.getName());
 				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
 				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
-				resource.getProfile().setReference((def.getResourceProfile(serverBase)));
+				resource.getProfileElement().setValue(def.getResourceProfile(serverBase));
 
 				TreeSet<String> includes = new TreeSet<String>();
 
@@ -267,7 +264,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
-							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition("OperationDefinition/" + opName);
 						}
 					}
 
@@ -302,7 +299,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							ourLog.debug("Found bound operation: {}", opName);
-							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition("OperationDefinition/" + opName);
 						}
 					}
 				}
@@ -316,7 +313,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void handleDynamicSearchMethodBinding(CapabilityStatementRestResourceComponent resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
 		includes.addAll(searchMethodBinding.getIncludes());
 
-		List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
+		List<RuntimeSearchParam> searchParameters = new ArrayList<>();
 		searchParameters.addAll(searchMethodBinding.getSearchParams());
 		sortRuntimeSearchParameters(searchParameters);
 

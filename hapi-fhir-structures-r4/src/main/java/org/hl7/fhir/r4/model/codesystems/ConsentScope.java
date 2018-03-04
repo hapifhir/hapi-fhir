@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -47,7 +47,7 @@ public enum ConsentScope {
         /**
          * Agreement to collect, access, use or disclose (share) information
          */
-        PRIVACY, 
+        PATIENTPRIVACY, 
         /**
          * Consent to undergo a specific treatment
          */
@@ -59,21 +59,21 @@ public enum ConsentScope {
         public static ConsentScope fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ADR".equals(codeString))
+        if ("adr".equals(codeString))
           return ADR;
         if ("research".equals(codeString))
           return RESEARCH;
-        if ("privacy".equals(codeString))
-          return PRIVACY;
+        if ("patient-privacy".equals(codeString))
+          return PATIENTPRIVACY;
         if ("treatment".equals(codeString))
           return TREATMENT;
         throw new FHIRException("Unknown ConsentScope code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ADR: return "ADR";
+            case ADR: return "adr";
             case RESEARCH: return "research";
-            case PRIVACY: return "privacy";
+            case PATIENTPRIVACY: return "patient-privacy";
             case TREATMENT: return "treatment";
             default: return "?";
           }
@@ -85,7 +85,7 @@ public enum ConsentScope {
           switch (this) {
             case ADR: return "Actions to be taken if they are no longer able to make decisions for themselves";
             case RESEARCH: return "Consent to participate in research protocol and information sharing required";
-            case PRIVACY: return "Agreement to collect, access, use or disclose (share) information";
+            case PATIENTPRIVACY: return "Agreement to collect, access, use or disclose (share) information";
             case TREATMENT: return "Consent to undergo a specific treatment";
             default: return "?";
           }
@@ -94,7 +94,7 @@ public enum ConsentScope {
           switch (this) {
             case ADR: return "Advanced Care Directive";
             case RESEARCH: return "Research";
-            case PRIVACY: return "Privacy Consent";
+            case PATIENTPRIVACY: return "Privacy Consent";
             case TREATMENT: return "Treatment";
             default: return "?";
           }

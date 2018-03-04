@@ -837,9 +837,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
 
-		Predicate paramNamePredicate = myBuilder.equal(join.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(paramNamePredicate, orPredicate);
-
+		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicate);
 		myPredicates.add(outerPredicate);
 	}
 
@@ -1195,7 +1193,7 @@ public class SearchBuilder implements ISearchBuilder {
 				for (VersionIndependentConcept nextCode : codes) {
 					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
 					if (null == systemCodes) {
-						systemCodes = new ArrayList<VersionIndependentConcept>();
+						systemCodes = new ArrayList<>();
 						map.put(nextCode.getSystem(), systemCodes);
 					}
 					systemCodes.add(nextCode);

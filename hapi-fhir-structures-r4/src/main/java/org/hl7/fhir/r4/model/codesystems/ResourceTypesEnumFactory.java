@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -281,8 +281,6 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.SEARCHPARAMETER;
     if ("Sequence".equals(codeString))
       return ResourceTypes.SEQUENCE;
-    if ("ServiceDefinition".equals(codeString))
-      return ResourceTypes.SERVICEDEFINITION;
     if ("ServiceRequest".equals(codeString))
       return ResourceTypes.SERVICEREQUEST;
     if ("Slot".equals(codeString))
@@ -571,8 +569,6 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "SearchParameter";
     if (code == ResourceTypes.SEQUENCE)
       return "Sequence";
-    if (code == ResourceTypes.SERVICEDEFINITION)
-      return "ServiceDefinition";
     if (code == ResourceTypes.SERVICEREQUEST)
       return "ServiceRequest";
     if (code == ResourceTypes.SLOT)

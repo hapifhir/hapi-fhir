@@ -75,6 +75,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myDaoConfig.setExpireSearchResultsAfterMillis(1000L);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
 		long start = System.currentTimeMillis();
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start);
 
 		final String searchUuid1;
 		{

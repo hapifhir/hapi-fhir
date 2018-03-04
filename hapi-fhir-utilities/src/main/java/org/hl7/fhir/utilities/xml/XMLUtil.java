@@ -487,5 +487,17 @@ public class XMLUtil {
 	  return b.toString().trim();
 	}
 
+  public static void deleteByName(Element e, String name) {
+    List<Element> matches = getNamedChildren(e, name);
+    for (Element m : matches)
+      e.removeChild(m);    
+  }
+
+  public static void deleteAttr(Element e, String namespaceURI, String localName) {
+    if (e.hasAttributeNS(namespaceURI, localName))
+      e.removeAttributeNS(namespaceURI, localName);
+    
+  }
+
  	
 }
