@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.TypedQuery;
 
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -538,13 +538,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
-		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
-		int insertionCount = session.getActionQueue().numberOfInsertions();
-		int updateCount = session.getActionQueue().numberOfUpdates();
-
-		StopWatch sw = new StopWatch();
-		myEntityManager.flush();
-		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
+		flushJpaSession();
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have

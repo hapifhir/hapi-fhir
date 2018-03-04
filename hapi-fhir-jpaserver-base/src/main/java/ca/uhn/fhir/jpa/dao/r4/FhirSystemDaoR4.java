@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -547,8 +548,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
-		myEntityManager.flush();
-		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
+		flushJpaSession();
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
@@ -619,9 +619,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
-		Meta retVal = toMeta(tagDefinitions);
-
-		return retVal;
+		return toMeta(tagDefinitions);
 	}
 
 	private String performIdSubstitutionsInMatchUrl(Map<IdType, IdType> theIdSubstitutions, String theMatchUrl) {

@@ -23,6 +23,8 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -38,7 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * 
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class ApacheHttpResponse implements IHttpResponse {
+public class ApacheHttpResponse extends BaseHttpResponse implements IHttpResponse {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ApacheHttpResponse.class);
 
@@ -46,7 +48,8 @@ public class ApacheHttpResponse implements IHttpResponse {
 	private byte[] myEntityBytes;
 	private final HttpResponse myResponse;
 
-	public ApacheHttpResponse(HttpResponse theResponse) {
+	public ApacheHttpResponse(HttpResponse theResponse, StopWatch theResponseStopWatch) {
+		super(theResponseStopWatch);
 		this.myResponse = theResponse;
 	}
 

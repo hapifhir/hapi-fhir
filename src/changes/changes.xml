@@ -156,7 +156,9 @@
 			</action>
 			<action type="remove">
 				A number of info level log lines have been reduced to debug level in the JPA server, in 
-				order to reduce contention during heavy loads.
+				order to reduce contention during heavy loads and reduce the amount of noise
+				in log files overall. A typical server should now see far less logging coming
+				from HAPI, at least at the INFO level.
 			</action>
 			<action type="fix" issue="863">
 				JPA server now correctly indexes custom search parameters which
@@ -193,6 +195,10 @@
 				Fix a bug where under certain circumstances, duplicate contained resources
 				could be output by the parser's encode methods. Thanks to
 				Frank Tao for supplying a test case!
+			</action>
+			<action type="add">
+				The client LoggingInterceptor now includes the number of
+				milliseconds spent performing each call that is logged.
 			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">

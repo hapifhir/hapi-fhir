@@ -66,7 +66,7 @@ public class LoggingInterceptorTest {
 	}
 
 	@Test
-	public void testLoggerNonVerbose() throws Exception {
+	public void testLoggerNonVerbose() {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -85,13 +85,13 @@ public class LoggingInterceptorTest {
 				System.out.flush();
 				return
 					formattedMessage.contains("Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1") ||
-					formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1)");
+					formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1) in ");
 			}
 		}));
 	}
 
 		@Test
-	public void testLoggerVerbose() throws Exception {
+	public void testLoggerVerbose() {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
