@@ -88,6 +88,39 @@ public class JsonParserR4Test {
 
 	}
 
+	/*
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIdsAndManualAddition() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.setId("#MR");
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		med.setId("#MED");
+
+		Reference medRef = new Reference();
+		medRef.setReference("#MED");
+		md.setMedication(medRef);
+		mr.setMedication(medRef);
+
+		md.getContained().add(mr);
+		md.getContained().add(med);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
+	}
+
 	@Test
 	public void testEncodeAndParseUnicodeCharacterInNarrative() {
 		Patient p = new Patient();

@@ -770,12 +770,11 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
 
-			if (params instanceof UriParam) {
-				UriParam param = (UriParam) params;
+			if (nextOr instanceof UriParam) {
+				UriParam param = (UriParam) nextOr;
 
 				String value = param.getValue();
 				if (value == null) {
@@ -820,7 +819,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				codePredicates.add(predicate);
 			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + params.getClass());
+				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
 			}
 
 		}
@@ -1340,7 +1339,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		myPredicates = new ArrayList<Predicate>();
+		myPredicates = new ArrayList<>();
 
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
@@ -1349,7 +1348,7 @@ public class SearchBuilder implements ISearchBuilder {
 				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<Long>(1);
+					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));

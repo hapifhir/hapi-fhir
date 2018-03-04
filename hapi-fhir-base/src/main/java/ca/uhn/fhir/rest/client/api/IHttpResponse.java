@@ -65,31 +65,31 @@ public interface IHttpResponse {
 	/**
 	 * Close the response
 	 */
-	public void close();
+	void close();
 
 	/**
 	 * Returna reader for the response entity
 	 */
-	public Reader createReader() throws IOException;
+	Reader createReader() throws IOException;
 
 	/**
 	 * Get map of the response headers and corresponding string values.
 	 * 
 	 * @return response headers as a map header keys and they values.
 	 */
-	public Map<String, List<String>> getAllHeaders();
+	Map<String, List<String>> getAllHeaders();
 
 	/**
 	 * Return all headers in the response with the given type 
 	 */
-	public List<String> getHeaders(String theName);
+	List<String> getHeaders(String theName);
 
 	/**
 	 * Extracts {@code Content-Type} value from the response exactly as
 	 * specified by the {@code Content-Type} header. Returns {@code null}
 	 * if not specified.
 	 */
-	public String getMimeType();
+	String getMimeType();
 
 	/**
 	 * @return the native response, depending on the client library used
@@ -101,18 +101,18 @@ public interface IHttpResponse {
 	 * 
 	 * @return the response status code.
 	 */
-	public int getStatus();
+	int getStatus();
 
 	/**
 	 * Get the response status information reason phrase associated with the response.
 	 * 
 	 * @return the reason phrase.
 	 */
-	public String getStatusInfo();
+	String getStatusInfo();
 
 	/**
 	 * Read the message entity input stream as an InputStream.
 	 */
-	public InputStream readEntity() throws IOException;
+	InputStream readEntity() throws IOException;
 
 }

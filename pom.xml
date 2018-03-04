@@ -386,6 +386,10 @@
 			<id>darktyko</id>
 			<name>Kyle Meadows</name>
 		</developer>
+		<developer>
+			<id>Tastelezz</id>
+			<name>Gaetano Gallo</name>
+		</developer>
 		
 	</developers>
 
@@ -508,6 +512,11 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
+				<version>23.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-testlib</artifactId>
 				<version>23.0</version>
 			</dependency>
 			<dependency>

@@ -1,17 +1,22 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import com.google.common.testing.EqualsTester;
+import org.junit.Test;
+
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.APPROXIMATE;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-
-import java.util.Date;
-import java.util.TimeZone;
-
-import org.junit.Test;
-
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
@@ -105,6 +110,21 @@ public class DateParamTest {
 		assertEquals(ParamPrefixEnum.LESSTHAN, new DateParam("lt2012").getPrefix());
 		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, new DateParam("le2012").getPrefix());
 	}
-	
 
+	@Test()
+	public void testEqualsAndHashCode() {
+		Date now = new Date();
+		Date later = new Date(now.getTime() + SECONDS.toMillis(666));
+		new EqualsTester()
+			.addEqualityGroup(new DateParam(),
+				               new DateParam(null))
+			.addEqualityGroup(new DateParam(NOT_EQUAL, now),
+				               new DateParam(NOT_EQUAL, now.getTime()))
+			.addEqualityGroup(new DateParam(EQUAL, now),
+				               new DateParam(EQUAL, now.getTime()))
+			.addEqualityGroup(new DateParam(EQUAL, later),
+				               new DateParam(EQUAL, later.getTime()))
+			.addEqualityGroup(new DateParam(APPROXIMATE, "2011-11-11T11:11:11.111-11:11"))
+			.testEquals();
+	}
 }
