@@ -24,6 +24,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Added for #870 - Can be enabled when the FHIR sources are fixed
+ */
 @Ignore("Requires a valid schematron file, e.g. bei merging pull request #869")
 public class SchematronValidationR4QuestionnaireTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchematronValidationR4QuestionnaireTest.class);
@@ -65,7 +68,7 @@ public class SchematronValidationR4QuestionnaireTest {
 
 		QuestionnaireItemEnableWhenComponent enableWhen = new QuestionnaireItemEnableWhenComponent();
 		enableWhen.setQuestion("q1");
-		enableWhen.setHasAnswer(true);
+//		enableWhen.setHasAnswer(true);
 		child1.addEnableWhen(enableWhen);
 
 		QuestionnaireItemComponent child21 = createItem(QuestionnaireItemType.STRING);
@@ -89,7 +92,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		QuestionnaireItemEnableWhenComponent enableWhen = new QuestionnaireItemEnableWhenComponent();
 		enableWhen.setQuestion("q1");
 		enableWhen.setAnswer(new StringType("a value"));
-		enableWhen.setHasAnswer(true);
+//		enableWhen.setHasAnswer(true);
 		child1.addEnableWhen(enableWhen);
 
 		QuestionnaireItemComponent child21 = createItem(QuestionnaireItemType.STRING);
