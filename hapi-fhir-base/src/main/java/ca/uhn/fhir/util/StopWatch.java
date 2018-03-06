@@ -67,15 +67,8 @@ public class StopWatch {
 	 * @return A formatted amount of time
 	 */
 	public String getEstimatedTimeRemaining(double theCompleteToDate, double theTotal) {
-		double completeSoFar = theCompleteToDate / theTotal;
-		double remaining;
-		if (completeSoFar > 0.5) {
-			remaining = (1.0 - completeSoFar);
-		} else {
-			remaining = (1.0 / completeSoFar);
-		}
 		double millis = getMillis();
-		long millisRemaining = (long) (millis * remaining);
+		long millisRemaining = (long) (((theTotal / theCompleteToDate) * millis) - (millis));
 		return formatMillis(millisRemaining);
 	}
 
