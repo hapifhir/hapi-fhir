@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -1090,6 +1091,11 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (theParameter instanceof StringParam) {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
+			if ((id.isContains()) &&
+				(!myCallingDao.getConfig().allowContainsSearches()))
+			{
+				throw new MethodNotAllowedException(":contains modifier is disabled on this server");
+			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;
 			rawSearchTerm = id.getValueAsString();
@@ -1103,7 +1109,20 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		likeExpression = createLeftMatchLikeExpression(likeExpression);
+		if (myCallingDao.getConfig().allowContainsSearches()) {
+			if (theParameter instanceof StringParam) {
+				if (((StringParam) theParameter).isContains()) {
+					likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+				} else {
+					likeExpression = createLeftMatchLikeExpression(likeExpression);
+				}
+			} else {
+				likeExpression = createLeftMatchLikeExpression(likeExpression);
+			}
+		}
+		else {
+			likeExpression = createLeftMatchLikeExpression(likeExpression);
+		}
 
 		Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 		if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
@@ -1995,6 +2014,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
+		return "%" + likeExpression.replace("%", "[%]") + "%";
 	}
 
 	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,

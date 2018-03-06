@@ -60,6 +60,8 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowExternalReferences = false;
+	private boolean myAllowContainsSearches = true;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -1095,6 +1097,16 @@ public class DaoConfig {
 			}
 		}
 
+	}
+
+	public boolean allowContainsSearches() {
+
+		return myAllowContainsSearches;
+	}
+
+	public void setAllowContainsSearches(boolean myAllowContainsSearches) {
+
+		this.myAllowContainsSearches = myAllowContainsSearches;
 	}
 
 	public enum IndexEnabledEnum {
