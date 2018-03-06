@@ -1194,6 +1194,62 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	}
 
 	@Test
+	public void testTransactionUpdateResourceNewVersionCreatedWhenDataChanges() {
+
+		Bundle request = new Bundle();
+		String patientId = "Patient/IShouldUpdate";
+		Patient p = new Patient();
+		p.addName().addFamily("Hello");
+		p.setId(patientId);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.PUT).setUrl(patientId);
+
+		Bundle initialBundleResponse = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, initialBundleResponse.getEntry().size());
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(initialBundleResponse));
+
+		Entry initialBundleResponseEntry = initialBundleResponse.getEntry().get(0);
+		assertEquals("201 Created", initialBundleResponseEntry.getResponse().getStatus());
+		assertThat(initialBundleResponseEntry.getResponse().getEtag(), is(equalTo("1")));
+
+		p.addName().addFamily("AnotherName");
+
+		Bundle secondBundleResponse = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, secondBundleResponse.getEntry().size());
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(secondBundleResponse));
+
+		Entry secondBundleResponseEntry = secondBundleResponse.getEntry().get(0);
+		assertEquals("200 OK", secondBundleResponseEntry.getResponse().getStatus());
+		assertThat(secondBundleResponseEntry.getResponse().getEtag(), is(equalTo("2")));
+	}
+
+	@Test
+	public void testTransactionUpdateResourceNewVersionNotCreatedWhenDataNotChanged() {
+
+		Bundle request = new Bundle();
+		String patientId = "Patient/IShouldNotUpdate";
+		Patient p = new Patient();
+		p.addName().addFamily("Hello");
+		p.setId(patientId);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.PUT).setUrl(patientId);
+
+		Bundle initialBundleResponse = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, initialBundleResponse.getEntry().size());
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(initialBundleResponse));
+
+		Entry initialBundleResponseEntry = initialBundleResponse.getEntry().get(0);
+		assertEquals("201 Created", initialBundleResponseEntry.getResponse().getStatus());
+		assertThat(initialBundleResponseEntry.getResponse().getEtag(), is(equalTo("1")));
+
+		Bundle secondBundleResponse = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, secondBundleResponse.getEntry().size());
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(secondBundleResponse));
+
+		Entry secondBundleResponseEntry = secondBundleResponse.getEntry().get(0);
+		assertEquals("200 OK", secondBundleResponseEntry.getResponse().getStatus());
+		assertThat(secondBundleResponseEntry.getResponse().getEtag(), is(equalTo("1")));
+	}
+
+	@Test
 	public void testTransactionUpdateMatchUrlWithTwoMatch() {
 		String methodName = "testTransactionUpdateMatchUrlWithTwoMatch";
 		Bundle request = new Bundle();
