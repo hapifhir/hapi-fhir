@@ -551,7 +551,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);

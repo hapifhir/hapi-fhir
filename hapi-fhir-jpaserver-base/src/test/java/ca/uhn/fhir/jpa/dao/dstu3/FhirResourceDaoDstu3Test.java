@@ -23,12 +23,10 @@ import org.hl7.fhir.dstu3.model.Quantity.QuantityComparator;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.*;

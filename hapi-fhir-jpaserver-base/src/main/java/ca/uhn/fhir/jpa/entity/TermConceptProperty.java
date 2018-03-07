@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.io.Serializable;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = {
@@ -43,8 +45,9 @@ public class TermConceptProperty implements Serializable {
 	private Long myId;
 
 	@Column(name="PROP_KEY", length=200, nullable=false)
+	@NotBlank
 	private String myKey;
-	
+
 	@Column(name="PROP_VAL", length=200, nullable=true)
 	private String myValue;
 

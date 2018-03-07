@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.*;
 
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
@@ -24,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,7 +48,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(false);
+		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@Before
@@ -67,7 +67,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
@@ -111,7 +110,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "codeA").setDisplay("CodeA");
 		cs.getConcepts().add(parentA);
@@ -149,7 +147,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept hello = new TermConcept(cs, "hello").setDisplay("Hello");
 		cs.getConcepts().add(hello);
@@ -486,7 +483,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandWithIsAInExternalValueSetReindex() {
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(true);
+		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		createExternalCsAndLocalVs();
 
@@ -714,7 +711,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
 		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", cs);

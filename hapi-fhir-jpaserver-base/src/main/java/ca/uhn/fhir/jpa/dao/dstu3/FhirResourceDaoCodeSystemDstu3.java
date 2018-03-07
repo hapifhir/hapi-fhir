@@ -232,7 +232,6 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 
 					persCs = new TermCodeSystemVersion();
 					persCs.setResource(retVal);
-					persCs.setResourceVersionId(retVal.getVersion());
 					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
 					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
 					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);

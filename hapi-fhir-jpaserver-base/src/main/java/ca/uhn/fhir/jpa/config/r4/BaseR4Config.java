@@ -122,7 +122,7 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcR4 terminologyService() {
+	public IHapiTerminologySvcR4 terminologyServiceR4() {
 		return new HapiTerminologySvcR4();
 	}
 

@@ -95,7 +95,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
 		List<IIdType> valueSetIds;
 		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
-		valueSetIds = new ArrayList<IIdType>();
+		valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdType("CodeSystem", next));
 		}
@@ -190,7 +190,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 	}
 
 	private List<TermConcept> toPersistedConcepts(List<ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {
-		ArrayList<TermConcept> retVal = new ArrayList<TermConcept>();
+		ArrayList<TermConcept> retVal = new ArrayList<>();
 
 		for (ConceptDefinitionComponent next : theConcept) {
 			if (isNotBlank(next.getCode())) {
@@ -226,7 +226,6 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 
 					persCs = new TermCodeSystemVersion();
 					persCs.setResource(retVal);
-					persCs.setResourceVersionId(retVal.getVersion());
 					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
 					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
 					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);

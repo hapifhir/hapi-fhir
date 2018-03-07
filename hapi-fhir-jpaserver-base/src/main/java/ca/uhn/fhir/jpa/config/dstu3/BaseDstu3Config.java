@@ -10,10 +10,7 @@ import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.*;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -113,7 +110,12 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcDstu3 terminologyService() {
+	public IHapiTerminologySvc terminologyService() {
+		return new HapiTerminologySvcImpl();
+	}
+
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologySvcDstu3 terminologyServiceDstu3() {
 		return new HapiTerminologySvcDstu3();
 	}
 

@@ -62,8 +62,8 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_VERSION_ID", nullable = false, updatable = false)
-	private Long myResourceVersionId;
+	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false)
+	private String myCodeSystemVersionId;
 
 	/**
 	 * Constructor
@@ -74,7 +74,7 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public Collection<TermConcept> getConcepts() {
 		if (myConcepts == null) {
-			myConcepts = new ArrayList<TermConcept>();
+			myConcepts = new ArrayList<>();
 		}
 		return myConcepts;
 	}
@@ -88,7 +88,7 @@ public class TermCodeSystemVersion implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
-		result = prime * result + ((myResourceVersionId == null) ? 0 : myResourceVersionId.hashCode());
+		result = prime * result + ((myCodeSystemVersionId == null) ? 0 : myCodeSystemVersionId.hashCode());
 		return result;
 	}
 
@@ -111,11 +111,11 @@ public class TermCodeSystemVersion implements Serializable {
 			return false;
 		}
 		
-		if (myResourceVersionId == null) {
-			if (other.myResourceVersionId != null) {
+		if (myCodeSystemVersionId == null) {
+			if (other.myCodeSystemVersionId != null) {
 				return false;
 			}
-		} else if (!myResourceVersionId.equals(other.myResourceVersionId)) {
+		} else if (!myCodeSystemVersionId.equals(other.myCodeSystemVersionId)) {
 			return false;
 		}
 		return true;
@@ -125,16 +125,16 @@ public class TermCodeSystemVersion implements Serializable {
 		return myResource;
 	}
 
-	public Long getResourceVersionId() {
-		return myResourceVersionId;
+	public String getCodeSystemVersionId() {
+		return myCodeSystemVersionId;
 	}
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
 
-	public void setResourceVersionId(Long theResourceVersionId) {
-		myResourceVersionId = theResourceVersionId;
+	public void setCodeSystemVersionId(String theCodeSystemVersionId) {
+		myCodeSystemVersionId = theCodeSystemVersionId;
 	}
 
 }

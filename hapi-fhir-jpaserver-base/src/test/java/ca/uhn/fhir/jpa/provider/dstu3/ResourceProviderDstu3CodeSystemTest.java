@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;

@@ -9,9 +9,9 @@ package ca.uhn.fhir.context.support;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
+/**
+ * This interface is a version-independent representation of the
+ * various functions that can be provided by validation and terminology
+ * services.
+ * <p>
+ * Implementations are not required to implement all of the functions
+ * in this interface; in fact it is expected that most won't. Any
+ * methods which are not implemented may simply return <code>null</code>
+ * and calling code is expected to be able to handle this.
+ * </p>
+ */
 public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> {
 
 	/**
@@ -91,7 +102,7 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 */
 	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-	public class CodeValidationResult<CDCT, IST> {
+	class CodeValidationResult<CDCT, IST> {
 		private CDCT definition;
 		private String message;
 		private IST severity;

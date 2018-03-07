@@ -1,19 +1,18 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
@@ -21,21 +20,21 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.*;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -50,9 +49,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,15 +60,21 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IValidationSupport, IHapiTerminologySvcR4 {
+public class HapiTerminologySvcR4 implements IHapiTerminologySvcR4 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcR4.class);
-
+	@Autowired
+	protected ITermCodeSystemDao myCodeSystemDao;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
-
 	@Autowired
 	private IValidationSupport myValidationSupport;
+	@Autowired
+	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private FhirContext myContext;
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -128,7 +133,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
 		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
-		Set<String> addedCodes = new HashSet<String>();
+		Set<String> addedCodes = new HashSet<>();
 		boolean haveIncludeCriteria = false;
 
 		/*
@@ -138,7 +143,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 			String nextCode = next.getCode();
 			if (isNotBlank(nextCode) && !addedCodes.contains(nextCode)) {
 				haveIncludeCriteria = true;
-				TermConcept code = super.findCode(system, nextCode);
+				TermConcept code = myTerminologySvc.findCode(system, nextCode);
 				if (code != null) {
 					addedCodes.add(nextCode);
 					ValueSetExpansionContainsComponent contains = retVal.addContains();
@@ -181,7 +186,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 						addDisplayFilterInexact(qb, bool, nextFilter);
 					}
 				} else if ((nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) && nextFilter.getOp() == FilterOperator.ISA) {
-					TermConcept code = super.findCode(system, nextFilter.getValue());
+					TermConcept code = myTerminologySvc.findCode(system, nextFilter.getValue());
 					if (code == null) {
 						throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
 					}
@@ -212,7 +217,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		}
 
 		if (!haveIncludeCriteria) {
-			List<TermConcept> allCodes = super.findCodes(system);
+			List<TermConcept> allCodes = myTerminologySvc.findCodes(system);
 			for (TermConcept nextConcept : allCodes) {
 				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
@@ -221,28 +226,28 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		return retVal;
 	}
 
-	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
-		ValueSet source = new ValueSet();
-		source.getCompose().addInclude().addValueSet(theValueSet);
-		try {
-			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
-
-			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
-			ValueSetExpansionOutcome outcome = worker.expand(source, null);
-			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
-				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
-			}
-
-			return retVal;
-
-		} catch (BaseServerResponseException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
-		}
-
-	}
+//	@Override
+//	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+//		ValueSet source = new ValueSet();
+//		source.getCompose().addInclude().addValueSet(theValueSet);
+//		try {
+//			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+//
+//			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
+//			ValueSetExpansionOutcome outcome = worker.expand(source, null);
+//			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
+//				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+//			}
+//
+//			return retVal;
+//
+//		} catch (BaseServerResponseException e) {
+//			throw e;
+//		} catch (Exception e) {
+//			throw new InternalErrorException(e);
+//		}
+//
+//	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
@@ -279,8 +284,8 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	}
 
 	@Override
-	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
@@ -304,8 +309,8 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	}
 
 	@Override
-	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
@@ -315,24 +320,15 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return super.supportsSystem(theSystem);
+		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails) {
-		CodeSystem cs = new org.hl7.fhir.r4.model.CodeSystem();
-		cs.setUrl(theSystem);
-		cs.setContent(CodeSystemContentMode.NOTPRESENT);
+	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets) {
+		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
-		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escapeUrlParam(theSystem), theRequestDetails);
-		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
-		if (createOutcome.getCreated() != Boolean.TRUE) {
-			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
-			csId = myCodeSystemResourceDao.update(existing, null, false, true, theRequestDetails).getId();
-
-			ourLog.info("Created new version of CodeSystem, got ID: {}", csId.toUnqualified().getValue());
-		}
+		IIdType csId = myCodeSystemResourceDao.update(theCodeSystemResource, "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl()), theRequestDetails).getId();
 
 		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
 		Long codeSystemResourcePid = resource.getId();
@@ -340,15 +336,14 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
 		theCodeSystemVersion.setResource(resource);
-		theCodeSystemVersion.setResourceVersionId(resource.getVersion());
-		super.storeNewCodeSystemVersion(codeSystemResourcePid, theSystem, theCodeSystemVersion);
+		myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemVersion);
 
 	}
 
 	@CoverageIgnore
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TermConcept code = super.findCode(theCodeSystem, theCode);
+		TermConcept code = myTerminologySvc.findCode(theCodeSystem, theCode);
 		if (code != null) {
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());

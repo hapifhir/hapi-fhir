@@ -20,14 +20,12 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvc {
+public class HapiTerminologySvcDstu2 extends HapiTerminologySvcImpl {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -39,10 +37,6 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvc {
 	}
 
 
-	@Override
-	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails) {
-		// nothing yet
-	}
 
 
 }

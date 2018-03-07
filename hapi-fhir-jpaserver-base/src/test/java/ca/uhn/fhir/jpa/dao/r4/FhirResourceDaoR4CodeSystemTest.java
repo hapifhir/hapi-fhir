@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
@@ -18,13 +18,13 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(false);
+		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	
 	@Test
 	public void testIndexContained() throws Exception {
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(true);
+		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		String input = IOUtils.toString(getClass().getResource("/r4/codesystem_complete.json"), StandardCharsets.UTF_8);
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);

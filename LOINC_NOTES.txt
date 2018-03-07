@@ -1,0 +1,4 @@
+Database migration:
+  update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+
+
