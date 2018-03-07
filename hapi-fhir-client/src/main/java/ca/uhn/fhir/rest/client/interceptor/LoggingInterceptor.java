@@ -115,7 +115,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 				}
 				respLocation = " (" + locationValue + ")";
 			}
-			myLog.info("Client response: {}{}", message, respLocation);
+
+			String timing = " in " + theResponse.getRequestStopWatch().toString();
+			myLog.info("Client response: {}{}{}", message, respLocation, timing);
 		}
 
 		if (myLogResponseHeaders) {

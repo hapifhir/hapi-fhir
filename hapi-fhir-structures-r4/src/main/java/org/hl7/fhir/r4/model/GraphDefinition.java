@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -959,9 +959,9 @@ public class GraphDefinition extends MetadataResource {
         /**
          * Profile for the target resource.
          */
-        @Child(name = "profile", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "profile", type = {CanonicalType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile for the target resource", formalDefinition="Profile for the target resource." )
-        protected UriType profile;
+        protected CanonicalType profile;
 
         /**
          * Compartment Consistency Rules.
@@ -977,7 +977,7 @@ public class GraphDefinition extends MetadataResource {
         @Description(shortDefinition="Additional links from target resource", formalDefinition="Additional links from target resource." )
         protected List<GraphDefinitionLinkComponent> link;
 
-        private static final long serialVersionUID = -341158110L;
+        private static final long serialVersionUID = -35248998L;
 
     /**
      * Constructor
@@ -1091,12 +1091,12 @@ public class GraphDefinition extends MetadataResource {
         /**
          * @return {@link #profile} (Profile for the target resource.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
-        public UriType getProfileElement() { 
+        public CanonicalType getProfileElement() { 
           if (this.profile == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create GraphDefinitionLinkTargetComponent.profile");
             else if (Configuration.doAutoCreate())
-              this.profile = new UriType(); // bb
+              this.profile = new CanonicalType(); // bb
           return this.profile;
         }
 
@@ -1111,7 +1111,7 @@ public class GraphDefinition extends MetadataResource {
         /**
          * @param value {@link #profile} (Profile for the target resource.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
-        public GraphDefinitionLinkTargetComponent setProfileElement(UriType value) { 
+        public GraphDefinitionLinkTargetComponent setProfileElement(CanonicalType value) { 
           this.profile = value;
           return this;
         }
@@ -1131,7 +1131,7 @@ public class GraphDefinition extends MetadataResource {
             this.profile = null;
           else {
             if (this.profile == null)
-              this.profile = new UriType();
+              this.profile = new CanonicalType();
             this.profile.setValue(value);
           }
           return this;
@@ -1247,7 +1247,7 @@ public class GraphDefinition extends MetadataResource {
           super.listChildren(children);
           children.add(new Property("type", "code", "Type of resource this link refers to.", 0, 1, type));
           children.add(new Property("params", "string", "A set of parameters to look up.", 0, 1, params));
-          children.add(new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile));
+          children.add(new Property("profile", "canonical(StructureDefinition)", "Profile for the target resource.", 0, 1, profile));
           children.add(new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment));
           children.add(new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link));
         }
@@ -1257,7 +1257,7 @@ public class GraphDefinition extends MetadataResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "Type of resource this link refers to.", 0, 1, type);
           case -995427962: /*params*/  return new Property("params", "string", "A set of parameters to look up.", 0, 1, params);
-          case -309425751: /*profile*/  return new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile);
+          case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "Profile for the target resource.", 0, 1, profile);
           case -397756334: /*compartment*/  return new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment);
           case 3321850: /*link*/  return new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1270,7 +1270,7 @@ public class GraphDefinition extends MetadataResource {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
         case -995427962: /*params*/ return this.params == null ? new Base[0] : new Base[] {this.params}; // StringType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // UriType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // CanonicalType
         case -397756334: /*compartment*/ return this.compartment == null ? new Base[0] : this.compartment.toArray(new Base[this.compartment.size()]); // GraphDefinitionLinkTargetCompartmentComponent
         case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // GraphDefinitionLinkComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1288,7 +1288,7 @@ public class GraphDefinition extends MetadataResource {
           this.params = castToString(value); // StringType
           return value;
         case -309425751: // profile
-          this.profile = castToUri(value); // UriType
+          this.profile = castToCanonical(value); // CanonicalType
           return value;
         case -397756334: // compartment
           this.getCompartment().add((GraphDefinitionLinkTargetCompartmentComponent) value); // GraphDefinitionLinkTargetCompartmentComponent
@@ -1308,7 +1308,7 @@ public class GraphDefinition extends MetadataResource {
         } else if (name.equals("params")) {
           this.params = castToString(value); // StringType
         } else if (name.equals("profile")) {
-          this.profile = castToUri(value); // UriType
+          this.profile = castToCanonical(value); // CanonicalType
         } else if (name.equals("compartment")) {
           this.getCompartment().add((GraphDefinitionLinkTargetCompartmentComponent) value);
         } else if (name.equals("link")) {
@@ -1336,7 +1336,7 @@ public class GraphDefinition extends MetadataResource {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
         case -995427962: /*params*/ return new String[] {"string"};
-        case -309425751: /*profile*/ return new String[] {"uri"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
         case -397756334: /*compartment*/ return new String[] {};
         case 3321850: /*link*/ return new String[] {"@GraphDefinition.link"};
         default: return super.getTypesForProperty(hash, name);
@@ -1402,8 +1402,7 @@ public class GraphDefinition extends MetadataResource {
         if (!(other_ instanceof GraphDefinitionLinkTargetComponent))
           return false;
         GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other_;
-        return compareValues(type, o.type, true) && compareValues(params, o.params, true) && compareValues(profile, o.profile, true)
-          ;
+        return compareValues(type, o.type, true) && compareValues(params, o.params, true);
       }
 
       public boolean isEmpty() {
@@ -1903,9 +1902,9 @@ public class GraphDefinition extends MetadataResource {
     /**
      * The profile that describes the use of the base resource.
      */
-    @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "profile", type = {CanonicalType.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Profile on base resource", formalDefinition="The profile that describes the use of the base resource." )
-    protected UriType profile;
+    protected CanonicalType profile;
 
     /**
      * Links this graph makes rules about.
@@ -1914,7 +1913,7 @@ public class GraphDefinition extends MetadataResource {
     @Description(shortDefinition="Links this graph makes rules about", formalDefinition="Links this graph makes rules about." )
     protected List<GraphDefinitionLinkComponent> link;
 
-    private static final long serialVersionUID = 86877575L;
+    private static final long serialVersionUID = 1529157887L;
 
   /**
    * Constructor
@@ -2569,12 +2568,12 @@ public class GraphDefinition extends MetadataResource {
     /**
      * @return {@link #profile} (The profile that describes the use of the base resource.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
      */
-    public UriType getProfileElement() { 
+    public CanonicalType getProfileElement() { 
       if (this.profile == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create GraphDefinition.profile");
         else if (Configuration.doAutoCreate())
-          this.profile = new UriType(); // bb
+          this.profile = new CanonicalType(); // bb
       return this.profile;
     }
 
@@ -2589,7 +2588,7 @@ public class GraphDefinition extends MetadataResource {
     /**
      * @param value {@link #profile} (The profile that describes the use of the base resource.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
      */
-    public GraphDefinition setProfileElement(UriType value) { 
+    public GraphDefinition setProfileElement(CanonicalType value) { 
       this.profile = value;
       return this;
     }
@@ -2609,7 +2608,7 @@ public class GraphDefinition extends MetadataResource {
         this.profile = null;
       else {
         if (this.profile == null)
-          this.profile = new UriType();
+          this.profile = new CanonicalType();
         this.profile.setValue(value);
       }
       return this;
@@ -2683,7 +2682,7 @@ public class GraphDefinition extends MetadataResource {
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, 1, start));
-        children.add(new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, 1, profile));
+        children.add(new Property("profile", "canonical(StructureDefinition)", "The profile that describes the use of the base resource.", 0, 1, profile));
         children.add(new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link));
       }
 
@@ -2703,7 +2702,7 @@ public class GraphDefinition extends MetadataResource {
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 109757538: /*start*/  return new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, 1, start);
-        case -309425751: /*profile*/  return new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, 1, profile);
+        case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "The profile that describes the use of the base resource.", 0, 1, profile);
         case 3321850: /*link*/  return new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2726,7 +2725,7 @@ public class GraphDefinition extends MetadataResource {
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // CodeType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // UriType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // CanonicalType
         case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // GraphDefinitionLinkComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2777,7 +2776,7 @@ public class GraphDefinition extends MetadataResource {
           this.start = castToCode(value); // CodeType
           return value;
         case -309425751: // profile
-          this.profile = castToUri(value); // UriType
+          this.profile = castToCanonical(value); // CanonicalType
           return value;
         case 3321850: // link
           this.getLink().add((GraphDefinitionLinkComponent) value); // GraphDefinitionLinkComponent
@@ -2817,7 +2816,7 @@ public class GraphDefinition extends MetadataResource {
         } else if (name.equals("start")) {
           this.start = castToCode(value); // CodeType
         } else if (name.equals("profile")) {
-          this.profile = castToUri(value); // UriType
+          this.profile = castToCanonical(value); // CanonicalType
         } else if (name.equals("link")) {
           this.getLink().add((GraphDefinitionLinkComponent) value);
         } else
@@ -2864,7 +2863,7 @@ public class GraphDefinition extends MetadataResource {
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 109757538: /*start*/ return new String[] {"code"};
-        case -309425751: /*profile*/ return new String[] {"uri"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
         case 3321850: /*link*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2986,8 +2985,7 @@ public class GraphDefinition extends MetadataResource {
         if (!(other_ instanceof GraphDefinition))
           return false;
         GraphDefinition o = (GraphDefinition) other_;
-        return compareValues(purpose, o.purpose, true) && compareValues(start, o.start, true) && compareValues(profile, o.profile, true)
-          ;
+        return compareValues(purpose, o.purpose, true) && compareValues(start, o.start, true);
       }
 
       public boolean isEmpty() {

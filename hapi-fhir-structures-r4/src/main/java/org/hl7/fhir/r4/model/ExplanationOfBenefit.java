@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -176,6 +176,10 @@ public class ExplanationOfBenefit extends DomainResource {
 
     public enum RemittanceOutcome {
         /**
+         * The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.
+         */
+        RECEIVED, 
+        /**
          * The processing has completed without errors
          */
         COMPLETE, 
@@ -194,6 +198,8 @@ public class ExplanationOfBenefit extends DomainResource {
         public static RemittanceOutcome fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("received".equals(codeString))
+          return RECEIVED;
         if ("complete".equals(codeString))
           return COMPLETE;
         if ("error".equals(codeString))
@@ -207,6 +213,7 @@ public class ExplanationOfBenefit extends DomainResource {
         }
         public String toCode() {
           switch (this) {
+            case RECEIVED: return "received";
             case COMPLETE: return "complete";
             case ERROR: return "error";
             case PARTIAL: return "partial";
@@ -215,6 +222,7 @@ public class ExplanationOfBenefit extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
+            case RECEIVED: return "http://hl7.org/fhir/remittance-outcome";
             case COMPLETE: return "http://hl7.org/fhir/remittance-outcome";
             case ERROR: return "http://hl7.org/fhir/remittance-outcome";
             case PARTIAL: return "http://hl7.org/fhir/remittance-outcome";
@@ -223,6 +231,7 @@ public class ExplanationOfBenefit extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
+            case RECEIVED: return "The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.";
             case COMPLETE: return "The processing has completed without errors";
             case ERROR: return "One or more errors have been detected in the Claim";
             case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
@@ -231,6 +240,7 @@ public class ExplanationOfBenefit extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
+            case RECEIVED: return "Received but not Processed";
             case COMPLETE: return "Processing Complete";
             case ERROR: return "Error";
             case PARTIAL: return "Partial Processing";
@@ -244,6 +254,8 @@ public class ExplanationOfBenefit extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("received".equals(codeString))
+          return RemittanceOutcome.RECEIVED;
         if ("complete".equals(codeString))
           return RemittanceOutcome.COMPLETE;
         if ("error".equals(codeString))
@@ -260,6 +272,8 @@ public class ExplanationOfBenefit extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("received".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.RECEIVED);
         if ("complete".equals(codeString))
           return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.COMPLETE);
         if ("error".equals(codeString))
@@ -269,6 +283,8 @@ public class ExplanationOfBenefit extends DomainResource {
         throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
         }
     public String toCode(RemittanceOutcome code) {
+      if (code == RemittanceOutcome.RECEIVED)
+        return "received";
       if (code == RemittanceOutcome.COMPLETE)
         return "complete";
       if (code == RemittanceOutcome.ERROR)
@@ -1335,7 +1351,7 @@ public class ExplanationOfBenefit extends DomainResource {
          * Sequence of careteam which serves to order and provide a link.
          */
         @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Number to covey order of careteam", formalDefinition="Sequence of careteam which serves to order and provide a link." )
+        @Description(shortDefinition="Number to convey order of careteam", formalDefinition="Sequence of careteam which serves to order and provide a link." )
         protected PositiveIntType sequence;
 
         /**
@@ -1744,7 +1760,7 @@ public class ExplanationOfBenefit extends DomainResource {
          * Sequence of diagnosis which serves to provide a link.
          */
         @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Number to covey order of diagnosis", formalDefinition="Sequence of diagnosis which serves to provide a link." )
+        @Description(shortDefinition="Number to convey order of diagnosis", formalDefinition="Sequence of diagnosis which serves to provide a link." )
         protected PositiveIntType sequence;
 
         /**
@@ -2580,7 +2596,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.preAuthRef == null)
             return false;
           for (StringType v : this.preAuthRef)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -3309,7 +3325,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.careTeamSequence == null)
             return false;
           for (PositiveIntType v : this.careTeamSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -3370,7 +3386,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.diagnosisSequence == null)
             return false;
           for (PositiveIntType v : this.diagnosisSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -3431,7 +3447,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.procedureSequence == null)
             return false;
           for (PositiveIntType v : this.procedureSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -3492,7 +3508,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.informationSequence == null)
             return false;
           for (PositiveIntType v : this.informationSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -4200,7 +4216,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -5782,7 +5798,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -6834,7 +6850,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -7326,7 +7342,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.itemSequence == null)
             return false;
           for (PositiveIntType v : this.itemSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -7387,7 +7403,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.detailSequence == null)
             return false;
           for (PositiveIntType v : this.detailSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -7448,7 +7464,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.subDetailSequence == null)
             return false;
           for (PositiveIntType v : this.subDetailSequence)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -7610,7 +7626,7 @@ public class ExplanationOfBenefit extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -7901,6 +7917,213 @@ public class ExplanationOfBenefit extends DomainResource {
 
   public String fhirType() {
     return "ExplanationOfBenefit.addItem";
+
+  }
+
+  }
+
+    @Block()
+    public static class TotalComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.
+         */
+        @Child(name = "category", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Adjudication category such as submitted, co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication")
+        protected CodeableConcept category;
+
+        /**
+         * Monitory amount associated with the code.
+         */
+        @Child(name = "amount", type = {Money.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        protected Money amount;
+
+        private static final long serialVersionUID = 2012310309L;
+
+    /**
+     * Constructor
+     */
+      public TotalComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TotalComponent(CodeableConcept category, Money amount) {
+        super();
+        this.category = category;
+        this.amount = amount;
+      }
+
+        /**
+         * @return {@link #category} (Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.)
+         */
+        public CodeableConcept getCategory() { 
+          if (this.category == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TotalComponent.category");
+            else if (Configuration.doAutoCreate())
+              this.category = new CodeableConcept(); // cc
+          return this.category;
+        }
+
+        public boolean hasCategory() { 
+          return this.category != null && !this.category.isEmpty();
+        }
+
+        /**
+         * @param value {@link #category} (Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.)
+         */
+        public TotalComponent setCategory(CodeableConcept value) { 
+          this.category = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #amount} (Monitory amount associated with the code.)
+         */
+        public Money getAmount() { 
+          if (this.amount == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TotalComponent.amount");
+            else if (Configuration.doAutoCreate())
+              this.amount = new Money(); // cc
+          return this.amount;
+        }
+
+        public boolean hasAmount() { 
+          return this.amount != null && !this.amount.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amount} (Monitory amount associated with the code.)
+         */
+        public TotalComponent setAmount(Money value) { 
+          this.amount = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.", 0, 1, category));
+          children.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, 1, amount));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.", 0, 1, category);
+          case -1413853096: /*amount*/  return new Property("amount", "Money", "Monitory amount associated with the code.", 0, 1, amount);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Money
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1413853096: // amount
+          this.amount = castToMoney(value); // Money
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("category")) {
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("amount")) {
+          this.amount = castToMoney(value); // Money
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102:  return getCategory(); 
+        case -1413853096:  return getAmount(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case -1413853096: /*amount*/ return new String[] {"Money"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("amount")) {
+          this.amount = new Money();
+          return this.amount;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TotalComponent copy() {
+        TotalComponent dst = new TotalComponent();
+        copyValues(dst);
+        dst.category = category == null ? null : category.copy();
+        dst.amount = amount == null ? null : amount.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof TotalComponent))
+          return false;
+        TotalComponent o = (TotalComponent) other_;
+        return compareDeep(category, o.category, true) && compareDeep(amount, o.amount, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof TotalComponent))
+          return false;
+        TotalComponent o = (TotalComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, amount);
+      }
+
+  public String fhirType() {
+    return "ExplanationOfBenefit.total";
 
   }
 
@@ -9803,7 +10026,7 @@ public class ExplanationOfBenefit extends DomainResource {
      * Processing outcome errror, partial or complete processing.
      */
     @Child(name = "outcome", type = {CodeType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="complete | error | partial", formalDefinition="Processing outcome errror, partial or complete processing." )
+    @Description(shortDefinition="received | complete | error | partial", formalDefinition="Processing outcome errror, partial or complete processing." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
     protected Enumeration<RemittanceOutcome> outcome;
 
@@ -9930,37 +10153,23 @@ public class ExplanationOfBenefit extends DomainResource {
     protected List<AddedItemComponent> addItem;
 
     /**
-     * The total cost of the services reported.
+     * Totals for amounts submitted, co-pays, benefits payable etc.
      */
-    @Child(name = "totalCost", type = {Money.class}, order=32, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Total Cost of service from the Claim", formalDefinition="The total cost of the services reported." )
-    protected Money totalCost;
-
-    /**
-     * The amount of deductable applied which was not allocated to any particular service line.
-     */
-    @Child(name = "unallocDeductable", type = {Money.class}, order=33, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Unallocated deductable", formalDefinition="The amount of deductable applied which was not allocated to any particular service line." )
-    protected Money unallocDeductable;
-
-    /**
-     * Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).
-     */
-    @Child(name = "totalBenefit", type = {Money.class}, order=34, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Total benefit payable for the Claim", formalDefinition="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)." )
-    protected Money totalBenefit;
+    @Child(name = "total", type = {}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Adjudication totals", formalDefinition="Totals for amounts submitted, co-pays, benefits payable etc." )
+    protected List<TotalComponent> total;
 
     /**
      * Payment details for the claim if the claim has been paid.
      */
-    @Child(name = "payment", type = {}, order=35, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "payment", type = {}, order=33, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Payment (if paid)", formalDefinition="Payment details for the claim if the claim has been paid." )
     protected PaymentComponent payment;
 
     /**
      * The form to be used for printing the content.
      */
-    @Child(name = "form", type = {CodeableConcept.class}, order=36, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "form", type = {CodeableConcept.class}, order=34, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
     protected CodeableConcept form;
@@ -9968,18 +10177,18 @@ public class ExplanationOfBenefit extends DomainResource {
     /**
      * Note text.
      */
-    @Child(name = "processNote", type = {}, order=37, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "processNote", type = {}, order=35, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing notes", formalDefinition="Note text." )
     protected List<NoteComponent> processNote;
 
     /**
      * Balance by Benefit Category.
      */
-    @Child(name = "benefitBalance", type = {}, order=38, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "benefitBalance", type = {}, order=36, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Balance by Benefit Category", formalDefinition="Balance by Benefit Category." )
     protected List<BenefitBalanceComponent> benefitBalance;
 
-    private static final long serialVersionUID = -787413395L;
+    private static final long serialVersionUID = -926517861L;
 
   /**
    * Constructor
@@ -11354,75 +11563,56 @@ public class ExplanationOfBenefit extends DomainResource {
     }
 
     /**
-     * @return {@link #totalCost} (The total cost of the services reported.)
+     * @return {@link #total} (Totals for amounts submitted, co-pays, benefits payable etc.)
      */
-    public Money getTotalCost() { 
-      if (this.totalCost == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExplanationOfBenefit.totalCost");
-        else if (Configuration.doAutoCreate())
-          this.totalCost = new Money(); // cc
-      return this.totalCost;
-    }
-
-    public boolean hasTotalCost() { 
-      return this.totalCost != null && !this.totalCost.isEmpty();
+    public List<TotalComponent> getTotal() { 
+      if (this.total == null)
+        this.total = new ArrayList<TotalComponent>();
+      return this.total;
     }
 
     /**
-     * @param value {@link #totalCost} (The total cost of the services reported.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ExplanationOfBenefit setTotalCost(Money value) { 
-      this.totalCost = value;
+    public ExplanationOfBenefit setTotal(List<TotalComponent> theTotal) { 
+      this.total = theTotal;
+      return this;
+    }
+
+    public boolean hasTotal() { 
+      if (this.total == null)
+        return false;
+      for (TotalComponent item : this.total)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public TotalComponent addTotal() { //3
+      TotalComponent t = new TotalComponent();
+      if (this.total == null)
+        this.total = new ArrayList<TotalComponent>();
+      this.total.add(t);
+      return t;
+    }
+
+    public ExplanationOfBenefit addTotal(TotalComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.total == null)
+        this.total = new ArrayList<TotalComponent>();
+      this.total.add(t);
       return this;
     }
 
     /**
-     * @return {@link #unallocDeductable} (The amount of deductable applied which was not allocated to any particular service line.)
+     * @return The first repetition of repeating field {@link #total}, creating it if it does not already exist
      */
-    public Money getUnallocDeductable() { 
-      if (this.unallocDeductable == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExplanationOfBenefit.unallocDeductable");
-        else if (Configuration.doAutoCreate())
-          this.unallocDeductable = new Money(); // cc
-      return this.unallocDeductable;
-    }
-
-    public boolean hasUnallocDeductable() { 
-      return this.unallocDeductable != null && !this.unallocDeductable.isEmpty();
-    }
-
-    /**
-     * @param value {@link #unallocDeductable} (The amount of deductable applied which was not allocated to any particular service line.)
-     */
-    public ExplanationOfBenefit setUnallocDeductable(Money value) { 
-      this.unallocDeductable = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).)
-     */
-    public Money getTotalBenefit() { 
-      if (this.totalBenefit == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExplanationOfBenefit.totalBenefit");
-        else if (Configuration.doAutoCreate())
-          this.totalBenefit = new Money(); // cc
-      return this.totalBenefit;
-    }
-
-    public boolean hasTotalBenefit() { 
-      return this.totalBenefit != null && !this.totalBenefit.isEmpty();
-    }
-
-    /**
-     * @param value {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).)
-     */
-    public ExplanationOfBenefit setTotalBenefit(Money value) { 
-      this.totalBenefit = value;
-      return this;
+    public TotalComponent getTotalFirstRep() { 
+      if (getTotal().isEmpty()) {
+        addTotal();
+      }
+      return getTotal().get(0);
     }
 
     /**
@@ -11613,9 +11803,7 @@ public class ExplanationOfBenefit extends DomainResource {
         children.add(new Property("hospitalization", "Period", "The start and optional end dates of when the patient was confined to a treatment center.", 0, 1, hospitalization));
         children.add(new Property("item", "", "First tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, item));
         children.add(new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
-        children.add(new Property("totalCost", "Money", "The total cost of the services reported.", 0, 1, totalCost));
-        children.add(new Property("unallocDeductable", "Money", "The amount of deductable applied which was not allocated to any particular service line.", 0, 1, unallocDeductable));
-        children.add(new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).", 0, 1, totalBenefit));
+        children.add(new Property("total", "", "Totals for amounts submitted, co-pays, benefits payable etc.", 0, java.lang.Integer.MAX_VALUE, total));
         children.add(new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment));
         children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
         children.add(new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote));
@@ -11657,9 +11845,7 @@ public class ExplanationOfBenefit extends DomainResource {
         case 1057894634: /*hospitalization*/  return new Property("hospitalization", "Period", "The start and optional end dates of when the patient was confined to a treatment center.", 0, 1, hospitalization);
         case 3242771: /*item*/  return new Property("item", "", "First tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, item);
         case -1148899500: /*addItem*/  return new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem);
-        case -577782479: /*totalCost*/  return new Property("totalCost", "Money", "The total cost of the services reported.", 0, 1, totalCost);
-        case 2096309753: /*unallocDeductable*/  return new Property("unallocDeductable", "Money", "The amount of deductable applied which was not allocated to any particular service line.", 0, 1, unallocDeductable);
-        case 332332211: /*totalBenefit*/  return new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).", 0, 1, totalBenefit);
+        case 110549828: /*total*/  return new Property("total", "", "Totals for amounts submitted, co-pays, benefits payable etc.", 0, java.lang.Integer.MAX_VALUE, total);
         case -786681338: /*payment*/  return new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment);
         case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
         case 202339073: /*processNote*/  return new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote);
@@ -11704,9 +11890,7 @@ public class ExplanationOfBenefit extends DomainResource {
         case 1057894634: /*hospitalization*/ return this.hospitalization == null ? new Base[0] : new Base[] {this.hospitalization}; // Period
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemComponent
         case -1148899500: /*addItem*/ return this.addItem == null ? new Base[0] : this.addItem.toArray(new Base[this.addItem.size()]); // AddedItemComponent
-        case -577782479: /*totalCost*/ return this.totalCost == null ? new Base[0] : new Base[] {this.totalCost}; // Money
-        case 2096309753: /*unallocDeductable*/ return this.unallocDeductable == null ? new Base[0] : new Base[] {this.unallocDeductable}; // Money
-        case 332332211: /*totalBenefit*/ return this.totalBenefit == null ? new Base[0] : new Base[] {this.totalBenefit}; // Money
+        case 110549828: /*total*/ return this.total == null ? new Base[0] : this.total.toArray(new Base[this.total.size()]); // TotalComponent
         case -786681338: /*payment*/ return this.payment == null ? new Base[0] : new Base[] {this.payment}; // PaymentComponent
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
         case 202339073: /*processNote*/ return this.processNote == null ? new Base[0] : this.processNote.toArray(new Base[this.processNote.size()]); // NoteComponent
@@ -11817,14 +12001,8 @@ public class ExplanationOfBenefit extends DomainResource {
         case -1148899500: // addItem
           this.getAddItem().add((AddedItemComponent) value); // AddedItemComponent
           return value;
-        case -577782479: // totalCost
-          this.totalCost = castToMoney(value); // Money
-          return value;
-        case 2096309753: // unallocDeductable
-          this.unallocDeductable = castToMoney(value); // Money
-          return value;
-        case 332332211: // totalBenefit
-          this.totalBenefit = castToMoney(value); // Money
+        case 110549828: // total
+          this.getTotal().add((TotalComponent) value); // TotalComponent
           return value;
         case -786681338: // payment
           this.payment = (PaymentComponent) value; // PaymentComponent
@@ -11911,12 +12089,8 @@ public class ExplanationOfBenefit extends DomainResource {
           this.getItem().add((ItemComponent) value);
         } else if (name.equals("addItem")) {
           this.getAddItem().add((AddedItemComponent) value);
-        } else if (name.equals("totalCost")) {
-          this.totalCost = castToMoney(value); // Money
-        } else if (name.equals("unallocDeductable")) {
-          this.unallocDeductable = castToMoney(value); // Money
-        } else if (name.equals("totalBenefit")) {
-          this.totalBenefit = castToMoney(value); // Money
+        } else if (name.equals("total")) {
+          this.getTotal().add((TotalComponent) value);
         } else if (name.equals("payment")) {
           this.payment = (PaymentComponent) value; // PaymentComponent
         } else if (name.equals("form")) {
@@ -11965,9 +12139,7 @@ public class ExplanationOfBenefit extends DomainResource {
         case 1057894634:  return getHospitalization(); 
         case 3242771:  return addItem(); 
         case -1148899500:  return addAddItem(); 
-        case -577782479:  return getTotalCost(); 
-        case 2096309753:  return getUnallocDeductable(); 
-        case 332332211:  return getTotalBenefit(); 
+        case 110549828:  return addTotal(); 
         case -786681338:  return getPayment(); 
         case 3148996:  return getForm(); 
         case 202339073:  return addProcessNote(); 
@@ -12012,9 +12184,7 @@ public class ExplanationOfBenefit extends DomainResource {
         case 1057894634: /*hospitalization*/ return new String[] {"Period"};
         case 3242771: /*item*/ return new String[] {};
         case -1148899500: /*addItem*/ return new String[] {};
-        case -577782479: /*totalCost*/ return new String[] {"Money"};
-        case 2096309753: /*unallocDeductable*/ return new String[] {"Money"};
-        case 332332211: /*totalBenefit*/ return new String[] {"Money"};
+        case 110549828: /*total*/ return new String[] {};
         case -786681338: /*payment*/ return new String[] {};
         case 3148996: /*form*/ return new String[] {"CodeableConcept"};
         case 202339073: /*processNote*/ return new String[] {};
@@ -12140,17 +12310,8 @@ public class ExplanationOfBenefit extends DomainResource {
         else if (name.equals("addItem")) {
           return addAddItem();
         }
-        else if (name.equals("totalCost")) {
-          this.totalCost = new Money();
-          return this.totalCost;
-        }
-        else if (name.equals("unallocDeductable")) {
-          this.unallocDeductable = new Money();
-          return this.unallocDeductable;
-        }
-        else if (name.equals("totalBenefit")) {
-          this.totalBenefit = new Money();
-          return this.totalBenefit;
+        else if (name.equals("total")) {
+          return addTotal();
         }
         else if (name.equals("payment")) {
           this.payment = new PaymentComponent();
@@ -12246,9 +12407,11 @@ public class ExplanationOfBenefit extends DomainResource {
           for (AddedItemComponent i : addItem)
             dst.addItem.add(i.copy());
         };
-        dst.totalCost = totalCost == null ? null : totalCost.copy();
-        dst.unallocDeductable = unallocDeductable == null ? null : unallocDeductable.copy();
-        dst.totalBenefit = totalBenefit == null ? null : totalBenefit.copy();
+        if (total != null) {
+          dst.total = new ArrayList<TotalComponent>();
+          for (TotalComponent i : total)
+            dst.total.add(i.copy());
+        };
         dst.payment = payment == null ? null : payment.copy();
         dst.form = form == null ? null : form.copy();
         if (processNote != null) {
@@ -12286,8 +12449,7 @@ public class ExplanationOfBenefit extends DomainResource {
            && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(procedure, o.procedure, true) && compareDeep(precedence, o.precedence, true)
            && compareDeep(insurance, o.insurance, true) && compareDeep(accident, o.accident, true) && compareDeep(employmentImpacted, o.employmentImpacted, true)
            && compareDeep(hospitalization, o.hospitalization, true) && compareDeep(item, o.item, true) && compareDeep(addItem, o.addItem, true)
-           && compareDeep(totalCost, o.totalCost, true) && compareDeep(unallocDeductable, o.unallocDeductable, true)
-           && compareDeep(totalBenefit, o.totalBenefit, true) && compareDeep(payment, o.payment, true) && compareDeep(form, o.form, true)
+           && compareDeep(total, o.total, true) && compareDeep(payment, o.payment, true) && compareDeep(form, o.form, true)
            && compareDeep(processNote, o.processNote, true) && compareDeep(benefitBalance, o.benefitBalance, true)
           ;
       }
@@ -12309,8 +12471,8 @@ public class ExplanationOfBenefit extends DomainResource {
           , subType, patient, billablePeriod, created, enterer, insurer, provider, organization
           , referral, facility, claim, claimResponse, outcome, disposition, related, prescription
           , originalPrescription, payee, information, careTeam, diagnosis, procedure, precedence
-          , insurance, accident, employmentImpacted, hospitalization, item, addItem, totalCost
-          , unallocDeductable, totalBenefit, payment, form, processNote, benefitBalance);
+          , insurance, accident, employmentImpacted, hospitalization, item, addItem, total
+          , payment, form, processNote, benefitBalance);
       }
 
   @Override

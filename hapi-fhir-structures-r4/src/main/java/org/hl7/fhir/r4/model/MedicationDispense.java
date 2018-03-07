@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -54,19 +54,19 @@ public class MedicationDispense extends DomainResource {
          */
         PREPARATION, 
         /**
-         * The dispense has started but has not yet completed.
+         * The dispensed producut is ready for pickup.
          */
         INPROGRESS, 
         /**
-         * The dispense was terminated prior to any impact on the subject (though prepartory actions may have been taken
+         * The dispensed product was not and will never be picked up by the patient.
          */
-        NOTDONE, 
+        CANCELLED, 
         /**
-         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended"
+         * The dispense process is paused while waiting for an external event to reactivate the dispense.  For example, new stock has arrived or the prescriber has called.
          */
         ONHOLD, 
         /**
-         * All actions that are implied by the dispense have occurred.
+         * The dispensed product has been picked up.
          */
         COMPLETED, 
         /**
@@ -78,6 +78,10 @@ public class MedicationDispense extends DomainResource {
          */
         STOPPED, 
         /**
+         * The authoring system does not know which of the status values applies for this medication dispense.  Note: this concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just now known which one.
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -88,8 +92,8 @@ public class MedicationDispense extends DomainResource {
           return PREPARATION;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
-        if ("not-done".equals(codeString))
-          return NOTDONE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
         if ("on-hold".equals(codeString))
           return ONHOLD;
         if ("completed".equals(codeString))
@@ -98,6 +102,8 @@ public class MedicationDispense extends DomainResource {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -107,11 +113,12 @@ public class MedicationDispense extends DomainResource {
           switch (this) {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
-            case NOTDONE: return "not-done";
+            case CANCELLED: return "cancelled";
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case STOPPED: return "stopped";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -119,23 +126,25 @@ public class MedicationDispense extends DomainResource {
           switch (this) {
             case PREPARATION: return "http://hl7.org/fhir/medication-dispense-status";
             case INPROGRESS: return "http://hl7.org/fhir/medication-dispense-status";
-            case NOTDONE: return "http://hl7.org/fhir/medication-dispense-status";
+            case CANCELLED: return "http://hl7.org/fhir/medication-dispense-status";
             case ONHOLD: return "http://hl7.org/fhir/medication-dispense-status";
             case COMPLETED: return "http://hl7.org/fhir/medication-dispense-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/medication-dispense-status";
             case STOPPED: return "http://hl7.org/fhir/medication-dispense-status";
+            case UNKNOWN: return "http://hl7.org/fhir/medication-dispense-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The dispense has started but has not yet completed.";
-            case NOTDONE: return "The dispense was terminated prior to any impact on the subject (though prepartory actions may have been taken";
-            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\"";
-            case COMPLETED: return "All actions that are implied by the dispense have occurred.";
+            case INPROGRESS: return "The dispensed producut is ready for pickup.";
+            case CANCELLED: return "The dispensed product was not and will never be picked up by the patient.";
+            case ONHOLD: return "The dispense process is paused while waiting for an external event to reactivate the dispense.  For example, new stock has arrived or the prescriber has called.";
+            case COMPLETED: return "The dispensed product has been picked up.";
             case ENTEREDINERROR: return "The dispense was entered in error and therefore nullified.";
             case STOPPED: return "Actions implied by the dispense have been permanently halted, before all of them occurred.";
+            case UNKNOWN: return "The authoring system does not know which of the status values applies for this medication dispense.  Note: this concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just now known which one.";
             default: return "?";
           }
         }
@@ -143,11 +152,12 @@ public class MedicationDispense extends DomainResource {
           switch (this) {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
-            case NOTDONE: return "Not Done";
+            case CANCELLED: return "Cancelled";
             case ONHOLD: return "On Hold";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in-Error";
             case STOPPED: return "Stopped";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -162,8 +172,8 @@ public class MedicationDispense extends DomainResource {
           return MedicationDispenseStatus.PREPARATION;
         if ("in-progress".equals(codeString))
           return MedicationDispenseStatus.INPROGRESS;
-        if ("not-done".equals(codeString))
-          return MedicationDispenseStatus.NOTDONE;
+        if ("cancelled".equals(codeString))
+          return MedicationDispenseStatus.CANCELLED;
         if ("on-hold".equals(codeString))
           return MedicationDispenseStatus.ONHOLD;
         if ("completed".equals(codeString))
@@ -172,6 +182,8 @@ public class MedicationDispense extends DomainResource {
           return MedicationDispenseStatus.ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return MedicationDispenseStatus.STOPPED;
+        if ("unknown".equals(codeString))
+          return MedicationDispenseStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown MedicationDispenseStatus code '"+codeString+"'");
         }
         public Enumeration<MedicationDispenseStatus> fromType(Base code) throws FHIRException {
@@ -186,8 +198,8 @@ public class MedicationDispense extends DomainResource {
           return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.PREPARATION);
         if ("in-progress".equals(codeString))
           return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.INPROGRESS);
-        if ("not-done".equals(codeString))
-          return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.NOTDONE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.CANCELLED);
         if ("on-hold".equals(codeString))
           return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.ONHOLD);
         if ("completed".equals(codeString))
@@ -196,6 +208,8 @@ public class MedicationDispense extends DomainResource {
           return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.ENTEREDINERROR);
         if ("stopped".equals(codeString))
           return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.STOPPED);
+        if ("unknown".equals(codeString))
+          return new Enumeration<MedicationDispenseStatus>(this, MedicationDispenseStatus.UNKNOWN);
         throw new FHIRException("Unknown MedicationDispenseStatus code '"+codeString+"'");
         }
     public String toCode(MedicationDispenseStatus code) {
@@ -203,8 +217,8 @@ public class MedicationDispense extends DomainResource {
         return "preparation";
       if (code == MedicationDispenseStatus.INPROGRESS)
         return "in-progress";
-      if (code == MedicationDispenseStatus.NOTDONE)
-        return "not-done";
+      if (code == MedicationDispenseStatus.CANCELLED)
+        return "cancelled";
       if (code == MedicationDispenseStatus.ONHOLD)
         return "on-hold";
       if (code == MedicationDispenseStatus.COMPLETED)
@@ -213,6 +227,8 @@ public class MedicationDispense extends DomainResource {
         return "entered-in-error";
       if (code == MedicationDispenseStatus.STOPPED)
         return "stopped";
+      if (code == MedicationDispenseStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
     public String toSystem(MedicationDispenseStatus code) {
@@ -880,8 +896,8 @@ public class MedicationDispense extends DomainResource {
     /**
      * A code specifying the state of the set of dispense events.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="preparation | in-progress | not-done | on-hold | completed | entered-in-error | stopped", formalDefinition="A code specifying the state of the set of dispense events." )
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="preparation | in-progress | cancelled | on-hold | completed | entered-in-error | stopped | unknown", formalDefinition="A code specifying the state of the set of dispense events." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-dispense-status")
     protected Enumeration<MedicationDispenseStatus> status;
 
@@ -1093,8 +1109,9 @@ public class MedicationDispense extends DomainResource {
   /**
    * Constructor
    */
-    public MedicationDispense(Type medication) {
+    public MedicationDispense(Enumeration<MedicationDispenseStatus> status, Type medication) {
       super();
+      this.status = status;
       this.medication = medication;
     }
 
@@ -1265,13 +1282,9 @@ public class MedicationDispense extends DomainResource {
      * @param value A code specifying the state of the set of dispense events.
      */
     public MedicationDispense setStatus(MedicationDispenseStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<MedicationDispenseStatus>(new MedicationDispenseStatusEnumFactory());
         this.status.setValue(value);
-      }
       return this;
     }
 

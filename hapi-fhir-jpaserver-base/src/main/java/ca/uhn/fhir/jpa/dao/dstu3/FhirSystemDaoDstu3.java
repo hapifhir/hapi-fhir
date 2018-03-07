@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.TypedQuery;
 
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -505,7 +505,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				}
 				if (theIdSubstitutions.containsKey(nextId)) {
 					IdType newId = theIdSubstitutions.get(nextId);
-					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 					nextRef.setReference(newId.getValue());
 				} else if (nextId.getValue().startsWith("urn:")) {
 					throw new InvalidRequestException("Unable to satisfy placeholder ID: " + nextId.getValue());
@@ -523,7 +523,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				IdType nextUriString = new IdType(nextRef.getValueAsString());
 				if (theIdSubstitutions.containsKey(nextUriString)) {
 					IdType newId = theIdSubstitutions.get(nextUriString);
-					ourLog.info(" * Replacing resource ref {} with {}", nextUriString, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 					nextRef.setValue(newId.getValue());
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
@@ -538,13 +538,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
-		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
-		int insertionCount = session.getActionQueue().numberOfInsertions();
-		int updateCount = session.getActionQueue().numberOfUpdates();
-
-		StopWatch sw = new StopWatch();
-		myEntityManager.flush();
-		ourLog.info("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
+		flushJpaSession();
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
@@ -570,7 +564,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			if (replacement.equals(next)) {
 				continue;
 			}
-			ourLog.info("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
+			ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 		}
 		return entriesToProcess;
 	}

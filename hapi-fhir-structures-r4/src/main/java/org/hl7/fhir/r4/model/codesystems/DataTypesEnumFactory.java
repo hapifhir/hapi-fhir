@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -125,6 +125,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.BASE64BINARY;
     if ("boolean".equals(codeString))
       return DataTypes.BOOLEAN;
+    if ("canonical".equals(codeString))
+      return DataTypes.CANONICAL;
     if ("code".equals(codeString))
       return DataTypes.CODE;
     if ("date".equals(codeString))
@@ -153,6 +155,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.UNSIGNEDINT;
     if ("uri".equals(codeString))
       return DataTypes.URI;
+    if ("url".equals(codeString))
+      return DataTypes.URL;
     if ("uuid".equals(codeString))
       return DataTypes.UUID;
     if ("xhtml".equals(codeString))
@@ -247,6 +251,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "base64Binary";
     if (code == DataTypes.BOOLEAN)
       return "boolean";
+    if (code == DataTypes.CANONICAL)
+      return "canonical";
     if (code == DataTypes.CODE)
       return "code";
     if (code == DataTypes.DATE)
@@ -275,6 +281,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "unsignedInt";
     if (code == DataTypes.URI)
       return "uri";
+    if (code == DataTypes.URL)
+      return "url";
     if (code == DataTypes.UUID)
       return "uuid";
     if (code == DataTypes.XHTML)

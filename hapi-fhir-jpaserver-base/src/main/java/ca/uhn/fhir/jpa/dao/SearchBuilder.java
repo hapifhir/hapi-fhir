@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -770,12 +770,11 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
 
-			if (params instanceof UriParam) {
-				UriParam param = (UriParam) params;
+			if (nextOr instanceof UriParam) {
+				UriParam param = (UriParam) nextOr;
 
 				String value = param.getValue();
 				if (value == null) {
@@ -820,7 +819,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				codePredicates.add(predicate);
 			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + params.getClass());
+				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
 			}
 
 		}
@@ -837,9 +836,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
 
-		Predicate paramNamePredicate = myBuilder.equal(join.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(paramNamePredicate, orPredicate);
-
+		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicate);
 		myPredicates.add(outerPredicate);
 	}
 
@@ -1195,7 +1192,7 @@ public class SearchBuilder implements ISearchBuilder {
 				for (VersionIndependentConcept nextCode : codes) {
 					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
 					if (null == systemCodes) {
-						systemCodes = new ArrayList<VersionIndependentConcept>();
+						systemCodes = new ArrayList<>();
 						map.put(nextCode.getSystem(), systemCodes);
 					}
 					systemCodes.add(nextCode);
@@ -1342,7 +1339,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		myPredicates = new ArrayList<Predicate>();
+		myPredicates = new ArrayList<>();
 
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
@@ -1351,7 +1348,7 @@ public class SearchBuilder implements ISearchBuilder {
 				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<Long>(1);
+					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));

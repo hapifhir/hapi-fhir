@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptPropertyComponent;
@@ -95,7 +96,7 @@ public class CodeSystemUtilities {
     for (UriType t : cs.getMeta().getProfile()) 
       if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"))
         return cs;
-    cs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"));
+    cs.getMeta().getProfile().add(new CanonicalType("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"));
     return cs;
   }
 

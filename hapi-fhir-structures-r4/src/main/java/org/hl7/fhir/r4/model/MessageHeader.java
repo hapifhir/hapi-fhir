@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -181,9 +181,9 @@ public class MessageHeader extends DomainResource {
         /**
          * Indicates where the message should be routed to.
          */
-        @Child(name = "endpoint", type = {UriType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "endpoint", type = {UrlType.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Actual destination address or id", formalDefinition="Indicates where the message should be routed to." )
-        protected UriType endpoint;
+        protected UrlType endpoint;
 
         /**
          * Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.
@@ -197,7 +197,7 @@ public class MessageHeader extends DomainResource {
          */
         protected Resource receiverTarget;
 
-        private static final long serialVersionUID = -87697001L;
+        private static final long serialVersionUID = 611064500L;
 
     /**
      * Constructor
@@ -209,7 +209,7 @@ public class MessageHeader extends DomainResource {
     /**
      * Constructor
      */
-      public MessageDestinationComponent(UriType endpoint) {
+      public MessageDestinationComponent(UrlType endpoint) {
         super();
         this.endpoint = endpoint;
       }
@@ -310,12 +310,12 @@ public class MessageHeader extends DomainResource {
         /**
          * @return {@link #endpoint} (Indicates where the message should be routed to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public UriType getEndpointElement() { 
+        public UrlType getEndpointElement() { 
           if (this.endpoint == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create MessageDestinationComponent.endpoint");
             else if (Configuration.doAutoCreate())
-              this.endpoint = new UriType(); // bb
+              this.endpoint = new UrlType(); // bb
           return this.endpoint;
         }
 
@@ -330,7 +330,7 @@ public class MessageHeader extends DomainResource {
         /**
          * @param value {@link #endpoint} (Indicates where the message should be routed to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public MessageDestinationComponent setEndpointElement(UriType value) { 
+        public MessageDestinationComponent setEndpointElement(UrlType value) { 
           this.endpoint = value;
           return this;
         }
@@ -347,7 +347,7 @@ public class MessageHeader extends DomainResource {
          */
         public MessageDestinationComponent setEndpoint(String value) { 
             if (this.endpoint == null)
-              this.endpoint = new UriType();
+              this.endpoint = new UrlType();
             this.endpoint.setValue(value);
           return this;
         }
@@ -395,7 +395,7 @@ public class MessageHeader extends DomainResource {
           super.listChildren(children);
           children.add(new Property("name", "string", "Human-readable name for the target system.", 0, 1, name));
           children.add(new Property("target", "Reference(Device)", "Identifies the target end system in situations where the initial message transmission is to an intermediary system.", 0, 1, target));
-          children.add(new Property("endpoint", "uri", "Indicates where the message should be routed to.", 0, 1, endpoint));
+          children.add(new Property("endpoint", "url", "Indicates where the message should be routed to.", 0, 1, endpoint));
           children.add(new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver));
         }
 
@@ -404,7 +404,7 @@ public class MessageHeader extends DomainResource {
           switch (_hash) {
           case 3373707: /*name*/  return new Property("name", "string", "Human-readable name for the target system.", 0, 1, name);
           case -880905839: /*target*/  return new Property("target", "Reference(Device)", "Identifies the target end system in situations where the initial message transmission is to an intermediary system.", 0, 1, target);
-          case 1741102485: /*endpoint*/  return new Property("endpoint", "uri", "Indicates where the message should be routed to.", 0, 1, endpoint);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "url", "Indicates where the message should be routed to.", 0, 1, endpoint);
           case -808719889: /*receiver*/  return new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -416,7 +416,7 @@ public class MessageHeader extends DomainResource {
         switch (hash) {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
-        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UriType
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UrlType
         case -808719889: /*receiver*/ return this.receiver == null ? new Base[0] : new Base[] {this.receiver}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -433,7 +433,7 @@ public class MessageHeader extends DomainResource {
           this.target = castToReference(value); // Reference
           return value;
         case 1741102485: // endpoint
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
           return value;
         case -808719889: // receiver
           this.receiver = castToReference(value); // Reference
@@ -450,7 +450,7 @@ public class MessageHeader extends DomainResource {
         } else if (name.equals("target")) {
           this.target = castToReference(value); // Reference
         } else if (name.equals("endpoint")) {
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
         } else if (name.equals("receiver")) {
           this.receiver = castToReference(value); // Reference
         } else
@@ -475,7 +475,7 @@ public class MessageHeader extends DomainResource {
         switch (hash) {
         case 3373707: /*name*/ return new String[] {"string"};
         case -880905839: /*target*/ return new String[] {"Reference"};
-        case 1741102485: /*endpoint*/ return new String[] {"uri"};
+        case 1741102485: /*endpoint*/ return new String[] {"url"};
         case -808719889: /*receiver*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -578,11 +578,11 @@ public class MessageHeader extends DomainResource {
         /**
          * Identifies the routing target to send acknowledgements to.
          */
-        @Child(name = "endpoint", type = {UriType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "endpoint", type = {UrlType.class}, order=5, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Actual message source address or id", formalDefinition="Identifies the routing target to send acknowledgements to." )
-        protected UriType endpoint;
+        protected UrlType endpoint;
 
-        private static final long serialVersionUID = -115878196L;
+        private static final long serialVersionUID = -350916401L;
 
     /**
      * Constructor
@@ -594,7 +594,7 @@ public class MessageHeader extends DomainResource {
     /**
      * Constructor
      */
-      public MessageSourceComponent(UriType endpoint) {
+      public MessageSourceComponent(UrlType endpoint) {
         super();
         this.endpoint = endpoint;
       }
@@ -773,12 +773,12 @@ public class MessageHeader extends DomainResource {
         /**
          * @return {@link #endpoint} (Identifies the routing target to send acknowledgements to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public UriType getEndpointElement() { 
+        public UrlType getEndpointElement() { 
           if (this.endpoint == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create MessageSourceComponent.endpoint");
             else if (Configuration.doAutoCreate())
-              this.endpoint = new UriType(); // bb
+              this.endpoint = new UrlType(); // bb
           return this.endpoint;
         }
 
@@ -793,7 +793,7 @@ public class MessageHeader extends DomainResource {
         /**
          * @param value {@link #endpoint} (Identifies the routing target to send acknowledgements to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public MessageSourceComponent setEndpointElement(UriType value) { 
+        public MessageSourceComponent setEndpointElement(UrlType value) { 
           this.endpoint = value;
           return this;
         }
@@ -810,7 +810,7 @@ public class MessageHeader extends DomainResource {
          */
         public MessageSourceComponent setEndpoint(String value) { 
             if (this.endpoint == null)
-              this.endpoint = new UriType();
+              this.endpoint = new UrlType();
             this.endpoint.setValue(value);
           return this;
         }
@@ -821,7 +821,7 @@ public class MessageHeader extends DomainResource {
           children.add(new Property("software", "string", "May include configuration or other information useful in debugging.", 0, 1, software));
           children.add(new Property("version", "string", "Can convey versions of multiple systems in situations where a message passes through multiple hands.", 0, 1, version));
           children.add(new Property("contact", "ContactPoint", "An e-mail, phone, website or other contact point to use to resolve issues with message communications.", 0, 1, contact));
-          children.add(new Property("endpoint", "uri", "Identifies the routing target to send acknowledgements to.", 0, 1, endpoint));
+          children.add(new Property("endpoint", "url", "Identifies the routing target to send acknowledgements to.", 0, 1, endpoint));
         }
 
         @Override
@@ -831,7 +831,7 @@ public class MessageHeader extends DomainResource {
           case 1319330215: /*software*/  return new Property("software", "string", "May include configuration or other information useful in debugging.", 0, 1, software);
           case 351608024: /*version*/  return new Property("version", "string", "Can convey versions of multiple systems in situations where a message passes through multiple hands.", 0, 1, version);
           case 951526432: /*contact*/  return new Property("contact", "ContactPoint", "An e-mail, phone, website or other contact point to use to resolve issues with message communications.", 0, 1, contact);
-          case 1741102485: /*endpoint*/  return new Property("endpoint", "uri", "Identifies the routing target to send acknowledgements to.", 0, 1, endpoint);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "url", "Identifies the routing target to send acknowledgements to.", 0, 1, endpoint);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -844,7 +844,7 @@ public class MessageHeader extends DomainResource {
         case 1319330215: /*software*/ return this.software == null ? new Base[0] : new Base[] {this.software}; // StringType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : new Base[] {this.contact}; // ContactPoint
-        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UriType
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UrlType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -866,7 +866,7 @@ public class MessageHeader extends DomainResource {
           this.contact = castToContactPoint(value); // ContactPoint
           return value;
         case 1741102485: // endpoint
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -884,7 +884,7 @@ public class MessageHeader extends DomainResource {
         } else if (name.equals("contact")) {
           this.contact = castToContactPoint(value); // ContactPoint
         } else if (name.equals("endpoint")) {
-          this.endpoint = castToUri(value); // UriType
+          this.endpoint = castToUrl(value); // UrlType
         } else
           return super.setProperty(name, value);
         return value;
@@ -910,7 +910,7 @@ public class MessageHeader extends DomainResource {
         case 1319330215: /*software*/ return new String[] {"string"};
         case 351608024: /*version*/ return new String[] {"string"};
         case 951526432: /*contact*/ return new String[] {"ContactPoint"};
-        case 1741102485: /*endpoint*/ return new String[] {"uri"};
+        case 1741102485: /*endpoint*/ return new String[] {"url"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1306,12 +1306,12 @@ public class MessageHeader extends DomainResource {
   }
 
     /**
-     * Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".
+     * Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.
      */
-    @Child(name = "event", type = {Coding.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Code for the event this message represents", formalDefinition="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\"." )
+    @Child(name = "event", type = {Coding.class, UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Code for the event this message represents or link to event definition", formalDefinition="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-events")
-    protected Coding event;
+    protected Type event;
 
     /**
      * The destination application which the message is intended for.
@@ -1405,11 +1405,11 @@ public class MessageHeader extends DomainResource {
     /**
      * Permanent link to the MessageDefinition for this message.
      */
-    @Child(name = "definition", type = {UriType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "definition", type = {CanonicalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Link to the definition for this message", formalDefinition="Permanent link to the MessageDefinition for this message." )
-    protected UriType definition;
+    protected CanonicalType definition;
 
-    private static final long serialVersionUID = -1741205235L;
+    private static final long serialVersionUID = -784318107L;
 
   /**
    * Constructor
@@ -1421,22 +1421,43 @@ public class MessageHeader extends DomainResource {
   /**
    * Constructor
    */
-    public MessageHeader(Coding event, MessageSourceComponent source) {
+    public MessageHeader(Type event, MessageSourceComponent source) {
       super();
       this.event = event;
       this.source = source;
     }
 
     /**
-     * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".)
+     * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
      */
-    public Coding getEvent() { 
-      if (this.event == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MessageHeader.event");
-        else if (Configuration.doAutoCreate())
-          this.event = new Coding(); // cc
+    public Type getEvent() { 
       return this.event;
+    }
+
+    /**
+     * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
+     */
+    public Coding getEventCoding() throws FHIRException { 
+      if (!(this.event instanceof Coding))
+        throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.event.getClass().getName()+" was encountered");
+      return (Coding) this.event;
+    }
+
+    public boolean hasEventCoding() { 
+      return this.event instanceof Coding;
+    }
+
+    /**
+     * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
+     */
+    public UriType getEventUriType() throws FHIRException { 
+      if (!(this.event instanceof UriType))
+        throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.event.getClass().getName()+" was encountered");
+      return (UriType) this.event;
+    }
+
+    public boolean hasEventUriType() { 
+      return this.event instanceof UriType;
     }
 
     public boolean hasEvent() { 
@@ -1444,9 +1465,9 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".)
+     * @param value {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
      */
-    public MessageHeader setEvent(Coding value) { 
+    public MessageHeader setEvent(Type value) { 
       this.event = value;
       return this;
     }
@@ -1808,12 +1829,12 @@ public class MessageHeader extends DomainResource {
     /**
      * @return {@link #definition} (Permanent link to the MessageDefinition for this message.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
      */
-    public UriType getDefinitionElement() { 
+    public CanonicalType getDefinitionElement() { 
       if (this.definition == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MessageHeader.definition");
         else if (Configuration.doAutoCreate())
-          this.definition = new UriType(); // bb
+          this.definition = new CanonicalType(); // bb
       return this.definition;
     }
 
@@ -1828,7 +1849,7 @@ public class MessageHeader extends DomainResource {
     /**
      * @param value {@link #definition} (Permanent link to the MessageDefinition for this message.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
      */
-    public MessageHeader setDefinitionElement(UriType value) { 
+    public MessageHeader setDefinitionElement(CanonicalType value) { 
       this.definition = value;
       return this;
     }
@@ -1848,7 +1869,7 @@ public class MessageHeader extends DomainResource {
         this.definition = null;
       else {
         if (this.definition == null)
-          this.definition = new UriType();
+          this.definition = new CanonicalType();
         this.definition.setValue(value);
       }
       return this;
@@ -1856,7 +1877,7 @@ public class MessageHeader extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("event", "Coding", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".", 0, 1, event));
+        children.add(new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event));
         children.add(new Property("destination", "", "The destination application which the message is intended for.", 0, java.lang.Integer.MAX_VALUE, destination));
         children.add(new Property("sender", "Reference(Practitioner|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender));
         children.add(new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer));
@@ -1866,13 +1887,16 @@ public class MessageHeader extends DomainResource {
         children.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason));
         children.add(new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response));
         children.add(new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus));
-        children.add(new Property("definition", "uri", "Permanent link to the MessageDefinition for this message.", 0, 1, definition));
+        children.add(new Property("definition", "canonical(MessageDefinition)", "Permanent link to the MessageDefinition for this message.", 0, 1, definition));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 96891546: /*event*/  return new Property("event", "Coding", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".", 0, 1, event);
+        case 278115238: /*event[x]*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
+        case 96891546: /*event*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
+        case -355957084: /*eventCoding*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
+        case 278109298: /*eventUri*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
         case -1429847026: /*destination*/  return new Property("destination", "", "The destination application which the message is intended for.", 0, java.lang.Integer.MAX_VALUE, destination);
         case -905962955: /*sender*/  return new Property("sender", "Reference(Practitioner|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender);
         case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer);
@@ -1882,7 +1906,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason);
         case -340323263: /*response*/  return new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response);
         case 97604824: /*focus*/  return new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus);
-        case -1014418093: /*definition*/  return new Property("definition", "uri", "Permanent link to the MessageDefinition for this message.", 0, 1, definition);
+        case -1014418093: /*definition*/  return new Property("definition", "canonical(MessageDefinition)", "Permanent link to the MessageDefinition for this message.", 0, 1, definition);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1891,7 +1915,7 @@ public class MessageHeader extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // Coding
+        case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // Type
         case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : this.destination.toArray(new Base[this.destination.size()]); // MessageDestinationComponent
         case -905962955: /*sender*/ return this.sender == null ? new Base[0] : new Base[] {this.sender}; // Reference
         case -1591951995: /*enterer*/ return this.enterer == null ? new Base[0] : new Base[] {this.enterer}; // Reference
@@ -1901,7 +1925,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
         case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // MessageHeaderResponseComponent
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // Reference
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1911,7 +1935,7 @@ public class MessageHeader extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 96891546: // event
-          this.event = castToCoding(value); // Coding
+          this.event = castToType(value); // Type
           return value;
         case -1429847026: // destination
           this.getDestination().add((MessageDestinationComponent) value); // MessageDestinationComponent
@@ -1941,7 +1965,7 @@ public class MessageHeader extends DomainResource {
           this.getFocus().add(castToReference(value)); // Reference
           return value;
         case -1014418093: // definition
-          this.definition = castToUri(value); // UriType
+          this.definition = castToCanonical(value); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1950,8 +1974,8 @@ public class MessageHeader extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("event")) {
-          this.event = castToCoding(value); // Coding
+        if (name.equals("event[x]")) {
+          this.event = castToType(value); // Type
         } else if (name.equals("destination")) {
           this.getDestination().add((MessageDestinationComponent) value);
         } else if (name.equals("sender")) {
@@ -1971,7 +1995,7 @@ public class MessageHeader extends DomainResource {
         } else if (name.equals("focus")) {
           this.getFocus().add(castToReference(value));
         } else if (name.equals("definition")) {
-          this.definition = castToUri(value); // UriType
+          this.definition = castToCanonical(value); // CanonicalType
         } else
           return super.setProperty(name, value);
         return value;
@@ -1980,6 +2004,7 @@ public class MessageHeader extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 278115238:  return getEvent(); 
         case 96891546:  return getEvent(); 
         case -1429847026:  return addDestination(); 
         case -905962955:  return getSender(); 
@@ -1999,7 +2024,7 @@ public class MessageHeader extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 96891546: /*event*/ return new String[] {"Coding"};
+        case 96891546: /*event*/ return new String[] {"Coding", "uri"};
         case -1429847026: /*destination*/ return new String[] {};
         case -905962955: /*sender*/ return new String[] {"Reference"};
         case -1591951995: /*enterer*/ return new String[] {"Reference"};
@@ -2009,7 +2034,7 @@ public class MessageHeader extends DomainResource {
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         case -340323263: /*response*/ return new String[] {};
         case 97604824: /*focus*/ return new String[] {"Reference"};
-        case -1014418093: /*definition*/ return new String[] {"uri"};
+        case -1014418093: /*definition*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2017,8 +2042,12 @@ public class MessageHeader extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("event")) {
+        if (name.equals("eventCoding")) {
           this.event = new Coding();
+          return this.event;
+        }
+        else if (name.equals("eventUri")) {
+          this.event = new UriType();
           return this.event;
         }
         else if (name.equals("destination")) {
@@ -2116,7 +2145,7 @@ public class MessageHeader extends DomainResource {
         if (!(other_ instanceof MessageHeader))
           return false;
         MessageHeader o = (MessageHeader) other_;
-        return compareValues(definition, o.definition, true);
+        return true;
       }
 
       public boolean isEmpty() {
@@ -2435,19 +2464,19 @@ public class MessageHeader extends DomainResource {
  /**
    * Search parameter: <b>event</b>
    * <p>
-   * Description: <b>Code for the event this message represents</b><br>
+   * Description: <b>Code for the event this message represents or link to event definition</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>MessageHeader.event</b><br>
+   * Path: <b>MessageHeader.event[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token" )
+  @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents or link to event definition", type="token" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
    * <p>
-   * Description: <b>Code for the event this message represents</b><br>
+   * Description: <b>Code for the event this message represents or link to event definition</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>MessageHeader.event</b><br>
+   * Path: <b>MessageHeader.event[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam EVENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EVENT);

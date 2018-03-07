@@ -20,21 +20,26 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ValidateUtil;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQueryParameterType , */IQueryParameterOr<DateParam> {
 
@@ -222,6 +227,23 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof DateParam)) {
+			return false;
+		}
+		DateParam other = (DateParam) obj;
+		return	Objects.equals(getValue(), other.getValue()) &&
+					Objects.equals(getPrefix(), other.getPrefix());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getValue(), getPrefix());
+	}
 
 	@Override
 	public String toString() {
@@ -241,8 +263,5 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 			return true;
 		}
-
 	}
-
-
 }

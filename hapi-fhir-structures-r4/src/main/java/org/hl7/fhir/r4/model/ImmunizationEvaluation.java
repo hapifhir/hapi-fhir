@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -150,7 +150,7 @@ public class ImmunizationEvaluation extends DomainResource {
     /**
      * Indicates the current status of the evaluation of the vaccination administration event.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="completed | entered-in-error", formalDefinition="Indicates the current status of the evaluation of the vaccination administration event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-evaluation-status")
     protected Enumeration<ImmunizationEvaluationStatus> status;
@@ -1308,6 +1308,26 @@ public class ImmunizationEvaluation extends DomainResource {
    * the path value of "<b>ImmunizationEvaluation:immunization-event</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_IMMUNIZATION_EVENT = new ca.uhn.fhir.model.api.Include("ImmunizationEvaluation:immunization-event").toLocked();
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>Immunization evaluation status</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImmunizationEvaluation.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="ImmunizationEvaluation.status", description="Immunization evaluation status", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>Immunization evaluation status</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImmunizationEvaluation.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

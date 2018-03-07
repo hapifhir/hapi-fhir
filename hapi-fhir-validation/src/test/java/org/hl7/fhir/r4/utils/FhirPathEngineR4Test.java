@@ -43,6 +43,28 @@ public class FhirPathEngineR4Test {
 	}
 
 	@Test
+	public void testApproxEquivalent() throws FHIRException {
+		Patient patient = new Patient();
+		patient.setDeceased(new BooleanType());
+		testEquivalent(patient, "@2012-04-15 ~ @2012-04-15",true);
+		testEquivalent(patient, "@2012-04-15 ~ @2012-04-15T10:00:00",true);
+	}
+
+	@Test
+	public void testApproxNotEquivalent() throws FHIRException {
+		Patient patient = new Patient();
+		patient.setDeceased(new BooleanType());
+		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15",false);
+		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15T10:00:00",false);
+	}
+
+
+	private void testEquivalent(Patient thePatient, String theExpression, boolean theExpected) throws FHIRException {
+		List<Base> eval = ourEngine.evaluate(thePatient, theExpression);
+		assertEquals(theExpected, ((BooleanType)eval.get(0)).getValue());
+	}
+
+	@Test
 	public void testExistsWithValue() throws FHIRException {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType(false));

@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.DefinitionNavigator;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -256,10 +257,11 @@ public class ProfileComparer {
    * over the right ones in the common structure definition
    * @throws DefinitionException 
    * @throws IOException 
+   * @throws FHIRFormatError 
    *  
    * @
    */
-  public ProfileComparison compareProfiles(StructureDefinition left, StructureDefinition right) throws DefinitionException, IOException {
+  public ProfileComparison compareProfiles(StructureDefinition left, StructureDefinition right) throws DefinitionException, IOException, FHIRFormatError {
     ProfileComparison outcome = new ProfileComparison();
     outcome.left = left;
     outcome.right = right;
@@ -324,8 +326,9 @@ public class ProfileComparer {
    * @- if there's a problem that needs fixing in this code
    * @throws DefinitionException 
    * @throws IOException 
+   * @throws FHIRFormatError 
    */
-  private boolean compareElements(ProfileComparison outcome, String path, DefinitionNavigator left, DefinitionNavigator right) throws DefinitionException, IOException {
+  private boolean compareElements(ProfileComparison outcome, String path, DefinitionNavigator left, DefinitionNavigator right) throws DefinitionException, IOException, FHIRFormatError {
 //    preconditions:
     assert(path != null);
     assert(left != null);
@@ -433,7 +436,7 @@ public class ProfileComparer {
     
     if (left.slices() != null)
       for (DefinitionNavigator ex : left.slices()) {
-        String url = ex.current().getType().get(0).getProfile();
+        String url = ex.current().getType().get(0).getProfile().get(0).getValue();
         if (map.containsKey(url))
           throw new DefinitionException("Duplicate Extension "+url+" at "+path);
         else
@@ -441,7 +444,7 @@ public class ProfileComparer {
       }
     if (right.slices() != null)
       for (DefinitionNavigator ex : right.slices()) {
-        String url = ex.current().getType().get(0).getProfile();
+        String url = ex.current().getType().get(0).getProfile().get(0).getValue();
         if (map.containsKey(url)) {
           ExtensionUsage exd = map.get(url);
           exd.minSuperset = unionMin(exd.defn.current().getMin(), ex.current().getMin());
@@ -470,7 +473,7 @@ public class ProfileComparer {
     return path.endsWith(".extension") || path.endsWith(".modifierExtension");
   }
 
-  private boolean compareChildren(ElementDefinition ed, ProfileComparison outcome, String path, DefinitionNavigator left, DefinitionNavigator right) throws DefinitionException, IOException {
+  private boolean compareChildren(ElementDefinition ed, ProfileComparison outcome, String path, DefinitionNavigator left, DefinitionNavigator right) throws DefinitionException, IOException, FHIRFormatError {
     List<DefinitionNavigator> lc = left.children();
     List<DefinitionNavigator> rc = right.children();
     // it's possible that one of these profiles walks into a data type and the other doesn't
@@ -513,7 +516,7 @@ public class ProfileComparer {
       return null;
   }
 
-  private boolean compareBindings(ProfileComparison outcome, ElementDefinition subset, ElementDefinition superset, String path, ElementDefinition lDef, ElementDefinition rDef) {
+  private boolean compareBindings(ProfileComparison outcome, ElementDefinition subset, ElementDefinition superset, String path, ElementDefinition lDef, ElementDefinition rDef) throws FHIRFormatError {
     assert(lDef.hasBinding() || rDef.hasBinding());
     if (!lDef.hasBinding()) {
       subset.setBinding(rDef.getBinding());
@@ -633,7 +636,7 @@ public class ProfileComparer {
     return false;
   }
 
-  private ElementDefinitionBindingComponent unionBindings(ElementDefinition ed, ProfileComparison outcome, String path, ElementDefinitionBindingComponent left, ElementDefinitionBindingComponent right) {
+  private ElementDefinitionBindingComponent unionBindings(ElementDefinition ed, ProfileComparison outcome, String path, ElementDefinitionBindingComponent left, ElementDefinitionBindingComponent right) throws FHIRFormatError {
     ElementDefinitionBindingComponent union = new ElementDefinitionBindingComponent();
     if (left.getStrength().compareTo(right.getStrength()) < 0)
       union.setStrength(left.getStrength());
@@ -771,7 +774,7 @@ public class ProfileComparer {
     return binding.getStrength() == BindingStrength.EXAMPLE || binding.getStrength() == BindingStrength.PREFERRED;
   }
 
-  private Collection<? extends TypeRefComponent> intersectTypes(ElementDefinition ed, ProfileComparison outcome, String path, List<TypeRefComponent> left, List<TypeRefComponent> right) throws DefinitionException, IOException {
+  private Collection<? extends TypeRefComponent> intersectTypes(ElementDefinition ed, ProfileComparison outcome, String path, List<TypeRefComponent> left, List<TypeRefComponent> right) throws DefinitionException, IOException, FHIRFormatError {
     List<TypeRefComponent> result = new ArrayList<TypeRefComponent>();
     for (TypeRefComponent l : left) {
       if (l.hasAggregation())
@@ -790,8 +793,8 @@ public class ProfileComparer {
           pfound = true;
           c.setProfile(r.getProfile());
         } else {
-          StructureDefinition sdl = resolveProfile(ed, outcome, path, l.getProfile(), outcome.leftName());
-          StructureDefinition sdr = resolveProfile(ed, outcome, path, r.getProfile(), outcome.rightName());
+          StructureDefinition sdl = resolveProfile(ed, outcome, path, l.getProfile().get(0).getValue(), outcome.leftName());
+          StructureDefinition sdr = resolveProfile(ed, outcome, path, r.getProfile().get(0).getValue(), outcome.rightName());
           if (sdl != null && sdr != null) {
             if (sdl == sdr) {
               pfound = true;
@@ -804,7 +807,7 @@ public class ProfileComparer {
               ProfileComparison comp = compareProfiles(sdl, sdr);
               if (comp.getSubset() != null) {
                 pfound = true;
-                c.setProfile("#"+comp.id);
+                c.addProfile("#"+comp.id);
               }
             }
           }
@@ -817,8 +820,8 @@ public class ProfileComparer {
           tfound = true;
           c.setTargetProfile(r.getTargetProfile());
         } else {
-          StructureDefinition sdl = resolveProfile(ed, outcome, path, l.getProfile(), outcome.leftName());
-          StructureDefinition sdr = resolveProfile(ed, outcome, path, r.getProfile(), outcome.rightName());
+          StructureDefinition sdl = resolveProfile(ed, outcome, path, l.getProfile().get(0).getValue(), outcome.leftName());
+          StructureDefinition sdr = resolveProfile(ed, outcome, path, r.getProfile().get(0).getValue(), outcome.rightName());
           if (sdl != null && sdr != null) {
             if (sdl == sdr) {
               tfound = true;
@@ -831,7 +834,7 @@ public class ProfileComparer {
               ProfileComparison comp = compareProfiles(sdl, sdr);
               if (comp.getSubset() != null) {
                 tfound = true;
-                c.setTargetProfile("#"+comp.id);
+                c.addTargetProfile("#"+comp.id);
               }
             }
           }
@@ -852,7 +855,7 @@ public class ProfileComparer {
     return res;
   }
 
-  private Collection<? extends TypeRefComponent> unionTypes(String path, List<TypeRefComponent> left, List<TypeRefComponent> right) throws DefinitionException, IOException {
+  private Collection<? extends TypeRefComponent> unionTypes(String path, List<TypeRefComponent> left, List<TypeRefComponent> right) throws DefinitionException, IOException, FHIRFormatError {
     List<TypeRefComponent> result = new ArrayList<TypeRefComponent>();
     for (TypeRefComponent l : left) 
       checkAddTypeUnion(path, result, l);
@@ -861,7 +864,7 @@ public class ProfileComparer {
     return result;
   }    
     
-  private void checkAddTypeUnion(String path, List<TypeRefComponent> results, TypeRefComponent nw) throws DefinitionException, IOException {
+  private void checkAddTypeUnion(String path, List<TypeRefComponent> results, TypeRefComponent nw) throws DefinitionException, IOException, FHIRFormatError {
     boolean pfound = false;
     boolean tfound = false;
     nw = nw.copy();
@@ -878,8 +881,8 @@ public class ProfileComparer {
           ex.setProfile(null);
         } else {
           // both have profiles. Is one derived from the other? 
-          StructureDefinition sdex = context.fetchResource(StructureDefinition.class, ex.getProfile());
-          StructureDefinition sdnw = context.fetchResource(StructureDefinition.class, nw.getProfile());
+          StructureDefinition sdex = context.fetchResource(StructureDefinition.class, ex.getProfile().get(0).getValue());
+          StructureDefinition sdnw = context.fetchResource(StructureDefinition.class, nw.getProfile().get(0).getValue());
           if (sdex != null && sdnw != null) {
             if (sdex == sdnw) {
               pfound = true;
@@ -892,7 +895,7 @@ public class ProfileComparer {
               ProfileComparison comp = compareProfiles(sdex, sdnw);
               if (comp.getSuperset() != null) {
                 pfound = true;
-                ex.setProfile("#"+comp.id);
+                ex.addProfile("#"+comp.id);
               }
             }
           }
@@ -906,8 +909,8 @@ public class ProfileComparer {
           ex.setTargetProfile(null);
         } else {
           // both have profiles. Is one derived from the other? 
-          StructureDefinition sdex = context.fetchResource(StructureDefinition.class, ex.getTargetProfile());
-          StructureDefinition sdnw = context.fetchResource(StructureDefinition.class, nw.getTargetProfile());
+          StructureDefinition sdex = context.fetchResource(StructureDefinition.class, ex.getTargetProfile().get(0).getValue());
+          StructureDefinition sdnw = context.fetchResource(StructureDefinition.class, nw.getTargetProfile().get(0).getValue());
           if (sdex != null && sdnw != null) {
             if (sdex == sdnw) {
               tfound = true;
@@ -920,7 +923,7 @@ public class ProfileComparer {
               ProfileComparison comp = compareProfiles(sdex, sdnw);
               if (comp.getSuperset() != null) {
                 tfound = true;
-                ex.setTargetProfile("#"+comp.id);
+                ex.addTargetProfile("#"+comp.id);
               }
             }
           }
@@ -938,27 +941,6 @@ public class ProfileComparer {
     return left.hasBaseDefinition() && left.getBaseDefinition().equals(right.getUrl());
   }
 
-//    result.addAll(left);
-//    for (TypeRefComponent r : right) {
-//      boolean found = false;
-//      TypeRefComponent c = r.copy();
-//      for (TypeRefComponent l : left)
-//        if (Utilities.equals(l.getCode(), r.getCode())) {
-//            
-//        }
-//        if (l.getCode().equals("Reference") && r.getCode().equals("Reference")) {
-//          if (Base.compareDeep(l.getProfile(), r.getProfile(), false)) {
-//            found = true;
-//          }
-//        } else 
-//          found = true;
-//          // todo: compare profiles
-//          // todo: compare aggregation values
-//        }
-//      if (!found)
-//        result.add(c);
-//    }
-//  }
 
   private String mergeText(ElementDefinition ed, ProfileComparison outcome, String path, String name, String left, String right) {
     if (left == null && right == null)

@@ -176,7 +176,15 @@
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.2.0-12917</td>
 					</tr>
-
+					<tr>
+						<td>HAPI FHIR 3.3.0</td>
+						<td>JDK7+</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.2.0-13271</td>
+					</tr>
 				</tbody>
 			</table>
 

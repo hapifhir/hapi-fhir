@@ -86,7 +86,7 @@ public class OperationServerR4Test {
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
 		
 //		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReferenceElement()).execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition()).execute();
 		assertEquals("OP_TYPE", def.getCode());
 	}
 	

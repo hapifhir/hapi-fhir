@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,8 +45,7 @@ public enum ItemType {
          */
         DISPLAY, 
         /**
-         * An item that defines a specific answer to be captured, and may have child items.
-(the answer provided in the QuestionnaireResponse should be of the defined datatype)
+         * An item that defines a specific answer to be captured, and may have child items. (the answer provided in the QuestionnaireResponse should be of the defined datatype)
          */
         QUESTION, 
         /**
@@ -102,8 +101,7 @@ public enum ItemType {
          */
         REFERENCE, 
         /**
-         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity)
-There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit)
+         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit)
          */
         QUANTITY, 
         /**
@@ -178,7 +176,7 @@ There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-uni
           switch (this) {
             case GROUP: return "An item with no direct answer but should have at least one child item.";
             case DISPLAY: return "Text for display that will not capture an answer or have child items.";
-            case QUESTION: return "An item that defines a specific answer to be captured, and may have child items.\n(the answer provided in the QuestionnaireResponse should be of the defined datatype)";
+            case QUESTION: return "An item that defines a specific answer to be captured, and may have child items. (the answer provided in the QuestionnaireResponse should be of the defined datatype)";
             case BOOLEAN: return "Question with a yes/no answer (valueBoolean)";
             case DECIMAL: return "Question with is a real number answer (valueDecimal)";
             case INTEGER: return "Question with an integer answer (valueInteger)";
@@ -192,7 +190,7 @@ There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-uni
             case OPENCHOICE: return "Answer is a Coding drawn from a list of options (as with the choice type) or a free-text entry in a string (valueCoding or valueString)";
             case ATTACHMENT: return "Question with binary content such as a image, PDF, etc. as an answer (valueAttachment)";
             case REFERENCE: return "Question with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference)";
-            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity)\nThere is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit)";
+            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit)";
             default: return "?";
           }
         }

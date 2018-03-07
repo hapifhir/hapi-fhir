@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -514,7 +515,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				}
 				if (theIdSubstitutions.containsKey(nextId)) {
 					IdType newId = theIdSubstitutions.get(nextId);
-					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 					nextRef.setReference(newId.getValue());
 				} else if (nextId.getValue().startsWith("urn:")) {
 					throw new InvalidRequestException("Unable to satisfy placeholder ID: " + nextId.getValue());
@@ -532,7 +533,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				IdType nextUriString = new IdType(nextRef.getValueAsString());
 				if (theIdSubstitutions.containsKey(nextUriString)) {
 					IdType newId = theIdSubstitutions.get(nextUriString);
-					ourLog.info(" * Replacing resource ref {} with {}", nextUriString, newId);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 					nextRef.setValue(newId.getValue());
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
@@ -547,7 +548,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
-		myEntityManager.flush();
+		flushJpaSession();
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
@@ -573,7 +574,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			if (replacement.equals(next)) {
 				continue;
 			}
-			ourLog.info("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
+			ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 		}
 		return entriesToProcess;
 	}
@@ -618,9 +619,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
-		Meta retVal = toMeta(tagDefinitions);
-
-		return retVal;
+		return toMeta(tagDefinitions);
 	}
 
 	private String performIdSubstitutionsInMatchUrl(Map<IdType, IdType> theIdSubstitutions, String theMatchUrl) {

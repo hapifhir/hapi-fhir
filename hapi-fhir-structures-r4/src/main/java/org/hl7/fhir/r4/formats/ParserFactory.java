@@ -9,6 +9,7 @@ public class ParserFactory {
     switch (format) {
     case JSON : return new JsonParser();
     case XML : return new XmlParser();
+    case TURTLE : return new RdfParser();
     default:
       throw new Error("Not supported at this time");
     }
@@ -18,6 +19,7 @@ public class ParserFactory {
     switch (format) {
     case JSON : return new JsonParser().setOutputStyle(style);
     case XML : return new XmlParser().setOutputStyle(style);
+    case TURTLE : return new RdfParser().setOutputStyle(style);
     default:
       throw new Error("Not supported at this time");
     }

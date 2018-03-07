@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -129,7 +130,7 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 
 		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
+			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new Reference(next.getDefinition())));
 		}
 
 		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());

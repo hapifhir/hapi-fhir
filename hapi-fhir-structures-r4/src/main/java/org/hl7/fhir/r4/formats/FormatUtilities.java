@@ -91,6 +91,16 @@ public abstract class FormatUtilities {
     throw new Error("unsupported Format "+format.toString());
   }
   
+  public static ParserBase makeParser(String format) {
+    if ("XML".equalsIgnoreCase(format)) return new XmlParser();
+    if ("JSON".equalsIgnoreCase(format)) return new JsonParser();
+    if ("TURTLE".equalsIgnoreCase(format)) throw new Error("unsupported Format "+format.toString()); // return new TurtleParser();
+    if ("JSONLD".equalsIgnoreCase(format)) throw new Error("unsupported Format "+format.toString()); // return new JsonLdParser();
+    if ("VBAR".equalsIgnoreCase(format)) throw new Error("unsupported Format "+format.toString()); // 
+    if ("TEXT".equalsIgnoreCase(format)) throw new Error("unsupported Format "+format.toString()); // 
+    throw new Error("unsupported Format "+format);
+  }  
+
   public static FhirFormat determineFormat(byte[] source) throws FHIRException {
     return determineFormat(source, MAX_SCAN_LENGTH);
   }

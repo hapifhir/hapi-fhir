@@ -61,9 +61,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -309,6 +314,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				 */
 				if (nextObject instanceof IBaseExtension<?, ?>) {
 					nextObject = ((IBaseExtension<?, ?>) nextObject).getValue();
+				}
+
+				if (nextObject instanceof CanonicalType) {
+					nextObject = new Reference(((CanonicalType) nextObject).getValueAsString());
 				}
 
 				IIdType nextId;
@@ -631,6 +640,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 			}
 		}
+	}
+
+	protected void flushJpaSession() {
+		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
+		int insertionCount = session.getActionQueue().numberOfInsertions();
+		int updateCount = session.getActionQueue().numberOfUpdates();
+
+		StopWatch sw = new StopWatch();
+		myEntityManager.flush();
+		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
 	}
 
 	private Set<TagDefinition> getAllTagDefinitions(ResourceTable theEntity) {

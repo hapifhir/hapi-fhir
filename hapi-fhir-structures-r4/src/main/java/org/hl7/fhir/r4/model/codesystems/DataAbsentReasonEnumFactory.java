@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,48 +41,68 @@ public class DataAbsentReasonEnumFactory implements EnumFactory<DataAbsentReason
       return null;
     if ("unknown".equals(codeString))
       return DataAbsentReason.UNKNOWN;
-    if ("asked".equals(codeString))
-      return DataAbsentReason.ASKED;
-    if ("temp".equals(codeString))
-      return DataAbsentReason.TEMP;
+    if ("asked-unknown".equals(codeString))
+      return DataAbsentReason.ASKEDUNKNOWN;
+    if ("temp-unknown".equals(codeString))
+      return DataAbsentReason.TEMPUNKNOWN;
     if ("not-asked".equals(codeString))
       return DataAbsentReason.NOTASKED;
+    if ("asked-declined".equals(codeString))
+      return DataAbsentReason.ASKEDDECLINED;
     if ("masked".equals(codeString))
       return DataAbsentReason.MASKED;
+    if ("not-applicable".equals(codeString))
+      return DataAbsentReason.NOTAPPLICABLE;
     if ("unsupported".equals(codeString))
       return DataAbsentReason.UNSUPPORTED;
-    if ("astext".equals(codeString))
+    if ("as-text".equals(codeString))
       return DataAbsentReason.ASTEXT;
     if ("error".equals(codeString))
       return DataAbsentReason.ERROR;
-    if ("NaN".equals(codeString))
-      return DataAbsentReason.NAN;
+    if ("not-a-number".equals(codeString))
+      return DataAbsentReason.NOTANUMBER;
+    if ("negative-infinity".equals(codeString))
+      return DataAbsentReason.NEGATIVEINFINITY;
+    if ("positive-infinity".equals(codeString))
+      return DataAbsentReason.POSITIVEINFINITY;
     if ("not-performed".equals(codeString))
       return DataAbsentReason.NOTPERFORMED;
+    if ("not-permitted".equals(codeString))
+      return DataAbsentReason.NOTPERMITTED;
     throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
   }
 
   public String toCode(DataAbsentReason code) {
     if (code == DataAbsentReason.UNKNOWN)
       return "unknown";
-    if (code == DataAbsentReason.ASKED)
-      return "asked";
-    if (code == DataAbsentReason.TEMP)
-      return "temp";
+    if (code == DataAbsentReason.ASKEDUNKNOWN)
+      return "asked-unknown";
+    if (code == DataAbsentReason.TEMPUNKNOWN)
+      return "temp-unknown";
     if (code == DataAbsentReason.NOTASKED)
       return "not-asked";
+    if (code == DataAbsentReason.ASKEDDECLINED)
+      return "asked-declined";
     if (code == DataAbsentReason.MASKED)
       return "masked";
+    if (code == DataAbsentReason.NOTAPPLICABLE)
+      return "not-applicable";
     if (code == DataAbsentReason.UNSUPPORTED)
       return "unsupported";
     if (code == DataAbsentReason.ASTEXT)
-      return "astext";
+      return "as-text";
     if (code == DataAbsentReason.ERROR)
       return "error";
-    if (code == DataAbsentReason.NAN)
-      return "NaN";
+    if (code == DataAbsentReason.NOTANUMBER)
+      return "not-a-number";
+    if (code == DataAbsentReason.NEGATIVEINFINITY)
+      return "negative-infinity";
+    if (code == DataAbsentReason.POSITIVEINFINITY)
+      return "positive-infinity";
     if (code == DataAbsentReason.NOTPERFORMED)
       return "not-performed";
+    if (code == DataAbsentReason.NOTPERMITTED)
+      return "not-permitted";
     return "?";
   }
 

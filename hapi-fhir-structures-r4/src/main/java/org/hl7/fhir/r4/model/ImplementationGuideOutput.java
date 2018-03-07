@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -47,349 +47,8 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
  */
 @ResourceDef(name="ImplementationGuideOutput", profile="http://hl7.org/fhir/Profile/ImplementationGuideOutput")
-@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "copyright", "fhirVersion", "dependency", "resource", "global", "rendering", "page", "image", "other"})
+@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "copyright", "fhirVersion", "dependsOn", "resource", "global", "rendering", "page", "image", "other"})
 public class ImplementationGuideOutput extends MetadataResource {
-
-    public enum GuideDependencyType {
-        /**
-         * The guide is referred to by URL.
-         */
-        REFERENCE, 
-        /**
-         * The guide is embedded in this guide when published.
-         */
-        INCLUSION, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static GuideDependencyType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("reference".equals(codeString))
-          return REFERENCE;
-        if ("inclusion".equals(codeString))
-          return INCLUSION;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown GuideDependencyType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case REFERENCE: return "reference";
-            case INCLUSION: return "inclusion";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case REFERENCE: return "http://hl7.org/fhir/guide-dependency-type";
-            case INCLUSION: return "http://hl7.org/fhir/guide-dependency-type";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case REFERENCE: return "The guide is referred to by URL.";
-            case INCLUSION: return "The guide is embedded in this guide when published.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case REFERENCE: return "Reference";
-            case INCLUSION: return "Inclusion";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class GuideDependencyTypeEnumFactory implements EnumFactory<GuideDependencyType> {
-    public GuideDependencyType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("reference".equals(codeString))
-          return GuideDependencyType.REFERENCE;
-        if ("inclusion".equals(codeString))
-          return GuideDependencyType.INCLUSION;
-        throw new IllegalArgumentException("Unknown GuideDependencyType code '"+codeString+"'");
-        }
-        public Enumeration<GuideDependencyType> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<GuideDependencyType>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("reference".equals(codeString))
-          return new Enumeration<GuideDependencyType>(this, GuideDependencyType.REFERENCE);
-        if ("inclusion".equals(codeString))
-          return new Enumeration<GuideDependencyType>(this, GuideDependencyType.INCLUSION);
-        throw new FHIRException("Unknown GuideDependencyType code '"+codeString+"'");
-        }
-    public String toCode(GuideDependencyType code) {
-      if (code == GuideDependencyType.REFERENCE)
-        return "reference";
-      if (code == GuideDependencyType.INCLUSION)
-        return "inclusion";
-      return "?";
-      }
-    public String toSystem(GuideDependencyType code) {
-      return code.getSystem();
-      }
-    }
-
-    @Block()
-    public static class ImplementationGuideOutputDependencyComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * How the dependency is represented when the guide is published.
-         */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="reference | inclusion", formalDefinition="How the dependency is represented when the guide is published." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/guide-dependency-type")
-        protected Enumeration<GuideDependencyType> type;
-
-        /**
-         * Where the dependency is located.
-         */
-        @Child(name = "uri", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Where to find dependency", formalDefinition="Where the dependency is located." )
-        protected UriType uri;
-
-        private static final long serialVersionUID = 162447098L;
-
-    /**
-     * Constructor
-     */
-      public ImplementationGuideOutputDependencyComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ImplementationGuideOutputDependencyComponent(Enumeration<GuideDependencyType> type, UriType uri) {
-        super();
-        this.type = type;
-        this.uri = uri;
-      }
-
-        /**
-         * @return {@link #type} (How the dependency is represented when the guide is published.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public Enumeration<GuideDependencyType> getTypeElement() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImplementationGuideOutputDependencyComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<GuideDependencyType>(new GuideDependencyTypeEnumFactory()); // bb
-          return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (How the dependency is represented when the guide is published.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public ImplementationGuideOutputDependencyComponent setTypeElement(Enumeration<GuideDependencyType> value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return How the dependency is represented when the guide is published.
-         */
-        public GuideDependencyType getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value How the dependency is represented when the guide is published.
-         */
-        public ImplementationGuideOutputDependencyComponent setType(GuideDependencyType value) { 
-            if (this.type == null)
-              this.type = new Enumeration<GuideDependencyType>(new GuideDependencyTypeEnumFactory());
-            this.type.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #uri} (Where the dependency is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
-         */
-        public UriType getUriElement() { 
-          if (this.uri == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImplementationGuideOutputDependencyComponent.uri");
-            else if (Configuration.doAutoCreate())
-              this.uri = new UriType(); // bb
-          return this.uri;
-        }
-
-        public boolean hasUriElement() { 
-          return this.uri != null && !this.uri.isEmpty();
-        }
-
-        public boolean hasUri() { 
-          return this.uri != null && !this.uri.isEmpty();
-        }
-
-        /**
-         * @param value {@link #uri} (Where the dependency is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
-         */
-        public ImplementationGuideOutputDependencyComponent setUriElement(UriType value) { 
-          this.uri = value;
-          return this;
-        }
-
-        /**
-         * @return Where the dependency is located.
-         */
-        public String getUri() { 
-          return this.uri == null ? null : this.uri.getValue();
-        }
-
-        /**
-         * @param value Where the dependency is located.
-         */
-        public ImplementationGuideOutputDependencyComponent setUri(String value) { 
-            if (this.uri == null)
-              this.uri = new UriType();
-            this.uri.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("type", "code", "How the dependency is represented when the guide is published.", 0, 1, type));
-          children.add(new Property("uri", "uri", "Where the dependency is located.", 0, 1, uri));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "code", "How the dependency is represented when the guide is published.", 0, 1, type);
-          case 116076: /*uri*/  return new Property("uri", "uri", "Where the dependency is located.", 0, 1, uri);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<GuideDependencyType>
-        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // UriType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          value = new GuideDependencyTypeEnumFactory().fromType(castToCode(value));
-          this.type = (Enumeration) value; // Enumeration<GuideDependencyType>
-          return value;
-        case 116076: // uri
-          this.uri = castToUri(value); // UriType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type")) {
-          value = new GuideDependencyTypeEnumFactory().fromType(castToCode(value));
-          this.type = (Enumeration) value; // Enumeration<GuideDependencyType>
-        } else if (name.equals("uri")) {
-          this.uri = castToUri(value); // UriType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getTypeElement();
-        case 116076:  return getUriElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return new String[] {"code"};
-        case 116076: /*uri*/ return new String[] {"uri"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuideOutput.type");
-        }
-        else if (name.equals("uri")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuideOutput.uri");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ImplementationGuideOutputDependencyComponent copy() {
-        ImplementationGuideOutputDependencyComponent dst = new ImplementationGuideOutputDependencyComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.uri = uri == null ? null : uri.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ImplementationGuideOutputDependencyComponent))
-          return false;
-        ImplementationGuideOutputDependencyComponent o = (ImplementationGuideOutputDependencyComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(uri, o.uri, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ImplementationGuideOutputDependencyComponent))
-          return false;
-        ImplementationGuideOutputDependencyComponent o = (ImplementationGuideOutputDependencyComponent) other_;
-        return compareValues(type, o.type, true) && compareValues(uri, o.uri, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, uri);
-      }
-
-  public String fhirType() {
-    return "ImplementationGuideOutput.dependency";
-
-  }
-
-  }
 
     @Block()
     public static class ImplementationGuideOutputResourceComponent extends BackboneElement implements IBaseBackboneElement {
@@ -730,16 +389,11 @@ public class ImplementationGuideOutput extends MetadataResource {
         /**
          * A reference to the profile that all instances must conform to.
          */
-        @Child(name = "profile", type = {StructureDefinition.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "profile", type = {CanonicalType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Profile that all resources must conform to", formalDefinition="A reference to the profile that all instances must conform to." )
-        protected Reference profile;
+        protected CanonicalType profile;
 
-        /**
-         * The actual object that is the target of the reference (A reference to the profile that all instances must conform to.)
-         */
-        protected StructureDefinition profileTarget;
-
-        private static final long serialVersionUID = 2011731959L;
+        private static final long serialVersionUID = 33894666L;
 
     /**
      * Constructor
@@ -751,7 +405,7 @@ public class ImplementationGuideOutput extends MetadataResource {
     /**
      * Constructor
      */
-      public ImplementationGuideOutputGlobalComponent(CodeType type, Reference profile) {
+      public ImplementationGuideOutputGlobalComponent(CodeType type, CanonicalType profile) {
         super();
         this.type = type;
         this.profile = profile;
@@ -803,15 +457,19 @@ public class ImplementationGuideOutput extends MetadataResource {
         }
 
         /**
-         * @return {@link #profile} (A reference to the profile that all instances must conform to.)
+         * @return {@link #profile} (A reference to the profile that all instances must conform to.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
-        public Reference getProfile() { 
+        public CanonicalType getProfileElement() { 
           if (this.profile == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ImplementationGuideOutputGlobalComponent.profile");
             else if (Configuration.doAutoCreate())
-              this.profile = new Reference(); // cc
+              this.profile = new CanonicalType(); // bb
           return this.profile;
+        }
+
+        public boolean hasProfileElement() { 
+          return this.profile != null && !this.profile.isEmpty();
         }
 
         public boolean hasProfile() { 
@@ -819,44 +477,41 @@ public class ImplementationGuideOutput extends MetadataResource {
         }
 
         /**
-         * @param value {@link #profile} (A reference to the profile that all instances must conform to.)
+         * @param value {@link #profile} (A reference to the profile that all instances must conform to.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
-        public ImplementationGuideOutputGlobalComponent setProfile(Reference value) { 
+        public ImplementationGuideOutputGlobalComponent setProfileElement(CanonicalType value) { 
           this.profile = value;
           return this;
         }
 
         /**
-         * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the profile that all instances must conform to.)
+         * @return A reference to the profile that all instances must conform to.
          */
-        public StructureDefinition getProfileTarget() { 
-          if (this.profileTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImplementationGuideOutputGlobalComponent.profile");
-            else if (Configuration.doAutoCreate())
-              this.profileTarget = new StructureDefinition(); // aa
-          return this.profileTarget;
+        public String getProfile() { 
+          return this.profile == null ? null : this.profile.getValue();
         }
 
         /**
-         * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the profile that all instances must conform to.)
+         * @param value A reference to the profile that all instances must conform to.
          */
-        public ImplementationGuideOutputGlobalComponent setProfileTarget(StructureDefinition value) { 
-          this.profileTarget = value;
+        public ImplementationGuideOutputGlobalComponent setProfile(String value) { 
+            if (this.profile == null)
+              this.profile = new CanonicalType();
+            this.profile.setValue(value);
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "code", "The type of resource that all instances must conform to.", 0, 1, type));
-          children.add(new Property("profile", "Reference(StructureDefinition)", "A reference to the profile that all instances must conform to.", 0, 1, profile));
+          children.add(new Property("profile", "canonical(StructureDefinition)", "A reference to the profile that all instances must conform to.", 0, 1, profile));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "The type of resource that all instances must conform to.", 0, 1, type);
-          case -309425751: /*profile*/  return new Property("profile", "Reference(StructureDefinition)", "A reference to the profile that all instances must conform to.", 0, 1, profile);
+          case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "A reference to the profile that all instances must conform to.", 0, 1, profile);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -866,7 +521,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -879,7 +534,7 @@ public class ImplementationGuideOutput extends MetadataResource {
           this.type = castToCode(value); // CodeType
           return value;
         case -309425751: // profile
-          this.profile = castToReference(value); // Reference
+          this.profile = castToCanonical(value); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -891,7 +546,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
         } else if (name.equals("profile")) {
-          this.profile = castToReference(value); // Reference
+          this.profile = castToCanonical(value); // CanonicalType
         } else
           return super.setProperty(name, value);
         return value;
@@ -901,7 +556,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getTypeElement();
-        case -309425751:  return getProfile(); 
+        case -309425751:  return getProfileElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -911,7 +566,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
-        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -923,8 +578,7 @@ public class ImplementationGuideOutput extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuideOutput.type");
         }
         else if (name.equals("profile")) {
-          this.profile = new Reference();
-          return this.profile;
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuideOutput.profile");
         }
         else
           return super.addChild(name);
@@ -1159,7 +813,7 @@ public class ImplementationGuideOutput extends MetadataResource {
           if (this.anchor == null)
             return false;
           for (StringType v : this.anchor)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -1323,9 +977,14 @@ public class ImplementationGuideOutput extends MetadataResource {
     /**
      * Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.
      */
-    @Child(name = "dependency", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "dependsOn", type = {ImplementationGuideOutput.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Another Implementation guide this depends on", formalDefinition="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides." )
-    protected List<ImplementationGuideOutputDependencyComponent> dependency;
+    protected List<Reference> dependsOn;
+    /**
+     * The actual objects that are the target of the reference (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.)
+     */
+    protected List<ImplementationGuideOutput> dependsOnTarget;
+
 
     /**
      * A resource that is part of the implementation guide. Conformance resources (value set, structure definition, capability statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.
@@ -1369,7 +1028,7 @@ public class ImplementationGuideOutput extends MetadataResource {
     @Description(shortDefinition="Additional linkable file in IG", formalDefinition="Indicates the relative path of an additional non-page, non-image file that is part of the IG - e.g. zip, jar and similar files that could be the target of a hyperlink in a derived IG." )
     protected List<StringType> other;
 
-    private static final long serialVersionUID = 1126161553L;
+    private static final long serialVersionUID = -1963803314L;
 
   /**
    * Constructor
@@ -2022,56 +1681,78 @@ public class ImplementationGuideOutput extends MetadataResource {
     }
 
     /**
-     * @return {@link #dependency} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.)
+     * @return {@link #dependsOn} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.)
      */
-    public List<ImplementationGuideOutputDependencyComponent> getDependency() { 
-      if (this.dependency == null)
-        this.dependency = new ArrayList<ImplementationGuideOutputDependencyComponent>();
-      return this.dependency;
+    public List<Reference> getDependsOn() { 
+      if (this.dependsOn == null)
+        this.dependsOn = new ArrayList<Reference>();
+      return this.dependsOn;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ImplementationGuideOutput setDependency(List<ImplementationGuideOutputDependencyComponent> theDependency) { 
-      this.dependency = theDependency;
+    public ImplementationGuideOutput setDependsOn(List<Reference> theDependsOn) { 
+      this.dependsOn = theDependsOn;
       return this;
     }
 
-    public boolean hasDependency() { 
-      if (this.dependency == null)
+    public boolean hasDependsOn() { 
+      if (this.dependsOn == null)
         return false;
-      for (ImplementationGuideOutputDependencyComponent item : this.dependency)
+      for (Reference item : this.dependsOn)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ImplementationGuideOutputDependencyComponent addDependency() { //3
-      ImplementationGuideOutputDependencyComponent t = new ImplementationGuideOutputDependencyComponent();
-      if (this.dependency == null)
-        this.dependency = new ArrayList<ImplementationGuideOutputDependencyComponent>();
-      this.dependency.add(t);
+    public Reference addDependsOn() { //3
+      Reference t = new Reference();
+      if (this.dependsOn == null)
+        this.dependsOn = new ArrayList<Reference>();
+      this.dependsOn.add(t);
       return t;
     }
 
-    public ImplementationGuideOutput addDependency(ImplementationGuideOutputDependencyComponent t) { //3
+    public ImplementationGuideOutput addDependsOn(Reference t) { //3
       if (t == null)
         return this;
-      if (this.dependency == null)
-        this.dependency = new ArrayList<ImplementationGuideOutputDependencyComponent>();
-      this.dependency.add(t);
+      if (this.dependsOn == null)
+        this.dependsOn = new ArrayList<Reference>();
+      this.dependsOn.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #dependency}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #dependsOn}, creating it if it does not already exist
      */
-    public ImplementationGuideOutputDependencyComponent getDependencyFirstRep() { 
-      if (getDependency().isEmpty()) {
-        addDependency();
+    public Reference getDependsOnFirstRep() { 
+      if (getDependsOn().isEmpty()) {
+        addDependsOn();
       }
-      return getDependency().get(0);
+      return getDependsOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<ImplementationGuideOutput> getDependsOnTarget() { 
+      if (this.dependsOnTarget == null)
+        this.dependsOnTarget = new ArrayList<ImplementationGuideOutput>();
+      return this.dependsOnTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public ImplementationGuideOutput addDependsOnTarget() { 
+      ImplementationGuideOutput r = new ImplementationGuideOutput();
+      if (this.dependsOnTarget == null)
+        this.dependsOnTarget = new ArrayList<ImplementationGuideOutput>();
+      this.dependsOnTarget.add(r);
+      return r;
     }
 
     /**
@@ -2338,7 +2019,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       if (this.image == null)
         return false;
       for (StringType v : this.image)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -2399,7 +2080,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       if (this.other == null)
         return false;
       for (StringType v : this.other)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -2419,7 +2100,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the implementation guide output is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the implementation guide output and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the implementation guide output.", 0, 1, copyright));
         children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion));
-        children.add(new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency));
+        children.add(new Property("dependsOn", "Reference(ImplementationGuideOutput)", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependsOn));
         children.add(new Property("resource", "", "A resource that is part of the implementation guide. Conformance resources (value set, structure definition, capability statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.", 0, java.lang.Integer.MAX_VALUE, resource));
         children.add(new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global));
         children.add(new Property("rendering", "uri", "A pointer to official web page, PDF or other rendering of the implementation guide.", 0, 1, rendering));
@@ -2444,7 +2125,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the implementation guide output is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the implementation guide output and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the implementation guide output.", 0, 1, copyright);
         case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion);
-        case -26291381: /*dependency*/  return new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency);
+        case -1109214266: /*dependsOn*/  return new Property("dependsOn", "Reference(ImplementationGuideOutput)", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependsOn);
         case -341064690: /*resource*/  return new Property("resource", "", "A resource that is part of the implementation guide. Conformance resources (value set, structure definition, capability statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.", 0, java.lang.Integer.MAX_VALUE, resource);
         case -1243020381: /*global*/  return new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global);
         case 1839654540: /*rendering*/  return new Property("rendering", "uri", "A pointer to official web page, PDF or other rendering of the implementation guide.", 0, 1, rendering);
@@ -2472,7 +2153,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 461006061: /*fhirVersion*/ return this.fhirVersion == null ? new Base[0] : new Base[] {this.fhirVersion}; // IdType
-        case -26291381: /*dependency*/ return this.dependency == null ? new Base[0] : this.dependency.toArray(new Base[this.dependency.size()]); // ImplementationGuideOutputDependencyComponent
+        case -1109214266: /*dependsOn*/ return this.dependsOn == null ? new Base[0] : this.dependsOn.toArray(new Base[this.dependsOn.size()]); // Reference
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // ImplementationGuideOutputResourceComponent
         case -1243020381: /*global*/ return this.global == null ? new Base[0] : this.global.toArray(new Base[this.global.size()]); // ImplementationGuideOutputGlobalComponent
         case 1839654540: /*rendering*/ return this.rendering == null ? new Base[0] : new Base[] {this.rendering}; // UriType
@@ -2527,8 +2208,8 @@ public class ImplementationGuideOutput extends MetadataResource {
         case 461006061: // fhirVersion
           this.fhirVersion = castToId(value); // IdType
           return value;
-        case -26291381: // dependency
-          this.getDependency().add((ImplementationGuideOutputDependencyComponent) value); // ImplementationGuideOutputDependencyComponent
+        case -1109214266: // dependsOn
+          this.getDependsOn().add(castToReference(value)); // Reference
           return value;
         case -341064690: // resource
           this.getResource().add((ImplementationGuideOutputResourceComponent) value); // ImplementationGuideOutputResourceComponent
@@ -2582,8 +2263,8 @@ public class ImplementationGuideOutput extends MetadataResource {
           this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("fhirVersion")) {
           this.fhirVersion = castToId(value); // IdType
-        } else if (name.equals("dependency")) {
-          this.getDependency().add((ImplementationGuideOutputDependencyComponent) value);
+        } else if (name.equals("dependsOn")) {
+          this.getDependsOn().add(castToReference(value));
         } else if (name.equals("resource")) {
           this.getResource().add((ImplementationGuideOutputResourceComponent) value);
         } else if (name.equals("global")) {
@@ -2617,7 +2298,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         case -507075711:  return addJurisdiction(); 
         case 1522889671:  return getCopyrightElement();
         case 461006061:  return getFhirVersionElement();
-        case -26291381:  return addDependency(); 
+        case -1109214266:  return addDependsOn(); 
         case -341064690:  return addResource(); 
         case -1243020381:  return addGlobal(); 
         case 1839654540:  return getRenderingElement();
@@ -2645,7 +2326,7 @@ public class ImplementationGuideOutput extends MetadataResource {
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 461006061: /*fhirVersion*/ return new String[] {"id"};
-        case -26291381: /*dependency*/ return new String[] {};
+        case -1109214266: /*dependsOn*/ return new String[] {"Reference"};
         case -341064690: /*resource*/ return new String[] {};
         case -1243020381: /*global*/ return new String[] {};
         case 1839654540: /*rendering*/ return new String[] {"uri"};
@@ -2698,8 +2379,8 @@ public class ImplementationGuideOutput extends MetadataResource {
         else if (name.equals("fhirVersion")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuideOutput.fhirVersion");
         }
-        else if (name.equals("dependency")) {
-          return addDependency();
+        else if (name.equals("dependsOn")) {
+          return addDependsOn();
         }
         else if (name.equals("resource")) {
           return addResource();
@@ -2756,10 +2437,10 @@ public class ImplementationGuideOutput extends MetadataResource {
         };
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.fhirVersion = fhirVersion == null ? null : fhirVersion.copy();
-        if (dependency != null) {
-          dst.dependency = new ArrayList<ImplementationGuideOutputDependencyComponent>();
-          for (ImplementationGuideOutputDependencyComponent i : dependency)
-            dst.dependency.add(i.copy());
+        if (dependsOn != null) {
+          dst.dependsOn = new ArrayList<Reference>();
+          for (Reference i : dependsOn)
+            dst.dependsOn.add(i.copy());
         };
         if (resource != null) {
           dst.resource = new ArrayList<ImplementationGuideOutputResourceComponent>();
@@ -2802,7 +2483,7 @@ public class ImplementationGuideOutput extends MetadataResource {
           return false;
         ImplementationGuideOutput o = (ImplementationGuideOutput) other_;
         return compareDeep(copyright, o.copyright, true) && compareDeep(fhirVersion, o.fhirVersion, true)
-           && compareDeep(dependency, o.dependency, true) && compareDeep(resource, o.resource, true) && compareDeep(global, o.global, true)
+           && compareDeep(dependsOn, o.dependsOn, true) && compareDeep(resource, o.resource, true) && compareDeep(global, o.global, true)
            && compareDeep(rendering, o.rendering, true) && compareDeep(page, o.page, true) && compareDeep(image, o.image, true)
            && compareDeep(other, o.other, true);
       }
@@ -2820,7 +2501,7 @@ public class ImplementationGuideOutput extends MetadataResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(copyright, fhirVersion, dependency
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(copyright, fhirVersion, dependsOn
           , resource, global, rendering, page, image, other);
       }
 
@@ -2852,22 +2533,28 @@ public class ImplementationGuideOutput extends MetadataResource {
  /**
    * Search parameter: <b>dependency</b>
    * <p>
-   * Description: <b>Where to find dependency</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImplementationGuideOutput.dependency.uri</b><br>
+   * Description: <b>Another Implementation guide this depends on</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImplementationGuideOutput.dependsOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependency", path="ImplementationGuideOutput.dependency.uri", description="Where to find dependency", type="uri" )
+  @SearchParamDefinition(name="dependency", path="ImplementationGuideOutput.dependsOn", description="Another Implementation guide this depends on", type="reference", target={ImplementationGuideOutput.class } )
   public static final String SP_DEPENDENCY = "dependency";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependency</b>
    * <p>
-   * Description: <b>Where to find dependency</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImplementationGuideOutput.dependency.uri</b><br>
+   * Description: <b>Another Implementation guide this depends on</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImplementationGuideOutput.dependsOn</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam DEPENDENCY = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_DEPENDENCY);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEPENDENCY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEPENDENCY);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImplementationGuideOutput:dependency</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEPENDENCY = new ca.uhn.fhir.model.api.Include("ImplementationGuideOutput:dependency").toLocked();
 
  /**
    * Search parameter: <b>resource</b>

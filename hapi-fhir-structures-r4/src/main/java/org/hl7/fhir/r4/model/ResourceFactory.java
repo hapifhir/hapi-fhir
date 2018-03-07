@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -363,6 +363,8 @@ public class ResourceFactory extends Factory {
             return new Period();
         if ("Duration".equals(name))
             return new Duration();
+        if ("canonical".equals(name))
+            return new CanonicalType();
         if ("Range".equals(name))
             return new Range();
         if ("RelatedArtifact".equals(name))
@@ -421,6 +423,8 @@ public class ResourceFactory extends Factory {
             return new Quantity();
         if ("uri".equals(name))
             return new UriType();
+        if ("url".equals(name))
+            return new UrlType();
         if ("Annotation".equals(name))
             return new Annotation();
         if ("Extension".equals(name))
@@ -623,6 +627,7 @@ public class ResourceFactory extends Factory {
         case -555387838: return new VisionPrescription();
         case -1216012752: return new Base64BinaryType();
         case 64711720: return new BooleanType();
+        case 828351732: return new CanonicalType();
         case 3059181: return new CodeType();
         case 3076014: return new DateType();
         case 1792749467: return new DateTimeType();
@@ -637,6 +642,7 @@ public class ResourceFactory extends Factory {
         case 3560141: return new TimeType();
         case 1145198778: return new UnsignedIntType();
         case 116076: return new UriType();
+        case 116079: return new UrlType();
         case 3601339: return new UuidType();
       default:
         throw new FHIRException("Unknown Resource or Type Name '"+name+"'");

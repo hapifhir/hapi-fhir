@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -51,29 +51,37 @@ public class Consent extends DomainResource {
 
     public enum ConsentState {
         /**
-         * The consent is in development or awaiting use but is not yet intended to be acted upon.
+         * The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.
          */
-        DRAFT, 
+        PREPARATION, 
         /**
-         * The consent has been proposed but not yet agreed to by all parties. The negotiation stage.
+         * The event is currently occurring
          */
-        PROPOSED, 
+        INPROGRESS, 
         /**
-         * The consent is to be followed and enforced.
+         * The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)
          */
-        ACTIVE, 
+        NOTDONE, 
         /**
-         * The consent has been rejected by one or more of the parties.
+         * The event has been temporarily stopped but is expected to resume in the future
          */
-        REJECTED, 
+        SUSPENDED, 
         /**
-         * The consent is terminated or replaced.
+         * The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.
          */
-        INACTIVE, 
+        ABORTED, 
         /**
-         * The consent was created wrongly (e.g. wrong patient) and should be ignored
+         * The event has now concluded
+         */
+        COMPLETED, 
+        /**
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
          */
         ENTEREDINERROR, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         */
+        UNKNOWN, 
         /**
          * added to help the parsers with the generic types
          */
@@ -81,18 +89,22 @@ public class Consent extends DomainResource {
         public static ConsentState fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("proposed".equals(codeString))
-          return PROPOSED;
-        if ("active".equals(codeString))
-          return ACTIVE;
-        if ("rejected".equals(codeString))
-          return REJECTED;
-        if ("inactive".equals(codeString))
-          return INACTIVE;
+        if ("preparation".equals(codeString))
+          return PREPARATION;
+        if ("in-progress".equals(codeString))
+          return INPROGRESS;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
+        if ("suspended".equals(codeString))
+          return SUSPENDED;
+        if ("aborted".equals(codeString))
+          return ABORTED;
+        if ("completed".equals(codeString))
+          return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -100,45 +112,53 @@ public class Consent extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case DRAFT: return "draft";
-            case PROPOSED: return "proposed";
-            case ACTIVE: return "active";
-            case REJECTED: return "rejected";
-            case INACTIVE: return "inactive";
+            case PREPARATION: return "preparation";
+            case INPROGRESS: return "in-progress";
+            case NOTDONE: return "not-done";
+            case SUSPENDED: return "suspended";
+            case ABORTED: return "aborted";
+            case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org/fhir/consent-state-codes";
-            case PROPOSED: return "http://hl7.org/fhir/consent-state-codes";
-            case ACTIVE: return "http://hl7.org/fhir/consent-state-codes";
-            case REJECTED: return "http://hl7.org/fhir/consent-state-codes";
-            case INACTIVE: return "http://hl7.org/fhir/consent-state-codes";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/consent-state-codes";
+            case PREPARATION: return "http://hl7.org/fhir/event-status";
+            case INPROGRESS: return "http://hl7.org/fhir/event-status";
+            case NOTDONE: return "http://hl7.org/fhir/event-status";
+            case SUSPENDED: return "http://hl7.org/fhir/event-status";
+            case ABORTED: return "http://hl7.org/fhir/event-status";
+            case COMPLETED: return "http://hl7.org/fhir/event-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/event-status";
+            case UNKNOWN: return "http://hl7.org/fhir/event-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The consent is in development or awaiting use but is not yet intended to be acted upon.";
-            case PROPOSED: return "The consent has been proposed but not yet agreed to by all parties. The negotiation stage.";
-            case ACTIVE: return "The consent is to be followed and enforced.";
-            case REJECTED: return "The consent has been rejected by one or more of the parties.";
-            case INACTIVE: return "The consent is terminated or replaced.";
-            case ENTEREDINERROR: return "The consent was created wrongly (e.g. wrong patient) and should be ignored";
+            case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
+            case INPROGRESS: return "The event is currently occurring";
+            case NOTDONE: return "The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
+            case SUSPENDED: return "The event has been temporarily stopped but is expected to resume in the future";
+            case ABORTED: return "The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.";
+            case COMPLETED: return "The event has now concluded";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DRAFT: return "Pending";
-            case PROPOSED: return "Proposed";
-            case ACTIVE: return "Active";
-            case REJECTED: return "Rejected";
-            case INACTIVE: return "Inactive";
+            case PREPARATION: return "Preparation";
+            case INPROGRESS: return "In Progress";
+            case NOTDONE: return "Not Done";
+            case SUSPENDED: return "Suspended";
+            case ABORTED: return "Aborted";
+            case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -149,18 +169,22 @@ public class Consent extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("draft".equals(codeString))
-          return ConsentState.DRAFT;
-        if ("proposed".equals(codeString))
-          return ConsentState.PROPOSED;
-        if ("active".equals(codeString))
-          return ConsentState.ACTIVE;
-        if ("rejected".equals(codeString))
-          return ConsentState.REJECTED;
-        if ("inactive".equals(codeString))
-          return ConsentState.INACTIVE;
+        if ("preparation".equals(codeString))
+          return ConsentState.PREPARATION;
+        if ("in-progress".equals(codeString))
+          return ConsentState.INPROGRESS;
+        if ("not-done".equals(codeString))
+          return ConsentState.NOTDONE;
+        if ("suspended".equals(codeString))
+          return ConsentState.SUSPENDED;
+        if ("aborted".equals(codeString))
+          return ConsentState.ABORTED;
+        if ("completed".equals(codeString))
+          return ConsentState.COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ConsentState.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return ConsentState.UNKNOWN;
         throw new IllegalArgumentException("Unknown ConsentState code '"+codeString+"'");
         }
         public Enumeration<ConsentState> fromType(Base code) throws FHIRException {
@@ -171,160 +195,44 @@ public class Consent extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("draft".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.DRAFT);
-        if ("proposed".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.PROPOSED);
-        if ("active".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.ACTIVE);
-        if ("rejected".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.REJECTED);
-        if ("inactive".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.INACTIVE);
+        if ("preparation".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.PREPARATION);
+        if ("in-progress".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.INPROGRESS);
+        if ("not-done".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.NOTDONE);
+        if ("suspended".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.SUSPENDED);
+        if ("aborted".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.ABORTED);
+        if ("completed".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.COMPLETED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<ConsentState>(this, ConsentState.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.UNKNOWN);
         throw new FHIRException("Unknown ConsentState code '"+codeString+"'");
         }
     public String toCode(ConsentState code) {
-      if (code == ConsentState.DRAFT)
-        return "draft";
-      if (code == ConsentState.PROPOSED)
-        return "proposed";
-      if (code == ConsentState.ACTIVE)
-        return "active";
-      if (code == ConsentState.REJECTED)
-        return "rejected";
-      if (code == ConsentState.INACTIVE)
-        return "inactive";
+      if (code == ConsentState.PREPARATION)
+        return "preparation";
+      if (code == ConsentState.INPROGRESS)
+        return "in-progress";
+      if (code == ConsentState.NOTDONE)
+        return "not-done";
+      if (code == ConsentState.SUSPENDED)
+        return "suspended";
+      if (code == ConsentState.ABORTED)
+        return "aborted";
+      if (code == ConsentState.COMPLETED)
+        return "completed";
       if (code == ConsentState.ENTEREDINERROR)
         return "entered-in-error";
+      if (code == ConsentState.UNKNOWN)
+        return "unknown";
       return "?";
       }
     public String toSystem(ConsentState code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum ConsentScope {
-        /**
-         * Actions to be taken if they are no longer able to make decisions for themselves
-         */
-        ADR, 
-        /**
-         * Consent to participate in research protocol and information sharing required
-         */
-        RESEARCH, 
-        /**
-         * Agreement to collect, access, use or disclose (share) information
-         */
-        PRIVACY, 
-        /**
-         * Consent to undergo a specific treatment
-         */
-        TREATMENT, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ConsentScope fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("ADR".equals(codeString))
-          return ADR;
-        if ("research".equals(codeString))
-          return RESEARCH;
-        if ("privacy".equals(codeString))
-          return PRIVACY;
-        if ("treatment".equals(codeString))
-          return TREATMENT;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ConsentScope code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case ADR: return "ADR";
-            case RESEARCH: return "research";
-            case PRIVACY: return "privacy";
-            case TREATMENT: return "treatment";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case ADR: return "http://hl7.org/fhir/consentscope";
-            case RESEARCH: return "http://hl7.org/fhir/consentscope";
-            case PRIVACY: return "http://hl7.org/fhir/consentscope";
-            case TREATMENT: return "http://hl7.org/fhir/consentscope";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case ADR: return "Actions to be taken if they are no longer able to make decisions for themselves";
-            case RESEARCH: return "Consent to participate in research protocol and information sharing required";
-            case PRIVACY: return "Agreement to collect, access, use or disclose (share) information";
-            case TREATMENT: return "Consent to undergo a specific treatment";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case ADR: return "Advanced Care Directive";
-            case RESEARCH: return "Research";
-            case PRIVACY: return "Privacy Consent";
-            case TREATMENT: return "Treatment";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ConsentScopeEnumFactory implements EnumFactory<ConsentScope> {
-    public ConsentScope fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("ADR".equals(codeString))
-          return ConsentScope.ADR;
-        if ("research".equals(codeString))
-          return ConsentScope.RESEARCH;
-        if ("privacy".equals(codeString))
-          return ConsentScope.PRIVACY;
-        if ("treatment".equals(codeString))
-          return ConsentScope.TREATMENT;
-        throw new IllegalArgumentException("Unknown ConsentScope code '"+codeString+"'");
-        }
-        public Enumeration<ConsentScope> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<ConsentScope>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("ADR".equals(codeString))
-          return new Enumeration<ConsentScope>(this, ConsentScope.ADR);
-        if ("research".equals(codeString))
-          return new Enumeration<ConsentScope>(this, ConsentScope.RESEARCH);
-        if ("privacy".equals(codeString))
-          return new Enumeration<ConsentScope>(this, ConsentScope.PRIVACY);
-        if ("treatment".equals(codeString))
-          return new Enumeration<ConsentScope>(this, ConsentScope.TREATMENT);
-        throw new FHIRException("Unknown ConsentScope code '"+codeString+"'");
-        }
-    public String toCode(ConsentScope code) {
-      if (code == ConsentScope.ADR)
-        return "ADR";
-      if (code == ConsentScope.RESEARCH)
-        return "research";
-      if (code == ConsentScope.PRIVACY)
-        return "privacy";
-      if (code == ConsentScope.TREATMENT)
-        return "treatment";
-      return "?";
-      }
-    public String toSystem(ConsentScope code) {
       return code.getSystem();
       }
     }
@@ -2024,7 +1932,7 @@ public class Consent extends DomainResource {
         /**
          * The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').
          */
-        @Child(name = "reference", type = {Device.class, Group.class, CareTeam.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "reference", type = {Device.class, Group.class, CareTeam.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, PractitionerRole.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource for the actor (or group, by role)", formalDefinition="The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers')." )
         protected Reference reference;
 
@@ -2117,14 +2025,14 @@ public class Consent extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role));
-          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
+          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role);
-          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2490,25 +2398,25 @@ public class Consent extends DomainResource {
     /**
      * Unique identifier for this copy of the Consent Statement.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifier for this record (external references)", formalDefinition="Unique identifier for this copy of the Consent Statement." )
-    protected Identifier identifier;
+    protected List<Identifier> identifier;
 
     /**
      * Indicates the current state of this consent.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | proposed | active | rejected | inactive | entered-in-error", formalDefinition="Indicates the current state of this consent." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-state-codes")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-status")
     protected Enumeration<ConsentState> status;
 
     /**
      * A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.
      */
-    @Child(name = "scope", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "scope", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="Which of the four areas this resource covers", formalDefinition="A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-scope")
-    protected Enumeration<ConsentScope> scope;
+    protected CodeableConcept scope;
 
     /**
      * A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.
@@ -2521,7 +2429,7 @@ public class Consent extends DomainResource {
     /**
      * The patient/healthcare consumer to whom this consent applies.
      */
-    @Child(name = "patient", type = {Patient.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "patient", type = {Patient.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who the consent applies to", formalDefinition="The patient/healthcare consumer to whom this consent applies." )
     protected Reference patient;
 
@@ -2540,13 +2448,13 @@ public class Consent extends DomainResource {
     /**
      * Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.
      */
-    @Child(name = "consentingParty", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "performer", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, PractitionerRole.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who is agreeing to the policy and rules", formalDefinition="Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions." )
-    protected List<Reference> consentingParty;
+    protected List<Reference> performer;
     /**
      * The actual objects that are the target of the reference (Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.)
      */
-    protected List<Resource> consentingPartyTarget;
+    protected List<Resource> performerTarget;
 
 
     /**
@@ -2576,11 +2484,11 @@ public class Consent extends DomainResource {
     protected List<ConsentPolicyComponent> policy;
 
     /**
-     * A reference to the specific base computable policy.
+     * A reference to the specific base computable regulation or policy.
      */
     @Child(name = "policyRule", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Policy that this consents to", formalDefinition="A reference to the specific base computable policy." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActConsentDirective")
+    @Description(shortDefinition="Regulation that this consents to", formalDefinition="A reference to the specific base computable regulation or policy." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-policy")
     protected CodeableConcept policyRule;
 
     /**
@@ -2593,11 +2501,11 @@ public class Consent extends DomainResource {
     /**
      * An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.
      */
-    @Child(name = "provision", type = {}, order=12, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "provision", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Constraints to the base Consent.policyRule", formalDefinition="An exception to the base policy of this consent. An exception can be an addition or removal of access permissions." )
     protected provisionComponent provision;
 
-    private static final long serialVersionUID = 1454563219L;
+    private static final long serialVersionUID = 206528051L;
 
   /**
    * Constructor
@@ -2609,36 +2517,63 @@ public class Consent extends DomainResource {
   /**
    * Constructor
    */
-    public Consent(Enumeration<ConsentState> status, Enumeration<ConsentScope> scope, Reference patient, provisionComponent provision) {
+    public Consent(Enumeration<ConsentState> status, CodeableConcept scope) {
       super();
       this.status = status;
       this.scope = scope;
-      this.patient = patient;
-      this.provision = provision;
     }
 
     /**
      * @return {@link #identifier} (Unique identifier for this copy of the Consent Statement.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Consent.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Consent setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public Consent addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Unique identifier for this copy of the Consent Statement.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public Consent setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2687,19 +2622,15 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.). This is the underlying object with id, value and extensions. The accessor "getScope" gives direct access to the value
+     * @return {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.)
      */
-    public Enumeration<ConsentScope> getScopeElement() { 
+    public CodeableConcept getScope() { 
       if (this.scope == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Consent.scope");
         else if (Configuration.doAutoCreate())
-          this.scope = new Enumeration<ConsentScope>(new ConsentScopeEnumFactory()); // bb
+          this.scope = new CodeableConcept(); // cc
       return this.scope;
-    }
-
-    public boolean hasScopeElement() { 
-      return this.scope != null && !this.scope.isEmpty();
     }
 
     public boolean hasScope() { 
@@ -2707,27 +2638,10 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @param value {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.). This is the underlying object with id, value and extensions. The accessor "getScope" gives direct access to the value
+     * @param value {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.)
      */
-    public Consent setScopeElement(Enumeration<ConsentScope> value) { 
+    public Consent setScope(CodeableConcept value) { 
       this.scope = value;
-      return this;
-    }
-
-    /**
-     * @return A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.
-     */
-    public ConsentScope getScope() { 
-      return this.scope == null ? null : this.scope.getValue();
-    }
-
-    /**
-     * @param value A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.
-     */
-    public Consent setScope(ConsentScope value) { 
-        if (this.scope == null)
-          this.scope = new Enumeration<ConsentScope>(new ConsentScopeEnumFactory());
-        this.scope.setValue(value);
       return this;
     }
 
@@ -2878,66 +2792,66 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #consentingParty} (Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.)
+     * @return {@link #performer} (Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.)
      */
-    public List<Reference> getConsentingParty() { 
-      if (this.consentingParty == null)
-        this.consentingParty = new ArrayList<Reference>();
-      return this.consentingParty;
+    public List<Reference> getPerformer() { 
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      return this.performer;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Consent setConsentingParty(List<Reference> theConsentingParty) { 
-      this.consentingParty = theConsentingParty;
+    public Consent setPerformer(List<Reference> thePerformer) { 
+      this.performer = thePerformer;
       return this;
     }
 
-    public boolean hasConsentingParty() { 
-      if (this.consentingParty == null)
+    public boolean hasPerformer() { 
+      if (this.performer == null)
         return false;
-      for (Reference item : this.consentingParty)
+      for (Reference item : this.performer)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addConsentingParty() { //3
+    public Reference addPerformer() { //3
       Reference t = new Reference();
-      if (this.consentingParty == null)
-        this.consentingParty = new ArrayList<Reference>();
-      this.consentingParty.add(t);
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      this.performer.add(t);
       return t;
     }
 
-    public Consent addConsentingParty(Reference t) { //3
+    public Consent addPerformer(Reference t) { //3
       if (t == null)
         return this;
-      if (this.consentingParty == null)
-        this.consentingParty = new ArrayList<Reference>();
-      this.consentingParty.add(t);
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      this.performer.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #consentingParty}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
      */
-    public Reference getConsentingPartyFirstRep() { 
-      if (getConsentingParty().isEmpty()) {
-        addConsentingParty();
+    public Reference getPerformerFirstRep() { 
+      if (getPerformer().isEmpty()) {
+        addPerformer();
       }
-      return getConsentingParty().get(0);
+      return getPerformer().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getConsentingPartyTarget() { 
-      if (this.consentingPartyTarget == null)
-        this.consentingPartyTarget = new ArrayList<Resource>();
-      return this.consentingPartyTarget;
+    public List<Resource> getPerformerTarget() { 
+      if (this.performerTarget == null)
+        this.performerTarget = new ArrayList<Resource>();
+      return this.performerTarget;
     }
 
     /**
@@ -3127,7 +3041,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #policyRule} (A reference to the specific base computable policy.)
+     * @return {@link #policyRule} (A reference to the specific base computable regulation or policy.)
      */
     public CodeableConcept getPolicyRule() { 
       if (this.policyRule == null)
@@ -3143,7 +3057,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @param value {@link #policyRule} (A reference to the specific base computable policy.)
+     * @param value {@link #policyRule} (A reference to the specific base computable regulation or policy.)
      */
     public Consent setPolicyRule(CodeableConcept value) { 
       this.policyRule = value;
@@ -3229,17 +3143,17 @@ public class Consent extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status));
-        children.add(new Property("scope", "code", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope));
+        children.add(new Property("scope", "CodeableConcept", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope));
         children.add(new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient));
         children.add(new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime));
-        children.add(new Property("consentingParty", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, consentingParty));
+        children.add(new Property("performer", "Reference(Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, performer));
         children.add(new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization));
         children.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source));
         children.add(new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
-        children.add(new Property("policyRule", "CodeableConcept", "A reference to the specific base computable policy.", 0, 1, policyRule));
+        children.add(new Property("policyRule", "CodeableConcept", "A reference to the specific base computable regulation or policy.", 0, 1, policyRule));
         children.add(new Property("verification", "", "Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification));
         children.add(new Property("provision", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, 1, provision));
       }
@@ -3247,13 +3161,13 @@ public class Consent extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status);
-        case 109264468: /*scope*/  return new Property("scope", "code", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope);
+        case 109264468: /*scope*/  return new Property("scope", "CodeableConcept", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient);
         case 1792749467: /*dateTime*/  return new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime);
-        case -1886702018: /*consentingParty*/  return new Property("consentingParty", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, consentingParty);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, performer);
         case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization);
         case -1698413947: /*source[x]*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
         case -896505829: /*source*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
@@ -3261,7 +3175,7 @@ public class Consent extends DomainResource {
         case -1985492188: /*sourceIdentifier*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
         case -244259472: /*sourceReference*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
         case -982670030: /*policy*/  return new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy);
-        case 1593493326: /*policyRule*/  return new Property("policyRule", "CodeableConcept", "A reference to the specific base computable policy.", 0, 1, policyRule);
+        case 1593493326: /*policyRule*/  return new Property("policyRule", "CodeableConcept", "A reference to the specific base computable regulation or policy.", 0, 1, policyRule);
         case -1484401125: /*verification*/  return new Property("verification", "", "Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification);
         case -547120939: /*provision*/  return new Property("provision", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, 1, provision);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -3272,13 +3186,13 @@ public class Consent extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConsentState>
-        case 109264468: /*scope*/ return this.scope == null ? new Base[0] : new Base[] {this.scope}; // Enumeration<ConsentScope>
+        case 109264468: /*scope*/ return this.scope == null ? new Base[0] : new Base[] {this.scope}; // CodeableConcept
         case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1792749467: /*dateTime*/ return this.dateTime == null ? new Base[0] : new Base[] {this.dateTime}; // DateTimeType
-        case -1886702018: /*consentingParty*/ return this.consentingParty == null ? new Base[0] : this.consentingParty.toArray(new Base[this.consentingParty.size()]); // Reference
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : this.organization.toArray(new Base[this.organization.size()]); // Reference
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
         case -982670030: /*policy*/ return this.policy == null ? new Base[0] : this.policy.toArray(new Base[this.policy.size()]); // ConsentPolicyComponent
@@ -3294,15 +3208,14 @@ public class Consent extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -892481550: // status
           value = new ConsentStateEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ConsentState>
           return value;
         case 109264468: // scope
-          value = new ConsentScopeEnumFactory().fromType(castToCode(value));
-          this.scope = (Enumeration) value; // Enumeration<ConsentScope>
+          this.scope = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 50511102: // category
           this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
@@ -3313,8 +3226,8 @@ public class Consent extends DomainResource {
         case 1792749467: // dateTime
           this.dateTime = castToDateTime(value); // DateTimeType
           return value;
-        case -1886702018: // consentingParty
-          this.getConsentingParty().add(castToReference(value)); // Reference
+        case 481140686: // performer
+          this.getPerformer().add(castToReference(value)); // Reference
           return value;
         case 1178922291: // organization
           this.getOrganization().add(castToReference(value)); // Reference
@@ -3342,21 +3255,20 @@ public class Consent extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("status")) {
           value = new ConsentStateEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<ConsentState>
         } else if (name.equals("scope")) {
-          value = new ConsentScopeEnumFactory().fromType(castToCode(value));
-          this.scope = (Enumeration) value; // Enumeration<ConsentScope>
+          this.scope = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("category")) {
           this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
         } else if (name.equals("dateTime")) {
           this.dateTime = castToDateTime(value); // DateTimeType
-        } else if (name.equals("consentingParty")) {
-          this.getConsentingParty().add(castToReference(value));
+        } else if (name.equals("performer")) {
+          this.getPerformer().add(castToReference(value));
         } else if (name.equals("organization")) {
           this.getOrganization().add(castToReference(value));
         } else if (name.equals("source[x]")) {
@@ -3377,13 +3289,13 @@ public class Consent extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case -892481550:  return getStatusElement();
-        case 109264468:  return getScopeElement();
+        case 109264468:  return getScope(); 
         case 50511102:  return addCategory(); 
         case -791418107:  return getPatient(); 
         case 1792749467:  return getDateTimeElement();
-        case -1886702018:  return addConsentingParty(); 
+        case 481140686:  return addPerformer(); 
         case 1178922291:  return addOrganization(); 
         case -1698413947:  return getSource(); 
         case -896505829:  return getSource(); 
@@ -3401,11 +3313,11 @@ public class Consent extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -892481550: /*status*/ return new String[] {"code"};
-        case 109264468: /*scope*/ return new String[] {"code"};
+        case 109264468: /*scope*/ return new String[] {"CodeableConcept"};
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case -791418107: /*patient*/ return new String[] {"Reference"};
         case 1792749467: /*dateTime*/ return new String[] {"dateTime"};
-        case -1886702018: /*consentingParty*/ return new String[] {"Reference"};
+        case 481140686: /*performer*/ return new String[] {"Reference"};
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case -896505829: /*source*/ return new String[] {"Attachment", "Identifier", "Reference"};
         case -982670030: /*policy*/ return new String[] {};
@@ -3420,14 +3332,14 @@ public class Consent extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Consent.status");
         }
         else if (name.equals("scope")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Consent.scope");
+          this.scope = new CodeableConcept();
+          return this.scope;
         }
         else if (name.equals("category")) {
           return addCategory();
@@ -3439,8 +3351,8 @@ public class Consent extends DomainResource {
         else if (name.equals("dateTime")) {
           throw new FHIRException("Cannot call addChild on a primitive type Consent.dateTime");
         }
-        else if (name.equals("consentingParty")) {
-          return addConsentingParty();
+        else if (name.equals("performer")) {
+          return addPerformer();
         }
         else if (name.equals("organization")) {
           return addOrganization();
@@ -3483,7 +3395,11 @@ public class Consent extends DomainResource {
       public Consent copy() {
         Consent dst = new Consent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.status = status == null ? null : status.copy();
         dst.scope = scope == null ? null : scope.copy();
         if (category != null) {
@@ -3493,10 +3409,10 @@ public class Consent extends DomainResource {
         };
         dst.patient = patient == null ? null : patient.copy();
         dst.dateTime = dateTime == null ? null : dateTime.copy();
-        if (consentingParty != null) {
-          dst.consentingParty = new ArrayList<Reference>();
-          for (Reference i : consentingParty)
-            dst.consentingParty.add(i.copy());
+        if (performer != null) {
+          dst.performer = new ArrayList<Reference>();
+          for (Reference i : performer)
+            dst.performer.add(i.copy());
         };
         if (organization != null) {
           dst.organization = new ArrayList<Reference>();
@@ -3532,7 +3448,7 @@ public class Consent extends DomainResource {
         Consent o = (Consent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(scope, o.scope, true)
            && compareDeep(category, o.category, true) && compareDeep(patient, o.patient, true) && compareDeep(dateTime, o.dateTime, true)
-           && compareDeep(consentingParty, o.consentingParty, true) && compareDeep(organization, o.organization, true)
+           && compareDeep(performer, o.performer, true) && compareDeep(organization, o.organization, true)
            && compareDeep(source, o.source, true) && compareDeep(policy, o.policy, true) && compareDeep(policyRule, o.policyRule, true)
            && compareDeep(verification, o.verification, true) && compareDeep(provision, o.provision, true)
           ;
@@ -3545,13 +3461,12 @@ public class Consent extends DomainResource {
         if (!(other_ instanceof Consent))
           return false;
         Consent o = (Consent) other_;
-        return compareValues(status, o.status, true) && compareValues(scope, o.scope, true) && compareValues(dateTime, o.dateTime, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(dateTime, o.dateTime, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, scope
-          , category, patient, dateTime, consentingParty, organization, source, policy, policyRule
+          , category, patient, dateTime, performer, organization, source, policy, policyRule
           , verification, provision);
       }
 
@@ -3720,7 +3635,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.provision.actor.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Consent.provision.actor.reference", description="Resource for the actor (or group, by role)", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="actor", path="Consent.provision.actor.reference", description="Resource for the actor (or group, by role)", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -3835,17 +3750,17 @@ public class Consent extends DomainResource {
    * <p>
    * Description: <b>Who is agreeing to the policy and rules</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Consent.consentingParty</b><br>
+   * Path: <b>Consent.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="consentor", path="Consent.consentingParty", description="Who is agreeing to the policy and rules", type="reference", target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="consentor", path="Consent.performer", description="Who is agreeing to the policy and rules", type="reference", target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_CONSENTOR = "consentor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>consentor</b>
    * <p>
    * Description: <b>Who is agreeing to the policy and rules</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Consent.consentingParty</b><br>
+   * Path: <b>Consent.performer</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONSENTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONSENTOR);

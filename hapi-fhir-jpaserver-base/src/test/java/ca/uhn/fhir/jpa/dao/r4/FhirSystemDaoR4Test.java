@@ -528,7 +528,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 			patient.getMeta().addTag(null, "Dog", "Puppies");
 			patient.getMeta().getSecurity().add(new Coding().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
-			patient.getMeta().getProfile().add(new IdType("http://profile/1"));
+			patient.getMeta().getProfile().add(new CanonicalType("http://profile/1"));
 
 			id1 = myPatientDao.create(patient, mySrd).getId();
 		}
@@ -539,7 +539,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
 			patient.getMeta().getSecurity().add(new Coding().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
-			patient.getMeta().getProfile().add(new IdType("http://profile/2"));
+			patient.getMeta().getProfile().add(new CanonicalType("http://profile/2"));
 
 			myPatientDao.create(patient, mySrd);
 		}
@@ -561,7 +561,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
 		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
 		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriType> profiles = meta.getProfile();
+		List<CanonicalType> profiles = meta.getProfile();
 		assertEquals(2, profiles.size());
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());

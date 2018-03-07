@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -2015,7 +2015,7 @@ public class EligibilityResponse extends DomainResource {
      * Transaction status: error, complete.
      */
     @Child(name = "outcome", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="complete | error | partial", formalDefinition="Transaction status: error, complete." )
+    @Description(shortDefinition="received | complete | error | partial", formalDefinition="Transaction status: error, complete." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
     protected Enumeration<RemittanceOutcome> outcome;
 

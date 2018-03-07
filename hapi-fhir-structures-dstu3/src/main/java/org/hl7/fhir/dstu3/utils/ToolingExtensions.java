@@ -53,8 +53,12 @@ import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 
 public class ToolingExtensions {
@@ -64,7 +68,8 @@ public class ToolingExtensions {
 //  private static final String EXT_OID = "http://hl7.org/fhir/StructureDefinition/valueset-oid";
 //  public static final String EXT_DEPRECATED = "http://hl7.org/fhir/StructureDefinition/codesystem-deprecated";
   public static final String EXT_DEFINITION = "http://hl7.org/fhir/StructureDefinition/valueset-definition";
-  public static final String EXT_COMMENT = "http://hl7.org/fhir/StructureDefinition/valueset-comments";
+  public static final String EXT_CS_COMMENT = "http://hl7.org/fhir/StructureDefinition/codesystem-comments";
+  public static final String EXT_VS_COMMENT = "http://hl7.org/fhir/StructureDefinition/valueset-comments";
   private static final String EXT_IDENTIFIER = "http://hl7.org/fhir/StructureDefinition/identifier";
   public static final String EXT_TRANSLATION = "http://hl7.org/fhir/StructureDefinition/translation";
   public static final String EXT_ISSUE_SOURCE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source";
@@ -86,7 +91,7 @@ public class ToolingExtensions {
   public static final String EXT_MAPPING_SUFFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-suffix";
 
 //  public static final String EXT_FLYOVER = "http://hl7.org/fhir/Profile/questionnaire-extensions#flyover";
-//  private static final String EXT_QTYPE = "http://www.healthintersections.com.au/fhir/Profile/metadata#type";
+  public static final String EXT_QTYPE = "http://hl7.org/fhir/StructureDefinition/questionnnaire-baseType";
 //  private static final String EXT_QREF = "http://www.healthintersections.com.au/fhir/Profile/metadata#reference";
 //  private static final String EXTENSION_FILTER_ONLY = "http://www.healthintersections.com.au/fhir/Profile/metadata#expandNeedsFilter";
 //  private static final String EXT_TYPE = "http://www.healthintersections.com.au/fhir/Profile/metadata#type";
@@ -99,20 +104,21 @@ public class ToolingExtensions {
   public static final String EXT_RESOURCE_CATEGORY = "http://hl7.org/fhir/StructureDefinition/structuredefinition-category";
   public static final String EXT_TABLE_NAME = "http://hl7.org/fhir/StructureDefinition/structuredefinition-table-name";
   public static final String EXT_OO_FILE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-file";
-
+  public static final String EXT_WORKGROUP = "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg";
+  public static final String EXT_BALLOT_STATUS = "http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status";
 
 
   // specific extension helpers
 
-//  public static Extension makeIssueSource(Source source) {
-//    Extension ex = new Extension();
-//    // todo: write this up and get it published with the pack (and handle the redirect?)
-//    ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);
-//    CodeType c = new CodeType();
-//    c.setValue(source.toString());
-//    ex.setValue(c);
-//    return ex;
-//  }
+  public static Extension makeIssueSource(Source source) {
+    Extension ex = new Extension();
+    // todo: write this up and get it published with the pack (and handle the redirect?)
+    ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);
+    CodeType c = new CodeType();
+    c.setValue(source.toString());
+    ex.setValue(c);
+    return ex;
+  }
 
   public static boolean hasExtension(DomainResource de, String url) {
     return getExtension(de, url) != null;
@@ -170,9 +176,18 @@ public class ToolingExtensions {
       dr.getExtension().add(Factory.newExtension(url, new IntegerType(value), true));   
   }
 
-  public static void addComment(Element nc, String comment) {
+  public static void addVSComment(ConceptSetComponent nc, String comment) {
     if (!StringUtils.isBlank(comment))
-      nc.getExtension().add(Factory.newExtension(EXT_COMMENT, Factory.newString_(comment), true));   
+      nc.getExtension().add(Factory.newExtension(EXT_VS_COMMENT, Factory.newString_(comment), true));   
+  }
+  public static void addVSComment(ConceptReferenceComponent nc, String comment) {
+    if (!StringUtils.isBlank(comment))
+      nc.getExtension().add(Factory.newExtension(EXT_VS_COMMENT, Factory.newString_(comment), true));   
+  }
+
+  public static void addCSComment(ConceptDefinitionComponent nc, String comment) {
+    if (!StringUtils.isBlank(comment))
+      nc.getExtension().add(Factory.newExtension(EXT_CS_COMMENT, Factory.newString_(comment), true));   
   }
 
 //  public static void markDeprecated(Element nc) {
@@ -203,6 +218,12 @@ public class ToolingExtensions {
       return null;
     if (ex.getValue() instanceof UriType)
       return ((UriType) ex.getValue()).getValue();
+    if (ex.getValue() instanceof CodeType)
+      return ((CodeType) ex.getValue()).getValue();
+    if (ex.getValue() instanceof IntegerType)
+      return ((IntegerType) ex.getValue()).asStringValue();
+    if ((ex.getValue() instanceof MarkdownType))
+      return ((MarkdownType) ex.getValue()).getValue();
     if (!(ex.getValue() instanceof StringType))
       return null;
     return ((StringType) ex.getValue()).getValue();
@@ -216,6 +237,10 @@ public class ToolingExtensions {
       return ((StringType) ex.getValue()).getValue();
     if ((ex.getValue() instanceof UriType))
       return ((UriType) ex.getValue()).getValue();
+    if (ex.getValue() instanceof CodeType)
+      return ((CodeType) ex.getValue()).getValue();
+    if (ex.getValue() instanceof IntegerType)
+      return ((IntegerType) ex.getValue()).asStringValue();
     if ((ex.getValue() instanceof MarkdownType))
       return ((MarkdownType) ex.getValue()).getValue();
     return null;
@@ -256,16 +281,16 @@ public class ToolingExtensions {
     return true;
   }
 
-  public static String getComment(ConceptDefinitionComponent c) {
-    return readStringExtension(c, EXT_COMMENT);    
+  public static String getCSComment(ConceptDefinitionComponent c) {
+    return readStringExtension(c, EXT_CS_COMMENT);    
   }
 //
 //  public static Boolean getDeprecated(Element c) {
 //    return readBooleanExtension(c, EXT_DEPRECATED);    
 //  }
 
-  public static boolean hasComment(ConceptDefinitionComponent c) {
-    return findStringExtension(c, EXT_COMMENT);    
+  public static boolean hasCSComment(ConceptDefinitionComponent c) {
+    return findStringExtension(c, EXT_CS_COMMENT);    
   }
 
 //  public static boolean hasDeprecated(Element c) {
@@ -353,6 +378,30 @@ public class ToolingExtensions {
       ext.setValue(new StringType(value));
     else
       resource.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
+  }
+
+  public static void setStringExtension(Element element, String uri, String value) {
+    Extension ext = getExtension(element, uri);
+    if (ext != null)
+      ext.setValue(new StringType(value));
+    else
+      element.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
+  }
+
+  public static void setCodeExtension(DomainResource resource, String uri, String value) {
+    Extension ext = getExtension(resource, uri);
+    if (ext != null)
+      ext.setValue(new CodeType(value));
+    else
+      resource.getExtension().add(new Extension(new UriType(uri)).setValue(new CodeType(value)));
+  }
+
+  public static void setIntegerExtension(DomainResource resource, String uri, int value) {
+    Extension ext = getExtension(resource, uri);
+    if (ext != null)
+      ext.setValue(new IntegerType(value));
+    else
+      resource.getExtension().add(new Extension(new UriType(uri)).setValue(new IntegerType(value)));
   }
 
 //  public static String getOID(CodeSystem define) {
@@ -495,6 +544,7 @@ public class ToolingExtensions {
       }
     }
   }
+
 
 //  public static boolean hasOID(ValueSet vs) {
 //    return hasExtension(vs, EXT_OID);

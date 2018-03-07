@@ -71,23 +71,6 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testCreateInvalidParamMismatchedResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.setBase(ResourceTypeEnum.PATIENT);
-		fooSp.setCode("foo");
-		fooSp.setType(SearchParamTypeEnum.TOKEN);
-		fooSp.setXpath("Patient.gender or Observation.code");
-		fooSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		fooSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"Observation.code\". All paths in a single SearchParameter must match the same resource type", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testCreateInvalidParamNoPath() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setBase(ResourceTypeEnum.PATIENT);

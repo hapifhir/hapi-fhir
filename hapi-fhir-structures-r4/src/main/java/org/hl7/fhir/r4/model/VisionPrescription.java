@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -429,77 +429,69 @@ public class VisionPrescription extends DomainResource {
         protected IntegerType axis;
 
         /**
-         * Amount of prism to compensate for eye alignment in fractional units.
+         * Allows for adjustment on two axis.
          */
-        @Child(name = "prism", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Lens prism", formalDefinition="Amount of prism to compensate for eye alignment in fractional units." )
-        protected DecimalType prism;
-
-        /**
-         * The relative base, or reference lens edge, for the prism.
-         */
-        @Child(name = "base", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="up | down | in | out", formalDefinition="The relative base, or reference lens edge, for the prism." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-base-codes")
-        protected Enumeration<VisionBase> base;
+        @Child(name = "prism", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Lens prism", formalDefinition="Allows for adjustment on two axis." )
+        protected List<PrismComponent> prism;
 
         /**
          * Power adjustment for multifocal lenses measured in diopters (0.25 units).
          */
-        @Child(name = "add", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "add", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens add", formalDefinition="Power adjustment for multifocal lenses measured in diopters (0.25 units)." )
         protected DecimalType add;
 
         /**
          * Contact lens power measured in diopters (0.25 units).
          */
-        @Child(name = "power", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "power", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens power", formalDefinition="Contact lens power measured in diopters (0.25 units)." )
         protected DecimalType power;
 
         /**
          * Back curvature measured in millimeters.
          */
-        @Child(name = "backCurve", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "backCurve", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens back curvature", formalDefinition="Back curvature measured in millimeters." )
         protected DecimalType backCurve;
 
         /**
          * Contact lens diameter measured in millimeters.
          */
-        @Child(name = "diameter", type = {DecimalType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "diameter", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens diameter", formalDefinition="Contact lens diameter measured in millimeters." )
         protected DecimalType diameter;
 
         /**
          * The recommended maximum wear period for the lens.
          */
-        @Child(name = "duration", type = {SimpleQuantity.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "duration", type = {SimpleQuantity.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens wear duration", formalDefinition="The recommended maximum wear period for the lens." )
         protected SimpleQuantity duration;
 
         /**
          * Special color or pattern.
          */
-        @Child(name = "color", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "color", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Color required", formalDefinition="Special color or pattern." )
         protected StringType color;
 
         /**
          * Brand recommendations or restrictions.
          */
-        @Child(name = "brand", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "brand", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Brand required", formalDefinition="Brand recommendations or restrictions." )
         protected StringType brand;
 
         /**
          * Notes for special requirements such as coatings and lens materials.
          */
-        @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "note", type = {Annotation.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Notes for coatings", formalDefinition="Notes for special requirements such as coatings and lens materials." )
         protected List<Annotation> note;
 
-        private static final long serialVersionUID = 400998008L;
+        private static final long serialVersionUID = -1539573506L;
 
     /**
      * Constructor
@@ -761,119 +753,56 @@ public class VisionPrescription extends DomainResource {
         }
 
         /**
-         * @return {@link #prism} (Amount of prism to compensate for eye alignment in fractional units.). This is the underlying object with id, value and extensions. The accessor "getPrism" gives direct access to the value
+         * @return {@link #prism} (Allows for adjustment on two axis.)
          */
-        public DecimalType getPrismElement() { 
+        public List<PrismComponent> getPrism() { 
           if (this.prism == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VisionPrescriptionDispenseComponent.prism");
-            else if (Configuration.doAutoCreate())
-              this.prism = new DecimalType(); // bb
+            this.prism = new ArrayList<PrismComponent>();
           return this.prism;
         }
 
-        public boolean hasPrismElement() { 
-          return this.prism != null && !this.prism.isEmpty();
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public VisionPrescriptionDispenseComponent setPrism(List<PrismComponent> thePrism) { 
+          this.prism = thePrism;
+          return this;
         }
 
         public boolean hasPrism() { 
-          return this.prism != null && !this.prism.isEmpty();
+          if (this.prism == null)
+            return false;
+          for (PrismComponent item : this.prism)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
-        /**
-         * @param value {@link #prism} (Amount of prism to compensate for eye alignment in fractional units.). This is the underlying object with id, value and extensions. The accessor "getPrism" gives direct access to the value
-         */
-        public VisionPrescriptionDispenseComponent setPrismElement(DecimalType value) { 
-          this.prism = value;
+        public PrismComponent addPrism() { //3
+          PrismComponent t = new PrismComponent();
+          if (this.prism == null)
+            this.prism = new ArrayList<PrismComponent>();
+          this.prism.add(t);
+          return t;
+        }
+
+        public VisionPrescriptionDispenseComponent addPrism(PrismComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.prism == null)
+            this.prism = new ArrayList<PrismComponent>();
+          this.prism.add(t);
           return this;
         }
 
         /**
-         * @return Amount of prism to compensate for eye alignment in fractional units.
+         * @return The first repetition of repeating field {@link #prism}, creating it if it does not already exist
          */
-        public BigDecimal getPrism() { 
-          return this.prism == null ? null : this.prism.getValue();
-        }
-
-        /**
-         * @param value Amount of prism to compensate for eye alignment in fractional units.
-         */
-        public VisionPrescriptionDispenseComponent setPrism(BigDecimal value) { 
-          if (value == null)
-            this.prism = null;
-          else {
-            if (this.prism == null)
-              this.prism = new DecimalType();
-            this.prism.setValue(value);
+        public PrismComponent getPrismFirstRep() { 
+          if (getPrism().isEmpty()) {
+            addPrism();
           }
-          return this;
-        }
-
-        /**
-         * @param value Amount of prism to compensate for eye alignment in fractional units.
-         */
-        public VisionPrescriptionDispenseComponent setPrism(long value) { 
-              this.prism = new DecimalType();
-            this.prism.setValue(value);
-          return this;
-        }
-
-        /**
-         * @param value Amount of prism to compensate for eye alignment in fractional units.
-         */
-        public VisionPrescriptionDispenseComponent setPrism(double value) { 
-              this.prism = new DecimalType();
-            this.prism.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
-         */
-        public Enumeration<VisionBase> getBaseElement() { 
-          if (this.base == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VisionPrescriptionDispenseComponent.base");
-            else if (Configuration.doAutoCreate())
-              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory()); // bb
-          return this.base;
-        }
-
-        public boolean hasBaseElement() { 
-          return this.base != null && !this.base.isEmpty();
-        }
-
-        public boolean hasBase() { 
-          return this.base != null && !this.base.isEmpty();
-        }
-
-        /**
-         * @param value {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
-         */
-        public VisionPrescriptionDispenseComponent setBaseElement(Enumeration<VisionBase> value) { 
-          this.base = value;
-          return this;
-        }
-
-        /**
-         * @return The relative base, or reference lens edge, for the prism.
-         */
-        public VisionBase getBase() { 
-          return this.base == null ? null : this.base.getValue();
-        }
-
-        /**
-         * @param value The relative base, or reference lens edge, for the prism.
-         */
-        public VisionPrescriptionDispenseComponent setBase(VisionBase value) { 
-          if (value == null)
-            this.base = null;
-          else {
-            if (this.base == null)
-              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory());
-            this.base.setValue(value);
-          }
-          return this;
+          return getPrism().get(0);
         }
 
         /**
@@ -1326,8 +1255,7 @@ public class VisionPrescription extends DomainResource {
           children.add(new Property("sphere", "decimal", "Lens power measured in diopters (0.25 units).", 0, 1, sphere));
           children.add(new Property("cylinder", "decimal", "Power adjustment for astigmatism measured in diopters (0.25 units).", 0, 1, cylinder));
           children.add(new Property("axis", "integer", "Adjustment for astigmatism measured in integer degrees.", 0, 1, axis));
-          children.add(new Property("prism", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, prism));
-          children.add(new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base));
+          children.add(new Property("prism", "", "Allows for adjustment on two axis.", 0, java.lang.Integer.MAX_VALUE, prism));
           children.add(new Property("add", "decimal", "Power adjustment for multifocal lenses measured in diopters (0.25 units).", 0, 1, add));
           children.add(new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, 1, power));
           children.add(new Property("backCurve", "decimal", "Back curvature measured in millimeters.", 0, 1, backCurve));
@@ -1346,8 +1274,7 @@ public class VisionPrescription extends DomainResource {
           case -895981619: /*sphere*/  return new Property("sphere", "decimal", "Lens power measured in diopters (0.25 units).", 0, 1, sphere);
           case -349378602: /*cylinder*/  return new Property("cylinder", "decimal", "Power adjustment for astigmatism measured in diopters (0.25 units).", 0, 1, cylinder);
           case 3008417: /*axis*/  return new Property("axis", "integer", "Adjustment for astigmatism measured in integer degrees.", 0, 1, axis);
-          case 106935105: /*prism*/  return new Property("prism", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, prism);
-          case 3016401: /*base*/  return new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base);
+          case 106935105: /*prism*/  return new Property("prism", "", "Allows for adjustment on two axis.", 0, java.lang.Integer.MAX_VALUE, prism);
           case 96417: /*add*/  return new Property("add", "decimal", "Power adjustment for multifocal lenses measured in diopters (0.25 units).", 0, 1, add);
           case 106858757: /*power*/  return new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, 1, power);
           case 1309344840: /*backCurve*/  return new Property("backCurve", "decimal", "Back curvature measured in millimeters.", 0, 1, backCurve);
@@ -1369,8 +1296,7 @@ public class VisionPrescription extends DomainResource {
         case -895981619: /*sphere*/ return this.sphere == null ? new Base[0] : new Base[] {this.sphere}; // DecimalType
         case -349378602: /*cylinder*/ return this.cylinder == null ? new Base[0] : new Base[] {this.cylinder}; // DecimalType
         case 3008417: /*axis*/ return this.axis == null ? new Base[0] : new Base[] {this.axis}; // IntegerType
-        case 106935105: /*prism*/ return this.prism == null ? new Base[0] : new Base[] {this.prism}; // DecimalType
-        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Enumeration<VisionBase>
+        case 106935105: /*prism*/ return this.prism == null ? new Base[0] : this.prism.toArray(new Base[this.prism.size()]); // PrismComponent
         case 96417: /*add*/ return this.add == null ? new Base[0] : new Base[] {this.add}; // DecimalType
         case 106858757: /*power*/ return this.power == null ? new Base[0] : new Base[] {this.power}; // DecimalType
         case 1309344840: /*backCurve*/ return this.backCurve == null ? new Base[0] : new Base[] {this.backCurve}; // DecimalType
@@ -1404,11 +1330,7 @@ public class VisionPrescription extends DomainResource {
           this.axis = castToInteger(value); // IntegerType
           return value;
         case 106935105: // prism
-          this.prism = castToDecimal(value); // DecimalType
-          return value;
-        case 3016401: // base
-          value = new VisionBaseEnumFactory().fromType(castToCode(value));
-          this.base = (Enumeration) value; // Enumeration<VisionBase>
+          this.getPrism().add((PrismComponent) value); // PrismComponent
           return value;
         case 96417: // add
           this.add = castToDecimal(value); // DecimalType
@@ -1453,10 +1375,7 @@ public class VisionPrescription extends DomainResource {
         } else if (name.equals("axis")) {
           this.axis = castToInteger(value); // IntegerType
         } else if (name.equals("prism")) {
-          this.prism = castToDecimal(value); // DecimalType
-        } else if (name.equals("base")) {
-          value = new VisionBaseEnumFactory().fromType(castToCode(value));
-          this.base = (Enumeration) value; // Enumeration<VisionBase>
+          this.getPrism().add((PrismComponent) value);
         } else if (name.equals("add")) {
           this.add = castToDecimal(value); // DecimalType
         } else if (name.equals("power")) {
@@ -1486,8 +1405,7 @@ public class VisionPrescription extends DomainResource {
         case -895981619:  return getSphereElement();
         case -349378602:  return getCylinderElement();
         case 3008417:  return getAxisElement();
-        case 106935105:  return getPrismElement();
-        case 3016401:  return getBaseElement();
+        case 106935105:  return addPrism(); 
         case 96417:  return getAddElement();
         case 106858757:  return getPowerElement();
         case 1309344840:  return getBackCurveElement();
@@ -1509,8 +1427,7 @@ public class VisionPrescription extends DomainResource {
         case -895981619: /*sphere*/ return new String[] {"decimal"};
         case -349378602: /*cylinder*/ return new String[] {"decimal"};
         case 3008417: /*axis*/ return new String[] {"integer"};
-        case 106935105: /*prism*/ return new String[] {"decimal"};
-        case 3016401: /*base*/ return new String[] {"code"};
+        case 106935105: /*prism*/ return new String[] {};
         case 96417: /*add*/ return new String[] {"decimal"};
         case 106858757: /*power*/ return new String[] {"decimal"};
         case 1309344840: /*backCurve*/ return new String[] {"decimal"};
@@ -1543,10 +1460,7 @@ public class VisionPrescription extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.axis");
         }
         else if (name.equals("prism")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.prism");
-        }
-        else if (name.equals("base")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.base");
+          return addPrism();
         }
         else if (name.equals("add")) {
           throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.add");
@@ -1585,8 +1499,11 @@ public class VisionPrescription extends DomainResource {
         dst.sphere = sphere == null ? null : sphere.copy();
         dst.cylinder = cylinder == null ? null : cylinder.copy();
         dst.axis = axis == null ? null : axis.copy();
-        dst.prism = prism == null ? null : prism.copy();
-        dst.base = base == null ? null : base.copy();
+        if (prism != null) {
+          dst.prism = new ArrayList<PrismComponent>();
+          for (PrismComponent i : prism)
+            dst.prism.add(i.copy());
+        };
         dst.add = add == null ? null : add.copy();
         dst.power = power == null ? null : power.copy();
         dst.backCurve = backCurve == null ? null : backCurve.copy();
@@ -1611,10 +1528,9 @@ public class VisionPrescription extends DomainResource {
         VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareDeep(product, o.product, true) && compareDeep(eye, o.eye, true) && compareDeep(sphere, o.sphere, true)
            && compareDeep(cylinder, o.cylinder, true) && compareDeep(axis, o.axis, true) && compareDeep(prism, o.prism, true)
-           && compareDeep(base, o.base, true) && compareDeep(add, o.add, true) && compareDeep(power, o.power, true)
-           && compareDeep(backCurve, o.backCurve, true) && compareDeep(diameter, o.diameter, true) && compareDeep(duration, o.duration, true)
-           && compareDeep(color, o.color, true) && compareDeep(brand, o.brand, true) && compareDeep(note, o.note, true)
-          ;
+           && compareDeep(add, o.add, true) && compareDeep(power, o.power, true) && compareDeep(backCurve, o.backCurve, true)
+           && compareDeep(diameter, o.diameter, true) && compareDeep(duration, o.duration, true) && compareDeep(color, o.color, true)
+           && compareDeep(brand, o.brand, true) && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -1625,20 +1541,286 @@ public class VisionPrescription extends DomainResource {
           return false;
         VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareValues(eye, o.eye, true) && compareValues(sphere, o.sphere, true) && compareValues(cylinder, o.cylinder, true)
-           && compareValues(axis, o.axis, true) && compareValues(prism, o.prism, true) && compareValues(base, o.base, true)
-           && compareValues(add, o.add, true) && compareValues(power, o.power, true) && compareValues(backCurve, o.backCurve, true)
-           && compareValues(diameter, o.diameter, true) && compareValues(color, o.color, true) && compareValues(brand, o.brand, true)
-          ;
+           && compareValues(axis, o.axis, true) && compareValues(add, o.add, true) && compareValues(power, o.power, true)
+           && compareValues(backCurve, o.backCurve, true) && compareValues(diameter, o.diameter, true) && compareValues(color, o.color, true)
+           && compareValues(brand, o.brand, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(product, eye, sphere, cylinder
-          , axis, prism, base, add, power, backCurve, diameter, duration, color, brand
-          , note);
+          , axis, prism, add, power, backCurve, diameter, duration, color, brand, note
+          );
       }
 
   public String fhirType() {
     return "VisionPrescription.dispense";
+
+  }
+
+  }
+
+    @Block()
+    public static class PrismComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Amount of prism to compensate for eye alignment in fractional units.
+         */
+        @Child(name = "amount", type = {DecimalType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Amount of adjustment", formalDefinition="Amount of prism to compensate for eye alignment in fractional units." )
+        protected DecimalType amount;
+
+        /**
+         * The relative base, or reference lens edge, for the prism.
+         */
+        @Child(name = "base", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="up | down | in | out", formalDefinition="The relative base, or reference lens edge, for the prism." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-base-codes")
+        protected Enumeration<VisionBase> base;
+
+        private static final long serialVersionUID = 1677247628L;
+
+    /**
+     * Constructor
+     */
+      public PrismComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public PrismComponent(DecimalType amount, Enumeration<VisionBase> base) {
+        super();
+        this.amount = amount;
+        this.base = base;
+      }
+
+        /**
+         * @return {@link #amount} (Amount of prism to compensate for eye alignment in fractional units.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         */
+        public DecimalType getAmountElement() { 
+          if (this.amount == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PrismComponent.amount");
+            else if (Configuration.doAutoCreate())
+              this.amount = new DecimalType(); // bb
+          return this.amount;
+        }
+
+        public boolean hasAmountElement() { 
+          return this.amount != null && !this.amount.isEmpty();
+        }
+
+        public boolean hasAmount() { 
+          return this.amount != null && !this.amount.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amount} (Amount of prism to compensate for eye alignment in fractional units.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         */
+        public PrismComponent setAmountElement(DecimalType value) { 
+          this.amount = value;
+          return this;
+        }
+
+        /**
+         * @return Amount of prism to compensate for eye alignment in fractional units.
+         */
+        public BigDecimal getAmount() { 
+          return this.amount == null ? null : this.amount.getValue();
+        }
+
+        /**
+         * @param value Amount of prism to compensate for eye alignment in fractional units.
+         */
+        public PrismComponent setAmount(BigDecimal value) { 
+            if (this.amount == null)
+              this.amount = new DecimalType();
+            this.amount.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value Amount of prism to compensate for eye alignment in fractional units.
+         */
+        public PrismComponent setAmount(long value) { 
+              this.amount = new DecimalType();
+            this.amount.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value Amount of prism to compensate for eye alignment in fractional units.
+         */
+        public PrismComponent setAmount(double value) { 
+              this.amount = new DecimalType();
+            this.amount.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+         */
+        public Enumeration<VisionBase> getBaseElement() { 
+          if (this.base == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PrismComponent.base");
+            else if (Configuration.doAutoCreate())
+              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory()); // bb
+          return this.base;
+        }
+
+        public boolean hasBaseElement() { 
+          return this.base != null && !this.base.isEmpty();
+        }
+
+        public boolean hasBase() { 
+          return this.base != null && !this.base.isEmpty();
+        }
+
+        /**
+         * @param value {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+         */
+        public PrismComponent setBaseElement(Enumeration<VisionBase> value) { 
+          this.base = value;
+          return this;
+        }
+
+        /**
+         * @return The relative base, or reference lens edge, for the prism.
+         */
+        public VisionBase getBase() { 
+          return this.base == null ? null : this.base.getValue();
+        }
+
+        /**
+         * @param value The relative base, or reference lens edge, for the prism.
+         */
+        public PrismComponent setBase(VisionBase value) { 
+            if (this.base == null)
+              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory());
+            this.base.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("amount", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, amount));
+          children.add(new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1413853096: /*amount*/  return new Property("amount", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, amount);
+          case 3016401: /*base*/  return new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // DecimalType
+        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Enumeration<VisionBase>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1413853096: // amount
+          this.amount = castToDecimal(value); // DecimalType
+          return value;
+        case 3016401: // base
+          value = new VisionBaseEnumFactory().fromType(castToCode(value));
+          this.base = (Enumeration) value; // Enumeration<VisionBase>
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("amount")) {
+          this.amount = castToDecimal(value); // DecimalType
+        } else if (name.equals("base")) {
+          value = new VisionBaseEnumFactory().fromType(castToCode(value));
+          this.base = (Enumeration) value; // Enumeration<VisionBase>
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1413853096:  return getAmountElement();
+        case 3016401:  return getBaseElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1413853096: /*amount*/ return new String[] {"decimal"};
+        case 3016401: /*base*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("amount")) {
+          throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.amount");
+        }
+        else if (name.equals("base")) {
+          throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.base");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public PrismComponent copy() {
+        PrismComponent dst = new PrismComponent();
+        copyValues(dst);
+        dst.amount = amount == null ? null : amount.copy();
+        dst.base = base == null ? null : base.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof PrismComponent))
+          return false;
+        PrismComponent o = (PrismComponent) other_;
+        return compareDeep(amount, o.amount, true) && compareDeep(base, o.base, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof PrismComponent))
+          return false;
+        PrismComponent o = (PrismComponent) other_;
+        return compareValues(amount, o.amount, true) && compareValues(base, o.base, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(amount, base);
+      }
+
+  public String fhirType() {
+    return "VisionPrescription.dispense.prism";
 
   }
 

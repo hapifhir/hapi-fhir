@@ -525,6 +525,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public List<org.hl7.fhir.r4.model.StructureMap> listTransforms() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public org.hl7.fhir.r4.model.StructureMap getTransform(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public Set<String> typeTails() {
 			return myWrap.typeTails();
 		}

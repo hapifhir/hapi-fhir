@@ -145,7 +145,7 @@ public class DefinitionNavigator {
 
   private void loadTypedChildren(TypeRefComponent type) throws DefinitionException {
     typeOfChildren = null;
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, type.hasProfile() ? type.getProfile() : type.getCode());
+    StructureDefinition sd = context.fetchResource(StructureDefinition.class, /* GF#13465 : this somehow needs to be revisited type.hasProfile() ? type.getProfile() : */ type.getCode());
     if (sd != null) {
       DefinitionNavigator dn = new DefinitionNavigator(context, sd, 0, path, names, sd.getType());
       typeChildren = dn.children();
