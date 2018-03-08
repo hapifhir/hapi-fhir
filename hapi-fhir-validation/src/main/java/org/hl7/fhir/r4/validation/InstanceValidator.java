@@ -2286,7 +2286,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
    *          - the candidate that might be in the slice
    * @param path
    *          - for reporting any errors. the XPath for the element
-   * @param slice
+   * @param slicer
    *          - the definition of how slicing is determined
    * @param ed
    *          - the slice for which to test membership
