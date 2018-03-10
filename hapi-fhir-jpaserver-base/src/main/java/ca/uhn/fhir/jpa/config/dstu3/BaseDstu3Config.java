@@ -110,12 +110,7 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvc terminologyService() {
-		return new HapiTerminologySvcImpl();
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcDstu3 terminologyServiceDstu3() {
+	public IHapiTerminologySvcDstu3 terminologyService() {
 		return new HapiTerminologySvcDstu3();
 	}
 

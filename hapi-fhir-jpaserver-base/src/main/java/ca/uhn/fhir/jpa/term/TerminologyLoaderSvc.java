@@ -4,9 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincHierarchyHandler;
+import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerRelationship;
@@ -62,6 +60,9 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
 	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
+	public static final String LOINC_PART_FILE = "Part_Beta_1.csv";
+	public static final String LOINC_PART_LINK_FILE = "LoincPartLink_Beta_1.csv";
+	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping_Beta_1.csv";
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
@@ -193,7 +194,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 		CodeSystem loincCs;
 		try {
-			String loincCsString = IOUtils.toString(HapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
+			String loincCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);
@@ -219,6 +220,18 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		// Answer lists (ValueSets of potential answers/values for loinc "questions")
 		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, propertyNames, valueSets);
 		iterateOverZipFile(theZipBytes, LOINC_ANSWERLIST_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Answer list links (connects loinc observation codes to answerlist codes)
+		handler = new LoincAnswerListLinkHandler(code2concept, valueSets);
+		iterateOverZipFile(theZipBytes, LOINC_ANSWERLIST_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Part file
+		handler = new LoincPartHandler(codeSystemVersion, code2concept);
+		iterateOverZipFile(theZipBytes, LOINC_PART_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Part link file
+		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
+		iterateOverZipFile(theZipBytes, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		theZipBytes.clear();
 

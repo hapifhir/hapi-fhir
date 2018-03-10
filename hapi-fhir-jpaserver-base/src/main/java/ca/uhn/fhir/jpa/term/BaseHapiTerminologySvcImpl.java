@@ -23,12 +23,14 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -44,6 +46,8 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -65,8 +69,8 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcImpl.class);
+public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	@Autowired
@@ -93,7 +97,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
 	@Autowired
-	private IVersionSpecificValidationSupport myVersionSpecificValidationSupport;
+	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
 
 	private void addCodeIfNotAlreadyAdded(String system, ValueSet.ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
 		if (addedCodes.add(nextConcept.getCode())) {
@@ -124,12 +128,16 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
-				String msg = myContext.getLocalizer().getMessage(HapiTerminologySvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
 				throw new InvalidRequestException(msg);
 			}
 		}
 		return retVal;
 	}
+
+	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+
+	abstract void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails);
 
 	@Override
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
@@ -241,7 +249,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 				} else {
 
 //					bool.must(qb.keyword().onField("myProperties").matching(nextFilter.getProperty()+"="+nextFilter.getValue()).createQuery());
-					bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty()+"="+nextFilter.getValue()).createQuery());
+					bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
 
 				}
 			}
@@ -340,7 +348,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
-			return myVersionSpecificValidationSupport.findCodesAboveUsingBuiltInSystems(theSystem, theCode);
+			return findCodesAboveUsingBuiltInSystems(theSystem, theCode);
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
@@ -372,7 +380,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
-			return myVersionSpecificValidationSupport.findCodesBelowUsingBuiltInSystems(theSystem, theCode);
+			return findCodesBelowUsingBuiltInSystems(theSystem, theCode);
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
@@ -651,7 +659,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(HapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
 					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
@@ -699,6 +707,27 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		if (myConceptsToSaveLater.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
 			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size());
 		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets) {
+		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
+
+		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource, theRequestDetails);
+
+		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
+		Long codeSystemResourcePid = resource.getId();
+
+		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
+
+		theCodeSystemVersion.setResource(resource);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemVersion);
+
+		for (ValueSet nextValueSet : theValueSets) {
+			createOrUpdateValueSet(nextValueSet, theRequestDetails);
+		}
+
 	}
 
 	@Override

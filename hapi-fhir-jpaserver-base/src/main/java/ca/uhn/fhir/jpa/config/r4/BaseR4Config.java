@@ -38,9 +38,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,6 +65,18 @@ public class BaseR4Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Bean(name = "myGraphQLProvider")
+	@Lazy
+	public GraphQLProvider graphQLProvider() {
+		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
+	}
+
+	@Bean
+	@Lazy
+	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
+		return new JpaStorageServices();
+	}
+
 	@Bean(name = "myInstanceValidatorR4")
 	@Lazy
 	public IValidatorModule instanceValidatorR4() {
@@ -84,12 +96,6 @@ public class BaseR4Config extends BaseConfig {
 	public IFulltextSearchSvc searchDaoR4() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
 		return searchDao;
-	}
-
-	@Bean(name = "myGraphQLProvider")
-	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -122,7 +128,7 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcR4 terminologyServiceR4() {
+	public IHapiTerminologySvcR4 terminologyService() {
 		return new HapiTerminologySvcR4();
 	}
 
@@ -137,12 +143,6 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
 		return new JpaValidationSupportChainR4();
-	}
-
-	@Bean
-	@Lazy
-	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
 	}
 
 }

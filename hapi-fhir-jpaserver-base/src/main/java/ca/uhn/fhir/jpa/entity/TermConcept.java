@@ -229,6 +229,16 @@ public class TermConcept implements Serializable {
 		return null;
 	}
 
+	public List<String> getProperties(String thePropertyName) {
+		List<String> retVal = new ArrayList<>();
+		for (TermConceptProperty next : getProperties()) {
+			if (thePropertyName.equals(next.getKey())) {
+				retVal.add(next.getValue());
+			}
+		}
+		return retVal;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();

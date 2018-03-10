@@ -9,7 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.*;
 
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
@@ -48,7 +48,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		
-		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@Before
@@ -483,7 +483,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandWithIsAInExternalValueSetReindex() {
-		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		createExternalCsAndLocalVs();
 

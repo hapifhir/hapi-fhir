@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -88,6 +89,7 @@ public class TerminologyLoaderSvcLoincTest {
 		addFile("/loinc/", "loinc.csv", TerminologyLoaderSvc.LOINC_FILE);
 		addFile("/loinc/", "hierarchy.csv", TerminologyLoaderSvc.LOINC_HIERARCHY_FILE);
 		addFile("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvc.LOINC_ANSWERLIST_FILE);
+		addFile("/loinc/", "LoincAnswerListLink_Beta_1.csv", TerminologyLoaderSvc.LOINC_ANSWERLIST_LINK_FILE);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles, details);
@@ -108,6 +110,10 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("Pt", code.getProperty("TIME_ASPCT"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 
+		// Loinc code with answer
+		code = concepts.get("61438-8");
+		assertThat(code.getProperties("answer-list"), contains("LL1000-0"));
+
 		// Answer list
 		code = concepts.get("LL1001-8");
 		assertEquals("LL1001-8", code.getCode());
@@ -118,6 +124,11 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("LA13834-9", code.getCode());
 		assertEquals("1-2 times per week", code.getDisplay());
 		assertEquals(3, code.getSequence().intValue());
+
+		// Answer list code with link to answers-for
+		code = concepts.get("LL1000-0");
+		assertThat(code.getProperties("answers-for"), contains("61438-8"));
+
 
 		// AnswerList valueSet
 		Map<String, ValueSet> valueSets = new HashMap<>();
@@ -130,10 +141,15 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("PhenX05_14_30D freq amts", vs.getName());
 		assertEquals("urn:oid:1.3.6.1.4.1.12009.10.1.166", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(6, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals(7, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URL, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals("LA6270-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+
+		// Part
+		code = concepts.get("LP101394-7");
+		assertEquals("LP101394-7", code.getCode());
+		assertEquals("adjusted for maternal weight", code.getDisplay());
 
 	}
 

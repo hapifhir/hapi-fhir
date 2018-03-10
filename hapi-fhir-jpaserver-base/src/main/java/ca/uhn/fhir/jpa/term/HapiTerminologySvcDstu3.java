@@ -1,44 +1,34 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.lucene.search.Query;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.FullTextQuery;
-import org.hibernate.search.query.dsl.BooleanJunction;
-import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet.*;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -61,9 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTerminologySvcDstu3 {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcDstu3.class);
-	private final VersionConvertor_30_40 myConverter;
+public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implements IValidationSupport, IHapiTerminologySvcDstu3 {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -71,10 +59,11 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 	protected FhirContext myContext;
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
-
+	@Autowired
+	@Qualifier("myValueSetDaoDstu3")
+	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
-
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
@@ -84,18 +73,21 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 	 * Constructor
 	 */
 	public HapiTerminologySvcDstu3() {
-		myConverter = new VersionConvertor_30_40();
+		super();
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
-		if (system != null) {
-			findCodesBelow(system, theSystem, theCode, retVal);
+	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
+		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+		ValueSet valueSetDstu3;
+		try {
+			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
 		}
-		return retVal;
+		myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
 	}
+
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -104,31 +96,6 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 		for (ConceptDefinitionComponent nextChild : theCode.getConcept()) {
 			addAllChildren(theSystemString, nextChild, theListToPopulate);
 		}
-	}
-
-	private void addCodeIfNotAlreadyAdded(String system, ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
-		if (addedCodes.add(nextConcept.getCode())) {
-			ValueSetExpansionContainsComponent contains = retVal.addContains();
-			contains.setCode(nextConcept.getCode());
-			contains.setSystem(system);
-			contains.setDisplay(nextConcept.getDisplay());
-		}
-	}
-
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-			.phrase()
-			.withSlop(2)
-			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
-			// .andField("myDisplayPhonetic").boostedTo(0.5f)
-			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
 	}
 
 	private boolean addTreeIfItContainsCode(String theSystemString, ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
@@ -146,115 +113,30 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
-		if (system != null) {
-			findCodesAbove(system, theSystem, theCode, retVal);
+	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
+		CodeSystem resourceToStore;
+		try {
+			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
 		}
-		return retVal;
+		return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
 	}
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		String system = theInclude.getSystem();
-		ourLog.info("Starting expansion around code system: {}", system);
+		ValueSet valueSetToExpand = new ValueSet();
+		valueSetToExpand.getCompose().addInclude(theInclude);
 
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
-
-		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
-		Set<String> addedCodes = new HashSet<>();
-		boolean haveIncludeCriteria = false;
-
-		/*
-		 * Include Concepts
-		 */
-		for (ConceptReferenceComponent next : theInclude.getConcept()) {
-			String nextCode = next.getCode();
-			if (isNotBlank(nextCode) && !addedCodes.contains(nextCode)) {
-				haveIncludeCriteria = true;
-				TermConcept code = myTerminologySvc.findCode(system, nextCode);
-				if (code != null) {
-					addedCodes.add(nextCode);
-					ValueSetExpansionContainsComponent contains = retVal.addContains();
-					contains.setCode(nextCode);
-					contains.setSystem(system);
-					contains.setDisplay(code.getDisplay());
-				}
-			}
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSet(valueSetToExpandR4).getExpansion();
+			return VersionConvertor_30_40.convertValueSetExpansionComponent(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
 		}
-
-		/*
-		 * Filters
-		 */
-
-		if (theInclude.getFilter().size() > 0) {
-			haveIncludeCriteria = true;
-
-			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-			QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-			BooleanJunction<?> bool = qb.bool();
-
-			bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
-
-			for (ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
-				if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
-					continue;
-				}
-
-				if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
-					throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
-				}
-
-
-				if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == FilterOperator.EQUAL) {
-					addDisplayFilterExact(qb, bool, nextFilter);
-				} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == FilterOperator.EQUAL) {
-					if (nextFilter.getValue().trim().contains(" ")) {
-						addDisplayFilterExact(qb, bool, nextFilter);
-					} else {
-						addDisplayFilterInexact(qb, bool, nextFilter);
-					}
-				} else if ((nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) && nextFilter.getOp() == FilterOperator.ISA) {
-					TermConcept code = myTerminologySvc.findCode(system, nextFilter.getValue());
-					if (code == null) {
-						throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
-					}
-
-					ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-					bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
-				} else {
-					throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
-				}
-			}
-
-			Query luceneQuery = bool.createQuery();
-			FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
-			jpaQuery.setMaxResults(1000);
-
-			StopWatch sw = new StopWatch();
-
-			@SuppressWarnings("unchecked")
-			List<TermConcept> result = jpaQuery.getResultList();
-
-			ourLog.info("Expansion completed in {}ms", sw.getMillis());
-
-			for (TermConcept nextConcept : result) {
-				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
-			}
-
-			retVal.setTotal(jpaQuery.getResultSize());
-		}
-
-		if (!haveIncludeCriteria) {
-			List<TermConcept> allCodes = myTerminologySvc.findCodes(system);
-			for (TermConcept nextConcept : allCodes) {
-				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
-			}
-		}
-
-		return retVal;
 	}
 
 	@Override
@@ -278,29 +160,6 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 		return null;
 	}
 
-//	@Override
-//	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
-//		ValueSet source = new ValueSet();
-//		source.getCompose().addInclude().addValueSet(theValueSet);
-//		try {
-//			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
-//
-//			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
-//			ValueSetExpansionOutcome outcome = worker.expand(source, null);
-//			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
-//				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
-//			}
-//
-//			return retVal;
-//
-//		} catch (BaseServerResponseException e) {
-//			throw e;
-//		} catch (Exception e) {
-//			throw new InternalErrorException(e);
-//		}
-//
-//	}
-
 	@CoverageIgnore
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
@@ -312,6 +171,16 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 		for (ConceptDefinitionComponent next : conceptList) {
 			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
 		}
+	}
+
+	@Override
+	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesAbove(system, theSystem, theCode, retVal);
+		}
+		return retVal;
 	}
 
 	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
@@ -330,34 +199,18 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return myTerminologySvc.supportsSystem(theSystem);
+	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesBelow(system, theSystem, theCode, retVal);
+		}
+		return retVal;
 	}
 
 	@Override
-	@org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets) {
-		CodeSystem cs = new org.hl7.fhir.dstu3.model.CodeSystem();
-		cs.setUrl(theCodeSystemResource.getUrl());
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-
-		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl()), theRequestDetails);
-		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
-		if (createOutcome.getCreated() != Boolean.TRUE) {
-			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
-			csId = myCodeSystemResourceDao.update(existing, null, false, true, theRequestDetails).getId();
-
-			ourLog.info("Created new version of CodeSystem, got ID: {}", csId.toUnqualified().getValue());
-		}
-
-		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
-		Long codeSystemResourcePid = resource.getId();
-
-		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
-
-		theCodeSystemVersion.setResource(resource);
-		myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemVersion);
-
+	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
 	@CoverageIgnore
@@ -371,7 +224,8 @@ public class HapiTerminologySvcDstu3 implements IValidationSupport, IHapiTermino
 			return new CodeValidationResult(def);
 		}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unkonwn code {" + theCodeSystem + "}" + theCode);
+		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
+
 
 }

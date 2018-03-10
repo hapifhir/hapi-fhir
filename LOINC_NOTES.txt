@@ -1,4 +1,22 @@
 Database migration:
   update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
 
+TODO:
+  In answer lists, figure out what to do with externally defined lists
+
+Comments for Loinc:
+
+Answer Lists
+- Per the notes, there is no way in FHIR currently to map answer lists to
+  codes based on context. For this reason, I am ignoring any entries in
+  LoincAnswerListLink_Beta_1.csv where the "ApplicableContext" context is
+  not empty. Is this correct?
+
+Parts
+- Only parts with a status of "ACTIVE" are being imported, any others are
+  ignored.
+- The PartTypeName (e.g. "ADJUSTMENT") is ignored as there is no corresponding
+  property in loinc.xml
+- PartDisplayName is not mapped
+
 

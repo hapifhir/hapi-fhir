@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.nio.charset.StandardCharsets;
 
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.junit.AfterClass;
@@ -18,13 +18,13 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	
 	@Test
 	public void testIndexContained() throws Exception {
-		HapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		String input = IOUtils.toString(getClass().getResource("/dstu3_codesystem_complete.json"), StandardCharsets.UTF_8);
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
