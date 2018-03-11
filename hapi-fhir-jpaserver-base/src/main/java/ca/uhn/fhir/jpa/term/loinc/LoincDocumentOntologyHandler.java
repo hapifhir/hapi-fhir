@@ -6,14 +6,11 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincDocumentOntologyHandler implements IRecordHandler {
@@ -26,7 +23,7 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 	private final Set<String> myPropertyNames;
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
-	private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
+	private final Set<String> myCodesInDocumentOntologyValueSet = new HashSet<>();
 
 	public LoincDocumentOntologyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets) {
 		myCodeSystemVersion = theCodeSystemVersion;
@@ -46,39 +43,50 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 
 		// RSNA Codes VS
 		ValueSet vs;
-		if (!myIdToValueSet.containsKey(RSNA_CODES_VS_ID)) {
+		if (!myIdToValueSet.containsKey(DOCUMENT_ONTOLOGY_CODES_VS_ID)) {
 			vs = new ValueSet();
-			vs.setUrl(RSNA_CODES_VS_URI);
-			vs.setId(RSNA_CODES_VS_ID);
-			vs.setName(RSNA_CODES_VS_NAME);
+			vs.setUrl(DOCUMENT_ONTOLOGY_CODES_VS_URI);
+			vs.setId(DOCUMENT_ONTOLOGY_CODES_VS_ID);
+			vs.setName(DOCUMENT_ONTOLOGY_CODES_VS_NAME);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			myIdToValueSet.put(RSNA_CODES_VS_ID, vs);
+			myIdToValueSet.put(DOCUMENT_ONTOLOGY_CODES_VS_ID, vs);
 			myValueSets.add(vs);
 		} else {
-			vs = myIdToValueSet.get(RSNA_CODES_VS_ID);
+			vs = myIdToValueSet.get(DOCUMENT_ONTOLOGY_CODES_VS_ID);
 		}
 
-		if (!myCodesInRsnaPlaybookValueSet.contains(loincNumber)) {
+		if (!myCodesInDocumentOntologyValueSet.contains(loincNumber)) {
+			String loincDisplayName= null;
+			if (myCode2Concept.containsKey(loincNumber)) {
+				loincDisplayName = myCode2Concept.get(loincNumber).getDisplay();
+			}
+
 			vs
 				.getCompose()
 				.getIncludeFirstRep()
 				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
 				.addConcept()
 				.setCode(loincNumber)
-				.setDisplay(longCommonName);
-			myCodesInRsnaPlaybookValueSet.add(loincNumber);
+				.setDisplay(loincDisplayName);
+			myCodesInDocumentOntologyValueSet.add(loincNumber);
 		}
 
 		String loincCodePropName;
 		switch (partTypeName) {
-			case "Rad.Anatomic Location.Region Imaged":
-				loincCodePropName = "rad-anatomic-location-region-imaged";
+			case "Document.Kind":
+				loincCodePropName = "document-kind";
 				break;
-			case "Rad.Anatomic Location.Imaging Focus":
-				loincCodePropName = "rad-anatomic-location-imaging-focus";
+			case "Document.Role":
+				loincCodePropName = "document-role";
 				break;
-			case "Rad.Modality.Modality type":
-				loincCodePropName = "rad-modality-modality-type";
+			case "Document.Setting":
+				loincCodePropName = "document-setting";
+				break;
+			case "Document.SubjectMatterDomain":
+				loincCodePropName = "document-subject-matter-domain";
+				break;
+			case "Document.TypeOfService":
+				loincCodePropName = "document-type-of-service";
 				break;
 			default:
 				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
@@ -88,7 +96,6 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 		if (code != null) {
 			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URL, partNumber, partName);
 		}
-
 
 	}
 

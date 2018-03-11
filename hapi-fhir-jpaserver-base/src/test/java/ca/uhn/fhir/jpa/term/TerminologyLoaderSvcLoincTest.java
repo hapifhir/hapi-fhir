@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
@@ -158,8 +159,22 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("420710006", group.getElement().get(0).getTarget().get(0).getCode());
 		assertEquals("Interferon beta (substance)", group.getElement().get(0).getTarget().get(0).getDisplay());
 
-		// Document Ontology Parts
+		// Document Ontology ValueSet
+		vs = valueSets.get(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID);
+		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME, vs.getName());
+		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI, vs.getUrl());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URL, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals("11488-4", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals("Consult note", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
+		// Document ontology parts
+		code = concepts.get("11488-4");
+		assertEquals(1, code.getCodingProperties("document-kind").size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URL, code.getCodingProperties("document-kind").get(0).getSystem());
+		assertEquals("LP173418-7", code.getCodingProperties("document-kind").get(0).getCode());
+		assertEquals("Note", code.getCodingProperties("document-kind").get(0).getDisplay());
 
 		// RSNA Playbook ValueSet
 		vs = valueSets.get(LoincRsnaPlaybookHandler.RSNA_CODES_VS_ID);

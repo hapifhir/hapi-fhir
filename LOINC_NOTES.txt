@@ -47,6 +47,10 @@ RSNA Playbook
   equivalent (or would they be wider/narrower). They look equivalent to me.
 
 Document Ontology
+- Per the SOW, "A value set containing terms in the LOINC Document Ontology
+  will be created". Just to confirm, entries in this ValueSet are therefore
+  LOINC terms (such as "11488-4 / Consultation Note") as opposed to part
+  codes?
 - Need to define a URI for the document ontology ValueSet. Currently I am
   using "http://loinc.org/document-ontology-codes"
 
