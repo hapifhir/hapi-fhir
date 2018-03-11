@@ -48,6 +48,7 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -91,20 +92,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private long myNextReindexPass;
-
 	private boolean myProcessDeferred = true;
-
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
 	@Autowired
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
 
-	private void addCodeIfNotAlreadyAdded(String system, ValueSet.ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
-		if (addedCodes.add(nextConcept.getCode())) {
-			ValueSet.ValueSetExpansionContainsComponent contains = retVal.addContains();
-			contains.setCode(nextConcept.getCode());
-			contains.setSystem(system);
-			contains.setDisplay(nextConcept.getDisplay());
+	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
+		if (theAddedCodes.add(theConcept.getCode())) {
+			ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+			contains.setCode(theConcept.getCode());
+			contains.setSystem(theCodeSystem);
+			contains.setDisplay(theConcept.getDisplay());
 		}
 	}
 
@@ -136,6 +135,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+
+	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails);
 
 	abstract void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails);
 
@@ -248,7 +249,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 				} else {
 
-//					bool.must(qb.keyword().onField("myProperties").matching(nextFilter.getProperty()+"="+nextFilter.getValue()).createQuery());
+//					bool.must(qb.keyword().onField("myProperties").matching(nextFilter.getStringProperty()+"="+nextFilter.getValue()).createQuery());
 					bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
 
 				}
@@ -300,8 +301,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findByCodeSystemResourceAndVersion(theCodeSystemResourcePid, theCodeSystemVersionPid);
-		TermConcept concept = myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
-		return concept;
+		return myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
 	}
 
 	private void fetchParents(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
@@ -353,8 +353,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
 		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getPid(), theCode);
-		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
-		return retVal;
+		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -711,7 +710,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets) {
+	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource, theRequestDetails);
@@ -726,6 +725,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		for (ValueSet nextValueSet : theValueSets) {
 			createOrUpdateValueSet(nextValueSet, theRequestDetails);
+		}
+
+		for (ConceptMap nextConceptMap : theConceptMaps) {
+			createOrUpdateConceptMap(nextConceptMap, theRequestDetails);
 		}
 
 	}

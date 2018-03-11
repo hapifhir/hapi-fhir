@@ -106,7 +106,7 @@ public class BaseDstu3Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvc();
+		return new TerminologyLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

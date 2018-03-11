@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -63,6 +63,16 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 
 	@Override
 	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -111,16 +121,6 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
 		return retVal;
-	}
-
-	@Override
-	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
 	}
 
 }

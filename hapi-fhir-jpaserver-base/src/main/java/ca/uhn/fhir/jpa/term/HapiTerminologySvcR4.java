@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -55,6 +56,9 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
+	@Qualifier("myConceptMapDaoR4")
+	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
+	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
 	@Autowired
@@ -76,7 +80,6 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		}
 	}
 
-
 	private boolean addTreeIfItContainsCode(String theSystemString, ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
 		boolean foundCodeInChild = false;
 		for (ConceptDefinitionComponent nextChild : theNext.getConcept()) {
@@ -95,6 +98,12 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 		return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl, theRequestDetails).getId();
+	}
+
+	@Override
+	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
+		String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+		myConceptMapResourceDao.update(theConceptMap, matchUrl, theRequestDetails).getId();
 	}
 
 	@Override

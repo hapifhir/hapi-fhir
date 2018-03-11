@@ -7,8 +7,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,9 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.Matchers.*;
@@ -37,7 +35,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class TerminologyLoaderSvcSnomedCtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtTest.class);
-	private TerminologyLoaderSvc mySvc;
+	private TerminologyLoaderSvcImpl mySvc;
 
 	@Mock
 	private IHapiTerminologySvc myTermSvc;
@@ -45,21 +43,15 @@ public class TerminologyLoaderSvcSnomedCtTest {
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	@Mock
 	private IHapiTerminologySvcDstu3 myTermSvcDstu3;
-
-	private void addEntry(ZipOutputStream zos, String theClasspathPrefix, String theFileName) throws IOException {
-		ourLog.info("Adding {} to test zip", theFileName);
-		zos.putNextEntry(new ZipEntry("SnomedCT_Release_INT_20160131_Full/Terminology/" + theFileName));
-		byte[] byteArray = IOUtils.toByteArray(getClass().getResourceAsStream(theClasspathPrefix + theFileName));
-		Validate.notNull(byteArray);
-		zos.write(byteArray);
-		zos.closeEntry();
-	}
+	private ZipCollectionBuilder myFiles;
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvc();
+		mySvc = new TerminologyLoaderSvcImpl();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
 		mySvc.setTermSvcDstu3ForUnitTest(myTermSvcDstu3);
+
+		myFiles = new ZipCollectionBuilder();
 	}
 
 	private List<byte[]> list(byte[]... theByteArray) {
@@ -68,23 +60,18 @@ public class TerminologyLoaderSvcSnomedCtTest {
 
 	@Test
 	public void testLoadSnomedCt() throws Exception {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
-		addEntry(zos, "/sct/", "sct2_Concept_Full_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_Description_Full-en_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_Identifier_Full_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_Relationship_Full_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		addEntry(zos, "/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
-		zos.close();
-
-		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
+		myFiles.addFile("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_Description_Full-en_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 
 		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadSnomedCt(list(bos.toByteArray()), details);
+		mySvc.loadSnomedCt(myFiles.getFiles(), details);
 
-		verify(myTermSvcDstu3).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyListOf(ValueSet.class));
+		verify(myTermSvcDstu3).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyListOf(ValueSet.class), anyListOf(ConceptMap.class));
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);
@@ -115,7 +102,7 @@ public class TerminologyLoaderSvcSnomedCtTest {
 	public void testLoadSnomedCtBadInput() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
-		addEntry(zos, "/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		myFiles.addFile("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		zos.close();
 
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);

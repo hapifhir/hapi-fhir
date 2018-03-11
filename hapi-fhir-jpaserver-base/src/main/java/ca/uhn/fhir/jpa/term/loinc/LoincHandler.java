@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 
@@ -32,7 +32,7 @@ public class LoincHandler implements IRecordHandler {
 			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
 			String shortName = trim(theRecord.get("SHORTNAME"));
 			String consumerName = trim(theRecord.get("CONSUMER_NAME"));
-			String display = TerminologyLoaderSvc.firstNonBlank(longCommonName, shortName, consumerName);
+			String display = TerminologyLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
 
 			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
 			concept.setDisplay(display);
@@ -43,7 +43,7 @@ public class LoincHandler implements IRecordHandler {
 				}
 				String nextPropertyValue = theRecord.get(nextPropertyName);
 				if (isNotBlank(nextPropertyValue)) {
-					concept.addProperty(nextPropertyName, nextPropertyValue);
+					concept.addPropertyString(nextPropertyName, nextPropertyValue);
 				}
 			}
 

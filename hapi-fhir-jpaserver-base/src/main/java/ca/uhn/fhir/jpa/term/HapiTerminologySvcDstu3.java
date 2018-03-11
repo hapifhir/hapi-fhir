@@ -63,6 +63,9 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
+	@Qualifier("myConceptMapDaoDstu3")
+	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
+	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -75,19 +78,6 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	public HapiTerminologySvcDstu3() {
 		super();
 	}
-
-	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
-		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-		ValueSet valueSetDstu3;
-		try {
-			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
-		}
-		myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
-	}
-
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -122,6 +112,30 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			throw new InternalErrorException(e);
 		}
 		return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+	}
+
+	@Override
+	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
+		String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+		ConceptMap resourceToStore;
+		try {
+			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+		myConceptMapResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+	}
+
+	@Override
+	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
+		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+		ValueSet valueSetDstu3;
+		try {
+			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+		myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
 	}
 
 	@Override

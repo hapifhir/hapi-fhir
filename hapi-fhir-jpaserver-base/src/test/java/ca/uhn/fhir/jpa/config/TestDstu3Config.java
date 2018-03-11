@@ -54,7 +54,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-//					if ("true".equals(System.getProperty("ci"))) {
+//					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e.toString());
 //					}
 //					System.exit(1);

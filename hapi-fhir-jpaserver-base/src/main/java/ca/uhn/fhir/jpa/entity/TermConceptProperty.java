@@ -33,8 +33,8 @@ import java.io.Serializable;
 })
 public class TermConceptProperty implements Serializable {
 
+	static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
-
 	@ManyToOne
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
@@ -48,6 +48,48 @@ public class TermConceptProperty implements Serializable {
 	private String myKey;
 	@Column(name = "PROP_VAL", length = 200, nullable = true)
 	private String myValue;
+	@Column(name = "PROP_TYPE", length = MAX_PROPTYPE_ENUM_LENGTH, nullable = false)
+	private TermConceptPropertyTypeEnum myType;
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	@Column(name = "PROP_CODESYSTEM", length = 200, nullable = true)
+	private String myCodeSystem;
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	@Column(name = "PROP_DISPLAY", length = 200, nullable = true)
+	private String myDisplay;
+
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	public String getCodeSystem() {
+		return myCodeSystem;
+	}
+
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	public TermConceptProperty setCodeSystem(String theCodeSystem) {
+		myCodeSystem = theCodeSystem;
+		return this;
+	}
+
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	public String getDisplay() {
+		return myDisplay;
+	}
+
+	/**
+	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 */
+	public TermConceptProperty setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
+		return this;
+	}
 
 	public String getKey() {
 		return myKey;
@@ -57,10 +99,27 @@ public class TermConceptProperty implements Serializable {
 		myKey = theKey;
 	}
 
+	public TermConceptPropertyTypeEnum getType() {
+		return myType;
+	}
+
+	public TermConceptProperty setType(TermConceptPropertyTypeEnum theType) {
+		myType = theType;
+		return this;
+	}
+
+	/**
+	 * This will contain the value for a {@link TermConceptPropertyTypeEnum#STRING string}
+	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
+	 */
 	public String getValue() {
 		return myValue;
 	}
 
+	/**
+	 * This will contain the value for a {@link TermConceptPropertyTypeEnum#STRING string}
+	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
+	 */
 	public void setValue(String theValue) {
 		myValue = theValue;
 	}

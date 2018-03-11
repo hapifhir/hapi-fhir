@@ -1,20 +1,17 @@
 package ca.uhn.fhir.jpa.term;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
+import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.util.TestUtil;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.List;
 
-public class TerminologyLoaderSvcIntegrationTest extends BaseJpaDstu3Test {
+public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
-	private TerminologyLoaderSvc myLoader;
+	private TerminologyLoaderSvcImpl myLoader;
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -23,13 +20,14 @@ public class TerminologyLoaderSvcIntegrationTest extends BaseJpaDstu3Test {
 
 	@Before
 	public void beforeInitTest() {
-		myLoader = new TerminologyLoaderSvc();
+		myLoader = new TerminologyLoaderSvcImpl();
 		myLoader.setTermSvcForUnitTests(myTermSvc);
 	}
 
 	@Test
 	@Ignore
-	public void testLoadAndStoreSnomedCt() {
+	public void testLoadAndStoreLoinc() {
+		List<byte[]> files;
 //		myLoader.processSnomedCtFiles(files, mySrd);
 	}
 

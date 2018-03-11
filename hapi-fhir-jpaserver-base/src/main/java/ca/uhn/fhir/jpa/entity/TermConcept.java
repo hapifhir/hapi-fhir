@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.*;
+import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -121,14 +122,27 @@ public class TermConcept implements Serializable {
 		}
 	}
 
-	public void addProperty(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
+	private TermConceptProperty addProperty(@Nonnull TermConceptPropertyTypeEnum thePropertyType, @Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
 
 		TermConceptProperty property = new TermConceptProperty();
 		property.setConcept(this);
+		property.setType(thePropertyType);
 		property.setKey(thePropertyName);
 		property.setValue(thePropertyValue);
-		getProperties().add(property);
+		getStringProperties().add(property);
+
+		return property;
+	}
+
+	public TermConceptProperty addPropertyCoding(@Nonnull String thePropertyName, @Nonnull String thePropertyCodeSystem, @Nonnull String thePropertyCode, String theDisplayName) {
+		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
+			.setCodeSystem(thePropertyCodeSystem)
+			.setDisplay(theDisplayName);
+	}
+
+	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
+		return addProperty(TermConceptPropertyTypeEnum.STRING, thePropertyName, thePropertyValue);
 	}
 
 	@Override
@@ -157,10 +171,6 @@ public class TermConcept implements Serializable {
 
 	public String getCode() {
 		return myCode;
-	}
-
-	public Integer getSequence() {
-		return mySequence;
 	}
 
 	public void setCode(String theCode) {
@@ -213,30 +223,55 @@ public class TermConcept implements Serializable {
 		return myParents;
 	}
 
-	public Collection<TermConceptProperty> getProperties() {
+	public Collection<TermConceptProperty> getStringProperties() {
 		if (myProperties == null) {
 			myProperties = new ArrayList<>();
 		}
 		return myProperties;
 	}
 
-	public String getProperty(String thePropertyName) {
-		for (TermConceptProperty next : getProperties()) {
-			if (thePropertyName.equals(next.getKey())) {
-				return next.getValue();
-			}
-		}
-		return null;
-	}
-
-	public List<String> getProperties(String thePropertyName) {
+	public List<String> getStringProperties(String thePropertyName) {
 		List<String> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getProperties()) {
+		for (TermConceptProperty next : getStringProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				retVal.add(next.getValue());
+				if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
+					retVal.add(next.getValue());
+				}
 			}
 		}
 		return retVal;
+	}
+
+	public List<Coding> getCodingProperties(String thePropertyName) {
+		List<Coding> retVal = new ArrayList<>();
+		for (TermConceptProperty next : getStringProperties()) {
+			if (thePropertyName.equals(next.getKey())) {
+				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+					Coding coding = new Coding();
+					coding.setSystem(next.getCodeSystem());
+					coding.setCode(next.getValue());
+					coding.setDisplay(next.getDisplay());
+					retVal.add(coding);
+				}
+			}
+		}
+		return retVal;
+	}
+
+	public Integer getSequence() {
+		return mySequence;
+	}
+
+	public void setSequence(Integer theSequence) {
+		mySequence = theSequence;
+	}
+
+	public String getStringProperty(String thePropertyName) {
+		List<String> properties = getStringProperties(thePropertyName);
+		if (properties.size() > 0) {
+			return properties.get(0);
+		}
+		return null;
 	}
 
 	@Override
@@ -292,10 +327,6 @@ public class TermConcept implements Serializable {
 
 	public void setParentPids(String theParentPids) {
 		myParentPids = theParentPids;
-	}
-
-	public void setSequence(Integer theSequence) {
-		mySequence = theSequence;
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,20 +56,22 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
-	public static final String LOINC_FILE = "loinc.csv";
-	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
-	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
-	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
-	public static final String LOINC_PART_FILE = "Part_Beta_1.csv";
-	public static final String LOINC_PART_LINK_FILE = "LoincPartLink_Beta_1.csv";
-	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping_Beta_1.csv";
+public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	private static final int LOG_INCREMENT = 100000;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvc.class);
+	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
+	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
+	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
+	public static final String LOINC_FILE = "loinc.csv";
+	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
+	public static final String LOINC_PART_FILE = "Part_Beta_1.csv";
+	public static final String LOINC_PART_LINK_FILE = "LoincPartLink_Beta_1.csv";
+	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping_Beta_1.csv";
+	public static final String LOINC_RSNA_PLAYBOOK_FILE = "LoincRsnaRadiologyPlaybook.csv";
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
 	@Autowired(required = false)
@@ -191,6 +194,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
+		final List<ConceptMap> conceptMaps = new ArrayList<>();
 
 		CodeSystem loincCs;
 		try {
@@ -233,6 +237,18 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
 		iterateOverZipFile(theZipBytes, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
+		// Part related code mapping
+		handler = new LoincPartRelatedCodeMappingHandler(codeSystemVersion, code2concept, conceptMaps);
+		iterateOverZipFile(theZipBytes, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Document Ontology File
+		handler = new LoincDocumentOntologyHandler(codeSystemVersion, code2concept, propertyNames, valueSets);
+		iterateOverZipFile(theZipBytes, LOINC_DOCUMENT_ONTOLOGY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// RSNA Playbook file
+		handler = new LoincRsnaPlaybookHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
+		iterateOverZipFile(theZipBytes, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
 		theZipBytes.clear();
 
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
@@ -242,18 +258,21 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			}
 		}
 
-		ourLog.info("Have {} total concepts, {} root concepts", code2concept.size(), codeSystemVersion.getConcepts().size());
+		int valueSetCount = valueSets.size();
+		int rootConceptCount = codeSystemVersion.getConcepts().size();
+		int conceptCount = code2concept.size();
+		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
-		storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets);
+		storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
 
-		return new UploadStatistics(code2concept.size());
+		return new UploadStatistics(conceptCount);
 	}
 
 	UploadStatistics processSnomedCtFiles(List<byte[]> theZipBytes, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> id2concept = new HashMap<String, TermConcept>();
-		final Map<String, TermConcept> code2concept = new HashMap<String, TermConcept>();
-		final Set<String> validConceptIds = new HashSet<String>();
+		final Map<String, TermConcept> id2concept = new HashMap<>();
+		final Map<String, TermConcept> code2concept = new HashMap<>();
+		final Set<String> validConceptIds = new HashSet<>();
 
 		IRecordHandler handler = new SctHandlerConcept(validConceptIds);
 		iterateOverZipFile(theZipBytes, SCT_FILE_CONCEPT, handler, '\t', null);
@@ -264,7 +283,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		iterateOverZipFile(theZipBytes, SCT_FILE_DESCRIPTION, handler, '\t', null);
 
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
-		final HashMap<String, TermConcept> rootConcepts = new HashMap<String, TermConcept>(code2concept);
+		final HashMap<String, TermConcept> rootConcepts = new HashMap<>(code2concept);
 
 		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
 		iterateOverZipFile(theZipBytes, SCT_FILE_RELATIONSHIP, handler, '\t', null);
@@ -293,7 +312,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		CodeSystem cs = new org.hl7.fhir.r4.model.CodeSystem();
 		cs.setUrl(SCT_URL);
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null);
+		storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
 		return new UploadStatistics(code2concept.size());
 	}
@@ -308,16 +327,17 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		myTermSvc = theTermSvc;
 	}
 
-	private void storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets) {
+	private void storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.isTrue(theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT);
 
 		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.<ValueSet>emptyList());
+		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.<ConceptMap>emptyList());
 
 		myTermSvc.setProcessDeferred(false);
 		if (myTermSvcDstu3 != null) {
-			myTermSvcDstu3.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets);
+			myTermSvcDstu3.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
 		} else {
-			myTermSvcR4.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets);
+			myTermSvcR4.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
 		}
 		myTermSvc.setProcessDeferred(true);
 	}

@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -124,7 +124,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvc();
+		return new TerminologyLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

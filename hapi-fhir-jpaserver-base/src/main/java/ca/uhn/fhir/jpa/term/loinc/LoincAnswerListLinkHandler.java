@@ -59,12 +59,12 @@ public class LoincAnswerListLinkHandler implements IRecordHandler {
 
 		TermConcept loincCode = myCode2Concept.get(loincNumber);
 		if (loincCode != null) {
-			loincCode.addProperty("answer-list", answerListId);
+			loincCode.addPropertyString("answer-list", answerListId);
 		}
 
 		TermConcept answerListCode = myCode2Concept.get(answerListId);
 		if (answerListCode != null) {
-			answerListCode.addProperty("answers-for", loincNumber);
+			answerListCode.addPropertyString("answers-for", loincNumber);
 		}
 
 	}

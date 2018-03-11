@@ -29,8 +29,6 @@ public class LoincPartLinkHandler implements IRecordHandler {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String longCommonName = trim(theRecord.get("LongCommonName"));
 		String partNumber = trim(theRecord.get("PartNumber"));
-		String partDisplayName = trim(theRecord.get("PartDisplayName"));
-		String status = trim(theRecord.get("Status"));
 
 		TermConcept loincConcept = myCode2Concept.get(loincNumber);
 		TermConcept partConcept = myCode2Concept.get(partNumber);
@@ -44,7 +42,7 @@ public class LoincPartLinkHandler implements IRecordHandler {
 			return;
 		}
 
-		partConcept.addProperty();
+		// For now we're ignoring these
 
 	}
 private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
