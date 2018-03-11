@@ -6,11 +6,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
+	@Autowired
 	private TerminologyLoaderSvcImpl myLoader;
 
 	@AfterClass
@@ -18,17 +21,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Before
-	public void beforeInitTest() {
-		myLoader = new TerminologyLoaderSvcImpl();
-		myLoader.setTermSvcForUnitTests(myTermSvc);
-	}
-
 	@Test
-	@Ignore
-	public void testLoadAndStoreLoinc() {
-		List<byte[]> files;
-//		myLoader.processSnomedCtFiles(files, mySrd);
+	public void testLoadAndStoreLoinc() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
+
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		Thread.sleep(120000);
 	}
 
 }

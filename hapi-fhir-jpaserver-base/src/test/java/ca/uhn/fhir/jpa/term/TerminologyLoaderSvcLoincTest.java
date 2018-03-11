@@ -2,10 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
+import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -21,6 +18,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,21 +58,13 @@ public class TerminologyLoaderSvcLoincTest {
 		mySvc = new TerminologyLoaderSvcImpl();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
 		mySvc.setTermSvcDstu3ForUnitTest(myTermSvcDstu3);
-		
+
 		myFiles = new ZipCollectionBuilder();
 	}
 
 	@Test
 	public void testLoadLoinc() throws Exception {
-		myFiles.addFile("/loinc/", "loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
-		myFiles.addFile("/loinc/", "hierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-		myFiles.addFile("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
-		myFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
+		createLoincBundle(myFiles);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), details);
@@ -240,14 +230,53 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("US Retroperitoneum", group.getElement().get(0).getTarget().get(0).getDisplay());
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
+		// TOP 2000 - US
+		vs = valueSets.get(LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_ID);
+		assertEquals(vs.getName(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME);
+		assertEquals(vs.getUrl(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI);
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URL, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals("2160-0", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+
+		// TOP 2000 - SI
+		vs = valueSets.get(LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_ID);
+		assertEquals(vs.getName(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_NAME);
+		assertEquals(vs.getUrl(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_URI);
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URL, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals("14682-9", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
 
 	}
-
-
 
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	static void createLoincBundle(ZipCollectionBuilder theFiles) throws IOException {
+		theFiles.addFile("/loinc/", "loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
+		theFiles.addFile("/loinc/", "hierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
+		theFiles.addFile("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
+		theFiles.addFile("/loinc/", TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
+		/*
+		 * Top 2000 files have versions in the filename so don't use the
+		 * constant.. that way this is a better test
+		 */
+		theFiles.addFile("/loinc/", "LOINC_1.6_Top2000CommonLabResultsSI.csv");
+		theFiles.addFile("/loinc/", "LOINC_1.6_Top2000CommonLabResultsUS.csv");
 	}
 
 }

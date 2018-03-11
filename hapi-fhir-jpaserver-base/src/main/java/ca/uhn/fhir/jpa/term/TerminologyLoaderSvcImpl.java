@@ -60,7 +60,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-	private static final int LOG_INCREMENT = 100000;
 	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
@@ -70,7 +69,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_PART_LINK_FILE = "LoincPartLink_Beta_1.csv";
 	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping_Beta_1.csv";
 	public static final String LOINC_RSNA_PLAYBOOK_FILE = "LoincRsnaRadiologyPlaybook.csv";
-
+	public static final String TOP2000_COMMON_LAB_RESULTS_US_FILE = "Top2000CommonLabResultsUS.csv";
+	public static final String TOP2000_COMMON_LAB_RESULTS_SI_FILE = "Top2000CommonLabResultsSI.csv";
+	private static final int LOG_INCREMENT = 100000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
@@ -248,6 +249,14 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		// RSNA Playbook file
 		handler = new LoincRsnaPlaybookHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
 		iterateOverZipFile(theZipBytes, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Top 2000 Codes - US
+		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets);
+		iterateOverZipFile(theZipBytes, TOP2000_COMMON_LAB_RESULTS_US_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Top 2000 Codes - SI
+		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets);
+		iterateOverZipFile(theZipBytes, TOP2000_COMMON_LAB_RESULTS_SI_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		theZipBytes.clear();
 

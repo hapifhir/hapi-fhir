@@ -1,5 +1,6 @@
 Database migration:
   update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+  drop constraint IDX_CSV_RESOURCEPID_AND_VER from table TRM_CODESYSTEM_VER
 
 TODO:
   In answer lists, figure out what to do with externally defined lists
@@ -54,3 +55,7 @@ Document Ontology
 - Need to define a URI for the document ontology ValueSet. Currently I am
   using "http://loinc.org/document-ontology-codes"
 
+Top 2000
+- Need to define a URI for both ValueSets. Currently I am using
+  "http://loinc.org/top-2000-lab-results-us" and
+  "http://loinc.org/top-2000-lab-results-si"

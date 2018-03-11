@@ -13,7 +13,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincDocumentOntologyHandler implements IRecordHandler {
+public class LoincDocumentOntologyHandler extends BaseHandler implements IRecordHandler {
 
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "DOCUMENT_ONTOLOGY_CODES_VS";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/document-ontology-codes";
@@ -21,15 +21,12 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final Set<String> myPropertyNames;
-	private final List<ValueSet> myValueSets;
-	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
-	private final Set<String> myCodesInDocumentOntologyValueSet = new HashSet<>();
 
 	public LoincDocumentOntologyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets) {
+		super(theCode2concept, theValueSets);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
-		myValueSets = theValueSets;
 	}
 
 	@Override
@@ -42,35 +39,10 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 		String partName = trim(theRecord.get("PartName"));
 
 		// RSNA Codes VS
-		ValueSet vs;
-		if (!myIdToValueSet.containsKey(DOCUMENT_ONTOLOGY_CODES_VS_ID)) {
-			vs = new ValueSet();
-			vs.setUrl(DOCUMENT_ONTOLOGY_CODES_VS_URI);
-			vs.setId(DOCUMENT_ONTOLOGY_CODES_VS_ID);
-			vs.setName(DOCUMENT_ONTOLOGY_CODES_VS_NAME);
-			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			myIdToValueSet.put(DOCUMENT_ONTOLOGY_CODES_VS_ID, vs);
-			myValueSets.add(vs);
-		} else {
-			vs = myIdToValueSet.get(DOCUMENT_ONTOLOGY_CODES_VS_ID);
-		}
+		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME);
+		addCodeAsIncludeToValueSet(vs, IHapiTerminologyLoaderSvc.LOINC_URL, loincNumber, null);
 
-		if (!myCodesInDocumentOntologyValueSet.contains(loincNumber)) {
-			String loincDisplayName= null;
-			if (myCode2Concept.containsKey(loincNumber)) {
-				loincDisplayName = myCode2Concept.get(loincNumber).getDisplay();
-			}
-
-			vs
-				.getCompose()
-				.getIncludeFirstRep()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
-				.addConcept()
-				.setCode(loincNumber)
-				.setDisplay(loincDisplayName);
-			myCodesInDocumentOntologyValueSet.add(loincNumber);
-		}
-
+		// Part Properties
 		String loincCodePropName;
 		switch (partTypeName) {
 			case "Document.Kind":
@@ -98,5 +70,7 @@ public class LoincDocumentOntologyHandler implements IRecordHandler {
 		}
 
 	}
+
+
 
 }

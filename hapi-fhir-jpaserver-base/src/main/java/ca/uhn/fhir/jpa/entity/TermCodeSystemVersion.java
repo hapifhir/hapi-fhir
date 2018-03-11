@@ -41,9 +41,9 @@ import javax.persistence.UniqueConstraint;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 //@formatter:off
-@Table(name="TRM_CODESYSTEM_VER", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_CSV_RESOURCEPID_AND_VER", columnNames= {"RES_ID", "RES_VERSION_ID"})
-})
+@Table(name="TRM_CODESYSTEM_VER"
+	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
+)
 @Entity()
 //@formatter:on
 public class TermCodeSystemVersion implements Serializable {
@@ -64,6 +64,10 @@ public class TermCodeSystemVersion implements Serializable {
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false)
 	private String myCodeSystemVersionId;
+
+	@SuppressWarnings("unused")
+	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
+	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
 	/**
 	 * Constructor
