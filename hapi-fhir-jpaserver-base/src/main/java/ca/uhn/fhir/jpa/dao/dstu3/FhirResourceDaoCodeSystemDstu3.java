@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -225,18 +225,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			} else if (cs.getContent() == CodeSystemContentMode.COMPLETE || cs.getContent() == null) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
 
-				TermCodeSystemVersion persCs = myCsvDao.findByCodeSystemResourceAndVersion(codeSystemResourcePid, retVal.getVersion());
-				if (persCs != null) {
-					ourLog.info("Code system version already exists in database");
-				} else {
-
-					persCs = new TermCodeSystemVersion();
-					persCs.setResource(retVal);
-					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
-					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
-
-				}
+				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
+				persCs.setResource(retVal);
+				persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
+				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+				myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
 
 			}
 		}

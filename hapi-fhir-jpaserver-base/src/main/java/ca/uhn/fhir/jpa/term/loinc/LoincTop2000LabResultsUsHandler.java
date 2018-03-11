@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LoincTop2000LabResultsUsHandler extends BaseLoincTop2000LabResultsHandler {
 
-	public static final String TOP_2000_US_VS_ID = "TOP_2000_LABRESULTS_US";
+	public static final String TOP_2000_US_VS_ID = "TOP-2000-LABRESULTS-US";
 	public static final String TOP_2000_US_VS_URI = "http://loinc.org/top-2000-lab-results-us";
 	public static final String TOP_2000_US_VS_NAME = "Top 2000 Lab Results US";
 

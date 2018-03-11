@@ -36,32 +36,39 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
- * Utilities for dealing with parameters resources
+ * Utilities for dealing with parameters resources in a version indepenedent way
  */
 public class ParametersUtil {
 
-	public static void addParameterToParameters(FhirContext theContext, IBaseResource theTargetResource, Object sourceClientArgument, String theName) {
-		RuntimeResourceDefinition def = theContext.getResourceDefinition(theTargetResource);
+	/**
+	 * Add a paratemer value to a Parameters resource
+	 * @param theContext The FhirContext
+	 * @param theParameters The Parameters resource
+	 * @param theName The parametr name
+	 * @param theValue The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
+	 */
+	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, Object theValue) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theParameters);
 		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
 		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
-		addClientParameter(theContext, sourceClientArgument, theTargetResource, paramChild, paramChildElem, theName);
+		addClientParameter(theContext, theValue, theParameters, paramChild, paramChildElem, theName);
 	}
 
-	private static void addClientParameter(FhirContext theContext, Object theSourceClientArgument, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
-		if (theSourceClientArgument instanceof IBaseResource) {
+	private static void addClientParameter(FhirContext theContext, Object theValue, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
+		if (theValue instanceof IBaseResource) {
 			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
-			paramChildElem.getChildByName("resource").getMutator().addValue(parameter, (IBaseResource) theSourceClientArgument);
-		} else if (theSourceClientArgument instanceof IBaseDatatype) {
+			paramChildElem.getChildByName("resource").getMutator().addValue(parameter, (IBaseResource) theValue);
+		} else if (theValue instanceof IBaseDatatype) {
 			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
-			paramChildElem.getChildByName("value[x]").getMutator().addValue(parameter, (IBaseDatatype) theSourceClientArgument);
-		} else if (theSourceClientArgument instanceof Collection) {
-			Collection<?> collection = (Collection<?>) theSourceClientArgument;
+			paramChildElem.getChildByName("value[x]").getMutator().addValue(parameter, (IBaseDatatype) theValue);
+		} else if (theValue instanceof Collection) {
+			Collection<?> collection = (Collection<?>) theValue;
 			for (Object next : collection) {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException("Don't know how to handle value of type " + theSourceClientArgument.getClass() + " for paramater " + theName);
+			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for paramater " + theName);
 		}
 	}
 

@@ -56,17 +56,8 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
-			if (result.isFound()==false) {
-				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
-			}
-			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("name").setValue(new StringType(result.getCodeSystemDisplayName()));
-			if (isNotBlank(result.getCodeSystemVersion())) {
-				retVal.addParameter().setName("version").setValue(new StringType(result.getCodeSystemVersion()));
-			}
-			retVal.addParameter().setName("display").setValue(new StringType(result.getCodeDisplay()));
-			retVal.addParameter().setName("abstract").setValue(new BooleanType(result.isCodeIsAbstract()));			
-			return retVal;
+			result.throwNotFoundIfAppropriate();
+			return result.toParameters();
 		} finally {
 			endRequest(theServletRequest);
 		}

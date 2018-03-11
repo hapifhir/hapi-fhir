@@ -70,6 +70,15 @@ public class TerminologyLoaderSvcLoincTest {
 		mySvc.loadLoinc(myFiles.getFiles(), details);
 
 		verify(myTermSvcDstu3, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		ValueSet input = new ValueSet();
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+			.addFilter()
+			.setProperty("SCALE_TYP")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Ord");
 
 		TermCodeSystemVersion ver = myCsvCaptor.getValue();
 

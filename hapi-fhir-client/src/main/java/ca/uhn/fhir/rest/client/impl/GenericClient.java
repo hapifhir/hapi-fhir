@@ -914,11 +914,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IBaseParameters parameters = ParametersUtil.newInstance(myContext);
 			switch (myOperation) {
 			case ADD:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				ParametersUtil.addParameterToParameters(myContext, parameters, "meta", myMeta);
 				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-add", parameters, false);
 				break;
 			case DELETE:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				ParametersUtil.addParameterToParameters(myContext, parameters, "meta", myMeta);
 				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-delete", parameters, false);
 				break;
 			case GET:

@@ -1,34 +1,92 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyLoaderSvcIntegrationDstu3Test.class);
+
 	@Autowired
-	private TerminologyLoaderSvcImpl myLoader;
+	private IHapiTerminologyLoaderSvc myLoader;
+
+	@After
+	public void after() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+	}
+
+	@Before
+	public void before() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(20000);
+	}
+
+	@Test
+	public void testExpandWithProperty() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		ValueSet input = new ValueSet();
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+			.addFilter()
+			.setProperty("SCALE_TYP")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Ord");
+		ValueSet expanded = myValueSetDao.expand(input, null);
+		Set<String> codes = toExpandedCodes(expanded);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		assertThat(codes, containsInAnyOrder("1001-7", "61438-8"));
+	}
+
+	@Test
+	public void testLookupWithProperties() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URL), null, mySrd);
+		org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters();
+		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+	}
+
+	private Set<String> toExpandedCodes(ValueSet theExpanded) {
+		return theExpanded
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toSet());
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@Test
-	public void testLoadAndStoreLoinc() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
-
-		myLoader.loadLoinc(files.getFiles(), mySrd);
-
-		Thread.sleep(120000);
 	}
 
 }

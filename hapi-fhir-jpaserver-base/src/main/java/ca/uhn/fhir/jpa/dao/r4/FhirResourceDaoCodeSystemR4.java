@@ -219,7 +219,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
 
 				Long codeSystemResourcePid = retVal.getId();
-				TermCodeSystemVersion persCs = myCsvDao.findByCodeSystemResourceAndVersion(codeSystemResourcePid, retVal.getVersion());
+				TermCodeSystemVersion persCs = myCsvDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
 				if (persCs != null) {
 					ourLog.info("Code system version already exists in database");
 				} else {

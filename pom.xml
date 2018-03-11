@@ -1114,18 +1114,10 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.7.0</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-						<!-- 
-						We compile the unit tests at Java 8. Might as well since they
-						need Java 8 in order to run (Jetty needs 8) so this way we can
-						use nice java 8 features in tests at least
-						-->
-						<testSource>1.8</testSource>
-						<testTarget>1.8</testTarget>
+						<source>1.8</source>
+						<target>1.8</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
-
 						<fork>true</fork>
 						<meminitial>500m</meminitial>
 						<maxmem>2000m</maxmem>

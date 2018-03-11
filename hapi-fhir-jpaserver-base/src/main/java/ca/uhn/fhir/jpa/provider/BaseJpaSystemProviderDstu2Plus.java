@@ -39,7 +39,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 		
 		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked " + count + " resources");
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}
@@ -58,7 +58,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		} else {
 			string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
 		}
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}

@@ -299,8 +299,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
-	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
-		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findByCodeSystemResourceAndVersion(theCodeSystemResourcePid, theCodeSystemVersionPid);
+	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, String theCode) {
+		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(theCodeSystemResourcePid);
 		return myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
 	}
 
@@ -330,7 +330,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		StopWatch stopwatch = new StopWatch();
 
-		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCodeSystemVersionPid, theCode);
+		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
 		if (concept == null) {
 			return Collections.emptySet();
 		}
@@ -361,7 +361,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 
-		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCodeSystemVersionPid, theCode);
+		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
 		if (concept == null) {
 			return Collections.emptySet();
 		}

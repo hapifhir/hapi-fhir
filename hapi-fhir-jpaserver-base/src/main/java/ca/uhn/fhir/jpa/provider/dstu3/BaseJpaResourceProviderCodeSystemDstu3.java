@@ -24,6 +24,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.*;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
@@ -32,6 +34,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
 
@@ -56,17 +59,11 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
-			if (result.isFound()==false) {
-				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
-			}
-			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("name").setValue(new StringType(result.getCodeSystemDisplayName()));
-			if (isNotBlank(result.getCodeSystemVersion())) {
-				retVal.addParameter().setName("version").setValue(new StringType(result.getCodeSystemVersion()));
-			}
-			retVal.addParameter().setName("display").setValue(new StringType(result.getCodeDisplay()));
-			retVal.addParameter().setName("abstract").setValue(new BooleanType(result.isCodeIsAbstract()));			
-			return retVal;
+			result.throwNotFoundIfAppropriate();
+			org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters();
+			return VersionConvertor_30_40.convertParameters(parametersR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -179,7 +180,7 @@ public class OperationParameter implements IParameter {
 			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
 		}
 
-		ParametersUtil.addParameterToParameters(theContext, theTargetResource, sourceClientArgument, myName);
+		ParametersUtil.addParameterToParameters(theContext, (IBaseParameters) theTargetResource, myName, sourceClientArgument);
 	}
 
 

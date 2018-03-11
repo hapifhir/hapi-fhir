@@ -20,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincPartRelatedCodeMappingHandler implements IRecordHandler {
 
-	public static final String LOINC_TO_SNOMED_CM_ID = "LOINC_TO_SNOMED_CM";
+	public static final String LOINC_TO_SNOMED_CM_ID = "LOINC-TO-SNOMED-CM";
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincPartRelatedCodeMappingHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;

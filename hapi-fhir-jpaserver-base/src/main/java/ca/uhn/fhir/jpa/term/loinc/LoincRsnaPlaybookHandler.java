@@ -18,14 +18,14 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincRsnaPlaybookHandler implements IRecordHandler {
 
-	public static final String RSNA_CODES_VS_ID = "RSNA_LOINC_CODES_VS";
+	public static final String RSNA_CODES_VS_ID = "RSNA-LOINC-CODES-VS";
 	public static final String RSNA_CODES_VS_URI = "http://loinc.org/rsna-codes";
 	public static final String RSNA_CODES_VS_NAME = "RSNA Playbook";
-	public static final String RID_MAPPING_CM_ID = "LOINC_TO_RID_CODES_CM";
+	public static final String RID_MAPPING_CM_ID = "LOINC-TO-RID-CODES-CM";
 	public static final String RID_MAPPING_CM_URI = "http://loinc.org/rid-codes";
 	public static final String RID_MAPPING_CM_NAME = "RSNA Playbook RID Codes Mapping";
 	public static final String RID_CS_URI = "http://rid";
-	public static final String RPID_MAPPING_CM_ID = "LOINC_TO_RPID_CODES_CM";
+	public static final String RPID_MAPPING_CM_ID = "LOINC-TO-RPID-CODES-CM";
 	public static final String RPID_MAPPING_CM_URI = "http://loinc.org/rpid-codes";
 	public static final String RPID_MAPPING_CM_NAME = "RSNA Playbook RPID Codes Mapping";
 	public static final String RPID_CS_URI = "http://rpid";
