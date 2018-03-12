@@ -200,6 +200,12 @@
 				The client LoggingInterceptor now includes the number of
 				milliseconds spent performing each call that is logged.
 			</action>
+			<action type="add" issue="786">
+				ReferenceParam has been enhanced to properly return the resource type to 
+				user code in a server via the ReferenceType#getResourceType() method
+				if the client has specified a reference parameter with
+				a resource type. Thanks to @CarthageKing for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
