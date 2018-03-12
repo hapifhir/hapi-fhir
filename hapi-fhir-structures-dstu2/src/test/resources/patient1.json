@@ -13,11 +13,11 @@
     ],
     "modifierExtension": [
       {
-        "url": "fhir-request-method",
+        "url": "modified-fhir-request-method",
         "valueString": "POST"
       },
       {
-        "url": "fhir-request-uri",
+        "url": "modified-fhir-request-uri",
         "valueUri": "Patient"
       }
     ],
