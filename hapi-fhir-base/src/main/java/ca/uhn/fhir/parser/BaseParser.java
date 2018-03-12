@@ -918,6 +918,18 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
+	protected List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> getExtensionMetadataKeys(IResource resource) {
+		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = new ArrayList<Map.Entry<ResourceMetadataKeyEnum<?>, Object>>();
+		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : resource.getResourceMetadata().entrySet()) {
+			if (entry.getKey() instanceof ResourceMetadataKeyEnum.ExtensionResourceMetadataKey) {
+				extensionMetadataKeys.add(entry);
+			}
+		}
+
+		return extensionMetadataKeys;
+	}
+
+
 	protected static <T> List<T> extractMetadataListNotNull(IResource resource, ResourceMetadataKeyEnum<List<T>> key) {
 		List<? extends T> securityLabels = key.get(resource);
 		if (securityLabels == null) {

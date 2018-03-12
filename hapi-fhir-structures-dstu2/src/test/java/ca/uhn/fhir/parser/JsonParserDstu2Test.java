@@ -1,5 +1,40 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.*;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.mockito.internal.stubbing.answers.ThrowsException;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -1886,6 +1921,113 @@ public class JsonParserDstu2Test {
 		//@formatter:off
 
 		assertEquals("Smith", p.getName().get(0).getGiven().get(0).getValue());
+		assertExtensionMetadata(p, "fhir-request-method", false, StringDt.class, "POST");
+		assertExtensionMetadata(p, "fhir-request-uri", false, UriDt.class, "Patient");
+		assertExtensionMetadata(p, "modified-fhir-request-method", true, StringDt.class, "POST");
+		assertExtensionMetadata(p, "modified-fhir-request-uri", true, UriDt.class, "Patient");
+	}
+
+	private void assertExtensionMetadata(
+		BaseResource resource,
+		String url,
+		boolean isModifier,
+		Class<?> expectedType,
+		String expectedValue) {
+		ExtensionDt extension = (ExtensionDt) resource.getResourceMetadata().get(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(url));
+		assertThat(extension.getValue(), instanceOf(expectedType));
+		assertThat(extension.isModifier(), equalTo(isModifier));
+		assertThat(extension.getValueAsPrimitive().getValueAsString(), equalTo(expectedValue));
+	}
+
+	@Test
+	public void testEncodeResourceWithExtensionMetadata() throws Exception {
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setStatus(ProcedureRequestStatusEnum.ACCEPTED);
+		ExtensionDt timestamp = new ExtensionDt(false, "http://fhir.sjanic.com/timestamp");
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/user", new ResourceReferenceDt("sjanic"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/instance", new InstantDt("2012-01-01T13:00:00Z"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/organization", new ResourceReferenceDt("sjanic_org"));
+		timestamp.addUndeclaredExtension(false, "http://fhir.sjanic.com/timestamp/role", new CodeableConceptDt().addCoding(new CodingDt("sjanic", "Doctor").setDisplay("Doctorin")));
+		ExtensionDt payment = new ExtensionDt(true, "http://fhir.sjanic.com/procedureRequest/requiresPatientPayment", new BooleanDt(true));
+		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(timestamp.getUrl()), timestamp);
+		procedureRequest.getResourceMetadata().put(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(payment.getUrl()), payment);
+
+		String json = ourCtx.newJsonParser().encodeResourceToString(procedureRequest);
+
+		// @formatter:off
+		assertThat(json, stringContainsInOrder(
+			"\"meta\":{"+
+				"\"extension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp\","+
+				"\"extension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/user\","+
+				"\"valueReference\":{"+
+				"\"reference\":\"sjanic\""+
+				"}"+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/instance\","+
+				"\"valueInstant\":\"2012-01-01T13:00:00Z\""+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/organization\","+
+				"\"valueReference\":{"+
+				"\"reference\":\"sjanic_org\""+
+				"}"+
+				"},"+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/timestamp/role\","+
+				"\"valueCodeableConcept\":{"+
+				"\"coding\":["+
+				"{"+
+				"\"system\":\"sjanic\","+
+				"\"code\":\"Doctor\","+
+				"\"display\":\"Doctorin\""+
+				"}"+
+				"]"+
+				"}"+
+				"}"+
+				"]"+
+				"}"+
+				"],"+
+				"\"modifierExtension\":["+
+				"{"+
+				"\"url\":\"http://fhir.sjanic.com/procedureRequest/requiresPatientPayment\","+
+				"\"valueBoolean\":true"+
+				"}"+
+				"]"+
+				"},"));
+		// @formatter:on
+	}
+
+	@Test
+	public void testParseResourceWithExtensionMetadata() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/procedure-request.json"));
+		IParser parser = ourCtx.newJsonParser();
+		IParserErrorHandler peh = mock(IParserErrorHandler.class);
+		parser.setParserErrorHandler(peh);
+
+		ProcedureRequest p = parser.parseResource(ProcedureRequest.class, input);
+
+		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
+		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		assertParsedResourcesExtensionMetadata(p);
+	}
+
+	private void assertParsedResourcesExtensionMetadata(ProcedureRequest resource) throws Exception {
+		ExtensionDt payment = (ExtensionDt) resource.getResourceMetadata().get(
+			new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://fhir.sjanic.com/procedureRequest/requiresPatientPayment"));
+		assertThat(payment.isModifier(), equalTo(true));
+		assertThat(((BooleanDt)payment.getValue()).getValue(), equalTo(true));
+
+		TimestampFields timestampFields = new TimestampFields(resource);
+		assertThat(timestampFields.user.getReference().getIdPart(), equalTo("sjanic"));
+		assertThat(timestampFields.instance.getValue(), equalTo(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		assertThat(timestampFields.organization.getReference().getIdPart(), equalTo("sjanic_org"));
+		assertThat(timestampFields.role.getCodingFirstRep().getSystem(), equalTo("sjanic"));
+		assertThat(timestampFields.role.getCodingFirstRep().getCode(), equalTo("Doctor"));
 	}
 
 	@Test
@@ -1988,5 +2130,190 @@ public class JsonParserDstu2Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+	
+	/**
+	 * See #537
+	 */
+	@Test
+	public void testEncodeNestedContained() {
+		
+		Organization org04 = new Organization();
+		org04.setName("LEVEL04");
+		
+		Organization org03 = new Organization();
+		org03.setName("LEVEL03");
+		org03.getPartOf().setResource(org04);
+		
+		Organization org02 = new Organization();
+		org02.setName("LEVEL02");
+		org02.getPartOf().setResource(org03);
+		
+		Organization org01 = new Organization();
+		org01.setName("LEVEL01");
+		org01.getPartOf().setResource(org02);
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(org01);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder("LEVEL02","LEVEL03","LEVEL04","LEVEL01" ));
+	}
+	
+	
+	/**
+	 * See #505
+	 */
+	@Test
+	public void testIncludeResourceWhenEncoding() {
+		Condition condition = new Condition();
+		condition.setDateRecorded(new DateDt("2011-01-01"));
+		
+		Goal goal = new Goal();
+		goal.setId("Goal1");
+		ResourceReferenceDt resourceReferenceDt = new ResourceReferenceDt(condition);
+		goal.setAddresses(Collections.singletonList(resourceReferenceDt));
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		Entry entry = bundle.addEntry();
+		entry.setResource(goal);
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		String resourceToString = parser.setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(resourceToString);
+		
+		assertThat(resourceToString, containsString("2011-01-01"));
+		
+		bundle = parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resourceToString);
+		assertEquals(1, bundle.getEntry().size());
+		goal = (Goal) bundle.getEntry().get(0).getResource();
+		
+		condition = (Condition) goal.getAddresses().get(0).getResource();
+		
+		assertEquals("2011-01-01", condition.getDateRecordedElement().getValueAsString());
+	}
+
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testGeneratedUrls() {
+		final IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		jsonParser.setServerBaseUrl("http://myserver.com");
+
+		final CustomPatientDstu2 patient = new CustomPatientDstu2();
+		patient.setHomeless(new BooleanDt(true));
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/Patient"));
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/homeless"));
+	}	
+  
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testCustomUrlExtension() {
+		final String expected = "{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+		System.out.println(parsedPatient);
+		assertEquals(expected, parsedPatient);
+
+		// Parse with string
+		MyPatientWithCustomUrlExtension newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		// Parse with stream
+		newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		//Check no NPE if base server not configure
+		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertNull("myName", newPatient.getPetName().getValue());
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCustomUrlExtensioninBundle() {
+		final String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final Bundle bundle = new Bundle();
+		final Entry entry = new Entry();
+		entry.setResource(patient);
+		bundle.addEntry(entry);
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
+		System.out.println(parsedBundle);
+		assertEquals(expected, parsedBundle);
+
+		// Parse with string
+		Bundle newBundle = jsonParser.parseResource(Bundle.class, parsedBundle);
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntry().size());
+		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+		// Parse with stream
+		newBundle = jsonParser.parseResource(Bundle.class, new StringReader(parsedBundle));
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntry().size());
+		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+	}  
+
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addUndeclaredExtension(false, "x1").setValue(new ResourceReferenceDt(refVal));
+
+		IParser parser = ourCtx.newJsonParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<ExtensionDt> extlst = fhirPat.getUndeclaredExtensionsByUrl("x1");
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
+	}
+
+	private static final class TimestampFields {
+		ResourceReferenceDt user;
+		InstantDt instance;
+		ResourceReferenceDt organization;
+		CodeableConceptDt role;
+
+		TimestampFields(BaseResource resource) {
+			ExtensionDt timestamp = (ExtensionDt) resource.getResourceMetadata().get(
+				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://fhir.sjanic.com/timestamp"));
+
+			Map<String, ExtensionDt> timestampFields = new HashMap<>(timestamp.getExtension().size());
+			for (ExtensionDt extensionDt : timestamp.getExtension()) {
+				timestampFields.put(extensionDt.getUrl(), extensionDt);
+			}
+			user = ((ResourceReferenceDt)timestampFields.get("http://fhir.sjanic.com/timestamp/user").getValue());
+			instance = (InstantDt) timestampFields.get("http://fhir.sjanic.com/timestamp/instance").getValue();
+			organization = (ResourceReferenceDt) timestampFields.get("http://fhir.sjanic.com/timestamp/organization").getValue();
+			role = (CodeableConceptDt) timestampFields.get("http://fhir.sjanic.com/timestamp/role").getValue();
+		}
 	}
 }
