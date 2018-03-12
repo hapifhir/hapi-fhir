@@ -11,6 +11,7 @@ import java.util.List;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
 import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.formats.XmlParser;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
@@ -157,8 +158,8 @@ public class CSVWriter  extends TextStreamWriter  {
       line.addString(ed.getBinding().getDescription());
       if (ed.getBinding().getValueSet()==null)
         line.addString("");
-      else if (ed.getBinding().getValueSet() instanceof Reference)
-      line.addString(ed.getBinding().getValueSetReference().getReference());
+      else if (ed.getBinding().getValueSet() instanceof CanonicalType)
+      line.addString(ed.getBinding().getValueSetCanonicalType().getValue());
       else
       line.addString(ed.getBinding().getValueSetUriType().getValue());
     } else {

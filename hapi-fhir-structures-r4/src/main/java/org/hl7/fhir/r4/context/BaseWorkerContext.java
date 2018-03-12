@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.BaseWorkerContext.NullTranslator;
+import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
 import org.hl7.fhir.r4.context.IWorkerContext.ILoggingService.LogCategory;
 import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -30,6 +31,8 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemHierarchyMeaning;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionDesignationComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -68,6 +71,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.NoTerminologyServiceException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.utilities.OIDUtils;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.Utilities;
@@ -76,27 +80,32 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+
+import ca.uhn.fhir.rest.annotation.Metadata;
 
 public abstract class BaseWorkerContext implements IWorkerContext {
 
-  protected Map<String, Map<String, Resource>> allResourcesById = new HashMap<String, Map<String, Resource>>();
+  private Object lock = new Object(); // used as a lock for the data that follows
+  
+  private Map<String, Map<String, Resource>> allResourcesById = new HashMap<String, Map<String, Resource>>();
   // all maps are to the full URI
-  protected Map<String, CodeSystem> codeSystems = new HashMap<String, CodeSystem>();
-  protected Set<String> nonSupportedCodeSystems = new HashSet<String>();
-  protected Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
-  protected Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
-  protected Map<String, StructureMap> transforms = new HashMap<String, StructureMap>();
+  private Map<String, CodeSystem> codeSystems = new HashMap<String, CodeSystem>();
+  private Set<String> nonSupportedCodeSystems = new HashSet<String>();
+  private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
+  private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
+  private Map<String, StructureMap> transforms = new HashMap<String, StructureMap>();
 //  private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
-  protected Map<String, StructureDefinition> structures = new HashMap<String, StructureDefinition>();
+  private Map<String, StructureDefinition> structures = new HashMap<String, StructureDefinition>();
 //  private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
-  protected Map<String, SearchParameter> searchParameters = new HashMap<String, SearchParameter>();
-  protected Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
-  protected Map<String, OperationDefinition> operations = new HashMap<String, OperationDefinition>();
-  protected List<NamingSystem> systems = new ArrayList<NamingSystem>();
+  private Map<String, SearchParameter> searchParameters = new HashMap<String, SearchParameter>();
+  private Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
+  private Map<String, OperationDefinition> operations = new HashMap<String, OperationDefinition>();
+  private List<NamingSystem> systems = new ArrayList<NamingSystem>();
 
   
-  protected ValueSetExpanderFactory expansionCache = new ValueSetExpansionCache(this);
+  private ValueSetExpansionCache expansionCache = new ValueSetExpansionCache(this);
   protected boolean cacheValidation; // if true, do an expansion and cache the expansion
   private Set<String> failed = new HashSet<String>(); // value sets for which we don't try to do expansion, since the first attempt to get a comprehensive expansion was not successful
   protected Map<String, Map<String, ValidationResult>> validationCache = new HashMap<String, Map<String,ValidationResult>>();
@@ -117,64 +126,82 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   protected ExpansionProfile expProfile;
   private TranslationServices translator = new NullTranslator();
 
-  protected void copy(BaseWorkerContext other) {
-    allResourcesById.putAll(other.allResourcesById);
-    translator = other.translator;
-    codeSystems.putAll(other.codeSystems);
-    nonSupportedCodeSystems.addAll(other.nonSupportedCodeSystems);
-    valueSets.putAll(other.valueSets);
-    maps.putAll(other.maps);
-    transforms.putAll(other.transforms);
-    structures.putAll(other.structures);
-    searchParameters.putAll(other.searchParameters);
-    questionnaires.putAll(other.questionnaires);
-    operations.putAll(other.operations);
-    systems.addAll(other.systems);
+  public BaseWorkerContext() {
+    super();
+  }
 
-    allowLoadingDuplicates = other.allowLoadingDuplicates;
-    cacheValidation = other.cacheValidation;
-    tsServer = other.tsServer;
-    validationCachePath = other.validationCachePath;
-    name = other.name;
-    txServer = other.txServer;
-    bndCodeSystems = other.bndCodeSystems;
-    canRunWithoutTerminology = other.canRunWithoutTerminology;
-    noTerminologyServer = other.noTerminologyServer;
-    cache = other.cache;
-    expandCodesLimit = other.expandCodesLimit;
-    logger = other.logger;
-    expProfile = other.expProfile;
+  public BaseWorkerContext(Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps,  Map<String, StructureDefinition> profiles) {
+    super();
+    this.codeSystems = codeSystems;
+    this.valueSets = valueSets;
+    this.maps = maps;
+    this.structures = profiles;
+  }
+
+  protected void copy(BaseWorkerContext other) {
+    synchronized (other.lock) { // tricky, because you need to lock this as well, but it's really not in use yet 
+      allResourcesById.putAll(other.allResourcesById);
+      translator = other.translator;
+      codeSystems.putAll(other.codeSystems);
+      nonSupportedCodeSystems.addAll(other.nonSupportedCodeSystems);
+      valueSets.putAll(other.valueSets);
+      maps.putAll(other.maps);
+      transforms.putAll(other.transforms);
+      structures.putAll(other.structures);
+      searchParameters.putAll(other.searchParameters);
+      questionnaires.putAll(other.questionnaires);
+      operations.putAll(other.operations);
+      systems.addAll(other.systems);
+
+      allowLoadingDuplicates = other.allowLoadingDuplicates;
+      cacheValidation = other.cacheValidation;
+      tsServer = other.tsServer;
+      validationCachePath = other.validationCachePath;
+      name = other.name;
+      txServer = other.txServer;
+      bndCodeSystems = other.bndCodeSystems;
+      canRunWithoutTerminology = other.canRunWithoutTerminology;
+      noTerminologyServer = other.noTerminologyServer;
+      cache = other.cache;
+      expandCodesLimit = other.expandCodesLimit;
+      logger = other.logger;
+      expProfile = other.expProfile;
+    }
   }
   
   public void cacheResource(Resource r) throws FHIRException {
-    Map<String, Resource> map = allResourcesById.get(r.fhirType());
-    if (map == null) {
-      map = new HashMap<String, Resource>();
-      allResourcesById.put(r.fhirType(), map);
-    }
-    map.put(r.getId(), r);
-    
-    if (r instanceof MetadataResource) {
-      MetadataResource m = (MetadataResource) r;
-      String url = m.getUrl();
-      if (!allowLoadingDuplicates && hasResource(r.getClass(), url))
-        throw new DefinitionException("Duplicate Resource " + url);
-      if (r instanceof StructureDefinition)
-        seeMetadataResource(m, structures, false);
-      else if (r instanceof ValueSet)
-        seeMetadataResource(m, valueSets, false);
-      else if (r instanceof CodeSystem)
-        seeMetadataResource(m, codeSystems, false);
-      else if (r instanceof OperationDefinition)
-        seeMetadataResource(m, operations, false);
-      else if (r instanceof Questionnaire)
-        seeMetadataResource(m, questionnaires, true);
-      else if (r instanceof ConceptMap)
-        seeMetadataResource(m, maps, false);
-      else if (r instanceof StructureMap)
-        seeMetadataResource(m, transforms, false);
-      else if (r instanceof NamingSystem)
-        systems.add((NamingSystem) r);
+    synchronized (lock) {
+      Map<String, Resource> map = allResourcesById.get(r.fhirType());
+      if (map == null) {
+        map = new HashMap<String, Resource>();
+        allResourcesById.put(r.fhirType(), map);
+      }
+      map.put(r.getId(), r);
+
+      if (r instanceof MetadataResource) {
+        MetadataResource m = (MetadataResource) r;
+        String url = m.getUrl();
+        if (!allowLoadingDuplicates && hasResource(r.getClass(), url))
+          throw new DefinitionException("Duplicate Resource " + url);
+        if (r instanceof StructureDefinition)
+          seeMetadataResource((StructureDefinition) m, structures, false);
+        else if (r instanceof ValueSet)
+          seeMetadataResource((ValueSet) m, valueSets, false);
+        else if (r instanceof CodeSystem)
+          seeMetadataResource((CodeSystem) m, codeSystems, false);
+        else if (r instanceof SearchParameter)
+          seeMetadataResource((SearchParameter) m, searchParameters, false);
+        else if (r instanceof OperationDefinition)
+          seeMetadataResource((OperationDefinition) m, operations, false);
+        else if (r instanceof Questionnaire)
+          seeMetadataResource((Questionnaire) m, questionnaires, true);
+        else if (r instanceof ConceptMap)
+          seeMetadataResource((ConceptMap) m, maps, false);
+        else if (r instanceof StructureMap)
+          seeMetadataResource((StructureMap) m, transforms, false);
+        else if (r instanceof NamingSystem)
+          systems.add((NamingSystem) r);
+      }
     }
   }
 
@@ -225,7 +252,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     throw new Error("delimited versions have exact match");
   }
   
-  protected void seeMetadataResource(MetadataResource r, Map map, boolean addId) throws FHIRException {
+  protected <T extends MetadataResource> void seeMetadataResource(T r, Map<String, T> map, boolean addId) throws FHIRException {
     if (addId)
       map.put(r.getId(), r); // todo: why?
     if (!map.containsKey(r.getUrl()))
@@ -249,47 +276,51 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
   @Override
   public CodeSystem fetchCodeSystem(String system) {
-    return codeSystems.get(system);
+    synchronized (lock) {
+      return codeSystems.get(system);
+    }
   } 
 
   @Override
   public boolean supportsSystem(String system) throws TerminologyServiceException {
-    if (codeSystems.containsKey(system))
-      return true;
-    else if (nonSupportedCodeSystems.contains(system))
-      return false;
-    else if (system.startsWith("http://example.org") || system.startsWith("http://acme.com") || system.startsWith("http://hl7.org/fhir/valueset-") || system.startsWith("urn:oid:"))
-      return false;
-    else {
-      if (noTerminologyServer)
-        return false;
-      if (bndCodeSystems == null) {
-        try {
-          tlog("Terminology server: Check for supported code systems for "+system);
-          bndCodeSystems = txServer.fetchFeed(txServer.getAddress()+"/CodeSystem?content-mode=not-present&_summary=true&_count=1000");
-        } catch (Exception e) {
-          if (canRunWithoutTerminology) {
-            noTerminologyServer = true;
-            log("==============!! Running without terminology server !!==============");
-            log("Error: "+e.getMessage());
-            return false;
-          } else
-            throw new TerminologyServiceException(e);
-        }
-      }
-      if (bndCodeSystems != null) {
-        for (BundleEntryComponent be : bndCodeSystems.getEntry()) {
-          CodeSystem cs = (CodeSystem) be.getResource();
-          if (!codeSystems.containsKey(cs.getUrl())) {
-            codeSystems.put(cs.getUrl(), null);
-          }
-        }
-      }
+    synchronized (lock) {
       if (codeSystems.containsKey(system))
         return true;
+      else if (nonSupportedCodeSystems.contains(system))
+        return false;
+      else if (system.startsWith("http://example.org") || system.startsWith("http://acme.com") || system.startsWith("http://hl7.org/fhir/valueset-") || system.startsWith("urn:oid:"))
+        return false;
+      else {
+        if (noTerminologyServer)
+          return false;
+        if (bndCodeSystems == null) {
+          try {
+            tlog("Terminology server: Check for supported code systems for "+system);
+            bndCodeSystems = txServer.fetchFeed(txServer.getAddress()+"/CodeSystem?content-mode=not-present&_summary=true&_count=1000");
+          } catch (Exception e) {
+            if (canRunWithoutTerminology) {
+              noTerminologyServer = true;
+              log("==============!! Running without terminology server !!============== ("+e.getMessage()+")");
+              log("Error: "+e.getMessage());
+              return false;
+            } else
+              throw new TerminologyServiceException(e);
+          }
+        }
+        if (bndCodeSystems != null) {
+          for (BundleEntryComponent be : bndCodeSystems.getEntry()) {
+            CodeSystem cs = (CodeSystem) be.getResource();
+            if (!codeSystems.containsKey(cs.getUrl())) {
+              codeSystems.put(cs.getUrl(), null);
+            }
+          }
+        }
+        if (codeSystems.containsKey(system))
+          return true;
+      }
+      nonSupportedCodeSystems.add(system);
+      return false;
     }
-    nonSupportedCodeSystems.add(system);
-    return false;
   }
 
   private void log(String message) {
@@ -693,8 +724,13 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   @Override
   public ValidationResult validateCode(String system, String code, String display) {
     try {
-      if (codeSystems.containsKey(system) && codeSystems.get(system) != null && codeSystems.get(system).getContent() == CodeSystemContentMode.COMPLETE)
-        return verifyCodeInCodeSystem(codeSystems.get(system), system, code, display);
+      CodeSystem cs = null;
+      synchronized (lock) {
+        cs = codeSystems.get(system);
+      }
+      
+      if (cs != null && cs.getContent() == CodeSystemContentMode.COMPLETE)
+        return verifyCodeInCodeSystem(cs, system, code, display);
       else 
         return verifyCodeExternal(null, new Coding().setSystem(system).setCode(code).setDisplay(display), false);
     } catch (Exception e) {
@@ -705,9 +741,13 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
   @Override
   public ValidationResult validateCode(Coding code, ValueSet vs) {
-    if (codeSystems.containsKey(code.getSystem()) && codeSystems.get(code.getSystem()) != null) 
+    CodeSystem cs = null;
+    synchronized (lock) {
+      cs = codeSystems.get(code.getSystem());
+    }
+    if (cs != null) 
       try {
-        return verifyCodeInCodeSystem(codeSystems.get(code.getSystem()), code.getSystem(), code.getCode(), code.getDisplay());
+        return verifyCodeInCodeSystem(cs, code.getSystem(), code.getCode(), code.getDisplay());
       } catch (Exception e) {
         return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+code.getSystem()+"\": "+e.getMessage());
       }
@@ -757,7 +797,12 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     try {
       if (system == null && display == null)
         return verifyCodeInternal(vs, code);
-      if ((codeSystems.containsKey(system)  && codeSystems.get(system) != null) || vs.hasExpansion()) 
+      CodeSystem cs = null;
+      synchronized (lock) {
+        cs = codeSystems.get(system);
+      }
+      
+      if (cs != null || vs.hasExpansion()) 
         return verifyCodeInternal(vs, system, code, display);
       else 
         return verifyCodeExternal(vs, new Coding().setSystem(system).setCode(code).setDisplay(display), true);
@@ -793,12 +838,14 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   }
 
   @Override
-  public List<ConceptMap> findMapsForSource(String url) {
-    List<ConceptMap> res = new ArrayList<ConceptMap>();
-    for (ConceptMap map : maps.values())
-      if (((Reference) map.getSource()).getReference().equals(url)) 
-        res.add(map);
-    return res;
+  public List<ConceptMap> findMapsForSource(String url) throws FHIRException {
+    synchronized (lock) {
+      List<ConceptMap> res = new ArrayList<ConceptMap>();
+      for (ConceptMap map : maps.values())
+        if (((Reference) map.getSource()).getReference().equals(url)) 
+          res.add(map);
+      return res;
+    }
   }
 
   private ValidationResult verifyCodeInternal(ValueSet vs, CodeableConcept code) throws Exception {
@@ -913,10 +960,6 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     return null;
   }
 
-  public Set<String> getNonSupportedCodeSystems() {
-    return nonSupportedCodeSystems;
-  }
-
   public boolean isCanRunWithoutTerminology() {
     return canRunWithoutTerminology;
   }
@@ -977,72 +1020,99 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   @Override
   public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
     if (class_ == null) {
+      // it might be a special URL.
+      if (Utilities.isAbsoluteUrl(uri) || uri.startsWith("ValueSet/")) {
+        Resource res = findTxValueSet(uri);
+        if (res != null)
+          return (T) res;
+      }
       return null;      
     }
-    
+
     if (class_ == StructureDefinition.class && !uri.contains("/"))
       uri = "http://hl7.org/fhir/StructureDefinition/"+uri;
-    
-    if (uri.startsWith("http:") || uri.startsWith("https:")) {
-      String version = null;
-      if (uri.contains("#"))
-        uri = uri.substring(0, uri.indexOf("#"));
-      if (class_ == Resource.class) {
-        if (structures.containsKey(uri))
+    synchronized (lock) {
+
+      if (uri.startsWith("http:") || uri.startsWith("https:")) {
+        String version = null;
+        if (uri.contains("#"))
+          uri = uri.substring(0, uri.indexOf("#"));
+        if (class_ == Resource.class) {
+          if (structures.containsKey(uri))
+            return (T) structures.get(uri);
+          if (valueSets.containsKey(uri))
+            return (T) valueSets.get(uri);
+          if (codeSystems.containsKey(uri))
+            return (T) codeSystems.get(uri);
+          if (operations.containsKey(uri))
+            return (T) operations.get(uri);
+          if (searchParameters.containsKey(uri))
+            return (T) searchParameters.get(uri);
+          if (maps.containsKey(uri))
+            return (T) maps.get(uri);
+          if (transforms.containsKey(uri))
+            return (T) transforms.get(uri);
+          return null;      
+        } else if (class_ == StructureDefinition.class) {
           return (T) structures.get(uri);
-        if (valueSets.containsKey(uri))
+        } else if (class_ == ValueSet.class) {
           return (T) valueSets.get(uri);
-        if (codeSystems.containsKey(uri))
+        } else if (class_ == CodeSystem.class) {
           return (T) codeSystems.get(uri);
-        if (operations.containsKey(uri))
-          return (T) operations.get(uri);
-        if (searchParameters.containsKey(uri))
-          return (T) searchParameters.get(uri);
-        if (maps.containsKey(uri))
-          return (T) maps.get(uri);
-        if (transforms.containsKey(uri))
-          return (T) transforms.get(uri);
-        return null;      
-      } else if (class_ == StructureDefinition.class) {
-        return (T) structures.get(uri);
-      } else if (class_ == ValueSet.class) {
-        return (T) valueSets.get(uri);
-      } else if (class_ == CodeSystem.class) {
-        return (T) codeSystems.get(uri);
-      } else if (class_ == OperationDefinition.class) {
-        OperationDefinition od = operations.get(uri);
-        return (T) od;
-      } else if (class_ == SearchParameter.class) {
-        SearchParameter res = searchParameters.get(uri);
-        if (res == null) {
-          StringBuilder b = new StringBuilder();
-          for (String s : searchParameters.keySet()) {
-            b.append(s);
-            b.append("\r\n");
+        } else if (class_ == OperationDefinition.class) {
+          OperationDefinition od = operations.get(uri);
+          return (T) od;
+        } else if (class_ == SearchParameter.class) {
+          SearchParameter res = searchParameters.get(uri);
+          if (res == null) {
+            StringBuilder b = new StringBuilder();
+            for (String s : searchParameters.keySet()) {
+              b.append(s);
+              b.append("\r\n");
+            }
           }
+
+
+          return (T) res;
         }
-        
-          
-        return (T) res;
       }
+      if (class_ == Questionnaire.class)
+        return null;
+      throw new FHIRException("not done yet: can't fetch "+uri);
     }
-    if (class_ == Questionnaire.class)
+  }
+
+  private MetadataResource findTxValueSet(String uri) {
+    MetadataResource res = expansionCache.getStoredResource(uri);
+    if (res != null)
+      return res;
+    try {
+      res = txServer.getCanonical(ValueSet.class, uri);
+    } catch (Exception e) {
       return null;
-    throw new FHIRException("not done yet: can't fetch "+uri);
+    }
+    if (res != null)
+      try {
+        expansionCache.storeResource(res);
+      } catch (IOException e) {
+      }
+    return res;
   }
 
   @Override
   public Resource fetchResourceById(String type, String uri) {
-    String[] parts = uri.split("\\/");
-    if (!Utilities.noString(type) && parts.length == 1)
-      return allResourcesById.get(type).get(parts[0]);
-    if (parts.length >= 2) {
-      if (!Utilities.noString(type))
-        if (!type.equals(parts[parts.length-2])) 
-          throw new Error("Resource type mismatch for "+type+" / "+uri);
-      return allResourcesById.get(parts[parts.length-2]).get(parts[parts.length-1]);
-    } else
-      throw new Error("Unable to process request for resource for "+type+" / "+uri);
+    synchronized (lock) {
+      String[] parts = uri.split("\\/");
+      if (!Utilities.noString(type) && parts.length == 1)
+        return allResourcesById.get(type).get(parts[0]);
+      if (parts.length >= 2) {
+        if (!Utilities.noString(type))
+          if (!type.equals(parts[parts.length-2])) 
+            throw new Error("Resource type mismatch for "+type+" / "+uri);
+        return allResourcesById.get(parts[parts.length-2]).get(parts[parts.length-1]);
+      } else
+        throw new Error("Unable to process request for resource for "+type+" / "+uri);
+    }
   }
 
   public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
@@ -1065,10 +1135,10 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   @Override
   public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heirarchical) throws FHIRException {
     ValueSet vs = null;
-    if (binding.hasValueSetReference()) {
-      vs = fetchResource(ValueSet.class, binding.getValueSetReference().getReference());
+    if (binding.hasValueSetCanonicalType()) {
+      vs = fetchResource(ValueSet.class, binding.getValueSetCanonicalType().getValue());
       if (vs == null)
-        throw new FHIRException("Unable to resolve value Set "+binding.getValueSetReference().getReference());
+        throw new FHIRException("Unable to resolve value Set "+binding.getValueSetCanonicalType().getValue());
     } else {
       vs = fetchResource(ValueSet.class, binding.getValueSetUriType().asStringValue());
       if (vs == null)
@@ -1126,5 +1196,189 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     }
 
   }
+  
+  public void reportStatus(JsonObject json) {
+    synchronized (lock) {
+      json.addProperty("codeystem-count", codeSystems.size());
+      json.addProperty("valueset-count", valueSets.size());
+      json.addProperty("conceptmap-count", maps.size());
+      json.addProperty("transforms-count", transforms.size());
+      json.addProperty("structures-count", structures.size());
+    }
+  }
+
+
+  public void dropResource(Resource r) throws FHIRException {
+    dropResource(r.fhirType(), r.getId());   
+  }
+
+  public void dropResource(String fhirType, String id) {
+    synchronized (lock) {
+
+      Map<String, Resource> map = allResourcesById.get(fhirType);
+      if (map == null) {
+        map = new HashMap<String, Resource>();
+        allResourcesById.put(fhirType, map);
+      }
+      if (map.containsKey(id))
+        map.remove(id);
+
+      if (fhirType.equals("StructureDefinition"))
+        dropMetadataResource(structures, id);
+      else if (fhirType.equals("ValueSet"))
+        dropMetadataResource(valueSets, id);
+      else if (fhirType.equals("CodeSystem"))
+        dropMetadataResource(codeSystems, id);
+      else if (fhirType.equals("OperationDefinition"))
+        dropMetadataResource(operations, id);
+      else if (fhirType.equals("Questionnaire"))
+        dropMetadataResource(questionnaires, id);
+      else if (fhirType.equals("ConceptMap"))
+        dropMetadataResource(maps, id);
+      else if (fhirType.equals("StructureMap"))
+        dropMetadataResource(transforms, id);
+      else if (fhirType.equals("NamingSystem"))
+        for (int i = systems.size()-1; i >= 0; i--) {
+          if (systems.get(i).getId().equals(id))
+            systems.remove(i);
+        }
+    }
+  }
+
+  private <T extends MetadataResource> void dropMetadataResource(Map<String, T> map, String id) {
+    T res = map.get(id);
+    if (res != null) {
+      map.remove(id);
+      if (map.containsKey(res.getUrl()))
+        map.remove(res.getUrl());
+      if (res.getVersion() != null)
+        if (map.containsKey(res.getUrl()+"|"+res.getVersion()))
+          map.remove(res.getUrl()+"|"+res.getVersion());
+    }
+  }
+
+  @Override
+  public List<MetadataResource> allConformanceResources() {
+    synchronized (lock) {
+      List<MetadataResource> result = new ArrayList<MetadataResource>();
+      result.addAll(structures.values());
+      result.addAll(codeSystems.values());
+      result.addAll(valueSets.values());
+      result.addAll(maps.values());
+      result.addAll(transforms.values());
+      return result;
+    }
+  }
+  
+  public void addNonSupportedCodeSystems(String s) {
+    synchronized (lock) {
+      nonSupportedCodeSystems.add(s);
+    }   
+   }
+
+  public String listNonSupportedSystems() {
+    synchronized (lock) {
+      String sl = null;
+      for (String s : nonSupportedCodeSystems)
+        sl = sl == null ? s : sl + "\r\n" + s;
+      return sl;
+    }
+  }
+
+
+  public int totalCount() {
+    synchronized (lock) {
+      return valueSets.size() +  maps.size() + structures.size() + transforms.size();
+    }
+  }
+  
+  public List<ConceptMap> listMaps() {
+    List<ConceptMap> m = new ArrayList<ConceptMap>();
+    synchronized (lock) {
+      m.addAll(maps.values());    
+    }
+    return m;
+  }
+  
+  public List<StructureMap> listTransforms() {
+    List<StructureMap> m = new ArrayList<StructureMap>();
+    synchronized (lock) {
+      m.addAll(transforms.values());    
+    }
+    return m;
+  }
+  
+  public StructureMap getTransform(String code) {
+    synchronized (lock) {
+      return transforms.get(code);
+    }
+  }
+
+  public List<StructureDefinition> listStructures() {
+    List<StructureDefinition> m = new ArrayList<StructureDefinition>();
+    synchronized (lock) {
+      m.addAll(structures.values());    
+    }
+    return m;
+  }
+
+  public StructureDefinition getStructure(String code) {
+    synchronized (lock) {
+      return structures.get(code);
+    }
+  }
+
+  public void setCache(ValueSetExpansionCache cache) {
+    synchronized (lock) {
+      this.expansionCache = cache;
+    }
+  }
+
+  @Override
+  public String oid2Uri(String oid) {
+    synchronized (lock) {
+      String uri = OIDUtils.getUriForOid(oid);
+      if (uri != null)
+        return uri;
+      for (NamingSystem ns : systems) {
+        if (hasOid(ns, oid)) {
+          uri = getUri(ns);
+          if (uri != null)
+            return null;
+        }
+      }
+    }
+    return null;
+  }
+  
+
+  private String getUri(NamingSystem ns) {
+    for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
+      if (id.getType() == NamingSystemIdentifierType.URI)
+        return id.getValue();
+    }
+    return null;
+  }
+
+  private boolean hasOid(NamingSystem ns, String oid) {
+    for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
+      if (id.getType() == NamingSystemIdentifierType.OID && id.getValue().equals(oid))
+        return true;
+    }
+    return false;
+  }
+
+  public void cacheVS(JsonObject json, Map<String, ValidationResult> t) {
+    synchronized (lock) {
+      validationCache.put(json.get("url").getAsString(), t);
+    }
+  }
+
+  public SearchParameter getSearchParameter(String code) {
+    synchronized (lock) {
+      return searchParameters.get(code);
+    }
+  }
+
   
 }

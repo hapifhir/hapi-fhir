@@ -38,6 +38,7 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class BaseParser implements IParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
@@ -156,7 +157,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
-		Set<String> allIds = new HashSet<String>();
 		Map<String, IBaseResource> existingIdToContainedResource = null;
 
 		if (theTarget instanceof IResource) {
@@ -167,9 +167,8 @@ public abstract class BaseParser implements IParser {
 					if (!nextId.startsWith("#")) {
 						nextId = '#' + nextId;
 					}
-					allIds.add(nextId);
 					if (existingIdToContainedResource == null) {
-						existingIdToContainedResource = new HashMap<String, IBaseResource>();
+						existingIdToContainedResource = new HashMap<>();
 					}
 					existingIdToContainedResource.put(nextId, next);
 				}
@@ -182,9 +181,8 @@ public abstract class BaseParser implements IParser {
 					if (!nextId.startsWith("#")) {
 						nextId = '#' + nextId;
 					}
-					allIds.add(nextId);
 					if (existingIdToContainedResource == null) {
-						existingIdToContainedResource = new HashMap<String, IBaseResource>();
+						existingIdToContainedResource = new HashMap<>();
 					}
 					existingIdToContainedResource.put(nextId, next);
 				}
@@ -480,7 +478,7 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes) {
 		if (thePreferTypes != null) {
-			ArrayList<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+			ArrayList<Class<? extends IBaseResource>> types = new ArrayList<>();
 			for (Class<? extends IBaseResource> next : thePreferTypes) {
 				if (Modifier.isAbstract(next.getModifiers()) == false) {
 					types.add(next);
@@ -516,8 +514,7 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 
-			List<T> newList = new ArrayList<T>();
-			newList.addAll(theProfiles);
+			List<T> newList = new ArrayList<>(theProfiles);
 
 			BaseRuntimeElementDefinition<?> idElement = myContext.getElementDefinition("id");
 			@SuppressWarnings("unchecked")
@@ -1195,8 +1192,10 @@ public abstract class BaseParser implements IParser {
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
-			myResourceToId.put(theResource, theId);
-			myResources.add(theResource);
+			if (!hasId(theId)) {
+				myResourceToId.put(theResource, theId);
+				myResources.add(theResource);
+			}
 		}
 
 		public List<IBaseResource> getContainedResources() {
@@ -1205,6 +1204,15 @@ public abstract class BaseParser implements IParser {
 
 		public IIdType getResourceId(IBaseResource theNext) {
 			return myResourceToId.get(theNext);
+		}
+
+		public boolean hasId(IIdType theId) {
+			for (IIdType next : myResourceToId.values()) {
+				if (Objects.equals(next.getValue(), theId.getValue())) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public boolean isEmpty() {

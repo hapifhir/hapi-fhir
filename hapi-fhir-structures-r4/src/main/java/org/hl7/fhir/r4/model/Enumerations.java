@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -38,21 +38,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public class Enumerations {
 
 // In here: 
-//   AbstractType: A type defined by FHIR that is an abstract type
+//   AbstractType: A list of the base types defined by this version of the FHIR specification - types that are defined, but for which only specializations actually are created
 //   AdministrativeGender: The gender of a person used for administrative purposes.
 //   AgeUnits: A valueSet of UCUM codes for representing age value units.
 //   BindingStrength: Indication of the degree of conformance expectations associated with a binding.
 //   ConceptMapEquivalence: The degree of equivalence between concepts.
 //   DataAbsentReason: Used to specify why the normally expected content of the data element is missing.
-//   DataType: The type of an element - one of the FHIR data types.
+//   DataType: A version specific list of the data types defined by the FHIR specification for use as an element  type (any of the FHIR defined data types)
 //   DocumentReferenceStatus: The status of the document reference.
-//   FHIRAllTypes: Either an abstract type, a resource or a data type.
-//   FHIRDefinedType: Either a resource or a data type.
-//   MessageEvent: One of the message events defined as part of FHIR.
+//   FHIRAllTypes: A list of all the concrete types defined in this version of the FHIR specification - Abstract Types, Data Types and Resource Types
+//   FHIRDefinedType: A list of all the concrete types defined in this version of the FHIR specification - Data Types and Resource Types
+//   MessageEvent: One of the message events defined as part of this version of FHIR.
 //   NoteType: The presentation types of notes.
 //   PublicationStatus: The lifecycle status of a Value Set or Concept Map.
 //   RemittanceOutcome: The outcome of the processing.
-//   ResourceType: One of the resource types defined as part of FHIR.
+//   ResourceType: One of the resource types defined as part of this version of FHIR.
 //   SearchParamType: Data types allowed to be used for search parameters.
 //   SpecialValues: A set of generally useful codes defined so they can be included in value sets.
 
@@ -760,25 +760,33 @@ public class Enumerations {
 
     public enum DataAbsentReason {
         /**
-         * The value is not known.
+         * The value is expected to exist but is not known.
          */
         UNKNOWN, 
         /**
-         * The source human does not know the value.
+         * The source was asked but does not know the value.
          */
-        ASKED, 
+        ASKEDUNKNOWN, 
         /**
          * There is reason to expect (from the workflow) that the value may become known.
          */
-        TEMP, 
+        TEMPUNKNOWN, 
         /**
          * The workflow didn't lead to this value being known.
          */
         NOTASKED, 
         /**
+         * The source was asked but declined to answer.
+         */
+        ASKEDDECLINED, 
+        /**
          * The information is not available due to security, privacy or related reasons.
          */
         MASKED, 
+        /**
+         * There is no proper value for this element (e.g. last menstrual period for a male)
+         */
+        NOTAPPLICABLE, 
         /**
          * The source system wasn't capable of supporting this element.
          */
@@ -792,13 +800,25 @@ public class Enumerations {
          */
         ERROR, 
         /**
-         * NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value.
+         * The numeric value is undefined or unrepresentable due to a floating point processing error.
          */
-        NAN, 
+        NOTANUMBER, 
+        /**
+         * The numeric value is excessively low and unrepresentable due to a floating point processing error.
+         */
+        NEGATIVEINFINITY, 
+        /**
+         * The numeric value is excessively high and unrepresentable due to a floating point processing error.
+         */
+        POSITIVEINFINITY, 
         /**
          * The value is not available because the observation procedure (test, etc.) was not performed.
          */
         NOTPERFORMED, 
+        /**
+         * The value is not permitted in this context (e.g. due to profiles, or the base data types)
+         */
+        NOTPERMITTED, 
         /**
          * added to help the parsers
          */
@@ -808,83 +828,113 @@ public class Enumerations {
                 return null;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        if ("asked".equals(codeString))
-          return ASKED;
-        if ("temp".equals(codeString))
-          return TEMP;
+        if ("asked-unknown".equals(codeString))
+          return ASKEDUNKNOWN;
+        if ("temp-unknown".equals(codeString))
+          return TEMPUNKNOWN;
         if ("not-asked".equals(codeString))
           return NOTASKED;
+        if ("asked-declined".equals(codeString))
+          return ASKEDDECLINED;
         if ("masked".equals(codeString))
           return MASKED;
+        if ("not-applicable".equals(codeString))
+          return NOTAPPLICABLE;
         if ("unsupported".equals(codeString))
           return UNSUPPORTED;
-        if ("astext".equals(codeString))
+        if ("as-text".equals(codeString))
           return ASTEXT;
         if ("error".equals(codeString))
           return ERROR;
-        if ("NaN".equals(codeString))
-          return NAN;
+        if ("not-a-number".equals(codeString))
+          return NOTANUMBER;
+        if ("negative-infinity".equals(codeString))
+          return NEGATIVEINFINITY;
+        if ("positive-infinity".equals(codeString))
+          return POSITIVEINFINITY;
         if ("not-performed".equals(codeString))
           return NOTPERFORMED;
+        if ("not-permitted".equals(codeString))
+          return NOTPERMITTED;
         throw new FHIRException("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case UNKNOWN: return "unknown";
-            case ASKED: return "asked";
-            case TEMP: return "temp";
+            case ASKEDUNKNOWN: return "asked-unknown";
+            case TEMPUNKNOWN: return "temp-unknown";
             case NOTASKED: return "not-asked";
+            case ASKEDDECLINED: return "asked-declined";
             case MASKED: return "masked";
+            case NOTAPPLICABLE: return "not-applicable";
             case UNSUPPORTED: return "unsupported";
-            case ASTEXT: return "astext";
+            case ASTEXT: return "as-text";
             case ERROR: return "error";
-            case NAN: return "NaN";
+            case NOTANUMBER: return "not-a-number";
+            case NEGATIVEINFINITY: return "negative-infinity";
+            case POSITIVEINFINITY: return "positive-infinity";
             case NOTPERFORMED: return "not-performed";
+            case NOTPERMITTED: return "not-permitted";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
             case UNKNOWN: return "http://hl7.org/fhir/data-absent-reason";
-            case ASKED: return "http://hl7.org/fhir/data-absent-reason";
-            case TEMP: return "http://hl7.org/fhir/data-absent-reason";
+            case ASKEDUNKNOWN: return "http://hl7.org/fhir/data-absent-reason";
+            case TEMPUNKNOWN: return "http://hl7.org/fhir/data-absent-reason";
             case NOTASKED: return "http://hl7.org/fhir/data-absent-reason";
+            case ASKEDDECLINED: return "http://hl7.org/fhir/data-absent-reason";
             case MASKED: return "http://hl7.org/fhir/data-absent-reason";
+            case NOTAPPLICABLE: return "http://hl7.org/fhir/data-absent-reason";
             case UNSUPPORTED: return "http://hl7.org/fhir/data-absent-reason";
             case ASTEXT: return "http://hl7.org/fhir/data-absent-reason";
             case ERROR: return "http://hl7.org/fhir/data-absent-reason";
-            case NAN: return "http://hl7.org/fhir/data-absent-reason";
+            case NOTANUMBER: return "http://hl7.org/fhir/data-absent-reason";
+            case NEGATIVEINFINITY: return "http://hl7.org/fhir/data-absent-reason";
+            case POSITIVEINFINITY: return "http://hl7.org/fhir/data-absent-reason";
             case NOTPERFORMED: return "http://hl7.org/fhir/data-absent-reason";
+            case NOTPERMITTED: return "http://hl7.org/fhir/data-absent-reason";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case UNKNOWN: return "The value is not known.";
-            case ASKED: return "The source human does not know the value.";
-            case TEMP: return "There is reason to expect (from the workflow) that the value may become known.";
+            case UNKNOWN: return "The value is expected to exist but is not known.";
+            case ASKEDUNKNOWN: return "The source was asked but does not know the value.";
+            case TEMPUNKNOWN: return "There is reason to expect (from the workflow) that the value may become known.";
             case NOTASKED: return "The workflow didn't lead to this value being known.";
+            case ASKEDDECLINED: return "The source was asked but declined to answer.";
             case MASKED: return "The information is not available due to security, privacy or related reasons.";
+            case NOTAPPLICABLE: return "There is no proper value for this element (e.g. last menstrual period for a male)";
             case UNSUPPORTED: return "The source system wasn't capable of supporting this element.";
             case ASTEXT: return "The content of the data is represented in the resource narrative.";
             case ERROR: return "Some system or workflow process error means that the information is not available.";
-            case NAN: return "NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value.";
+            case NOTANUMBER: return "The numeric value is undefined or unrepresentable due to a floating point processing error.";
+            case NEGATIVEINFINITY: return "The numeric value is excessively low and unrepresentable due to a floating point processing error.";
+            case POSITIVEINFINITY: return "The numeric value is excessively high and unrepresentable due to a floating point processing error.";
             case NOTPERFORMED: return "The value is not available because the observation procedure (test, etc.) was not performed.";
+            case NOTPERMITTED: return "The value is not permitted in this context (e.g. due to profiles, or the base data types)";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case UNKNOWN: return "Unknown";
-            case ASKED: return "Asked";
-            case TEMP: return "Temp";
+            case ASKEDUNKNOWN: return "Asked But Unknown";
+            case TEMPUNKNOWN: return "Temporarily Unknown";
             case NOTASKED: return "Not Asked";
+            case ASKEDDECLINED: return "Asked But Declined";
             case MASKED: return "Masked";
+            case NOTAPPLICABLE: return "Not Applicable";
             case UNSUPPORTED: return "Unsupported";
             case ASTEXT: return "As Text";
             case ERROR: return "Error";
-            case NAN: return "Not a Number";
+            case NOTANUMBER: return "Not a Number (NaN)";
+            case NEGATIVEINFINITY: return "Negative Infinity (NINF)";
+            case POSITIVEINFINITY: return "Positive Infinity (PINF)";
             case NOTPERFORMED: return "Not Performed";
+            case NOTPERMITTED: return "Not Permitted";
             default: return "?";
           }
         }
@@ -897,24 +947,34 @@ public class Enumerations {
                 return null;
         if ("unknown".equals(codeString))
           return DataAbsentReason.UNKNOWN;
-        if ("asked".equals(codeString))
-          return DataAbsentReason.ASKED;
-        if ("temp".equals(codeString))
-          return DataAbsentReason.TEMP;
+        if ("asked-unknown".equals(codeString))
+          return DataAbsentReason.ASKEDUNKNOWN;
+        if ("temp-unknown".equals(codeString))
+          return DataAbsentReason.TEMPUNKNOWN;
         if ("not-asked".equals(codeString))
           return DataAbsentReason.NOTASKED;
+        if ("asked-declined".equals(codeString))
+          return DataAbsentReason.ASKEDDECLINED;
         if ("masked".equals(codeString))
           return DataAbsentReason.MASKED;
+        if ("not-applicable".equals(codeString))
+          return DataAbsentReason.NOTAPPLICABLE;
         if ("unsupported".equals(codeString))
           return DataAbsentReason.UNSUPPORTED;
-        if ("astext".equals(codeString))
+        if ("as-text".equals(codeString))
           return DataAbsentReason.ASTEXT;
         if ("error".equals(codeString))
           return DataAbsentReason.ERROR;
-        if ("NaN".equals(codeString))
-          return DataAbsentReason.NAN;
+        if ("not-a-number".equals(codeString))
+          return DataAbsentReason.NOTANUMBER;
+        if ("negative-infinity".equals(codeString))
+          return DataAbsentReason.NEGATIVEINFINITY;
+        if ("positive-infinity".equals(codeString))
+          return DataAbsentReason.POSITIVEINFINITY;
         if ("not-performed".equals(codeString))
           return DataAbsentReason.NOTPERFORMED;
+        if ("not-permitted".equals(codeString))
+          return DataAbsentReason.NOTPERMITTED;
         throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public Enumeration<DataAbsentReason> fromType(Base code) throws FHIRException {
@@ -927,47 +987,67 @@ public class Enumerations {
             return null;
         if ("unknown".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.UNKNOWN);
-        if ("asked".equals(codeString))
-          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ASKED);
-        if ("temp".equals(codeString))
-          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.TEMP);
+        if ("asked-unknown".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ASKEDUNKNOWN);
+        if ("temp-unknown".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.TEMPUNKNOWN);
         if ("not-asked".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTASKED);
+        if ("asked-declined".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ASKEDDECLINED);
         if ("masked".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.MASKED);
+        if ("not-applicable".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTAPPLICABLE);
         if ("unsupported".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.UNSUPPORTED);
-        if ("astext".equals(codeString))
+        if ("as-text".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ASTEXT);
         if ("error".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ERROR);
-        if ("NaN".equals(codeString))
-          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NAN);
+        if ("not-a-number".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTANUMBER);
+        if ("negative-infinity".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NEGATIVEINFINITY);
+        if ("positive-infinity".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.POSITIVEINFINITY);
         if ("not-performed".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTPERFORMED);
+        if ("not-permitted".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTPERMITTED);
         throw new FHIRException("Unknown DataAbsentReason code '"+codeString+"'");
         }
     public String toCode(DataAbsentReason code) {
       if (code == DataAbsentReason.UNKNOWN)
         return "unknown";
-      if (code == DataAbsentReason.ASKED)
-        return "asked";
-      if (code == DataAbsentReason.TEMP)
-        return "temp";
+      if (code == DataAbsentReason.ASKEDUNKNOWN)
+        return "asked-unknown";
+      if (code == DataAbsentReason.TEMPUNKNOWN)
+        return "temp-unknown";
       if (code == DataAbsentReason.NOTASKED)
         return "not-asked";
+      if (code == DataAbsentReason.ASKEDDECLINED)
+        return "asked-declined";
       if (code == DataAbsentReason.MASKED)
         return "masked";
+      if (code == DataAbsentReason.NOTAPPLICABLE)
+        return "not-applicable";
       if (code == DataAbsentReason.UNSUPPORTED)
         return "unsupported";
       if (code == DataAbsentReason.ASTEXT)
-        return "astext";
+        return "as-text";
       if (code == DataAbsentReason.ERROR)
         return "error";
-      if (code == DataAbsentReason.NAN)
-        return "NaN";
+      if (code == DataAbsentReason.NOTANUMBER)
+        return "not-a-number";
+      if (code == DataAbsentReason.NEGATIVEINFINITY)
+        return "negative-infinity";
+      if (code == DataAbsentReason.POSITIVEINFINITY)
+        return "positive-infinity";
       if (code == DataAbsentReason.NOTPERFORMED)
         return "not-performed";
+      if (code == DataAbsentReason.NOTPERMITTED)
+        return "not-permitted";
       return "?";
       }
     public String toSystem(DataAbsentReason code) {
@@ -1113,7 +1193,7 @@ public class Enumerations {
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+         * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
@@ -1149,6 +1229,10 @@ public class Enumerations {
          */
         BOOLEAN, 
         /**
+         * A URI that is a reference to a canonical URI on a FHIR resource
+         */
+        CANONICAL, 
+        /**
          * A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents
          */
         CODE, 
@@ -1177,7 +1261,7 @@ public class Enumerations {
          */
         INTEGER, 
         /**
-         * A string that may contain markdown syntax for optional processing by a mark down presentation engine
+         * A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine
          */
         MARKDOWN, 
         /**
@@ -1204,6 +1288,10 @@ public class Enumerations {
          * String of characters used to identify a name or a resource
          */
         URI, 
+        /**
+         * A URI that is a literal reference
+         */
+        URL, 
         /**
          * A UUID, represented as a URI
          */
@@ -1305,6 +1393,8 @@ public class Enumerations {
           return BASE64BINARY;
         if ("boolean".equals(codeString))
           return BOOLEAN;
+        if ("canonical".equals(codeString))
+          return CANONICAL;
         if ("code".equals(codeString))
           return CODE;
         if ("date".equals(codeString))
@@ -1333,6 +1423,8 @@ public class Enumerations {
           return UNSIGNEDINT;
         if ("uri".equals(codeString))
           return URI;
+        if ("url".equals(codeString))
+          return URL;
         if ("uuid".equals(codeString))
           return UUID;
         if ("xhtml".equals(codeString))
@@ -1384,6 +1476,7 @@ public class Enumerations {
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -1398,6 +1491,7 @@ public class Enumerations {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             default: return "?";
@@ -1448,6 +1542,7 @@ public class Enumerations {
             case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
+            case CANONICAL: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
             case DATE: return "http://hl7.org/fhir/data-types";
             case DATETIME: return "http://hl7.org/fhir/data-types";
@@ -1462,6 +1557,7 @@ public class Enumerations {
             case TIME: return "http://hl7.org/fhir/data-types";
             case UNSIGNEDINT: return "http://hl7.org/fhir/data-types";
             case URI: return "http://hl7.org/fhir/data-types";
+            case URL: return "http://hl7.org/fhir/data-types";
             case UUID: return "http://hl7.org/fhir/data-types";
             case XHTML: return "http://hl7.org/fhir/data-types";
             default: return "?";
@@ -1503,7 +1599,7 @@ public class Enumerations {
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
+            case SIGNATURE: return "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
@@ -1512,6 +1608,7 @@ public class Enumerations {
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
+            case CANONICAL: return "A URI that is a reference to a canonical URI on a FHIR resource";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
             case DATE: return "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.";
             case DATETIME: return "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.";
@@ -1519,13 +1616,14 @@ public class Enumerations {
             case ID: return "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.";
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
-            case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
+            case MARKDOWN: return "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine";
             case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
             case UNSIGNEDINT: return "An integer with a value that is not negative (e.g. >= 0)";
             case URI: return "String of characters used to identify a name or a resource";
+            case URL: return "A URI that is a literal reference";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
             default: return "?";
@@ -1576,6 +1674,7 @@ public class Enumerations {
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -1590,6 +1689,7 @@ public class Enumerations {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             default: return "?";
@@ -1688,6 +1788,8 @@ public class Enumerations {
           return DataType.BASE64BINARY;
         if ("boolean".equals(codeString))
           return DataType.BOOLEAN;
+        if ("canonical".equals(codeString))
+          return DataType.CANONICAL;
         if ("code".equals(codeString))
           return DataType.CODE;
         if ("date".equals(codeString))
@@ -1716,6 +1818,8 @@ public class Enumerations {
           return DataType.UNSIGNEDINT;
         if ("uri".equals(codeString))
           return DataType.URI;
+        if ("url".equals(codeString))
+          return DataType.URL;
         if ("uuid".equals(codeString))
           return DataType.UUID;
         if ("xhtml".equals(codeString))
@@ -1816,6 +1920,8 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.BASE64BINARY);
         if ("boolean".equals(codeString))
           return new Enumeration<DataType>(this, DataType.BOOLEAN);
+        if ("canonical".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.CANONICAL);
         if ("code".equals(codeString))
           return new Enumeration<DataType>(this, DataType.CODE);
         if ("date".equals(codeString))
@@ -1844,6 +1950,8 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.UNSIGNEDINT);
         if ("uri".equals(codeString))
           return new Enumeration<DataType>(this, DataType.URI);
+        if ("url".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.URL);
         if ("uuid".equals(codeString))
           return new Enumeration<DataType>(this, DataType.UUID);
         if ("xhtml".equals(codeString))
@@ -1937,6 +2045,8 @@ public class Enumerations {
         return "base64Binary";
       if (code == DataType.BOOLEAN)
         return "boolean";
+      if (code == DataType.CANONICAL)
+        return "canonical";
       if (code == DataType.CODE)
         return "code";
       if (code == DataType.DATE)
@@ -1965,6 +2075,8 @@ public class Enumerations {
         return "unsignedInt";
       if (code == DataType.URI)
         return "uri";
+      if (code == DataType.URL)
+        return "url";
       if (code == DataType.UUID)
         return "uuid";
       if (code == DataType.XHTML)
@@ -2219,7 +2331,7 @@ public class Enumerations {
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+         * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
@@ -2255,6 +2367,10 @@ public class Enumerations {
          */
         BOOLEAN, 
         /**
+         * A URI that is a reference to a canonical URI on a FHIR resource
+         */
+        CANONICAL, 
+        /**
          * A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents
          */
         CODE, 
@@ -2283,7 +2399,7 @@ public class Enumerations {
          */
         INTEGER, 
         /**
-         * A string that may contain markdown syntax for optional processing by a mark down presentation engine
+         * A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine
          */
         MARKDOWN, 
         /**
@@ -2310,6 +2426,10 @@ public class Enumerations {
          * String of characters used to identify a name or a resource
          */
         URI, 
+        /**
+         * A URI that is a literal reference
+         */
+        URL, 
         /**
          * A UUID, represented as a URI
          */
@@ -2396,7 +2516,7 @@ into another (possibly the same) biological entity.
          */
         CLINICALIMPRESSION, 
         /**
-         * A code system resource specifies a set of codes drawn from one or more code systems.
+         * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
          */
         CODESYSTEM, 
         /**
@@ -2412,7 +2532,7 @@ into another (possibly the same) biological entity.
          */
         COMPARTMENTDEFINITION, 
         /**
-         * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
+         * A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).
          */
         COMPOSITION, 
         /**
@@ -2688,7 +2808,7 @@ into another (possibly the same) biological entity.
          */
         OBSERVATIONDEFINITION, 
         /**
-         * Patient’s or family member's work information.
+         * A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.
          */
         OCCUPATIONALDATA, 
         /**
@@ -2992,6 +3112,8 @@ into another (possibly the same) biological entity.
           return BASE64BINARY;
         if ("boolean".equals(codeString))
           return BOOLEAN;
+        if ("canonical".equals(codeString))
+          return CANONICAL;
         if ("code".equals(codeString))
           return CODE;
         if ("date".equals(codeString))
@@ -3020,6 +3142,8 @@ into another (possibly the same) biological entity.
           return UNSIGNEDINT;
         if ("uri".equals(codeString))
           return URI;
+        if ("url".equals(codeString))
+          return URL;
         if ("uuid".equals(codeString))
           return UUID;
         if ("xhtml".equals(codeString))
@@ -3361,6 +3485,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -3375,6 +3500,7 @@ into another (possibly the same) biological entity.
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             case ACCOUNT: return "Account";
@@ -3570,6 +3696,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
+            case CANONICAL: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
             case DATE: return "http://hl7.org/fhir/data-types";
             case DATETIME: return "http://hl7.org/fhir/data-types";
@@ -3584,6 +3711,7 @@ into another (possibly the same) biological entity.
             case TIME: return "http://hl7.org/fhir/data-types";
             case UNSIGNEDINT: return "http://hl7.org/fhir/data-types";
             case URI: return "http://hl7.org/fhir/data-types";
+            case URL: return "http://hl7.org/fhir/data-types";
             case UUID: return "http://hl7.org/fhir/data-types";
             case XHTML: return "http://hl7.org/fhir/data-types";
             case ACCOUNT: return "http://hl7.org/fhir/resource-types";
@@ -3770,7 +3898,7 @@ into another (possibly the same) biological entity.
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
+            case SIGNATURE: return "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
@@ -3779,6 +3907,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
+            case CANONICAL: return "A URI that is a reference to a canonical URI on a FHIR resource";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
             case DATE: return "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.";
             case DATETIME: return "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.";
@@ -3786,13 +3915,14 @@ into another (possibly the same) biological entity.
             case ID: return "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.";
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
-            case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
+            case MARKDOWN: return "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine";
             case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
             case UNSIGNEDINT: return "An integer with a value that is not negative (e.g. >= 0)";
             case URI: return "String of characters used to identify a name or a resource";
+            case URL: return "A URI that is a literal reference";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
             case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.";
@@ -3814,11 +3944,11 @@ into another (possibly the same) biological entity.
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
-            case CODESYSTEM: return "A code system resource specifies a set of codes drawn from one or more code systems.";
+            case CODESYSTEM: return "The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPARTMENTDEFINITION: return "A compartment definition that defines how resources are accessed on a server.";
-            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
+            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
             case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
@@ -3887,7 +4017,7 @@ into another (possibly the same) biological entity.
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
-            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
+            case OCCUPATIONALDATA: return "A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
@@ -3988,6 +4118,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -4002,6 +4133,7 @@ into another (possibly the same) biological entity.
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             case ACCOUNT: return "Account";
@@ -4245,6 +4377,8 @@ into another (possibly the same) biological entity.
           return FHIRAllTypes.BASE64BINARY;
         if ("boolean".equals(codeString))
           return FHIRAllTypes.BOOLEAN;
+        if ("canonical".equals(codeString))
+          return FHIRAllTypes.CANONICAL;
         if ("code".equals(codeString))
           return FHIRAllTypes.CODE;
         if ("date".equals(codeString))
@@ -4273,6 +4407,8 @@ into another (possibly the same) biological entity.
           return FHIRAllTypes.UNSIGNEDINT;
         if ("uri".equals(codeString))
           return FHIRAllTypes.URI;
+        if ("url".equals(codeString))
+          return FHIRAllTypes.URL;
         if ("uuid".equals(codeString))
           return FHIRAllTypes.UUID;
         if ("xhtml".equals(codeString))
@@ -4663,6 +4799,8 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.BASE64BINARY);
         if ("boolean".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.BOOLEAN);
+        if ("canonical".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CANONICAL);
         if ("code".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CODE);
         if ("date".equals(codeString))
@@ -4691,6 +4829,8 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.UNSIGNEDINT);
         if ("uri".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.URI);
+        if ("url".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.URL);
         if ("uuid".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.UUID);
         if ("xhtml".equals(codeString))
@@ -5074,6 +5214,8 @@ into another (possibly the same) biological entity.
         return "base64Binary";
       if (code == FHIRAllTypes.BOOLEAN)
         return "boolean";
+      if (code == FHIRAllTypes.CANONICAL)
+        return "canonical";
       if (code == FHIRAllTypes.CODE)
         return "code";
       if (code == FHIRAllTypes.DATE)
@@ -5102,6 +5244,8 @@ into another (possibly the same) biological entity.
         return "unsignedInt";
       if (code == FHIRAllTypes.URI)
         return "uri";
+      if (code == FHIRAllTypes.URL)
+        return "url";
       if (code == FHIRAllTypes.UUID)
         return "uuid";
       if (code == FHIRAllTypes.XHTML)
@@ -5541,7 +5685,7 @@ into another (possibly the same) biological entity.
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+         * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
@@ -5577,6 +5721,10 @@ into another (possibly the same) biological entity.
          */
         BOOLEAN, 
         /**
+         * A URI that is a reference to a canonical URI on a FHIR resource
+         */
+        CANONICAL, 
+        /**
          * A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents
          */
         CODE, 
@@ -5605,7 +5753,7 @@ into another (possibly the same) biological entity.
          */
         INTEGER, 
         /**
-         * A string that may contain markdown syntax for optional processing by a mark down presentation engine
+         * A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine
          */
         MARKDOWN, 
         /**
@@ -5632,6 +5780,10 @@ into another (possibly the same) biological entity.
          * String of characters used to identify a name or a resource
          */
         URI, 
+        /**
+         * A URI that is a literal reference
+         */
+        URL, 
         /**
          * A UUID, represented as a URI
          */
@@ -5718,7 +5870,7 @@ into another (possibly the same) biological entity.
          */
         CLINICALIMPRESSION, 
         /**
-         * A code system resource specifies a set of codes drawn from one or more code systems.
+         * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
          */
         CODESYSTEM, 
         /**
@@ -5734,7 +5886,7 @@ into another (possibly the same) biological entity.
          */
         COMPARTMENTDEFINITION, 
         /**
-         * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
+         * A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).
          */
         COMPOSITION, 
         /**
@@ -6010,7 +6162,7 @@ into another (possibly the same) biological entity.
          */
         OBSERVATIONDEFINITION, 
         /**
-         * Patient’s or family member's work information.
+         * A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.
          */
         OCCUPATIONALDATA, 
         /**
@@ -6306,6 +6458,8 @@ into another (possibly the same) biological entity.
           return BASE64BINARY;
         if ("boolean".equals(codeString))
           return BOOLEAN;
+        if ("canonical".equals(codeString))
+          return CANONICAL;
         if ("code".equals(codeString))
           return CODE;
         if ("date".equals(codeString))
@@ -6334,6 +6488,8 @@ into another (possibly the same) biological entity.
           return UNSIGNEDINT;
         if ("uri".equals(codeString))
           return URI;
+        if ("url".equals(codeString))
+          return URL;
         if ("uuid".equals(codeString))
           return UUID;
         if ("xhtml".equals(codeString))
@@ -6671,6 +6827,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -6685,6 +6842,7 @@ into another (possibly the same) biological entity.
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             case ACCOUNT: return "Account";
@@ -6878,6 +7036,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
+            case CANONICAL: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
             case DATE: return "http://hl7.org/fhir/data-types";
             case DATETIME: return "http://hl7.org/fhir/data-types";
@@ -6892,6 +7051,7 @@ into another (possibly the same) biological entity.
             case TIME: return "http://hl7.org/fhir/data-types";
             case UNSIGNEDINT: return "http://hl7.org/fhir/data-types";
             case URI: return "http://hl7.org/fhir/data-types";
+            case URL: return "http://hl7.org/fhir/data-types";
             case UUID: return "http://hl7.org/fhir/data-types";
             case XHTML: return "http://hl7.org/fhir/data-types";
             case ACCOUNT: return "http://hl7.org/fhir/resource-types";
@@ -7076,7 +7236,7 @@ into another (possibly the same) biological entity.
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
+            case SIGNATURE: return "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
@@ -7085,6 +7245,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
+            case CANONICAL: return "A URI that is a reference to a canonical URI on a FHIR resource";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
             case DATE: return "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.";
             case DATETIME: return "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.";
@@ -7092,13 +7253,14 @@ into another (possibly the same) biological entity.
             case ID: return "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.";
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
-            case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
+            case MARKDOWN: return "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine";
             case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
             case UNSIGNEDINT: return "An integer with a value that is not negative (e.g. >= 0)";
             case URI: return "String of characters used to identify a name or a resource";
+            case URL: return "A URI that is a literal reference";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
             case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.";
@@ -7120,11 +7282,11 @@ into another (possibly the same) biological entity.
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
-            case CODESYSTEM: return "A code system resource specifies a set of codes drawn from one or more code systems.";
+            case CODESYSTEM: return "The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPARTMENTDEFINITION: return "A compartment definition that defines how resources are accessed on a server.";
-            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
+            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
             case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
@@ -7193,7 +7355,7 @@ into another (possibly the same) biological entity.
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
-            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
+            case OCCUPATIONALDATA: return "A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
@@ -7292,6 +7454,7 @@ into another (possibly the same) biological entity.
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -7306,6 +7469,7 @@ into another (possibly the same) biological entity.
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             case ACCOUNT: return "Account";
@@ -7547,6 +7711,8 @@ into another (possibly the same) biological entity.
           return FHIRDefinedType.BASE64BINARY;
         if ("boolean".equals(codeString))
           return FHIRDefinedType.BOOLEAN;
+        if ("canonical".equals(codeString))
+          return FHIRDefinedType.CANONICAL;
         if ("code".equals(codeString))
           return FHIRDefinedType.CODE;
         if ("date".equals(codeString))
@@ -7575,6 +7741,8 @@ into another (possibly the same) biological entity.
           return FHIRDefinedType.UNSIGNEDINT;
         if ("uri".equals(codeString))
           return FHIRDefinedType.URI;
+        if ("url".equals(codeString))
+          return FHIRDefinedType.URL;
         if ("uuid".equals(codeString))
           return FHIRDefinedType.UUID;
         if ("xhtml".equals(codeString))
@@ -7961,6 +8129,8 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.BASE64BINARY);
         if ("boolean".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.BOOLEAN);
+        if ("canonical".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CANONICAL);
         if ("code".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CODE);
         if ("date".equals(codeString))
@@ -7989,6 +8159,8 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.UNSIGNEDINT);
         if ("uri".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.URI);
+        if ("url".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.URL);
         if ("uuid".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.UUID);
         if ("xhtml".equals(codeString))
@@ -8368,6 +8540,8 @@ into another (possibly the same) biological entity.
         return "base64Binary";
       if (code == FHIRDefinedType.BOOLEAN)
         return "boolean";
+      if (code == FHIRDefinedType.CANONICAL)
+        return "canonical";
       if (code == FHIRDefinedType.CODE)
         return "code";
       if (code == FHIRDefinedType.DATE)
@@ -8396,6 +8570,8 @@ into another (possibly the same) biological entity.
         return "unsignedInt";
       if (code == FHIRDefinedType.URI)
         return "uri";
+      if (code == FHIRDefinedType.URL)
+        return "url";
       if (code == FHIRDefinedType.UUID)
         return "uuid";
       if (code == FHIRDefinedType.XHTML)
@@ -8695,151 +8871,31 @@ into another (possibly the same) biological entity.
 
     public enum MessageEvent {
         /**
-         * Change the status of a Medication Administration to show that it is complete.
-         */
-        MEDICATIONADMINISTRATIONCOMPLETE, 
-        /**
-         * Someone wishes to record that the record of administration of a medication is in error and should be ignored.
-         */
-        MEDICATIONADMINISTRATIONNULLIFICATION, 
-        /**
-         * Indicates that a medication has been recorded against the patient's record.
-         */
-        MEDICATIONADMINISTRATIONRECORDING, 
-        /**
-         * Update a Medication Administration record.
-         */
-        MEDICATIONADMINISTRATIONUPDATE, 
-        /**
-         * Notification.
-         */
-        ADMINNOTIFY, 
-        /**
-         * The definition of a code system is used to create a simple collection of codes suitable for use for data entry or validation. An expanded code system will be returned, or an error message.
-         */
-        CODESYSTEMEXPAND, 
-        /**
-         * Notification to convey information.
-         */
-        COMMUNICATIONREQUEST, 
-        /**
-         * Provide a diagnostic report, or update a previously provided diagnostic report.
-         */
-        DIAGNOSTICREPORTPROVIDE, 
-        /**
-         * Provide a simple observation or update a previously provided simple observation.
-         */
-        OBSERVATIONPROVIDE, 
-        /**
-         * Notification that two patient records actually identify the same patient.
-         */
-        PATIENTLINK, 
-        /**
-         * Notification that previous advice that two patient records concern the same patient is now considered incorrect.
-         */
-        PATIENTUNLINK, 
-        /**
-         * The definition of a value set is used to create a simple collection of codes suitable for use for data entry or validation. An expanded value set will be returned, or an error message.
-         */
-        VALUESETEXPAND, 
-        /**
          * added to help the parsers
          */
         NULL;
         public static MessageEvent fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("MedicationAdministration-Complete".equals(codeString))
-          return MEDICATIONADMINISTRATIONCOMPLETE;
-        if ("MedicationAdministration-Nullification".equals(codeString))
-          return MEDICATIONADMINISTRATIONNULLIFICATION;
-        if ("MedicationAdministration-Recording".equals(codeString))
-          return MEDICATIONADMINISTRATIONRECORDING;
-        if ("MedicationAdministration-Update".equals(codeString))
-          return MEDICATIONADMINISTRATIONUPDATE;
-        if ("admin-notify".equals(codeString))
-          return ADMINNOTIFY;
-        if ("codesystem-expand".equals(codeString))
-          return CODESYSTEMEXPAND;
-        if ("communication-request".equals(codeString))
-          return COMMUNICATIONREQUEST;
-        if ("diagnosticreport-provide".equals(codeString))
-          return DIAGNOSTICREPORTPROVIDE;
-        if ("observation-provide".equals(codeString))
-          return OBSERVATIONPROVIDE;
-        if ("patient-link".equals(codeString))
-          return PATIENTLINK;
-        if ("patient-unlink".equals(codeString))
-          return PATIENTUNLINK;
-        if ("valueset-expand".equals(codeString))
-          return VALUESETEXPAND;
         throw new FHIRException("Unknown MessageEvent code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case MEDICATIONADMINISTRATIONCOMPLETE: return "MedicationAdministration-Complete";
-            case MEDICATIONADMINISTRATIONNULLIFICATION: return "MedicationAdministration-Nullification";
-            case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration-Recording";
-            case MEDICATIONADMINISTRATIONUPDATE: return "MedicationAdministration-Update";
-            case ADMINNOTIFY: return "admin-notify";
-            case CODESYSTEMEXPAND: return "codesystem-expand";
-            case COMMUNICATIONREQUEST: return "communication-request";
-            case DIAGNOSTICREPORTPROVIDE: return "diagnosticreport-provide";
-            case OBSERVATIONPROVIDE: return "observation-provide";
-            case PATIENTLINK: return "patient-link";
-            case PATIENTUNLINK: return "patient-unlink";
-            case VALUESETEXPAND: return "valueset-expand";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case MEDICATIONADMINISTRATIONCOMPLETE: return "http://hl7.org/fhir/message-events";
-            case MEDICATIONADMINISTRATIONNULLIFICATION: return "http://hl7.org/fhir/message-events";
-            case MEDICATIONADMINISTRATIONRECORDING: return "http://hl7.org/fhir/message-events";
-            case MEDICATIONADMINISTRATIONUPDATE: return "http://hl7.org/fhir/message-events";
-            case ADMINNOTIFY: return "http://hl7.org/fhir/message-events";
-            case CODESYSTEMEXPAND: return "http://hl7.org/fhir/message-events";
-            case COMMUNICATIONREQUEST: return "http://hl7.org/fhir/message-events";
-            case DIAGNOSTICREPORTPROVIDE: return "http://hl7.org/fhir/message-events";
-            case OBSERVATIONPROVIDE: return "http://hl7.org/fhir/message-events";
-            case PATIENTLINK: return "http://hl7.org/fhir/message-events";
-            case PATIENTUNLINK: return "http://hl7.org/fhir/message-events";
-            case VALUESETEXPAND: return "http://hl7.org/fhir/message-events";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case MEDICATIONADMINISTRATIONCOMPLETE: return "Change the status of a Medication Administration to show that it is complete.";
-            case MEDICATIONADMINISTRATIONNULLIFICATION: return "Someone wishes to record that the record of administration of a medication is in error and should be ignored.";
-            case MEDICATIONADMINISTRATIONRECORDING: return "Indicates that a medication has been recorded against the patient's record.";
-            case MEDICATIONADMINISTRATIONUPDATE: return "Update a Medication Administration record.";
-            case ADMINNOTIFY: return "Notification.";
-            case CODESYSTEMEXPAND: return "The definition of a code system is used to create a simple collection of codes suitable for use for data entry or validation. An expanded code system will be returned, or an error message.";
-            case COMMUNICATIONREQUEST: return "Notification to convey information.";
-            case DIAGNOSTICREPORTPROVIDE: return "Provide a diagnostic report, or update a previously provided diagnostic report.";
-            case OBSERVATIONPROVIDE: return "Provide a simple observation or update a previously provided simple observation.";
-            case PATIENTLINK: return "Notification that two patient records actually identify the same patient.";
-            case PATIENTUNLINK: return "Notification that previous advice that two patient records concern the same patient is now considered incorrect.";
-            case VALUESETEXPAND: return "The definition of a value set is used to create a simple collection of codes suitable for use for data entry or validation. An expanded value set will be returned, or an error message.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case MEDICATIONADMINISTRATIONCOMPLETE: return "MedicationAdministration Complete";
-            case MEDICATIONADMINISTRATIONNULLIFICATION: return "MedicationAdministration Nullification";
-            case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration Recording";
-            case MEDICATIONADMINISTRATIONUPDATE: return "MedicationAdministration Update";
-            case ADMINNOTIFY: return "Admin Notify";
-            case CODESYSTEMEXPAND: return "Codesystem Expand";
-            case COMMUNICATIONREQUEST: return "Communication Request";
-            case DIAGNOSTICREPORTPROVIDE: return "Diagnosticreport Provide";
-            case OBSERVATIONPROVIDE: return "Observation Provide";
-            case PATIENTLINK: return "Patient Link";
-            case PATIENTUNLINK: return "Patient Unlink";
-            case VALUESETEXPAND: return "Valueset Expand";
             default: return "?";
           }
         }
@@ -8850,30 +8906,6 @@ into another (possibly the same) biological entity.
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("MedicationAdministration-Complete".equals(codeString))
-          return MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE;
-        if ("MedicationAdministration-Nullification".equals(codeString))
-          return MessageEvent.MEDICATIONADMINISTRATIONNULLIFICATION;
-        if ("MedicationAdministration-Recording".equals(codeString))
-          return MessageEvent.MEDICATIONADMINISTRATIONRECORDING;
-        if ("MedicationAdministration-Update".equals(codeString))
-          return MessageEvent.MEDICATIONADMINISTRATIONUPDATE;
-        if ("admin-notify".equals(codeString))
-          return MessageEvent.ADMINNOTIFY;
-        if ("codesystem-expand".equals(codeString))
-          return MessageEvent.CODESYSTEMEXPAND;
-        if ("communication-request".equals(codeString))
-          return MessageEvent.COMMUNICATIONREQUEST;
-        if ("diagnosticreport-provide".equals(codeString))
-          return MessageEvent.DIAGNOSTICREPORTPROVIDE;
-        if ("observation-provide".equals(codeString))
-          return MessageEvent.OBSERVATIONPROVIDE;
-        if ("patient-link".equals(codeString))
-          return MessageEvent.PATIENTLINK;
-        if ("patient-unlink".equals(codeString))
-          return MessageEvent.PATIENTUNLINK;
-        if ("valueset-expand".equals(codeString))
-          return MessageEvent.VALUESETEXPAND;
         throw new IllegalArgumentException("Unknown MessageEvent code '"+codeString+"'");
         }
         public Enumeration<MessageEvent> fromType(Base code) throws FHIRException {
@@ -8884,57 +8916,9 @@ into another (possibly the same) biological entity.
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("MedicationAdministration-Complete".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE);
-        if ("MedicationAdministration-Nullification".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONNULLIFICATION);
-        if ("MedicationAdministration-Recording".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONRECORDING);
-        if ("MedicationAdministration-Update".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONUPDATE);
-        if ("admin-notify".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.ADMINNOTIFY);
-        if ("codesystem-expand".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.CODESYSTEMEXPAND);
-        if ("communication-request".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.COMMUNICATIONREQUEST);
-        if ("diagnosticreport-provide".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.DIAGNOSTICREPORTPROVIDE);
-        if ("observation-provide".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.OBSERVATIONPROVIDE);
-        if ("patient-link".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.PATIENTLINK);
-        if ("patient-unlink".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.PATIENTUNLINK);
-        if ("valueset-expand".equals(codeString))
-          return new Enumeration<MessageEvent>(this, MessageEvent.VALUESETEXPAND);
         throw new FHIRException("Unknown MessageEvent code '"+codeString+"'");
         }
     public String toCode(MessageEvent code) {
-      if (code == MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE)
-        return "MedicationAdministration-Complete";
-      if (code == MessageEvent.MEDICATIONADMINISTRATIONNULLIFICATION)
-        return "MedicationAdministration-Nullification";
-      if (code == MessageEvent.MEDICATIONADMINISTRATIONRECORDING)
-        return "MedicationAdministration-Recording";
-      if (code == MessageEvent.MEDICATIONADMINISTRATIONUPDATE)
-        return "MedicationAdministration-Update";
-      if (code == MessageEvent.ADMINNOTIFY)
-        return "admin-notify";
-      if (code == MessageEvent.CODESYSTEMEXPAND)
-        return "codesystem-expand";
-      if (code == MessageEvent.COMMUNICATIONREQUEST)
-        return "communication-request";
-      if (code == MessageEvent.DIAGNOSTICREPORTPROVIDE)
-        return "diagnosticreport-provide";
-      if (code == MessageEvent.OBSERVATIONPROVIDE)
-        return "observation-provide";
-      if (code == MessageEvent.PATIENTLINK)
-        return "patient-link";
-      if (code == MessageEvent.PATIENTUNLINK)
-        return "patient-unlink";
-      if (code == MessageEvent.VALUESETEXPAND)
-        return "valueset-expand";
       return "?";
       }
     public String toSystem(MessageEvent code) {
@@ -9170,6 +9154,10 @@ into another (possibly the same) biological entity.
 
     public enum RemittanceOutcome {
         /**
+         * The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.
+         */
+        RECEIVED, 
+        /**
          * The processing has completed without errors
          */
         COMPLETE, 
@@ -9188,6 +9176,8 @@ into another (possibly the same) biological entity.
         public static RemittanceOutcome fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("received".equals(codeString))
+          return RECEIVED;
         if ("complete".equals(codeString))
           return COMPLETE;
         if ("error".equals(codeString))
@@ -9198,6 +9188,7 @@ into another (possibly the same) biological entity.
         }
         public String toCode() {
           switch (this) {
+            case RECEIVED: return "received";
             case COMPLETE: return "complete";
             case ERROR: return "error";
             case PARTIAL: return "partial";
@@ -9206,6 +9197,7 @@ into another (possibly the same) biological entity.
         }
         public String getSystem() {
           switch (this) {
+            case RECEIVED: return "http://hl7.org/fhir/remittance-outcome";
             case COMPLETE: return "http://hl7.org/fhir/remittance-outcome";
             case ERROR: return "http://hl7.org/fhir/remittance-outcome";
             case PARTIAL: return "http://hl7.org/fhir/remittance-outcome";
@@ -9214,6 +9206,7 @@ into another (possibly the same) biological entity.
         }
         public String getDefinition() {
           switch (this) {
+            case RECEIVED: return "The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.";
             case COMPLETE: return "The processing has completed without errors";
             case ERROR: return "One or more errors have been detected in the Claim";
             case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
@@ -9222,6 +9215,7 @@ into another (possibly the same) biological entity.
         }
         public String getDisplay() {
           switch (this) {
+            case RECEIVED: return "Received but not Processed";
             case COMPLETE: return "Processing Complete";
             case ERROR: return "Error";
             case PARTIAL: return "Partial Processing";
@@ -9235,6 +9229,8 @@ into another (possibly the same) biological entity.
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("received".equals(codeString))
+          return RemittanceOutcome.RECEIVED;
         if ("complete".equals(codeString))
           return RemittanceOutcome.COMPLETE;
         if ("error".equals(codeString))
@@ -9251,6 +9247,8 @@ into another (possibly the same) biological entity.
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("received".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.RECEIVED);
         if ("complete".equals(codeString))
           return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.COMPLETE);
         if ("error".equals(codeString))
@@ -9260,6 +9258,8 @@ into another (possibly the same) biological entity.
         throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
         }
     public String toCode(RemittanceOutcome code) {
+      if (code == RemittanceOutcome.RECEIVED)
+        return "received";
       if (code == RemittanceOutcome.COMPLETE)
         return "complete";
       if (code == RemittanceOutcome.ERROR)
@@ -9352,7 +9352,7 @@ into another (possibly the same) biological entity.
          */
         CLINICALIMPRESSION, 
         /**
-         * A code system resource specifies a set of codes drawn from one or more code systems.
+         * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
          */
         CODESYSTEM, 
         /**
@@ -9368,7 +9368,7 @@ into another (possibly the same) biological entity.
          */
         COMPARTMENTDEFINITION, 
         /**
-         * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
+         * A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).
          */
         COMPOSITION, 
         /**
@@ -9644,7 +9644,7 @@ into another (possibly the same) biological entity.
          */
         OBSERVATIONDEFINITION, 
         /**
-         * Patient’s or family member's work information.
+         * A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.
          */
         OCCUPATIONALDATA, 
         /**
@@ -10459,11 +10459,11 @@ into another (possibly the same) biological entity.
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
-            case CODESYSTEM: return "A code system resource specifies a set of codes drawn from one or more code systems.";
+            case CODESYSTEM: return "The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPARTMENTDEFINITION: return "A compartment definition that defines how resources are accessed on a server.";
-            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
+            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
             case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
@@ -10532,7 +10532,7 @@ into another (possibly the same) biological entity.
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
-            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
+            case OCCUPATIONALDATA: return "A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
@@ -11637,7 +11637,7 @@ into another (possibly the same) biological entity.
          */
         TOKEN, 
         /**
-         * A reference to another resource.
+         * A reference to another resource (Reference or canonical).
          */
         REFERENCE, 
         /**
@@ -11709,7 +11709,7 @@ into another (possibly the same) biological entity.
             case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.";
             case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.";
             case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used.";
-            case REFERENCE: return "A reference to another resource.";
+            case REFERENCE: return "A reference to another resource (Reference or canonical).";
             case COMPOSITE: return "A composite search parameter that combines a search on two values together.";
             case QUANTITY: return "A search parameter that searches on a quantity.";
             case URI: return "A search parameter that searches on a URI (RFC 3986).";

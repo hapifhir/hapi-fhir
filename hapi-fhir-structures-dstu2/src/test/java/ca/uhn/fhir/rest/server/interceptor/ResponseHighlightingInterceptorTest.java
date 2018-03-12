@@ -1,28 +1,34 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.phloc.commons.collections.iterate.ArrayEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,30 +39,26 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.web.cors.CorsConfiguration;
 
-import com.phloc.commons.collections.iterate.ArrayEnumeration;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ResponseHighlightingInterceptorTest {
 
@@ -87,7 +89,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo", status.getFirstHeader("content-type").getValue());
 		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+		assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
 	}
 
 	@Test
@@ -116,7 +118,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo", status.getFirstHeader("content-type").getValue());
 		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+		assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
 
 	}
 
@@ -153,7 +155,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -253,6 +255,23 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@Test
+	public void testForceHtmlJsonWithAdditionalParts() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString(">{<"));
+		assertThat(responseContent, not(containsString("&lt;")));
+
+		ourLog.info(responseContent);
+	}
+
+	@Test
 	public void testForceHtmlXml() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/xml");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
@@ -308,7 +327,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle"));
 
 	}
-	
+
 	@Test
 	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
@@ -402,13 +421,13 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
-		params.put(Constants.PARAM_FORMAT, new String[] { Constants.FORMAT_HTML });
+		params.put(Constants.PARAM_FORMAT, new String[]{Constants.FORMAT_HTML});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**
@@ -436,13 +455,13 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
-		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_HTML });
+		params.put(Constants.PARAM_FORMAT, new String[]{Constants.CT_HTML});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	@Test
@@ -467,15 +486,15 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
-		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
-		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
-		params.put(ResponseHighlighterInterceptor.PARAM_RAW, new String[] { ResponseHighlighterInterceptor.PARAM_RAW_TRUE });
+		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
+		params.put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
+		params.put(ResponseHighlighterInterceptor.PARAM_RAW, new String[]{ResponseHighlighterInterceptor.PARAM_RAW_TRUE});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -504,7 +523,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -535,12 +554,12 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
-		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
+		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -579,13 +598,13 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("resourceType"));
 	}
-	
+
 	@Test
 	public void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
@@ -615,7 +634,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// True here means the interceptor didn't handle the request, because HTML wasn't the top ranked accept header
-		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+		assertTrue(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**
@@ -701,7 +720,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(responseContent, not(containsStringIgnoringCase("Accept")));
 		assertThat(responseContent, not(containsStringIgnoringCase("Content-Type")));
 	}
-	
+
 	@Test
 	public void testShowRequest() throws Exception {
 		ourInterceptor.setShowRequestHeaders(true);
@@ -718,7 +737,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(responseContent, (containsStringIgnoringCase("Accept")));
 		assertThat(responseContent, not(containsStringIgnoringCase("Content-Type")));
 	}
-	
+
 	@Test
 	public void testShowRequestAndResponse() throws Exception {
 		ourInterceptor.setShowRequestHeaders(true);
@@ -767,7 +786,7 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
-		
+
 		/*
 		 * Enable CORS
 		 */
@@ -782,15 +801,15 @@ public class ResponseHighlightingInterceptorTest {
 		config.addAllowedOrigin("*");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		ourServlet.registerInterceptor(corsInterceptor);
-		
+
 		ourServlet.registerInterceptor(ourInterceptor);
 		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		
+
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
@@ -800,7 +819,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourClient = builder.build();
 
 	}
-	
+
 	class TestServletRequestDetails extends ServletRequestDetails {
 		@Override
 		public String getServerBaseForRequest() {
@@ -819,7 +838,7 @@ public class ResponseHighlightingInterceptorTest {
 		public Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
@@ -828,7 +847,7 @@ public class ResponseHighlightingInterceptorTest {
 		public List<Binary> search() {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType("text/plain");
 			return Collections.singletonList(retVal);
 		}
@@ -894,8 +913,7 @@ public class ResponseHighlightingInterceptorTest {
 		/**
 		 * Retrieve the resource by its identifier
 		 *
-		 * @param theId
-		 *           The resource identity
+		 * @param theId The resource identity
 		 * @return The resource
 		 */
 		@Read()
@@ -908,8 +926,7 @@ public class ResponseHighlightingInterceptorTest {
 		/**
 		 * Retrieve the resource by its identifier
 		 *
-		 * @param theId
-		 *           The resource identity
+		 * @param theId The resource identity
 		 * @return The resource
 		 */
 		@Search()

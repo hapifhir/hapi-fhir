@@ -2,13 +2,12 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -19,6 +18,8 @@ import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -28,7 +29,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,9 +39,11 @@ import org.mockito.InOrder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -82,15 +85,46 @@ public class InterceptorDstu3Test {
 	}
 
 	@Test
+	public void testModifyResponse() throws IOException {
+		InterceptorAdapter interceptor = new InterceptorAdapter() {
+			@Override
+			public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+				Patient retVal = new Patient();
+				retVal.setId(theResponseDetails.getResponseResource().getIdElement());
+				retVal.addName().setFamily("NAME1");
+				theResponseDetails.setResponseResource(retVal);
+				theResponseDetails.setResponseCode(202);
+				return true;
+			}
+		};
+		ourServlet.registerInterceptor(interceptor);
+		try {
+
+			HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+			try (CloseableHttpResponse status = ourClient.execute(get)) {
+				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
+				assertThat(response, containsString("NAME1"));
+				assertEquals(202, status.getStatusLine().getStatusCode());
+				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
+			}
+
+		} finally {
+			ourServlet.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
 	public void testResourceResponseIncluded() throws Exception {
 		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 
 		when(myInterceptor1.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
 		String input = createInput();
 
@@ -109,7 +143,9 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IBaseResource.class));
+		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IBaseResource.class));
+		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 
 		// Avoid concurrency issues
 		Thread.sleep(500);
@@ -123,21 +159,6 @@ public class InterceptorDstu3Test {
 		assertNotNull(arTypeCapt.getValue().getResource());
 	}
 
-	public void testModifyResponse() {
-		InterceptorAdapter interceptor = new InterceptorAdapter(){
-			@Override
-			public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-				ServletRequestDetails srd = (ServletRequestDetails)theRequestDetails;
-				String input = new String(srd.loadRequestContents(), Constants.CHARSET_UTF8);
-				assertThat(input, StringContains.containsString("\"active\":true"));
-
-				String newInput = createInput().replace("true", "false");
-				srd.setRequestContents(newInput.getBytes(Constants.CHARSET_UTF8));
-				return true;
-			}
-		};
-	}
-
 	@Test
 	public void testResponseWithNothing() throws Exception {
 		ourServlet.setInterceptors(myInterceptor1);
@@ -145,6 +166,7 @@ public class InterceptorDstu3Test {
 		when(myInterceptor1.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
 		String input = createInput();
 
@@ -240,7 +262,6 @@ public class InterceptorDstu3Test {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource) {
 			ourLastPatient = theResource;
@@ -250,6 +271,14 @@ public class InterceptorDstu3Test {
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdType theId) {
+			Patient retVal = new Patient();
+			retVal.setId(theId);
+			retVal.addName().setFamily("NAME0");
+			return retVal;
 		}
 
 		@Validate()

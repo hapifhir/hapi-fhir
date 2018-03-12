@@ -58,6 +58,7 @@ public class RestfulServerUtils {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
+	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<FhirVersionEnum, FhirContext>());
 
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
@@ -266,7 +267,7 @@ public class RestfulServerUtils {
 		 * Some browsers (e.g. FF) request "application/xml" in their Accept header,
 		 * and we generally want to treat this as a preference for FHIR XML even if
 		 * it's not the FHIR version of the CT, which should be "application/xml+fhir".
-		 * 
+		 *
 		 * When we're serving up Binary resources though, we are a bit more strict,
 		 * since Binary is supposed to use native content types unless the client has
 		 * explicitly requested FHIR.
@@ -433,7 +434,9 @@ public class RestfulServerUtils {
 		if (theResourceId.hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theResourceId.getResourceType();
 			if (theResource != null && isBlank(resName)) {
-				resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
+				FhirContext context = theServer.getFhirContext();
+				context = getContextForVersion(context, theResource.getStructureFhirVersionEnum());
+				resName = context.getResourceDefinition(theResource).getName();
 			}
 			if (isNotBlank(resName)) {
 				retVal = theResourceId.withServerBase(theServerBase, resName);
@@ -455,24 +458,37 @@ public class RestfulServerUtils {
 		return new ResponseEncoding(theFhirContext, encoding, theContentType);
 	}
 
-	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
+	public static IParser getNewParser(FhirContext theContext, FhirVersionEnum theForVersion, RequestDetails theRequestDetails) {
+		FhirContext context = getContextForVersion(theContext, theForVersion);
 
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 		IParser parser;
 		switch (responseEncoding) {
 			case JSON:
-				parser = theContext.newJsonParser();
+				parser = context.newJsonParser();
 				break;
 			case XML:
 			default:
-				parser = theContext.newXmlParser();
+				parser = context.newXmlParser();
 				break;
 		}
 
 		configureResponseParser(theRequestDetails, parser);
 
 		return parser;
+	}
+
+	private static FhirContext getContextForVersion(FhirContext theContext, FhirVersionEnum theForVersion) {
+		FhirContext context = theContext;
+		if (context.getVersion().getVersion() != theForVersion) {
+			context = myFhirContextMap.get(theForVersion);
+			if (context == null) {
+				context = theForVersion.newContext();
+				myFhirContextMap.put(theForVersion, context);
+			}
+		}
+		return context;
 	}
 
 	public static Set<String> parseAcceptHeaderAndReturnHighestRankedOptions(HttpServletRequest theRequest) {
@@ -581,7 +597,7 @@ public class RestfulServerUtils {
 		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage,
 																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
@@ -636,7 +652,7 @@ public class RestfulServerUtils {
 				}
 			}
 
-			return response.sendAttachmentResponse(bin, theStausCode, contentType);
+			return response.sendAttachmentResponse(bin, theStatusCode, contentType);
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding
@@ -683,17 +699,18 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = response.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
+		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
 			writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
 		} else {
-			IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
+			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
+			IParser parser = getNewParser(theServer.getFhirContext(), forVersion, theRequestDetails);
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 		//FIXME resource leak
-		return response.sendWriterResponse(theStausCode, contentType, charset, writer);
+		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
 	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
@@ -747,17 +764,15 @@ public class RestfulServerUtils {
 			super();
 			myEncoding = theEncoding;
 			if (theContentType != null) {
+				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
 				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
-					FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU3)
-						|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()));
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1);
 				} else {
-					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
 				}
 			} else {
 				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)
-					|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && "1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()))) {
+				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
 					myNonLegacy = null;
 				} else {
 					myNonLegacy = Boolean.TRUE;

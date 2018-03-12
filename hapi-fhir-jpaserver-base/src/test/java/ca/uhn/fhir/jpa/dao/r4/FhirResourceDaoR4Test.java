@@ -171,8 +171,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		});
 	}
 	
-	private List<UriType> sortIds(List<UriType> theProfiles) {
-		ArrayList<UriType> retVal = new ArrayList<UriType>(theProfiles);
+	private List<CanonicalType> sortIds(List<CanonicalType> theProfiles) {
+		ArrayList<CanonicalType> retVal = new ArrayList<>(theProfiles);
 		Collections.sort(retVal, new Comparator<UriType>() {
 			@Override
 			public int compare(UriType theO1, UriType theO2) {
@@ -1346,7 +1346,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		Organization org = new Organization();
 
-		org.getMeta().getProfile().add(new IdType("http://foo"));
+		org.getMeta().getProfile().add(new CanonicalType("http://foo"));
 		org.setName(methodName);
 
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -2552,7 +2552,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
 		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
 		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriType> profiles = meta.getProfile();
+		List<CanonicalType> profiles = meta.getProfile();
 		assertEquals(2, profiles.size());
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
@@ -2683,7 +2683,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
 		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
 		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriType> profiles = meta.getProfile();
+		List<CanonicalType> profiles = meta.getProfile();
 		assertEquals(2, profiles.size());
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
@@ -2784,7 +2784,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
 		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
 		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriType> profiles = meta.getProfile();
+		List<CanonicalType> profiles = meta.getProfile();
 		assertEquals(2, profiles.size());
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
@@ -3489,9 +3489,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		securityLabels.add(new Coding().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
 		patient.getMeta().getSecurity().addAll(securityLabels);
 
-		List<UriType> profiles = new ArrayList<UriType>();
-		profiles.add(new IdType("http://profile/1"));
-		profiles.add(new IdType("http://profile/2"));
+		List<CanonicalType> profiles = new ArrayList<>();
+		profiles.add(new CanonicalType("http://profile/1"));
+		profiles.add(new CanonicalType("http://profile/2"));
 		patient.getMeta().getProfile().addAll(profiles);
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
@@ -3697,7 +3697,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
 	}
 
-	private static List<String> toStringList(List<UriType> theUriType) {
+	private static List<String> toStringList(List<CanonicalType> theUriType) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (UriType next : theUriType) {
 			retVal.add(next.getValue());

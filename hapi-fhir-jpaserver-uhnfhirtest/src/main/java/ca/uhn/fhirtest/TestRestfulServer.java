@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.*;
+import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -175,6 +176,11 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
+
+		/*
+		 * Enable version conversion
+		 */
+		registerInterceptor(new VersionedApiConverterInterceptor());
 
 		/*
 		 * We want to format the response using nice HTML if it's a browser, since this

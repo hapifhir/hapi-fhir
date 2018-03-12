@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -66,11 +66,11 @@ public class MedicationRequest extends DomainResource {
          */
         COMPLETED, 
         /**
-         * The prescription was entered in error.
+         * Some of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
          */
         ENTEREDINERROR, 
         /**
-         * Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.
+         * Actions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error
          */
         STOPPED, 
         /**
@@ -141,8 +141,8 @@ public class MedicationRequest extends DomainResource {
             case ONHOLD: return "Actions implied by the prescription are to be temporarily halted, but are expected to continue later.  May also be called \"suspended\".";
             case CANCELLED: return "The prescription has been withdrawn before any administrations have occurred";
             case COMPLETED: return "All actions that are implied by the prescription have occurred.";
-            case ENTEREDINERROR: return "The prescription was entered in error.";
-            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
+            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error";
             case DRAFT: return "The prescription is not yet 'actionable', i.e. it is a work in progress, requires sign-off or verification, and needs to be run through decision support process.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request";
             default: return "?";
@@ -250,6 +250,10 @@ public class MedicationRequest extends DomainResource {
          */
         ORDER, 
         /**
+         * The request represents the original authorization for the medication request.
+         */
+        ORIGINALORDER, 
+        /**
          * The request represents an instance for the particular order, for example a medication administration record.
          */
         INSTANCEORDER, 
@@ -270,6 +274,8 @@ public class MedicationRequest extends DomainResource {
           return PLAN;
         if ("order".equals(codeString))
           return ORDER;
+        if ("original-order".equals(codeString))
+          return ORIGINALORDER;
         if ("instance-order".equals(codeString))
           return INSTANCEORDER;
         if ("option".equals(codeString))
@@ -284,6 +290,7 @@ public class MedicationRequest extends DomainResource {
             case PROPOSAL: return "proposal";
             case PLAN: return "plan";
             case ORDER: return "order";
+            case ORIGINALORDER: return "original-order";
             case INSTANCEORDER: return "instance-order";
             case OPTION: return "option";
             default: return "?";
@@ -294,6 +301,7 @@ public class MedicationRequest extends DomainResource {
             case PROPOSAL: return "http://hl7.org/fhir/medication-request-intent";
             case PLAN: return "http://hl7.org/fhir/medication-request-intent";
             case ORDER: return "http://hl7.org/fhir/medication-request-intent";
+            case ORIGINALORDER: return "http://hl7.org/fhir/medication-request-intent";
             case INSTANCEORDER: return "http://hl7.org/fhir/medication-request-intent";
             case OPTION: return "http://hl7.org/fhir/medication-request-intent";
             default: return "?";
@@ -304,6 +312,7 @@ public class MedicationRequest extends DomainResource {
             case PROPOSAL: return "The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
             case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
             case ORDER: return "The request represents a request/demand and authorization for action";
+            case ORIGINALORDER: return "The request represents the original authorization for the medication request.";
             case INSTANCEORDER: return "The request represents an instance for the particular order, for example a medication administration record.";
             case OPTION: return "The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
             default: return "?";
@@ -314,6 +323,7 @@ public class MedicationRequest extends DomainResource {
             case PROPOSAL: return "Proposal";
             case PLAN: return "Plan";
             case ORDER: return "Order";
+            case ORIGINALORDER: return "Original Order";
             case INSTANCEORDER: return "Instance Order";
             case OPTION: return "Option";
             default: return "?";
@@ -332,6 +342,8 @@ public class MedicationRequest extends DomainResource {
           return MedicationRequestIntent.PLAN;
         if ("order".equals(codeString))
           return MedicationRequestIntent.ORDER;
+        if ("original-order".equals(codeString))
+          return MedicationRequestIntent.ORIGINALORDER;
         if ("instance-order".equals(codeString))
           return MedicationRequestIntent.INSTANCEORDER;
         if ("option".equals(codeString))
@@ -352,6 +364,8 @@ public class MedicationRequest extends DomainResource {
           return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.PLAN);
         if ("order".equals(codeString))
           return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.ORDER);
+        if ("original-order".equals(codeString))
+          return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.ORIGINALORDER);
         if ("instance-order".equals(codeString))
           return new Enumeration<MedicationRequestIntent>(this, MedicationRequestIntent.INSTANCEORDER);
         if ("option".equals(codeString))
@@ -365,6 +379,8 @@ public class MedicationRequest extends DomainResource {
         return "plan";
       if (code == MedicationRequestIntent.ORDER)
         return "order";
+      if (code == MedicationRequestIntent.ORIGINALORDER)
+        return "original-order";
       if (code == MedicationRequestIntent.INSTANCEORDER)
         return "instance-order";
       if (code == MedicationRequestIntent.OPTION)
@@ -1119,7 +1135,7 @@ public class MedicationRequest extends DomainResource {
     /**
      * A code specifying the current state of the order.  Generally this will be active or completed state.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | on-hold | cancelled | completed | entered-in-error | stopped | draft | unknown", formalDefinition="A code specifying the current state of the order.  Generally this will be active or completed state." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-request-status")
     protected Enumeration<MedicationRequestStatus> status;
@@ -1128,7 +1144,7 @@ public class MedicationRequest extends DomainResource {
      * Whether the request is a proposal, plan, or an original order.
      */
     @Child(name = "intent", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposal | plan | order | instance-order | option", formalDefinition="Whether the request is a proposal, plan, or an original order." )
+    @Description(shortDefinition="proposal | plan | order | original-order | instance-order | option", formalDefinition="Whether the request is a proposal, plan, or an original order." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-request-intent")
     protected Enumeration<MedicationRequestIntent> intent;
 
@@ -1385,8 +1401,9 @@ public class MedicationRequest extends DomainResource {
   /**
    * Constructor
    */
-    public MedicationRequest(Enumeration<MedicationRequestIntent> intent, Type medication, Reference subject) {
+    public MedicationRequest(Enumeration<MedicationRequestStatus> status, Enumeration<MedicationRequestIntent> intent, Type medication, Reference subject) {
       super();
+      this.status = status;
       this.intent = intent;
       this.medication = medication;
       this.subject = subject;
@@ -1484,13 +1501,9 @@ public class MedicationRequest extends DomainResource {
      * @param value A code specifying the current state of the order.  Generally this will be active or completed state.
      */
     public MedicationRequest setStatus(MedicationRequestStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<MedicationRequestStatus>(new MedicationRequestStatusEnumFactory());
         this.status.setValue(value);
-      }
       return this;
     }
 
@@ -2194,7 +2207,7 @@ public class MedicationRequest extends DomainResource {
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }

@@ -96,7 +96,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
-		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
+		List<QualifiedParamList> paramList = new ArrayList<>();
 		String name = getName();
 		parseParams(theRequest, paramList, name, null);
 

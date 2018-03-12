@@ -253,7 +253,7 @@ public class GraphQLSchemaGenerator {
       } else {
         boolean ref  = false;
         for (TypeRefComponent t : child.getType()) {
-          if (!"Reference".equals(t.getCode()))
+          if (!t.hasTarget())
             generateProperty(list, b, typeName, sd, child, t, true, null, mode);
           else if (!ref) {
             ref = true;

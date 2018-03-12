@@ -157,6 +157,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
+	@Qualifier("myBinaryDaoR4")
+	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
@@ -315,7 +318,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		linkNext = linkNext.substring(linkNext.indexOf('?'));
 		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[0];
+		String uuid = uuidParams[ 0 ];
 		return uuid;
 	}
 

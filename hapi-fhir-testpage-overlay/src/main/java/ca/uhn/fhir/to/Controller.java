@@ -96,27 +96,29 @@ public class Controller extends BaseController {
 	}
 
 	@RequestMapping(value = { "/delete" })
-	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theReq, theRequest, theModel);
+	public String actionDelete(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
-			def = getResourceType(theRequest, theReq);
+			def = getResourceType(theRequest, theServletRequest);
 		} catch (ServletException e) {
+			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
 
-		String id = StringUtils.defaultString(theReq.getParameter("resource-delete-id"));
+		String id = StringUtils.defaultString(theServletRequest.getParameter("resource-delete-id"));
 		if (StringUtils.isBlank(id)) {
+			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 
-		ResultType returnsResource = ResultType.BUNDLE;
+		ResultType returnsResource = ResultType.RESOURCE;
 		String outcomeDescription = "Delete Resource";
 
 		long start = System.currentTimeMillis();
@@ -192,27 +194,29 @@ public class Controller extends BaseController {
 	}
 
 	@RequestMapping(value = { "/read" })
-	public String actionRead(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theReq, theRequest, theModel);
+	public String actionRead(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
-			def = getResourceType(theRequest, theReq);
+			def = getResourceType(theRequest, theServletRequest);
 		} catch (ServletException e) {
+			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
-		String id = StringUtils.defaultString(theReq.getParameter("id"));
+		String id = StringUtils.defaultString(theServletRequest.getParameter("id"));
 		if (StringUtils.isBlank(id)) {
+			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 		ResultType returnsResource = ResultType.RESOURCE;
 
-		String versionId = StringUtils.defaultString(theReq.getParameter("vid"));
+		String versionId = StringUtils.defaultString(theServletRequest.getParameter("vid"));
 		String outcomeDescription;
 		if (StringUtils.isBlank(versionId)) {
 			versionId = null;
@@ -242,45 +246,18 @@ public class Controller extends BaseController {
 
 	@RequestMapping({ "/resource" })
 	public String actionResource(HttpServletRequest theServletRequest, final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		IBaseResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
-
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		String resourceName = theRequest.getResource();
-		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
 
-		TreeSet<String> includes = new TreeSet<String>();
-		TreeSet<String> revIncludes = new TreeSet<String>();
-		TreeSet<String> sortParams = new TreeSet<String>();
-		boolean haveSearchParams = false;
-		List<List<String>> queryIncludes = new ArrayList<List<String>>();
-
-		switch (theRequest.getFhirVersion(myConfig)) {
-		case DSTU2:
-			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-			break;
-		case DSTU3:
-			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-			break;
-		case R4:
-			haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-			break;
-		default:
-			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
-		}
-
-		theModel.put("includes", includes);
-		theModel.put("revincludes", revIncludes);
-		theModel.put("queries", Collections.emptyList()); // TODO: remove this, it does nothing
-		theModel.put("haveSearchParams", haveSearchParams);
-		theModel.put("queryIncludes", queryIncludes);
-		theModel.put("sortParams", sortParams);
+		populateModelForResource(theServletRequest, theRequest, theModel);
 
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();
 			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
-			IBaseResource updateResource = (IBaseResource) client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+			CaptureInterceptor interceptor = new CaptureInterceptor();
+			GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
+			IBaseResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
 			String updateResourceString = theRequest.newParser(getContext(theRequest)).setPrettyPrint(true).encodeResourceToString(updateResource);
 			theModel.put("updateResource", updateResourceString);
 			theModel.put("updateResourceId", updateId);
@@ -291,10 +268,43 @@ public class Controller extends BaseController {
 		return "resource";
 	}
 
+	private void populateModelForResource(HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
+		IBaseResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
+
+		String resourceName = theRequest.getResource();
+
+		TreeSet<String> includes = new TreeSet<>();
+		TreeSet<String> revIncludes = new TreeSet<>();
+		TreeSet<String> sortParams = new TreeSet<>();
+		boolean haveSearchParams = false;
+		List<List<String>> queryIncludes = new ArrayList<>();
+
+		switch (theRequest.getFhirVersion(myConfig)) {
+			case DSTU2:
+				haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+				break;
+			case DSTU3:
+				haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+				break;
+			case R4:
+				haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+				break;
+			default:
+				throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
+		}
+
+		theModel.put("includes", includes);
+		theModel.put("revincludes", revIncludes);
+		theModel.put("queries", Collections.emptyList()); // TODO: remove this, it does nothing
+		theModel.put("haveSearchParams", haveSearchParams);
+		theModel.put("queryIncludes", queryIncludes);
+		theModel.put("sortParams", sortParams);
+	}
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
-	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) throws IOException {
-		addCommonParams(theReq, theRequest, theModel);
+	public String actionSearch(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) throws IOException {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
 		JsonWriter clientCodeJsonWriter = new JsonWriter(clientCodeJsonStringWriter);
@@ -305,19 +315,20 @@ public class Controller extends BaseController {
 		clientCodeJsonWriter.value((String) theModel.get("base"));
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		IUntypedQuery search = client.search();
 		IQuery query;
-		if (isNotBlank(theReq.getParameter("resource"))) {
+		if (isNotBlank(theServletRequest.getParameter("resource"))) {
 			try {
-				query = search.forResource((Class<? extends IBaseResource>) getResourceType(theRequest, theReq).getImplementingClass());
+				query = search.forResource(getResourceType(theRequest, theServletRequest).getImplementingClass());
 			} catch (ServletException e) {
+				populateModelForResource(theServletRequest, theRequest, theModel);
 				theModel.put("errorMsg", toDisplayError(e.toString(), e));
 				return "resource";
 			}
 			clientCodeJsonWriter.name("resource");
-			clientCodeJsonWriter.value(theReq.getParameter("resource"));
+			clientCodeJsonWriter.value(theServletRequest.getParameter("resource"));
 		} else {
 			query = search.forAllResources();
 			clientCodeJsonWriter.name("resource");
@@ -334,7 +345,7 @@ public class Controller extends BaseController {
 
 		if (client.getEncoding() != null) {
 			clientCodeJsonWriter.name("format");
-			clientCodeJsonWriter.value(client.getEncoding().getRequestContentType());
+			clientCodeJsonWriter.value(client.getEncoding().getFormatContentType());
 		} else {
 			clientCodeJsonWriter.name("format");
 			clientCodeJsonWriter.nullValue();
@@ -349,7 +360,7 @@ public class Controller extends BaseController {
 			paramIdx++;
 
 			String paramIdxString = Integer.toString(paramIdx);
-			boolean shouldContinue = handleSearchParam(paramIdxString, theReq, query, clientCodeJsonWriter);
+			boolean shouldContinue = handleSearchParam(paramIdxString, theServletRequest, query, clientCodeJsonWriter);
 			if (!shouldContinue) {
 				break;
 			}
@@ -358,7 +369,7 @@ public class Controller extends BaseController {
 
 		clientCodeJsonWriter.name("includes");
 		clientCodeJsonWriter.beginArray();
-		String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
+		String[] incValues = theServletRequest.getParameterValues(Constants.PARAM_INCLUDE);
 		if (incValues != null) {
 			for (String next : incValues) {
 				if (isNotBlank(next)) {
@@ -371,7 +382,7 @@ public class Controller extends BaseController {
 
 		clientCodeJsonWriter.name("revincludes");
 		clientCodeJsonWriter.beginArray();
-		String[] revIncValues = theReq.getParameterValues(Constants.PARAM_REVINCLUDE);
+		String[] revIncValues = theServletRequest.getParameterValues(Constants.PARAM_REVINCLUDE);
 		if (revIncValues != null) {
 			for (String next : revIncValues) {
 				if (isNotBlank(next)) {
@@ -382,9 +393,10 @@ public class Controller extends BaseController {
 		}
 		clientCodeJsonWriter.endArray();
 
-		String limit = theReq.getParameter("resource-search-limit");
+		String limit = theServletRequest.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
 			if (!limit.matches("[0-9]+")) {
+				populateModelForResource(theServletRequest, theRequest, theModel);
 				theModel.put("errorMsg", toDisplayError("Search limit must be a numeric value.", null));
 				return "resource";
 			}
@@ -397,13 +409,13 @@ public class Controller extends BaseController {
 			clientCodeJsonWriter.nullValue();
 		}
 
-		String[] sort = theReq.getParameterValues("sort_by");
+		String[] sort = theServletRequest.getParameterValues("sort_by");
 		if (sort != null) {
 			for (String next : sort) {
 				if (isBlank(next)) {
 					continue;
 				}
-				String direction = theReq.getParameter("sort_direction");
+				String direction = theServletRequest.getParameter("sort_direction");
 				if ("asc".equals(direction)) {
 					query.sort().ascending(new StringClientParam(next));
 				} else if ("desc".equals(direction)) {
@@ -505,7 +517,7 @@ public class Controller extends BaseController {
 		Class<? extends IBaseResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
-			type = (Class<? extends IBaseResource>) def.getImplementingClass();
+			type = def.getImplementingClass();
 		}
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
@@ -588,7 +600,7 @@ public class Controller extends BaseController {
 		Class<? extends IBaseResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
-			type = (Class<? extends IBaseResource>) def.getImplementingClass();
+			type = def.getImplementingClass();
 			id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
 		}
 

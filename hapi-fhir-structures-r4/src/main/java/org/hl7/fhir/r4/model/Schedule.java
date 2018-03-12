@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -65,10 +65,10 @@ public class Schedule extends DomainResource {
     /**
      * A broad categorisation of the service that is to be performed during this appointment.
      */
-    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
-    protected CodeableConcept serviceCategory;
+    protected List<CodeableConcept> serviceCategory;
 
     /**
      * The specific service that is to be performed during this appointment.
@@ -112,7 +112,7 @@ public class Schedule extends DomainResource {
     @Description(shortDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated." )
     protected StringType comment;
 
-    private static final long serialVersionUID = -266680210L;
+    private static final long serialVersionUID = 203182600L;
 
   /**
    * Constructor
@@ -222,25 +222,54 @@ public class Schedule extends DomainResource {
     /**
      * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
      */
-    public CodeableConcept getServiceCategory() { 
+    public List<CodeableConcept> getServiceCategory() { 
       if (this.serviceCategory == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Schedule.serviceCategory");
-        else if (Configuration.doAutoCreate())
-          this.serviceCategory = new CodeableConcept(); // cc
+        this.serviceCategory = new ArrayList<CodeableConcept>();
       return this.serviceCategory;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Schedule setServiceCategory(List<CodeableConcept> theServiceCategory) { 
+      this.serviceCategory = theServiceCategory;
+      return this;
+    }
+
     public boolean hasServiceCategory() { 
-      return this.serviceCategory != null && !this.serviceCategory.isEmpty();
+      if (this.serviceCategory == null)
+        return false;
+      for (CodeableConcept item : this.serviceCategory)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addServiceCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.serviceCategory == null)
+        this.serviceCategory = new ArrayList<CodeableConcept>();
+      this.serviceCategory.add(t);
+      return t;
+    }
+
+    public Schedule addServiceCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.serviceCategory == null)
+        this.serviceCategory = new ArrayList<CodeableConcept>();
+      this.serviceCategory.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return The first repetition of repeating field {@link #serviceCategory}, creating it if it does not already exist
      */
-    public Schedule setServiceCategory(CodeableConcept value) { 
-      this.serviceCategory = value;
-      return this;
+    public CodeableConcept getServiceCategoryFirstRep() { 
+      if (getServiceCategory().isEmpty()) {
+        addServiceCategory();
+      }
+      return getServiceCategory().get(0);
     }
 
     /**
@@ -489,7 +518,7 @@ public class Schedule extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("active", "boolean", "Whether this schedule record is in active use, or should not be used (such as was entered in error).", 0, 1, active));
-        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
         children.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
@@ -502,7 +531,7 @@ public class Schedule extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this schedule record is in active use, or should not be used (such as was entered in error).", 0, 1, active);
-        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
         case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor);
@@ -518,7 +547,7 @@ public class Schedule extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
-        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
+        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : this.serviceCategory.toArray(new Base[this.serviceCategory.size()]); // CodeableConcept
         case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
         case 92645877: /*actor*/ return this.actor == null ? new Base[0] : this.actor.toArray(new Base[this.actor.size()]); // Reference
@@ -539,7 +568,7 @@ public class Schedule extends DomainResource {
           this.active = castToBoolean(value); // BooleanType
           return value;
         case 1281188563: // serviceCategory
-          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          this.getServiceCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1928370289: // serviceType
           this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
@@ -568,7 +597,7 @@ public class Schedule extends DomainResource {
         } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
         } else if (name.equals("serviceCategory")) {
-          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          this.getServiceCategory().add(castToCodeableConcept(value));
         } else if (name.equals("serviceType")) {
           this.getServiceType().add(castToCodeableConcept(value));
         } else if (name.equals("specialty")) {
@@ -589,7 +618,7 @@ public class Schedule extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
         case -1422950650:  return getActiveElement();
-        case 1281188563:  return getServiceCategory(); 
+        case 1281188563:  return addServiceCategory(); 
         case -1928370289:  return addServiceType(); 
         case -1694759682:  return addSpecialty(); 
         case 92645877:  return addActor(); 
@@ -625,8 +654,7 @@ public class Schedule extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Schedule.active");
         }
         else if (name.equals("serviceCategory")) {
-          this.serviceCategory = new CodeableConcept();
-          return this.serviceCategory;
+          return addServiceCategory();
         }
         else if (name.equals("serviceType")) {
           return addServiceType();
@@ -662,7 +690,11 @@ public class Schedule extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.active = active == null ? null : active.copy();
-        dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
+        if (serviceCategory != null) {
+          dst.serviceCategory = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : serviceCategory)
+            dst.serviceCategory.add(i.copy());
+        };
         if (serviceType != null) {
           dst.serviceType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceType)

@@ -18,11 +18,11 @@ public class MarkDownProcessor {
   }
 
 
-  public String process(String source) {
+  public String process(String source, String context) {
     switch (dialect) {
     case DARING_FIREBALL : return Processor.process(source); 
     case COMMON_MARK : return processCommonMark(source); 
-    default: throw new Error("Unknown Markdown Dialect: "+dialect.toString()); 
+    default: throw new Error("Unknown Markdown Dialect: "+dialect.toString()+" at "+context); 
     }
   }
 

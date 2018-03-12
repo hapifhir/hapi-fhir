@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -34,7 +34,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -158,7 +157,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		Integer size = theFound.size();
 		StopWatch sw = new StopWatch();
 		while (size == null) {
@@ -171,6 +170,7 @@ public abstract class BaseJpaTest {
 			} catch (InterruptedException theE) {
 				//ignore
 			}
+			size = theFound.size();
 		}
 
 		ourLog.info("Found {} results", size);

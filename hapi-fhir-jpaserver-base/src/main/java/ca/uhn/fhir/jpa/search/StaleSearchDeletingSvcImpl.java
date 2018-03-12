@@ -37,6 +37,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Date;
@@ -95,17 +96,24 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
-		int count = tt.execute(new TransactionCallback<Integer>() {
+		final Slice<Long> toDelete = tt.execute(new TransactionCallback<Slice<Long>>() {
 			@Override
-			public Integer doInTransaction(TransactionStatus theStatus) {
-				Slice<Long> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000));
-				for (final Long next : toDelete) {
-					deleteSearch(next);
-				}
-				return toDelete.getContent().size();
+			public Slice<Long> doInTransaction(TransactionStatus theStatus) {
+				return mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000));
 			}
 		});
 
+		for (final Long nextSearchToDelete : toDelete) {
+			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
+			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					deleteSearch(nextSearchToDelete);
+				}
+			});
+		}
+
+		int count = toDelete.getContent().size();
 		if (count > 0) {
 			long total = tt.execute(new TransactionCallback<Long>() {
 				@Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class MedicationStatement extends DomainResource {
          */
         COMPLETED, 
         /**
-         * The statement was recorded incorrectly.
+         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
          */
         ENTEREDINERROR, 
         /**
@@ -66,7 +66,7 @@ public class MedicationStatement extends DomainResource {
          */
         INTENDED, 
         /**
-         * Actions implied by the statement have been permanently halted, before all of them occurred.
+         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error
          */
         STOPPED, 
         /**
@@ -139,9 +139,9 @@ public class MedicationStatement extends DomainResource {
           switch (this) {
             case ACTIVE: return "The medication is still being taken.";
             case COMPLETED: return "The medication is no longer being taken.";
-            case ENTEREDINERROR: return "The statement was recorded incorrectly.";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
             case INTENDED: return "The medication may be taken at some time in the future.";
-            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred.";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error";
             case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case UNKNOWN: return "The state of the medication use is not currently known.";
             case NOTTAKEN: return "The medication was not consumed by the patient";
@@ -276,10 +276,10 @@ public class MedicationStatement extends DomainResource {
     protected Enumeration<MedicationStatementStatus> status;
 
     /**
-     * A code indicating why the medication was not taken.
+     * Captures the reason for the current state of the MedicationStatement.
      */
     @Child(name = "statusReason", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="True if asserting medication was not given", formalDefinition="A code indicating why the medication was not taken." )
+    @Description(shortDefinition="Reason for current status", formalDefinition="Captures the reason for the current state of the MedicationStatement." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/reason-medication-status-codes")
     protected List<CodeableConcept> statusReason;
 
@@ -639,7 +639,7 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #statusReason} (A code indicating why the medication was not taken.)
+     * @return {@link #statusReason} (Captures the reason for the current state of the MedicationStatement.)
      */
     public List<CodeableConcept> getStatusReason() { 
       if (this.statusReason == null)
@@ -1262,7 +1262,7 @@ public class MedicationStatement extends DomainResource {
         children.add(new Property("basedOn", "Reference(MedicationRequest|CarePlan|ServiceRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("partOf", "Reference(MedicationAdministration|MedicationDispense|MedicationStatement|Procedure|Observation)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.", 0, 1, status));
-        children.add(new Property("statusReason", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, statusReason));
+        children.add(new Property("statusReason", "CodeableConcept", "Captures the reason for the current state of the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, statusReason));
         children.add(new Property("category", "CodeableConcept", "Indicates where type of medication statement and where the medication is expected to be consumed or administered.", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "The person, animal or group who is/was taking the medication.", 0, 1, subject));
@@ -1284,7 +1284,7 @@ public class MedicationStatement extends DomainResource {
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(MedicationRequest|CarePlan|ServiceRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(MedicationAdministration|MedicationDispense|MedicationStatement|Procedure|Observation)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.", 0, 1, status);
-        case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, statusReason);
+        case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "Captures the reason for the current state of the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, statusReason);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates where type of medication statement and where the medication is expected to be consumed or administered.", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);

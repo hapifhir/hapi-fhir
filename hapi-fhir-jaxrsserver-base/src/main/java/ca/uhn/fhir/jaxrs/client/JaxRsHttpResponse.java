@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.ObjectUtils;
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
@@ -42,12 +42,13 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
  * A Http Response based on JaxRs. This is an adapter around the class {@link javax.ws.rs.core.Response Response}
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsHttpResponse implements IHttpResponse {
+public class JaxRsHttpResponse extends BaseHttpResponse implements IHttpResponse {
 	
 	private boolean myBufferedEntity = false;
 	private final Response myResponse;
 	
-	public JaxRsHttpResponse(Response theResponse) {
+	public JaxRsHttpResponse(Response theResponse, StopWatch theResponseStopWatch) {
+		super(theResponseStopWatch);
 		this.myResponse = theResponse;
 	}
 

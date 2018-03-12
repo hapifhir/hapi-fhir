@@ -1,0 +1,286 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "fiphr-boolean",
+	"meta": {
+		"lastUpdated": "2017-09-05T12:48:55.148+00:00"
+	},
+	"url": "http://phr.kanta.fi/StructureDefinition/fiphr-boolean",
+	"version": "0.05",
+	"name": "Finnish PHR boolean extension",
+	"title": "Finnish PHR boolean extension",
+	"status": "draft",
+	"experimental": true,
+	"date": "2017-08-18T07:54:02.783+00:00",
+	"publisher": "Kela",
+	"description": "Finnish PHR extension structure to be used in boolean type extension element in profiles.",
+	"fhirVersion": "3.0.1",
+	"kind": "primitive-type",
+	"abstract": false,
+	"contextType": "resource",
+	"context": [
+		"StructureDefinition"
+	],
+	"type": "Extension",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+	"derivation": "constraint",
+	"snapshot": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Finnish PHR boolean extension",
+				"definition": "Finnish PHR extension structure to be used in boolean type extension element in profiles.",
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element",
+					"min": 0,
+					"max": "*"
+				},
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.id",
+				"path": "Extension.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": 0,
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension",
+				"path": "Extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "identifies the meaning of the extension",
+				"definition": "Source of the definition for the extension code - a logical name or a URL.",
+				"comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.url",
+					"min": 1,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-boolean",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueBoolean",
+				"path": "Extension.valueBoolean",
+				"sliceName": "valueBoolean",
+				"short": "Value of extension",
+				"definition": "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).",
+				"comment": "A stream of bytes, base64 encoded",
+				"min": 0,
+				"max": "1",
+				"base": {
+					"path": "Extension.value[x]",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "boolean"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			}
+		]
+	},
+	"differential": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Finnish PHR boolean extension",
+				"definition": "Finnish PHR extension structure to be used in boolean type extension element in profiles."
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-boolean"
+			},
+			{
+				"id": "Extension.value[x]:valueBoolean",
+				"path": "Extension.valueBoolean",
+				"sliceName": "valueBoolean",
+				"type": [
+					{
+						"code": "boolean"
+					}
+				]
+			}
+		]
+	}
+}

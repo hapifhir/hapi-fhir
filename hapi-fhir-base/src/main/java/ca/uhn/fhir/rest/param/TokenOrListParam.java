@@ -69,14 +69,12 @@ public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenPar
 
 	/**
 	 * Add a new token to this list
-	 * 
-	 * @param theSystem
+	 *  @param theSystem
 	 *            The system to use for the one token to pre-populate in this list
-	 * @param theValue
-	 *            The value to use for the one token to pre-populate in this list
 	 */
-	public void add(String theSystem, String theValue) {
+	public TokenOrListParam add(String theSystem, String theValue) {
 		add(new TokenParam(theSystem, theValue));
+		return this;
 	}
 
 	public List<BaseCodingDt> getListAsCodings() {

@@ -54,7 +54,7 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 	 */
 	@Deprecated
 	public Enumeration() {
-		// nothing
+		super();
 	}
 
 	/**

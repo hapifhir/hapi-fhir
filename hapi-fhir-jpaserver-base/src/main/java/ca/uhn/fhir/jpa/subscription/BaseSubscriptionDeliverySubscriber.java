@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ import org.springframework.messaging.MessagingException;
 
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
+	private boolean myReloadResourceBeforeDelivery = true;
 
 	public BaseSubscriptionDeliverySubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
@@ -40,24 +44,54 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			ourLog.warn("Unexpected payload type: {}", theMessage.getPayload());
 			return;
 		}
+
+		String subscriptionId = "(unknown?)";
+
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+			subscriptionId = msg.getPayload(getContext()).getIdElement().getValue();
+
 			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription(getContext()))) {
 				return;
 			}
 
-			CanonicalSubscription updatedSubscription = (CanonicalSubscription)getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
+			CanonicalSubscription updatedSubscription = (CanonicalSubscription) getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
 			}
 
+			if (myReloadResourceBeforeDelivery) {
+				// Reload the payload just in case any interceptors modified
+				// it before it was saved to the database. This is also
+				// useful for resources created in a transaction, since they
+				// can have placeholder IDs in them.
+				IIdType payloadId = msg.getPayloadId(getContext());
+				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
+				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+				IBaseResource loadedPayload;
+				try {
+					loadedPayload = dao.read(payloadId);
+				} catch (ResourceNotFoundException e) {
+					// This can happen if a last minute failure happens when saving a resource,
+					// eg a constraint causes the transaction to roll back on commit
+					ourLog.warn("Unable to find resource {} - Aborting delivery", payloadId.getValue());
+					return;
+				}
+				msg.setPayload(getContext(), loadedPayload);
+			}
+
 			handleMessage(msg);
 		} catch (Exception e) {
-			ourLog.error("Failure handling subscription payload", e);
-			throw new MessagingException(theMessage, "Failure handling subscription payload", e);
+			String msg = "Failure handling subscription payload for subscription: " + subscriptionId;
+			ourLog.error(msg, e);
+			throw new MessagingException(theMessage, msg, e);
 		}
 	}
 
 	public abstract void handleMessage(ResourceDeliveryMessage theMessage) throws Exception;
+
+	public void setReloadResourceBeforeDelivery(boolean theReloadResourceBeforeDelivery) {
+		myReloadResourceBeforeDelivery = theReloadResourceBeforeDelivery;
+	}
 
 }

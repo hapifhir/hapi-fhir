@@ -46,6 +46,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -74,10 +75,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("SearchParameter/patient-gender"));
+			.setDefinition("SearchParameter/patient-gender");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("SearchParameter/patient-birthdate"));
+			.setDefinition("SearchParameter/patient-birthdate");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -115,10 +116,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Coverage");
 		sp.addComponent()
 			.setExpression("Coverage")
-			.setDefinition(new Reference("/SearchParameter/coverage-beneficiary"));
+			.setDefinition("/SearchParameter/coverage-beneficiary");
 		sp.addComponent()
 			.setExpression("Coverage")
-			.setDefinition(new Reference("/SearchParameter/coverage-identifier"));
+			.setDefinition("/SearchParameter/coverage-identifier");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -147,7 +148,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Observation");
 		sp.addComponent()
 			.setExpression("Observation")
-			.setDefinition(new Reference("/SearchParameter/observation-subject"));
+			.setDefinition("/SearchParameter/observation-subject");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -176,7 +177,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("/SearchParameter/patient-identifier"));
+			.setDefinition("/SearchParameter/patient-identifier");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -205,7 +206,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("/SearchParameter/patient-identifier"));
+			.setDefinition("/SearchParameter/patient-identifier");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -239,10 +240,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("SearchParameter/patient-name"));
+			.setDefinition("SearchParameter/patient-name");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition(new Reference("SearchParameter/patient-organization"));
+			.setDefinition("SearchParameter/patient-organization");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -288,13 +289,13 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp.setExpression("Observation.code");
 		sp.addComponent()
 			.setExpression("Observation")
-			.setDefinition(new Reference("SearchParameter/obs-subject"));
+			.setDefinition("SearchParameter/obs-subject");
 		sp.addComponent()
 			.setExpression("Observation")
-			.setDefinition(new Reference("SearchParameter/obs-effective"));
+			.setDefinition("SearchParameter/obs-effective");
 		sp.addComponent()
 			.setExpression("Observation")
-			.setDefinition(new Reference("SearchParameter/obs-code"));
+			.setDefinition("SearchParameter/obs-code");
 		sp.addExtension()
 			.setUrl(JpaConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -411,6 +412,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
+		myDaoConfig.setSchedulingDisabled(true);
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
@@ -449,7 +451,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		myResourceIndexedCompositeStringUniqueDao.deleteAll();
 
-		mySystemDao.markAllResourcesForReindexing();
+		assertEquals(1, mySearchParamRegsitry.getActiveUniqueSearchParams("Observation").size());
+
+		assertEquals(7, mySystemDao.markAllResourcesForReindexing());
 		mySystemDao.performReindexingPass(1000);
 		mySystemDao.performReindexingPass(1000);
 

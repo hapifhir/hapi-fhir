@@ -292,12 +292,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     source = Source.InstanceValidator;
   }
 
-    public InstanceValidator(ValidationEngine engine) {
-	    super();
-	    this.context = engine.getContext();
-		 fpe = engine.getFpe();
-		 source = Source.InstanceValidator;
-    }
 
 
   @Override
@@ -1119,7 +1113,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       List<Element> extensions = new ArrayList<Element>();
       focus.getNamedChildren("extension", extensions);
       if (fixed.getExtension().size() == 0) {
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed");
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed, as the specified fixed value doesn't contain any extensions");
       } else if (rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == fixed.getExtension().size(),
           "Extensions count mismatch: expected " + Integer.toString(fixed.getExtension().size()) + " but found " + Integer.toString(extensions.size()))) {
         for (Extension e : fixed.getExtension()) {

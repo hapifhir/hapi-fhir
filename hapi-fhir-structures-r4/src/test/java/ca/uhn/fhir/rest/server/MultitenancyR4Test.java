@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
@@ -83,8 +84,9 @@ public class MultitenancyR4Test {
 			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			Bundle resp = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+			ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
+			assertEquals("http://localhost:" + ourPort + "/TENANT2/Patient?identifier=foo%7Cbar", resp.getLink("self").getUrl());
 			assertEquals("http://localhost:" + ourPort + "/TENANT2/Patient/0", resp.getEntry().get(0).getFullUrl());
 			assertEquals("http://localhost:"+ourPort+"/TENANT2/Patient/0", resp.getEntry().get(0).getResource().getId());
 			assertThat(resp.getLink("next").getUrl(), startsWith("http://localhost:"+ourPort+"/TENANT2?_getpages="));
@@ -93,6 +95,16 @@ public class MultitenancyR4Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
+		// GET the root
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/");
+		status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("\"diagnostics\":\"This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\""));
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
 	}
 
 	@AfterClass

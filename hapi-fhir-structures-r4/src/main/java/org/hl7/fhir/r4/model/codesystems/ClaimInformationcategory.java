@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -77,6 +77,14 @@ public enum ClaimInformationcategory {
          */
         OTHER, 
         /**
+         * An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).
+         */
+        HOSPITALIZED, 
+        /**
+         * An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).
+         */
+        EMPLOYMENTIMPACTED, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -103,6 +111,10 @@ public enum ClaimInformationcategory {
           return PROSTHESIS;
         if ("other".equals(codeString))
           return OTHER;
+        if ("hospitalized".equals(codeString))
+          return HOSPITALIZED;
+        if ("employmentimpacted".equals(codeString))
+          return EMPLOYMENTIMPACTED;
         throw new FHIRException("Unknown ClaimInformationcategory code '"+codeString+"'");
         }
         public String toCode() {
@@ -117,6 +129,8 @@ public enum ClaimInformationcategory {
             case MISSINGTOOTH: return "missingtooth";
             case PROSTHESIS: return "prosthesis";
             case OTHER: return "other";
+            case HOSPITALIZED: return "hospitalized";
+            case EMPLOYMENTIMPACTED: return "employmentimpacted";
             default: return "?";
           }
         }
@@ -135,6 +149,8 @@ public enum ClaimInformationcategory {
             case MISSINGTOOTH: return "Teeth which are missing for any reason, for example: prior extraction, never developed.";
             case PROSTHESIS: return "The type of prosthesis and date of supply if a previously supplied prosthesis.";
             case OTHER: return "Other information identified by the type.system.";
+            case HOSPITALIZED: return "An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).";
+            case EMPLOYMENTIMPACTED: return "An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).";
             default: return "?";
           }
         }
@@ -150,6 +166,8 @@ public enum ClaimInformationcategory {
             case MISSINGTOOTH: return "Missing Tooth";
             case PROSTHESIS: return "Prosthesis";
             case OTHER: return "Other";
+            case HOSPITALIZED: return "Hospitalized";
+            case EMPLOYMENTIMPACTED: return "EmploymentImpacted";
             default: return "?";
           }
     }

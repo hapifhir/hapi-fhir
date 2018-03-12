@@ -423,6 +423,11 @@ public class Element extends Base {
 	}
 	
   @Override
+  public boolean isBooleanPrimitive() {
+    return isPrimitive() && ("boolean".equals(type) || "boolean".equals(property.getType(name)));
+  }
+ 
+  @Override
   public boolean isResource() {
     return property.isResource();
   }

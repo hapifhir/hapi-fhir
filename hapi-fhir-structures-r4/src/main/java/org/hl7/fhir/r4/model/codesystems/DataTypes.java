@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -173,7 +173,7 @@ public enum DataTypes {
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+         * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
@@ -209,6 +209,10 @@ public enum DataTypes {
          */
         BOOLEAN, 
         /**
+         * A URI that is a reference to a canonical URI on a FHIR resource
+         */
+        CANONICAL, 
+        /**
          * A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents
          */
         CODE, 
@@ -237,7 +241,7 @@ public enum DataTypes {
          */
         INTEGER, 
         /**
-         * A string that may contain markdown syntax for optional processing by a mark down presentation engine
+         * A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine
          */
         MARKDOWN, 
         /**
@@ -264,6 +268,10 @@ public enum DataTypes {
          * String of characters used to identify a name or a resource
          */
         URI, 
+        /**
+         * A URI that is a literal reference
+         */
+        URL, 
         /**
          * A UUID, represented as a URI
          */
@@ -365,6 +373,8 @@ public enum DataTypes {
           return BASE64BINARY;
         if ("boolean".equals(codeString))
           return BOOLEAN;
+        if ("canonical".equals(codeString))
+          return CANONICAL;
         if ("code".equals(codeString))
           return CODE;
         if ("date".equals(codeString))
@@ -393,6 +403,8 @@ public enum DataTypes {
           return UNSIGNEDINT;
         if ("uri".equals(codeString))
           return URI;
+        if ("url".equals(codeString))
+          return URL;
         if ("uuid".equals(codeString))
           return UUID;
         if ("xhtml".equals(codeString))
@@ -444,6 +456,7 @@ public enum DataTypes {
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -458,6 +471,7 @@ public enum DataTypes {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             default: return "?";
@@ -502,7 +516,7 @@ public enum DataTypes {
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
+            case SIGNATURE: return "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
@@ -511,6 +525,7 @@ public enum DataTypes {
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
+            case CANONICAL: return "A URI that is a reference to a canonical URI on a FHIR resource";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
             case DATE: return "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.";
             case DATETIME: return "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.";
@@ -518,13 +533,14 @@ public enum DataTypes {
             case ID: return "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.";
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
-            case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
+            case MARKDOWN: return "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine";
             case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
             case UNSIGNEDINT: return "An integer with a value that is not negative (e.g. >= 0)";
             case URI: return "String of characters used to identify a name or a resource";
+            case URL: return "A URI that is a literal reference";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
             default: return "?";
@@ -575,6 +591,7 @@ public enum DataTypes {
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -589,6 +606,7 @@ public enum DataTypes {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             default: return "?";

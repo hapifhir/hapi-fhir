@@ -142,7 +142,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-
+		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 

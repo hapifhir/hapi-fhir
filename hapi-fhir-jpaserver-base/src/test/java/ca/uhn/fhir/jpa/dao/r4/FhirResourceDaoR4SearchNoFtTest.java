@@ -681,6 +681,27 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(actual, contains(id));
 	}
 
+	@Test
+	public void testReturnOnlyCorrectResourceType() {
+		ValueSet vsRes = new ValueSet();
+		vsRes.setUrl("http://foo");
+		String vsId = myValueSetDao.create(vsRes).getId().toUnqualifiedVersionless().getValue();
+
+		CodeSystem csRes = new CodeSystem();
+		csRes.setUrl("http://bar");
+		String csId = myCodeSystemDao.create(csRes).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
+		map.add(ValueSet.SP_URL, new UriParam("http://foo"));
+		List<String> actual = toUnqualifiedVersionlessIdValues(myValueSetDao.search(map));
+		assertThat(actual, contains(vsId));
+
+		map = new SearchParameterMap().setLoadSynchronous(true);
+		map.add(ValueSet.SP_URL, new UriParam("http://bar"));
+		actual = toUnqualifiedVersionlessIdValues(myCodeSystemDao.search(map));
+		assertThat(actual, contains(csId));
+	}
+
 	/**
 	 * #454
 	 */

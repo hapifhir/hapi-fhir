@@ -13,6 +13,9 @@ import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.VelocityHelper;
 import ca.uhn.fhir.tinder.model.*;
 import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -455,8 +458,8 @@ public abstract class BaseStructureParser {
 		scanForTypeNameConflicts(theNext, typeNames);
 	}
 
-	public void setExtensions(ArrayList<Extension> theExts) {
-		myExtensions = theExts;
+	public void setExtensions(ArrayList<Extension> theExtensions) {
+		myExtensions = theExtensions;
 	}
 
 	public void setVelocityProperties(String theVelocityProperties) {
@@ -464,12 +467,7 @@ public abstract class BaseStructureParser {
 	}
 
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
-		FileOutputStream fos = new FileOutputStream(theFile, false);
-		OutputStreamWriter w = new OutputStreamWriter(fos, "UTF-8");
-
-		ourLog.debug("Writing file: {}", theFile.getAbsolutePath());
-
-		ArrayList<String> imports = new ArrayList<String>();
+		ArrayList<String> imports = new ArrayList<>();
 		for (String next : myImports) {
 			next = Resource.correctName(next);
 			if (next.contains(".")) {
@@ -535,10 +533,36 @@ public abstract class BaseStructureParser {
 		}
 
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
-		v.evaluate(ctx, w, "", templateReader);
+		ByteArrayOutputStream byteArrayWriter = new ByteArrayOutputStream();
+		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(byteArrayWriter, Charsets.UTF_8);
+		v.evaluate(ctx, outputStreamWriter, "", templateReader);
+		outputStreamWriter.flush();
 
-		w.close();
-		fos.close();
+		byte[] bytesToWrite = byteArrayWriter.toByteArray();
+
+		boolean actuallyWrite = false;
+		if (!theFile.exists()) {
+			actuallyWrite = true;
+		} else if (FileUtils.sizeOf(theFile) != bytesToWrite.length) {
+			actuallyWrite = true;
+		} else {
+			byte[] existingBytes = IOUtils.toByteArray(new FileInputStream(theFile));
+			if (!Arrays.equals(existingBytes, bytesToWrite)) {
+				actuallyWrite = true;
+			}
+		}
+
+		if (!actuallyWrite) {
+			ourLog.info("Skipping writing already up-to-date file: {}", theFile.getAbsolutePath());
+			return;
+		}
+
+		ourLog.debug("Writing file: {}", theFile.getAbsolutePath());
+
+		try (FileOutputStream fos = new FileOutputStream(theFile, false)) {
+			fos.write(bytesToWrite);
+			fos.flush();
+		}
 	}
 	
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {

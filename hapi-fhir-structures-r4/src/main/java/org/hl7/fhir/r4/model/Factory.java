@@ -68,6 +68,22 @@ public class Factory {
     return res;
   }
 
+  public static UrlType newUrl(String value) throws URISyntaxException {
+    if (value == null)
+      return null;
+    UrlType res = new UrlType();
+    res.setValue(value);
+    return res;
+  }
+
+  public static CanonicalType newCanonical(String value) throws URISyntaxException {
+    if (value == null)
+      return null;
+    CanonicalType res = new CanonicalType();
+    res.setValue(value);
+    return res;
+  }
+
   public static DateTimeType newDateTime(String value) throws ParseException {
     if (value == null)
       return null;
@@ -193,6 +209,10 @@ public class Factory {
       return new StringType();
     else if (name.equals("uri"))
       return new UriType();
+    else if (name.equals("url"))
+      return new UrlType();
+    else if (name.equals("canonical"))
+      return new CanonicalType();
     else if (name.equals("date"))
       return new DateType();
     else if (name.equals("dateTime"))

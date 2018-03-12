@@ -806,7 +806,7 @@ class ParserState<T> {
 				@SuppressWarnings("unchecked")
 				List<IBase> securityLabels = (List<IBase>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
 				if (securityLabels == null) {
-					securityLabels = new ArrayList<IBase>();
+					securityLabels = new ArrayList<>();
 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 				}
 				IBase securityLabel = myContext.getVersion().newCodingDt();

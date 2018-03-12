@@ -306,7 +306,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.resource(eyeColourSp)
 				.execute();
 
-		// mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegsitry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.setActive(true);

@@ -241,7 +241,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
 	}
 
-	public class NullEvaluationContext implements IEvaluationContext {
+	public static class NullEvaluationContext implements IEvaluationContext {
 
 		@Override
 		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {

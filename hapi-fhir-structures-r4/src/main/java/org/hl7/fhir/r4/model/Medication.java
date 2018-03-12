@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -473,7 +473,14 @@ public class Medication extends DomainResource {
         @Description(shortDefinition="When batch will expire", formalDefinition="When this specific batch of product will expire." )
         protected DateTimeType expirationDate;
 
-        private static final long serialVersionUID = 1982738755L;
+        /**
+         * An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         */
+        @Child(name = "serialNumber", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Identifier assigned to a drug at the time of manufacture", formalDefinition="An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs." )
+        protected StringType serialNumber;
+
+        private static final long serialVersionUID = 321549563L;
 
     /**
      * Constructor
@@ -580,10 +587,60 @@ public class Medication extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
+         */
+        public StringType getSerialNumberElement() { 
+          if (this.serialNumber == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MedicationBatchComponent.serialNumber");
+            else if (Configuration.doAutoCreate())
+              this.serialNumber = new StringType(); // bb
+          return this.serialNumber;
+        }
+
+        public boolean hasSerialNumberElement() { 
+          return this.serialNumber != null && !this.serialNumber.isEmpty();
+        }
+
+        public boolean hasSerialNumber() { 
+          return this.serialNumber != null && !this.serialNumber.isEmpty();
+        }
+
+        /**
+         * @param value {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
+         */
+        public MedicationBatchComponent setSerialNumberElement(StringType value) { 
+          this.serialNumber = value;
+          return this;
+        }
+
+        /**
+         * @return An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         */
+        public String getSerialNumber() { 
+          return this.serialNumber == null ? null : this.serialNumber.getValue();
+        }
+
+        /**
+         * @param value An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         */
+        public MedicationBatchComponent setSerialNumber(String value) { 
+          if (Utilities.noString(value))
+            this.serialNumber = null;
+          else {
+            if (this.serialNumber == null)
+              this.serialNumber = new StringType();
+            this.serialNumber.setValue(value);
+          }
+          return this;
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber));
           children.add(new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate));
+          children.add(new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.", 0, 1, serialNumber));
         }
 
         @Override
@@ -591,6 +648,7 @@ public class Medication extends DomainResource {
           switch (_hash) {
           case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber);
           case -668811523: /*expirationDate*/  return new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate);
+          case 83787357: /*serialNumber*/  return new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.", 0, 1, serialNumber);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -601,6 +659,7 @@ public class Medication extends DomainResource {
         switch (hash) {
         case 462547450: /*lotNumber*/ return this.lotNumber == null ? new Base[0] : new Base[] {this.lotNumber}; // StringType
         case -668811523: /*expirationDate*/ return this.expirationDate == null ? new Base[0] : new Base[] {this.expirationDate}; // DateTimeType
+        case 83787357: /*serialNumber*/ return this.serialNumber == null ? new Base[0] : new Base[] {this.serialNumber}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -615,6 +674,9 @@ public class Medication extends DomainResource {
         case -668811523: // expirationDate
           this.expirationDate = castToDateTime(value); // DateTimeType
           return value;
+        case 83787357: // serialNumber
+          this.serialNumber = castToString(value); // StringType
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -626,6 +688,8 @@ public class Medication extends DomainResource {
           this.lotNumber = castToString(value); // StringType
         } else if (name.equals("expirationDate")) {
           this.expirationDate = castToDateTime(value); // DateTimeType
+        } else if (name.equals("serialNumber")) {
+          this.serialNumber = castToString(value); // StringType
         } else
           return super.setProperty(name, value);
         return value;
@@ -636,6 +700,7 @@ public class Medication extends DomainResource {
         switch (hash) {
         case 462547450:  return getLotNumberElement();
         case -668811523:  return getExpirationDateElement();
+        case 83787357:  return getSerialNumberElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -646,6 +711,7 @@ public class Medication extends DomainResource {
         switch (hash) {
         case 462547450: /*lotNumber*/ return new String[] {"string"};
         case -668811523: /*expirationDate*/ return new String[] {"dateTime"};
+        case 83787357: /*serialNumber*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -659,6 +725,9 @@ public class Medication extends DomainResource {
         else if (name.equals("expirationDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type Medication.expirationDate");
         }
+        else if (name.equals("serialNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Medication.serialNumber");
+        }
         else
           return super.addChild(name);
       }
@@ -668,6 +737,7 @@ public class Medication extends DomainResource {
         copyValues(dst);
         dst.lotNumber = lotNumber == null ? null : lotNumber.copy();
         dst.expirationDate = expirationDate == null ? null : expirationDate.copy();
+        dst.serialNumber = serialNumber == null ? null : serialNumber.copy();
         return dst;
       }
 
@@ -679,7 +749,7 @@ public class Medication extends DomainResource {
           return false;
         MedicationBatchComponent o = (MedicationBatchComponent) other_;
         return compareDeep(lotNumber, o.lotNumber, true) && compareDeep(expirationDate, o.expirationDate, true)
-          ;
+           && compareDeep(serialNumber, o.serialNumber, true);
       }
 
       @Override
@@ -690,12 +760,12 @@ public class Medication extends DomainResource {
           return false;
         MedicationBatchComponent o = (MedicationBatchComponent) other_;
         return compareValues(lotNumber, o.lotNumber, true) && compareValues(expirationDate, o.expirationDate, true)
-          ;
+           && compareValues(serialNumber, o.serialNumber, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lotNumber, expirationDate
-          );
+          , serialNumber);
       }
 
   public String fhirType() {
@@ -1311,6 +1381,66 @@ public class Medication extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam FORM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FORM);
+
+ /**
+   * Search parameter: <b>lot-number</b>
+   * <p>
+   * Description: <b>Identifier assigned to batch</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.batch.lotNumber</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="lot-number", path="Medication.batch.lotNumber", description="Identifier assigned to batch", type="token" )
+  public static final String SP_LOT_NUMBER = "lot-number";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>lot-number</b>
+   * <p>
+   * Description: <b>Identifier assigned to batch</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.batch.lotNumber</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam LOT_NUMBER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_LOT_NUMBER);
+
+ /**
+   * Search parameter: <b>serial-number</b>
+   * <p>
+   * Description: <b>Identifier assigned to a drug at the time of manufacture</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.batch.serialNumber</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="serial-number", path="Medication.batch.serialNumber", description="Identifier assigned to a drug at the time of manufacture", type="token" )
+  public static final String SP_SERIAL_NUMBER = "serial-number";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>serial-number</b>
+   * <p>
+   * Description: <b>Identifier assigned to a drug at the time of manufacture</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.batch.serialNumber</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERIAL_NUMBER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERIAL_NUMBER);
+
+ /**
+   * Search parameter: <b>expiration-date</b>
+   * <p>
+   * Description: <b>When batch will expire</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Medication.batch.expirationDate</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="expiration-date", path="Medication.batch.expirationDate", description="When batch will expire", type="date" )
+  public static final String SP_EXPIRATION_DATE = "expiration-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>expiration-date</b>
+   * <p>
+   * Description: <b>When batch will expire</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Medication.batch.expirationDate</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EXPIRATION_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EXPIRATION_DATE);
 
  /**
    * Search parameter: <b>manufacturer</b>

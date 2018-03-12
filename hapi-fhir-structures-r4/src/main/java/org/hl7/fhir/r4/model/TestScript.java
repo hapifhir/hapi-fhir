@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1755,14 +1755,14 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.
          */
-        @Child(name = "required", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "required", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Are the capabilities required?", formalDefinition="Whether or not the test execution will require the given capabilities of the server in order for this test script to execute." )
         protected BooleanType required;
 
         /**
          * Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.
          */
-        @Child(name = "validated", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validated", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Are the capabilities validated?", formalDefinition="Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute." )
         protected BooleanType validated;
 
@@ -1818,8 +1818,10 @@ public class TestScript extends MetadataResource {
     /**
      * Constructor
      */
-      public TestScriptMetadataCapabilityComponent(Reference capabilities) {
+      public TestScriptMetadataCapabilityComponent(BooleanType required, BooleanType validated, Reference capabilities) {
         super();
+        this.required = required;
+        this.validated = validated;
         this.capabilities = capabilities;
       }
 
@@ -2018,7 +2020,7 @@ public class TestScript extends MetadataResource {
           if (this.origin == null)
             return false;
           for (IntegerType v : this.origin)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -2124,7 +2126,7 @@ public class TestScript extends MetadataResource {
           if (this.link == null)
             return false;
           for (UriType v : this.link)
-            if (v.equals(value)) // uri
+            if (v.getValue().equals(value)) // uri
               return true;
           return false;
         }
@@ -2384,14 +2386,14 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.
          */
-        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly create the fixture during setup", formalDefinition="Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section." )
         protected BooleanType autocreate;
 
         /**
          * Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
-        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly delete the fixture during teardown", formalDefinition="Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section." )
         protected BooleanType autodelete;
 
@@ -2414,6 +2416,15 @@ public class TestScript extends MetadataResource {
      */
       public TestScriptFixtureComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptFixtureComponent(BooleanType autocreate, BooleanType autodelete) {
+        super();
+        this.autocreate = autocreate;
+        this.autodelete = autodelete;
       }
 
         /**
@@ -5066,7 +5077,7 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
          */
-        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to send the request url in encoded format", formalDefinition="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths." )
         protected BooleanType encodeRequestUrl;
 
@@ -5133,6 +5144,14 @@ public class TestScript extends MetadataResource {
      */
       public SetupActionOperationComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionOperationComponent(BooleanType encodeRequestUrl) {
+        super();
+        this.encodeRequestUrl = encodeRequestUrl;
       }
 
         /**
@@ -6638,7 +6657,7 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not the test execution will produce a warning only on error for this assert.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=24, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=24, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
@@ -6649,6 +6668,14 @@ public class TestScript extends MetadataResource {
      */
       public SetupActionAssertComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertComponent(BooleanType warningOnly) {
+        super();
+        this.warningOnly = warningOnly;
       }
 
         /**

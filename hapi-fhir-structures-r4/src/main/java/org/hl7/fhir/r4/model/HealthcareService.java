@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -877,10 +877,10 @@ public class HealthcareService extends DomainResource {
     /**
      * Identifies the broad category of service being performed or delivered.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Broad category of service being performed or delivered", formalDefinition="Identifies the broad category of service being performed or delivered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
-    protected CodeableConcept category;
+    protected List<CodeableConcept> category;
 
     /**
      * The specific type of service that may be delivered or performed.
@@ -1041,7 +1041,7 @@ public class HealthcareService extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = -202805485L;
+    private static final long serialVersionUID = 1984827757L;
 
   /**
    * Constructor
@@ -1195,25 +1195,54 @@ public class HealthcareService extends DomainResource {
     /**
      * @return {@link #category} (Identifies the broad category of service being performed or delivered.)
      */
-    public CodeableConcept getCategory() { 
+    public List<CodeableConcept> getCategory() { 
       if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
+        this.category = new ArrayList<CodeableConcept>();
       return this.category;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
+    }
+
     public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public HealthcareService addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #category} (Identifies the broad category of service being performed or delivered.)
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public HealthcareService setCategory(CodeableConcept value) { 
-      this.category = value;
-      return this;
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
     }
 
     /**
@@ -1878,7 +1907,7 @@ public class HealthcareService extends DomainResource {
       if (this.programName == null)
         return false;
       for (StringType v : this.programName)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -2269,7 +2298,7 @@ public class HealthcareService extends DomainResource {
         children.add(new Property("identifier", "Identifier", "External identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("active", "boolean", "This flag is used to mark the record to not be used. This is not used when a centre is closed for maintenance, or for holidays, the notAvailable period is to be used for this.", 0, 1, active));
         children.add(new Property("providedBy", "Reference(Organization)", "The organization that provides this healthcare service.", 0, 1, providedBy));
-        children.add(new Property("category", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("type", "CodeableConcept", "The specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("specialty", "CodeableConcept", "Collection of specialties handled by the service site. This is more of a medical term.", 0, java.lang.Integer.MAX_VALUE, specialty));
         children.add(new Property("location", "Reference(Location)", "The location(s) where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
@@ -2298,7 +2327,7 @@ public class HealthcareService extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -1422950650: /*active*/  return new Property("active", "boolean", "This flag is used to mark the record to not be used. This is not used when a centre is closed for maintenance, or for holidays, the notAvailable period is to be used for this.", 0, 1, active);
         case 205136282: /*providedBy*/  return new Property("providedBy", "Reference(Organization)", "The organization that provides this healthcare service.", 0, 1, providedBy);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, java.lang.Integer.MAX_VALUE, category);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, type);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "Collection of specialties handled by the service site. This is more of a medical term.", 0, java.lang.Integer.MAX_VALUE, specialty);
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The location(s) where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location);
@@ -2330,7 +2359,7 @@ public class HealthcareService extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case 205136282: /*providedBy*/ return this.providedBy == null ? new Base[0] : new Base[] {this.providedBy}; // Reference
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
@@ -2369,7 +2398,7 @@ public class HealthcareService extends DomainResource {
           this.providedBy = castToReference(value); // Reference
           return value;
         case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 3575610: // type
           this.getType().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2445,7 +2474,7 @@ public class HealthcareService extends DomainResource {
         } else if (name.equals("providedBy")) {
           this.providedBy = castToReference(value); // Reference
         } else if (name.equals("category")) {
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("type")) {
           this.getType().add(castToCodeableConcept(value));
         } else if (name.equals("specialty")) {
@@ -2497,7 +2526,7 @@ public class HealthcareService extends DomainResource {
         case -1618432855:  return addIdentifier(); 
         case -1422950650:  return getActiveElement();
         case 205136282:  return getProvidedBy(); 
-        case 50511102:  return getCategory(); 
+        case 50511102:  return addCategory(); 
         case 3575610:  return addType(); 
         case -1694759682:  return addSpecialty(); 
         case 1901043637:  return addLocation(); 
@@ -2568,8 +2597,7 @@ public class HealthcareService extends DomainResource {
           return this.providedBy;
         }
         else if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+          return addCategory();
         }
         else if (name.equals("type")) {
           return addType();
@@ -2652,7 +2680,11 @@ public class HealthcareService extends DomainResource {
         };
         dst.active = active == null ? null : active.copy();
         dst.providedBy = providedBy == null ? null : providedBy.copy();
-        dst.category = category == null ? null : category.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)

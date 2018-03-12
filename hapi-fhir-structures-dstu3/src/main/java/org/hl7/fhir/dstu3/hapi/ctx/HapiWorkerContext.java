@@ -18,7 +18,6 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -124,10 +123,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public IResourceValidator newValidator() {
-		throw new UnsupportedOperationException();
-	}
 
 	@Override
 	public IParser newXmlParser() {
@@ -204,8 +199,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				}
 			}
 		}
-		
-		
+
+
 		boolean caseSensitive = true;
 		if (isNotBlank(theSystem)) {
 			CodeSystem system = fetchCodeSystem(theSystem);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,41 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdverseEventCausalityAssess {
 
         /**
-         * i) Event or laboratory test abnormality, with plausible time relationship to drug intake
-ii) Cannot be explained by disease or other drugs
-iii) Response to withdrawal plausible (pharmacologically, pathologically)
-iv) Event definitive pharmacologically or phenomenologically (i.e. an objective and specific medical disorder or a recognized pharmacological phenomenon)
-v) Re-challenge satisfactory, if necessary
+         * i) Event or laboratory test abnormality, with plausible time relationship to drug intake ii) Cannot be explained by disease or other drugs iii) Response to withdrawal plausible (pharmacologically, pathologically) iv) Event definitive pharmacologically or phenomenologically (i.e. an objective and specific medical disorder or a recognized pharmacological phenomenon) v) Re-challenge satisfactory, if necessary
          */
         CERTAIN, 
         /**
-         * i) Event or laboratory test abnormality, with reasonable time relationship to drug intake
-ii) Unlikely to be attributed to disease or other drugs
-iii) Response to withdrawal clinically reasonable
-iv) Re-challenge not required
+         * i) Event or laboratory test abnormality, with reasonable time relationship to drug intake ii) Unlikely to be attributed to disease or other drugs iii) Response to withdrawal clinically reasonable iv) Re-challenge not required
          */
         PROBABLYLIKELY, 
         /**
-         * i) Event or laboratory test abnormality, with reasonable time relationship to drug intake
-ii) Could also be explained by disease or other drugs
-iii) Information on drug withdrawal may be lacking or unclear
+         * i) Event or laboratory test abnormality, with reasonable time relationship to drug intake ii) Could also be explained by disease or other drugs iii) Information on drug withdrawal may be lacking or unclear
          */
         POSSIBLE, 
         /**
-         * i) Event or laboratory test abnormality, with a time to drug intake that makes a relationship improbable (but not impossible)
-ii) Disease or other drugs provide plausible explanations
+         * i) Event or laboratory test abnormality, with a time to drug intake that makes a relationship improbable (but not impossible) ii) Disease or other drugs provide plausible explanations
          */
         UNLIKELY, 
         /**
-         * i) Event or laboratory test abnormality
-ii) More data for proper assessment needed, or
-iii) Additional data under examination
+         * i) Event or laboratory test abnormality ii) More data for proper assessment needed, or iii) Additional data under examination
          */
         CONDITIONALCLASSIFIED, 
         /**
-         * i) Report suggesting an adverse reaction
-ii) Cannot be judged because information is insufficient or contradictory
-iii) Data cannot be supplemented or verified
+         * i) Report suggesting an adverse reaction ii) Cannot be judged because information is insufficient or contradictory iii) Data cannot be supplemented or verified
          */
         UNASSESSABLEUNCLASSIFIABLE, 
         /**
@@ -111,12 +97,12 @@ iii) Data cannot be supplemented or verified
         }
         public String getDefinition() {
           switch (this) {
-            case CERTAIN: return "i) Event or laboratory test abnormality, with plausible time relationship to drug intake\nii) Cannot be explained by disease or other drugs\niii) Response to withdrawal plausible (pharmacologically, pathologically)\niv) Event definitive pharmacologically or phenomenologically (i.e. an objective and specific medical disorder or a recognized pharmacological phenomenon)\nv) Re-challenge satisfactory, if necessary";
-            case PROBABLYLIKELY: return "i) Event or laboratory test abnormality, with reasonable time relationship to drug intake\nii) Unlikely to be attributed to disease or other drugs\niii) Response to withdrawal clinically reasonable\niv) Re-challenge not required";
-            case POSSIBLE: return "i) Event or laboratory test abnormality, with reasonable time relationship to drug intake\nii) Could also be explained by disease or other drugs\niii) Information on drug withdrawal may be lacking or unclear";
-            case UNLIKELY: return "i) Event or laboratory test abnormality, with a time to drug intake that makes a relationship improbable (but not impossible)\nii) Disease or other drugs provide plausible explanations";
-            case CONDITIONALCLASSIFIED: return "i) Event or laboratory test abnormality\nii) More data for proper assessment needed, or\niii) Additional data under examination";
-            case UNASSESSABLEUNCLASSIFIABLE: return "i) Report suggesting an adverse reaction\nii) Cannot be judged because information is insufficient or contradictory\niii) Data cannot be supplemented or verified";
+            case CERTAIN: return "i) Event or laboratory test abnormality, with plausible time relationship to drug intake ii) Cannot be explained by disease or other drugs iii) Response to withdrawal plausible (pharmacologically, pathologically) iv) Event definitive pharmacologically or phenomenologically (i.e. an objective and specific medical disorder or a recognized pharmacological phenomenon) v) Re-challenge satisfactory, if necessary";
+            case PROBABLYLIKELY: return "i) Event or laboratory test abnormality, with reasonable time relationship to drug intake ii) Unlikely to be attributed to disease or other drugs iii) Response to withdrawal clinically reasonable iv) Re-challenge not required";
+            case POSSIBLE: return "i) Event or laboratory test abnormality, with reasonable time relationship to drug intake ii) Could also be explained by disease or other drugs iii) Information on drug withdrawal may be lacking or unclear";
+            case UNLIKELY: return "i) Event or laboratory test abnormality, with a time to drug intake that makes a relationship improbable (but not impossible) ii) Disease or other drugs provide plausible explanations";
+            case CONDITIONALCLASSIFIED: return "i) Event or laboratory test abnormality ii) More data for proper assessment needed, or iii) Additional data under examination";
+            case UNASSESSABLEUNCLASSIFIABLE: return "i) Report suggesting an adverse reaction ii) Cannot be judged because information is insufficient or contradictory iii) Data cannot be supplemented or verified";
             default: return "?";
           }
         }

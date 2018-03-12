@@ -44,12 +44,12 @@ public interface IBaseResource extends IBase, IElement {
 	/**
 	 * Include constant for <code>*</code> (return all includes)
 	 */
-	public static final Include INCLUDE_ALL = new Include("*", false).toLocked();
+	Include INCLUDE_ALL = new Include("*", false).toLocked();
 
 	/**
 	 * Include set containing only {@link #INCLUDE_ALL}
 	 */
-	public static final Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<Include>(Arrays.asList(INCLUDE_ALL)));
+	Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(INCLUDE_ALL)));
 
 	IIdType getIdElement();
 	

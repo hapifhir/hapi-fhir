@@ -242,7 +242,7 @@ public class XmlParser extends ParserBase {
 	    		else
 	    	    context.getChildren().add(new Element(property.getName(), property, property.getType(), av).markLocation(line(node), col(node)));
         } else if (!allowXsiLocation || !attr.getNodeName().endsWith(":schemaLocation") ) {
-          logError(line(node), col(node), path, IssueType.STRUCTURE, "Undefined attribute '@"+attr.getNodeName()+"' on "+node.getNodeName(), IssueSeverity.ERROR);      		
+          logError(line(node), col(node), path, IssueType.STRUCTURE, "Undefined attribute '@"+attr.getNodeName()+"' on "+node.getNodeName()+" for type "+context.fhirType()+" (properties = "+properties+")", IssueSeverity.ERROR);      		
       	}
     	}
     }

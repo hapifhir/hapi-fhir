@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v2-valuesets"/>
  <meta>
-  <lastUpdated value="2018-01-09T14:51:00.810-05:00"/>
+  <lastUpdated value="2018-03-03T18:00:41.371-05:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -59948,10 +59948,13 @@
      <profile value="http://hl7.org/fhir/StructureDefinition/shareablecodesystem"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status">
-     <valueString value="External"/>
+     <valueString value="Normative"/>
     </extension>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
-     <valueInteger value="0"/>
+     <valueInteger value="5"/>
+    </extension>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+     <valueCode value="oo"/>
     </extension>
     <url value="http://hl7.org/fhir/v2/0078"/>
     <identifier>

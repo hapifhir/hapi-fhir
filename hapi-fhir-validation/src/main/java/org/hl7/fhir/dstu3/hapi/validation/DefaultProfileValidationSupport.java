@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -121,7 +122,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     } else if (StringUtils.countMatches(url, '/') == 1) {
       url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
     }
-    return provideStructureDefinitionMap(theContext).get(url);
+	  Map<String, StructureDefinition> map = provideStructureDefinitionMap(theContext);
+	  StructureDefinition retVal = map.get(url);
+
+	  if (retVal == null && url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+	  		String tryUrl = URL_PREFIX_STRUCTURE_DEFINITION + StringUtils.capitalize(url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length()));
+		  retVal = map.get(tryUrl);
+	  }
+
+	  return retVal;
   }
 
   ValueSet fetchValueSet(FhirContext theContext, String theSystem) {

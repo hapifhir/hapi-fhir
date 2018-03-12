@@ -29,14 +29,18 @@ class ParseLocation implements IParseLocation {
 	/**
 	 * Constructor
 	 */
-	public ParseLocation(String theParentElementName) {
+	public ParseLocation() {
 		super();
-		myParentElementName = theParentElementName;
 	}
 
 	@Override
 	public String getParentElementName() {
 		return myParentElementName;
+	}
+
+	public ParseLocation setParentElementName(String theParentElementName) {
+		myParentElementName = theParentElementName;
+		return this;
 	}
 
 }

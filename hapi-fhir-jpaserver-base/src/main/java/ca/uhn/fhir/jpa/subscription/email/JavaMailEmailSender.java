@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.email;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
@@ -95,7 +95,6 @@ public class JavaMailEmailSender implements IEmailSender {
 	@Override
 	public void send(EmailDetails theDetails) {
 		String subscriptionId = theDetails.getSubscription().toUnqualifiedVersionless().getValue();
-		ourLog.info("Sending email for subscription {} to recipients: {}", subscriptionId, theDetails.getTo());
 		StopWatch sw = new StopWatch();
 
 		StringTemplateResolver templateResolver = new StringTemplateResolver();
@@ -116,15 +115,18 @@ public class JavaMailEmailSender implements IEmailSender {
 
 		MimeMessage email = mySender.createMimeMessage();
 
+		String from = trim(theDetails.getFrom());
+		ourLog.info("Sending email for subscription {} from [{}] to recipients: [{}]", subscriptionId, from, theDetails.getTo());
+
 		try {
-			email.setFrom(trim(theDetails.getFrom()));
+			email.setFrom(from);
 			email.setRecipients(Message.RecipientType.TO, toTrimmedCommaSeparatedString(theDetails.getTo()));
 			email.setSubject(subject);
 			email.setText(body);
 			email.setSentDate(new Date());
 			email.addHeader("X-FHIR-Subscription", subscriptionId);
 		} catch (MessagingException e) {
-			throw new InternalErrorException("Failed to create email messaage", e);
+			throw new InternalErrorException("Failed to create email message", e);
 		}
 
 		mySender.send(email);
