@@ -2555,7 +2555,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         validateQuestionnaireResponseItemType(errors, answer, ns, "Reference");
         break;
       case QUANTITY:
-        if (validateQuestionnaireResponseItemType(errors, answer, ns, "Quantity").equals("Quantity"))
+        if ("Quantity".equals(validateQuestionnaireResponseItemType(errors, answer, ns, "Quantity")))
           if (qItem.hasExtension("???"))
             validateQuestionnaireResponseItemQuantity(errors, answer, ns);
         break;
@@ -2664,6 +2664,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   private String validateQuestionnaireResponseItemType(List<ValidationMessage> errors, Element element, NodeStack stack, String... types) {
     List<Element> values = new ArrayList<Element>();
     element.getNamedChildrenWithWildcard("value[x]", values);
+    for (int i = 0; i < types.length; i++) {
+      if (types[i].equals("text")) {
+        types[i] = "string";
+      }
+    }
     if (values.size() > 0) {
       NodeStack ns = stack.push(values.get(0), -1, null, null);
       CommaSeparatedStringBuilder l = new CommaSeparatedStringBuilder();
