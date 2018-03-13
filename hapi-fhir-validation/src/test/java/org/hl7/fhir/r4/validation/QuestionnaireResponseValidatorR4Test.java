@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -216,6 +217,156 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No response found for required item link0"));
+	}
+
+	@Test
+	public void testEmbeddedItemInChoice() {
+		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String valueSetRef = "http://somevalueset";
+		String codeSystemUrl = "http://codesystems.com/system";
+		String codeValue = "code0";
+
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.CHOICE)
+			.setOptions(valueSetRef);
+
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
+
+		Questionnaire q = new Questionnaire();
+		q.addItem(item1);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+			.thenReturn(q);
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
+		codeSystem.setUrl(codeSystemUrl);
+		codeSystem.addConcept().setCode(codeValue);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq(codeSystemUrl)))
+			.thenReturn(codeSystem);
+
+		ValueSet options = new ValueSet();
+		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
+			.thenReturn(options);
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class)))
+			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String qXml = xmlParser.encodeResourceToString(q);
+		ourLog.info(qXml);
+
+		// create the response
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+		qa.setQuestionnaire(questionnaireRef);
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
+
+		String rXml = xmlParser.encodeResourceToString(qa);
+		ourLog.info(rXml);
+
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), empty());
+	}
+
+	@Test
+	public void testEmbeddedItemInOpenChoice() {
+		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String valueSetRef = "http://somevalueset";
+		String codeSystemUrl = "http://codesystems.com/system";
+		String codeValue = "code0";
+
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.OPENCHOICE)
+			.setOptions(valueSetRef);
+
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
+
+		Questionnaire q = new Questionnaire();
+		q.addItem(item1);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+			.thenReturn(q);
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
+		codeSystem.setUrl(codeSystemUrl);
+		codeSystem.addConcept().setCode(codeValue);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq(codeSystemUrl)))
+			.thenReturn(codeSystem);
+
+		ValueSet options = new ValueSet();
+		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
+			.thenReturn(options);
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class)))
+			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String qXml = xmlParser.encodeResourceToString(q);
+		ourLog.info(qXml);
+
+		// create the response
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+		qa.setQuestionnaire(questionnaireRef);
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
+
+		String rXml = xmlParser.encodeResourceToString(qa);
+		ourLog.info(rXml);
+
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), empty());
+	}
+
+	@Test
+	public void testEmbeddedItemInString() {
+		String questionnaireRef = "http://example.com/Questionnaire/q1";
+
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.TEXT);
+
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
+
+		Questionnaire q = new Questionnaire();
+		q.addItem(item1);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+			.thenReturn(q);
+
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String qXml = xmlParser.encodeResourceToString(q);
+		ourLog.info(qXml);
+
+		// create the response
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+		qa.setQuestionnaire(questionnaireRef);
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
+
+		String rXml = xmlParser.encodeResourceToString(qa);
+		ourLog.info(rXml);
+
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), empty());
 	}
 
 	@Test
