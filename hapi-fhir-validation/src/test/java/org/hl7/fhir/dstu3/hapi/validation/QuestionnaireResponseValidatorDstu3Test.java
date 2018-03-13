@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -23,6 +24,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
@@ -74,6 +77,83 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		}
 
 		return new ValidationResult(ourCtx, messages);
+	}
+
+	@Test
+	public void testAnswerWithCorrectType() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
+		codeSystem.setUrl("http://codesystems.com/system");
+		codeSystem.addConcept().setCode("code0");
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+
+		ValueSet options = new ValueSet();
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+
+		int itemCnt = 16;
+		QuestionnaireItemType[] questionnaireItemTypes = new QuestionnaireItemType[itemCnt];
+		questionnaireItemTypes[0] = QuestionnaireItemType.BOOLEAN;
+		questionnaireItemTypes[1] = QuestionnaireItemType.DECIMAL;
+		questionnaireItemTypes[2] = QuestionnaireItemType.INTEGER;
+		questionnaireItemTypes[3] = QuestionnaireItemType.DATE;
+		questionnaireItemTypes[4] = QuestionnaireItemType.DATETIME;
+		questionnaireItemTypes[5] = QuestionnaireItemType.TIME;
+		questionnaireItemTypes[6] = QuestionnaireItemType.STRING;
+		questionnaireItemTypes[7] = QuestionnaireItemType.TEXT;
+		questionnaireItemTypes[8] = QuestionnaireItemType.TEXT;
+		questionnaireItemTypes[9] = QuestionnaireItemType.URL;
+		questionnaireItemTypes[10] = QuestionnaireItemType.CHOICE;
+		questionnaireItemTypes[11] = QuestionnaireItemType.OPENCHOICE;
+		questionnaireItemTypes[12] = QuestionnaireItemType.OPENCHOICE;
+		questionnaireItemTypes[13] = QuestionnaireItemType.ATTACHMENT;
+		questionnaireItemTypes[14] = QuestionnaireItemType.REFERENCE;
+		questionnaireItemTypes[15] = QuestionnaireItemType.QUANTITY;
+
+		Type[] answerValues = new Type[itemCnt];
+		answerValues[0] = new BooleanType(true);
+		answerValues[1] = new DecimalType(42.0);
+		answerValues[2] = new IntegerType(42);
+		answerValues[3] = new DateType(new Date());
+		answerValues[4] = new DateTimeType(new Date());
+		answerValues[5] = new TimeType("04:47:12");
+		answerValues[6] = new StringType("some text");
+		answerValues[7] = new StringType("some text");
+		answerValues[8] = new MarkdownType("some text");
+		answerValues[9] = new UriType("http://example.com");
+		answerValues[10] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
+		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
+		answerValues[12] = new StringType("some value");
+		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType("txt");
+		answerValues[14] = new Reference("http://example.com/Questionnaire/q1");
+		answerValues[15] = new Quantity(42);
+
+		for (int i = 0; i < itemCnt; i++) {
+			if (questionnaireItemTypes[i] == null) continue;
+			String linkId = "link" + i;
+			Questionnaire q = new Questionnaire();
+			QuestionnaireItemComponent questionnaireItemComponent =
+				q.addItem().setLinkId(linkId).setRequired(true).setType(questionnaireItemTypes[i]);
+			if (i == 10 || i == 11) {
+				questionnaireItemComponent.setOptions(new Reference("http://somevalueset"));
+			} else if (i == 12) {
+				questionnaireItemComponent.setOption(
+					Arrays.asList(new QuestionnaireItemOptionComponent(new StringType("some value"))));
+			}
+
+			QuestionnaireResponse qa = new QuestionnaireResponse();
+			qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+			qa.addItem().setLinkId(linkId).addAnswer().setValue(answerValues[i]);
+
+			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
+				eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+
+			ValidationResult errors = myVal.validateWithResult(qa);
+
+			ourLog.info(errors.toString());
+			assertThat("index[" + i + "]: " + errors.toString(), errors.getMessages(), empty());
+		}
 	}
 
 	@Test
