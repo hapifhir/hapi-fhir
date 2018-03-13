@@ -22,10 +22,8 @@ import java.io.StringReader;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -51,28 +49,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.google.common.collect.Sets;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.mockito.internal.stubbing.answers.ThrowsException;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.*;
-
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class JsonParserDstu2Test {
@@ -2130,170 +2111,6 @@ public class JsonParserDstu2Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-	
-	/**
-	 * See #537
-	 */
-	@Test
-	public void testEncodeNestedContained() {
-		
-		Organization org04 = new Organization();
-		org04.setName("LEVEL04");
-		
-		Organization org03 = new Organization();
-		org03.setName("LEVEL03");
-		org03.getPartOf().setResource(org04);
-		
-		Organization org02 = new Organization();
-		org02.setName("LEVEL02");
-		org02.getPartOf().setResource(org03);
-		
-		Organization org01 = new Organization();
-		org01.setName("LEVEL01");
-		org01.getPartOf().setResource(org02);
-		
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(org01);
-		ourLog.info(encoded);
-		
-		assertThat(encoded, stringContainsInOrder("LEVEL02","LEVEL03","LEVEL04","LEVEL01" ));
-	}
-	
-	
-	/**
-	 * See #505
-	 */
-	@Test
-	public void testIncludeResourceWhenEncoding() {
-		Condition condition = new Condition();
-		condition.setDateRecorded(new DateDt("2011-01-01"));
-		
-		Goal goal = new Goal();
-		goal.setId("Goal1");
-		ResourceReferenceDt resourceReferenceDt = new ResourceReferenceDt(condition);
-		goal.setAddresses(Collections.singletonList(resourceReferenceDt));
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		Entry entry = bundle.addEntry();
-		entry.setResource(goal);
-		
-		IParser parser = ourCtx.newJsonParser();
-		
-		String resourceToString = parser.setPrettyPrint(true).encodeResourceToString(bundle);
-		ourLog.info(resourceToString);
-		
-		assertThat(resourceToString, containsString("2011-01-01"));
-		
-		bundle = parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resourceToString);
-		assertEquals(1, bundle.getEntry().size());
-		goal = (Goal) bundle.getEntry().get(0).getResource();
-		
-		condition = (Condition) goal.getAddresses().get(0).getResource();
-		
-		assertEquals("2011-01-01", condition.getDateRecordedElement().getValueAsString());
-	}
-
-	/**
-	 * Test for the url generated based on the server config
-	 */
-	@Test
-	public void testGeneratedUrls() {
-		final IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
-		jsonParser.setServerBaseUrl("http://myserver.com");
-
-		final CustomPatientDstu2 patient = new CustomPatientDstu2();
-		patient.setHomeless(new BooleanDt(true));
-
-		final String parsedPatient = jsonParser.encodeResourceToString(patient);
-
-		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/Patient"));
-		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/homeless"));
-	}	
-  
-	/**
-	 * Test for the url generated based on the server config
-	 */
-	@Test
-	public void testCustomUrlExtension() {
-		final String expected = "{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}";
-
-		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
-		patient.setPetName(new StringDt("myName"));
-
-		final IParser jsonParser = ourCtx.newJsonParser();
-		jsonParser.setServerBaseUrl("http://www.example.com");
-
-		final String parsedPatient = jsonParser.encodeResourceToString(patient);
-		System.out.println(parsedPatient);
-		assertEquals(expected, parsedPatient);
-
-		// Parse with string
-		MyPatientWithCustomUrlExtension newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
-		assertEquals("myName", newPatient.getPetName().getValue());
-
-		// Parse with stream
-		newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertEquals("myName", newPatient.getPetName().getValue());
-
-		//Check no NPE if base server not configure
-		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName().getValue());
-		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
-	}
-
-	@Test
-	public void testCustomUrlExtensioninBundle() {
-		final String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}}]}";
-
-		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
-		patient.setPetName(new StringDt("myName"));
-
-		final Bundle bundle = new Bundle();
-		final Entry entry = new Entry();
-		entry.setResource(patient);
-		bundle.addEntry(entry);
-
-		final IParser jsonParser = ourCtx.newJsonParser();
-		jsonParser.setServerBaseUrl("http://www.example.com");
-
-		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
-		System.out.println(parsedBundle);
-		assertEquals(expected, parsedBundle);
-
-		// Parse with string
-		Bundle newBundle = jsonParser.parseResource(Bundle.class, parsedBundle);
-		assertNotNull(newBundle);
-		assertEquals(1, newBundle.getEntry().size());
-		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
-		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
-
-		// Parse with stream
-		newBundle = jsonParser.parseResource(Bundle.class, new StringReader(parsedBundle));
-		assertNotNull(newBundle);
-		assertEquals(1, newBundle.getEntry().size());
-		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
-		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
-
-	}  
-
-	@Test
-	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
-		String refVal = "http://my.org/FooBar";
-
-		Patient fhirPat = new Patient();
-		fhirPat.addUndeclaredExtension(false, "x1").setValue(new ResourceReferenceDt(refVal));
-
-		IParser parser = ourCtx.newJsonParser();
-
-		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
-
-		// Deserialize then check that valueReference value is still correct
-		fhirPat = parser.parseResource(Patient.class, output);
-
-		List<ExtensionDt> extlst = fhirPat.getUndeclaredExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
 	}
 
 	private static final class TimestampFields {
