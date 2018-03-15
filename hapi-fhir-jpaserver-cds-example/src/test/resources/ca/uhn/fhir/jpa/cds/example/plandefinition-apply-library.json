@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "plandefinitionApplyTest",
+  "version": "1.0",
+  "status": "draft",
+  "type": {
+    "coding": [
+      {
+        "code": "logic-library"
+      }
+    ]
+  },
+  "content": [
+    {
+      "contentType": "text/cql",
+      "data": "bGlicmFyeSBwbGFuZGVmaW5pdGlvbkFwcGx5VGVzdCB2ZXJzaW9uICcxLjAnDQoNCmRlZmluZSBSZXN1bHRzOg0KICAgIHRydWUNCg0KZGVmaW5lICJEeW5hbWljIERldGFpbCBEZWZpbml0aW9uIjoNCiAgICAnVGhpcyBpcyBhIGR5bmFtaWMgZGVmaW5pdGlvbiEn"
+    }
+  ]
+}

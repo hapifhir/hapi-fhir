@@ -1,0 +1,9 @@
+{
+  "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
+  "fhirServer": "https://sb-fhir-dstu2.smarthealthit.org/smartdstu2/open",
+  "hook": "patient-view",
+  "user": "Practitioner/example",
+  "context": [],
+  "patient": "Patient/Patient-6535",
+  "prefetch": {}
+}

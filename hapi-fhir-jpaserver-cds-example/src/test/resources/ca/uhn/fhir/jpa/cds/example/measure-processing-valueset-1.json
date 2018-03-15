@@ -1,0 +1,416 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.108.11.1001",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2017-07-25T09:54:33.579+00:00"
+  },
+  "url": "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/Valueset/2.16.840.1.113883.3.464.1003.108.11.1001",
+  "name": "Malignant Neoplasm of Colon (SNOMED CT) eCQM",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "concept": [
+          {
+            "code": "187758006"
+          },
+          {
+            "code": "109838007"
+          },
+          {
+            "code": "1701000119104"
+          },
+          {
+            "code": "187757001"
+          },
+          {
+            "code": "269533000"
+          },
+          {
+            "code": "269544008"
+          },
+          {
+            "code": "285312008"
+          },
+          {
+            "code": "285611007"
+          },
+          {
+            "code": "301756000"
+          },
+          {
+            "code": "312111009"
+          },
+          {
+            "code": "312112002"
+          },
+          {
+            "code": "312113007"
+          },
+          {
+            "code": "312114001"
+          },
+          {
+            "code": "312115000"
+          },
+          {
+            "code": "314965007"
+          },
+          {
+            "code": "315058005"
+          },
+          {
+            "code": "363406005"
+          },
+          {
+            "code": "363407001"
+          },
+          {
+            "code": "363408006"
+          },
+          {
+            "code": "363409003"
+          },
+          {
+            "code": "363410008"
+          },
+          {
+            "code": "363412000"
+          },
+          {
+            "code": "363413005"
+          },
+          {
+            "code": "363414004"
+          },
+          {
+            "code": "363510005"
+          },
+          {
+            "code": "425178004"
+          },
+          {
+            "code": "449218003"
+          },
+          {
+            "code": "93683002"
+          },
+          {
+            "code": "93761005"
+          },
+          {
+            "code": "93771007"
+          },
+          {
+            "code": "93826009"
+          },
+          {
+            "code": "93980002"
+          },
+          {
+            "code": "94006002"
+          },
+          {
+            "code": "94072004"
+          },
+          {
+            "code": "94105000"
+          },
+          {
+            "code": "94179005"
+          },
+          {
+            "code": "94260004"
+          },
+          {
+            "code": "94271003"
+          },
+          {
+            "code": "94328005"
+          },
+          {
+            "code": "94509004"
+          },
+          {
+            "code": "94538001"
+          },
+          {
+            "code": "94604000"
+          },
+          {
+            "code": "94643001"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "http://open-api2.hspconsortium.org/payerextract/data/ValueSet/2.16.840.1.113883.3.464.1003.108.11.1001",
+    "timestamp": "2016-09-19T14:05:21.939-04:00",
+    "total": 43,
+    "offset": 0,
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "425178004",
+        "display": "Adenocarcinoma of rectosigmoid junction"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "301756000",
+        "display": "Adenocarcinoma of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "312111009",
+        "display": "Carcinoma of ascending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "269533000",
+        "display": "Carcinoma of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "312113007",
+        "display": "Carcinoma of descending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "312114001",
+        "display": "Carcinoma of hepatic flexure"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "285312008",
+        "display": "Carcinoma of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "312115000",
+        "display": "Carcinoma of splenic flexure"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "269544008",
+        "display": "Carcinoma of the rectosigmoid junction"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "312112002",
+        "display": "Carcinoma of transverse colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "315058005",
+        "display": "Lynch syndrome"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "314965007",
+        "display": "Local recurrence of malignant tumor of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "449218003",
+        "display": "Lymphoma of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "187758006",
+        "display": "Malignant neoplasm of other specified sites of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "187757001",
+        "display": "Malignant neoplasm, overlapping lesion of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363412000",
+        "display": "Malignant tumor of ascending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363406005",
+        "display": "Malignant tumor of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363409003",
+        "display": "Malignant tumor of descending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363407001",
+        "display": "Malignant tumor of hepatic flexure"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363510005",
+        "display": "Malignant tumor of large intestine"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363414004",
+        "display": "Malignant tumor of rectosigmoid junction"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363410008",
+        "display": "Malignant tumor of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363413005",
+        "display": "Malignant tumor of splenic flexure"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "363408006",
+        "display": "Malignant tumor of transverse colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "285611007",
+        "display": "Metastasis to colon of unknown primary"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "109838007",
+        "display": "Overlapping malignant neoplasm of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "1701000119104",
+        "display": "Primary adenocarcinoma of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "93683002",
+        "display": "Primary malignant neoplasm of ascending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "93761005",
+        "display": "Primary malignant neoplasm of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "93771007",
+        "display": "Primary malignant neoplasm of descending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "93826009",
+        "display": "Primary malignant neoplasm of hepatic flexure of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "93980002",
+        "display": "Primary malignant neoplasm of rectosigmoid junction"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94006002",
+        "display": "Primary malignant neoplasm of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94072004",
+        "display": "Primary malignant neoplasm of splenic flexure of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94105000",
+        "display": "Primary malignant neoplasm of transverse colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94179005",
+        "display": "Secondary malignant neoplasm of ascending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94260004",
+        "display": "Secondary malignant neoplasm of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94271003",
+        "display": "Secondary malignant neoplasm of descending colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94328005",
+        "display": "Secondary malignant neoplasm of hepatic flexure of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94509004",
+        "display": "Secondary malignant neoplasm of rectosigmoid junction"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94538001",
+        "display": "Secondary malignant neoplasm of sigmoid colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94604000",
+        "display": "Secondary malignant neoplasm of splenic flexure of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2015.03.14AB",
+        "code": "94643001",
+        "display": "Secondary malignant neoplasm of transverse colon"
+      }
+    ]
+  }
+}
