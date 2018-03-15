@@ -394,6 +394,10 @@
 			<id>sjanic</id>
 			<name>sjanic</name>
 		</developer>
+		<developer>
+			<id>c-schuler</id>
+			<name>Chris Schuler</name>
+		</developer>
 		
 	</developers>
 
@@ -1967,6 +1971,7 @@
 				<module>examples</module>
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
+				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
 				<module>hapi-fhir-jacoco</module>
 				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-spring-boot</module>

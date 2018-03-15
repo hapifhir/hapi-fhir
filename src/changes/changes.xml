@@ -213,6 +213,11 @@
 				the older structures worked a bit differently. Thanks to GitHub user
 				sjanic for the contribution!
 			</action>
+			<action type="add" issue="791">
+				An example project has een contributed which shows how to use the CQL
+				framework in a server with HAPI FHIR JPA. Thanks to Chris Schuler
+				for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
