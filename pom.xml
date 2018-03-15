@@ -959,6 +959,11 @@
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search-elasticsearch</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
 				<version>3.20.0-GA</version>
@@ -1958,6 +1963,7 @@
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
