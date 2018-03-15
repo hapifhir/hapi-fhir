@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.search.elasticsearch.cfg.ElasticsearchEnvironment;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,7 +77,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
 		// the belowing properties are used for ElasticSearch integration
-		extraProperties.put("hibernate.search.elasticsearch.analyzer_definition_provider", ElasticsearchMappingProvider.class.getName());
+		extraProperties.put(ElasticsearchEnvironment.ANALYZER_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
 		extraProperties.put("hibernate.search.default.indexmanager", "elasticsearch");
 		extraProperties.put("hibernate.search.default.elasticsearch.host", "http://127.0.0.1:9200");
 		extraProperties.put("hibernate.search.default.elasticsearch.index_schema_management_strategy", "CREATE");

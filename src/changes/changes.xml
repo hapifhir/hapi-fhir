@@ -218,6 +218,12 @@
 				framework in a server with HAPI FHIR JPA. Thanks to Chris Schuler
 				for the pull request!
 			</action>
+			<action type="add" issue="798">
+				A new module has been contributed called hapi-fhir-jpaserver-elasticsearch
+				which adds support for Elasticsearch instead of raw Lucene for fulltext
+				indexing. Testing help on this would be appreciated! Thanks to
+				Jiajing Liang for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
