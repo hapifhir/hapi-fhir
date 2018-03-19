@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -16,7 +15,7 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincRsnaPlaybookHandler implements IRecordHandler {
+public class LoincRsnaPlaybookHandler extends BaseHandler implements IRecordHandler {
 
 	public static final String RSNA_CODES_VS_ID = "RSNA-LOINC-CODES-VS";
 	public static final String RSNA_CODES_VS_URI = "http://loinc.org/rsna-codes";
@@ -34,19 +33,17 @@ public class LoincRsnaPlaybookHandler implements IRecordHandler {
 	private final Set<String> myPropertyNames;
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
-	private final List<ConceptMap> myConceptMaps;
 	private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
-	private final Map<String, ConceptMap> myIdToConceptMaps = new HashMap<>();
 
 	/**
 	 * Constructor
 	 */
 	public LoincRsnaPlaybookHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+		super(theCode2concept, theValueSets, theConceptMaps);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
 		myValueSets = theValueSets;
-		myConceptMaps = theConceptMaps;
 	}
 
 	@Override
@@ -81,7 +78,7 @@ public class LoincRsnaPlaybookHandler implements IRecordHandler {
 			vs
 				.getCompose()
 				.getIncludeFirstRep()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 				.addConcept()
 				.setCode(loincNumber)
 				.setDisplay(longCommonName);
@@ -105,61 +102,42 @@ public class LoincRsnaPlaybookHandler implements IRecordHandler {
 
 		TermConcept code = myCode2Concept.get(loincNumber);
 		if (code != null) {
-			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URL, partNumber, partName);
+			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, partName);
 		}
 
 		// LOINC Part -> Radlex RID code mappings
-		addMapping(partNumber, partName, RID_MAPPING_CM_ID, RID_MAPPING_CM_URI, RID_MAPPING_CM_NAME, RID_CS_URI, rid, preferredName, Enumerations.ConceptMapEquivalence.EQUAL);
+		if (isNotBlank(rid)) {
+			addConceptMapEntry(
+				new ConceptMapping()
+					.setConceptMapId(RID_MAPPING_CM_ID)
+					.setConceptMapUri(RID_MAPPING_CM_URI)
+					.setConceptMapName(RID_MAPPING_CM_NAME)
+					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+					.setSourceCode(partNumber)
+					.setSourceDisplay(partName)
+					.setTargetCodeSystem(RID_CS_URI)
+					.setTargetCode(rid)
+					.setTargetDisplay(preferredName)
+					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL));
+		}
 
 		// LOINC Term -> Radlex RPID code mappings
-		addMapping(loincNumber, longCommonName, RPID_MAPPING_CM_ID, RPID_MAPPING_CM_URI, RPID_MAPPING_CM_NAME, RPID_CS_URI, rpid, longName, Enumerations.ConceptMapEquivalence.EQUAL);
-
-	}
-
-	private void addMapping(String theLoincNumber, String theLongCommonName, String theConceptMapId, String theConceptMapUri, String theConceptMapName, String theTargetCodeSystemUri, String theTargetCode, String theTargetDisplay, Enumerations.ConceptMapEquivalence theEquivalence) {
-		if (isNotBlank(theTargetCode)) {
-
-			ConceptMap conceptMap;
-			if (!myIdToConceptMaps.containsKey(theConceptMapId)) {
-				conceptMap = new ConceptMap();
-				conceptMap.setId(theConceptMapId);
-				conceptMap.setUrl(theConceptMapUri);
-				conceptMap.setName(theConceptMapName);
-				conceptMap.setSource(new CanonicalType(IHapiTerminologyLoaderSvc.LOINC_URL));
-				conceptMap.setTarget(new CanonicalType(theTargetCodeSystemUri));
-				myIdToConceptMaps.put(theConceptMapId, conceptMap);
-				myConceptMaps.add(conceptMap);
-			} else {
-				conceptMap = myIdToConceptMaps.get(theConceptMapId);
-			}
-
-			ConceptMap.SourceElementComponent source = null;
-			ConceptMap.ConceptMapGroupComponent group = conceptMap.getGroupFirstRep();
-			for (ConceptMap.SourceElementComponent next : group.getElement()) {
-				if (next.getCode().equals(theLoincNumber)) {
-					source = next;
-				}
-			}
-			if (source == null) {
-				source = group.addElement();
-				source.setCode(theLoincNumber);
-				source.setDisplay(theLongCommonName);
-			}
-
-			boolean found = false;
-			for (ConceptMap.TargetElementComponent next : source.getTarget()) {
-				if (next.getCode().equals(theTargetCode)) {
-					found = true;
-				}
-			}
-			if (!found) {
-				source
-					.addTarget()
-					.setCode(theTargetCode)
-					.setDisplay(theTargetDisplay)
-					.setEquivalence(theEquivalence);
-			}
+		if (isNotBlank(rpid)) {
+			addConceptMapEntry(
+				new ConceptMapping()
+					.setConceptMapId(RPID_MAPPING_CM_ID)
+					.setConceptMapUri(RPID_MAPPING_CM_URI)
+					.setConceptMapName(RPID_MAPPING_CM_NAME)
+					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+					.setSourceCode(loincNumber)
+					.setSourceDisplay(longCommonName)
+					.setTargetCodeSystem(RPID_CS_URI)
+					.setTargetCode(rpid)
+					.setTargetDisplay(longName)
+					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL));
 		}
+
 	}
+
 
 }

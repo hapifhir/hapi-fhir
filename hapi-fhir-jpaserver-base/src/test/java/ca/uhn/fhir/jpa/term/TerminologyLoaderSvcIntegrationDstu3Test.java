@@ -16,10 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -44,14 +42,15 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testExpandWithProperty() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		ValueSet input = new ValueSet();
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -65,10 +64,11 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testLookupWithProperties() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.createLoincBundle(files);
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URL), null, mySrd);
+		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
 		org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters();
 		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
 

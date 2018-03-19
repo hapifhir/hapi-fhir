@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class BaseLoincTop2000LabResultsHandler extends BaseHandler implements IR
 	private String myValueSetUri;
 	private String myValueSetName;
 
-	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, String theValueSetId, String theValueSetUri, String theValueSetName) {
-		super(theCode2concept, theValueSets);
+	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps) {
+		super(theCode2concept, theValueSets, theConceptMaps);
 		myValueSetId = theValueSetId;
 		myValueSetUri = theValueSetUri;
 		myValueSetName = theValueSetName;
@@ -30,7 +31,7 @@ public class BaseLoincTop2000LabResultsHandler extends BaseHandler implements IR
 		String displayName = trim(theRecord.get("Long Common Name"));
 
 		ValueSet valueSet = getValueSet(myValueSetId, myValueSetUri, myValueSetName);
-		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URL, loincNumber, displayName);
+		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 
 }

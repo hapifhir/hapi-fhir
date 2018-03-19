@@ -61,7 +61,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
+//			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", , cs);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
@@ -194,7 +194,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
 
 		return id;
 	}
@@ -213,7 +213,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2,"SYSTEM NAME" , cs);
 
 		return id;
 	}
@@ -327,7 +327,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -336,7 +336,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -346,7 +346,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		try {
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));

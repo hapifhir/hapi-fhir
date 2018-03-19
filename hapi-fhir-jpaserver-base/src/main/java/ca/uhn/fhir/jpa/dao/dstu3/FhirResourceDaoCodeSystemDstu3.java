@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
@@ -98,7 +99,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
 		List<IIdType> valueSetIds;
 		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
-		valueSetIds = new ArrayList<IIdType>();
+		valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdType("CodeSystem", next));
 		}
@@ -128,11 +129,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			system = theSystem.getValue();
 		}
 
-		ourLog.info("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}", system, code);
 
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
 
-			ourLog.info("Code system {} is supported", system);
+			ourLog.debug("Code system {} is supported", system);
 
 			CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, null);
 			if (result != null) {
@@ -142,31 +143,19 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 					retVal.setSearchedForCode(code);
 					retVal.setSearchedForSystem(system);
 					retVal.setCodeDisplay(result.asConceptDefinition().getDisplay());
-					retVal.setCodeSystemDisplayName("Unknown");
-					retVal.setCodeSystemVersion("");
+
+					String codeSystemDisplayName = result.getCodeSystemName();
+					if (isBlank(codeSystemDisplayName)) {
+						codeSystemDisplayName = "Unknown";
+					}
+
+					retVal.setCodeSystemDisplayName(codeSystemDisplayName);
+					retVal.setCodeSystemVersion(result.getCodeSystemVersion());
+					retVal.setProperties(result.getProperties());
+
 					return retVal;
 				}
 			}
-
-//			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
-//			ValueSetExpander expander = ctx.getExpander();
-//			ValueSet source = new ValueSet();
-//			source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
-//
-//			ValueSetExpansionOutcome expansion;
-//			try {
-//				expansion = expander.expand(source);
-//			} catch (Exception e) {
-//				throw new InternalErrorException(e);
-//			}
-//
-//			if (expansion.getValueset() != null) {
-//				List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
-//				LookupCodeResult result = lookup(contains, system, code);
-//				if (result != null) {
-//					return result;
-//				}
-//			}
 
 		}
 
@@ -229,7 +218,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 				persCs.setResource(retVal);
 				persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
 				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-				myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
+				myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, cs.getName(), persCs);
 
 			}
 		}

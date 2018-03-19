@@ -103,7 +103,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	@Override
 	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
 		String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-		myConceptMapResourceDao.update(theConceptMap, matchUrl, theRequestDetails).getId();
+		myConceptMapResourceDao.update(theConceptMap, matchUrl, theRequestDetails);
 	}
 
 	@Override
@@ -201,10 +201,12 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
-			return new CodeValidationResult(def);
+			CodeValidationResult retVal = new CodeValidationResult(def);
+			retVal.setProperties(code.toValidationProperties());
+			return retVal;
 		}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unkonwn code {" + theCodeSystem + "}" + theCode);
+		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 }

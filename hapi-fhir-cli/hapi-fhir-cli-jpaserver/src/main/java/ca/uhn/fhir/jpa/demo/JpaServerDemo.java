@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -24,11 +24,9 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -84,7 +82,7 @@ public class JpaServerDemo extends RestfulServer {
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
-			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 		} else {
 			throw new IllegalStateException();
 		}

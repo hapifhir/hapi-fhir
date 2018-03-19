@@ -102,40 +102,130 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 */
 	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
+	abstract class BaseConceptProperty {
+		private final String myPropertyName;
+
+		/**
+		 * Constructor
+		 */
+		protected BaseConceptProperty(String thePropertyName) {
+			myPropertyName = thePropertyName;
+		}
+
+		public String getPropertyName() {
+			return myPropertyName;
+		}
+	}
+
+	class StringConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public StringConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+	}
+
+	class CodingConceptProperty extends BaseConceptProperty {
+		private final String myCode;
+		private final String myCodeSystem;
+		private final String myDisplay;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public CodingConceptProperty(String theName, String theCodeSystem, String theCode, String theDisplay) {
+			super(theName);
+			myCodeSystem = theCodeSystem;
+			myCode = theCode;
+			myDisplay = theDisplay;
+		}
+
+		public String getCode() {
+			return myCode;
+		}
+
+		public String getCodeSystem() {
+			return myCodeSystem;
+		}
+
+		public String getDisplay() {
+			return myDisplay;
+		}
+	}
+
 	class CodeValidationResult<CDCT, IST> {
-		private CDCT definition;
-		private String message;
-		private IST severity;
+		private CDCT myDefinition;
+		private String myMessage;
+		private IST mySeverity;
+		private String myCodeSystemName;
+		private String myCodeSystemVersion;
+		private List<BaseConceptProperty> myProperties;
 
 		public CodeValidationResult(CDCT theNext) {
-			this.definition = theNext;
+			this.myDefinition = theNext;
 		}
 
 		public CodeValidationResult(IST severity, String message) {
-			this.severity = severity;
-			this.message = message;
+			this.mySeverity = severity;
+			this.myMessage = message;
 		}
 
 		public CodeValidationResult(IST severity, String message, CDCT definition) {
-			this.severity = severity;
-			this.message = message;
-			this.definition = definition;
+			this.mySeverity = severity;
+			this.myMessage = message;
+			this.myDefinition = definition;
 		}
 
 		public CDCT asConceptDefinition() {
-			return definition;
+			return myDefinition;
+		}
+
+		public String getCodeSystemName() {
+			return myCodeSystemName;
+		}
+
+		public void setCodeSystemName(String theCodeSystemName) {
+			myCodeSystemName = theCodeSystemName;
+		}
+
+		public String getCodeSystemVersion() {
+			return myCodeSystemVersion;
+		}
+
+		public void setCodeSystemVersion(String theCodeSystemVersion) {
+			myCodeSystemVersion = theCodeSystemVersion;
 		}
 
 		public String getMessage() {
-			return message;
+			return myMessage;
+		}
+
+		public List<BaseConceptProperty> getProperties() {
+			return myProperties;
+		}
+
+		public void setProperties(List<BaseConceptProperty> theProperties) {
+			myProperties = theProperties;
 		}
 
 		public IST getSeverity() {
-			return severity;
+			return mySeverity;
 		}
 
 		public boolean isOk() {
-			return definition != null;
+			return myDefinition != null;
 		}
 
 	}

@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
@@ -22,8 +22,8 @@ public class LoincDocumentOntologyHandler extends BaseHandler implements IRecord
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final Set<String> myPropertyNames;
 
-	public LoincDocumentOntologyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets) {
-		super(theCode2concept, theValueSets);
+	public LoincDocumentOntologyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+		super(theCode2concept, theValueSets, theConceptMaps);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
@@ -40,7 +40,7 @@ public class LoincDocumentOntologyHandler extends BaseHandler implements IRecord
 
 		// RSNA Codes VS
 		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME);
-		addCodeAsIncludeToValueSet(vs, IHapiTerminologyLoaderSvc.LOINC_URL, loincNumber, null);
+		addCodeAsIncludeToValueSet(vs, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, null);
 
 		// Part Properties
 		String loincCodePropName;
@@ -66,7 +66,7 @@ public class LoincDocumentOntologyHandler extends BaseHandler implements IRecord
 
 		TermConcept code = myCode2Concept.get(loincNumber);
 		if (code != null) {
-			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URL, partNumber, partName);
+			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, partName);
 		}
 
 	}

@@ -41,7 +41,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		opt.setRequired(true);
 		options.addOption(opt);
 
-		opt = new Option("u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URL + ")");
+		opt = new Option("u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		opt.setRequired(false);
 		options.addOption(opt);
 

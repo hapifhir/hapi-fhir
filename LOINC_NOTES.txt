@@ -59,3 +59,6 @@ Top 2000
 - Need to define a URI for both ValueSets. Currently I am using
   "http://loinc.org/top-2000-lab-results-us" and
   "http://loinc.org/top-2000-lab-results-si"
+
+Universal Order Set
+- Need to define a URI for this ValueSet - Currenty using "http://loinc.org/fhir/loinc-universal-order-set"

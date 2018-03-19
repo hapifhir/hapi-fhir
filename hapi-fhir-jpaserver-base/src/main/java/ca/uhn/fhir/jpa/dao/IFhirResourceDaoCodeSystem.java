@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.List;
 
@@ -48,6 +47,8 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 		private boolean myFound;
 		private String mySearchedForCode;
 		private String mySearchedForSystem;
+		private List<IContextValidationSupport.BaseConceptProperty> myProperties;
+
 		/**
 		 * Constructor
 		 */
@@ -111,6 +112,10 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 			myFound = theFound;
 		}
 
+		public void setProperties(List<IContextValidationSupport.BaseConceptProperty> theProperties) {
+			myProperties = theProperties;
+		}
+
 		public void throwNotFoundIfAppropriate() {
 			if (isFound() == false) {
 				throw new ResourceNotFoundException("Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
@@ -126,6 +131,35 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 			}
 			retVal.addParameter().setName("display").setValue(new StringType(getCodeDisplay()));
 			retVal.addParameter().setName("abstract").setValue(new BooleanType(isCodeIsAbstract()));
+
+			if (myProperties != null) {
+				for (IContextValidationSupport.BaseConceptProperty next : myProperties) {
+					Parameters.ParametersParameterComponent property = retVal.addParameter().setName("property");
+					property
+						.addPart()
+						.setName("code")
+						.setValue(new CodeType(next.getPropertyName()));
+
+					if (next instanceof IContextValidationSupport.StringConceptProperty) {
+						IContextValidationSupport.StringConceptProperty prop = (IContextValidationSupport.StringConceptProperty) next;
+						property
+							.addPart()
+							.setName("value")
+							.setValue(new StringType(prop.getValue()));
+					} else if (next instanceof IContextValidationSupport.CodingConceptProperty) {
+						IContextValidationSupport.CodingConceptProperty prop = (IContextValidationSupport.CodingConceptProperty) next;
+						property
+							.addPart()
+							.setName("value")
+							.setValue(new Coding()
+								.setSystem(prop.getCodeSystem())
+								.setCode(prop.getCode())
+								.setDisplay(prop.getDisplay()));
+					} else {
+						throw new IllegalStateException("Don't know how to handle " + next.getClass());
+					}
+				}
+			}
 
 			return retVal;
 		}

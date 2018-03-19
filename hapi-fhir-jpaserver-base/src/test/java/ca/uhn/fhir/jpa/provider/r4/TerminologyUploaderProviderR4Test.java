@@ -47,7 +47,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onServer()
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("package", new Attachment().setData(packageBytes))
 			.execute();
 		//@formatter:on
@@ -67,7 +67,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onServer()
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URL))
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setData(packageBytes))
 			.execute();
 		//@formatter:on
@@ -86,7 +86,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onServer()
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URL))
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setData(packageBytes))
 			.execute();
 		//@formatter:on
@@ -111,7 +111,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onServer()
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
 			.execute();
 		//@formatter:on
@@ -132,7 +132,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onServer()
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL + "FOO"))
+				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI + "FOO"))
 				.andParameter("package", new Attachment().setData(packageBytes))
 				.execute();
 			fail();
@@ -169,7 +169,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onServer()
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
+				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
