@@ -229,6 +229,11 @@
 				previously missing. Thanks to Clayton Bodendein for the pull
 				request!
 			</action>
+			<action type="fix" issue="806">
+				AuthorizationInterceptor did not correctly handle authorization against
+				against a compartment where the compartment owner was specified
+				as a list of IDs. Thanks to Jiajing Liang for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
