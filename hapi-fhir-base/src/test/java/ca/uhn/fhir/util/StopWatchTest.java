@@ -103,17 +103,17 @@ public class StopWatchTest {
 		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
 		assertEquals("01:00:00", StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR));
-		assertEquals("1.0 day", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY));
-		assertEquals("2.0 days", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2));
-		assertEquals("2.0 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1));
-		assertEquals("2.4 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR)));
+		assertEquals("1.0 day", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY).replace(',','.'));
+		assertEquals("2.0 days", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2).replace(',','.'));
+		assertEquals("2.0 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1).replace(',','.'));
+		assertEquals("2.4 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR)).replace(',','.'));
 		assertEquals("11 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 11) + (10 * DateUtils.MILLIS_PER_HOUR)));
 	}
 
 	@Test
 	public void testFormatThroughput60Ops4Min() {
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -4));
-		String throughput = sw.formatThroughput(60, TimeUnit.MINUTES);
+		String throughput = sw.formatThroughput(60, TimeUnit.MINUTES).replace(',','.');
 		ourLog.info("{} operations in {}ms = {} ops / second", 60, sw.getMillis(), throughput);
 		assertThat(throughput, oneOf("14.9", "15.0", "15.1", "14,9", "15,0", "15,1"));
 	}

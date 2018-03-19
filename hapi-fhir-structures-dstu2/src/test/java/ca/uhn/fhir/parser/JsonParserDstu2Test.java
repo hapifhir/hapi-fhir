@@ -1980,7 +1980,7 @@ public class JsonParserDstu2Test {
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
 		verify(peh, times(0)).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
-		
+
 		assertEquals("Smith", p.getName().get(0).getGiven().get(0).getValue());
 		assertExtensionMetadata(p, "fhir-request-method", false, StringDt.class, "POST");
 		assertExtensionMetadata(p, "fhir-request-uri", false, UriDt.class, "Patient");
