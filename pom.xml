@@ -398,7 +398,10 @@
 			<id>c-schuler</id>
 			<name>Chris Schuler</name>
 		</developer>
-		
+		<developer>
+			<id>javajeff</id>
+			<name>Jeff Chung</name>
+		</developer>
 	</developers>
 
 	<licenses>

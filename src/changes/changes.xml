@@ -234,6 +234,12 @@
 				against a compartment where the compartment owner was specified
 				as a list of IDs. Thanks to Jiajing Liang for the pull request!
 			</action>
+			<action type="add" issue="812">
+				REST HOOK subscriptions in the JPA server now support having
+				an empty/missing Subscription.channel.payload value, which
+				is supported according to the FHIR specification. Thanks
+				to Jeff Chung for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
