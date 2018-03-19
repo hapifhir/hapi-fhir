@@ -1,21 +1,23 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +28,9 @@ import static org.junit.Assert.*;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
+	private static final String CM_URL = "http://example.com/my_concept_map";
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -354,4 +356,60 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
+	@Autowired
+	private ITermConceptMapDao myTermConceptMapDao;
+
+	@Test
+	public void testStoreNewConceptMap() {
+		TermConceptMap newConceptMap = createTermConceptMap();
+		myTermSvc.storeNewConceptMap(newConceptMap);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				TermConceptMap conceptMap = myTermConceptMapDao.findConceptMapByUrl(CM_URL);
+				assertNotNull(conceptMap);
+				assertEquals(1, conceptMap.getConceptMapGroups().size());
+
+				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
+				assertEquals(CS_URL, group.getSourceUrl());
+				assertEquals(CS_URL_2, group.getTargetUrl());
+				assertEquals(1, group.getConceptMapGroupElements().size());
+
+				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+				assertEquals("12345", element.getSourceCode());
+				assertEquals("Source Code 12345", element.getSourceDisplay());
+				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+
+				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+				assertEquals("23456", target.getTargetCode());
+				assertEquals("Target Code 23456", target.getTargetDisplay());
+			}
+		});
+	}
+
+	private TermConceptMap createTermConceptMap() {
+		TermConceptMap conceptMap = new TermConceptMap();
+		conceptMap.setUrl(CM_URL);
+
+		TermConceptMapGroup group = new TermConceptMapGroup();
+		group.setConceptMap(conceptMap);
+		group.setSourceUrl(CS_URL);
+		group.setTargetUrl(CS_URL_2);
+		conceptMap.getConceptMapGroups().add(group);
+
+		TermConceptMapGroupElement element = new TermConceptMapGroupElement();
+		element.setConceptMapGroup(group);
+		element.setSourceCode("12345");
+		element.setSourceDisplay("Source Code 12345");
+		group.getConceptMapGroupElements().add(element);
+
+		TermConceptMapGroupElementTarget target = new TermConceptMapGroupElementTarget();
+		target.setConceptMapGroupElement(element);
+		target.setTargetCode("23456");
+		target.setTargetDisplay("Target Code 23456");
+		element.getConceptMapGroupElementTargets().add(target);
+
+		return conceptMap;
+	}
 }

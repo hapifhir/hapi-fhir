@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -59,6 +57,8 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
 
+	void storeNewConceptMap(TermConceptMap theConceptMap);
+
 	boolean supportsSystem(String theCodeSystem);
 
 	List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
@@ -67,4 +67,5 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-	}
+	List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theSourceCode, String theTargetCodeSystem);
+}

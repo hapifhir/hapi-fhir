@@ -39,6 +39,7 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.search.Query;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
@@ -75,6 +76,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+	@Autowired
+	protected ITermConceptMapDao myConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupDao myConceptMapGroupDao;
+	@Autowired
+	protected ITermConceptMapGroupElementDao myConceptMapGroupElementDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
 	@Autowired
 	protected ITermConceptPropertyDao myConceptPropertyDao;
 	@Autowired
@@ -384,6 +393,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getPid(), theCode);
 		return toVersionIndependentConcepts(theSystem, codes);
+	}
+
+	public TermConceptMap findConceptMapByUrl(String theUrl) {
+		return myConceptMapDao.findConceptMapByUrl(theUrl);
 	}
 
 	private TermCodeSystemVersion findCurrentCodeSystemVersionForSystem(String theCodeSystem) {
@@ -735,6 +748,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			createOrUpdateConceptMap(nextConceptMap, theRequestDetails);
 		}
 
+	}
+
+	@Override
+	@Transactional
+	public void storeNewConceptMap(TermConceptMap theConceptMap) {
+		if (theConceptMap != null) {
+			myConceptMapDao.save(theConceptMap);
+
+			for (TermConceptMapGroup conceptMapGroup : theConceptMap.getConceptMapGroups()) {
+				myConceptMapGroupDao.save(conceptMapGroup);
+
+				for (TermConceptMapGroupElement conceptMapGroupElement : conceptMapGroup.getConceptMapGroupElements()) {
+					myConceptMapGroupElementDao.save(conceptMapGroupElement);
+
+					for (TermConceptMapGroupElementTarget conceptMapGroupElementTarget : conceptMapGroupElement.getConceptMapGroupElementTargets()) {
+						myConceptMapGroupElementTargetDao.save(conceptMapGroupElementTarget);
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theSourceCode, String theTargetCodeSystem) {
+		// TODO: Do something!
+		throw new NotYetImplementedException();
 	}
 
 	@Override

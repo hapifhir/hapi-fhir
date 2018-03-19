@@ -237,7 +237,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			def.setDisplay(code.getDisplay());
 			CodeValidationResult retVal = new CodeValidationResult(def);
 			retVal.setProperties(code.toValidationProperties());
-			retVal.setCodeSystemName(code.getCodeSystem().get);
+			// This came in from source branch loinc_loader_update
+//			retVal.setCodeSystemName(code.getCodeSystem().get);
 			return retVal;
 		}
 
