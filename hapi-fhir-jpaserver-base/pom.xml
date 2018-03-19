@@ -600,7 +600,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>
