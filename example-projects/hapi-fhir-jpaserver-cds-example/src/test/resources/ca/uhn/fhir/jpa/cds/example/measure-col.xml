@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Measure xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/measure.xsd">
+	<id value="col"/>
+	<text>
+		<status value="additional"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">
+      Cohort definition for Colorectal Cancer Screening.
+    </div>
+	</text>
+	<identifier>
+		<use value="official"/>
+		<system value="http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/payer-extract"/>
+		<value value="COL"/>
+	</identifier>
+	<version value="1.0.0"/>
+	<title value="Colorectal Cancer Screening. Cohort Definition"/>
+	<status value="active"/>
+	<experimental value="true"/>
+	<description value="Colorectal Cancer Screening. Cohort Definition"/>
+	<topic>
+		<coding>
+			<system value="http://hl7.org/fhir/c80-doc-typecodes"/>
+			<code value="57024-2"/>
+		</coding>
+	</topic>
+	<library>
+		<reference value="Library/col-logic"/>
+	</library>
+	<scoring value="cohort"/>
+	<group>
+		<identifier>
+			<value value="in-demographic"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="in-demographic"/>
+			</identifier>
+			<criteria value="In Demographic"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="history-of-colorectal-cancer"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="history-of-colorectal-cancer"/>
+			</identifier>
+			<criteria value="Hx Colorectal Cancer"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="history-of-total-colectomy"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="history-of-total-colectomy"/>
+			</identifier>
+			<criteria value="Hx Total Colectomy"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="colonoscopy-performed"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="colonoscopy-performed"/>
+			</identifier>
+			<criteria value="Colonoscopy Performed"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="colonoscopy-results"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="colonoscopy-results"/>
+			</identifier>
+			<criteria value="Colonoscopy Results"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="sigmoidoscopy-procedure"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="sigmoidoscopy-procedure"/>
+			</identifier>
+			<criteria value="Sigmoidoscopy Procedure"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="sigmoidoscopy-observation"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="sigmoidoscopy-observation"/>
+			</identifier>
+			<criteria value="Sigmoidoscopy Observation"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="fobt-procedure"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="fobt-procedure"/>
+			</identifier>
+			<criteria value="FOBT Procedure"/>
+		</population>
+	</group>
+	<group>
+		<identifier>
+			<value value="fobt-observation"/>
+		</identifier>
+		<population>
+			<type value="initial-population"/>
+			<identifier>
+				<value value="fobt-observation"/>
+			</identifier>
+			<criteria value="FOBT Observation"/>
+		</population>
+	</group>
+</Measure>

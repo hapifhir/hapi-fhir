@@ -841,6 +841,25 @@ class ParserState<T> {
 			}
 		}
 
+		@Override
+		public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+			ResourceMetadataKeyEnum.ExtensionResourceMetadataKey resourceMetadataKeyEnum = new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(theUrlAttr);
+			Object metadataValue = myMap.get(resourceMetadataKeyEnum);
+			ExtensionDt newExtension;
+			if (metadataValue == null) {
+				newExtension = new ExtensionDt(theIsModifier);
+			} else if (metadataValue instanceof ExtensionDt) {
+				newExtension = (ExtensionDt) metadataValue;
+			} else {
+				throw new IllegalStateException("Expected ExtensionDt as custom resource metadata type, got: " + metadataValue.getClass().getSimpleName());
+			}
+			newExtension.setUrl(theUrlAttr);
+			myMap.put(resourceMetadataKeyEnum, newExtension);
+
+			ExtensionState newState = new ExtensionState(getPreResourceState(), newExtension);
+			push(newState);
+		}
+
 	}
 
 	private class MetaVersionElementState extends BaseState {

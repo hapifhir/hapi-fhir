@@ -34,7 +34,7 @@ import static org.junit.Assert.fail;
  */
 public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu3Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
@@ -309,6 +309,25 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+	}
+
+	@Test
+	public void testRestHookSubscriptionWithoutPayload() throws Exception {
+		String payload = "";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code;
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
+
+		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+
+		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification, but no payload
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 	}
 
 	// TODO: Reenable this

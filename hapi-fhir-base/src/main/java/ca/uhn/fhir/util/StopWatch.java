@@ -6,7 +6,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -17,9 +20,9 @@ import java.util.concurrent.TimeUnit;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +32,14 @@ import java.util.concurrent.TimeUnit;
  */
 
 /**
+ * A multipurpose stopwatch which can be used to time tasks and produce
+ * human readable output about task duration, throughput, estimated task completion,
+ * etc.
+ * <p>
+ * <p>
+ * <b>Thread Safety Note: </b> StopWatch is not intended to be thread safe.
+ * </p>
+ *
  * @since HAPI FHIR 3.3.0
  */
 public class StopWatch {
@@ -37,6 +48,9 @@ public class StopWatch {
 	private static final NumberFormat TEN_DAY_FORMAT = new DecimalFormat("0");
 	private static Long ourNowForUnitTest;
 	private long myStarted = now();
+	private long myCurrentTaskStarted = -1L;
+	private LinkedHashMap<String, Long> myTaskTotals;
+	private String myCurrentTaskName;
 
 	/**
 	 * Constructor
@@ -54,6 +68,66 @@ public class StopWatch {
 		myStarted = theStart.getTime();
 	}
 
+	private void ensureTaskTotalsMapExists() {
+		if (myTaskTotals == null) {
+			myTaskTotals = new LinkedHashMap<>();
+		}
+	}
+
+	/**
+	 * Finish the counter on the current task (which was started by calling
+	 * {@link #startTask(String)}. This method has no effect if no task
+	 * is currently started so it's ok to call it more than once.
+	 */
+	public void endCurrentTask() {
+		if (isNotBlank(myCurrentTaskName)) {
+			ensureTaskTotalsMapExists();
+			Long existingTotal = myTaskTotals.get(myCurrentTaskName);
+			long taskTimeElapsed = now() - myCurrentTaskStarted;
+			Long newTotal = existingTotal != null ? existingTotal + taskTimeElapsed : taskTimeElapsed;
+			myTaskTotals.put(myCurrentTaskName, newTotal);
+		}
+		myCurrentTaskName = null;
+	}
+
+	/**
+	 * Returns a string providing the durations of all tasks collected by {@link #startTask(String)}
+	 */
+	public String formatTaskDurations() {
+
+		// Flush the current task if it's ongoing
+		String continueTask = myCurrentTaskName;
+		if (isNotBlank(myCurrentTaskName)) {
+			endCurrentTask();
+			startTask(continueTask);
+		}
+
+		ensureTaskTotalsMapExists();
+		StringBuilder b = new StringBuilder();
+		for (String nextTask : myTaskTotals.keySet()) {
+			if (b.length() > 0) {
+				b.append("\n");
+			}
+
+			b.append(nextTask);
+			b.append(": ");
+			b.append(formatMillis(myTaskTotals.get(nextTask)));
+		}
+
+		return b.toString();
+	}
+
+	/**
+	 * Determine the current throughput per unit of time (specified in theUnit)
+	 * assuming that theNumOperations operations have happened.
+	 * <p>
+	 * For example, if this stopwatch has 2 seconds elapsed, and this method is
+	 * called for theNumOperations=30 and TimeUnit=SECONDS,
+	 * this method will return 15
+	 * </p>
+	 *
+	 * @see #getThroughput(int, TimeUnit)
+	 */
 	public String formatThroughput(int theNumOperations, TimeUnit theUnit) {
 		double throughput = getThroughput(theNumOperations, theUnit);
 		return new DecimalFormat("0.0").format(throughput);
@@ -99,6 +173,17 @@ public class StopWatch {
 		return new Date(myStarted);
 	}
 
+	/**
+	 * Determine the current throughput per unit of time (specified in theUnit)
+	 * assuming that theNumOperations operations have happened.
+	 * <p>
+	 * For example, if this stopwatch has 2 seconds elapsed, and this method is
+	 * called for theNumOperations=30 and TimeUnit=SECONDS,
+	 * this method will return 15
+	 * </p>
+	 *
+	 * @see #formatThroughput(int, TimeUnit)
+	 */
 	public double getThroughput(int theNumOperations, TimeUnit theUnit) {
 		if (theNumOperations <= 0) {
 			return 0.0f;
@@ -115,6 +200,23 @@ public class StopWatch {
 
 	public void restart() {
 		myStarted = now();
+	}
+
+	/**
+	 * Starts a counter for a sub-task
+	 * <p>
+	 * <b>Thread Safety Note: </b> This method is not threadsafe! Do not use subtasks in a
+	 * multithreaded environment.
+	 * </p>
+	 *
+	 * @param theTaskName Note that if theTaskName is blank or empty, no task is started
+	 */
+	public void startTask(String theTaskName) {
+		endCurrentTask();
+		if (isNotBlank(theTaskName)) {
+			myCurrentTaskStarted = now();
+		}
+		myCurrentTaskName = theTaskName;
 	}
 
 	/**
