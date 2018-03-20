@@ -157,7 +157,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		if (transactionType == null) {
-			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleType.TRANSACTION.toCode();
+			String message = "Transaction Bundle did not specify valid Bundle.type, assuming " + BundleType.TRANSACTION.toCode();
 			ourLog.warn(message);
 			transactionType = BundleType.TRANSACTION;
 		}
@@ -165,7 +165,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType.toCode());
 		}
 
-		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
+		ourLog.debug("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
 
 		long start = System.currentTimeMillis();
 		final Date updateTime = new Date();
