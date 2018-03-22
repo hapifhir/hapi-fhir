@@ -26,6 +26,6 @@ import org.springframework.data.repository.query.Param;
  */
 
 public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
-	@Query("SELECT c FROM TermConceptMap c WHERE c.myUrl = :url")
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url")
 	TermConceptMap findConceptMapByUrl(@Param("url") String theUrl);
 }

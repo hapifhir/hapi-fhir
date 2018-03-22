@@ -39,7 +39,6 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.search.Query;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
@@ -65,8 +64,7 @@ import javax.persistence.PersistenceContextType;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
@@ -772,8 +770,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	public List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theSourceCode, String theTargetCodeSystem) {
-		// TODO: Do something!
-		throw new NotYetImplementedException();
+		List<TermConceptMapGroupElementTarget> retVal = null;
+
+		if (isNoneBlank(theSourceCodeSystem, theSourceCode, theTargetCodeSystem)) {
+			retVal = myConceptMapGroupElementTargetDao.findTargetsByCodeSystemsAndSourceCode(
+				theSourceCodeSystem,
+				theSourceCode,
+				theTargetCodeSystem);
+		}
+
+		return retVal;
 	}
 
 	@Override
