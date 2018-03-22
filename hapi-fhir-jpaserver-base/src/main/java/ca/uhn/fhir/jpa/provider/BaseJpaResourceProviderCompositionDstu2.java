@@ -1,6 +1,9 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.model.api.annotation.Description;
+
+import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -11,8 +14,8 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.dstu3.model.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /*
  * #%L
@@ -34,40 +37,21 @@ import org.hl7.fhir.dstu3.model.*;
  * #L%
  */
 
-public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProviderDstu3<Composition> {
+public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProviderDstu2<Composition> {
 
 	/**
 	 * Composition/123/$document
-	 * @param theRequestDetails
 	 */
 	//@formatter:off
 	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getDocumentForComposition(
 
-			javax.servlet.http.HttpServletRequest theServletRequest,
-
-			@IdParam 
-			IdType theId,
-			
-			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
-			@OperationParam(name = Constants.PARAM_COUNT) 
-			UnsignedIntType theCount,
-			
-			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
-			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
-			DateRangeParam theLastUpdated,
-
-			@Sort
-			SortSpec theSortSpec, 
-			
-			RequestDetails theRequestDetails
-			) {
+			javax.servlet.http.HttpServletRequest theServletRequest) {
 		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			throw new InvalidRequestException("test");
-			//return ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			return ((IFhirResourceDaoComposition<Composition>)getDao()).getDocumentForComposition(theServletRequest, null, null, null, null, null);
 		} finally {
 			endRequest(theServletRequest);
 		}

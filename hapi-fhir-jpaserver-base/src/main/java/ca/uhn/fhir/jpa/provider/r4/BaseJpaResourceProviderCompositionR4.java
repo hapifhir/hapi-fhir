@@ -1,5 +1,7 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaResourceProviderDstu3;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -11,8 +13,10 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.UnsignedIntType;
+
 
 /*
  * #%L
@@ -34,7 +38,7 @@ import org.hl7.fhir.dstu3.model.*;
  * #L%
  */
 
-public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProviderDstu3<Composition> {
+public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<Composition> {
 
 	/**
 	 * Composition/123/$document
@@ -46,11 +50,11 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
-			@IdParam 
+			@IdParam
 			IdType theId,
 			
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
-			@OperationParam(name = Constants.PARAM_COUNT) 
+			@OperationParam(name = Constants.PARAM_COUNT)
 			UnsignedIntType theCount,
 			
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
@@ -66,8 +70,7 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 
 		startRequest(theServletRequest);
 		try {
-			throw new InvalidRequestException("test");
-			//return ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			return ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}
