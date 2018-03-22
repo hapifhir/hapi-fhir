@@ -39,7 +39,7 @@ public class LoincHierarchyHandler implements IRecordHandler {
       TermConcept retVal = myCode2Concept.get(theCode);
       if (retVal == null) {
          retVal = new TermConcept();
-         retVal.setCodeSystem(myCodeSystemVersion);
+         retVal.setCodeSystemVersion(myCodeSystemVersion);
          retVal.setCode(theCode);
          retVal.setDisplay(theDisplay);
          myCode2Concept.put(theCode, retVal);

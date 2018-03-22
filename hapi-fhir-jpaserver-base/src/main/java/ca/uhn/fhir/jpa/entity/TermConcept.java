@@ -101,7 +101,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
-		setCodeSystem(theCs);
+		setCodeSystemVersion(theCs);
 		setCode(theCode);
 	}
 
@@ -178,14 +178,14 @@ public class TermConcept implements Serializable {
 		myCode = theCode;
 	}
 
-	public TermCodeSystemVersion getCodeSystem() {
+	public TermCodeSystemVersion getCodeSystemVersion() {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
-		myCodeSystem = theCodeSystem;
-		if (theCodeSystem.getPid() != null) {
-			myCodeSystemVersionPid = theCodeSystem.getPid();
+	public void setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystem = theCodeSystemVersion;
+		if (theCodeSystemVersion.getPid() != null) {
+			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
 	}
 

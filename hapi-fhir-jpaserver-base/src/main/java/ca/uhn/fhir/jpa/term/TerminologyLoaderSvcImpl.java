@@ -389,7 +389,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		if (concept == null) {
 			concept = new TermConcept();
 			id2concept.put(id, concept);
-			concept.setCodeSystem(codeSystemVersion);
+			concept.setCodeSystemVersion(codeSystemVersion);
 		}
 		return concept;
 	}

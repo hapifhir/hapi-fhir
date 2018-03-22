@@ -5,9 +5,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.rp.dstu3.ActivityDefinitionResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.PlanDefinitionResourceProvider;
@@ -149,7 +149,7 @@ public class CdsServerExample extends RestfulServer {
 		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor
 		 * with this feature.
 		 */
-		registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+		registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 	}
 
 	public IResourceProvider getProvider(String name) {

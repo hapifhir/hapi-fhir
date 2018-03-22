@@ -49,12 +49,12 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		cs.setResource(table);
 
 		TermConcept parent = new TermConcept();
-		parent.setCodeSystem(cs);
+		parent.setCodeSystemVersion(cs);
 		parent.setCode("parent");
 		cs.getConcepts().add(parent);
 
 		TermConcept child = new TermConcept();
-		child.setCodeSystem(cs);
+		child.setCodeSystemVersion(cs);
 		child.setCode("child");
 		parent.addChild(child, RelationshipTypeEnum.ISA);
 

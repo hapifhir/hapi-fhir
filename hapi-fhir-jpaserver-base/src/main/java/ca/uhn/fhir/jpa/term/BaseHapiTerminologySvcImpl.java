@@ -408,7 +408,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int) (pct * 100.0f));
 		}
 
-		theConcept.setCodeSystem(theCodeSystem);
+		theConcept.setCodeSystemVersion(theCodeSystem);
 		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
 		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
@@ -436,10 +436,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
-		if (theNext.getCodeSystem() != null) {
+		if (theNext.getCodeSystemVersion() != null) {
 			return;
 		}
-		theNext.setCodeSystem(theCodeSystemVersion);
+		theNext.setCodeSystemVersion(theCodeSystemVersion);
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
@@ -667,6 +667,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				throw new UnprocessableEntityException(msg);
 			}
 		}
+		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
@@ -753,8 +754,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() != null, "CodesystemValue is null");
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "CodeSystems are not equal");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodesystemValue is null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, "CodeSystems are not equal");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
 
 		if (theConceptsStack.contains(theConcept.getCode())) {
