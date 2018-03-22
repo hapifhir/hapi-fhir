@@ -56,6 +56,7 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 			Parameters retVal = new Parameters();
 
 			// TODO: Implement!
+			// Note: Using org.hl7.fhir.r4.model.Parameters creates problems for versions implementations of interface.
 
 			return retVal;
 		}

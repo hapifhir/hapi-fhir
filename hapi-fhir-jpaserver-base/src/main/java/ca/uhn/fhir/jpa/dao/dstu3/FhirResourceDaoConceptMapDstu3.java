@@ -21,14 +21,20 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
+	@Autowired
+	private IHapiTerminologySvc myHapiTerminologySvc;
+
 	@Override
 	public TranslationResult translate(IPrimitiveType<String> theSourceCode, IPrimitiveType<String> theSourceSystem, IPrimitiveType<String> theTargetSystem, RequestDetails theRequestDetails) {
 		// TODO: Implement!
+		//myHapiTerminologySvc.translate("","","");
 
 		return null;
 	}
