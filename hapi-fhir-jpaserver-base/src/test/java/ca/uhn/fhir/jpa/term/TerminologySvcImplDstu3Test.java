@@ -508,6 +508,16 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals("67890", target.getTargetCode());
 				assertEquals("Target Code 67890", target.getTargetDisplay());
 				// </editor-fold>
+
+				// <editor-fold desc="Attempt to map unknown source code">
+				targets =
+					myTermConceptMapGroupElementTargetDao.findTargetsByCodeSystemsAndSourceCode(
+						CS_URL,
+						"BOGUS",
+						CS_URL_3);
+				assertNotNull(targets);
+				assertTrue(targets.isEmpty());
+				// </editor-fold>
 			}
 		});
 	}

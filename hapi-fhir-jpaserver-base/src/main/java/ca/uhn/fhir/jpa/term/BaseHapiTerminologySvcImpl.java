@@ -770,7 +770,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	public List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theSourceCode, String theTargetCodeSystem) {
-		List<TermConceptMapGroupElementTarget> retVal = null;
+		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
 
 		if (isNoneBlank(theSourceCodeSystem, theSourceCode, theTargetCodeSystem)) {
 			retVal = myConceptMapGroupElementTargetDao.findTargetsByCodeSystemsAndSourceCode(
