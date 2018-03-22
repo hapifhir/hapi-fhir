@@ -240,6 +240,18 @@
 				is supported according to the FHIR specification. Thanks
 				to Jeff Chung for the pull request!
 			</action>
+			<action type="fix">
+				JPA Server Operation Interceptor create/update methods will now no
+				longer be fired if the create/update operation being performed
+				is a no-op (e.g. a conditional create that did not need to perform
+				any action, or an update where the contents didn't actually change)
+			</action>
+			<action type="fix" issue="879">
+				JPA server sometimes updated resources even though the client
+				supplied an update with no actual changes in it, due to 
+				changes in the metadata section being considered content
+				changes. Thanks to Kyle Meadows for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
