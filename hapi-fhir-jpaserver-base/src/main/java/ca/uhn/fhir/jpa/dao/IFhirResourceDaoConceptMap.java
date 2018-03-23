@@ -23,7 +23,11 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFhirResourceDao<T> {
 	TranslationResult translate(IPrimitiveType<String> theSourceCode, IPrimitiveType<String> theSourceSystem, IPrimitiveType<String> theTargetSystem, RequestDetails theRequestDetails);
@@ -55,8 +59,10 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 		public Parameters toParameters() {
 			Parameters retVal = new Parameters();
 
-			// TODO: Implement!
-			// Note: Using org.hl7.fhir.r4.model.Parameters creates problems for versions implementations of interface.
+			retVal.addParameter().setName("result").setValue(new BooleanType(isMatched()));
+			if (isNotBlank(getMessage())) {
+				retVal.addParameter().setName("message").setValue(new StringType(getMessage()));
+			}
 
 			return retVal;
 		}

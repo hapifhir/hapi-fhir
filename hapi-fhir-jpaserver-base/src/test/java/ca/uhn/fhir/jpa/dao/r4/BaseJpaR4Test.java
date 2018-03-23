@@ -235,6 +235,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	@Autowired
+	protected ITermConceptMapDao myTermConceptMapDao;
 
 	@After()
 	public void afterCleanupDao() {

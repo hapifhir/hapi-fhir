@@ -273,6 +273,10 @@ public abstract class BaseJpaTest {
 				entityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d").executeUpdate();
 				return null;
 			}
 		});

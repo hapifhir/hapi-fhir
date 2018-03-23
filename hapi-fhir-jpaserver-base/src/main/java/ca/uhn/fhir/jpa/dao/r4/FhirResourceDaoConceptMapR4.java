@@ -21,11 +21,17 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
@@ -33,9 +39,24 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 	@Override
 	public TranslationResult translate(IPrimitiveType<String> theSourceCode, IPrimitiveType<String> theSourceSystem, IPrimitiveType<String> theTargetSystem, RequestDetails theRequestDetails) {
-		// TODO: Implement!
-		//myHapiTerminologySvc.translate("","","");
+		TranslationResult retVal = new TranslationResult();
 
-		return null;
+		String sourceCode = theSourceCode.getValueAsString();
+		String sourceSystem = theSourceSystem.getValueAsString();
+		String targetSystem = theTargetSystem.getValueAsString();
+		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
+		if (isNoneBlank(sourceCode, sourceSystem, targetSystem)) {
+			targets = myHapiTerminologySvc.translate(sourceCode, sourceSystem, targetSystem);
+		}
+
+		if (targets.isEmpty()) {
+			retVal.setMatched(false);
+			retVal.setMessage("No matches found!");
+		} else {
+			retVal.setMatched(true);
+			retVal.setMessage("Matches found!");
+		}
+
+		return retVal;
 	}
 }

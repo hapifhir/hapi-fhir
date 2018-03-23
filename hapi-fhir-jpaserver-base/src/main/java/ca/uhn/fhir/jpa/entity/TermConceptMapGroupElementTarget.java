@@ -13,7 +13,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false, referencedColumnName = "PID")
+	@JoinColumn(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false, referencedColumnName = "PID", foreignKey=@ForeignKey(name="FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
 	@Column(name = "TARGET_CODE", nullable = false, length = 50)

@@ -17,7 +17,7 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "URL", length = 200)
 	private String myUrl;
 
-	@OneToMany()
+	@OneToMany(mappedBy = "myConceptMap")
 	private List<TermConceptMapGroup> myConceptMapGroups;
 
 	public List<TermConceptMapGroup> getConceptMapGroups() {

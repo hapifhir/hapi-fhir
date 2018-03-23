@@ -15,7 +15,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID")
+	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID", foreignKey=@ForeignKey(name="FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = 50)
@@ -24,7 +24,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@Column(name = "SOURCE_DISPLAY", length = 100)
 	private String mySourceDisplay;
 
-	@OneToMany()
+	@OneToMany(mappedBy = "myConceptMapGroupElement")
 	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
 
 	public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
