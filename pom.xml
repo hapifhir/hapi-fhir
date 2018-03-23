@@ -1954,8 +1954,6 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-utilities</module>
-				<module>hapi-fhir-base-test-mindeps-client</module>
-				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
@@ -1990,6 +1988,8 @@
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
+				<module>tests/hapi-fhir-base-test-mindeps-client</module>
+				<module>tests/hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-fhir-jacoco</module>
 				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-spring-boot</module>

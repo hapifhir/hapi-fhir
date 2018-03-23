@@ -5,10 +5,10 @@
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>3.3.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-base-testmindeps-client</artifactId>
+	<artifactId>hapi-fhir-base-test-mindeps-client</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Minimal Dependency Test - Client</name>
