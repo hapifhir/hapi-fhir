@@ -6,6 +6,10 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -32,7 +36,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreNewConceptMap() {
-		TermConceptMap newConceptMap = createTermConceptMap();
+		ConceptMap newConceptMap = createTermConceptMap();
 		myTermSvc.storeNewConceptMap(newConceptMap);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -124,7 +128,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslate() {
-		TermConceptMap newConceptMap = createTermConceptMap();
+		ConceptMap newConceptMap = createTermConceptMap();
 		myTermSvc.storeNewConceptMap(newConceptMap);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -178,7 +182,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Creates a single {@link TermConceptMap} entity that includes:
+	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
 	 * <br>
 	 * <ul>
 	 *     <li>
@@ -193,33 +197,27 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	 * </br>
 	 * Both groups also include an element with the same source code.
 	 *
-	 * @return A TermConceptMap {@link TermConceptMap} entity for testing.
+	 * @return A TermConceptMap {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
 	 */
-	private TermConceptMap createTermConceptMap() {
+	private ConceptMap createTermConceptMap() {
 		// <editor-fold desc="ConceptMap">
-		TermConceptMap conceptMap = new TermConceptMap();
+		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
 
 		// <editor-fold desc="ConceptMap.group(0)">
-		TermConceptMapGroup group = new TermConceptMapGroup();
-		group.setConceptMap(conceptMap);
-		group.setSourceUrl(CS_URL);
-		group.setTargetUrl(CS_URL_2);
-		conceptMap.getConceptMapGroups().add(group);
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_2);
 
 		// <editor-fold desc="ConceptMap.group(0).element(0))">
-		TermConceptMapGroupElement element = new TermConceptMapGroupElement();
-		element.setConceptMapGroup(group);
-		element.setSourceCode("12345");
-		element.setSourceDisplay("Source Code 12345");
-		group.getConceptMapGroupElements().add(element);
+		SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
 
 		// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
-		TermConceptMapGroupElementTarget target = new TermConceptMapGroupElementTarget();
-		target.setConceptMapGroupElement(element);
-		target.setTargetCode("34567");
-		target.setTargetDisplay("Target Code 34567");
-		element.getConceptMapGroupElementTargets().add(target);
+		TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
 		// End ConceptMap.group(0).element(0).target(0)
 		// </editor-fold>
 
@@ -227,18 +225,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		// </editor-fold>
 
 		// <editor-fold desc="ConceptMap.group(0).element(1))">
-		element = new TermConceptMapGroupElement();
-		element.setConceptMapGroup(group);
-		element.setSourceCode("23456");
-		element.setSourceDisplay("Source Code 23456");
-		group.getConceptMapGroupElements().add(element);
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
 
 		// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
-		target = new TermConceptMapGroupElementTarget();
-		target.setConceptMapGroupElement(element);
-		target.setTargetCode("45678");
-		target.setTargetDisplay("Target Code 45678");
-		element.getConceptMapGroupElementTargets().add(target);
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
 		// End ConceptMap.group(0).element(1).target(0)
 		// </editor-fold>
 
@@ -249,34 +243,26 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		// </editor-fold>
 
 		// <editor-fold desc="ConceptMap.group(1)">
-		group = new TermConceptMapGroup();
-		group.setConceptMap(conceptMap);
-		group.setSourceUrl(CS_URL);
-		group.setTargetUrl(CS_URL_3);
-		conceptMap.getConceptMapGroups().add(group);
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_3);
 
 		// <editor-fold desc="ConceptMap.group(1).element(0))">
-		element = new TermConceptMapGroupElement();
-		element.setConceptMapGroup(group);
-		element.setSourceCode("12345");
-		element.setSourceDisplay("Source Code 12345");
-		group.getConceptMapGroupElements().add(element);
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
 
 		// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
-		target = new TermConceptMapGroupElementTarget();
-		target.setConceptMapGroupElement(element);
-		target.setTargetCode("56789");
-		target.setTargetDisplay("Target Code 56789");
-		element.getConceptMapGroupElementTargets().add(target);
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
 		// End ConceptMap.group(1).element(0).target(0)
 		// </editor-fold>
 
 		// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
-		target = new TermConceptMapGroupElementTarget();
-		target.setConceptMapGroupElement(element);
-		target.setTargetCode("67890");
-		target.setTargetDisplay("Target Code 67890");
-		element.getConceptMapGroupElementTargets().add(target);
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
 		// End ConceptMap.group(1).element(0).target(1)
 		// </editor-fold>
 

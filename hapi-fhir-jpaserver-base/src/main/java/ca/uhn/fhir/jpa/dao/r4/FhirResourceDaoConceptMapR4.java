@@ -21,19 +21,24 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoConceptMapR4.class);
+
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
 
@@ -56,6 +61,16 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 			retVal.setMatched(true);
 			retVal.setMessage("Matches found!");
 		}
+
+		return retVal;
+	}
+
+	@Override
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+
+		myHapiTerminologySvc.storeNewConceptMap((ConceptMap) theResource);
 
 		return retVal;
 	}

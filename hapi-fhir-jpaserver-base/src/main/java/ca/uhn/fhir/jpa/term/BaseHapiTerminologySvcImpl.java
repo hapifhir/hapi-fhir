@@ -46,6 +46,9 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -750,18 +753,41 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	@Transactional
-	public void storeNewConceptMap(TermConceptMap theConceptMap) {
+	public void storeNewConceptMap(ConceptMap theConceptMap) {
 		if (theConceptMap != null) {
-			myConceptMapDao.save(theConceptMap);
+			TermConceptMap termConceptMap = new TermConceptMap();
+			termConceptMap.setUrl(theConceptMap.getUrl());
+			myConceptMapDao.save(termConceptMap);
 
-			for (TermConceptMapGroup conceptMapGroup : theConceptMap.getConceptMapGroups()) {
-				myConceptMapGroupDao.save(conceptMapGroup);
+			if (theConceptMap.hasGroup()) {
+				TermConceptMapGroup termConceptMapGroup;
+				for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+					termConceptMapGroup = new TermConceptMapGroup();
+					termConceptMapGroup.setConceptMap(termConceptMap);
+					termConceptMapGroup.setSourceUrl(group.getSource());
+					termConceptMapGroup.setTargetUrl(group.getTarget());
+					myConceptMapGroupDao.save(termConceptMapGroup);
 
-				for (TermConceptMapGroupElement conceptMapGroupElement : conceptMapGroup.getConceptMapGroupElements()) {
-					myConceptMapGroupElementDao.save(conceptMapGroupElement);
+					if (group.hasElement()) {
+						TermConceptMapGroupElement termConceptMapGroupElement;
+						for (SourceElementComponent element : group.getElement()) {
+							termConceptMapGroupElement = new TermConceptMapGroupElement();
+							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
+							termConceptMapGroupElement.setSourceCode(element.getCode());
+							termConceptMapGroupElement.setSourceDisplay(element.getDisplay());
+							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
-					for (TermConceptMapGroupElementTarget conceptMapGroupElementTarget : conceptMapGroupElement.getConceptMapGroupElementTargets()) {
-						myConceptMapGroupElementTargetDao.save(conceptMapGroupElementTarget);
+							if (element.hasTarget()) {
+								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
+								for (TargetElementComponent target : element.getTarget()) {
+									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
+									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
+									termConceptMapGroupElementTarget.setTargetCode(target.getCode());
+									termConceptMapGroupElementTarget.setTargetDisplay(target.getDisplay());
+									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+								}
+							}
+						}
 					}
 				}
 			}

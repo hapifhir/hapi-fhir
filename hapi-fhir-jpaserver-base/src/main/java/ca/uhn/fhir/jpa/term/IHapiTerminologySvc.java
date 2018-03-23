@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
@@ -57,7 +58,7 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
 
-	void storeNewConceptMap(TermConceptMap theConceptMap);
+	void storeNewConceptMap(ConceptMap theConceptMap);
 
 	boolean supportsSystem(String theCodeSystem);
 
