@@ -396,10 +396,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
-	public TermConceptMap findConceptMapByUrl(String theUrl) {
-		return myConceptMapDao.findConceptMapByUrl(theUrl);
-	}
-
 	private TermCodeSystemVersion findCurrentCodeSystemVersionForSystem(String theCodeSystem) {
 		TermCodeSystem cs = getCodeSystem(theCodeSystem);
 		if (cs == null || cs.getCurrentVersion() == null) {

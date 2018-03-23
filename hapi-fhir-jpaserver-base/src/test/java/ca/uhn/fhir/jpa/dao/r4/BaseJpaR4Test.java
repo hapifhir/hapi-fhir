@@ -27,6 +27,9 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -52,6 +55,11 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
+
+	protected static final String CM_URL = "http://example.com/my_concept_map";
+	protected static final String CS_URL = "http://example.com/my_code_system";
+	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
+	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
 
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
@@ -324,4 +332,100 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return uuid;
 	}
 
+	/**
+	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
+	 * <br>
+	 * <ul>
+	 *     <li>
+	 *         One group with two elements, each identifying one target apiece.
+	 *     </li>
+	 *     <li>
+	 *         One group with one element, identifying two targets.
+	 *     </li>
+	 * </ul>
+	 * </br>
+	 * Both groups identify the same source code system and different target code systems.
+	 * </br>
+	 * Both groups also include an element with the same source code.
+	 *
+	 * @return A TermConceptMap {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
+	 */
+	public static ConceptMap createConceptMap() {
+		// <editor-fold desc="ConceptMap">
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(CM_URL);
+
+		// <editor-fold desc="ConceptMap.group(0)">
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_2);
+
+		// <editor-fold desc="ConceptMap.group(0).element(0))">
+		SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
+		TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		// End ConceptMap.group(0).element(0).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(0).element(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(0).element(1))">
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
+
+		// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		// End ConceptMap.group(0).element(1).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(0).element(1)
+		// </editor-fold>
+
+		// End ConceptMap.group(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(1)">
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_3);
+
+		// <editor-fold desc="ConceptMap.group(1).element(0))">
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
+		// End ConceptMap.group(1).element(0).target(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
+		// End ConceptMap.group(1).element(0).target(1)
+		// </editor-fold>
+
+		// End ConceptMap.group(1).element(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(1)
+		// </editor-fold>
+
+		// End ConceptMap
+		// </editor-fold>
+
+		return conceptMap;
+	}
 }

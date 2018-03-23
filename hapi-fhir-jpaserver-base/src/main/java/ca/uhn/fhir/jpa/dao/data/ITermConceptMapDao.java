@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -26,6 +28,7 @@ import org.springframework.data.repository.query.Param;
  */
 
 public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
+	// TODO: URL should be globally unique. This requires a unique constraint.
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url")
-	TermConceptMap findConceptMapByUrl(@Param("url") String theUrl);
+	Optional<TermConceptMap> findConceptMapByUrl(@Param("url") String theUrl);
 }

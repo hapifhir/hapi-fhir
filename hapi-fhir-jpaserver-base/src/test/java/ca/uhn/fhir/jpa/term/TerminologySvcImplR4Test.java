@@ -6,10 +6,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
-import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
-import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -17,17 +13,11 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TerminologySvcImplR4Test extends BaseJpaR4Test {
-
-	private static final String CM_URL = "http://example.com/my_concept_map";
-	private static final String CS_URL = "http://example.com/my_code_system";
-	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-	private static final String CS_URL_3 = "http://example.com/my_code_system3";
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -36,15 +26,16 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreNewConceptMap() {
-		ConceptMap newConceptMap = createTermConceptMap();
-		myTermSvc.storeNewConceptMap(newConceptMap);
+		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="ConceptMap">
-				TermConceptMap conceptMap = myTermConceptMapDao.findConceptMapByUrl(CM_URL);
-				assertNotNull(conceptMap);
+				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findConceptMapByUrl(CM_URL);
+				assertTrue(optionalConceptMap.isPresent());
+
+				TermConceptMap conceptMap = optionalConceptMap.get();
 				assertEquals(2, conceptMap.getConceptMapGroups().size());
 
 				// <editor-fold desc="ConceptMap.group(0)">
@@ -128,8 +119,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslate() {
-		ConceptMap newConceptMap = createTermConceptMap();
-		myTermSvc.storeNewConceptMap(newConceptMap);
+		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -179,102 +169,5 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				// </editor-fold>
 			}
 		});
-	}
-
-	/**
-	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
-	 * <br>
-	 * <ul>
-	 *     <li>
-	 *         One group with two elements, each identifying one target apiece.
-	 *     </li>
-	 *     <li>
-	 *         One group with one element, identifying two targets.
-	 *     </li>
-	 * </ul>
-	 * </br>
-	 * Both groups identify the same source code system and different target code systems.
-	 * </br>
-	 * Both groups also include an element with the same source code.
-	 *
-	 * @return A TermConceptMap {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
-	 */
-	private ConceptMap createTermConceptMap() {
-		// <editor-fold desc="ConceptMap">
-		ConceptMap conceptMap = new ConceptMap();
-		conceptMap.setUrl(CM_URL);
-
-		// <editor-fold desc="ConceptMap.group(0)">
-		ConceptMapGroupComponent group = conceptMap.addGroup();
-		group.setSource(CS_URL);
-		group.setTarget(CS_URL_2);
-
-		// <editor-fold desc="ConceptMap.group(0).element(0))">
-		SourceElementComponent element = group.addElement();
-		element.setCode("12345");
-		element.setDisplay("Source Code 12345");
-
-		// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
-		TargetElementComponent target = element.addTarget();
-		target.setCode("34567");
-		target.setDisplay("Target Code 34567");
-		// End ConceptMap.group(0).element(0).target(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(0).element(0)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(0).element(1))">
-		element = group.addElement();
-		element.setCode("23456");
-		element.setDisplay("Source Code 23456");
-
-		// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
-		target = element.addTarget();
-		target.setCode("45678");
-		target.setDisplay("Target Code 45678");
-		// End ConceptMap.group(0).element(1).target(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(0).element(1)
-		// </editor-fold>
-
-		// End ConceptMap.group(0)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(1)">
-		group = conceptMap.addGroup();
-		group.setSource(CS_URL);
-		group.setTarget(CS_URL_3);
-
-		// <editor-fold desc="ConceptMap.group(1).element(0))">
-		element = group.addElement();
-		element.setCode("12345");
-		element.setDisplay("Source Code 12345");
-
-		// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
-		target = element.addTarget();
-		target.setCode("56789");
-		target.setDisplay("Target Code 56789");
-		// End ConceptMap.group(1).element(0).target(0)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
-		target = element.addTarget();
-		target.setCode("67890");
-		target.setDisplay("Target Code 67890");
-		// End ConceptMap.group(1).element(0).target(1)
-		// </editor-fold>
-
-		// End ConceptMap.group(1).element(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(1)
-		// </editor-fold>
-
-		// End ConceptMap
-		// </editor-fold>
-
-		return conceptMap;
 	}
 }
