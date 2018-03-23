@@ -262,6 +262,11 @@
 				A new example project showing the use of JAX-RS Server Side Events has
 				been added. Thanks to Jens Kristian Villadsen for the pull request!
 			</action>
+			<action type="remove" issue="864">
+				An unneccesary reference to the Javassist library has been
+				removed from the build. Thanks to Łukasz Dywicki for the 
+				pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">

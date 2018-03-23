@@ -406,6 +406,10 @@
 			<id>anoush-bch</id>
 			<name>Anoush Mouradian</name>
 		</developer>
+		<developer>
+			<id>splatch</id>
+			<name>Łukasz Dywicki</name>
+		</developer>
 	</developers>
 
 	<licenses>
