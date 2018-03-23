@@ -258,6 +258,10 @@
 				of FHIR the server supports and other configuration. Thanks to
 				Anoush Mouradian for the pull request!
 			</action>
+			<action type="add" issue="581">
+				A new example project showing the use of JAX-RS Server Side Events has
+				been added. Thanks to Jens Kristian Villadsen for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
