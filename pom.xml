@@ -324,9 +324,6 @@
 			<name>Joel Schneider</name>
 		</developer>
 		<developer>
-			<id>elnin0815</id>
-		</developer>
-		<developer>
 			<id>dangerousben</id>
 			<name>Ben Spencer</name>
 		</developer>
@@ -1801,6 +1798,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+			<groupId>org.owasp</groupId>
+			<artifactId>dependency-check-maven</artifactId>
+			<version>3.1.1</version>
+			<configuration>
+				<failBuildOnCVSS>8</failBuildOnCVSS>
+			</configuration>
+			<executions>
+				<execution>
+					<goals>
+						<goal>check</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
 		</plugins>
 	</build>
 
