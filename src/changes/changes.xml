@@ -267,6 +267,10 @@
 				removed from the build. Thanks to Łukasz Dywicki for the 
 				pull request!
 			</action>
+			<action type="add" issue="819">
+				Support has been added to the JPA server for the :not modifier. Thanks 
+				to Łukasz Dywicki for the pull request!
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
