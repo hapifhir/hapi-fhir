@@ -17,8 +17,11 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.Questionnaire;
+import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
 import org.hl7.fhir.instance.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -215,6 +218,32 @@ public class FhirInstanceValidatorTest {
 		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
 
 		val.registerValidatorModule(ourValidator);
+
+		ValidationResult result = val.validateWithResult(qr);
+
+		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(encoded);
+
+		assertTrue(result.isSuccessful());
+	}
+	
+	@Test
+	public void testQuestionnaireResponseValidator() {
+		final Questionnaire q = new Questionnaire();
+		q.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo").setType(AnswerFormat.BOOLEAN);
+		q.getGroup().addQuestion().setLinkId("bar").setType(AnswerFormat.TEXT);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo");
+		qr.getGroup().addQuestion().setLinkId("bar");
+		qr.setQuestionnaire(new Reference("#q"));
+		qr.getQuestionnaire().setResource(q);
+
+		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
+
+		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
+		val.registerValidatorModule(module);
 
 		ValidationResult result = val.validateWithResult(qr);
 
