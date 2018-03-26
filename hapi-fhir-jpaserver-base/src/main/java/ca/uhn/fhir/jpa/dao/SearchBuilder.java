@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,6 @@ import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -45,7 +43,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -1091,10 +1091,10 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (theParameter instanceof StringParam) {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
-			if ((id.isContains()) &&
-				(!myCallingDao.getConfig().allowContainsSearches()))
-			{
-				throw new MethodNotAllowedException(":contains modifier is disabled on this server");
+			if (id.isContains()) {
+				if (!myCallingDao.getConfig().isAllowContainsSearches()) {
+					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
+				}
 			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;
@@ -1109,18 +1109,11 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		if (myCallingDao.getConfig().allowContainsSearches()) {
-			if (theParameter instanceof StringParam) {
-				if (((StringParam) theParameter).isContains()) {
-					likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
-				} else {
-					likeExpression = createLeftMatchLikeExpression(likeExpression);
-				}
-			} else {
-				likeExpression = createLeftMatchLikeExpression(likeExpression);
-			}
-		}
-		else {
+		if (theParameter instanceof StringParam &&
+			((StringParam) theParameter).isContains() &&
+			myCallingDao.getConfig().isAllowContainsSearches()) {
+			likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+		} else {
 			likeExpression = createLeftMatchLikeExpression(likeExpression);
 		}
 
@@ -2020,12 +2013,12 @@ public class SearchBuilder implements ISearchBuilder {
 		return lastUpdatedPredicates;
 	}
 
-	private static String createLeftMatchLikeExpression(String likeExpression) {
-		return likeExpression.replace("%", "[%]") + "%";
-	}
-
 	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static String createLeftMatchLikeExpression(String likeExpression) {
+		return likeExpression.replace("%", "[%]") + "%";
 	}
 
 	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
