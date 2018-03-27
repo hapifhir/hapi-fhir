@@ -41,6 +41,28 @@
 					</ul>
 				]]>
 			</action>
+			<action tyoe="add" issue="871">
+				A number of HAPI FHIR modules have been converted so that they now work
+				as OSGi modules. Unlike the previous OSGi module, which was a mega-JAR
+				with all of HAPI FHIR in it, this is simply the appropriate
+				OSGi manifest inside the existing JARs. Thanks to John Poth
+				for the Pull Request!
+				<![CDATA[
+				<br/><br/>
+				Note that this does not cover all modules in the project. Current support includes:
+				<ul>
+					<li>HAPI-FHIR structures DSTU2, HL7ORGDSTU2, DSTU2.1, DSTU3, R4</li>
+					<li>HAPI-FHIR Resource validation DSTU2, HL7ORGDSTU2, DSTU2.1, DSTU3, R4</li>
+					<li>Apache Karaf features for all the above</li>
+					<li> Integration Tests</li>
+				</ul>
+				Remaining work includes:
+				<ul>
+					<li>HAPI-FHIR Server support</li>
+					<li> HAPI-FHIR narrative support. This might be tricky as Thymeleaf doesn't support OSGi.</li>
+				</ul>
+				]]>
+			</action>
 			<action type="fix">
 				Fix a crash in the JSON parser when parsing extensions on repeatable
 				elements (e.g. Patient.address.line) where there is an extension on the

@@ -1,0 +1,455 @@
+<QuestionnaireResponse xmlns="http://hl7.org/fhir">
+    <identifier>
+        <value value="1234567890"/>
+    </identifier>
+    <questionnaire>
+        <reference value="Questionnaire/q_jon"/>
+    </questionnaire>
+    <status value="completed"/>
+    <subject>
+        <reference value="http://fhirtest.uhn.ca/baseDstu3/Patient/proband"/>
+    </subject>
+    <author>
+        <reference value="http://fhirtest.uhn.ca/baseDstu3/Practitioner/f007"/>
+    </author>
+    <authored value="2016-01-08"/>
+    <item>
+        <linkId value="root"/>
+        <item>
+            <linkId value="g1"/>
+            <text value="CLINICAL INFORMATION"/>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="1.1"/>
+                </extension>
+                <linkId value="1.1"/>
+                <text value="Patient Clinical Information"/>
+                <answer>
+                    <valueString value="Previous chest X-RAY was suspicious. Heavy smoker, 15 pack years."/>
+                </answer>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="1.2"/>
+                </extension>
+                <linkId value="1.2"/>
+                <text value="Previous Examination (Date and Modality)"/>
+                <answer>
+                    <valueString value="Chest XR - September 23, 2015"/>
+                </answer>
+            </item>
+        </item>
+        <item>
+            <linkId value="g2"/>
+            <text value="IMAGING PROCEDURE DESCRIPTION"/>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="2.1"/>
+                </extension>
+                <linkId value="2.1"/>
+                <text value="Overall Image Quality:"/>
+                <answer>
+                    <valueCoding>
+                        <code value="2.1a"/>
+                        <display value="Adequate"/>
+                    </valueCoding>
+                </answer>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="2.2"/>
+                </extension>
+                <linkId value="2.2"/>
+                <text value="Intravenous Contrast Used?"/>
+                <answer>
+                    <valueBoolean value="false"/>
+                </answer>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="2.3"/>
+                </extension>
+                <linkId value="2.3"/>
+                <text value="Additional Comments"/>
+                <answer>
+                    <valueString value="n/a."/>
+                </answer>
+            </item>
+        </item>
+        <item>
+            <linkId value="g3"/>
+            <text value="FINDINGS"/>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="3"/>
+                </extension>
+                <linkId value="g3.0"/>
+                <text value="T Category"/>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="3.1"/>
+                    </extension>
+                    <linkId value="g3.1"/>
+                    <text value="Location of Main Nodule/Mass (Primary tumor, or Reference tumor)"/>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.1.1"/>
+                        </extension>
+                        <linkId value="q3.1.1"/>
+                        <text value="Location of main nodule/mass:"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="3.1.1a"/>
+                                <display value="Peripheral"/>
+                            </valueCoding>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.1.2"/>
+                        </extension>
+                        <linkId value="3.1.2"/>
+                        <answer>
+                            <valueString value="Right Upper Lung, Posterior segment."/>
+                        </answer>
+                    </item>
+                </item>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="3.2"/>
+                    </extension>
+                    <linkId value="g3.2"/>
+                    <text value="Size and characteristics of main nodule/mass"/>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.2.1"/>
+                        </extension>
+                        <linkId value="3.2.1"/>
+                        <text value="Size of the nodule/mass:"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="3.2.1a"/>
+                                <display value="Solid nodule/mass"/>
+                            </valueCoding>
+                        </answer>
+                        <item><!-- Measurement, image, series, etc for all 3 answer choices goes here. Conditonal. -->
+                            <linkId value="g3.2.1"/>
+                            <item><!-- Group for answer choice a -->
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen"><!-- Note that this extension is at the group level. -->
+                                    <extension url="#question">
+                                        <valueString value="3.2.1"/>
+                                    </extension>
+                                    <extension url="#answer">
+                                        <valueCoding>
+                                            <code value="3.2.1a"/>
+                                        </valueCoding>
+                                    </extension>
+                                </extension>
+                                <linkId value="g3.2.1a"/>
+                                <item>
+                                    <linkId value="3.2.1a"/>
+                                    <text value="largest dimension:"/>
+                                    <answer>
+                                        <valueInteger value="20"/>
+                                    </answer>
+                                    <item>
+                                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                            <valueCodeableConcept>
+                                                <coding>
+                                                    <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                    <code value="unit"/>
+                                                </coding>
+                                            </valueCodeableConcept>
+                                        </extension>
+                                        <text value="mm"/>
+                                    </item>
+                                </item>
+                                <item>
+                                    <linkId value="3.2.1a.image"/>
+                                    <text value="image"/>
+                                    <answer>
+                                        <valueString value="32"/>
+                                    </answer>
+                                </item>
+                                <item>
+                                    <linkId value="3.2.1a.series"/>
+                                    <text value="series"/>
+                                    <answer>
+                                        <valueString value="3"/>
+                                    </answer>
+                                </item>
+                            </item>    
+                        </item>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.2.2"/>
+                        </extension>
+                        <linkId value="3.2.2"/>
+                        <text value="Plane in which the mass was measured:"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="3.2.2a"/>
+                                <display value="Axial"/>
+                            </valueCoding>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.2.3"/>
+                        </extension>
+                        <linkId value="3.2.3"/>
+                        <answer>
+                            <valueString value="Solid attenuation of mass, margins spiculated."/>
+                        </answer>
+                    </item>
+                </item>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="3.3"/>
+                    </extension>
+                    <linkId value="g3.3"/>
+                    <text value="Structures directly involved"/>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.3.1"/>
+                        </extension>
+                        <linkId value="3.3.1"/>
+                        <text value="State if there is bronchial involvement:"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="3.3.1b"/>
+                                <display value="No"/>
+                            </valueCoding>
+                        </answer>
+                    </item>    
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.3.2"/>
+                        </extension>
+                        <linkId value="3.3.2"/>
+                        <text value="Is there direct involvement of any other anatomical structures?"/>
+                        <answer>
+                            <valueBoolean value="false"/>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.3.3"/>
+                        </extension>
+                        <linkId value="3.3.3"/>
+                        <text value="Are there additional suspicious pulmonary nodules?"/>
+                        <answer>
+                            <valueBoolean value="false"/>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="3.3.4"/>
+                        </extension>
+                        <linkId value="3.3.4"/>
+                        <text value="Other notable intrathoracic findings (eg lymphangitis carcinomatosis):"/>
+                        <answer>
+                            <valueString value="n/a"/>
+                        </answer>
+                    </item>
+                </item>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="4"/>
+                </extension>
+                <linkId value="4.0"/>
+                <text value="N Category"/>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="4.1"/>
+                    </extension>
+                    <linkId value="4.1"/>
+                    <text value="Are there enlarged lymph nodes?"/>
+                    <answer>
+                        <valueBoolean value="false"/>
+                    </answer>
+                </item>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="4.2"/>
+                    </extension>
+                    <linkId value="4.2"/>
+                    <text value="Other notable findings:"/>
+                    <answer>
+                        <valueString value="Liner / scar atelectasis lingua, anterior segment of right upper lobe and bilateral lower lobes."/>
+                    </answer>
+                </item>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="5"/>
+                </extension>
+                <linkId value="5.0"/>
+                <text value="M Category (Suspicious Extrathoracic Findings (M1b))"/>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="5.1"/>
+                    </extension>
+                    <linkId value="5.1"/>
+                    <text value="Are there suspicious extrathoracic findings?"/>
+                    <answer>
+                        <valueBoolean value="true"/>
+                    </answer>
+                    <item>
+                        <linkId value="g5.1.yes"/>
+                        <item>
+                            <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
+                                <extension url="#question">
+                                    <valueString value="5.1"/>
+                                </extension>
+                                <extension url="#answer">
+                                    <valueBoolean value="true"/>
+                                </extension>
+                            </extension>
+                            <linkId value="5.1.yes"/>
+                            <text value="Applicable Structures and Descriptions:"/>
+                            <answer>
+                                <valueCoding>
+                                    <code value="5.1.yes.d"/>
+                                    <display value="Other"/>
+                                </valueCoding>
+                            </answer>
+                            <item>
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
+                                    <extension url="#question">
+                                        <valueString value="5.1.yes"/>
+                                    </extension>
+                                    <extension url="#answer">
+                                        <valueCoding>
+                                            <code value="5.1.yes.d"/>
+                                        </valueCoding>
+                                    </extension>
+                                </extension>
+                                <linkId value="5.1.yes.d.description"/>
+                                <text value="Description of structures:"/>
+                                <answer>
+                                    <valueString value="3 cm calcified thyroid nodule on TUL left."/>
+                                </answer>
+                            </item>
+                        </item>
+                    </item>
+                </item>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="6"/>
+                </extension>
+                <linkId value="6.0"/>
+                <text value="Additional Findings"/>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="6.1"/>
+                    </extension>
+                    <linkId value="6.1"/>
+                    <text value="Are there additional findings?"/>
+                    <answer>
+                        <valueBoolean value="true"/>
+                    </answer>
+                </item>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="6.2"/>
+                    </extension>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
+                        <extension url="#question">
+                            <valueString value="6.1"/>
+                        </extension>
+                        <extension url="#answer">
+                            <valueBoolean value="true"/>
+                        </extension>
+                    </extension>
+                    <linkId value="6.2"/>
+                    <text value="Findings and Descriptions:"/>
+                    <answer>
+                        <valueString value="Oligemic changes in right upper lobe from possible old pulmonary embolus."/>
+                    </answer>
+                </item>
+            </item>
+        </item>
+        <item>
+            <linkId value="g7"/>
+            <text value="IMPRESSIONS"/>
+            <item>
+                <linkId value="g7.1"/>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                        <valueString value="7.1"/>
+                    </extension>
+                    <linkId value="7.1"/>
+                    <text value="Impression/Summary:"/>
+                    <answer>
+                        <valueString value="Spiculated mass in posterior segment of right upper lobe that has increasing size from 16 to 20 mm."/>
+                    </answer>
+                </item>
+            </item>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                    <valueString value="7.2"/>
+                </extension>
+                <linkId value="g7.2"/>
+                <text value="Radiologic Staging (TNM Version – 7th edition)"/>
+                <item>
+                    <linkId value="g7.20"/>
+                    <text value="If this is a biopsy proven carcinoma, the preliminary radiologic stage is:"/>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="i)"/>
+                        </extension>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-questionControl" >
+                            <valueCodeableConcept>
+                                <coding>
+                                    <code value="radio-button"/>
+                                    <display value="Radio Button"/>
+                                </coding>
+                            </valueCodeableConcept>
+                        </extension>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation" >
+                            <valueCode value="horizontal"/>
+                        </extension>
+                        <linkId value="7.2i"/>
+                        <text value="Primary Tumour (T):"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="T1a"/>
+                                <display value="T1a"/>
+                            </valueCoding>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="ii)"/>
+                        </extension>
+                        <linkId value="7.2ii"/>
+                        <text value="Regional Lymph Nodes (N):"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="N0"/>
+                                <display value="N0"/>
+                            </valueCoding>
+                        </answer>
+                    </item>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
+                            <valueString value="iii)"/>
+                        </extension>
+                        <linkId value="7.2iii"/>
+                        <text value="Distant Metastasis (M):"/>
+                        <answer>
+                            <valueCoding>
+                                <code value="M0"/>
+                                <display value="M0"/>
+                            </valueCoding>
+                        </answer>
+                    </item>
+                </item>
+            </item>
+        </item>
+    </item>
+</QuestionnaireResponse>
