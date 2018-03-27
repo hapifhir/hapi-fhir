@@ -15,58 +15,58 @@ public class PatientProfileDstu2 extends Patient {
 	private static final long serialVersionUID = 1L;
 
 	@Child(name="owner", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#owningOrganization", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The organization that owns this animal")
-    private ResourceReferenceDt owningOrganization;
+	@Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#owningOrganization", definedLocally=false, isModifier=false)
+	@Description(shortDefinition="The organization that owns this animal")
+	private ResourceReferenceDt owningOrganization;
 
-    public ResourceReferenceDt getOwningOrganization() {
-        if (owningOrganization == null) {
-            owningOrganization = new ResourceReferenceDt();
-        }
-        return owningOrganization;
-    }
+	public ResourceReferenceDt getOwningOrganization() {
+		if (owningOrganization == null) {
+			owningOrganization = new ResourceReferenceDt();
+		}
+		return owningOrganization;
+	}
 
-    public PatientProfileDstu2 setOwningOrganization(ResourceReferenceDt owningOrganization) {
-        this.owningOrganization = owningOrganization;
-        return this;
-    }
+	public PatientProfileDstu2 setOwningOrganization(ResourceReferenceDt owningOrganization) {
+		this.owningOrganization = owningOrganization;
+		return this;
+	}
 
-    @Child(name="colorPrimary", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorPrimary", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The animals primary color")
-    private CodeableConceptDt colorPrimary;
+	@Child(name="colorPrimary", min=0, max=1)
+	@Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorPrimary", definedLocally=false, isModifier=false)
+	@Description(shortDefinition="The animals primary color")
+	private CodeableConceptDt colorPrimary;
 
-    @Child(name="colorSecondary", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The animals secondary color")
-    private CodeableConceptDt colorSecondary;
+	@Child(name="colorSecondary", min=0, max=1)
+	@Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary", definedLocally=false, isModifier=false)
+	@Description(shortDefinition="The animals secondary color")
+	private CodeableConceptDt colorSecondary;
 
-    public CodeableConceptDt getColorPrimary() {
-        if (this.colorPrimary == null) {
-            return new CodeableConceptDt();
-        }
-        return colorPrimary;
-    }
+	public CodeableConceptDt getColorPrimary() {
+		if (this.colorPrimary == null) {
+			return new CodeableConceptDt();
+		}
+		return colorPrimary;
+	}
 
-    public void setColorPrimary(CodeableConceptDt colorPrimary) {
-        this.colorPrimary = colorPrimary;
-    }
+	public void setColorPrimary(CodeableConceptDt colorPrimary) {
+		this.colorPrimary = colorPrimary;
+	}
 
-    public CodeableConceptDt getColorSecondary() {
-        if (this.colorSecondary == null) {
-            return new CodeableConceptDt();
-        }
-        return colorSecondary;
-    }
+	public CodeableConceptDt getColorSecondary() {
+		if (this.colorSecondary == null) {
+			return new CodeableConceptDt();
+		}
+		return colorSecondary;
+	}
 
-    public void setColorSecondary(CodeableConceptDt colorSecondary) {
-        this.colorSecondary = colorSecondary;
-    }
+	public void setColorSecondary(CodeableConceptDt colorSecondary) {
+		this.colorSecondary = colorSecondary;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return super.isEmpty() && ElementUtil.isEmpty(owningOrganization) &&  ElementUtil.isEmpty(colorPrimary)
-                && ElementUtil.isEmpty(colorSecondary) ;
-    }
+	@Override
+	public boolean isEmpty() {
+		return super.isEmpty() && ElementUtil.isEmpty(owningOrganization) &&  ElementUtil.isEmpty(colorPrimary)
+				&& ElementUtil.isEmpty(colorSecondary) ;
+	}
 
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.tests.integration.karaf.r4;
+package ca.uhn.fhir.tests.integration.karaf.client;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,11 +37,11 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConf
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class FhirInstanceValidatorR4Test {
+public class FhirClientTest {
 
 	private FhirContext ourCtx = FhirContext.forR4();
 	private FHIRPathEngine ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
-	private final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
+	private final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirClientTest.class);
 
 	@Configuration
 	public Option[] config() throws IOException {
