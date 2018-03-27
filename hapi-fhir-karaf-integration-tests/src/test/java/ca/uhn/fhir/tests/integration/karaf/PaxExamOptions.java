@@ -39,6 +39,16 @@ public enum PaxExamOptions {
 				.versionAsInProject(),
 			"wrap")
 	),
+	HAPI_FHIR_CLIENT(
+		features(
+			maven()
+				.groupId("ca.uhn.hapi.fhir.karaf")
+				.artifactId("hapi-fhir")
+				.type("xml")
+				.classifier("features")
+				.versionAsInProject(),
+			"hapi-fhir-client")
+	),
 	HAPI_FHIR_HL7ORG_DSTU2(
 		features(
 			maven()
