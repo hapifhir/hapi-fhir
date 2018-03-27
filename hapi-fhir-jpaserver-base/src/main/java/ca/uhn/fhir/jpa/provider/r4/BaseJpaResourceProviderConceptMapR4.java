@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationResult;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -36,15 +35,15 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 	})
 	public Parameters translate(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
 		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
+		@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
 		RequestDetails theRequestDetails
 	) {
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
-			TranslationResult result = dao.translate(theSourceCode, theSourceCodeSystem, theTargetCodeSystem, theRequestDetails);
+			IFhirResourceDaoConceptMap.TranslationResult result = dao.translate(theSourceCodeSystem, theTargetCodeSystem, theSourceCode, theRequestDetails);
 			return result.toParameters();
 		} finally {
 			endRequest(theServletRequest);

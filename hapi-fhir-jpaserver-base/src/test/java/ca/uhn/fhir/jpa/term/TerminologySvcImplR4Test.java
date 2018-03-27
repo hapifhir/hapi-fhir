@@ -126,7 +126,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to one target code">
 				List<TermConceptMapGroupElementTarget> targets =
-					myTermSvc.translate(CS_URL,"12345",CS_URL_2);
+					myTermSvc.translate(CS_URL, CS_URL_2, "12345");
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 
@@ -149,7 +149,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				// </editor-fold>
 
 				// <editor-fold desc="Map one source code to multiple target codes">
-				targets = myTermSvc.translate(CS_URL,"12345",CS_URL_3);
+				targets = myTermSvc.translate(CS_URL, CS_URL_3, "12345");
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 
@@ -163,7 +163,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				// </editor-fold>
 
 				// <editor-fold desc="Attempt to map unknown source code">
-				targets = myTermSvc.translate(CS_URL,"BOGUS",CS_URL_3);
+				targets = myTermSvc.translate(CS_URL, CS_URL_3, "BOGUS");
 				assertNotNull(targets);
 				assertTrue(targets.isEmpty());
 				// </editor-fold>

@@ -37,21 +37,19 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoConceptMapR4.class);
-
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
 
 	@Override
-	public TranslationResult translate(IPrimitiveType<String> theSourceCode, IPrimitiveType<String> theSourceSystem, IPrimitiveType<String> theTargetSystem, RequestDetails theRequestDetails) {
+	public TranslationResult translate(IPrimitiveType<String> theSourceCodeSystem, IPrimitiveType<String> theTargetCodeSystem, IPrimitiveType<String> theSourceCode, RequestDetails theRequestDetails) {
 		TranslationResult retVal = new TranslationResult();
 
+		String sourceCodeSystem = theSourceCodeSystem.getValueAsString();
+		String targetCodeSystem = theTargetCodeSystem.getValueAsString();
 		String sourceCode = theSourceCode.getValueAsString();
-		String sourceSystem = theSourceSystem.getValueAsString();
-		String targetSystem = theTargetSystem.getValueAsString();
 		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
-		if (isNoneBlank(sourceCode, sourceSystem, targetSystem)) {
-			targets = myHapiTerminologySvc.translate(sourceCode, sourceSystem, targetSystem);
+		if (isNoneBlank(sourceCodeSystem, targetCodeSystem, sourceCode)) {
+			targets = myHapiTerminologySvc.translate(sourceCodeSystem, targetCodeSystem, sourceCode);
 		}
 
 		if (targets.isEmpty()) {

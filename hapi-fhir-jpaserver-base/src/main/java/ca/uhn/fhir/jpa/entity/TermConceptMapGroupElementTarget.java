@@ -7,8 +7,8 @@ import java.io.Serializable;
 @Table(name = "TRM_CONCEPT_MAP_GRP_ELM_TGT")
 public class TermConceptMapGroupElementTarget implements Serializable {
 	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_GRP_ELM_TGT_PID", sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_TGT_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GRP_ELM_TGT_PID")
+	@SequenceGenerator(name = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID", sequenceName = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID")
 	@Column(name = "PID")
 	private Long myId;
 

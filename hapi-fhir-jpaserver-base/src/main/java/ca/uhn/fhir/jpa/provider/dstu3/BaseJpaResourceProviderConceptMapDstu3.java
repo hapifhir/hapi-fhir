@@ -20,13 +20,8 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.rest.annotation.Operation;
 import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.Parameters;
 
 public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderDstu3<ConceptMap> {
-	@Operation(name = "$translate", idempotent = true)
-	public Parameters translate() {
-		return null;
-	}
+	// TODO: Convert version and use BaseJpaResourceProviderConceptMapR4 implementation.
 }

@@ -105,7 +105,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
-	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -245,6 +245,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 
 	@After()
 	public void afterCleanupDao() {
@@ -348,7 +350,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	 * </br>
 	 * Both groups also include an element with the same source code.
 	 *
-	 * @return A TermConceptMap {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
+	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
 	 */
 	public static ConceptMap createConceptMap() {
 		// <editor-fold desc="ConceptMap">

@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.StringType;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFhirResourceDao<T> {
-	TranslationResult translate(IPrimitiveType<String> theSourceCode, IPrimitiveType<String> theSourceSystem, IPrimitiveType<String> theTargetSystem, RequestDetails theRequestDetails);
+	TranslationResult translate(IPrimitiveType<String> theSourceCodeSystem, IPrimitiveType<String> theTargetCodeSystem, IPrimitiveType<String> theSourceCode, RequestDetails theRequestDetails);
 
 	class TranslationResult {
 		private boolean myIsMatched;

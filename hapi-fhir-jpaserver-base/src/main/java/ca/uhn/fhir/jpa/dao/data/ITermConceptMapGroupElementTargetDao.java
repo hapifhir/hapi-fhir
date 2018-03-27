@@ -34,6 +34,6 @@ public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<Term
 		"AND t.myConceptMapGroupElement.mySourceCode = :source_code")
 	List<TermConceptMapGroupElementTarget> findTargetsByCodeSystemsAndSourceCode(
 		@Param("source_code_system") String theSourceCodeSystem,
-		@Param("source_code") String theSourceCode,
-		@Param("target_code_system") String theTargetCodeSystem);
+		@Param("target_code_system") String theTargetCodeSystem,
+		@Param("source_code") String theSourceCode);
 }
