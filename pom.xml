@@ -411,6 +411,11 @@
 			<id>anthonys123</id>
 			<name>Anthony Sute</name>
 		</developer>
+		<developer>
+			<id>johnpoth</id>
+			<name>John Poth</name>
+			<organization>Red Hat</organization>
+		</developer>
 	</developers>
 
 	<licenses>
