@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -609,7 +610,7 @@
 				<groupId>es.nitaur.markdown</groupId>
 				<artifactId>txtmark</artifactId>
 				<version>0.16</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>javax.ejb</groupId>
 				<artifactId>ejb-api</artifactId>
@@ -676,9 +677,9 @@
 				<version>2.0.1</version>
 			</dependency>
 			<dependency>
-	         <groupId>junit</groupId>
-	         <artifactId>junit</artifactId>
-	         <version>4.12</version>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
 			</dependency>
 			<dependency>
 				<groupId>lt.velykis.maven.skins</groupId>
@@ -1320,7 +1321,8 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>
-						jacoco-maven-plugin</artifactId>
+						jacoco-maven-plugin
+					</artifactId>
 					<version>0.7.9</version>
 				</plugin>
 				<plugin>
@@ -1568,7 +1570,9 @@
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
+									<replacetoken>
+										http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css
+									</replacetoken>
 									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
@@ -1578,8 +1582,10 @@
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacetoken>
-									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacevalue>
+									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacetoken>
+									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
@@ -1623,28 +1629,35 @@
 								<echo>Adding Fontawesome</echo>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
-									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
+									<replacetoken>
+										<![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
+									<replacevalue>
+										<![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
-									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
+									<replacetoken>
+										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
+									<replacevalue>
+										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
@@ -1860,9 +1873,12 @@
 				<configuration>
 					<reportsDirectories>
 						<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/
+						</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/
+						</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/
+						</reportDirectory>
 					</reportsDirectories>
 				</configuration>
 			</plugin>
@@ -1977,8 +1993,6 @@
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
-				<module>hapi-fhir-karaf-features</module>
-				<module>hapi-fhir-karaf-integration-tests</module>
 				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->
@@ -2006,6 +2020,8 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
+				<module>osgi/hapi-fhir-karaf-features</module>
+				<module>osgi/hapi-fhir-karaf-integration-tests</module>
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>

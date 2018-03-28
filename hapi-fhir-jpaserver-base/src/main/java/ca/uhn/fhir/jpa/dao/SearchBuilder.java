@@ -59,6 +59,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.engine.spi.EntityKey;
+import org.hibernate.engine.spi.PersistenceContext;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -104,6 +107,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
+	private int myFetchSize;
 
 	/**
 	 * Constructor
@@ -1927,6 +1931,11 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
+	public void setFetchSize(int theFetchSize) {
+		myFetchSize = theFetchSize;
+	}
+
+	@Override
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
@@ -2181,6 +2190,7 @@ public class SearchBuilder implements ISearchBuilder {
 				final TypedQuery<Long> query = createQuery(mySort, maximumResults);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
+				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 				myResultsIterator = new ScrollableResultsIterator(scroll);
 
