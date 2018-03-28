@@ -206,6 +206,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
+		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo;
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
@@ -233,7 +234,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				public SimpleBundleProvider doInTransaction(TransactionStatus theStatus) {
 
 					// Load the results synchronously
-					final List<Long> pids = new ArrayList<Long>();
+					final List<Long> pids = new ArrayList<>();
 
 					Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
 					while (resultIter.hasNext()) {
@@ -458,8 +459,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private final SearchParameterMap myParams;
 		private final String myResourceType;
 		private final Search mySearch;
-		private final ArrayList<Long> mySyncedPids = new ArrayList<Long>();
-		private final ArrayList<Long> myUnsyncedPids = new ArrayList<Long>();
+		private final ArrayList<Long> mySyncedPids = new ArrayList<>();
+		private final ArrayList<Long> myUnsyncedPids = new ArrayList<>();
 		private boolean myAbortRequested;
 		private int myCountSaved = 0;
 		private String mySearchUuid;
@@ -503,7 +504,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * It is called automatically by the thread pool.
 		 */
 		@Override
-		public Void call() throws Exception {
+		public Void call() {
 			StopWatch sw = new StopWatch();
 
 			try {
@@ -631,10 +632,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			boolean keepWaiting;
 			do {
 				synchronized (mySyncedPids) {
-					keepWaiting = false;
-					if (mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING) {
-						keepWaiting = true;
-					}
+					keepWaiting = mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING;
 				}
 				if (keepWaiting) {
 					ourLog.info("Waiting, as we only have {} results", mySyncedPids.size());

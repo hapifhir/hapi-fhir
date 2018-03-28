@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR - Validation Resources DSTU2.1 (2016May)</name>
 
@@ -20,6 +20,20 @@
 				<filtering>false</filtering>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 </project>

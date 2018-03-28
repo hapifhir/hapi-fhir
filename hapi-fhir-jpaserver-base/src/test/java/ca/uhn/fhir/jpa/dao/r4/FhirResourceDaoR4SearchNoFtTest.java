@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
 	@Before
@@ -1404,43 +1406,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-	/**
-	 * See #819
-	 */
-	@Test
-	public void testSearchTokenWithNotModifier() {
-		String male, female;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().setFamily("Tester").addGiven("Joe");
-			patient.setGender(AdministrativeGender.MALE);
-			male = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().setFamily("Tester").addGiven("Jane");
-			patient.setGender(AdministrativeGender.FEMALE);
-			female = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
-		}
-
-		List<String> patients;
-		SearchParameterMap params;
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
-		params.setLoadSynchronous(true);
-		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patients, contains(male));
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
-		params.setLoadSynchronous(true);
-		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patients, contains(female));
-	}
-
 	@Test
 	public void testSearchNumberParam() {
 		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
@@ -2122,6 +2087,43 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * See #819
+	 */
+	@Test
+	public void testSearchTokenWithNotModifier() {
+		String male, female;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			patient.setGender(AdministrativeGender.MALE);
+			male = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().setFamily("Tester").addGiven("Jane");
+			patient.setGender(AdministrativeGender.FEMALE);
+			female = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		}
+
+		List<String> patients;
+		SearchParameterMap params;
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
+		params.setLoadSynchronous(true);
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, contains(male));
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
+		params.setLoadSynchronous(true);
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, contains(female));
+	}
+
 	@Test
 	public void testSearchTokenWrongParam() {
 		Patient p1 = new Patient();
@@ -2255,6 +2257,67 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), empty());
 
+	}
+
+	@Test
+	public void testSearchWithContains() {
+
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("ABCDEFGHIJK");
+		String pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient pt2 = new Patient();
+		pt2.addName().setFamily("FGHIJK");
+		String pt2id = myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
+
+		Patient pt3 = new Patient();
+		pt3.addName().setFamily("ZZZZZ");
+		myPatientDao.create(pt3).getId().toUnqualifiedVersionless().getValue();
+
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		// Contains = true
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("FGHIJK").setContains(true));
+		map.setLoadSynchronous(true);
+		results = myPatientDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder(pt1id, pt2id));
+
+		// Contains = false
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("FGHIJK").setContains(false));
+		map.setLoadSynchronous(true);
+		results = myPatientDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder(pt2id));
+
+		// No contains
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("FGHIJK"));
+		map.setLoadSynchronous(true);
+		results = myPatientDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder(pt2id));
+	}
+
+	@Test
+	public void testSearchWithContainsDisabled() {
+		myDaoConfig.setAllowContainsSearches(false);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_NAME, new StringParam("FGHIJK").setContains(true));
+
+		try {
+			myPatientDao.search(map);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals(":contains modifier is disabled on this server", e.getMessage());
+		}
 	}
 
 	@Test

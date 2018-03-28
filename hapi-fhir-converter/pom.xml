@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-converter</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>
@@ -134,5 +134,21 @@
 				<filtering>false</filtering>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							ca.uhn.fhir.rest.server*;resolution:=optional,
+							javax.servlet.http;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>

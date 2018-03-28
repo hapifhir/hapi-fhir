@@ -1,0 +1,50 @@
+<Bundle xmlns="http://hl7.org/fhir">
+  <id value="fe7ff16d-8bdf-47a5-9de3-20165c6fe440" />
+  <meta>
+    <lastUpdated value="2016-08-25T12:17:12.159-04:00" />
+  </meta>
+  <type value="searchset" />
+  <total value="208" />
+  <link>
+    <relation value="self" />
+    <url value="http://foo.uhn.on.ca:25180/uhn-fhir-service-2.1/DiagnosticReport?_format=xml&amp;_include=DiagnosticReport%3Aencounter&amp;_include=Encounter%3AfacilityLocation&amp;_include=Observation%3Aperformer&amp;_include=DiagnosticReport%3Aresult&amp;_include=Encounter%3Alocation&amp;_include=Location.partOf&amp;_include=Encounter%3Aparticipant&amp;_include=DiagnosticReport%3Apatient&amp;subject%3Aidentifier=urn%3Aoid%3A2.16.840.1.113883.3.239.18.148%7C7000135" />
+  </link>
+ <entry>
+    <fullUrl value="http://uhnvesb01d.uhn.on.ca:25180/uhn-fhir-service-2.1/DiagnosticReport/7162221" />
+    <resource>
+      <DiagnosticReport xmlns="http://hl7.org/fhir">
+        <id value="7162221" />
+        <meta>
+          <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+          <profile value="http://fhir.uhn.ca/Profile/diagnosticreport" />
+        </meta>
+        <extension url="http://fhir.uhn.ca/Profile/diagnosticreport#source_system_status">
+          <valueString value="F" />
+        </extension>
+        <identifier>
+          <system value="urn:uhn:qcpr:order_ids" />
+          <value value="GI93#discharge_5677961273802d07ad7d079141525bba" />
+        </identifier>
+        <status value="final" />
+        <code>
+          <coding>
+            <system value="urn:oid:1.3.6.1.4.1.12201.102.5" />
+            <code value="5053" />
+          </coding>
+          <text value="Unscheduled Discharge Summary" />
+        </code>
+        <subject>
+          <reference value="Patient/5556918" />
+        </subject>
+        <encounter>
+          <reference value="Encounter/5885735" />
+        </encounter>
+        <effectiveDateTime value="2014-09-26T11:55:00-04:00" />
+        <issued value="2014-09-26T11:55:33.000-04:00" />
+        <result>
+          <reference value="#1" />
+        </result>
+      </DiagnosticReport>
+    </resource>
+  </entry>
+</Bundle>
