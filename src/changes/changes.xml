@@ -297,6 +297,13 @@
 				Suport for the :contains string search parameter modifier has been added to
 				the JPA server. Thanks to Anthony Sute for the pull request!
 			</action>
+			<action type="fix">
+				All instances of DefaultProfileValidationSupport (i.e. one for
+				each version of FHIR) have been fixed so that they explicitly
+				close any InputStreams they open in order to read the built-in
+				profile resources. Leaving these open caused resource starvation
+				in some cases under heavy load.
+			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">
 			<action type="add">
