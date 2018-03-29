@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import javax.persistence.*;
@@ -73,6 +74,8 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	public String getConceptMapUrl() {
 		if (myConceptMapUrl == null) {
 			myConceptMapUrl = getConceptMapGroupElement().getConceptMapGroup().getConceptMap().getUrl();
+
+			CodeType code = new CodeType();
 		}
 		return myConceptMapUrl;
 	}

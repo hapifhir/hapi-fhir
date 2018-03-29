@@ -64,8 +64,9 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 			retVal.setMessage(new StringType("Matches found!"));
 
-			TranslationMatch translationMatch = new TranslationMatch();
+			TranslationMatch translationMatch;
 			for (TermConceptMapGroupElementTarget target : targets) {
+				translationMatch = new TranslationMatch();
 
 				translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
 
@@ -74,6 +75,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 						.setCode(target.getCode())
 						.setSystem(target.getSystem())
 						.setDisplay(target.getDisplay())
+						.setUserSelected(false)
 				);
 
 				translationMatch.setSource(new UriType(target.getConceptMapUrl()));

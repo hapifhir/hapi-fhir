@@ -127,7 +127,41 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslate() {
+	public void testTranslateOneToMany() {
+		myTermSvc.storeNewConceptMap(createConceptMap());
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Map one source code to multiple target codes">
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(CS_URL, CS_URL_3, "12345");
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+
+				target = targets.get(1);
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				// </editor-fold>
+
+				// <editor-fold desc="Attempt to map unknown source code">
+				targets = myTermSvc.translate(CS_URL, CS_URL_3, "BOGUS");
+				assertNotNull(targets);
+				assertTrue(targets.isEmpty());
+				// </editor-fold>
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateOneToOne() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -158,27 +192,19 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertNotNull(conceptMap);
 				// </editor-fold>
 				// </editor-fold>
+			}
+		});
+	}
 
-				// <editor-fold desc="Map one source code to multiple target codes">
-				targets = myTermSvc.translate(CS_URL, CS_URL_3, "12345");
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
+	@Test
+	public void testTranslateUnmapped() {
+		myTermSvc.storeNewConceptMap(createConceptMap());
 
-				target = targets.get(0);
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
-
-				target = targets.get(1);
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
-				// </editor-fold>
-
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
-				targets = myTermSvc.translate(CS_URL, CS_URL_3, "BOGUS");
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(CS_URL, CS_URL_3, "BOGUS");
 				assertNotNull(targets);
 				assertTrue(targets.isEmpty());
 				// </editor-fold>

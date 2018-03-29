@@ -45,9 +45,11 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
 		RequestDetails theRequestDetails
 	) {
+		// TODO: Throw InvalidRequestException for bad input.
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
+			// TODO: Account for different inputs.
 			IFhirResourceDaoConceptMap.TranslationResult result = dao.translate(theSourceCodeSystem, theTargetCodeSystem, theSourceCode, theRequestDetails);
 			return result.toParameters();
 		} finally {
