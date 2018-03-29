@@ -75,13 +75,13 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"additive"</span>)
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theAdditive, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Return nutrition orders requested on this date"</span>)
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"datetime"</span>)
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			DateRangeParam theDatetime, 
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Return nutrition orders with this encounter identifier"</span>)
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"context"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			ReferenceAndListParam theContext, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Return nutrition orders with this encounter identifier"</span>)
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"encounter"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theEncounter, 
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Return nutrition orders requested on this date"</span>)
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"datetime"</span>)
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			DateRangeParam theDatetime, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"Type of enteral or infant formula"</span>)
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"formula"</span>)
@@ -121,7 +121,7 @@
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 					<span class="jxr_string">"NutritionOrder:encounter"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> , 						<span class="jxr_string">"NutritionOrder:encounter"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> , 						<span class="jxr_string">"NutritionOrder:encounter"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 					<span class="jxr_string">"NutritionOrder:context"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> , 						<span class="jxr_string">"NutritionOrder:context"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> , 						<span class="jxr_string">"NutritionOrder:context"</span> , 					<span class="jxr_string">"NutritionOrder:patient"</span> , 					<span class="jxr_string">"NutritionOrder:provider"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 			}) 
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 			
@@ -143,8 +143,8 @@
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 			paramMap.add(<span class="jxr_string">"additive"</span>, theAdditive);
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			paramMap.add(<span class="jxr_string">"datetime"</span>, theDatetime);
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			paramMap.add(<span class="jxr_string">"encounter"</span>, theEncounter);
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			paramMap.add(<span class="jxr_string">"context"</span>, theContext);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			paramMap.add(<span class="jxr_string">"datetime"</span>, theDatetime);
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 			paramMap.add(<span class="jxr_string">"formula"</span>, theFormula);
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 			paramMap.add(<span class="jxr_string">"oraldiet"</span>, theOraldiet);

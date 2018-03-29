@@ -88,8 +88,8 @@
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  			TokenAndListParam theFormat, 
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>    
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"Implementation guides supported"</span>)
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"guide"</span>)
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			UriAndListParam theGuide, 
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"guide"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			ReferenceAndListParam theGuide, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"Intended jurisdiction for the capability statement"</span>)
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"jurisdiction"</span>)
@@ -153,7 +153,7 @@
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 					<span class="jxr_string">"CapabilityStatement:resource-profile"</span> , 					<span class="jxr_string">"CapabilityStatement:supported-profile"</span> , 						<span class="jxr_string">"CapabilityStatement:resource-profile"</span> , 					<span class="jxr_string">"CapabilityStatement:supported-profile"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 					<span class="jxr_string">"CapabilityStatement:guide"</span> , 					<span class="jxr_string">"CapabilityStatement:resource-profile"</span> , 					<span class="jxr_string">"CapabilityStatement:supported-profile"</span> , 						<span class="jxr_string">"CapabilityStatement:guide"</span> , 					<span class="jxr_string">"CapabilityStatement:resource-profile"</span> , 					<span class="jxr_string">"CapabilityStatement:supported-profile"</span> , 						<span class="jxr_string">"CapabilityStatement:guide"</span> , 					<span class="jxr_string">"CapabilityStatement:resource-profile"</span> , 					<span class="jxr_string">"CapabilityStatement:supported-profile"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 			}) 
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 			

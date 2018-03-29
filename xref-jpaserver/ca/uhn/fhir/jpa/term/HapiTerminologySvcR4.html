@@ -15,7 +15,7 @@
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermCodeSystem;
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermConcept;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.util.StopWatch;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.StopWatch;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.server.RequestDetails;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.BaseServerResponseException;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.InternalErrorException;
@@ -205,7 +205,7 @@
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 			FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 			jpaQuery.setMaxResults(1000);
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> 
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 			StopWatch sw = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/util/StopWatch.html">StopWatch</a>();
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 			StopWatch sw = <strong class="jxr_keyword">new</strong> StopWatch();
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> 			@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L203" href="#L203">203</a> 			List&lt;TermConcept&gt; result = jpaQuery.getResultList();

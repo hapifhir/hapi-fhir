@@ -92,8 +92,8 @@
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  			DateRangeParam theDate, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"Original Definition for the search parameter"</span>)
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"derived-from"</span>)
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			UriAndListParam theDerived_from, 
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"derived-from"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			ReferenceAndListParam theDerived_from, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"The description of the search parameter"</span>)
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"description"</span>)
@@ -141,7 +141,7 @@
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 					<span class="jxr_string">"SearchParameter:component"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 					<span class="jxr_string">"SearchParameter:component"</span> , 					<span class="jxr_string">"SearchParameter:derived-from"</span> , 						<span class="jxr_string">"SearchParameter:component"</span> , 					<span class="jxr_string">"SearchParameter:derived-from"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 			}) 
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 			

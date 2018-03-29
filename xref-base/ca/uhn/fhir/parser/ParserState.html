@@ -814,7 +814,7 @@
 <a class="jxr_linenumber" name="L806" href="#L806">806</a> 				@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L807" href="#L807">807</a> 				List&lt;IBase&gt; securityLabels = (List&lt;IBase&gt;) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
 <a class="jxr_linenumber" name="L808" href="#L808">808</a> 				<strong class="jxr_keyword">if</strong> (securityLabels == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L809" href="#L809">809</a> 					securityLabels = <strong class="jxr_keyword">new</strong> ArrayList&lt;IBase&gt;();
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> 					securityLabels = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L810" href="#L810">810</a> 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 <a class="jxr_linenumber" name="L811" href="#L811">811</a> 				}
 <a class="jxr_linenumber" name="L812" href="#L812">812</a> 				IBase securityLabel = myContext.getVersion().newCodingDt();
@@ -849,753 +849,772 @@
 <a class="jxr_linenumber" name="L841" href="#L841">841</a> 			}
 <a class="jxr_linenumber" name="L842" href="#L842">842</a> 		}
 <a class="jxr_linenumber" name="L843" href="#L843">843</a> 
-<a class="jxr_linenumber" name="L844" href="#L844">844</a> 	}
-<a class="jxr_linenumber" name="L845" href="#L845">845</a> 
-<a class="jxr_linenumber" name="L846" href="#L846">846</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaVersionElementState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L847" href="#L847">847</a> 
-<a class="jxr_linenumber" name="L848" href="#L848">848</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/base/resource/ResourceMetadataMap.html">ResourceMetadataMap</a> myMap;
-<a class="jxr_linenumber" name="L849" href="#L849">849</a> 
-<a class="jxr_linenumber" name="L850" href="#L850">850</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaVersionElementState</a>(ParserState&lt;T&gt;.PreResourceState thePreResourceState, <a href="../../../../ca/uhn/fhir/model/base/resource/ResourceMetadataMap.html">ResourceMetadataMap</a> theMap) {
-<a class="jxr_linenumber" name="L851" href="#L851">851</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
-<a class="jxr_linenumber" name="L852" href="#L852">852</a> 			myMap = theMap;
-<a class="jxr_linenumber" name="L853" href="#L853">853</a> 		}
-<a class="jxr_linenumber" name="L854" href="#L854">854</a> 
-<a class="jxr_linenumber" name="L855" href="#L855">855</a> 		@Override
-<a class="jxr_linenumber" name="L856" href="#L856">856</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L857" href="#L857">857</a> 			myMap.put(ResourceMetadataKeyEnum.VERSION, theValue);
-<a class="jxr_linenumber" name="L858" href="#L858">858</a> 		}
-<a class="jxr_linenumber" name="L859" href="#L859">859</a> 
-<a class="jxr_linenumber" name="L860" href="#L860">860</a> 		@Override
-<a class="jxr_linenumber" name="L861" href="#L861">861</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L862" href="#L862">862</a> 			pop();
-<a class="jxr_linenumber" name="L863" href="#L863">863</a> 		}
+<a class="jxr_linenumber" name="L844" href="#L844">844</a> 		@Override
+<a class="jxr_linenumber" name="L845" href="#L845">845</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElementExtension(StartElement theElem, String theUrlAttr, <strong class="jxr_keyword">boolean</strong> theIsModifier, <strong class="jxr_keyword">final</strong> String baseServerUrl) {
+<a class="jxr_linenumber" name="L846" href="#L846">846</a> 			ResourceMetadataKeyEnum.ExtensionResourceMetadataKey resourceMetadataKeyEnum = <strong class="jxr_keyword">new</strong> ResourceMetadataKeyEnum.ExtensionResourceMetadataKey(theUrlAttr);
+<a class="jxr_linenumber" name="L847" href="#L847">847</a> 			Object metadataValue = myMap.get(resourceMetadataKeyEnum);
+<a class="jxr_linenumber" name="L848" href="#L848">848</a> 			ExtensionDt newExtension;
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> 			<strong class="jxr_keyword">if</strong> (metadataValue == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L850" href="#L850">850</a> 				newExtension = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/api/ExtensionDt.html">ExtensionDt</a>(theIsModifier);
+<a class="jxr_linenumber" name="L851" href="#L851">851</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (metadataValue instanceof ExtensionDt) {
+<a class="jxr_linenumber" name="L852" href="#L852">852</a> 				newExtension = (ExtensionDt) metadataValue;
+<a class="jxr_linenumber" name="L853" href="#L853">853</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L854" href="#L854">854</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"Expected ExtensionDt as custom resource metadata type, got: "</span> + metadataValue.getClass().getSimpleName());
+<a class="jxr_linenumber" name="L855" href="#L855">855</a> 			}
+<a class="jxr_linenumber" name="L856" href="#L856">856</a> 			newExtension.setUrl(theUrlAttr);
+<a class="jxr_linenumber" name="L857" href="#L857">857</a> 			myMap.put(resourceMetadataKeyEnum, newExtension);
+<a class="jxr_linenumber" name="L858" href="#L858">858</a> 
+<a class="jxr_linenumber" name="L859" href="#L859">859</a> 			ExtensionState newState = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ExtensionState</a>(getPreResourceState(), newExtension);
+<a class="jxr_linenumber" name="L860" href="#L860">860</a> 			push(newState);
+<a class="jxr_linenumber" name="L861" href="#L861">861</a> 		}
+<a class="jxr_linenumber" name="L862" href="#L862">862</a> 
+<a class="jxr_linenumber" name="L863" href="#L863">863</a> 	}
 <a class="jxr_linenumber" name="L864" href="#L864">864</a> 
-<a class="jxr_linenumber" name="L865" href="#L865">865</a> 		@Override
-<a class="jxr_linenumber" name="L866" href="#L866">866</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L867" href="#L867">867</a> 			myErrorHandler.unknownElement(<strong class="jxr_keyword">null</strong>, theLocalPart);
-<a class="jxr_linenumber" name="L868" href="#L868">868</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(getPreResourceState()));
-<a class="jxr_linenumber" name="L869" href="#L869">869</a> 			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L870" href="#L870">870</a> 		}
-<a class="jxr_linenumber" name="L871" href="#L871">871</a> 
-<a class="jxr_linenumber" name="L872" href="#L872">872</a> 	}
+<a class="jxr_linenumber" name="L865" href="#L865">865</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaVersionElementState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> 
+<a class="jxr_linenumber" name="L867" href="#L867">867</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/base/resource/ResourceMetadataMap.html">ResourceMetadataMap</a> myMap;
+<a class="jxr_linenumber" name="L868" href="#L868">868</a> 
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaVersionElementState</a>(ParserState&lt;T&gt;.PreResourceState thePreResourceState, <a href="../../../../ca/uhn/fhir/model/base/resource/ResourceMetadataMap.html">ResourceMetadataMap</a> theMap) {
+<a class="jxr_linenumber" name="L870" href="#L870">870</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
+<a class="jxr_linenumber" name="L871" href="#L871">871</a> 			myMap = theMap;
+<a class="jxr_linenumber" name="L872" href="#L872">872</a> 		}
 <a class="jxr_linenumber" name="L873" href="#L873">873</a> 
-<a class="jxr_linenumber" name="L874" href="#L874">874</a> 
-<a class="jxr_linenumber" name="L875" href="#L875">875</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L876" href="#L876">876</a> 
-<a class="jxr_linenumber" name="L877" href="#L877">877</a> 		<strong class="jxr_keyword">private</strong> Map&lt;String, IBaseResource&gt; myContainedResources;
-<a class="jxr_linenumber" name="L878" href="#L878">878</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myInstance;
-<a class="jxr_linenumber" name="L879" href="#L879">879</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> myParentVersion;
-<a class="jxr_linenumber" name="L880" href="#L880">880</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myRequireResourceType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L881" href="#L881">881</a> 		<strong class="jxr_keyword">private</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; myResourceType;
-<a class="jxr_linenumber" name="L882" href="#L882">882</a> 
-<a class="jxr_linenumber" name="L883" href="#L883">883</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L884" href="#L884">884</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L885" href="#L885">885</a> 			myResourceType = theResourceType;
-<a class="jxr_linenumber" name="L886" href="#L886">886</a> 			myContainedResources = <strong class="jxr_keyword">new</strong> HashMap&lt;String, IBaseResource&gt;();
-<a class="jxr_linenumber" name="L887" href="#L887">887</a> 			<strong class="jxr_keyword">if</strong> (theResourceType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L888" href="#L888">888</a> 				myParentVersion = myContext.getResourceDefinition(theResourceType).getStructureVersion();
-<a class="jxr_linenumber" name="L889" href="#L889">889</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L890" href="#L890">890</a> 				myParentVersion = myContext.getVersion().getVersion();
-<a class="jxr_linenumber" name="L891" href="#L891">891</a> 			}
-<a class="jxr_linenumber" name="L892" href="#L892">892</a> 		}
+<a class="jxr_linenumber" name="L874" href="#L874">874</a> 		@Override
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L876" href="#L876">876</a> 			myMap.put(ResourceMetadataKeyEnum.VERSION, theValue);
+<a class="jxr_linenumber" name="L877" href="#L877">877</a> 		}
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> 
+<a class="jxr_linenumber" name="L879" href="#L879">879</a> 		@Override
+<a class="jxr_linenumber" name="L880" href="#L880">880</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L881" href="#L881">881</a> 			pop();
+<a class="jxr_linenumber" name="L882" href="#L882">882</a> 		}
+<a class="jxr_linenumber" name="L883" href="#L883">883</a> 
+<a class="jxr_linenumber" name="L884" href="#L884">884</a> 		@Override
+<a class="jxr_linenumber" name="L885" href="#L885">885</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a> 			myErrorHandler.unknownElement(<strong class="jxr_keyword">null</strong>, theLocalPart);
+<a class="jxr_linenumber" name="L887" href="#L887">887</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(getPreResourceState()));
+<a class="jxr_linenumber" name="L888" href="#L888">888</a> 			<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L889" href="#L889">889</a> 		}
+<a class="jxr_linenumber" name="L890" href="#L890">890</a> 
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> 	}
+<a class="jxr_linenumber" name="L892" href="#L892">892</a> 
 <a class="jxr_linenumber" name="L893" href="#L893">893</a> 
-<a class="jxr_linenumber" name="L894" href="#L894">894</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourcesState, <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> theParentVersion) {
-<a class="jxr_linenumber" name="L895" href="#L895">895</a> 			<strong class="jxr_keyword">super</strong>(thePreResourcesState);
-<a class="jxr_linenumber" name="L896" href="#L896">896</a> 			Validate.notNull(theParentVersion);
-<a class="jxr_linenumber" name="L897" href="#L897">897</a> 			myParentVersion = theParentVersion;
-<a class="jxr_linenumber" name="L898" href="#L898">898</a> 			myContainedResources = thePreResourcesState.getContainedResources();
-<a class="jxr_linenumber" name="L899" href="#L899">899</a> 		}
-<a class="jxr_linenumber" name="L900" href="#L900">900</a> 
-<a class="jxr_linenumber" name="L901" href="#L901">901</a> 		@Override
-<a class="jxr_linenumber" name="L902" href="#L902">902</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L903" href="#L903">903</a> 			stitchBundleCrossReferences();
-<a class="jxr_linenumber" name="L904" href="#L904">904</a> 			pop();
-<a class="jxr_linenumber" name="L905" href="#L905">905</a> 		}
-<a class="jxr_linenumber" name="L906" href="#L906">906</a> 
-<a class="jxr_linenumber" name="L907" href="#L907">907</a> 		@Override
-<a class="jxr_linenumber" name="L908" href="#L908">908</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L909" href="#L909">909</a> 			BaseRuntimeElementDefinition&lt;?&gt; definition;
-<a class="jxr_linenumber" name="L910" href="#L910">910</a> 			<strong class="jxr_keyword">if</strong> (myResourceType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L911" href="#L911">911</a> 				definition = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L912" href="#L912">912</a> 				<strong class="jxr_keyword">if</strong> (myParser.getPreferTypes() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L913" href="#L913">913</a> 					<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; next : myParser.getPreferTypes()) {
-<a class="jxr_linenumber" name="L914" href="#L914">914</a> 						RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(next);
-<a class="jxr_linenumber" name="L915" href="#L915">915</a> 						<strong class="jxr_keyword">if</strong> (nextDef.getName().equals(theLocalPart)) {
-<a class="jxr_linenumber" name="L916" href="#L916">916</a> 							definition = nextDef;
-<a class="jxr_linenumber" name="L917" href="#L917">917</a> 						}
-<a class="jxr_linenumber" name="L918" href="#L918">918</a> 					}
-<a class="jxr_linenumber" name="L919" href="#L919">919</a> 				}
-<a class="jxr_linenumber" name="L920" href="#L920">920</a> 				<strong class="jxr_keyword">if</strong> (definition == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L921" href="#L921">921</a> 					definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
-<a class="jxr_linenumber" name="L922" href="#L922">922</a> 				}
-<a class="jxr_linenumber" name="L923" href="#L923">923</a> 				<strong class="jxr_keyword">if</strong> ((definition == <strong class="jxr_keyword">null</strong>)) {
-<a class="jxr_linenumber" name="L924" href="#L924">924</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Element '"</span> + theLocalPart + <span class="jxr_string">"' is not a known resource type, expected a resource at this position"</span>);
-<a class="jxr_linenumber" name="L925" href="#L925">925</a> 				}
-<a class="jxr_linenumber" name="L926" href="#L926">926</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L927" href="#L927">927</a> 				definition = myContext.getResourceDefinition(myResourceType);
-<a class="jxr_linenumber" name="L928" href="#L928">928</a> 				<strong class="jxr_keyword">if</strong> (!StringUtils.equals(theLocalPart, definition.getName())) {
-<a class="jxr_linenumber" name="L929" href="#L929">929</a> 					<strong class="jxr_keyword">if</strong> (myRequireResourceType) {
-<a class="jxr_linenumber" name="L930" href="#L930">930</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(myContext.getLocalizer().getMessage(ParserState.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"wrongResourceTypeFound"</span>, definition.getName(), theLocalPart));
-<a class="jxr_linenumber" name="L931" href="#L931">931</a> 					}
-<a class="jxr_linenumber" name="L932" href="#L932">932</a> 					definition = myContext.getResourceDefinition(theLocalPart);
-<a class="jxr_linenumber" name="L933" href="#L933">933</a> 					<strong class="jxr_keyword">if</strong> (!(definition instanceof RuntimeResourceDefinition)) {
-<a class="jxr_linenumber" name="L934" href="#L934">934</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Element '"</span> + theLocalPart + <span class="jxr_string">"' is not a resource, expected a resource at this position"</span>);
-<a class="jxr_linenumber" name="L935" href="#L935">935</a> 					}
-<a class="jxr_linenumber" name="L936" href="#L936">936</a> 				}
-<a class="jxr_linenumber" name="L937" href="#L937">937</a> 			}
-<a class="jxr_linenumber" name="L938" href="#L938">938</a> 
-<a class="jxr_linenumber" name="L939" href="#L939">939</a> 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
-<a class="jxr_linenumber" name="L940" href="#L940">940</a> 			<strong class="jxr_keyword">if</strong> (!definition.getName().equals(theLocalPart) &amp;&amp; definition.getName().equalsIgnoreCase(theLocalPart)) {
-<a class="jxr_linenumber" name="L941" href="#L941">941</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unknown resource type '"</span> + theLocalPart + <span class="jxr_string">"': Resource names are case sensitive, found similar name: '"</span> + definition.getName() + <span class="jxr_string">"'"</span>);
-<a class="jxr_linenumber" name="L942" href="#L942">942</a> 			}
-<a class="jxr_linenumber" name="L943" href="#L943">943</a> 			myInstance = def.newInstance();
-<a class="jxr_linenumber" name="L944" href="#L944">944</a> 
-<a class="jxr_linenumber" name="L945" href="#L945">945</a> 			<strong class="jxr_keyword">if</strong> (myInstance instanceof IResource) {
-<a class="jxr_linenumber" name="L946" href="#L946">946</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a>(getRootPreResourceState(), def, (IResource) myInstance));
-<a class="jxr_linenumber" name="L947" href="#L947">947</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L948" href="#L948">948</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a>(getRootPreResourceState(), def, myInstance));
-<a class="jxr_linenumber" name="L949" href="#L949">949</a> 			}
-<a class="jxr_linenumber" name="L950" href="#L950">950</a> 		}
-<a class="jxr_linenumber" name="L951" href="#L951">951</a> 
-<a class="jxr_linenumber" name="L952" href="#L952">952</a> 		<strong class="jxr_keyword">public</strong> Map&lt;String, IBaseResource&gt; getContainedResources() {
-<a class="jxr_linenumber" name="L953" href="#L953">953</a> 			<strong class="jxr_keyword">return</strong> myContainedResources;
-<a class="jxr_linenumber" name="L954" href="#L954">954</a> 		}
-<a class="jxr_linenumber" name="L955" href="#L955">955</a> 
-<a class="jxr_linenumber" name="L956" href="#L956">956</a> 		@Override
-<a class="jxr_linenumber" name="L957" href="#L957">957</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> getCurrentElement() {
-<a class="jxr_linenumber" name="L958" href="#L958">958</a> 			<strong class="jxr_keyword">return</strong> myInstance;
-<a class="jxr_linenumber" name="L959" href="#L959">959</a> 		}
-<a class="jxr_linenumber" name="L960" href="#L960">960</a> 
-<a class="jxr_linenumber" name="L961" href="#L961">961</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> getRootPreResourceState() {
-<a class="jxr_linenumber" name="L962" href="#L962">962</a> 			<strong class="jxr_keyword">if</strong> (getPreResourceState() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L963" href="#L963">963</a> 				<strong class="jxr_keyword">return</strong> getPreResourceState();
-<a class="jxr_linenumber" name="L964" href="#L964">964</a> 			}
-<a class="jxr_linenumber" name="L965" href="#L965">965</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L966" href="#L966">966</a> 		}
-<a class="jxr_linenumber" name="L967" href="#L967">967</a> 
-<a class="jxr_linenumber" name="L968" href="#L968">968</a> 		@Override
-<a class="jxr_linenumber" name="L969" href="#L969">969</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPreResource() {
-<a class="jxr_linenumber" name="L970" href="#L970">970</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L971" href="#L971">971</a> 		}
-<a class="jxr_linenumber" name="L972" href="#L972">972</a> 
-<a class="jxr_linenumber" name="L973" href="#L973">973</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> populateTarget();
+<a class="jxr_linenumber" name="L894" href="#L894">894</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L895" href="#L895">895</a> 
+<a class="jxr_linenumber" name="L896" href="#L896">896</a> 		<strong class="jxr_keyword">private</strong> Map&lt;String, IBaseResource&gt; myContainedResources;
+<a class="jxr_linenumber" name="L897" href="#L897">897</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myInstance;
+<a class="jxr_linenumber" name="L898" href="#L898">898</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> myParentVersion;
+<a class="jxr_linenumber" name="L899" href="#L899">899</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myRequireResourceType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L900" href="#L900">900</a> 		<strong class="jxr_keyword">private</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; myResourceType;
+<a class="jxr_linenumber" name="L901" href="#L901">901</a> 
+<a class="jxr_linenumber" name="L902" href="#L902">902</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L903" href="#L903">903</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L904" href="#L904">904</a> 			myResourceType = theResourceType;
+<a class="jxr_linenumber" name="L905" href="#L905">905</a> 			myContainedResources = <strong class="jxr_keyword">new</strong> HashMap&lt;String, IBaseResource&gt;();
+<a class="jxr_linenumber" name="L906" href="#L906">906</a> 			<strong class="jxr_keyword">if</strong> (theResourceType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> 				myParentVersion = myContext.getResourceDefinition(theResourceType).getStructureVersion();
+<a class="jxr_linenumber" name="L908" href="#L908">908</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L909" href="#L909">909</a> 				myParentVersion = myContext.getVersion().getVersion();
+<a class="jxr_linenumber" name="L910" href="#L910">910</a> 			}
+<a class="jxr_linenumber" name="L911" href="#L911">911</a> 		}
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> 
+<a class="jxr_linenumber" name="L913" href="#L913">913</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourcesState, <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> theParentVersion) {
+<a class="jxr_linenumber" name="L914" href="#L914">914</a> 			<strong class="jxr_keyword">super</strong>(thePreResourcesState);
+<a class="jxr_linenumber" name="L915" href="#L915">915</a> 			Validate.notNull(theParentVersion);
+<a class="jxr_linenumber" name="L916" href="#L916">916</a> 			myParentVersion = theParentVersion;
+<a class="jxr_linenumber" name="L917" href="#L917">917</a> 			myContainedResources = thePreResourcesState.getContainedResources();
+<a class="jxr_linenumber" name="L918" href="#L918">918</a> 		}
+<a class="jxr_linenumber" name="L919" href="#L919">919</a> 
+<a class="jxr_linenumber" name="L920" href="#L920">920</a> 		@Override
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L922" href="#L922">922</a> 			stitchBundleCrossReferences();
+<a class="jxr_linenumber" name="L923" href="#L923">923</a> 			pop();
+<a class="jxr_linenumber" name="L924" href="#L924">924</a> 		}
+<a class="jxr_linenumber" name="L925" href="#L925">925</a> 
+<a class="jxr_linenumber" name="L926" href="#L926">926</a> 		@Override
+<a class="jxr_linenumber" name="L927" href="#L927">927</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L928" href="#L928">928</a> 			BaseRuntimeElementDefinition&lt;?&gt; definition;
+<a class="jxr_linenumber" name="L929" href="#L929">929</a> 			<strong class="jxr_keyword">if</strong> (myResourceType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L930" href="#L930">930</a> 				definition = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L931" href="#L931">931</a> 				<strong class="jxr_keyword">if</strong> (myParser.getPreferTypes() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L932" href="#L932">932</a> 					<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; next : myParser.getPreferTypes()) {
+<a class="jxr_linenumber" name="L933" href="#L933">933</a> 						RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(next);
+<a class="jxr_linenumber" name="L934" href="#L934">934</a> 						<strong class="jxr_keyword">if</strong> (nextDef.getName().equals(theLocalPart)) {
+<a class="jxr_linenumber" name="L935" href="#L935">935</a> 							definition = nextDef;
+<a class="jxr_linenumber" name="L936" href="#L936">936</a> 						}
+<a class="jxr_linenumber" name="L937" href="#L937">937</a> 					}
+<a class="jxr_linenumber" name="L938" href="#L938">938</a> 				}
+<a class="jxr_linenumber" name="L939" href="#L939">939</a> 				<strong class="jxr_keyword">if</strong> (definition == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L940" href="#L940">940</a> 					definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
+<a class="jxr_linenumber" name="L941" href="#L941">941</a> 				}
+<a class="jxr_linenumber" name="L942" href="#L942">942</a> 				<strong class="jxr_keyword">if</strong> ((definition == <strong class="jxr_keyword">null</strong>)) {
+<a class="jxr_linenumber" name="L943" href="#L943">943</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Element '"</span> + theLocalPart + <span class="jxr_string">"' is not a known resource type, expected a resource at this position"</span>);
+<a class="jxr_linenumber" name="L944" href="#L944">944</a> 				}
+<a class="jxr_linenumber" name="L945" href="#L945">945</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L946" href="#L946">946</a> 				definition = myContext.getResourceDefinition(myResourceType);
+<a class="jxr_linenumber" name="L947" href="#L947">947</a> 				<strong class="jxr_keyword">if</strong> (!StringUtils.equals(theLocalPart, definition.getName())) {
+<a class="jxr_linenumber" name="L948" href="#L948">948</a> 					<strong class="jxr_keyword">if</strong> (myRequireResourceType) {
+<a class="jxr_linenumber" name="L949" href="#L949">949</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(myContext.getLocalizer().getMessage(ParserState.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"wrongResourceTypeFound"</span>, definition.getName(), theLocalPart));
+<a class="jxr_linenumber" name="L950" href="#L950">950</a> 					}
+<a class="jxr_linenumber" name="L951" href="#L951">951</a> 					definition = myContext.getResourceDefinition(theLocalPart);
+<a class="jxr_linenumber" name="L952" href="#L952">952</a> 					<strong class="jxr_keyword">if</strong> (!(definition instanceof RuntimeResourceDefinition)) {
+<a class="jxr_linenumber" name="L953" href="#L953">953</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Element '"</span> + theLocalPart + <span class="jxr_string">"' is not a resource, expected a resource at this position"</span>);
+<a class="jxr_linenumber" name="L954" href="#L954">954</a> 					}
+<a class="jxr_linenumber" name="L955" href="#L955">955</a> 				}
+<a class="jxr_linenumber" name="L956" href="#L956">956</a> 			}
+<a class="jxr_linenumber" name="L957" href="#L957">957</a> 
+<a class="jxr_linenumber" name="L958" href="#L958">958</a> 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
+<a class="jxr_linenumber" name="L959" href="#L959">959</a> 			<strong class="jxr_keyword">if</strong> (!definition.getName().equals(theLocalPart) &amp;&amp; definition.getName().equalsIgnoreCase(theLocalPart)) {
+<a class="jxr_linenumber" name="L960" href="#L960">960</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unknown resource type '"</span> + theLocalPart + <span class="jxr_string">"': Resource names are case sensitive, found similar name: '"</span> + definition.getName() + <span class="jxr_string">"'"</span>);
+<a class="jxr_linenumber" name="L961" href="#L961">961</a> 			}
+<a class="jxr_linenumber" name="L962" href="#L962">962</a> 			myInstance = def.newInstance();
+<a class="jxr_linenumber" name="L963" href="#L963">963</a> 
+<a class="jxr_linenumber" name="L964" href="#L964">964</a> 			<strong class="jxr_keyword">if</strong> (myInstance instanceof IResource) {
+<a class="jxr_linenumber" name="L965" href="#L965">965</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a>(getRootPreResourceState(), def, (IResource) myInstance));
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L967" href="#L967">967</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a>(getRootPreResourceState(), def, myInstance));
+<a class="jxr_linenumber" name="L968" href="#L968">968</a> 			}
+<a class="jxr_linenumber" name="L969" href="#L969">969</a> 		}
+<a class="jxr_linenumber" name="L970" href="#L970">970</a> 
+<a class="jxr_linenumber" name="L971" href="#L971">971</a> 		<strong class="jxr_keyword">public</strong> Map&lt;String, IBaseResource&gt; getContainedResources() {
+<a class="jxr_linenumber" name="L972" href="#L972">972</a> 			<strong class="jxr_keyword">return</strong> myContainedResources;
+<a class="jxr_linenumber" name="L973" href="#L973">973</a> 		}
 <a class="jxr_linenumber" name="L974" href="#L974">974</a> 
-<a class="jxr_linenumber" name="L975" href="#L975">975</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> postProcess() {
-<a class="jxr_linenumber" name="L976" href="#L976">976</a> 			<strong class="jxr_keyword">if</strong> (myContext.hasDefaultTypeForProfile()) {
-<a class="jxr_linenumber" name="L977" href="#L977">977</a> 				IBaseMetaType meta = myInstance.getMeta();
-<a class="jxr_linenumber" name="L978" href="#L978">978</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; wantedProfileType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L979" href="#L979">979</a> 				String usedProfile = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L980" href="#L980">980</a> 				<strong class="jxr_keyword">for</strong> (IPrimitiveType&lt;String&gt; next : meta.getProfile()) {
-<a class="jxr_linenumber" name="L981" href="#L981">981</a> 					<strong class="jxr_keyword">if</strong> (isNotBlank(next.getValue())) {
-<a class="jxr_linenumber" name="L982" href="#L982">982</a> 						wantedProfileType = myContext.getDefaultTypeForProfile(next.getValue());
-<a class="jxr_linenumber" name="L983" href="#L983">983</a> 						<strong class="jxr_keyword">if</strong> (wantedProfileType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L984" href="#L984">984</a> 							usedProfile = next.getValue();
-<a class="jxr_linenumber" name="L985" href="#L985">985</a> 							<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L986" href="#L986">986</a> 						}
-<a class="jxr_linenumber" name="L987" href="#L987">987</a> 					}
-<a class="jxr_linenumber" name="L988" href="#L988">988</a> 				}
-<a class="jxr_linenumber" name="L989" href="#L989">989</a> 
-<a class="jxr_linenumber" name="L990" href="#L990">990</a> 				<strong class="jxr_keyword">if</strong> (wantedProfileType != <strong class="jxr_keyword">null</strong> &amp;&amp; !wantedProfileType.equals(myInstance.getClass())) {
-<a class="jxr_linenumber" name="L991" href="#L991">991</a> 					<strong class="jxr_keyword">if</strong> (myResourceType == <strong class="jxr_keyword">null</strong> || myResourceType.isAssignableFrom(wantedProfileType)) {
-<a class="jxr_linenumber" name="L992" href="#L992">992</a> 						ourLog.debug(<span class="jxr_string">"Converting resource of type {} to type defined for profile \&quot;{}\&quot;: {}"</span>, <strong class="jxr_keyword">new</strong> Object[] { myInstance.getClass().getName(), usedProfile, wantedProfileType });
+<a class="jxr_linenumber" name="L975" href="#L975">975</a> 		@Override
+<a class="jxr_linenumber" name="L976" href="#L976">976</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> getCurrentElement() {
+<a class="jxr_linenumber" name="L977" href="#L977">977</a> 			<strong class="jxr_keyword">return</strong> myInstance;
+<a class="jxr_linenumber" name="L978" href="#L978">978</a> 		}
+<a class="jxr_linenumber" name="L979" href="#L979">979</a> 
+<a class="jxr_linenumber" name="L980" href="#L980">980</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> getRootPreResourceState() {
+<a class="jxr_linenumber" name="L981" href="#L981">981</a> 			<strong class="jxr_keyword">if</strong> (getPreResourceState() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L982" href="#L982">982</a> 				<strong class="jxr_keyword">return</strong> getPreResourceState();
+<a class="jxr_linenumber" name="L983" href="#L983">983</a> 			}
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L985" href="#L985">985</a> 		}
+<a class="jxr_linenumber" name="L986" href="#L986">986</a> 
+<a class="jxr_linenumber" name="L987" href="#L987">987</a> 		@Override
+<a class="jxr_linenumber" name="L988" href="#L988">988</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPreResource() {
+<a class="jxr_linenumber" name="L989" href="#L989">989</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L990" href="#L990">990</a> 		}
+<a class="jxr_linenumber" name="L991" href="#L991">991</a> 
+<a class="jxr_linenumber" name="L992" href="#L992">992</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> populateTarget();
 <a class="jxr_linenumber" name="L993" href="#L993">993</a> 
-<a class="jxr_linenumber" name="L994" href="#L994">994</a> 						<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L995" href="#L995">995</a> <em class="jxr_comment">						 * This isn't the most efficient thing really.. If we want a specific</em>
-<a class="jxr_linenumber" name="L996" href="#L996">996</a> <em class="jxr_comment">						 * type we just re-parse into that type. The problem is that we don't know</em>
-<a class="jxr_linenumber" name="L997" href="#L997">997</a> <em class="jxr_comment">						 * until we've parsed the resource which type we want to use because the</em>
-<a class="jxr_linenumber" name="L998" href="#L998">998</a> <em class="jxr_comment">						 * profile declarations are in the text of the resource itself.</em>
-<a class="jxr_linenumber" name="L999" href="#L999">999</a> <em class="jxr_comment">						 * </em>
-<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> <em class="jxr_comment">						 * At some point it would be good to write code which can present a view</em>
-<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a> <em class="jxr_comment">						 * of one type backed by another type and use that.</em>
-<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> <em class="jxr_comment">						 */</em>
-<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> 						IParser parser = myContext.newJsonParser();
-<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> 						String asString = parser.encodeResourceToString(myInstance);
-<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a> 						myInstance = parser.parseResource(wantedProfileType, asString);
+<a class="jxr_linenumber" name="L994" href="#L994">994</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> postProcess() {
+<a class="jxr_linenumber" name="L995" href="#L995">995</a> 			<strong class="jxr_keyword">if</strong> (myContext.hasDefaultTypeForProfile()) {
+<a class="jxr_linenumber" name="L996" href="#L996">996</a> 				IBaseMetaType meta = myInstance.getMeta();
+<a class="jxr_linenumber" name="L997" href="#L997">997</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; wantedProfileType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L998" href="#L998">998</a> 				String usedProfile = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L999" href="#L999">999</a> 				<strong class="jxr_keyword">for</strong> (IPrimitiveType&lt;String&gt; next : meta.getProfile()) {
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> 					<strong class="jxr_keyword">if</strong> (isNotBlank(next.getValue())) {
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a> 						wantedProfileType = myContext.getDefaultTypeForProfile(next.getValue());
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> 						<strong class="jxr_keyword">if</strong> (wantedProfileType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> 							usedProfile = next.getValue();
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> 							<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a> 						}
 <a class="jxr_linenumber" name="L1006" href="#L1006">1006</a> 					}
 <a class="jxr_linenumber" name="L1007" href="#L1007">1007</a> 				}
-<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a> 			}
-<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> 
-<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> 			populateTarget();
-<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a> 		}
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a> 
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> 				<strong class="jxr_keyword">if</strong> (wantedProfileType != <strong class="jxr_keyword">null</strong> &amp;&amp; !wantedProfileType.equals(myInstance.getClass())) {
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> 					<strong class="jxr_keyword">if</strong> (myResourceType == <strong class="jxr_keyword">null</strong> || myResourceType.isAssignableFrom(wantedProfileType)) {
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a> 						ourLog.debug(<span class="jxr_string">"Converting resource of type {} to type defined for profile \&quot;{}\&quot;: {}"</span>, <strong class="jxr_keyword">new</strong> Object[] { myInstance.getClass().getName(), usedProfile, wantedProfileType });
 <a class="jxr_linenumber" name="L1012" href="#L1012">1012</a> 
-<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> stitchBundleCrossReferences() {
-<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> 			<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> bundle = <span class="jxr_string">"Bundle"</span>.equals(myContext.getResourceDefinition(myInstance).getName());
-<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> 			<strong class="jxr_keyword">if</strong> (bundle) {
-<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> 
-<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> 				FhirTerser t = myContext.newTerser();
-<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> 
-<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> 				Map&lt;String, IBaseResource&gt; idToResource = <strong class="jxr_keyword">new</strong> HashMap&lt;String, IBaseResource&gt;();
-<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> 				List&lt;IBase&gt; entries = t.getValues(myInstance, <span class="jxr_string">"Bundle.entry"</span>, IBase.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> 				<strong class="jxr_keyword">for</strong> (IBase nextEntry : entries) {
-<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> 					IPrimitiveType&lt;?&gt; fullUrl = t.getSingleValueOrNull(nextEntry, <span class="jxr_string">"fullUrl"</span>, IPrimitiveType.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> 					<strong class="jxr_keyword">if</strong> (fullUrl != <strong class="jxr_keyword">null</strong> &amp;&amp; isNotBlank(fullUrl.getValueAsString())) {
-<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> 						IBaseResource resource = t.getSingleValueOrNull(nextEntry, <span class="jxr_string">"resource"</span>, IBaseResource.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> 						<strong class="jxr_keyword">if</strong> (resource != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> 							idToResource.put(fullUrl.getValueAsString(), resource);
-<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a> 						}
-<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a> 					}
-<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> 				}
-<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 
-<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a> 				<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> <em class="jxr_comment">				 * Stitch together resource references</em>
-<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> 				List&lt;IBaseResource&gt; resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> 				<strong class="jxr_keyword">for</strong> (IBaseResource next : resources) {
-<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> 					IIdType id = next.getIdElement();
-<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> 					<strong class="jxr_keyword">if</strong> (id != <strong class="jxr_keyword">null</strong> &amp;&amp; id.isEmpty() == false) {
-<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a> 						String resName = myContext.getResourceDefinition(next).getName();
-<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> 						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a> 						idToResource.put(idType.getValueAsString(), next);
-<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> 					}
-<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a> 				}
-<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a> 
-<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> 				<strong class="jxr_keyword">for</strong> (IBaseResource next : resources) {
-<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a> 					List&lt;IBaseReference&gt; refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> 					<strong class="jxr_keyword">for</strong> (IBaseReference nextRef : refs) {
-<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> 						<strong class="jxr_keyword">if</strong> (nextRef.isEmpty() == false &amp;&amp; nextRef.getReferenceElement() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> 							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> 							IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
-<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> 							<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> 								nextRef.setResource(target);
-<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> 							}
-<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 						}
-<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> 					}
-<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> 				}
-<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> 
-<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 				<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> <em class="jxr_comment">				 * Set resource IDs based on Bundle.entry.request.url</em>
-<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 				List&lt;Pair&lt;String, IBaseResource&gt;&gt; urlsAndResources = BundleUtil.getBundleEntryUrlsAndResources(myContext, (IBaseBundle) myInstance);
-<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 				<strong class="jxr_keyword">for</strong> (Pair&lt;String, IBaseResource&gt; pair : urlsAndResources) {
-<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a> 					<strong class="jxr_keyword">if</strong> (pair.getRight() != <strong class="jxr_keyword">null</strong> &amp;&amp; isNotBlank(pair.getLeft()) &amp;&amp; pair.getRight().getIdElement().isEmpty()) {
-<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> 						<strong class="jxr_keyword">if</strong> (pair.getLeft().startsWith(<span class="jxr_string">"urn:"</span>)) {
-<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> 							pair.getRight().setId(pair.getLeft());
-<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> 						}
-<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 					}
-<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 				}
-<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> 
-<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 			}
-<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> 		}
-<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a> 
-<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> weaveContainedResources() {
-<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 			FhirTerser terser = myContext.newTerser();
-<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> 			terser.visit(myInstance, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/util/IModelVisitor.html">IModelVisitor</a>() {
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 						<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> <em class="jxr_comment">						 * This isn't the most efficient thing really.. If we want a specific</em>
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> <em class="jxr_comment">						 * type we just re-parse into that type. The problem is that we don't know</em>
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> <em class="jxr_comment">						 * until we've parsed the resource which type we want to use because the</em>
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> <em class="jxr_comment">						 * profile declarations are in the text of the resource itself.</em>
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> <em class="jxr_comment">						 * </em>
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> <em class="jxr_comment">						 * At some point it would be good to write code which can present a view</em>
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> <em class="jxr_comment">						 * of one type backed by another type and use that.</em>
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> <em class="jxr_comment">						 */</em>
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> 						IParser parser = myContext.newJsonParser();
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> 						String asString = parser.encodeResourceToString(myInstance);
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> 						myInstance = parser.parseResource(wantedProfileType, asString);
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> 					}
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> 				}
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a> 			}
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a> 
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> 			populateTarget();
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 		}
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a> 
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> stitchBundleCrossReferences() {
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> 			<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> bundle = <span class="jxr_string">"Bundle"</span>.equals(myContext.getResourceDefinition(myInstance).getName());
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> 			<strong class="jxr_keyword">if</strong> (bundle) {
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> 
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> 				FhirTerser t = myContext.newTerser();
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> 
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a> 				Map&lt;String, IBaseResource&gt; idToResource = <strong class="jxr_keyword">new</strong> HashMap&lt;String, IBaseResource&gt;();
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> 				List&lt;IBase&gt; entries = t.getValues(myInstance, <span class="jxr_string">"Bundle.entry"</span>, IBase.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a> 				<strong class="jxr_keyword">for</strong> (IBase nextEntry : entries) {
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> 					IPrimitiveType&lt;?&gt; fullUrl = t.getSingleValueOrNull(nextEntry, <span class="jxr_string">"fullUrl"</span>, IPrimitiveType.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a> 					<strong class="jxr_keyword">if</strong> (fullUrl != <strong class="jxr_keyword">null</strong> &amp;&amp; isNotBlank(fullUrl.getValueAsString())) {
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a> 						IBaseResource resource = t.getSingleValueOrNull(nextEntry, <span class="jxr_string">"resource"</span>, IBaseResource.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> 						<strong class="jxr_keyword">if</strong> (resource != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a> 							idToResource.put(fullUrl.getValueAsString(), resource);
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> 						}
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> 					}
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> 				}
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> 
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> 				<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> <em class="jxr_comment">				 * Stitch together resource references</em>
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> <em class="jxr_comment">				 */</em>
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 				List&lt;IBaseResource&gt; resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> 				<strong class="jxr_keyword">for</strong> (IBaseResource next : resources) {
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> 					IIdType id = next.getIdElement();
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> 					<strong class="jxr_keyword">if</strong> (id != <strong class="jxr_keyword">null</strong> &amp;&amp; id.isEmpty() == false) {
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 						String resName = myContext.getResourceDefinition(next).getName();
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> 						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a> 						idToResource.put(idType.getValueAsString(), next);
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 					}
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 				}
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a> 
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> 				<strong class="jxr_keyword">for</strong> (IBaseResource next : resources) {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> 					List&lt;IBaseReference&gt; refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> 					<strong class="jxr_keyword">for</strong> (IBaseReference nextRef : refs) {
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 						<strong class="jxr_keyword">if</strong> (nextRef.isEmpty() == false &amp;&amp; nextRef.getReferenceElement() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> 							IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 							<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> 								nextRef.setResource(target);
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a> 							}
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> 						}
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 					}
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> 				}
 <a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> 
-<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> 				@Override
-<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> acceptElement(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theElement, List&lt;String&gt; thePathToElement, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">BaseRuntimeChildDefinition</a> theChildDefinition,
-<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> 						BaseRuntimeElementDefinition&lt;?&gt; theDefinition) {
-<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 					<strong class="jxr_keyword">if</strong> (theElement instanceof BaseResourceReferenceDt) {
-<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
-<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 						String ref = nextRef.getReference().getValue();
-<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(ref)) {
-<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 							<strong class="jxr_keyword">if</strong> (ref.startsWith(<span class="jxr_string">"#"</span>)) {
-<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a> 								IResource target = (IResource) myContainedResources.get(ref);
-<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> 								<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a> 									ourLog.debug(<span class="jxr_string">"Resource contains local ref {} in field {}"</span>, ref, thePathToElement);
-<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> 									nextRef.setResource(target);
-<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> 								} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> 									myErrorHandler.unknownReference(<strong class="jxr_keyword">null</strong>, ref);
-<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> 								}
-<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 							}
-<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 						}
-<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theElement instanceof IBaseReference) {
-<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 						IBaseReference nextRef = (IBaseReference) theElement;
-<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 						String ref = nextRef.getReferenceElement().getValue();
-<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(ref)) {
-<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a> 							<strong class="jxr_keyword">if</strong> (ref.startsWith(<span class="jxr_string">"#"</span>)) {
-<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> 								IBaseResource target = myContainedResources.get(ref);
-<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> 								<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a> 									ourLog.debug(<span class="jxr_string">"Resource contains local ref {} in field {}"</span>, ref, thePathToElement);
-<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a> 									nextRef.setResource(target);
-<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a> 								} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> 									myErrorHandler.unknownReference(<strong class="jxr_keyword">null</strong>, ref);
-<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a> 								}
-<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> 							}
-<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> 						}
-<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> 					}
-<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a> 				}
-<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> 			});
-<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a> 		}
-<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> 
-<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a> 		@Override
-<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
-<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> 			postProcess();
-<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a> 		}
-<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a> 
-<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a> 	}
-<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a> 
-<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> {
-<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> myMutator;
-<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a> 		<strong class="jxr_keyword">private</strong> Object myTarget;
-<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a> 
-<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> 
-<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
-<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a> 			assert theResourceType == <strong class="jxr_keyword">null</strong> || IResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theResourceType);
-<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a> 		}
-<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a> 
-<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a>(Object theTarget, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> theMutator, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
-<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a> 			myTarget = theTarget;
-<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a> 			myMutator = theMutator;
-<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a> 			assert theResourceType == <strong class="jxr_keyword">null</strong> || IResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theResourceType);
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> 				<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> <em class="jxr_comment">				 * Set resource IDs based on Bundle.entry.request.url</em>
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> <em class="jxr_comment">				 */</em>
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 				List&lt;Pair&lt;String, IBaseResource&gt;&gt; urlsAndResources = BundleUtil.getBundleEntryUrlsAndResources(myContext, (IBaseBundle) myInstance);
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 				<strong class="jxr_keyword">for</strong> (Pair&lt;String, IBaseResource&gt; pair : urlsAndResources) {
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 					<strong class="jxr_keyword">if</strong> (pair.getRight() != <strong class="jxr_keyword">null</strong> &amp;&amp; isNotBlank(pair.getLeft()) &amp;&amp; pair.getRight().getIdElement().isEmpty()) {
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 						<strong class="jxr_keyword">if</strong> (pair.getLeft().startsWith(<span class="jxr_string">"urn:"</span>)) {
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 							pair.getRight().setId(pair.getLeft());
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a> 						}
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> 					}
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a> 				}
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> 
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> 			}
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> 		}
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> 
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> weaveContainedResources() {
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 			FhirTerser terser = myContext.newTerser();
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 			terser.visit(myInstance, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/util/IModelVisitor.html">IModelVisitor</a>() {
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 				@Override
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> acceptElement(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theElement, List&lt;String&gt; thePathToElement, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">BaseRuntimeChildDefinition</a> theChildDefinition,
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a> 						BaseRuntimeElementDefinition&lt;?&gt; theDefinition) {
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> 					<strong class="jxr_keyword">if</strong> (theElement instanceof BaseResourceReferenceDt) {
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> 						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a> 						String ref = nextRef.getReference().getValue();
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(ref)) {
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a> 							<strong class="jxr_keyword">if</strong> (ref.startsWith(<span class="jxr_string">"#"</span>)) {
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> 								IResource target = (IResource) myContainedResources.get(ref);
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a> 								<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> 									ourLog.debug(<span class="jxr_string">"Resource contains local ref {} in field {}"</span>, ref, thePathToElement);
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> 									nextRef.setResource(target);
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> 								} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a> 									myErrorHandler.unknownReference(<strong class="jxr_keyword">null</strong>, ref);
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> 								}
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a> 							}
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> 						}
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theElement instanceof IBaseReference) {
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a> 						IBaseReference nextRef = (IBaseReference) theElement;
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> 						String ref = nextRef.getReferenceElement().getValue();
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(ref)) {
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a> 							<strong class="jxr_keyword">if</strong> (ref.startsWith(<span class="jxr_string">"#"</span>)) {
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a> 								IBaseResource target = myContainedResources.get(ref);
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a> 								<strong class="jxr_keyword">if</strong> (target != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a> 									ourLog.debug(<span class="jxr_string">"Resource contains local ref {} in field {}"</span>, ref, thePathToElement);
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> 									nextRef.setResource(target);
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a> 								} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a> 									myErrorHandler.unknownReference(<strong class="jxr_keyword">null</strong>, ref);
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> 								}
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a> 							}
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a> 						}
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a> 					}
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a> 				}
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a> 			});
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a> 		}
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a> 
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a> 		@Override
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a> 			postProcess();
 <a class="jxr_linenumber" name="L1134" href="#L1134">1134</a> 		}
 <a class="jxr_linenumber" name="L1135" href="#L1135">1135</a> 
-<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a> 		<em class="jxr_comment">// @Override</em>
-<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a> 		<em class="jxr_comment">// public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {</em>
-<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a> 		<em class="jxr_comment">// super.enteringNewElement(theNamespaceUri, theLocalPart);</em>
-<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a> 		<em class="jxr_comment">// populateTarget();</em>
-<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a> 		<em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a> 	}
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a> 
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> {
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> myMutator;
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a> 		<strong class="jxr_keyword">private</strong> Object myTarget;
 <a class="jxr_linenumber" name="L1141" href="#L1141">1141</a> 
-<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a> 		@Override
-<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> populateTarget() {
-<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a> 			weaveContainedResources();
-<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a> 			<strong class="jxr_keyword">if</strong> (myMutator != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a> 				myMutator.setValue(myTarget, getCurrentElement());
-<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a> 			}
-<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a> 		}
-<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a> 
-<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a> 		@Override
-<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
-<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a> 			<strong class="jxr_keyword">super</strong>.wereBack();
-<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a> 
-<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a> 			IResource nextResource = (IResource) getCurrentElement();
-<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a> 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
-<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a> 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
-<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a> 			String bundleIdPart = nextResource.getId().getIdPart();
-<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(bundleIdPart)) {
-<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a>         <em class="jxr_comment">// if (isNotBlank(entryBaseUrl)) {</em>
-<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a>         <em class="jxr_comment">// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));</em>
-<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a>         <em class="jxr_comment">// } else {</em>
-<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a>         <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> previousId = nextResource.getId();
-<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a>         nextResource.setId(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<strong class="jxr_keyword">null</strong>, resourceName, bundleIdPart, version));
-<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a>         <em class="jxr_comment">// Copy extensions</em>
-<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a>         <strong class="jxr_keyword">if</strong> (!previousId.getAllUndeclaredExtensions().isEmpty()) {
-<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a>           <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">final</strong> ExtensionDt ext : previousId.getAllUndeclaredExtensions()) {
-<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a>             nextResource.getId().addUndeclaredExtension(ext);
-<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a>           }
-<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a>         }
-<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a>        <em class="jxr_comment">// }</em>
-<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a> 			}
-<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a> 		}
-<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a> 
-<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a> 	}
-<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a> 
-<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> {
-<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a> 
-<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> myMutator;
-<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a> 		<strong class="jxr_keyword">private</strong> Object myTarget;
-<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a> 
-<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
-<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a> 		}
-<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a> 
-<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a>(Object theTarget, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> theMutator, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
-<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a> 			myMutator = theMutator;
-<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a> 			myTarget = theTarget;
-<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a> 		}
-<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a> 
-<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a> 		@Override
-<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> populateTarget() {
-<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a> 			weaveContainedResources();
-<a class="jxr_linenumber" name="L1194" href="#L1194">1194</a> 			<strong class="jxr_keyword">if</strong> (myMutator != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1195" href="#L1195">1195</a> 				myMutator.setValue(myTarget, getCurrentElement());
-<a class="jxr_linenumber" name="L1196" href="#L1196">1196</a> 			}
-<a class="jxr_linenumber" name="L1197" href="#L1197">1197</a> 		}
-<a class="jxr_linenumber" name="L1198" href="#L1198">1198</a> 
-<a class="jxr_linenumber" name="L1199" href="#L1199">1199</a> 		@Override
-<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
-<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a> 			<strong class="jxr_keyword">super</strong>.wereBack();
-<a class="jxr_linenumber" name="L1202" href="#L1202">1202</a> 
-<a class="jxr_linenumber" name="L1203" href="#L1203">1203</a> 			<strong class="jxr_keyword">if</strong> (getCurrentElement() instanceof IDomainResource) {
-<a class="jxr_linenumber" name="L1204" href="#L1204">1204</a> 				IDomainResource elem = (IDomainResource) getCurrentElement();
-<a class="jxr_linenumber" name="L1205" href="#L1205">1205</a> 				String resourceName = myContext.getResourceDefinition(elem).getName();
-<a class="jxr_linenumber" name="L1206" href="#L1206">1206</a> 				String versionId = elem.getMeta().getVersionId();
-<a class="jxr_linenumber" name="L1207" href="#L1207">1207</a> 				<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
-<a class="jxr_linenumber" name="L1208" href="#L1208">1208</a> 					<em class="jxr_comment">// Resource has no ID</em>
-<a class="jxr_linenumber" name="L1209" href="#L1209">1209</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(versionId)) {
-<a class="jxr_linenumber" name="L1210" href="#L1210">1210</a> 					elem.getIdElement().setValue(resourceName + <span class="jxr_string">"/"</span> + elem.getIdElement().getIdPart() + <span class="jxr_string">"/_history/"</span> + versionId);
-<a class="jxr_linenumber" name="L1211" href="#L1211">1211</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1212" href="#L1212">1212</a> 					elem.getIdElement().setValue(resourceName + <span class="jxr_string">"/"</span> + elem.getIdElement().getIdPart());
-<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a> 				}
-<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a> 			}
-<a class="jxr_linenumber" name="L1215" href="#L1215">1215</a> 		}
-<a class="jxr_linenumber" name="L1216" href="#L1216">1216</a> 
-<a class="jxr_linenumber" name="L1217" href="#L1217">1217</a> 	}
-<a class="jxr_linenumber" name="L1218" href="#L1218">1218</a> 
-<a class="jxr_linenumber" name="L1219" href="#L1219">1219</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreTagListState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1220" href="#L1220">1220</a> 
-<a class="jxr_linenumber" name="L1221" href="#L1221">1221</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
-<a class="jxr_linenumber" name="L1222" href="#L1222">1222</a> 
-<a class="jxr_linenumber" name="L1223" href="#L1223">1223</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreTagListState</a>() {
-<a class="jxr_linenumber" name="L1224" href="#L1224">1224</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L1225" href="#L1225">1225</a> 			myTagList = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a>();
-<a class="jxr_linenumber" name="L1226" href="#L1226">1226</a> 		}
-<a class="jxr_linenumber" name="L1227" href="#L1227">1227</a> 
-<a class="jxr_linenumber" name="L1228" href="#L1228">1228</a> 		@Override
-<a class="jxr_linenumber" name="L1229" href="#L1229">1229</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1230" href="#L1230">1230</a> 			pop();
-<a class="jxr_linenumber" name="L1231" href="#L1231">1231</a> 		}
-<a class="jxr_linenumber" name="L1232" href="#L1232">1232</a> 
-<a class="jxr_linenumber" name="L1233" href="#L1233">1233</a> 		@Override
-<a class="jxr_linenumber" name="L1234" href="#L1234">1234</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1235" href="#L1235">1235</a> 			<strong class="jxr_keyword">if</strong> (!TagList.ELEMENT_NAME_LC.equals(theLocalPart.toLowerCase())) {
-<a class="jxr_linenumber" name="L1236" href="#L1236">1236</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"resourceType does not appear to be 'TagList', found: "</span> + theLocalPart);
-<a class="jxr_linenumber" name="L1237" href="#L1237">1237</a> 			}
-<a class="jxr_linenumber" name="L1238" href="#L1238">1238</a> 
-<a class="jxr_linenumber" name="L1239" href="#L1239">1239</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a>(myTagList));
-<a class="jxr_linenumber" name="L1240" href="#L1240">1240</a> 		}
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a> 
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
+<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a> 			assert theResourceType == <strong class="jxr_keyword">null</strong> || IResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theResourceType);
+<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a> 		}
+<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a> 
+<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHapi</a>(Object theTarget, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> theMutator, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
+<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a> 			myTarget = theTarget;
+<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a> 			myMutator = theMutator;
+<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a> 			assert theResourceType == <strong class="jxr_keyword">null</strong> || IResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theResourceType);
+<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a> 		}
+<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a> 
+<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a> 		<em class="jxr_comment">// @Override</em>
+<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a> 		<em class="jxr_comment">// public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {</em>
+<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a> 		<em class="jxr_comment">// super.enteringNewElement(theNamespaceUri, theLocalPart);</em>
+<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a> 		<em class="jxr_comment">// populateTarget();</em>
+<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a> 		<em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a> 
+<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a> 		@Override
+<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> populateTarget() {
+<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a> 			weaveContainedResources();
+<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a> 			<strong class="jxr_keyword">if</strong> (myMutator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a> 				myMutator.setValue(myTarget, getCurrentElement());
+<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a> 			}
+<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a> 		}
+<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a> 
+<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a> 		@Override
+<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
+<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a> 			<strong class="jxr_keyword">super</strong>.wereBack();
+<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a> 
+<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a> 			IResource nextResource = (IResource) getCurrentElement();
+<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a> 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
+<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a> 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
+<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a> 			String bundleIdPart = nextResource.getId().getIdPart();
+<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(bundleIdPart)) {
+<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a>         <em class="jxr_comment">// if (isNotBlank(entryBaseUrl)) {</em>
+<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a>         <em class="jxr_comment">// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));</em>
+<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a>         <em class="jxr_comment">// } else {</em>
+<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a>         <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> previousId = nextResource.getId();
+<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a>         nextResource.setId(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<strong class="jxr_keyword">null</strong>, resourceName, bundleIdPart, version));
+<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a>         <em class="jxr_comment">// Copy extensions</em>
+<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a>         <strong class="jxr_keyword">if</strong> (!previousId.getAllUndeclaredExtensions().isEmpty()) {
+<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a>           <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">final</strong> ExtensionDt ext : previousId.getAllUndeclaredExtensions()) {
+<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a>             nextResource.getId().addUndeclaredExtension(ext);
+<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a>           }
+<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a>         }
+<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a>        <em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a> 			}
+<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a> 		}
+<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a> 
+<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a> 	}
+<a class="jxr_linenumber" name="L1194" href="#L1194">1194</a> 
+<a class="jxr_linenumber" name="L1195" href="#L1195">1195</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> {
+<a class="jxr_linenumber" name="L1196" href="#L1196">1196</a> 
+<a class="jxr_linenumber" name="L1197" href="#L1197">1197</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> myMutator;
+<a class="jxr_linenumber" name="L1198" href="#L1198">1198</a> 		<strong class="jxr_keyword">private</strong> Object myTarget;
+<a class="jxr_linenumber" name="L1199" href="#L1199">1199</a> 
+<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a>(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
+<a class="jxr_linenumber" name="L1202" href="#L1202">1202</a> 		}
+<a class="jxr_linenumber" name="L1203" href="#L1203">1203</a> 
+<a class="jxr_linenumber" name="L1204" href="#L1204">1204</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceStateHl7Org</a>(Object theTarget, <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> theMutator, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1205" href="#L1205">1205</a> 			<strong class="jxr_keyword">super</strong>(theResourceType);
+<a class="jxr_linenumber" name="L1206" href="#L1206">1206</a> 			myMutator = theMutator;
+<a class="jxr_linenumber" name="L1207" href="#L1207">1207</a> 			myTarget = theTarget;
+<a class="jxr_linenumber" name="L1208" href="#L1208">1208</a> 		}
+<a class="jxr_linenumber" name="L1209" href="#L1209">1209</a> 
+<a class="jxr_linenumber" name="L1210" href="#L1210">1210</a> 		@Override
+<a class="jxr_linenumber" name="L1211" href="#L1211">1211</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> populateTarget() {
+<a class="jxr_linenumber" name="L1212" href="#L1212">1212</a> 			weaveContainedResources();
+<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a> 			<strong class="jxr_keyword">if</strong> (myMutator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a> 				myMutator.setValue(myTarget, getCurrentElement());
+<a class="jxr_linenumber" name="L1215" href="#L1215">1215</a> 			}
+<a class="jxr_linenumber" name="L1216" href="#L1216">1216</a> 		}
+<a class="jxr_linenumber" name="L1217" href="#L1217">1217</a> 
+<a class="jxr_linenumber" name="L1218" href="#L1218">1218</a> 		@Override
+<a class="jxr_linenumber" name="L1219" href="#L1219">1219</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> wereBack() {
+<a class="jxr_linenumber" name="L1220" href="#L1220">1220</a> 			<strong class="jxr_keyword">super</strong>.wereBack();
+<a class="jxr_linenumber" name="L1221" href="#L1221">1221</a> 
+<a class="jxr_linenumber" name="L1222" href="#L1222">1222</a> 			<strong class="jxr_keyword">if</strong> (getCurrentElement() instanceof IDomainResource) {
+<a class="jxr_linenumber" name="L1223" href="#L1223">1223</a> 				IDomainResource elem = (IDomainResource) getCurrentElement();
+<a class="jxr_linenumber" name="L1224" href="#L1224">1224</a> 				String resourceName = myContext.getResourceDefinition(elem).getName();
+<a class="jxr_linenumber" name="L1225" href="#L1225">1225</a> 				String versionId = elem.getMeta().getVersionId();
+<a class="jxr_linenumber" name="L1226" href="#L1226">1226</a> 				<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
+<a class="jxr_linenumber" name="L1227" href="#L1227">1227</a> 					<em class="jxr_comment">// Resource has no ID</em>
+<a class="jxr_linenumber" name="L1228" href="#L1228">1228</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(versionId)) {
+<a class="jxr_linenumber" name="L1229" href="#L1229">1229</a> 					elem.getIdElement().setValue(resourceName + <span class="jxr_string">"/"</span> + elem.getIdElement().getIdPart() + <span class="jxr_string">"/_history/"</span> + versionId);
+<a class="jxr_linenumber" name="L1230" href="#L1230">1230</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1231" href="#L1231">1231</a> 					elem.getIdElement().setValue(resourceName + <span class="jxr_string">"/"</span> + elem.getIdElement().getIdPart());
+<a class="jxr_linenumber" name="L1232" href="#L1232">1232</a> 				}
+<a class="jxr_linenumber" name="L1233" href="#L1233">1233</a> 			}
+<a class="jxr_linenumber" name="L1234" href="#L1234">1234</a> 		}
+<a class="jxr_linenumber" name="L1235" href="#L1235">1235</a> 
+<a class="jxr_linenumber" name="L1236" href="#L1236">1236</a> 	}
+<a class="jxr_linenumber" name="L1237" href="#L1237">1237</a> 
+<a class="jxr_linenumber" name="L1238" href="#L1238">1238</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreTagListState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L1239" href="#L1239">1239</a> 
+<a class="jxr_linenumber" name="L1240" href="#L1240">1240</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
 <a class="jxr_linenumber" name="L1241" href="#L1241">1241</a> 
-<a class="jxr_linenumber" name="L1242" href="#L1242">1242</a> 		@Override
-<a class="jxr_linenumber" name="L1243" href="#L1243">1243</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
-<a class="jxr_linenumber" name="L1244" href="#L1244">1244</a> 			<strong class="jxr_keyword">return</strong> myTagList;
+<a class="jxr_linenumber" name="L1242" href="#L1242">1242</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreTagListState</a>() {
+<a class="jxr_linenumber" name="L1243" href="#L1243">1243</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1244" href="#L1244">1244</a> 			myTagList = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a>();
 <a class="jxr_linenumber" name="L1245" href="#L1245">1245</a> 		}
 <a class="jxr_linenumber" name="L1246" href="#L1246">1246</a> 
 <a class="jxr_linenumber" name="L1247" href="#L1247">1247</a> 		@Override
-<a class="jxr_linenumber" name="L1248" href="#L1248">1248</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPreResource() {
-<a class="jxr_linenumber" name="L1249" href="#L1249">1249</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1248" href="#L1248">1248</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1249" href="#L1249">1249</a> 			pop();
 <a class="jxr_linenumber" name="L1250" href="#L1250">1250</a> 		}
 <a class="jxr_linenumber" name="L1251" href="#L1251">1251</a> 
-<a class="jxr_linenumber" name="L1252" href="#L1252">1252</a> 	}
-<a class="jxr_linenumber" name="L1253" href="#L1253">1253</a> 
-<a class="jxr_linenumber" name="L1254" href="#L1254">1254</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1255" href="#L1255">1255</a> 		<strong class="jxr_keyword">private</strong> IPrimitiveType&lt;?&gt; myInstance;
-<a class="jxr_linenumber" name="L1256" href="#L1256">1256</a> 
-<a class="jxr_linenumber" name="L1257" href="#L1257">1257</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, IPrimitiveType&lt;?&gt; theInstance) {
-<a class="jxr_linenumber" name="L1258" href="#L1258">1258</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
-<a class="jxr_linenumber" name="L1259" href="#L1259">1259</a> 			myInstance = theInstance;
-<a class="jxr_linenumber" name="L1260" href="#L1260">1260</a> 		}
-<a class="jxr_linenumber" name="L1261" href="#L1261">1261</a> 
-<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a> 		@Override
-<a class="jxr_linenumber" name="L1263" href="#L1263">1263</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1264" href="#L1264">1264</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"value"</span>.equals(theName)) {
-<a class="jxr_linenumber" name="L1265" href="#L1265">1265</a> 				<strong class="jxr_keyword">if</strong> (<span class="jxr_string">""</span>.equals(theValue)) {
-<a class="jxr_linenumber" name="L1266" href="#L1266">1266</a> 					myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, <span class="jxr_string">"Attribute values must not be empty (\&quot;\&quot;)"</span>);
-<a class="jxr_linenumber" name="L1267" href="#L1267">1267</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1268" href="#L1268">1268</a> 					<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L1269" href="#L1269">1269</a> 						myInstance.setValueAsString(theValue);
-<a class="jxr_linenumber" name="L1270" href="#L1270">1270</a> 					} <strong class="jxr_keyword">catch</strong> (DataFormatException e) {
-<a class="jxr_linenumber" name="L1271" href="#L1271">1271</a> 						myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, e.getMessage());
-<a class="jxr_linenumber" name="L1272" href="#L1272">1272</a> 					} <strong class="jxr_keyword">catch</strong> (IllegalArgumentException e) {
-<a class="jxr_linenumber" name="L1273" href="#L1273">1273</a> 						myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, e.getMessage());
-<a class="jxr_linenumber" name="L1274" href="#L1274">1274</a> 					}
-<a class="jxr_linenumber" name="L1275" href="#L1275">1275</a> 				}
-<a class="jxr_linenumber" name="L1276" href="#L1276">1276</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"id"</span>.equals(theName)) {
-<a class="jxr_linenumber" name="L1277" href="#L1277">1277</a> 				<strong class="jxr_keyword">if</strong> (myInstance instanceof IIdentifiableElement) {
-<a class="jxr_linenumber" name="L1278" href="#L1278">1278</a> 					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
-<a class="jxr_linenumber" name="L1279" href="#L1279">1279</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myInstance instanceof IBaseElement) {
-<a class="jxr_linenumber" name="L1280" href="#L1280">1280</a> 					((IBaseElement) myInstance).setId(theValue);
-<a class="jxr_linenumber" name="L1281" href="#L1281">1281</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myInstance instanceof IBaseResource) {
-<a class="jxr_linenumber" name="L1282" href="#L1282">1282</a> 					<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
-<a class="jxr_linenumber" name="L1283" href="#L1283">1283</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1284" href="#L1284">1284</a> 					myErrorHandler.unknownAttribute(<strong class="jxr_keyword">null</strong>, theName);
-<a class="jxr_linenumber" name="L1285" href="#L1285">1285</a> 				}
-<a class="jxr_linenumber" name="L1286" href="#L1286">1286</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1287" href="#L1287">1287</a> 				myErrorHandler.unknownAttribute(<strong class="jxr_keyword">null</strong>, theName);
-<a class="jxr_linenumber" name="L1288" href="#L1288">1288</a> 			}
-<a class="jxr_linenumber" name="L1289" href="#L1289">1289</a> 		}
-<a class="jxr_linenumber" name="L1290" href="#L1290">1290</a> 
-<a class="jxr_linenumber" name="L1291" href="#L1291">1291</a> 		@Override
-<a class="jxr_linenumber" name="L1292" href="#L1292">1292</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() {
-<a class="jxr_linenumber" name="L1293" href="#L1293">1293</a> 			pop();
-<a class="jxr_linenumber" name="L1294" href="#L1294">1294</a> 		}
-<a class="jxr_linenumber" name="L1295" href="#L1295">1295</a> 
-<a class="jxr_linenumber" name="L1296" href="#L1296">1296</a> 		<em class="jxr_comment">// @Override</em>
-<a class="jxr_linenumber" name="L1297" href="#L1297">1297</a> 		<em class="jxr_comment">// public void enteringNewElementExtension(StartElement theElement,</em>
-<a class="jxr_linenumber" name="L1298" href="#L1298">1298</a> 		<em class="jxr_comment">// String theUrlAttr) {</em>
-<a class="jxr_linenumber" name="L1299" href="#L1299">1299</a> 		<em class="jxr_comment">// if (myInstance instanceof ISupportsUndeclaredExtensions) {</em>
-<a class="jxr_linenumber" name="L1300" href="#L1300">1300</a> 		<em class="jxr_comment">// UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);</em>
-<a class="jxr_linenumber" name="L1301" href="#L1301">1301</a> 		<em class="jxr_comment">// ((ISupportsUndeclaredExtensions)</em>
-<a class="jxr_linenumber" name="L1302" href="#L1302">1302</a> 		<em class="jxr_comment">// myInstance).getUndeclaredExtensions().add(ext);</em>
-<a class="jxr_linenumber" name="L1303" href="#L1303">1303</a> 		<em class="jxr_comment">// push(new ExtensionState(ext));</em>
-<a class="jxr_linenumber" name="L1304" href="#L1304">1304</a> 		<em class="jxr_comment">// }</em>
-<a class="jxr_linenumber" name="L1305" href="#L1305">1305</a> 		<em class="jxr_comment">// }</em>
-<a class="jxr_linenumber" name="L1306" href="#L1306">1306</a> 
-<a class="jxr_linenumber" name="L1307" href="#L1307">1307</a> 		@Override
-<a class="jxr_linenumber" name="L1308" href="#L1308">1308</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1309" href="#L1309">1309</a> 			myErrorHandler.unknownElement(<strong class="jxr_keyword">null</strong>, theLocalPart);
-<a class="jxr_linenumber" name="L1310" href="#L1310">1310</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(getPreResourceState()));
-<a class="jxr_linenumber" name="L1311" href="#L1311">1311</a> 			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L1312" href="#L1312">1312</a> 		}
-<a class="jxr_linenumber" name="L1313" href="#L1313">1313</a> 
-<a class="jxr_linenumber" name="L1314" href="#L1314">1314</a> 		@Override
-<a class="jxr_linenumber" name="L1315" href="#L1315">1315</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
-<a class="jxr_linenumber" name="L1316" href="#L1316">1316</a> 			<strong class="jxr_keyword">return</strong> myInstance;
-<a class="jxr_linenumber" name="L1317" href="#L1317">1317</a> 		}
-<a class="jxr_linenumber" name="L1318" href="#L1318">1318</a> 
-<a class="jxr_linenumber" name="L1319" href="#L1319">1319</a> 	}
-<a class="jxr_linenumber" name="L1320" href="#L1320">1320</a> 
-<a class="jxr_linenumber" name="L1321" href="#L1321">1321</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
-<a class="jxr_linenumber" name="L1322" href="#L1322">1322</a> 
-<a class="jxr_linenumber" name="L1323" href="#L1323">1323</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> myInstance;
-<a class="jxr_linenumber" name="L1324" href="#L1324">1324</a> 
-<a class="jxr_linenumber" name="L1325" href="#L1325">1325</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> theInstance) {
-<a class="jxr_linenumber" name="L1326" href="#L1326">1326</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, theDef.getName(), theDef, theInstance);
-<a class="jxr_linenumber" name="L1327" href="#L1327">1327</a> 			myInstance = theInstance;
-<a class="jxr_linenumber" name="L1328" href="#L1328">1328</a> 		}
-<a class="jxr_linenumber" name="L1329" href="#L1329">1329</a> 
-<a class="jxr_linenumber" name="L1330" href="#L1330">1330</a> 		@Override
-<a class="jxr_linenumber" name="L1331" href="#L1331">1331</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespace, String theChildName) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1332" href="#L1332">1332</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"id"</span>.equals(theChildName)) {
-<a class="jxr_linenumber" name="L1333" href="#L1333">1333</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a>(getPreResourceState(), myInstance.getId()));
-<a class="jxr_linenumber" name="L1334" href="#L1334">1334</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"meta"</span>.equals(theChildName)) {
-<a class="jxr_linenumber" name="L1335" href="#L1335">1335</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaElementState</a>(getPreResourceState(), myInstance.getResourceMetadata()));
-<a class="jxr_linenumber" name="L1336" href="#L1336">1336</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1337" href="#L1337">1337</a> 				<strong class="jxr_keyword">super</strong>.enteringNewElement(theNamespace, theChildName);
-<a class="jxr_linenumber" name="L1338" href="#L1338">1338</a> 			}
-<a class="jxr_linenumber" name="L1339" href="#L1339">1339</a> 		}
-<a class="jxr_linenumber" name="L1340" href="#L1340">1340</a> 	}
+<a class="jxr_linenumber" name="L1252" href="#L1252">1252</a> 		@Override
+<a class="jxr_linenumber" name="L1253" href="#L1253">1253</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1254" href="#L1254">1254</a> 			<strong class="jxr_keyword">if</strong> (!TagList.ELEMENT_NAME_LC.equals(theLocalPart.toLowerCase())) {
+<a class="jxr_linenumber" name="L1255" href="#L1255">1255</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"resourceType does not appear to be 'TagList', found: "</span> + theLocalPart);
+<a class="jxr_linenumber" name="L1256" href="#L1256">1256</a> 			}
+<a class="jxr_linenumber" name="L1257" href="#L1257">1257</a> 
+<a class="jxr_linenumber" name="L1258" href="#L1258">1258</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a>(myTagList));
+<a class="jxr_linenumber" name="L1259" href="#L1259">1259</a> 		}
+<a class="jxr_linenumber" name="L1260" href="#L1260">1260</a> 
+<a class="jxr_linenumber" name="L1261" href="#L1261">1261</a> 		@Override
+<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
+<a class="jxr_linenumber" name="L1263" href="#L1263">1263</a> 			<strong class="jxr_keyword">return</strong> myTagList;
+<a class="jxr_linenumber" name="L1264" href="#L1264">1264</a> 		}
+<a class="jxr_linenumber" name="L1265" href="#L1265">1265</a> 
+<a class="jxr_linenumber" name="L1266" href="#L1266">1266</a> 		@Override
+<a class="jxr_linenumber" name="L1267" href="#L1267">1267</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPreResource() {
+<a class="jxr_linenumber" name="L1268" href="#L1268">1268</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1269" href="#L1269">1269</a> 		}
+<a class="jxr_linenumber" name="L1270" href="#L1270">1270</a> 
+<a class="jxr_linenumber" name="L1271" href="#L1271">1271</a> 	}
+<a class="jxr_linenumber" name="L1272" href="#L1272">1272</a> 
+<a class="jxr_linenumber" name="L1273" href="#L1273">1273</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L1274" href="#L1274">1274</a> 		<strong class="jxr_keyword">private</strong> IPrimitiveType&lt;?&gt; myInstance;
+<a class="jxr_linenumber" name="L1275" href="#L1275">1275</a> 
+<a class="jxr_linenumber" name="L1276" href="#L1276">1276</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, IPrimitiveType&lt;?&gt; theInstance) {
+<a class="jxr_linenumber" name="L1277" href="#L1277">1277</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
+<a class="jxr_linenumber" name="L1278" href="#L1278">1278</a> 			myInstance = theInstance;
+<a class="jxr_linenumber" name="L1279" href="#L1279">1279</a> 		}
+<a class="jxr_linenumber" name="L1280" href="#L1280">1280</a> 
+<a class="jxr_linenumber" name="L1281" href="#L1281">1281</a> 		@Override
+<a class="jxr_linenumber" name="L1282" href="#L1282">1282</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1283" href="#L1283">1283</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"value"</span>.equals(theName)) {
+<a class="jxr_linenumber" name="L1284" href="#L1284">1284</a> 				<strong class="jxr_keyword">if</strong> (<span class="jxr_string">""</span>.equals(theValue)) {
+<a class="jxr_linenumber" name="L1285" href="#L1285">1285</a> 					myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, <span class="jxr_string">"Attribute values must not be empty (\&quot;\&quot;)"</span>);
+<a class="jxr_linenumber" name="L1286" href="#L1286">1286</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1287" href="#L1287">1287</a> 					<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1288" href="#L1288">1288</a> 						myInstance.setValueAsString(theValue);
+<a class="jxr_linenumber" name="L1289" href="#L1289">1289</a> 					} <strong class="jxr_keyword">catch</strong> (DataFormatException e) {
+<a class="jxr_linenumber" name="L1290" href="#L1290">1290</a> 						myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, e.getMessage());
+<a class="jxr_linenumber" name="L1291" href="#L1291">1291</a> 					} <strong class="jxr_keyword">catch</strong> (IllegalArgumentException e) {
+<a class="jxr_linenumber" name="L1292" href="#L1292">1292</a> 						myErrorHandler.invalidValue(<strong class="jxr_keyword">null</strong>, theValue, e.getMessage());
+<a class="jxr_linenumber" name="L1293" href="#L1293">1293</a> 					}
+<a class="jxr_linenumber" name="L1294" href="#L1294">1294</a> 				}
+<a class="jxr_linenumber" name="L1295" href="#L1295">1295</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"id"</span>.equals(theName)) {
+<a class="jxr_linenumber" name="L1296" href="#L1296">1296</a> 				<strong class="jxr_keyword">if</strong> (myInstance instanceof IIdentifiableElement) {
+<a class="jxr_linenumber" name="L1297" href="#L1297">1297</a> 					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
+<a class="jxr_linenumber" name="L1298" href="#L1298">1298</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myInstance instanceof IBaseElement) {
+<a class="jxr_linenumber" name="L1299" href="#L1299">1299</a> 					((IBaseElement) myInstance).setId(theValue);
+<a class="jxr_linenumber" name="L1300" href="#L1300">1300</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myInstance instanceof IBaseResource) {
+<a class="jxr_linenumber" name="L1301" href="#L1301">1301</a> 					<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
+<a class="jxr_linenumber" name="L1302" href="#L1302">1302</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1303" href="#L1303">1303</a> 					myErrorHandler.unknownAttribute(<strong class="jxr_keyword">null</strong>, theName);
+<a class="jxr_linenumber" name="L1304" href="#L1304">1304</a> 				}
+<a class="jxr_linenumber" name="L1305" href="#L1305">1305</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1306" href="#L1306">1306</a> 				myErrorHandler.unknownAttribute(<strong class="jxr_keyword">null</strong>, theName);
+<a class="jxr_linenumber" name="L1307" href="#L1307">1307</a> 			}
+<a class="jxr_linenumber" name="L1308" href="#L1308">1308</a> 		}
+<a class="jxr_linenumber" name="L1309" href="#L1309">1309</a> 
+<a class="jxr_linenumber" name="L1310" href="#L1310">1310</a> 		@Override
+<a class="jxr_linenumber" name="L1311" href="#L1311">1311</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() {
+<a class="jxr_linenumber" name="L1312" href="#L1312">1312</a> 			pop();
+<a class="jxr_linenumber" name="L1313" href="#L1313">1313</a> 		}
+<a class="jxr_linenumber" name="L1314" href="#L1314">1314</a> 
+<a class="jxr_linenumber" name="L1315" href="#L1315">1315</a> 		<em class="jxr_comment">// @Override</em>
+<a class="jxr_linenumber" name="L1316" href="#L1316">1316</a> 		<em class="jxr_comment">// public void enteringNewElementExtension(StartElement theElement,</em>
+<a class="jxr_linenumber" name="L1317" href="#L1317">1317</a> 		<em class="jxr_comment">// String theUrlAttr) {</em>
+<a class="jxr_linenumber" name="L1318" href="#L1318">1318</a> 		<em class="jxr_comment">// if (myInstance instanceof ISupportsUndeclaredExtensions) {</em>
+<a class="jxr_linenumber" name="L1319" href="#L1319">1319</a> 		<em class="jxr_comment">// UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);</em>
+<a class="jxr_linenumber" name="L1320" href="#L1320">1320</a> 		<em class="jxr_comment">// ((ISupportsUndeclaredExtensions)</em>
+<a class="jxr_linenumber" name="L1321" href="#L1321">1321</a> 		<em class="jxr_comment">// myInstance).getUndeclaredExtensions().add(ext);</em>
+<a class="jxr_linenumber" name="L1322" href="#L1322">1322</a> 		<em class="jxr_comment">// push(new ExtensionState(ext));</em>
+<a class="jxr_linenumber" name="L1323" href="#L1323">1323</a> 		<em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L1324" href="#L1324">1324</a> 		<em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L1325" href="#L1325">1325</a> 
+<a class="jxr_linenumber" name="L1326" href="#L1326">1326</a> 		@Override
+<a class="jxr_linenumber" name="L1327" href="#L1327">1327</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1328" href="#L1328">1328</a> 			myErrorHandler.unknownElement(<strong class="jxr_keyword">null</strong>, theLocalPart);
+<a class="jxr_linenumber" name="L1329" href="#L1329">1329</a> 			push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(getPreResourceState()));
+<a class="jxr_linenumber" name="L1330" href="#L1330">1330</a> 			<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L1331" href="#L1331">1331</a> 		}
+<a class="jxr_linenumber" name="L1332" href="#L1332">1332</a> 
+<a class="jxr_linenumber" name="L1333" href="#L1333">1333</a> 		@Override
+<a class="jxr_linenumber" name="L1334" href="#L1334">1334</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
+<a class="jxr_linenumber" name="L1335" href="#L1335">1335</a> 			<strong class="jxr_keyword">return</strong> myInstance;
+<a class="jxr_linenumber" name="L1336" href="#L1336">1336</a> 		}
+<a class="jxr_linenumber" name="L1337" href="#L1337">1337</a> 
+<a class="jxr_linenumber" name="L1338" href="#L1338">1338</a> 	}
+<a class="jxr_linenumber" name="L1339" href="#L1339">1339</a> 
+<a class="jxr_linenumber" name="L1340" href="#L1340">1340</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
 <a class="jxr_linenumber" name="L1341" href="#L1341">1341</a> 
-<a class="jxr_linenumber" name="L1342" href="#L1342">1342</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
+<a class="jxr_linenumber" name="L1342" href="#L1342">1342</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> myInstance;
 <a class="jxr_linenumber" name="L1343" href="#L1343">1343</a> 
-<a class="jxr_linenumber" name="L1344" href="#L1344">1344</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theInstance) {
+<a class="jxr_linenumber" name="L1344" href="#L1344">1344</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHapi</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> theInstance) {
 <a class="jxr_linenumber" name="L1345" href="#L1345">1345</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, theDef.getName(), theDef, theInstance);
-<a class="jxr_linenumber" name="L1346" href="#L1346">1346</a> 		}
-<a class="jxr_linenumber" name="L1347" href="#L1347">1347</a> 
-<a class="jxr_linenumber" name="L1348" href="#L1348">1348</a> 	}
-<a class="jxr_linenumber" name="L1349" href="#L1349">1349</a> 
-<a class="jxr_linenumber" name="L1350" href="#L1350">1350</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SecurityLabelElementStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
-<a class="jxr_linenumber" name="L1351" href="#L1351">1351</a> 
-<a class="jxr_linenumber" name="L1352" href="#L1352">1352</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SecurityLabelElementStateHapi</a>(ParserState&lt;T&gt;.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> codingDt) {
-<a class="jxr_linenumber" name="L1353" href="#L1353">1353</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, theDef.getName(), theDef, codingDt);
-<a class="jxr_linenumber" name="L1354" href="#L1354">1354</a> 		}
-<a class="jxr_linenumber" name="L1355" href="#L1355">1355</a> 
-<a class="jxr_linenumber" name="L1356" href="#L1356">1356</a> 		@Override
-<a class="jxr_linenumber" name="L1357" href="#L1357">1357</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1358" href="#L1358">1358</a> 			pop();
-<a class="jxr_linenumber" name="L1359" href="#L1359">1359</a> 		}
+<a class="jxr_linenumber" name="L1346" href="#L1346">1346</a> 			myInstance = theInstance;
+<a class="jxr_linenumber" name="L1347" href="#L1347">1347</a> 		}
+<a class="jxr_linenumber" name="L1348" href="#L1348">1348</a> 
+<a class="jxr_linenumber" name="L1349" href="#L1349">1349</a> 		@Override
+<a class="jxr_linenumber" name="L1350" href="#L1350">1350</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespace, String theChildName) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1351" href="#L1351">1351</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"id"</span>.equals(theChildName)) {
+<a class="jxr_linenumber" name="L1352" href="#L1352">1352</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">PrimitiveState</a>(getPreResourceState(), myInstance.getId()));
+<a class="jxr_linenumber" name="L1353" href="#L1353">1353</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"meta"</span>.equals(theChildName)) {
+<a class="jxr_linenumber" name="L1354" href="#L1354">1354</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">MetaElementState</a>(getPreResourceState(), myInstance.getResourceMetadata()));
+<a class="jxr_linenumber" name="L1355" href="#L1355">1355</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1356" href="#L1356">1356</a> 				<strong class="jxr_keyword">super</strong>.enteringNewElement(theNamespace, theChildName);
+<a class="jxr_linenumber" name="L1357" href="#L1357">1357</a> 			}
+<a class="jxr_linenumber" name="L1358" href="#L1358">1358</a> 		}
+<a class="jxr_linenumber" name="L1359" href="#L1359">1359</a> 	}
 <a class="jxr_linenumber" name="L1360" href="#L1360">1360</a> 
-<a class="jxr_linenumber" name="L1361" href="#L1361">1361</a> 	}
+<a class="jxr_linenumber" name="L1361" href="#L1361">1361</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
 <a class="jxr_linenumber" name="L1362" href="#L1362">1362</a> 
-<a class="jxr_linenumber" name="L1363" href="#L1363">1363</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1364" href="#L1364">1364</a> 
-<a class="jxr_linenumber" name="L1365" href="#L1365">1365</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> myDepth;
+<a class="jxr_linenumber" name="L1363" href="#L1363">1363</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ResourceStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theInstance) {
+<a class="jxr_linenumber" name="L1364" href="#L1364">1364</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, theDef.getName(), theDef, theInstance);
+<a class="jxr_linenumber" name="L1365" href="#L1365">1365</a> 		}
 <a class="jxr_linenumber" name="L1366" href="#L1366">1366</a> 
-<a class="jxr_linenumber" name="L1367" href="#L1367">1367</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState) {
-<a class="jxr_linenumber" name="L1368" href="#L1368">1368</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
-<a class="jxr_linenumber" name="L1369" href="#L1369">1369</a> 		}
+<a class="jxr_linenumber" name="L1367" href="#L1367">1367</a> 	}
+<a class="jxr_linenumber" name="L1368" href="#L1368">1368</a> 
+<a class="jxr_linenumber" name="L1369" href="#L1369">1369</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SecurityLabelElementStateHapi</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">ElementCompositeState</a> {
 <a class="jxr_linenumber" name="L1370" href="#L1370">1370</a> 
-<a class="jxr_linenumber" name="L1371" href="#L1371">1371</a> 		@Override
-<a class="jxr_linenumber" name="L1372" href="#L1372">1372</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1373" href="#L1373">1373</a> 			<em class="jxr_comment">// ignore</em>
-<a class="jxr_linenumber" name="L1374" href="#L1374">1374</a> 		}
-<a class="jxr_linenumber" name="L1375" href="#L1375">1375</a> 
-<a class="jxr_linenumber" name="L1376" href="#L1376">1376</a> 		@Override
-<a class="jxr_linenumber" name="L1377" href="#L1377">1377</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1378" href="#L1378">1378</a> 			myDepth--;
-<a class="jxr_linenumber" name="L1379" href="#L1379">1379</a> 			<strong class="jxr_keyword">if</strong> (myDepth &lt; 0) {
-<a class="jxr_linenumber" name="L1380" href="#L1380">1380</a> 				pop();
-<a class="jxr_linenumber" name="L1381" href="#L1381">1381</a> 			}
-<a class="jxr_linenumber" name="L1382" href="#L1382">1382</a> 		}
+<a class="jxr_linenumber" name="L1371" href="#L1371">1371</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SecurityLabelElementStateHapi</a>(ParserState&lt;T&gt;.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition&lt;?&gt; theDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> codingDt) {
+<a class="jxr_linenumber" name="L1372" href="#L1372">1372</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, theDef.getName(), theDef, codingDt);
+<a class="jxr_linenumber" name="L1373" href="#L1373">1373</a> 		}
+<a class="jxr_linenumber" name="L1374" href="#L1374">1374</a> 
+<a class="jxr_linenumber" name="L1375" href="#L1375">1375</a> 		@Override
+<a class="jxr_linenumber" name="L1376" href="#L1376">1376</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1377" href="#L1377">1377</a> 			pop();
+<a class="jxr_linenumber" name="L1378" href="#L1378">1378</a> 		}
+<a class="jxr_linenumber" name="L1379" href="#L1379">1379</a> 
+<a class="jxr_linenumber" name="L1380" href="#L1380">1380</a> 	}
+<a class="jxr_linenumber" name="L1381" href="#L1381">1381</a> 
+<a class="jxr_linenumber" name="L1382" href="#L1382">1382</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
 <a class="jxr_linenumber" name="L1383" href="#L1383">1383</a> 
-<a class="jxr_linenumber" name="L1384" href="#L1384">1384</a> 		@Override
-<a class="jxr_linenumber" name="L1385" href="#L1385">1385</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1386" href="#L1386">1386</a> 			myDepth++;
-<a class="jxr_linenumber" name="L1387" href="#L1387">1387</a> 		}
-<a class="jxr_linenumber" name="L1388" href="#L1388">1388</a> 
-<a class="jxr_linenumber" name="L1389" href="#L1389">1389</a> 		@Override
-<a class="jxr_linenumber" name="L1390" href="#L1390">1390</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElementExtension(StartElement theElement, String theUrlAttr, <strong class="jxr_keyword">boolean</strong> theIsModifier, <strong class="jxr_keyword">final</strong> String baseServerUrl) {
-<a class="jxr_linenumber" name="L1391" href="#L1391">1391</a> 			myDepth++;
-<a class="jxr_linenumber" name="L1392" href="#L1392">1392</a> 		}
-<a class="jxr_linenumber" name="L1393" href="#L1393">1393</a> 
-<a class="jxr_linenumber" name="L1394" href="#L1394">1394</a> 	}
-<a class="jxr_linenumber" name="L1395" href="#L1395">1395</a> 
-<a class="jxr_linenumber" name="L1396" href="#L1396">1396</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1397" href="#L1397">1397</a> 
-<a class="jxr_linenumber" name="L1398" href="#L1398">1398</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
-<a class="jxr_linenumber" name="L1399" href="#L1399">1399</a> 
-<a class="jxr_linenumber" name="L1400" href="#L1400">1400</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a>(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList) {
-<a class="jxr_linenumber" name="L1401" href="#L1401">1401</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a> 			myTagList = theTagList;
-<a class="jxr_linenumber" name="L1403" href="#L1403">1403</a> 		}
-<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a> 
-<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a> 		@Override
-<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1407" href="#L1407">1407</a> 			pop();
-<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a> 		}
-<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a> 
-<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a> 		@Override
-<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a> 			<strong class="jxr_keyword">if</strong> (TagList.ATTR_CATEGORY.equals(theLocalPart)) {
-<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a>(myTagList));
-<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unexpected element: "</span> + theLocalPart);
-<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a> 			}
-<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a> 		}
+<a class="jxr_linenumber" name="L1384" href="#L1384">1384</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> myDepth;
+<a class="jxr_linenumber" name="L1385" href="#L1385">1385</a> 
+<a class="jxr_linenumber" name="L1386" href="#L1386">1386</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">SwallowChildrenWholeState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState) {
+<a class="jxr_linenumber" name="L1387" href="#L1387">1387</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
+<a class="jxr_linenumber" name="L1388" href="#L1388">1388</a> 		}
+<a class="jxr_linenumber" name="L1389" href="#L1389">1389</a> 
+<a class="jxr_linenumber" name="L1390" href="#L1390">1390</a> 		@Override
+<a class="jxr_linenumber" name="L1391" href="#L1391">1391</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1392" href="#L1392">1392</a> 			<em class="jxr_comment">// ignore</em>
+<a class="jxr_linenumber" name="L1393" href="#L1393">1393</a> 		}
+<a class="jxr_linenumber" name="L1394" href="#L1394">1394</a> 
+<a class="jxr_linenumber" name="L1395" href="#L1395">1395</a> 		@Override
+<a class="jxr_linenumber" name="L1396" href="#L1396">1396</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1397" href="#L1397">1397</a> 			myDepth--;
+<a class="jxr_linenumber" name="L1398" href="#L1398">1398</a> 			<strong class="jxr_keyword">if</strong> (myDepth &lt; 0) {
+<a class="jxr_linenumber" name="L1399" href="#L1399">1399</a> 				pop();
+<a class="jxr_linenumber" name="L1400" href="#L1400">1400</a> 			}
+<a class="jxr_linenumber" name="L1401" href="#L1401">1401</a> 		}
+<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a> 
+<a class="jxr_linenumber" name="L1403" href="#L1403">1403</a> 		@Override
+<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a> 			myDepth++;
+<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a> 		}
+<a class="jxr_linenumber" name="L1407" href="#L1407">1407</a> 
+<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a> 		@Override
+<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElementExtension(StartElement theElement, String theUrlAttr, <strong class="jxr_keyword">boolean</strong> theIsModifier, <strong class="jxr_keyword">final</strong> String baseServerUrl) {
+<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a> 			myDepth++;
+<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a> 		}
+<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a> 
+<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a> 	}
+<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a> 
+<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a> 
+<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
 <a class="jxr_linenumber" name="L1418" href="#L1418">1418</a> 
-<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a> 		@Override
-<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
-<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a> 			<strong class="jxr_keyword">return</strong> myTagList;
+<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagListState</a>(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList) {
+<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a> 			myTagList = theTagList;
 <a class="jxr_linenumber" name="L1422" href="#L1422">1422</a> 		}
 <a class="jxr_linenumber" name="L1423" href="#L1423">1423</a> 
-<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a> 	}
-<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a> 
-<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1427" href="#L1427">1427</a> 
-<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> LABEL = 2;
-<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> NONE = 0;
-<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a> 
-<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> SCHEME = 3;
-<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TERM = 1;
-<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a> 		<strong class="jxr_keyword">private</strong> String myLabel;
-<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a> 		<strong class="jxr_keyword">private</strong> String myScheme;
-<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> mySubState = 0;
-<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
-<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a> 		<strong class="jxr_keyword">private</strong> String myTerm;
-<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a> 
-<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a>(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList) {
-<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a> 			myTagList = theTagList;
-<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a> 		}
-<a class="jxr_linenumber" name="L1443" href="#L1443">1443</a> 
-<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a> 		@Override
-<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a> 			String value = defaultIfBlank(theValue, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a> 
-<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a> 			<strong class="jxr_keyword">switch</strong> (mySubState) {
-<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a> 			<strong class="jxr_keyword">case</strong> TERM:
-<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a> 				myTerm = (value);
-<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a> 			<strong class="jxr_keyword">case</strong> LABEL:
-<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a> 				myLabel = (value);
-<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a> 			<strong class="jxr_keyword">case</strong> SCHEME:
-<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a> 				myScheme = (value);
-<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a> 			<strong class="jxr_keyword">case</strong> NONE:
-<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> 				<em class="jxr_comment">// This handles JSON encoding, which is a bit weird</em>
-<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 				enteringNewElement(<strong class="jxr_keyword">null</strong>, theName);
-<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> 				attributeValue(<strong class="jxr_keyword">null</strong>, value);
-<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> 				endingElement();
-<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a> 			}
-<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a> 		}
+<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a> 		@Override
+<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a> 			pop();
+<a class="jxr_linenumber" name="L1427" href="#L1427">1427</a> 		}
+<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a> 
+<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> 		@Override
+<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> 			<strong class="jxr_keyword">if</strong> (TagList.ATTR_CATEGORY.equals(theLocalPart)) {
+<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a> 				push(<strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a>(myTagList));
+<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unexpected element: "</span> + theLocalPart);
+<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a> 			}
+<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a> 		}
+<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a> 
+<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a> 		@Override
+<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> getCurrentElement() {
+<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a> 			<strong class="jxr_keyword">return</strong> myTagList;
+<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a> 		}
+<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a> 
+<a class="jxr_linenumber" name="L1443" href="#L1443">1443</a> 	}
+<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a> 
+<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a> 
+<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> LABEL = 2;
+<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> NONE = 0;
+<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a> 
+<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> SCHEME = 3;
+<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TERM = 1;
+<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a> 		<strong class="jxr_keyword">private</strong> String myLabel;
+<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a> 		<strong class="jxr_keyword">private</strong> String myScheme;
+<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> mySubState = 0;
+<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> myTagList;
+<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a> 		<strong class="jxr_keyword">private</strong> String myTerm;
+<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a> 
+<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">TagState</a>(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList) {
+<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> 			<strong class="jxr_keyword">super</strong>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 			myTagList = theTagList;
+<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> 		}
+<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> 
+<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> 		@Override
+<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a> 			String value = defaultIfBlank(theValue, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L1466" href="#L1466">1466</a> 
-<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a> 		@Override
-<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a> 			<strong class="jxr_keyword">if</strong> (mySubState != NONE) {
-<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 				mySubState = NONE;
-<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 				<strong class="jxr_keyword">if</strong> (isNotEmpty(myScheme) || isNotBlank(myTerm) || isNotBlank(myLabel)) {
-<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a> 					myTagList.addTag(myScheme, myTerm, myLabel);
-<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a> 				}
-<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a> 				pop();
-<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a> 			}
-<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a> 		}
-<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a> 
-<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a> 		@Override
-<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a> 			<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a> <em class="jxr_comment">			 * We allow for both the DSTU1 and DSTU2 names here</em>
-<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a> <em class="jxr_comment">			 */</em>
-<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a> 			<strong class="jxr_keyword">if</strong> (Tag.ATTR_TERM.equals(theLocalPart) || <span class="jxr_string">"code"</span>.equals(theLocalPart)) {
-<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a> 				mySubState = TERM;
-<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Tag.ATTR_SCHEME.equals(theLocalPart) || <span class="jxr_string">"system"</span>.equals(theLocalPart)) {
-<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a> 				mySubState = SCHEME;
-<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Tag.ATTR_LABEL.equals(theLocalPart) || <span class="jxr_string">"display"</span>.equals(theLocalPart)) {
-<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a> 				mySubState = LABEL;
+<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a> 			<strong class="jxr_keyword">switch</strong> (mySubState) {
+<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 			<strong class="jxr_keyword">case</strong> TERM:
+<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a> 				myTerm = (value);
+<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 			<strong class="jxr_keyword">case</strong> LABEL:
+<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 				myLabel = (value);
+<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a> 			<strong class="jxr_keyword">case</strong> SCHEME:
+<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a> 				myScheme = (value);
+<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a> 			<strong class="jxr_keyword">case</strong> NONE:
+<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a> 				<em class="jxr_comment">// This handles JSON encoding, which is a bit weird</em>
+<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a> 				enteringNewElement(<strong class="jxr_keyword">null</strong>, theName);
+<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a> 				attributeValue(<strong class="jxr_keyword">null</strong>, value);
+<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a> 				endingElement();
+<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a> 			}
+<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a> 		}
+<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a> 
+<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a> 		@Override
+<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a> 			<strong class="jxr_keyword">if</strong> (mySubState != NONE) {
+<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a> 				mySubState = NONE;
 <a class="jxr_linenumber" name="L1490" href="#L1490">1490</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unexpected element: "</span> + theLocalPart);
-<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a> 			}
-<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a> 		}
-<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a> 
-<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a> 	}
-<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a> 
-<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
-<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> myDepth;
-<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> myDt;
-<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a> 		<strong class="jxr_keyword">private</strong> List&lt;XMLEvent&gt; myEvents = <strong class="jxr_keyword">new</strong> ArrayList&lt;XMLEvent&gt;();
-<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myIncludeOuterEvent;
-<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a> 
-<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> theXhtmlDt, <strong class="jxr_keyword">boolean</strong> theIncludeOuterEvent) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
-<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a> 			myDepth = 0;
-<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a> 			myDt = theXhtmlDt;
-<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a> 			myIncludeOuterEvent = theIncludeOuterEvent;
-<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a> 		}
-<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a> 
-<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a> 		@Override
-<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a> 			<strong class="jxr_keyword">if</strong> (myJsonMode) {
-<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a> 				myDt.setValueAsString(theValue);
-<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a> 				<em class="jxr_comment">// IGNORE - don't handle this as an error, we process these as XML events</em>
-<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a> 			}
-<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a> 		}
-<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a> 
-<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doPop() {
-<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a> 			pop();
-<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a> 		}
-<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a> 
-<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a> 		@Override
-<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a> 			<strong class="jxr_keyword">if</strong> (myJsonMode) {
-<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a> 				doPop();
-<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a> 				<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a> 			}
-<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a> 			<strong class="jxr_keyword">super</strong>.endingElement();
-<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a> 		}
-<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a> 
-<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a> 		@Override
-<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a> 			<em class="jxr_comment">// IGNORE - don't handle this as an error, we process these as XML events</em>
-<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a> 		}
-<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a> 
-<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a> 		@Override
-<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../ca/uhn/fhir/model/api/IElement.html">IElement</a> getCurrentElement() {
-<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a> 			<strong class="jxr_keyword">return</strong> myDt;
+<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> 				<strong class="jxr_keyword">if</strong> (isNotEmpty(myScheme) || isNotBlank(myTerm) || isNotBlank(myLabel)) {
+<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a> 					myTagList.addTag(myScheme, myTerm, myLabel);
+<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a> 				}
+<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a> 				pop();
+<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a> 			}
+<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a> 		}
+<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a> 
+<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a> 		@Override
+<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a> 			<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a> <em class="jxr_comment">			 * We allow for both the DSTU1 and DSTU2 names here</em>
+<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a> <em class="jxr_comment">			 */</em>
+<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a> 			<strong class="jxr_keyword">if</strong> (Tag.ATTR_TERM.equals(theLocalPart) || <span class="jxr_string">"code"</span>.equals(theLocalPart)) {
+<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a> 				mySubState = TERM;
+<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Tag.ATTR_SCHEME.equals(theLocalPart) || <span class="jxr_string">"system"</span>.equals(theLocalPart)) {
+<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a> 				mySubState = SCHEME;
+<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Tag.ATTR_LABEL.equals(theLocalPart) || <span class="jxr_string">"display"</span>.equals(theLocalPart)) {
+<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a> 				mySubState = LABEL;
+<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a>(<span class="jxr_string">"Unexpected element: "</span> + theLocalPart);
+<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a> 			}
+<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a> 		}
+<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a> 
+<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a> 	}
+<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a> 
+<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">BaseState</a> {
+<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> myDepth;
+<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> myDt;
+<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a> 		<strong class="jxr_keyword">private</strong> List&lt;XMLEvent&gt; myEvents = <strong class="jxr_keyword">new</strong> ArrayList&lt;XMLEvent&gt;();
+<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myIncludeOuterEvent;
+<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a> 
+<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> theXhtmlDt, <strong class="jxr_keyword">boolean</strong> theIncludeOuterEvent) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState);
+<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a> 			myDepth = 0;
+<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a> 			myDt = theXhtmlDt;
+<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a> 			myIncludeOuterEvent = theIncludeOuterEvent;
+<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a> 		}
+<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a> 
+<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a> 		@Override
+<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> attributeValue(String theName, String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a> 			<strong class="jxr_keyword">if</strong> (myJsonMode) {
+<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a> 				myDt.setValueAsString(theValue);
+<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a> 				<em class="jxr_comment">// IGNORE - don't handle this as an error, we process these as XML events</em>
+<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a> 			}
+<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a> 		}
+<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a> 
+<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doPop() {
+<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a> 			pop();
 <a class="jxr_linenumber" name="L1540" href="#L1540">1540</a> 		}
 <a class="jxr_linenumber" name="L1541" href="#L1541">1541</a> 
-<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> getDt() {
-<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a> 			<strong class="jxr_keyword">return</strong> myDt;
-<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a> 		}
-<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a> 
-<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a> 		@Override
-<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> xmlEvent(XMLEvent theEvent) {
-<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isEndElement()) {
-<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> 				myDepth--;
-<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> 			}
-<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> 
-<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a> 			<strong class="jxr_keyword">if</strong> (myIncludeOuterEvent || myDepth &gt; 0) {
-<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a> 				myEvents.add(theEvent);
-<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a> 			}
+<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a> 		@Override
+<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> endingElement() <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a> 			<strong class="jxr_keyword">if</strong> (myJsonMode) {
+<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a> 				doPop();
+<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a> 				<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> 			}
+<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a> 			<strong class="jxr_keyword">super</strong>.endingElement();
+<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> 		}
+<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> 
+<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> 		@Override
+<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> enteringNewElement(String theNamespaceUri, String theLocalPart) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a> 			<em class="jxr_comment">// IGNORE - don't handle this as an error, we process these as XML events</em>
+<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a> 		}
 <a class="jxr_linenumber" name="L1555" href="#L1555">1555</a> 
-<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isStartElement()) {
-<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a> 				myDepth++;
-<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a> 			}
-<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> 
-<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isEndElement()) {
-<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 				<strong class="jxr_keyword">if</strong> (myDepth == 0) {
-<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 					String eventsAsString = XmlUtil.encode(myEvents);
-<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 					myDt.setValue(eventsAsString);
-<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 					doPop();
-<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 				}
-<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> 			}
-<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 		}
-<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 
-<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 	}
+<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a> 		@Override
+<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a> 		<strong class="jxr_keyword">protected</strong> <a href="../../../../ca/uhn/fhir/model/api/IElement.html">IElement</a> getCurrentElement() {
+<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a> 			<strong class="jxr_keyword">return</strong> myDt;
+<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> 		}
+<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 
+<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> getDt() {
+<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 			<strong class="jxr_keyword">return</strong> myDt;
+<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 		}
+<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 
+<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 		@Override
+<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> xmlEvent(XMLEvent theEvent) {
+<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isEndElement()) {
+<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 				myDepth--;
+<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 			}
 <a class="jxr_linenumber" name="L1570" href="#L1570">1570</a> 
-<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> {
-<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> myHl7OrgDatatype;
-<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> 
-<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> theHl7OrgDatatype) {
-<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a>(), <strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 			myHl7OrgDatatype = theHl7OrgDatatype;
-<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 		}
+<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 			<strong class="jxr_keyword">if</strong> (myIncludeOuterEvent || myDepth &gt; 0) {
+<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 				myEvents.add(theEvent);
+<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> 			}
+<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 
+<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isStartElement()) {
+<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 				myDepth++;
+<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 			}
 <a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> 
-<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 		@Override
-<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doPop() {
-<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> 			<em class="jxr_comment">// TODO: this is not very efficient</em>
-<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> 			String value = getDt().getValueAsString();
-<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 			myHl7OrgDatatype.setValueAsString(value);
-<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 
-<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> 			<strong class="jxr_keyword">super</strong>.doPop();
+<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 			<strong class="jxr_keyword">if</strong> (theEvent.isEndElement()) {
+<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 				<strong class="jxr_keyword">if</strong> (myDepth == 0) {
+<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> 					String eventsAsString = XmlUtil.encode(myEvents);
+<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> 					myDt.setValue(eventsAsString);
+<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 					doPop();
+<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 				}
+<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> 			}
 <a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> 		}
 <a class="jxr_linenumber" name="L1587" href="#L1587">1587</a> 
 <a class="jxr_linenumber" name="L1588" href="#L1588">1588</a> 	}
 <a class="jxr_linenumber" name="L1589" href="#L1589">1589</a> 
-<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a> }
+<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlState</a> {
+<a class="jxr_linenumber" name="L1591" href="#L1591">1591</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> myHl7OrgDatatype;
+<a class="jxr_linenumber" name="L1592" href="#L1592">1592</a> 
+<a class="jxr_linenumber" name="L1593" href="#L1593">1593</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/parser/ParserState.html">XhtmlStateHl7Org</a>(<a href="../../../../ca/uhn/fhir/parser/ParserState.html">PreResourceState</a> thePreResourceState, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseXhtml.html">IBaseXhtml</a> theHl7OrgDatatype) {
+<a class="jxr_linenumber" name="L1594" href="#L1594">1594</a> 			<strong class="jxr_keyword">super</strong>(thePreResourceState, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a>(), <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L1595" href="#L1595">1595</a> 			myHl7OrgDatatype = theHl7OrgDatatype;
+<a class="jxr_linenumber" name="L1596" href="#L1596">1596</a> 		}
+<a class="jxr_linenumber" name="L1597" href="#L1597">1597</a> 
+<a class="jxr_linenumber" name="L1598" href="#L1598">1598</a> 		@Override
+<a class="jxr_linenumber" name="L1599" href="#L1599">1599</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doPop() {
+<a class="jxr_linenumber" name="L1600" href="#L1600">1600</a> 			<em class="jxr_comment">// TODO: this is not very efficient</em>
+<a class="jxr_linenumber" name="L1601" href="#L1601">1601</a> 			String value = getDt().getValueAsString();
+<a class="jxr_linenumber" name="L1602" href="#L1602">1602</a> 			myHl7OrgDatatype.setValueAsString(value);
+<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a> 
+<a class="jxr_linenumber" name="L1604" href="#L1604">1604</a> 			<strong class="jxr_keyword">super</strong>.doPop();
+<a class="jxr_linenumber" name="L1605" href="#L1605">1605</a> 		}
+<a class="jxr_linenumber" name="L1606" href="#L1606">1606</a> 
+<a class="jxr_linenumber" name="L1607" href="#L1607">1607</a> 	}
+<a class="jxr_linenumber" name="L1608" href="#L1608">1608</a> 
+<a class="jxr_linenumber" name="L1609" href="#L1609">1609</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

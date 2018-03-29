@@ -82,7 +82,7 @@
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  		<strong class="jxr_keyword">if</strong> (newStatus == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  			String actualCode = subscription.getStatusElement().getValueAsString();
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Can not "</span> + theOperation.getCode() + <span class="jxr_string">" resource: Subscription.status must be populated"</span> + ((isNotBlank(actualCode)) ? <span class="jxr_string">" (invalid value "</span> + actualCode + <span class="jxr_string">")"</span> : <span class="jxr_string">""</span>));
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Can not "</span> + theOperation.getCode() + <span class="jxr_string">" resource: Subscription.status must be populated on this server"</span> + ((isNotBlank(actualCode)) ? <span class="jxr_string">" (invalid value "</span> + actualCode + <span class="jxr_string">")"</span> : <span class="jxr_string">""</span>));
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  		}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">if</strong> (theOldResourceOrNull != <strong class="jxr_keyword">null</strong>) {
@@ -116,7 +116,7 @@
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 		}
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 		<strong class="jxr_keyword">if</strong> (theSubscription.getStatus() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Can not "</span> + theOperation.getCode().toLowerCase() + <span class="jxr_string">" resource: Subscription.status must be populated"</span>);
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Can not "</span> + theOperation.getCode().toLowerCase() + <span class="jxr_string">" resource: Subscription.status must be populated on this server"</span>);
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		}
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.status must be '"</span> + SubscriptionStatus.OFF.toCode() + <span class="jxr_string">"' or '"</span> + SubscriptionStatus.REQUESTED.toCode() + <span class="jxr_string">"' on a newly created subscription"</span>);

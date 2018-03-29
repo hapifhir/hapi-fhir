@@ -63,7 +63,7 @@
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">void</strong> incorrectJsonType(<a href="../../../../ca/uhn/fhir/parser/IParserErrorHandler.html">IParseLocation</a> theLocation, String theElementName, ValueType theExpectedValueType, ScalarType theExpectedScalarType, ValueType theFoundValueType, ScalarType theFoundScalarType);
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * The parser detected an atttribute value that was invalid (such as: empty "" values are not permitted)</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * The parser detected an attribute value that was invalid (such as: empty "" values are not permitted)</em>
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * </em>
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * @param theLocation</em>
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">	 *           The location in the document. Note that this may be &lt;code&gt;null&lt;/code&gt; as the ParseLocation feature is experimental. Use with caution, as the API may change. </em>
@@ -78,7 +78,7 @@
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">	 * </em>
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">	 * @param theLocation</em>
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment">	 *           The location in the document. Note that this may be &lt;code&gt;null&lt;/code&gt; as the ParseLocation feature is experimental. Use with caution, as the API may change. </em>
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">	 * @param theReference The actual invalid reference (e.g. "#3")</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">	 * @param theElementName The missing element name</em>
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">	 * @since 2.1</em>
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">void</strong> missingRequiredElement(<a href="../../../../ca/uhn/fhir/parser/IParserErrorHandler.html">IParseLocation</a> theLocation, String theElementName);
@@ -131,7 +131,7 @@
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">	 * type which will currently always be set to null. This interface is included here so that</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">	 * locations can be added to the API in a future release without changing the API.</em>
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../ca/uhn/fhir/parser/IParserErrorHandler.html">IParseLocation</a> {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	<strong class="jxr_keyword">interface</strong> <a href="../../../../ca/uhn/fhir/parser/IParserErrorHandler.html">IParseLocation</a> {
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 		<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment">		 * Returns the name of the parent element (the element containing the element currently being parsed)</em>
