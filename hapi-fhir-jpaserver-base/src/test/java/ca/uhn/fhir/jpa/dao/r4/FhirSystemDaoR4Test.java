@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1511,6 +1512,58 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = find(list, Patient.class, 0);
 		assertTrue(p.getIdElement().isIdPartValidLong());
 		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
+	}
+
+	@Test
+	public void testTransactionDoesntDoubleCreate() throws IOException {
+		String inputString = IOUtils.toString(FhirSystemDaoR4Test.class.getResourceAsStream("/r4/musc-obs-transaction.xml"), Charsets.UTF_8);
+
+		Bundle output;
+		BundleEntryResponseComponent respEntry;
+		IdType createdId;
+
+		Bundle input = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputString);
+		output = mySystemDao.transaction(mySrd, input);
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Encounter", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		// Same bundle again
+
+		input = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputString);
+		output = mySystemDao.transaction(mySrd, input);
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Encounter", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
 	}
 
 	@Test
