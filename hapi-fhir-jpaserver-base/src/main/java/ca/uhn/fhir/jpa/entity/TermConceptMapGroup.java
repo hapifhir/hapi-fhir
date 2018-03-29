@@ -19,10 +19,10 @@ public class TermConceptMapGroup implements Serializable {
 	private TermConceptMap myConceptMap;
 
 	@Column(name = "SOURCE_URL", nullable = false, length = 200)
-	private String mySourceUrl;
+	private String mySource;
 
 	@Column(name = "TARGET_URL", nullable = false, length = 200)
-	private String myTargetUrl;
+	private String myTarget;
 
 	@OneToMany(mappedBy = "myConceptMapGroup")
 	private List<TermConceptMapGroupElement> myConceptMapGroupElements;
@@ -39,23 +39,23 @@ public class TermConceptMapGroup implements Serializable {
 		return myConceptMap;
 	}
 
-	public void setConceptMap(TermConceptMap conceptMap) {
-		myConceptMap = conceptMap;
+	public void setConceptMap(TermConceptMap theTermConceptMap) {
+		myConceptMap = theTermConceptMap;
 	}
 
-	public String getSourceUrl() {
-		return mySourceUrl;
+	public String getSource() {
+		return mySource;
 	}
 
-	public void setSourceUrl(String mySourceUrl) {
-		this.mySourceUrl = mySourceUrl;
+	public void setSource(String theSource) {
+		this.mySource = theSource;
 	}
 
-	public String getTargetUrl() {
-		return myTargetUrl;
+	public String getTarget() {
+		return myTarget;
 	}
 
-	public void setTargetUrl(String myTargetUrl) {
-		this.myTargetUrl = myTargetUrl;
+	public void setTarget(String theTarget) {
+		this.myTarget = theTarget;
 	}
 }

@@ -37,6 +37,26 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		param = respParams.getParameter().get(1);
 		assertEquals("message", param.getName());
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValue());
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		param = respParams.getParameter().get(2);
+		assertEquals("match", param.getName());
+		assertEquals(3, param.getPart().size());
+
+		ParametersParameterComponent part = param.getPart().get(0);
+		assertEquals("equivalence", part.getName());
+
+		part = param.getPart().get(1);
+		assertEquals("concept", part.getName());
+		Coding coding = (Coding) part.getValue();
+		assertEquals("34567", coding.getCode());
+		assertEquals("Target Code 34567", coding.getDisplay());
+		assertEquals(CS_URL_2, coding.getSystem());
+
+		part = param.getPart().get(2);
+		assertEquals("source", part.getName());
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
+
+	// TODO: Utility method for fetching paramByName
 }

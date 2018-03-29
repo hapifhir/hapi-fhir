@@ -35,9 +35,14 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 	})
 	public Parameters translate(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
-		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
+		@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theSourceCodeSystemVersion,
+		@OperationParam(name = "source", min = 0, max = 1) UriType theSourceValueSet,
+		@OperationParam(name = "coding", min = 0, max = 1) Coding theSourceCoding,
+		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theSourceCodeableConcept,
+		@OperationParam(name = "target", min = 0, max = 1) UriType theTargetValueSet,
+		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
 		RequestDetails theRequestDetails
 	) {
 		startRequest(theServletRequest);

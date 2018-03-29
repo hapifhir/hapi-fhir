@@ -32,7 +32,7 @@ public class TermConceptMap implements Serializable {
 		return myUrl;
 	}
 
-	public void setUrl(String url) {
-		myUrl = url;
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
 	}
 }

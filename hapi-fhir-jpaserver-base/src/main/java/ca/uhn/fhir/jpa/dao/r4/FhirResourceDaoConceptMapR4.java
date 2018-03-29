@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -53,11 +53,33 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 		}
 
 		if (targets.isEmpty()) {
-			retVal.setMatched(false);
-			retVal.setMessage("No matches found!");
+
+			retVal.setResult(new BooleanType(false));
+
+			retVal.setMessage(new StringType("No matches found!"));
+
 		} else {
-			retVal.setMatched(true);
-			retVal.setMessage("Matches found!");
+
+			retVal.setResult(new BooleanType(true));
+
+			retVal.setMessage(new StringType("Matches found!"));
+
+			TranslationMatch translationMatch = new TranslationMatch();
+			for (TermConceptMapGroupElementTarget target : targets) {
+
+				translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+
+				translationMatch.setConcept(
+					new Coding()
+						.setCode(target.getCode())
+						.setSystem(target.getSystem())
+						.setDisplay(target.getDisplay())
+				);
+
+				translationMatch.setSource(new UriType(target.getConceptMapUrl()));
+
+				retVal.addMatch(translationMatch);
+			}
 		}
 
 		return retVal;

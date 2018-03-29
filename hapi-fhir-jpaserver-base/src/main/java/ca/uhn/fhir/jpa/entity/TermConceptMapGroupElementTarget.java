@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -17,32 +19,61 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
 	@Column(name = "TARGET_CODE", nullable = false, length = 50)
-	private String myTargetCode;
+	private String myCode;
 
 	@Column(name = "TARGET_DISPLAY", length = 100)
-	private String myTargetDisplay;
+	private String myDisplay;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TARGET_EQUIVALENCE", length = 50)
+	private ConceptMapEquivalence myEquivalence;
+
+	private String mySystem;
+	private String myConceptMapUrl;
 
 	public TermConceptMapGroupElement getConceptMapGroupElement() {
 		return myConceptMapGroupElement;
 	}
 
-	public void setConceptMapGroupElement(TermConceptMapGroupElement conceptMapGroupElement) {
-		myConceptMapGroupElement = conceptMapGroupElement;
+	public void setConceptMapGroupElement(TermConceptMapGroupElement theTermConceptMapGroupElement) {
+		myConceptMapGroupElement = theTermConceptMapGroupElement;
 	}
 
-	public String getTargetCode() {
-		return myTargetCode;
+	public String getCode() {
+		return myCode;
 	}
 
-	public void setTargetCode(String targetCode) {
-		myTargetCode = targetCode;
+	public void setCode(String theCode) {
+		myCode = theCode;
 	}
 
-	public String getTargetDisplay() {
-		return myTargetDisplay;
+	public String getDisplay() {
+		return myDisplay;
 	}
 
-	public void setTargetDisplay(String targetDisplay) {
-		myTargetDisplay = targetDisplay;
+	public void setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
+	}
+
+	public ConceptMapEquivalence getEquivalence() {
+		return myEquivalence;
+	}
+
+	public void setEquivalence(ConceptMapEquivalence theEquivalence) {
+		myEquivalence = theEquivalence;
+	}
+
+	public String getSystem() {
+		if (mySystem == null) {
+			mySystem = getConceptMapGroupElement().getConceptMapGroup().getTarget();
+		}
+		return mySystem;
+	}
+
+	public String getConceptMapUrl() {
+		if (myConceptMapUrl == null) {
+			myConceptMapUrl = getConceptMapGroupElement().getConceptMapGroup().getConceptMap().getUrl();
+		}
+		return myConceptMapUrl;
 	}
 }

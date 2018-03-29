@@ -29,9 +29,9 @@ import java.util.List;
 
 public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<TermConceptMapGroupElementTarget, Long> {
 	@Query("SELECT t FROM TermConceptMapGroupElementTarget t " +
-		"WHERE t.myConceptMapGroupElement.myConceptMapGroup.mySourceUrl = :source_code_system " +
-		"AND t.myConceptMapGroupElement.myConceptMapGroup.myTargetUrl = :target_code_system " +
-		"AND t.myConceptMapGroupElement.mySourceCode = :source_code")
+		"WHERE t.myConceptMapGroupElement.myConceptMapGroup.mySource = :source_code_system " +
+		"AND t.myConceptMapGroupElement.myConceptMapGroup.myTarget = :target_code_system " +
+		"AND t.myConceptMapGroupElement.myCode = :source_code")
 	List<TermConceptMapGroupElementTarget> findTargetsByCodeSystemsAndSourceCode(
 		@Param("source_code_system") String theSourceCodeSystem,
 		@Param("target_code_system") String theTargetCodeSystem,

@@ -19,10 +19,10 @@ public class TermConceptMapGroupElement implements Serializable {
 	private TermConceptMapGroup myConceptMapGroup;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = 50)
-	private String mySourceCode;
+	private String myCode;
 
 	@Column(name = "SOURCE_DISPLAY", length = 100)
-	private String mySourceDisplay;
+	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
 	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
@@ -39,23 +39,23 @@ public class TermConceptMapGroupElement implements Serializable {
 		return myConceptMapGroup;
 	}
 
-	public void setConceptMapGroup(TermConceptMapGroup conceptMapGroup) {
-		myConceptMapGroup = conceptMapGroup;
+	public void setConceptMapGroup(TermConceptMapGroup theTermConceptMapGroup) {
+		myConceptMapGroup = theTermConceptMapGroup;
 	}
 
-	public String getSourceCode() {
-		return mySourceCode;
+	public String getCode() {
+		return myCode;
 	}
 
-	public void setSourceCode(String sourceCode) {
-		mySourceCode = sourceCode;
+	public void setCode(String theCode) {
+		myCode = theCode;
 	}
 
-	public String getSourceDisplay() {
-		return mySourceDisplay;
+	public String getDisplay() {
+		return myDisplay;
 	}
 
-	public void setSourceDisplay(String sourceDisplay) {
-		mySourceDisplay = sourceDisplay;
+	public void setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
 	}
 }

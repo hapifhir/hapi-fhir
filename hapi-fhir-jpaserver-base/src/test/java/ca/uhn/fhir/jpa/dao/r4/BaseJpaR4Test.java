@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,7 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -371,6 +372,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		TargetElementComponent target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
 		// End ConceptMap.group(0).element(0).target(0)
 		// </editor-fold>
 
@@ -386,6 +388,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
 		// End ConceptMap.group(0).element(1).target(0)
 		// </editor-fold>
 
@@ -409,6 +412,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("56789");
 		target.setDisplay("Target Code 56789");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
 		// End ConceptMap.group(1).element(0).target(0)
 		// </editor-fold>
 
@@ -416,6 +420,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
 		// End ConceptMap.group(1).element(0).target(1)
 		// </editor-fold>
 

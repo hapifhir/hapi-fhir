@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationMatch;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -31,8 +34,19 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					new StringType("12345"),
 					null);
 
-				assertTrue(translationResult.isMatched());
-				assertEquals("Matches found!", translationResult.getMessage());
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals(1, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+
+				Coding concept = translationMatch.getConcept();
+				assertEquals("34567", concept.getCode());
+				assertEquals("Target Code 34567", concept.getDisplay());
+				assertEquals(CS_URL_2, concept.getSystem());
+
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
 		});
 	}

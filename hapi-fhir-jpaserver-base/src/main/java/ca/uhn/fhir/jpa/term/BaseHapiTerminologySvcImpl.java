@@ -760,8 +760,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
-					termConceptMapGroup.setSourceUrl(group.getSource());
-					termConceptMapGroup.setTargetUrl(group.getTarget());
+					termConceptMapGroup.setSource(group.getSource());
+					termConceptMapGroup.setTarget(group.getTarget());
 					myConceptMapGroupDao.save(termConceptMapGroup);
 
 					if (group.hasElement()) {
@@ -769,8 +769,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 						for (SourceElementComponent element : group.getElement()) {
 							termConceptMapGroupElement = new TermConceptMapGroupElement();
 							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
-							termConceptMapGroupElement.setSourceCode(element.getCode());
-							termConceptMapGroupElement.setSourceDisplay(element.getDisplay());
+							termConceptMapGroupElement.setCode(element.getCode());
+							termConceptMapGroupElement.setDisplay(element.getDisplay());
 							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
 							if (element.hasTarget()) {
@@ -778,8 +778,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 								for (TargetElementComponent target : element.getTarget()) {
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
-									termConceptMapGroupElementTarget.setTargetCode(target.getCode());
-									termConceptMapGroupElementTarget.setTargetDisplay(target.getDisplay());
+									termConceptMapGroupElementTarget.setCode(target.getCode());
+									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
+									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
 									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 								}
 							}
