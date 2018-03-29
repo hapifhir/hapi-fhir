@@ -138,6 +138,41 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		createSubscription(criteria1, payload, ourListenerServerBase);
+		createSubscription(criteria2, payload, ourListenerServerBase);
+
+		Observation obs = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		// Send an update with no changes
+		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
+		myClient.update().resource(obs).execute();
+
+		// Should be no further deliveries
+		Thread.sleep(1000);
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+
+
+
+
+
+	}
+
+	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
 

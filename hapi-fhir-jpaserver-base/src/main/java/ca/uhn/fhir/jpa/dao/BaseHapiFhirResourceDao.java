@@ -431,7 +431,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Perform actual DB update
-		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
+		ResourceTable updatedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
 		theResource.setId(entity.getIdDt());
 
 
@@ -445,12 +445,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Notify JPA interceptors
-		if (theRequestDetails != null) {
-			theRequestDetails.getRequestOperationCallback().resourceCreated(theResource);
-		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
+		if (!updatedEntity.isUnchangedInCurrentOperation()) {
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourceCreated(theResource);
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
+				}
 			}
 		}
 
@@ -1262,14 +1264,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Notify interceptors
-		if (theRequestDetails != null) {
-			theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
-			theRequestDetails.getRequestOperationCallback().resourceUpdated(oldResource, theResource);
-		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
-				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, oldResource, theResource);
+		if (!savedEntity.isUnchangedInCurrentOperation()) {
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(oldResource, theResource);
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, oldResource, theResource);
+				}
 			}
 		}
 

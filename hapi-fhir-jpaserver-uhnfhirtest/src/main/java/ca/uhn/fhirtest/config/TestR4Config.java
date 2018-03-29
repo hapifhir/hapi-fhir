@@ -58,6 +58,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4");
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
+		retVal.setFetchSizeDefaultMaximum(10000);
 		return retVal;
 	}
 
