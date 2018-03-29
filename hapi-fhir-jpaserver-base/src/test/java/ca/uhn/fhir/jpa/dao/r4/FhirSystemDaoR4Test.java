@@ -2260,6 +2260,78 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChange() {
+
+		Observation obs = new Observation();
+		obs.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertEquals(1, output.getEntry().size());
+		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id.getResourceType());
+		assertEquals("1", id.getVersionIdPart());
+
+		/*
+		 * Try again with same contents
+		 */
+
+		Observation obs2 = new Observation();
+		obs2.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs2
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs2.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs2.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input2 = new Bundle();
+		input2.setType(BundleType.TRANSACTION);
+		input2
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output2 = mySystemDao.transaction(mySrd, input2);
+		assertEquals(1, output2.getEntry().size());
+		IdType id2 = new IdType(output2.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id2.getResourceType());
+		assertEquals("1", id2.getVersionIdPart());
+
+		assertEquals(id.getValue(), id2.getValue());
+	}
+
+	@Test
 	public void testTransactionWithIfMatch() {
 		Patient p = new Patient();
 		p.setId("P1");
