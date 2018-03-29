@@ -24,10 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -78,6 +75,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+	@Autowired
+	protected ITermConceptPropertyDao myConceptPropertyDao;
 	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -409,7 +408,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int) (pct * 100.0f));
 		}
 
-		theConcept.setCodeSystem(theCodeSystem);
+		theConcept.setCodeSystemVersion(theCodeSystem);
 		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
 		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
@@ -430,13 +429,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 		}
 
+		for (TermConceptProperty next : theConcept.getProperties()){
+			myConceptPropertyDao.save(next);
+		}
+
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
-		if (theNext.getCodeSystem() != null) {
+		if (theNext.getCodeSystemVersion() != null) {
 			return;
 		}
-		theNext.setCodeSystem(theCodeSystemVersion);
+		theNext.setCodeSystemVersion(theCodeSystemVersion);
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
@@ -616,7 +619,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSystemVersion) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSystemVersion) {
 		ourLog.info("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
@@ -655,6 +658,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 			codeSystem.setResource(theCodeSystemVersion.getResource());
 			codeSystem.setCodeSystemUri(theSystemUri);
+			codeSystem.setName(theSystemName);
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
@@ -663,6 +667,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				throw new UnprocessableEntityException(msg);
 			}
 		}
+		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
@@ -721,7 +726,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
 		theCodeSystemVersion.setResource(resource);
-		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemVersion);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
 
 		for (ValueSet nextValueSet : theValueSets) {
 			createOrUpdateValueSet(nextValueSet, theRequestDetails);
@@ -749,8 +754,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() != null, "CodesystemValue is null");
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "CodeSystems are not equal");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodesystemValue is null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, "CodeSystems are not equal");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
 
 		if (theConceptsStack.contains(theConcept.getCode())) {

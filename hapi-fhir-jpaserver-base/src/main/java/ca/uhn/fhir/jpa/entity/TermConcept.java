@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 import org.apache.commons.lang3.Validate;
@@ -75,7 +76,7 @@ public class TermConcept implements Serializable {
 	})
 	private String myDisplay;
 
-	@OneToMany(mappedBy = "myConcept")
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
 	@Field
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
@@ -100,7 +101,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
-		setCodeSystem(theCs);
+		setCodeSystemVersion(theCs);
 		setCode(theCode);
 	}
 
@@ -130,7 +131,7 @@ public class TermConcept implements Serializable {
 		property.setType(thePropertyType);
 		property.setKey(thePropertyName);
 		property.setValue(thePropertyValue);
-		getStringProperties().add(property);
+		getProperties().add(property);
 
 		return property;
 	}
@@ -177,14 +178,14 @@ public class TermConcept implements Serializable {
 		myCode = theCode;
 	}
 
-	public TermCodeSystemVersion getCodeSystem() {
+	public TermCodeSystemVersion getCodeSystemVersion() {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
-		myCodeSystem = theCodeSystem;
-		if (theCodeSystem.getPid() != null) {
-			myCodeSystemVersionPid = theCodeSystem.getPid();
+	public void setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystem = theCodeSystemVersion;
+		if (theCodeSystemVersion.getPid() != null) {
+			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
 	}
 
@@ -223,7 +224,7 @@ public class TermConcept implements Serializable {
 		return myParents;
 	}
 
-	public Collection<TermConceptProperty> getStringProperties() {
+	public Collection<TermConceptProperty> getProperties() {
 		if (myProperties == null) {
 			myProperties = new ArrayList<>();
 		}
@@ -232,7 +233,7 @@ public class TermConcept implements Serializable {
 
 	public List<String> getStringProperties(String thePropertyName) {
 		List<String> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getStringProperties()) {
+		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
 				if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
 					retVal.add(next.getValue());
@@ -244,7 +245,7 @@ public class TermConcept implements Serializable {
 
 	public List<Coding> getCodingProperties(String thePropertyName) {
 		List<Coding> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getStringProperties()) {
+		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
 				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
 					Coding coding = new Coding();
@@ -334,4 +335,20 @@ public class TermConcept implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("code", myCode).append("display", myDisplay).build();
 	}
 
+	public List<IContextValidationSupport.BaseConceptProperty> toValidationProperties() {
+		List<IContextValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
+		for (TermConceptProperty next : getProperties()) {
+			switch (next.getType()) {
+				case STRING:
+					retVal.add(new IContextValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
+					break;
+				case CODING:
+					retVal.add(new IContextValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
+					break;
+				default:
+					throw new IllegalStateException("Don't know how to handle " + next.getType());
+			}
+		}
+		return retVal;
+	}
 }

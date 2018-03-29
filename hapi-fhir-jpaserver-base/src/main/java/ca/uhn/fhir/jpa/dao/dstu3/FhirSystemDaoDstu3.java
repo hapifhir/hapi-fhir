@@ -32,8 +32,6 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
-import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
@@ -150,7 +148,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		if (transactionType == null) {
-			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleType.TRANSACTION.toCode();
+			String message = "Transaction Bundle did not specify valid Bundle.type, assuming " + BundleType.TRANSACTION.toCode();
 			ourLog.warn(message);
 			transactionType = BundleType.TRANSACTION;
 		}
@@ -158,9 +156,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType.toCode());
 		}
 
-		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
+		ourLog.debug("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
 
-		long start = System.currentTimeMillis();
+//		long start = System.currentTimeMillis();
+		final StopWatch transactionSw = new StopWatch();
 		final Date updateTime = new Date();
 
 		final Set<IdType> allIds = new LinkedHashSet<IdType>();
@@ -202,7 +201,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		 * Basically if the resource has a match URL that references a placeholder,
 		 * we try to handle the resource with the placeholder first.
 		 */
-		Set<String> placeholderIds = new HashSet<String>();
+		Set<String> placeholderIds = new HashSet<>();
 		final List<BundleEntryComponent> entries = theRequest.getEntry();
 		for (BundleEntryComponent nextEntry : entries) {
 			if (isNotBlank(nextEntry.getFullUrl()) && nextEntry.getFullUrl().startsWith(IdType.URN_PREFIX)) {
@@ -224,7 +223,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = txManager.execute(new TransactionCallback<Map<BundleEntryComponent, ResourceTable>>() {
 			@Override
 			public Map<BundleEntryComponent, ResourceTable> doInTransaction(TransactionStatus status) {
-				return doTransactionWriteOperations(theRequestDetails, theRequest, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response,	originalRequestOrder, entries);
+				return doTransactionWriteOperations(theRequestDetails, theRequest, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response,	originalRequestOrder, entries, transactionSw);
 			}
 		});
 		for (Entry<BundleEntryComponent, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
@@ -237,8 +236,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		/*
 		 * Loop through the request and process any entries of type GET
 		 */
-		for (int i = 0; i < getEntries.size(); i++) {
-			BundleEntryComponent nextReqEntry = getEntries.get(i);
+		for (BundleEntryComponent nextReqEntry : getEntries) {
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			BundleEntryComponent nextRespEntry = response.getEntry().get(originalOrder);
 
@@ -258,7 +256,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
-				for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
+				for (Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
 					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
 					requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
 				}
@@ -302,8 +300,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		}
 
-		long delay = System.currentTimeMillis() - start;
-		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
+		ourLog.info(theActionName + " completed in {}", transactionSw.toString());
+		ourLog.info(theActionName + " details:\n{}", transactionSw.formatTaskDurations());
 
 		response.setType(BundleType.TRANSACTIONRESPONSE);
 		return response;
@@ -311,12 +309,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	
 	@SuppressWarnings("unchecked")
 	private Map<BundleEntryComponent, ResourceTable> doTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date updateTime, Set<IdType> allIds,
-			Map<IdType, IdType> theIdSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, Bundle response, IdentityHashMap<BundleEntryComponent, Integer> originalRequestOrder, List<BundleEntryComponent> theEntries) {
-		Set<String> deletedResources = new HashSet<String>();
-		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
-		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<BundleEntryComponent, ResourceTable>();
-		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
-		Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<String, Class<? extends IBaseResource>>();
+			Map<IdType, IdType> theIdSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, Bundle response, IdentityHashMap<BundleEntryComponent, Integer> originalRequestOrder, List<BundleEntryComponent> theEntries, StopWatch theStopWatch) {
+		Set<String> deletedResources = new HashSet<>();
+		List<DeleteConflict> deleteConflicts = new ArrayList<>();
+		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<>();
+		Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
+		Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 		/*
 		 * Loop through the request and process any entries of type
@@ -370,6 +368,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
 			BundleEntryComponent nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));
+
+			theStopWatch.startTask("Process entry " + i + ": " + verb + " " + defaultString(resourceType));
 
 			switch (verb) {
 			case POST: {
@@ -470,6 +470,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
+		theStopWatch.endCurrentTask();
+
 		/*
 		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 		 * if something else has a reference to it.. Unless the thing that has a reference to it
@@ -538,7 +540,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 
+		theStopWatch.startTask("Flush Session");
+
 		flushJpaSession();
+
+		theStopWatch.endCurrentTask();
 
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have

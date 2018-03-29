@@ -235,7 +235,10 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
-			return new CodeValidationResult(def);
+			CodeValidationResult retVal = new CodeValidationResult(def);
+			retVal.setProperties(code.toValidationProperties());
+			retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
+			return retVal;
 		}
 
 		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);

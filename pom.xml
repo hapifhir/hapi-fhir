@@ -390,7 +390,18 @@
 			<id>Tastelezz</id>
 			<name>Gaetano Gallo</name>
 		</developer>
-		
+		<developer>
+			<id>sjanic</id>
+			<name>sjanic</name>
+		</developer>
+		<developer>
+			<id>c-schuler</id>
+			<name>Chris Schuler</name>
+		</developer>
+		<developer>
+			<id>javajeff</id>
+			<name>Jeff Chung</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -948,6 +959,11 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-orm</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search-elasticsearch</artifactId>
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
@@ -1942,6 +1958,7 @@
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
@@ -1955,6 +1972,7 @@
 				<module>examples</module>
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
+				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
 				<module>hapi-fhir-jacoco</module>
 				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-spring-boot</module>

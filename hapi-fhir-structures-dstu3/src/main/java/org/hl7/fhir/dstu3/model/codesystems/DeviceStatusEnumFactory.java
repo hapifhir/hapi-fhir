@@ -47,7 +47,7 @@ public class DeviceStatusEnumFactory implements EnumFactory<DeviceStatus> {
       return DeviceStatus.ENTEREDINERROR;
     if ("unknown".equals(codeString))
       return DeviceStatus.UNKNOWN;
-    throw new IllegalArgumentException("Unknown DeviceStatus code '"+codeString+"'");
+    throw new IllegalArgumentException("Unknown DeviceStatus code '" + codeString + "'");
   }
 
   public String toCode(DeviceStatus code) {
@@ -62,9 +62,9 @@ public class DeviceStatusEnumFactory implements EnumFactory<DeviceStatus> {
     return "?";
   }
 
-    public String toSystem(DeviceStatus code) {
-      return code.getSystem();
-      }
+  public String toSystem(DeviceStatus code) {
+    return code.getSystem();
+  }
 
 }
 

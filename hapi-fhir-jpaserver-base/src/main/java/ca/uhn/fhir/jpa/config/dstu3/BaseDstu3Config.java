@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.*;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -115,8 +115,8 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
-		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
+	public TerminologyUploaderProvider terminologyUploaderProvider() {
+		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
 		retVal.setContext(fhirContextDstu3());
 		return retVal;
 	}

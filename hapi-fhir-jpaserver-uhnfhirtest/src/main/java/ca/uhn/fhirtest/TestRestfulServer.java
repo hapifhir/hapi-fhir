@@ -8,10 +8,9 @@ import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -29,13 +28,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -123,7 +120,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			break;
 		}
 		case "R4": {
@@ -141,7 +138,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			break;
 		}
 		default:

@@ -1,0 +1,68 @@
+{
+  "resourceType": "Procedure",
+  "id": "Procedure-9",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2017-09-09T21:52:35.933-06:00"
+  },
+  "extension": [
+    {
+      "url": "http://mihin.org/fhir/templateId",
+      "valueString": "2.16.840.1.113883.10.20.24.3.64"
+    },
+    {
+      "url": "http://mihin.org/fhir/templateId",
+      "valueString": "2.16.840.1.113883.10.20.22.4.14"
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/identifier",
+      "value": "1.3.6.1.4.1.115:579f4eb5aeac500a550c5c7b"
+    }
+  ],
+  "status": "completed",
+  "category": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "387713003",
+        "display": "Surgical Procedure"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "36192008"
+      }
+    ],
+    "text": "Procedure, Performed: Total Colectomy"
+  },
+  "subject": {
+    "reference": "Patient/Patient-12214",
+    "display": "2  N Geriatric Jr"
+  },
+  "performedPeriod": {
+    "start": "2010-10-12T06:00:00-04:00",
+    "end": "2010-10-12T08:15:00-04:00"
+  },
+  "performer": [
+    {
+      "role": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/ValueSet/performer-role",
+            "code": "112247003",
+            "display": "Medical doctor (occupation)"
+          }
+        ]
+      },
+      "actor": {
+        "reference": "Practitioner/Practitioner-12208",
+        "display": "Jay McCann Sawyer MD"
+      }
+    }
+  ]
+}

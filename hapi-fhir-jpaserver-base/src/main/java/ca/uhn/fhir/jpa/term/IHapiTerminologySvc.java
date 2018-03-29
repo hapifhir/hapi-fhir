@@ -57,7 +57,7 @@ public interface IHapiTerminologySvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSytemVersion);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
 
 	boolean supportsSystem(String theCodeSystem);
 

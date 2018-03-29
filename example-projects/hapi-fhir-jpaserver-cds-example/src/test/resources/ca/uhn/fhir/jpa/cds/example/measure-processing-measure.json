@@ -1,0 +1,158 @@
+{
+  "resourceType": "Measure",
+  "id": "col",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2017-09-09T21:26:03.890-06:00"
+  },
+  "text": {
+    "status": "additional",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n      Cohort definition for Colorectal Cancer Screening.\n    </div>"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/payer-extract",
+      "value": "COL"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Colorectal Cancer Screening. Cohort Definition",
+  "status": "active",
+  "experimental": true,
+  "description": "Colorectal Cancer Screening. Cohort Definition",
+  "topic": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/c80-doc-typecodes",
+          "code": "57024-2"
+        }
+      ]
+    }
+  ],
+  "library": [
+    {
+      "reference": "Library/col-logic"
+    }
+  ],
+  "group": [
+    {
+      "identifier": {
+        "value": "in-demographic"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "in-demographic"
+          },
+          "criteria": "In Demographic"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "history-of-colorectal-cancer"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "history-of-colorectal-cancer"
+          },
+          "criteria": "Hx Colorectal Cancer"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "history-of-total-colectomy"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "history-of-total-colectomy"
+          },
+          "criteria": "Hx Total Colectomy"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "colonoscopy-performed"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "colonoscopy-performed"
+          },
+          "criteria": "Colonoscopy Performed"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "colonoscopy-results"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "colonoscopy-results"
+          },
+          "criteria": "Colonoscopy Results"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "sigmoidoscopy-procedure"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "sigmoidoscopy-procedure"
+          },
+          "criteria": "Sigmoidoscopy Procedure"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "sigmoidoscopy-observation"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "sigmoidoscopy-observation"
+          },
+          "criteria": "Sigmoidoscopy Observation"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "fobt-procedure"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "fobt-procedure"
+          },
+          "criteria": "FOBT Procedure"
+        }
+      ]
+    },
+    {
+      "identifier": {
+        "value": "fobt-observation"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "fobt-observation"
+          },
+          "criteria": "FOBT Observation"
+        }
+      ]
+    }
+  ]
+}

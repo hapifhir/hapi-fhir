@@ -2105,14 +2105,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IUpdateTyped resource(IBaseResource theResource) {
-			Validate.notNull(theResource, "Resource can not be null");
+			//Validate.notNull(theResource, "Resource can not be null");
 			myResource = theResource;
 			return this;
 		}
 
 		@Override
 		public IUpdateTyped resource(String theResourceBody) {
-			Validate.notBlank(theResourceBody, "Body can not be null or blank");
+			//Validate.notBlank(theResourceBody, "Body can not be null or blank");
 			myResourceBody = theResourceBody;
 			return this;
 		}

@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
@@ -133,8 +133,8 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProviderR4 terminologyUploaderProvider() {
-		TerminologyUploaderProviderR4 retVal = new TerminologyUploaderProviderR4();
+	public TerminologyUploaderProvider terminologyUploaderProvider() {
+		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
 		retVal.setContext(fhirContextR4());
 		return retVal;
 	}

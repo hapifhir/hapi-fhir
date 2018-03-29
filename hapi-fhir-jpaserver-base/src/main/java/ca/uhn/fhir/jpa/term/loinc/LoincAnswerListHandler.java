@@ -73,7 +73,7 @@ public class LoincAnswerListHandler implements IRecordHandler {
 			vs = new ValueSet();
 			vs.setUrl("urn:oid:" + answerListOid);
 			vs.addIdentifier()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 				.setValue(answerListId);
 			vs.setId(answerListId);
 			vs.setName(answerListName);
@@ -86,7 +86,7 @@ public class LoincAnswerListHandler implements IRecordHandler {
 		vs
 			.getCompose()
 			.getIncludeFirstRep()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URL)
+			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 			.addConcept()
 			.setCode(answerString)
 			.setDisplay(displayText);

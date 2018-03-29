@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
@@ -66,30 +67,6 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 	private IHapiTerminologySvc myTerminologySvc;
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
-
-//	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {
-//		for (ValueSetExpansionContainsComponent nextCode : theContains) {
-//
-//			String system = nextCode.getSystem();
-//			String code = nextCode.getCode();
-//			if (theSystem.equals(system) && theCode.equals(code)) {
-//				LookupCodeResult retVal = new LookupCodeResult();
-//				retVal.setSearchedForCode(code);
-//				retVal.setSearchedForSystem(system);
-//				retVal.setFound(true);
-//				if (nextCode.getAbstractElement().getValue() != null) {
-//					retVal.setCodeIsAbstract(nextCode.getAbstractElement().booleanValue());
-//				}
-//				retVal.setCodeDisplay(nextCode.getDisplay());
-//				retVal.setCodeSystemVersion(nextCode.getVersion());
-//				retVal.setCodeSystemDisplayName("Unknown"); // TODO: implement
-//				return retVal;
-//			}
-//
-//		}
-//
-//		return null;
-//	}
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
@@ -139,31 +116,19 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 					retVal.setSearchedForCode(code);
 					retVal.setSearchedForSystem(system);
 					retVal.setCodeDisplay(result.asConceptDefinition().getDisplay());
-					retVal.setCodeSystemDisplayName("Unknown");
-					retVal.setCodeSystemVersion("");
+
+					String codeSystemDisplayName = result.getCodeSystemName();
+					if (isBlank(codeSystemDisplayName)) {
+						codeSystemDisplayName = "Unknown";
+					}
+
+					retVal.setCodeSystemDisplayName(codeSystemDisplayName);
+					retVal.setCodeSystemVersion(result.getCodeSystemVersion());
+					retVal.setProperties(result.getProperties());
+
 					return retVal;
 				}
 			}
-
-//			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
-//			ValueSetExpander expander = ctx.getExpander();
-//			ValueSet source = new ValueSet();
-//			source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
-//
-//			ValueSetExpansionOutcome expansion;
-//			try {
-//				expansion = expander.expand(source);
-//			} catch (Exception e) {
-//				throw new InternalErrorException(e);
-//			}
-//
-//			if (expansion.getValueset() != null) {
-//				List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
-//				LookupCodeResult result = lookup(contains, system, code);
-//				if (result != null) {
-//					return result;
-//				}
-//			}
 
 		}
 
@@ -196,7 +161,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 			if (isNotBlank(next.getCode())) {
 				TermConcept termConcept = new TermConcept();
 				termConcept.setCode(next.getCode());
-				termConcept.setCodeSystem(theCodeSystemVersion);
+				termConcept.setCodeSystemVersion(theCodeSystemVersion);
 				termConcept.setDisplay(next.getDisplay());
 				termConcept.addChildren(toPersistedConcepts(next.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 				retVal.add(termConcept);
@@ -228,7 +193,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 					persCs.setResource(retVal);
 					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
 					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
+					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, cs.getName(), persCs);
 
 				}
 

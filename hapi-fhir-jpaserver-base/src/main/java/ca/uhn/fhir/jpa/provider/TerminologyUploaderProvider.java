@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider;
 
 /*
  * #%L
@@ -20,81 +20,86 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class TerminologyUploaderProviderDstu3 extends BaseJpaProvider {
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderDstu3.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 
 	@Autowired
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
 	
-	//@formatter:off
 	@Operation(name = UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters= {
 		@OperationParam(name="conceptCount", type=IntegerType.class, min=1)
 	})
 	public Parameters uploadExternalCodeSystem(
 			HttpServletRequest theServletRequest,
-			@OperationParam(name="url", min=1) UriType theUrl,
-			@OperationParam(name="package", min=0) Attachment thePackage,
-			@OperationParam(name="localfile", min=0, max=OperationParam.MAX_UNLIMITED) List<StringType> theLocalFile,
+			@OperationParam(name="url", min=1) StringParam theCodeSystemUrl,
+			@OperationParam(name="localfile", min=1, max=OperationParam.MAX_UNLIMITED) List<StringType> theLocalFile,
 			RequestDetails theRequestDetails 
 			) {
-		//@formatter:on
-		
+
 		startRequest(theServletRequest);
 		try {
-			List<byte[]> data = new ArrayList<byte[]>();
+			List<IHapiTerminologyLoaderSvc.FileDescriptor> localFiles = new ArrayList<>();
 			if (theLocalFile != null && theLocalFile.size() > 0) {
 				for (StringType nextLocalFile : theLocalFile) {
 					if (isNotBlank(nextLocalFile.getValue())) {
 						ourLog.info("Reading in local file: {}", nextLocalFile.getValue());
-						try {
-							byte[] nextData = IOUtils.toByteArray(new FileInputStream(nextLocalFile.getValue()));
-							data.add(nextData);
-						} catch (IOException e) {
-							throw new InternalErrorException(e);
+						File nextFile = new File(nextLocalFile.getValue());
+						if (!nextFile.exists() || nextFile.isFile()) {
+							throw new InvalidRequestException("Unknown file: " +nextFile.getName());
 						}
+						localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+							@Override
+							public String getFilename() {
+								return nextFile.getAbsolutePath();
+							}
+
+							@Override
+							public InputStream getInputStream() {
+								try {
+									return new FileInputStream(nextFile);
+								} catch (FileNotFoundException theE) {
+									throw new InternalErrorException(theE);
+								}
+							}
+						});
 					}
 				}
-			} else if (thePackage == null || thePackage.getData() == null || thePackage.getData().length == 0) {
-				throw new InvalidRequestException("No 'localfile' or 'package' parameter, or package had no data");
-			} else {
-				data = new ArrayList<byte[]>();
-				data.add(thePackage.getData());
-				thePackage.setData(null);
 			}
 			
-			String url = theUrl != null ? theUrl.getValueAsString() : null;
+			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			url = defaultString(url);
 
 			UploadStatistics stats;
-			if (IHapiTerminologyLoaderSvc.SCT_URL.equals(url)) {
-				stats = myTerminologyLoaderSvc.loadSnomedCt((data), theRequestDetails);
-			} else if (IHapiTerminologyLoaderSvc.LOINC_URL.equals(url)) {
-					stats = myTerminologyLoaderSvc.loadLoinc((data), theRequestDetails);
+			if (IHapiTerminologyLoaderSvc.SCT_URI.equals(url)) {
+				stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+			} else if (IHapiTerminologyLoaderSvc.LOINC_URI.equals(url)) {
+					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
 			} else {
 				throw new InvalidRequestException("Unknown URL: " + url);
 			}

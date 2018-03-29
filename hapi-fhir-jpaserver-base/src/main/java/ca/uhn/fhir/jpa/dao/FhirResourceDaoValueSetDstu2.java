@@ -194,7 +194,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
 				if (nextCode.getAbstract() != null) {
-					retVal.setCodeIsAbstract(nextCode.getAbstract().booleanValue());
+					retVal.setCodeIsAbstract(nextCode.getAbstract());
 				}
 				retVal.setCodeDisplay(nextCode.getDisplay());
 				retVal.setCodeSystemVersion(nextCode.getVersion());

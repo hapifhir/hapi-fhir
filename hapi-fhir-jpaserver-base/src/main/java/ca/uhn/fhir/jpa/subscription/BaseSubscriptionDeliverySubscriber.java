@@ -49,7 +49,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-			subscriptionId = msg.getPayload(getContext()).getIdElement().getValue();
+			subscriptionId = msg.getSubscription().getIdElement(getContext()).getValue();
 
 			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription(getContext()))) {
 				return;

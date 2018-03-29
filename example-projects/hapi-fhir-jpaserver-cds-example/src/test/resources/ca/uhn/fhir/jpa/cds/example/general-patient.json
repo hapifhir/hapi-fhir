@@ -1,0 +1,114 @@
+{
+  "resourceType": "Patient",
+  "id": "Patient-12214",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2017-07-17T16:34:10.814+00:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">2 <b>N GERIATRIC </b>Jr</div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>7f3672feb3b54789953e012d8aef5246</td></tr><tr><td>Address</td><td><span>202 Burlington Rd. </span><br/><span>Bedford </span><span>MA </span></td></tr><tr><td>Date of birth</td><td><span>07 May 1946</span></td></tr></tbody></table></div>"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/us-core-race",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/v3/Race",
+            "code": "2106-3",
+            "display": "White"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/v3/Ethnicity",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/us-core-religion",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/v3/ReligiousAffiliation",
+            "code": "1007",
+            "display": "Atheism"
+          }
+        ]
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/identifier-type",
+            "code": "SB",
+            "display": "Social Beneficiary Identifier"
+          }
+        ],
+        "text": "Michigan Common Key Service Identifier"
+      },
+      "system": "http://mihin.org/fhir/cks",
+      "value": "7f3672feb3b54789953e012d8aef5246"
+    }
+  ],
+  "active": false,
+  "name": [
+    {
+      "family": "N Geriatric",
+      "given": [
+        "2"
+      ],
+      "suffix": [
+        "Jr"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "586-555-7576",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "586-555-0297",
+      "use": "work"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        }
+      ],
+      "system": "email",
+      "value": "2.N.Geriatric@direct.mihintest.org",
+      "use": "home"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1946-05-07",
+  "address": [
+    {
+      "line": [
+        "202 Burlington Rd."
+      ],
+      "city": "Bedford",
+      "state": "MA",
+      "postalCode": "01730"
+    }
+  ]
+}

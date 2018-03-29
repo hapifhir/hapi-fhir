@@ -20,8 +20,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.zip.ZipOutputStream;
 
@@ -54,19 +56,32 @@ public class TerminologyLoaderSvcSnomedCtTest {
 		myFiles = new ZipCollectionBuilder();
 	}
 
-	private List<byte[]> list(byte[]... theByteArray) {
-		return new ArrayList<>(Arrays.asList(theByteArray));
+	private ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
+		ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
+		for (byte[] next : theByteArray) {
+			retVal.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+				@Override
+				public String getFilename() {
+					return "aaa.zip";				}
+
+				@Override
+				public InputStream getInputStream() {
+					return new ByteArrayInputStream(next);
+				}
+			});
+		}
+		return retVal;
 	}
 
 	@Test
 	public void testLoadSnomedCt() throws Exception {
-		myFiles.addFile("/sct/", "sct2_Concept_Full_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_Description_Full-en_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		myFiles.addFile("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full-en_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 
 		RequestDetails details = mock(RequestDetails.class);
 		mySvc.loadSnomedCt(myFiles.getFiles(), details);
@@ -102,14 +117,14 @@ public class TerminologyLoaderSvcSnomedCtTest {
 	public void testLoadSnomedCtBadInput() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
-		myFiles.addFile("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		zos.close();
 
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 
 		RequestDetails details = mock(RequestDetails.class);
 		try {
-			mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
+			mySvc.loadSnomedCt(list(bos.toByteArray()), details);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid input zip file, expected zip to contain the following name fragments: [Terminology/sct2_Description_Full-en, Terminology/sct2_Relationship_Full, Terminology/sct2_Concept_Full_] but found: []", e.getMessage());
