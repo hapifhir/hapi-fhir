@@ -1516,13 +1516,33 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionDoesntDoubleCreate() throws IOException {
-		String inputString = IOUtils.toString(FhirSystemDaoR4Test.class.getResourceAsStream("/r4/musc-obs-transaction.xml"), Charsets.UTF_8);
-
-		Bundle output;
+		Bundle output, input;
 		BundleEntryResponseComponent respEntry;
 		IdType createdId;
 
-		Bundle input = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputString);
+		input = new Bundle();
+
+		Patient pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+
 		output = mySystemDao.transaction(mySrd, input);
 		respEntry = output.getEntry().get(0).getResponse();
 		assertEquals("201 Created", respEntry.getStatus());
@@ -1531,12 +1551,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", createdId.getVersionIdPart());
 
 		respEntry = output.getEntry().get(1).getResponse();
-		assertEquals("201 Created", respEntry.getStatus());
-		createdId = new IdType(respEntry.getLocation());
-		assertEquals("Encounter", createdId.getResourceType());
-		assertEquals("1", createdId.getVersionIdPart());
-
-		respEntry = output.getEntry().get(0).getResponse();
 		assertEquals("201 Created", respEntry.getStatus());
 		createdId = new IdType(respEntry.getLocation());
 		assertEquals("Observation", createdId.getResourceType());
@@ -1544,7 +1558,30 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Same bundle again
 
-		input = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputString);
+		input = new Bundle();
+
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+
+
 		output = mySystemDao.transaction(mySrd, input);
 		respEntry = output.getEntry().get(0).getResponse();
 		assertEquals("200 OK", respEntry.getStatus());
@@ -1553,12 +1590,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", createdId.getVersionIdPart());
 
 		respEntry = output.getEntry().get(1).getResponse();
-		assertEquals("200 OK", respEntry.getStatus());
-		createdId = new IdType(respEntry.getLocation());
-		assertEquals("Encounter", createdId.getResourceType());
-		assertEquals("1", createdId.getVersionIdPart());
-
-		respEntry = output.getEntry().get(0).getResponse();
 		assertEquals("200 OK", respEntry.getStatus());
 		createdId = new IdType(respEntry.getLocation());
 		assertEquals("Observation", createdId.getResourceType());
