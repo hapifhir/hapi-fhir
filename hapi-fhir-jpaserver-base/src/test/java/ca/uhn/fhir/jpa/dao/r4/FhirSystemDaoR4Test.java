@@ -1129,7 +1129,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateWithLinks() throws IOException {
+	public void testTransactionCreateWithLinks() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
 
@@ -1492,7 +1492,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
+	public void testTransactionDoesNotLeavePlaceholderIds() {
 		String input;
 		try {
 			input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
@@ -1515,7 +1515,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionDoesntDoubleCreate() throws IOException {
+	public void testTransactionDoesntDoubleCreate() {
 		Bundle output, input;
 		BundleEntryResponseComponent respEntry;
 		IdType createdId;
@@ -2051,7 +2051,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getId());
-		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertThat(p.getId(), endsWith("/_history/2"));
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
@@ -2177,7 +2177,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWIthInvalidPlaceholder() throws Exception {
+	public void testTransactionWIthInvalidPlaceholder() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -2875,7 +2875,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWithRelativeOidIds() throws Exception {
+	public void testTransactionWithRelativeOidIds() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -3018,7 +3018,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * This is not the correct way to do it, but we'll allow it to be lenient
 	 */
 	@Test
-	public void testTransactionWithRelativeOidIdsQualified() throws Exception {
+	public void testTransactionWithRelativeOidIdsQualified() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
