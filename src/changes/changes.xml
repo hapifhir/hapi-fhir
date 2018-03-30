@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.3.0" date="TBD">
+		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
 				This release corrects an inefficiency in the JPA Server, but requires a schema
 				change in order to update. Prior to this version of HAPI FHIR, a CLOB column
@@ -14,12 +14,29 @@
 				tables: HFJ_RESOURCE and HFJ_RES_VER. Because the same content was stored in two
 				places, the database consumed more space than is needed to.
 				<![CDATA[<br/><br/>]]>
-				In order to reduce this duplication, two columns have been removed from the
-				HFJ_RESOURCE table. This means that on any database that is being upgraded
-				to HAPI FHIR 3.3.0+, you will need to remove the columns
-				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]> (or
-				set them to nullable if you want an easy means of rolling back). Naturally
-				you should back your database up prior to making this change.
+				In order to reduce this duplication, the
+				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]>
+				columns have been
+				<![CDATA[<b>dropped</b>]]>
+				from the
+				<![CDATA[<code>HFJ_RESOURCE]]>
+				table, and the
+				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]>
+				columns have been
+				<![CDATA[<b>made NULLABLE</b>]]>
+				on the
+				<![CDATA[<code>HFJ_RES_VER]]>
+				table.
+				<![CDATA[<br/><br/>]]>
+				The following migration script may be used to apply these changes to
+				your database. Naturally you should back your database up prior to
+				making this change.
+				<![CDATA[
+				<pre>ALTER TABLE hfj_resource DROP COLUMN res_text;
+ALTER TABLE hfj_resource DROP COLUMN res_encoding;
+ALTER TABLE hfj_res_ver ALTER COLUMN res_encoding DROP NOT NULL;
+ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
+				]]>
 			</action>
 			<action type="fix">
 				The validation module has been refactored to use the R4 (currently maintained)
@@ -41,7 +58,7 @@
 					</ul>
 				]]>
 			</action>
-			<action tyoe="add" issue="871">
+			<action type="add" issue="871">
 				A number of HAPI FHIR modules have been converted so that they now work
 				as OSGi modules. Unlike the previous OSGi module, which was a mega-JAR
 				with all of HAPI FHIR in it, this is simply the appropriate

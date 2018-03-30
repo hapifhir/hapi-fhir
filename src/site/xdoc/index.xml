@@ -70,6 +70,62 @@
 
 		<section name="Announcements">
 			<p>
+				<b>Mar 29, 2018 - HAPI FHIR 3.3.0 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings logs of fixes and some significant enhancements.See the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes. Notable changes include:
+			</p>
+
+			<ul>
+				<li>
+					A schema change to the JPA server has been made which will result in
+					significantly less storage space being used and better write performance
+					for repositories which contain a large number of resource, or larger
+					resource bodies. Prior to this change, resource bodies were stored in
+					duplicate in two places in the database and this has now been corrected.
+					<br/><br/>
+					Note that a database migration script must be run for this upgrade, see
+					the changelog for details.
+				</li>
+				<li>
+					The validator has been refactored to use a single codebase across DSTU3/R4
+					validation which means that any fixes and enhancements will now affect both.
+					This makes the DSTU3 validator much more complete in terms of support for
+					advanced validation as well.
+				</li>
+				<li>
+					Several significant features were contributed by the community, including
+					native OSGi support (several HAPI FHIR JARs now have OSGi metadata included)
+					as well as initial experimental support for ElasticSearch instead of
+					Raw Lucene for the JPA server.
+				</li>
+				<li>
+					Several enhancements and bugfixes have been made to the interceptor
+					framework.
+				</li>
+				<li>
+					Many other bugfixes and enhancements have been made as well
+				</li>
+			</ul>
+			<p>
+				Note also that we are hiring! If you have an interest in helping us develop
+				HAPI FHIR or work on implementation projects, please
+				<a href="mailto:jamesagnew@gmail.com">get in touch</a>!
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release! The HAPI FHIR community
+				continues to get bigger and bigger. Together we are transforming healthcare.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+
+			<br/><br/>
+			<p>
 				<b>Jan 13, 2018 - HAPI FHIR 3.2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
@@ -111,8 +167,9 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
-			<br/><br/>
 
+			<!--
+			<br/><br/>
 			<p>
 				<b>November 23, 2017 - HAPI FHIR 3.1.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
@@ -271,7 +328,6 @@
 			</p>
 			<br/><br/>
 
-			<!--
 			<p>
 				<b>June 8, 2017 - HAPI FHIR 2.5 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
