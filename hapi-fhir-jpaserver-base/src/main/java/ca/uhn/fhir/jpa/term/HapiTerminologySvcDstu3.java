@@ -154,6 +154,24 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
+	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
+		if (vs == null) {
+			return Collections.emptyList();
+		}
+
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+		try {
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(vs);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+
+
+		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4);
+	}
+
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
 		return null;
 	}
@@ -220,6 +238,16 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
 		return retVal;
+	}
+
+	@Override
+	protected org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
+		CodeSystem codeSystem = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		try {
+			return VersionConvertor_30_40.convertCodeSystem(codeSystem);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
 	}
 
 	@Override

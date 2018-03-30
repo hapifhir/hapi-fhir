@@ -75,7 +75,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		assertEquals("SYSTEM", this.<CodeType>getPropertyPart(parameters, "property", "code").get().getValueAsString());
-		assertEquals("Heart", this.<CodeType>getPropertyPart(parameters, "property", "value").get().getValueAsString());
+		assertEquals("Heart", this.<StringType>getPropertyPart(parameters, "property", "value").get().getValueAsString());
 
 	}
 

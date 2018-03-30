@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.r4;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -52,6 +51,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
 import com.google.common.collect.ArrayListMultimap;
+import javolution.io.Struct;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.*;
@@ -266,7 +266,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					paramValues.put(next.getName(), next.getValue());
 				}
 				for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
-					String[] nextValue = nextParamEntry.getValue().toArray(new String[ nextParamEntry.getValue().size() ]);
+					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
 					requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
 				}
 				url = url.substring(0, qIndex);
@@ -323,6 +323,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		List<DeleteConflict> deleteConflicts = new ArrayList<>();
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 		Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
+		Set<ResourceTable> updatedEntities = new HashSet<>();
 		Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 		/*
@@ -467,6 +468,10 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 						}
 					}
 
+					if (outcome.getCreated() == Boolean.FALSE) {
+						updatedEntities.add(outcome.getEntity());
+					}
+
 					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
 					entriesToProcess.put(nextRespEntry, outcome.getEntity());
 					break;
@@ -538,9 +543,11 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
-			if (shouldUpdate) {
-				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, false, theUpdateTime, false, true);
+
+			if (updatedEntities.contains(nextOutcome.getEntity())) {
+				updateInternal(nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+			} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 			}
 		}
 

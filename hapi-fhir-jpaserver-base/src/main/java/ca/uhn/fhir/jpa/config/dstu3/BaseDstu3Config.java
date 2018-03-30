@@ -9,8 +9,11 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.*;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -32,9 +35,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -115,8 +118,8 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProvider terminologyUploaderProvider() {
-		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
+	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
+		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
 		retVal.setContext(fhirContextDstu3());
 		return retVal;
 	}
@@ -126,5 +129,5 @@ public class BaseDstu3Config extends BaseConfig {
 	public IValidationSupport validationSupportChainDstu3() {
 		return new JpaValidationSupportChainDstu3();
 	}
-	
+
 }

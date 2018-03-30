@@ -56,7 +56,7 @@ public class TermCodeSystemVersion implements Serializable {
 	 * issued. It should be made non-nullable at some point.
 	 */
 	@ManyToOne
-	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true)
+	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 	@SuppressWarnings("unused")
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)

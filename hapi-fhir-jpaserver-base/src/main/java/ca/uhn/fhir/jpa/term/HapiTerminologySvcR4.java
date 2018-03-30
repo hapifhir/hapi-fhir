@@ -113,6 +113,16 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
+	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
+		if (vs == null) {
+			return Collections.emptyList();
+		}
+
+		return expandValueSetAndReturnVersionIndependentConcepts(vs);
+	}
+
+	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSet valueSetToExpand = new ValueSet();
 		valueSetToExpand.getCompose().addInclude(theInclude);
@@ -186,6 +196,11 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
 		return retVal;
+	}
+
+	@Override
+	protected CodeSystem getCodeSystemFromContext(String theSystem) {
+		return myValidationSupport.fetchCodeSystem(myContext, theSystem);
 	}
 
 	@Override

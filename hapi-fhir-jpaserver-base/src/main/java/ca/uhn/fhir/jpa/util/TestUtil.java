@@ -96,7 +96,7 @@ public class TestUtil {
 			assertThat(joinColumn.name(), null);
 			ForeignKey fk = joinColumn.foreignKey();
 			Validate.notNull(fk);
-			Validate.isTrue(isNotBlank(fk.name()));
+			Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + ae.toString() + " has no name()");
 			Validate.isTrue(fk.name().startsWith("FK_"));
 			assertThat(fk.name(), theNames);
 		}

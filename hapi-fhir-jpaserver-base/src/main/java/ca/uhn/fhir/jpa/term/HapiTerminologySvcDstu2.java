@@ -77,6 +77,11 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
+	protected CodeSystem getCodeSystemFromContext(String theSystem) {
+		return null;
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		throw new UnsupportedOperationException();
 	}

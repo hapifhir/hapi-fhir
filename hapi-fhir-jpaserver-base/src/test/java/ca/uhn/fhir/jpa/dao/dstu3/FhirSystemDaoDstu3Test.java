@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
@@ -1437,6 +1438,213 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Patient p = find(list, Patient.class, 0);
 		assertTrue(p.getIdElement().isIdPartValidLong());
 		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
+	}
+
+	@Test
+	public void testTransactionDoesntUpdateUnchangesResourceWithPlaceholderIds() {
+		Bundle output, input;
+		BundleEntryResponseComponent respEntry;
+		IdType createdPatientId;
+		SearchParameterMap map;
+		IBundleProvider search;
+
+		input = new Bundle();
+
+		/*
+		 * Create a transaction with a patient and an observation using
+		 * placeholder IDs in them
+		 */
+		Patient pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Both resrouces should be created and have version 1
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdPatientId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdPatientId.getResourceType());
+		assertEquals("1", createdPatientId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		IdType createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0, 1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0, 1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+
+		/*
+		 * Now run the same transaction, which should not make any changes this time
+		 * around
+		 */
+
+		input = new Bundle();
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Should still have version 1 of both resources
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should still work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0, 1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0, 1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+
+		/*
+		 * Now run the transaction, but this time with an actual
+		 * change to the Observation
+		 */
+
+		input = new Bundle();
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Observation should now be version 2
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("2", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should still work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0, 1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0, 1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
 	}
 
 	@Test

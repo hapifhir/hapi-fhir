@@ -11,8 +11,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,136 +28,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-	@Test
-	public void testStoreCodeSystemInvalidCyclicLoop() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(CS_URL);
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-
-		TermConcept parent = new TermConcept();
-		parent.setCodeSystemVersion(cs);
-		parent.setCode("parent");
-		cs.getConcepts().add(parent);
-
-		TermConcept child = new TermConcept();
-		child.setCodeSystemVersion(cs);
-		child.setCode("child");
-		parent.addChild(child, RelationshipTypeEnum.ISA);
-
-		child.addChild(parent, RelationshipTypeEnum.ISA);
-
-		try {
-//			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", , cs);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testFindCodesAboveAndBelowUnknown() {
-		createCodeSystem();
-
-		assertThat(myTermSvc.findCodesBelow("http://foo", "code"), empty());
-		assertThat(myTermSvc.findCodesBelow(CS_URL, "code"), empty());
-		assertThat(myTermSvc.findCodesAbove("http://foo", "code"), empty());
-		assertThat(myTermSvc.findCodesAbove(CS_URL, "code"), empty());
-	}
-	
-	@Test
-	public void testFindCodesBelowA() {
-		IIdType id = createCodeSystem();
-
-		Set<TermConcept> concepts;
-		Set<String> codes;
-
-		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "ParentA");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "childAAB", "childAB"));
-
-		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
-		
-		// Try an unknown code
-		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
-
-	}
-
-	@Test
-	public void testFindCodesBelowBuiltInCodeSystem() {
-		List<VersionIndependentConcept> concepts;
-		Set<String> codes;
-
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "inactive");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
-
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "resolved");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("resolved"));
-
-		// Unknown code
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "FOO");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
-
-		// Unknown system
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status2222", "active");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
-	}
-
-	@Test
-	public void testFindCodesAboveBuiltInCodeSystem() {
-		List<VersionIndependentConcept> concepts;
-		Set<String> codes;
-
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "active");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active"));
-
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "resolved");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
-
-		// Unknown code
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "FOO");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
-
-		// Unknown system
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status2222", "active");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
-	}
-
-	@Test
-	public void testReindexTerminology() {
-		IIdType id = createCodeSystem();
-		
-		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
-		
-		assertThat(mySystemDao.performReindexingPass(100), greaterThan(0));
-	}
-
-
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
 
@@ -194,7 +64,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
 
 		return id;
 	}
@@ -213,30 +83,48 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2,"SYSTEM NAME" , cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2, "SYSTEM NAME", cs);
 
 		return id;
 	}
 
 	@Test
-	public void testFindCodesAbove() {
-		IIdType id = createCodeSystem();
+	public void testCreateDuplicateCodeSystemUri() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		Set<TermConcept> concepts;
-		Set<String> codes;
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
 
-		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA"));
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
 
-		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAAB");
-		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAB"));
-		
-		// Try an unknown code
-		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
-		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+
+		// Update
+		cs = new TermCodeSystemVersion();
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
+		table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		cs.setResource(table);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+
+		// Try to update to a different resource
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+		table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		cs.setResource(table);
+		try {
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));
+		}
+
 	}
 
 	@Test
@@ -305,18 +193,118 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes, containsInAnyOrder("ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
 	}
 
-	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
-		List<String> retVal = new ArrayList<>();
+	@Test
+	public void testFindCodesAbove() {
+		IIdType id = createCodeSystem();
 
-		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
-			retVal.add(next.getCode());
-		}
+		Set<TermConcept> concepts;
+		Set<String> codes;
 
-		return retVal;
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA"));
+
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAAB");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAB"));
+
+		// Try an unknown code
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
 	}
 
 	@Test
-	public void testCreateDuplicateCodeSystemUri() {
+	public void testFindCodesAboveAndBelowUnknown() {
+		createCodeSystem();
+
+		assertThat(myTermSvc.findCodesBelow("http://foo", "code"), empty());
+		assertThat(myTermSvc.findCodesBelow(CS_URL, "code"), empty());
+		assertThat(myTermSvc.findCodesAbove("http://foo", "code"), empty());
+		assertThat(myTermSvc.findCodesAbove(CS_URL, "code"), empty());
+	}
+
+	@Test
+	public void testFindCodesAboveBuiltInCodeSystem() {
+		List<VersionIndependentConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "active");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("active"));
+
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "resolved");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
+
+		// Unknown code
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+
+		// Unknown system
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status2222", "active");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+	}
+
+	@Test
+	public void testFindCodesBelowA() {
+		IIdType id = createCodeSystem();
+
+		Set<TermConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "ParentA");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "childAAB", "childAB"));
+
+		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+
+		// Try an unknown code
+		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+
+	}
+
+	@Test
+	public void testFindCodesBelowBuiltInCodeSystem() {
+		List<VersionIndependentConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "inactive");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
+
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "resolved");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("resolved"));
+
+		// Unknown code
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+
+		// Unknown system
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status2222", "active");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+	}
+
+	@Test
+	public void testReindexTerminology() {
+		IIdType id = createCodeSystem();
+
+		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
+
+		assertThat(mySystemDao.performReindexingPass(100), greaterThan(0));
+	}
+
+	@Test
+	public void testStoreCodeSystemInvalidCyclicLoop() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -327,31 +315,39 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
+		TermConcept parent = new TermConcept();
+		parent.setCodeSystemVersion(cs);
+		parent.setCode("parent");
+		cs.getConcepts().add(parent);
 
-		// Update
-		cs = new TermCodeSystemVersion();
-		TermConcept parentA = new TermConcept(cs, "ParentA");
-		cs.getConcepts().add(parentA);
-		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
-		table = myResourceTableDao.findOne(id.getIdPartAsLong());
-		cs.setResource(table);
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
+		TermConcept child = new TermConcept();
+		child.setCodeSystemVersion(cs);
+		child.setCode("child");
+		parent.addChild(child, RelationshipTypeEnum.ISA);
 
-		// Try to update to a different resource
-		codeSystem = new CodeSystem();
-		codeSystem.setUrl(CS_URL);
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		table = myResourceTableDao.findOne(id.getIdPartAsLong());
-		cs.setResource(table);
+		child.addChild(parent, RelationshipTypeEnum.ISA);
+
 		try {
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL,"SYSTEM NAME" , cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", "SYSTEM NAME", cs);
 			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));
+		} catch (InvalidRequestException e) {
+			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
+		}
+	}
+
+	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> retVal = new ArrayList<>();
+
+		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
 		}
 
+		return retVal;
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

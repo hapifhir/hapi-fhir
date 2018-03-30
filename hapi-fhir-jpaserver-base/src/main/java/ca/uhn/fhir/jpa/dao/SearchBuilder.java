@@ -1193,7 +1193,7 @@ public class SearchBuilder implements ISearchBuilder {
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
 
-		ArrayList<Predicate> singleCodePredicates = new ArrayList<Predicate>();
+		ArrayList<Predicate> singleCodePredicates = new ArrayList<>();
 		if (codes != null) {
 
 			if (codes.isEmpty()) {
@@ -1581,7 +1581,8 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 				if (valueSetUris.size() == 1) {
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
+					String valueSet = valueSetUris.iterator().next();
+					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSet);
 					for (VersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();

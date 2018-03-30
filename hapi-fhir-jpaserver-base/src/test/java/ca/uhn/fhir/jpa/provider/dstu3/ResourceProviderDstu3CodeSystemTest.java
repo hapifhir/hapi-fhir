@@ -32,12 +32,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	private IIdType myExtensionalVsId;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Before
 	@Transactional
 	public void before02() throws IOException {
@@ -47,11 +41,11 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
-	
+
 	@Test
 	public void testLookupOnExternalCode() {
 		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
-		
+
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
@@ -62,9 +56,9 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals("Parent A", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -82,9 +76,9 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals("Parent A", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -104,7 +98,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -112,7 +106,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
 	}
-
+	
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
 		//@formatter:off
@@ -145,7 +139,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -185,7 +179,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -247,7 +241,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		}
 		//@formatter:on
 	}
-	
+
 	@Test
 //	@Ignore
 	public void testLookupOperationForBuiltInCode() {
@@ -263,13 +257,18 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals("Unknown", ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals("Married", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).booleanValue());
+	}
+	
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	
