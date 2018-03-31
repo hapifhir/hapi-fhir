@@ -59,6 +59,13 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		return new StringExactly();
 	}
 
+	/**
+	 * The string contains given value
+	 */
+	public IStringMatch contains() {
+		return new StringContains();
+	}
+
 	public interface IStringMatch {
 
 		/**
@@ -106,6 +113,28 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		@Override
 		public ICriterion<?> values(String... theValues) {
 			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, Arrays.asList(theValues));
+		}
+	}
+
+	private class StringContains implements IStringMatch {
+		@Override
+		public ICriterion<StringClientParam> value(String theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+		}
+
+		@Override
+		public ICriterion<StringClientParam> value(StringDt theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
+		}
+
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+		}
+
+		@Override
+		public ICriterion<?> values(String... theValues) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, Arrays.asList(theValues));
 		}
 	}
 
