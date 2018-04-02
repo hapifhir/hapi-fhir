@@ -6,7 +6,37 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.3.0" date="TBD">
+		<release version="3.4.0" date="TBD">
+			<action type="fix">
+				When performing a FHIR resource update in the JPA server
+				where the update happens within a transaction, and the
+				resource being updated contains placeholder IDs, and
+				the resource has not actually changed, a new version was
+				created even though there was not actually any change.
+				This particular combination of circumstances seems very
+				specific and improbable, but it is quite common for some
+				types of solutions (e.g. mapping HL7v2 data) so this
+				fix can prevent significant wasted space in some cases.
+			</action>
+			<action type="fix">
+				JPA server index tables did not have a column length specified
+				on the resource type column. This caused the default of 255 to
+				be used, which wasted a lot of space since resource names are all
+				less than 30 chars long and a single resource can have 10-100+
+				index rows depending on configuration. This has now been set
+				to a much more sensible 30.
+			</action>
+			<action type="fix">
+				The LOINC uploader for the JPA Terminology Server has been
+				significantly beefed up so that it now takes in the full
+				set of LOINC distribution artifacts, and creates not only
+				the LOINC CodeSystem but a complete set of concept properties,
+				a number of LOINC ValueSets, and a number of LOINC ConceptMaps.
+				This work was sponsored by the Regenstrief Institute. Thanks
+				to Regenstrief for their support!
+			</action>
+		</release>
+		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
 				This release corrects an inefficiency in the JPA Server, but requires a schema
 				change in order to update. Prior to this version of HAPI FHIR, a CLOB column
@@ -14,12 +44,29 @@
 				tables: HFJ_RESOURCE and HFJ_RES_VER. Because the same content was stored in two
 				places, the database consumed more space than is needed to.
 				<![CDATA[<br/><br/>]]>
-				In order to reduce this duplication, two columns have been removed from the
-				HFJ_RESOURCE table. This means that on any database that is being upgraded
-				to HAPI FHIR 3.3.0+, you will need to remove the columns
-				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]> (or
-				set them to nullable if you want an easy means of rolling back). Naturally
-				you should back your database up prior to making this change.
+				In order to reduce this duplication, the
+				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]>
+				columns have been
+				<![CDATA[<b>dropped</b>]]>
+				from the
+				<![CDATA[<code>HFJ_RESOURCE]]>
+				table, and the
+				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]>
+				columns have been
+				<![CDATA[<b>made NULLABLE</b>]]>
+				on the
+				<![CDATA[<code>HFJ_RES_VER]]>
+				table.
+				<![CDATA[<br/><br/>]]>
+				The following migration script may be used to apply these changes to
+				your database. Naturally you should back your database up prior to
+				making this change.
+				<![CDATA[
+				<pre>ALTER TABLE hfj_resource DROP COLUMN res_text;
+ALTER TABLE hfj_resource DROP COLUMN res_encoding;
+ALTER TABLE hfj_res_ver ALTER COLUMN res_encoding DROP NOT NULL;
+ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
+				]]>
 			</action>
 			<action type="fix">
 				The validation module has been refactored to use the R4 (currently maintained)
@@ -39,6 +86,28 @@
 						<li>Spring (JPA): 5.0.0 -&gt; 5.0.3</li>
 						<li>Thymeleaf (Web Tespage Overlay): 3.0.7.RELEASE -&gt; 3.0.9.RELEASE</li>
 					</ul>
+				]]>
+			</action>
+			<action type="add" issue="871">
+				A number of HAPI FHIR modules have been converted so that they now work
+				as OSGi modules. Unlike the previous OSGi module, which was a mega-JAR
+				with all of HAPI FHIR in it, this is simply the appropriate
+				OSGi manifest inside the existing JARs. Thanks to John Poth
+				for the Pull Request!
+				<![CDATA[
+				<br/><br/>
+				Note that this does not cover all modules in the project. Current support includes:
+				<ul>
+					<li>HAPI-FHIR structures DSTU2, HL7ORGDSTU2, DSTU2.1, DSTU3, R4</li>
+					<li>HAPI-FHIR Resource validation DSTU2, HL7ORGDSTU2, DSTU2.1, DSTU3, R4</li>
+					<li>Apache Karaf features for all the above</li>
+					<li> Integration Tests</li>
+				</ul>
+				Remaining work includes:
+				<ul>
+					<li>HAPI-FHIR Server support</li>
+					<li> HAPI-FHIR narrative support. This might be tricky as Thymeleaf doesn't support OSGi.</li>
+				</ul>
 				]]>
 			</action>
 			<action type="fix">
@@ -239,6 +308,48 @@
 				an empty/missing Subscription.channel.payload value, which
 				is supported according to the FHIR specification. Thanks
 				to Jeff Chung for the pull request!
+			</action>
+			<action type="fix">
+				JPA Server Operation Interceptor create/update methods will now no
+				longer be fired if the create/update operation being performed
+				is a no-op (e.g. a conditional create that did not need to perform
+				any action, or an update where the contents didn't actually change)
+			</action>
+			<action type="fix" issue="879">
+				JPA server sometimes updated resources even though the client
+				supplied an update with no actual changes in it, due to 
+				changes in the metadata section being considered content
+				changes. Thanks to Kyle Meadows for the pull request!
+			</action>
+			<action type="add" issue="817">
+				A new example project has been added called hapi-fhir-jpaserver-dynamic,
+				which uses application/environment properties to configure which version
+				of FHIR the server supports and other configuration. Thanks to
+				Anoush Mouradian for the pull request!
+			</action>
+			<action type="add" issue="581">
+				A new example project showing the use of JAX-RS Server Side Events has
+				been added. Thanks to Jens Kristian Villadsen for the pull request!
+			</action>
+			<action type="remove" issue="864">
+				An unneccesary reference to the Javassist library has been
+				removed from the build. Thanks to Łukasz Dywicki for the 
+				pull request!
+			</action>
+			<action type="add" issue="819">
+				Support has been added to the JPA server for the :not modifier. Thanks 
+				to Łukasz Dywicki for the pull request!
+			</action>
+			<action type="add" issue="877">
+				Suport for the :contains string search parameter modifier has been added to
+				the JPA server. Thanks to Anthony Sute for the pull request!
+			</action>
+			<action type="fix">
+				All instances of DefaultProfileValidationSupport (i.e. one for
+				each version of FHIR) have been fixed so that they explicitly
+				close any InputStreams they open in order to read the built-in
+				profile resources. Leaving these open caused resource starvation
+				in some cases under heavy load.
 			</action>
 		</release>
 		<release version="3.2.0" date="2018-01-13">

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -79,6 +80,12 @@ abstract class BaseHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
+			conceptMap.setPublisher("Regentrief Institute, Inc.");
+			conceptMap.addContact()
+				.setName("Regentrief Institute, Inc.")
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue("https://loinc.org");
 			myIdToConceptMaps.put(theMapping.getConceptMapId(), conceptMap);
 			myConceptMaps.add(conceptMap);
 		} else {
@@ -144,6 +151,12 @@ abstract class BaseHandler implements IRecordHandler {
 			vs.setId(theValueSetId);
 			vs.setName(theValueSetName);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.setPublisher("Regentrief Institute, Inc.");
+			vs.addContact()
+				.setName("Regentrief Institute, Inc.")
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue("https://loinc.org");
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
 		} else {

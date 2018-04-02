@@ -53,7 +53,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	private Long myResourcePid;
 
 	@Field()
-	@Column(name = "RES_TYPE", nullable = false)
+	@Column(name = "RES_TYPE", nullable = false, length = 30)
 	private String myResourceType;
 
 	@Field()

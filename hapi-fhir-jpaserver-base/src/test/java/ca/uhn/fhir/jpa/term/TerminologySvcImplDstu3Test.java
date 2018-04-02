@@ -181,6 +181,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept childAAA = new TermConcept(cs, "childAAA");
 		childAAA.addPropertyString("propA", "valueAAA");
 		childAAA.addPropertyString("propB", "foo");
+		childAAA.addDesignation()
+			.setUseSystem("http://designationsystem")
+			.setUseCode("somedesig")
+			.setUseDisplay("Designation Use")
+			.setValue("Bananas");
 		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAB = new TermConcept(cs, "childAAB");
