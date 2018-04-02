@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR - Validation Resources (DSTU2)</name>
 
@@ -20,6 +20,20 @@
 				<filtering>false</filtering>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 </project>

@@ -129,7 +129,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		HashSet<String> excludeElementsInEncoded = new HashSet<String>();
 		excludeElementsInEncoded.add("id");
-		excludeElementsInEncoded.add("meta");
+		excludeElementsInEncoded.add("*.meta");
 		EXCLUDE_ELEMENTS_IN_ENCODED = Collections.unmodifiableSet(excludeElementsInEncoded);
 	}
 

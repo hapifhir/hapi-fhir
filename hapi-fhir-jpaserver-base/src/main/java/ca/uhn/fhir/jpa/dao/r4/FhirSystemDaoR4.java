@@ -487,12 +487,8 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		 * end.
 		 */
 
-		for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
-			DeleteConflict next = iter.next();
-			if (deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue())) {
-				iter.remove();
-			}
-		}
+		deleteConflicts.removeIf(next ->
+			deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		/*

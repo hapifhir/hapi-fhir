@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1128,7 +1129,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateWithLinks() throws IOException {
+	public void testTransactionCreateWithLinks() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
 
@@ -1491,7 +1492,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
+	public void testTransactionDoesNotLeavePlaceholderIds() {
 		String input;
 		try {
 			input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
@@ -1511,6 +1512,89 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = find(list, Patient.class, 0);
 		assertTrue(p.getIdElement().isIdPartValidLong());
 		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
+	}
+
+	@Test
+	public void testTransactionDoesntDoubleCreate() {
+		Bundle output, input;
+		BundleEntryResponseComponent respEntry;
+		IdType createdId;
+
+		input = new Bundle();
+
+		Patient pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+
+		output = mySystemDao.transaction(mySrd, input);
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		// Same bundle again
+
+		input = new Bundle();
+
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+
+
+		output = mySystemDao.transaction(mySrd, input);
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdId.getResourceType());
+		assertEquals("1", createdId.getVersionIdPart());
+
 	}
 
 	@Test
@@ -1967,7 +2051,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getId());
-		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertThat(p.getId(), endsWith("/_history/2"));
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
@@ -2093,7 +2177,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWIthInvalidPlaceholder() throws Exception {
+	public void testTransactionWIthInvalidPlaceholder() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -2257,6 +2341,78 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		respEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 
+	}
+
+	@Test
+	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChange() {
+
+		Observation obs = new Observation();
+		obs.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertEquals(1, output.getEntry().size());
+		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id.getResourceType());
+		assertEquals("1", id.getVersionIdPart());
+
+		/*
+		 * Try again with same contents
+		 */
+
+		Observation obs2 = new Observation();
+		obs2.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs2
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs2.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs2.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input2 = new Bundle();
+		input2.setType(BundleType.TRANSACTION);
+		input2
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output2 = mySystemDao.transaction(mySrd, input2);
+		assertEquals(1, output2.getEntry().size());
+		IdType id2 = new IdType(output2.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id2.getResourceType());
+		assertEquals("1", id2.getVersionIdPart());
+
+		assertEquals(id.getValue(), id2.getValue());
 	}
 
 	@Test
@@ -2719,7 +2875,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWithRelativeOidIds() throws Exception {
+	public void testTransactionWithRelativeOidIds() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -2862,7 +3018,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * This is not the correct way to do it, but we'll allow it to be lenient
 	 */
 	@Test
-	public void testTransactionWithRelativeOidIdsQualified() throws Exception {
+	public void testTransactionWithRelativeOidIdsQualified() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
