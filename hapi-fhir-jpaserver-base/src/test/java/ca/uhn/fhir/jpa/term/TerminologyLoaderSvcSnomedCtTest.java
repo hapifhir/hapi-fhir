@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -126,8 +127,8 @@ public class TerminologyLoaderSvcSnomedCtTest {
 		try {
 			mySvc.loadSnomedCt(list(bos.toByteArray()), details);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid input zip file, expected zip to contain the following name fragments: [Terminology/sct2_Description_Full-en, Terminology/sct2_Relationship_Full, Terminology/sct2_Concept_Full_] but found: []", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input: "));
 		}
 	}
 

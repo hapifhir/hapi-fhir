@@ -105,6 +105,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			contains.setCode(theConcept.getCode());
 			contains.setSystem(theCodeSystem);
 			contains.setDisplay(theConcept.getDisplay());
+			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
+				contains
+					.addDesignation()
+					.setValue(nextDesignation.getValue())
+					.getUse()
+					.setSystem(nextDesignation.getUseSystem())
+					.setCode(nextDesignation.getUseCode())
+					.setDisplay(nextDesignation.getUseDisplay());
+			}
 		}
 	}
 
@@ -232,11 +241,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 							haveIncludeCriteria = true;
 							TermConcept code = findCode(system, nextCode);
 							if (code != null) {
-								addedCodes.add(nextCode);
-								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
-								contains.setCode(nextCode);
-								contains.setSystem(system);
-								contains.setDisplay(code.getDisplay());
+								addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, code);
+//
+//								addedCodes.add(nextCode);
+//								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
+//								contains.setCode(nextCode);
+//								contains.setSystem(system);
+//								contains.setDisplay(code.getDisplay());
 							}
 						}
 					}

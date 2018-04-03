@@ -22,47 +22,47 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
-public class TerminologyUploaderProvider extends BaseJpaProvider {
+public abstract class BaseTerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTerminologyUploaderProvider.class);
 
 	@Autowired
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
-	
-	@Operation(name = UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters= {
-		@OperationParam(name="conceptCount", type=IntegerType.class, min=1)
-	})
-	public Parameters uploadExternalCodeSystem(
-			HttpServletRequest theServletRequest,
-			@OperationParam(name="url", min=1) StringParam theCodeSystemUrl,
-			@OperationParam(name="localfile", min=1, max=OperationParam.MAX_UNLIMITED) List<StringType> theLocalFile,
-			RequestDetails theRequestDetails 
-			) {
+
+	protected Parameters handleUploadExternalCodeSystem(
+		HttpServletRequest theServletRequest,
+		StringParam theCodeSystemUrl,
+		List<StringType> theLocalFile,
+		List<Attachment> thePackage, RequestDetails theRequestDetails
+	) {
 
 		startRequest(theServletRequest);
+
+		if (theLocalFile == null || theLocalFile.size() == 0) {
+			if (thePackage == null || thePackage.size() == 0) {
+				throw new InvalidRequestException("No 'localfile' or 'package' parameter, or package had no data");
+			}
+		}
+
 		try {
 			List<IHapiTerminologyLoaderSvc.FileDescriptor> localFiles = new ArrayList<>();
 			if (theLocalFile != null && theLocalFile.size() > 0) {
@@ -70,8 +70,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					if (isNotBlank(nextLocalFile.getValue())) {
 						ourLog.info("Reading in local file: {}", nextLocalFile.getValue());
 						File nextFile = new File(nextLocalFile.getValue());
-						if (!nextFile.exists() || nextFile.isFile()) {
-							throw new InvalidRequestException("Unknown file: " +nextFile.getName());
+						if (!nextFile.exists() || !nextFile.isFile()) {
+							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
 						}
 						localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
 							@Override
@@ -91,7 +91,27 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					}
 				}
 			}
-			
+
+			if (thePackage != null) {
+				for (Attachment nextPackage : thePackage) {
+					if (isBlank(nextPackage.getUrl())) {
+						throw new UnprocessableEntityException("Package is missing mandatory url element");
+					}
+
+					localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+						@Override
+						public String getFilename() {
+							return nextPackage.getUrl();
+						}
+
+						@Override
+						public InputStream getInputStream() {
+							return new ByteArrayInputStream(nextPackage.getData());
+						}
+					});
+				}
+			}
+
 			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			url = defaultString(url);
 
@@ -99,11 +119,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			if (IHapiTerminologyLoaderSvc.SCT_URI.equals(url)) {
 				stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
 			} else if (IHapiTerminologyLoaderSvc.LOINC_URI.equals(url)) {
-					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+				stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
 			} else {
 				throw new InvalidRequestException("Unknown URL: " + url);
 			}
-			
+
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("conceptCount").setValue(new IntegerType(stats.getConceptCount()));
 			return retVal;
@@ -112,5 +132,5 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		}
 	}
 
-	
+
 }

@@ -128,6 +128,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				CSVParser parsed;
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
+
+					if (ourLog.isTraceEnabled()) {
+						String contents = IOUtils.toString(reader);
+						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
+						reader = new StringReader(contents);
+					}
+
 					CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
 					if (theQuoteMode != null) {
 						format = format.withQuote('"').withQuoteMode(theQuoteMode);
@@ -402,16 +409,15 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		LoadedFileDescriptors(List<IHapiTerminologyLoaderSvc.FileDescriptor> theFileDescriptors) {
 			try {
 				for (FileDescriptor next : theFileDescriptors) {
-					File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-					nextTemporaryFile.deleteOnExit();
-
 					if (next.getFilename().toLowerCase().endsWith(".zip")) {
 						ourLog.info("Uncompressing {} into temporary files", next.getFilename());
 						try (InputStream inputStream = next.getInputStream()) {
 							ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream));
 							for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
 								BOMInputStream fis = new BOMInputStream(zis);
-								FileOutputStream fos = new FileOutputStream(nextTemporaryFile);
+								File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
+								nextTemporaryFile.deleteOnExit();
+								FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
 								IOUtils.copy(fis, fos);
 								String nextEntryFileName = nextEntry.getName();
 								myUncompressedFileDescriptors.add(new FileDescriptor() {

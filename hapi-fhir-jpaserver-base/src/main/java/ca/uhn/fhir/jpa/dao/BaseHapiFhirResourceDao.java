@@ -77,7 +77,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
-	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
@@ -590,22 +589,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
 		return retVal;
-	}
-
-	private void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		String newVersion;
-		long newVersionLong;
-		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
-		} else {
-			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
-		}
-
-		IIdType newId = theResourceId.withVersion(newVersion);
-		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	protected boolean isPagingProviderDatabaseBacked(RequestDetails theRequestDetails) {
@@ -1229,54 +1212,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
 
-		// Notify interceptors
-		ActionRequestDetails requestDetails = null;
-		if (theRequestDetails != null) {
-			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, getResourceName(), resourceId);
-			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
-		}
-
 		IBaseResource oldResource = toResource(entity, false);
 
-		// Notify IServerOperationInterceptors about pre-action call
-		if (theRequestDetails != null) {
-			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(oldResource, theResource);
+		/*
+		 * If we aren't indexing, that means we're doing this inside a transaction.
+		 * The transaction will do the actual storate to the database a bit later on,
+		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
+		 * directly. So we just bail now.
+		 */
+		if (!thePerformIndexing) {
+			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
+			outcome.setPreviousResource(oldResource);
+			return outcome;
 		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, oldResource, theResource);
-			}
-		}
-
-		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/*
-		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
-		 * we'll manually increase the version. This is important because we want the updated version number
-		 * to be reflected in the resource shared with interceptors
+		 * Otherwise, we're not in a transaction
 		 */
-		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation() && !ourDisableIncrementOnUpdateForUnitTest) {
-			if (resourceId.hasVersionIdPart() == false) {
-				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
-			}
-			incrementId(theResource, savedEntity, resourceId);
-		}
-
-		// Notify interceptors
-		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			if (theRequestDetails != null) {
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(oldResource, theResource);
-			}
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, oldResource, theResource);
-				}
-			}
-		}
-
+		ResourceTable savedEntity = updateInternal(theResource, thePerformIndexing, theForceUpdateVersion, theRequestDetails, entity, resourceId, oldResource);
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
 
 		if (!thePerformIndexing) {
@@ -1366,9 +1319,5 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	@VisibleForTesting
-	public static void setDisableIncrementOnUpdateForUnitTest(boolean theDisableIncrementOnUpdateForUnitTest) {
-		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
-	}
 
 }

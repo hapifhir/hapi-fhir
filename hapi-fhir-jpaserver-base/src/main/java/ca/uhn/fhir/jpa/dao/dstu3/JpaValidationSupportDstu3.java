@@ -19,6 +19,8 @@ import javax.transaction.Transactional.TxType;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -87,6 +89,9 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
