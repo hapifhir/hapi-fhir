@@ -78,6 +78,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@Autowired
 	protected ITermConceptPropertyDao myConceptPropertyDao;
 	@Autowired
+	protected ITermConceptDesignationDao myConceptDesignationDao;
+	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -103,6 +105,28 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			contains.setCode(theConcept.getCode());
 			contains.setSystem(theCodeSystem);
 			contains.setDisplay(theConcept.getDisplay());
+			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
+				contains
+					.addDesignation()
+					.setValue(nextDesignation.getValue())
+					.getUse()
+					.setSystem(nextDesignation.getUseSystem())
+					.setCode(nextDesignation.getUseCode())
+					.setDisplay(nextDesignation.getUseDisplay());
+			}
+		}
+	}
+
+	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept) {
+		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
+			if (!theAddedCodes.contains(next.getCode())) {
+				theAddedCodes.add(next.getCode());
+				ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+				contains.setCode(next.getCode());
+				contains.setSystem(theSystem);
+				contains.setDisplay(next.getDisplay());
+			}
+			addConceptsToList(theExpansionComponent, theAddedCodes, theSystem, next.getConcept());
 		}
 	}
 
@@ -162,10 +186,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		myCodeSystemDao.save(cs);
 		myCodeSystemDao.flush();
 
+		int i = 0;
 		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
 				myConceptPropertyDao.delete(nextConcept.getProperties());
+				myConceptDesignationDao.delete(nextConcept.getDesignations());
 				myConceptDao.delete(nextConcept);
 			}
 			if (next.getCodeSystem().getCurrentVersion() == next) {
@@ -173,10 +199,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				myCodeSystemDao.save(next.getCodeSystem());
 			}
 			myCodeSystemVersionDao.delete(next);
+
+			if (i % 1000 == 0) {
+				myEntityManager.flush();
+			}
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
 		myCodeSystemDao.delete(theCodeSystem);
 
+		myEntityManager.flush();
 	}
 
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
@@ -223,11 +254,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 							haveIncludeCriteria = true;
 							TermConcept code = findCode(system, nextCode);
 							if (code != null) {
-								addedCodes.add(nextCode);
-								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
-								contains.setCode(nextCode);
-								contains.setSystem(system);
-								contains.setDisplay(code.getDisplay());
+								addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, code);
+//
+//								addedCodes.add(nextCode);
+//								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
+//								contains.setCode(nextCode);
+//								contains.setSystem(system);
+//								contains.setDisplay(code.getDisplay());
 							}
 						}
 					}
@@ -509,6 +542,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		for (TermConceptProperty next : theConcept.getProperties()) {
 			myConceptPropertyDao.save(next);
+		}
+
+		for (TermConceptDesignation next : theConcept.getDesignations()) {
+			myConceptDesignationDao.save(next);
 		}
 
 	}

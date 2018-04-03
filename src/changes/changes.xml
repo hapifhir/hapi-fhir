@@ -6,6 +6,36 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.4.0" date="TBD">
+			<action type="fix">
+				When performing a FHIR resource update in the JPA server
+				where the update happens within a transaction, and the
+				resource being updated contains placeholder IDs, and
+				the resource has not actually changed, a new version was
+				created even though there was not actually any change.
+				This particular combination of circumstances seems very
+				specific and improbable, but it is quite common for some
+				types of solutions (e.g. mapping HL7v2 data) so this
+				fix can prevent significant wasted space in some cases.
+			</action>
+			<action type="fix">
+				JPA server index tables did not have a column length specified
+				on the resource type column. This caused the default of 255 to
+				be used, which wasted a lot of space since resource names are all
+				less than 30 chars long and a single resource can have 10-100+
+				index rows depending on configuration. This has now been set
+				to a much more sensible 30.
+			</action>
+			<action type="fix">
+				The LOINC uploader for the JPA Terminology Server has been
+				significantly beefed up so that it now takes in the full
+				set of LOINC distribution artifacts, and creates not only
+				the LOINC CodeSystem but a complete set of concept properties,
+				a number of LOINC ValueSets, and a number of LOINC ConceptMaps.
+				This work was sponsored by the Regenstrief Institute. Thanks
+				to Regenstrief for their support!
+			</action>
+		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
 				This release corrects an inefficiency in the JPA Server, but requires a schema

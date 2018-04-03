@@ -1,6 +1,9 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.dao.data;
 
-/*-
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+/*
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -20,8 +23,6 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import org.apache.commons.csv.CSVRecord;
-
-public interface IRecordHandler {
-   void accept(CSVRecord theRecord);
+public interface ITermConceptDesignationDao extends JpaRepository<TermConceptDesignation, Long> {
+	// nothing
 }

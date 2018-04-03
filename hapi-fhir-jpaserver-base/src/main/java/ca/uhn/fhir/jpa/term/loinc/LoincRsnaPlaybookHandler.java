@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
@@ -17,17 +37,27 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincRsnaPlaybookHandler extends BaseHandler implements IRecordHandler {
 
-	public static final String RSNA_CODES_VS_ID = "RSNA-LOINC-CODES-VS";
-	public static final String RSNA_CODES_VS_URI = "http://loinc.org/rsna-codes";
-	public static final String RSNA_CODES_VS_NAME = "RSNA Playbook";
+	public static final String RSNA_CODES_VS_ID = "loinc-rsna-radiology-playbook";
+	public static final String RSNA_CODES_VS_URI = "http://loinc.org/vs/loinc-rsna-radiology-playbook";
+	public static final String RSNA_CODES_VS_NAME = "LOINC/RSNA Radiology Playbook";
 	public static final String RID_MAPPING_CM_ID = "LOINC-TO-RID-CODES-CM";
 	public static final String RID_MAPPING_CM_URI = "http://loinc.org/rid-codes";
 	public static final String RID_MAPPING_CM_NAME = "RSNA Playbook RID Codes Mapping";
-	public static final String RID_CS_URI = "http://rid";
+	public static final String RID_CS_URI = "http://www.radlex.org";
 	public static final String RPID_MAPPING_CM_ID = "LOINC-TO-RPID-CODES-CM";
 	public static final String RPID_MAPPING_CM_URI = "http://loinc.org/rpid-codes";
 	public static final String RPID_MAPPING_CM_NAME = "RSNA Playbook RPID Codes Mapping";
-	public static final String RPID_CS_URI = "http://rpid";
+	/*
+	 * About these being the same - Per Dan:
+	 * We had some discussion about this, and both
+	 * RIDs (RadLex clinical terms) and RPIDs  (Radlex Playbook Ids)
+	 * belong to the same "code system" since they will never collide.
+	 * The codesystem uri is "http://www.radlex.org". FYI, that's
+	 * now listed on the FHIR page:
+	 * https://www.hl7.org/fhir/terminologies-systems.html
+	 */
+	public static final String RPID_CS_URI = RID_CS_URI;
+	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final Set<String> myPropertyNames;
@@ -118,7 +148,8 @@ public class LoincRsnaPlaybookHandler extends BaseHandler implements IRecordHand
 					.setTargetCodeSystem(RID_CS_URI)
 					.setTargetCode(rid)
 					.setTargetDisplay(preferredName)
-					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL));
+					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
+				CM_COPYRIGHT);
 		}
 
 		// LOINC Term -> Radlex RPID code mappings
@@ -134,7 +165,8 @@ public class LoincRsnaPlaybookHandler extends BaseHandler implements IRecordHand
 					.setTargetCodeSystem(RPID_CS_URI)
 					.setTargetCode(rpid)
 					.setTargetDisplay(longName)
-					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL));
+					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
+				CM_COPYRIGHT);
 		}
 
 	}

@@ -134,7 +134,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 	@Test
 	public void testUploadMissingUrl() throws Exception {
 		byte[] packageBytes = createSctZip();
-		
+
 		try {
 			ourClient
 				.operation()
@@ -207,7 +207,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

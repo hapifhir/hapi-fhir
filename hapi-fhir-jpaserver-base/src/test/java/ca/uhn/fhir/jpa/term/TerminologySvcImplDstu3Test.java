@@ -56,6 +56,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept childAAB = new TermConcept(cs, "childAAB");
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
 		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
@@ -191,6 +196,31 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
+	}
+
+	@Test
+	public void testPropertiesAndDesignationsPreservedInExpansion() {
+		createCodeSystem();
+
+		List<String> codes;
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include.addConcept().setCode("childAAB");
+		ValueSet outcome = myTermSvc.expandValueSet(vs);
+
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAB"));
+
+		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
+		assertEquals("childAAB", concept.getCode());
+		assertEquals("http://example.com/my_code_system", concept.getSystem());
+		assertEquals(null, concept.getDisplay());
+		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
+		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
+		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
+		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
 
 	@Test

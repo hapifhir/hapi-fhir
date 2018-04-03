@@ -271,5 +271,10 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 	
 }
