@@ -130,18 +130,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
-	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept) {
-		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
-			if (!theAddedCodes.contains(next.getCode())) {
-				theAddedCodes.add(next.getCode());
-				ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
-				contains.setCode(next.getCode());
-				contains.setSystem(theSystem);
-				contains.setDisplay(next.getDisplay());
-			}
-			addConceptsToList(theExpansionComponent, theAddedCodes, theSystem, next.getConcept());
-		}
-	}
 
 	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
