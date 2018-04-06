@@ -38,15 +38,15 @@ public class TermConceptDesignation implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_DESIG_PID")
 	@Column(name = "PID")
 	private Long myId;
-	@Column(name = "LANG", length = 50, nullable = true)
+	@Column(name = "LANG", length = 500, nullable = true)
 	private String myLanguage;
-	@Column(name = "USE_SYSTEM", length = 50, nullable = true)
+	@Column(name = "USE_SYSTEM", length = 500, nullable = true)
 	private String myUseSystem;
-	@Column(name = "USE_CODE", length = 50, nullable = true)
+	@Column(name = "USE_CODE", length = 500, nullable = true)
 	private String myUseCode;
-	@Column(name = "USE_DISPLAY", length = 50, nullable = true)
+	@Column(name = "USE_DISPLAY", length = 500, nullable = true)
 	private String myUseDisplay;
-	@Column(name = "VAL", length = 50, nullable = false)
+	@Column(name = "VAL", length = 500, nullable = false)
 	private String myValue;
 
 	public String getLanguage() {
