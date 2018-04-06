@@ -74,7 +74,7 @@ public class LoincHandler implements IRecordHandler {
 				}
 			}
 
-			Validate.isTrue(!myCode2Concept.containsKey(code), "The code {0} has appeared more than once", code);
+			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 			myCode2Concept.put(code, concept);
 		}
 	}
