@@ -126,6 +126,51 @@ public class LoincRsnaPlaybookHandler extends BaseHandler implements IRecordHand
 			case "Rad.Modality.Modality type":
 				loincCodePropName = "rad-modality-modality-type";
 				break;
+			case "Rad.Modality.Modality subtype":
+				loincCodePropName = "rad-modality-modality-subtype";
+				break;
+			case "Rad.Anatomic Location.Laterality":
+				loincCodePropName = "rad-anatomic-location-laterality";
+				break;
+			case "Rad.Anatomic Location.Laterality.Presence":
+				loincCodePropName = "rad-anatomic-location-laterality-presence";
+				break;
+			case "Rad.Guidance for.Action":
+				loincCodePropName = "rad-guidance-for-action";
+				break;
+			case "Rad.Guidance for.Approach":
+				loincCodePropName = "rad-guidance-for-approach";
+				break;
+			case "Rad.Guidance for.Object":
+				loincCodePropName = "rad-guidance-for-object";
+				break;
+			case "Rad.Guidance for.Presence":
+				loincCodePropName = "rad-guidance-for-presence";
+				break;
+			case "Rad.Maneuver.Maneuver type":
+				loincCodePropName = "rad-maneuver-maneuver-type";
+				break;
+			case "Rad.Pharmaceutical.Route":
+				loincCodePropName = "rad-pharmaceutical-route";
+				break;
+			case "Rad.Pharmaceutical.Substance Given":
+				loincCodePropName = "rad-pharmaceutical-substance-given";
+				break;
+			case "Rad.Reason for Exam":
+				loincCodePropName = "rad-reason-for-exam";
+				break;
+			case "Rad.Subject":
+				loincCodePropName = "rad-subject";
+				break;
+			case "Rad.Timing":
+				loincCodePropName = "rad-timing";
+				break;
+			case "Rad.View.Aggregation":
+				loincCodePropName = "rad-view-view-aggregation";
+				break;
+			case "Rad.View.View type":
+				loincCodePropName = "rad-view-view-type";
+				break;
 			default:
 				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
 		}
