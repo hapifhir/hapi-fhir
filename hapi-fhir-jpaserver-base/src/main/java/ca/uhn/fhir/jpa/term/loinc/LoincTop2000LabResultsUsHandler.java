@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class LoincTop2000LabResultsUsHandler extends BaseLoincTop2000LabResultsHandler {
 
-	public static final String TOP_2000_US_VS_ID = "TOP-2000-LABRESULTS-US";
-	public static final String TOP_2000_US_VS_URI = "http://loinc.org/top-2000-lab-results-us";
+	public static final String TOP_2000_US_VS_ID = "top-2000-lab-observations-us";
+	public static final String TOP_2000_US_VS_URI = "http://loinc.org/vs/top-2000-lab-observations-us";
 	public static final String TOP_2000_US_VS_NAME = "Top 2000 Lab Results US";
 
 	public LoincTop2000LabResultsUsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
