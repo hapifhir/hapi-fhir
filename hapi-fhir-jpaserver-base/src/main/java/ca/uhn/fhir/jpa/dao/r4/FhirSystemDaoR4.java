@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
 import com.google.common.collect.ArrayListMultimap;
+import javolution.io.Struct;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.*;
