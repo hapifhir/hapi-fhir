@@ -36,6 +36,7 @@ public class LoincPartLinkHandler implements IRecordHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
+	private Long myPartCount;
 
 	public LoincPartLinkHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept) {
 		myCodeSystemVersion = theCodeSystemVersion;
@@ -57,7 +58,14 @@ public class LoincPartLinkHandler implements IRecordHandler {
 			return;
 		}
 		if (partConcept == null) {
-			ourLog.warn("No part code: {}", partNumber);
+			if (myPartCount == null) {
+				myPartCount = myCode2Concept
+					.keySet()
+					.stream()
+					.filter(t->t.startsWith("LP"))
+					.count();
+			}
+			ourLog.debug("No part code: {} - Have {} part codes", partNumber, myPartCount);
 			return;
 		}
 

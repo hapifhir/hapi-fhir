@@ -81,7 +81,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements I
 				equivalence = Enumerations.ConceptMapEquivalence.WIDER;
 				break;
 			default:
-				throw new InternalErrorException("Unknown MapType: " + mapType);
+				throw new InternalErrorException("Unknown MapType '" + mapType + "' for PartNumber: " + partNumber);
 		}
 
 		addConceptMapEntry(

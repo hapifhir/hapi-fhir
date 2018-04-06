@@ -12,6 +12,7 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
+						<li>Hibernate (JPA): 5.2.12.Final -&gt; 5.2.16.Final</li>
 						<li>Javassist (JPA): 3.20.0-GA -&gt; 3.22.0-GA</li>
 					</ul>
 				]]>
