@@ -836,10 +836,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
 
 		for (ValueSet nextValueSet : theValueSets) {
+			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
 			createOrUpdateValueSet(nextValueSet, theRequestDetails);
 		}
 
 		for (ConceptMap nextConceptMap : theConceptMaps) {
+			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
 			createOrUpdateConceptMap(nextConceptMap, theRequestDetails);
 		}
 
