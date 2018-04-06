@@ -7,6 +7,15 @@
 	</properties>
 	<body>
 		<release version="3.4.0" date="TBD">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Javassist (JPA): 3.20.0-GA -&gt; 3.22.0-GA</li>
+					</ul>
+				]]>
+			</action>
 			<action type="fix">
 				When performing a FHIR resource update in the JPA server
 				where the update happens within a transaction, and the
