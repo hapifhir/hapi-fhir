@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -104,38 +105,51 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 	@Override
 	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
-		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 		CodeSystem resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
+			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
+			return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		} else {
+			return myCodeSystemResourceDao.update(resourceToStore, theRequestDetails).getId();
+		}
 	}
 
 	@Override
 	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
-		String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
 		ConceptMap resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		myConceptMapResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
+			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+			myConceptMapResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		} else {
+			myConceptMapResourceDao.update(resourceToStore, theRequestDetails).getId();
+		}
 	}
 
 	@Override
 	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
-		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
 		ValueSet valueSetDstu3;
 		try {
 			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
+
+		if (isBlank(valueSetDstu3.getIdElement().getIdPart())) {
+			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+			myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
+		} else {
+			myValueSetResourceDao.update(valueSetDstu3, theRequestDetails);
+		}
 	}
 
 	@Override
