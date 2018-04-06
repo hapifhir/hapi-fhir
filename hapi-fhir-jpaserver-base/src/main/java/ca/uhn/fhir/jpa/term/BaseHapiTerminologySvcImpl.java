@@ -528,14 +528,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 		}
 
-		for (TermConceptProperty next : theConcept.getProperties()) {
-			myConceptPropertyDao.save(next);
-		}
-
-		for (TermConceptDesignation next : theConcept.getDesignations()) {
-			myConceptDesignationDao.save(next);
-		}
-
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
@@ -681,6 +673,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			myConceptDao.save(theConcept);
+
+			for (TermConceptProperty next : theConcept.getProperties()) {
+				myConceptPropertyDao.save(next);
+			}
+
+			for (TermConceptDesignation next : theConcept.getDesignations()) {
+				myConceptDesignationDao.save(next);
+			}
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
