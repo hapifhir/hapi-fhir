@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
@@ -104,7 +103,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
 		CodeSystem resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
@@ -113,14 +112,14 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		}
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();
 		} else {
-			return myCodeSystemResourceDao.update(resourceToStore, theRequestDetails).getId();
+			return myCodeSystemResourceDao.update(resourceToStore).getId();
 		}
 	}
 
 	@Override
-	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
+	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
@@ -129,14 +128,14 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		}
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-			myConceptMapResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+			myConceptMapResourceDao.update(resourceToStore, matchUrl);
 		} else {
-			myConceptMapResourceDao.update(resourceToStore, theRequestDetails).getId();
+			myConceptMapResourceDao.update(resourceToStore);
 		}
 	}
 
 	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
+	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
 			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
@@ -146,9 +145,9 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 		if (isBlank(valueSetDstu3.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
+			myValueSetResourceDao.update(valueSetDstu3, matchUrl);
 		} else {
-			myValueSetResourceDao.update(valueSetDstu3, theRequestDetails);
+			myValueSetResourceDao.update(valueSetDstu3);
 		}
 	}
 

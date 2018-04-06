@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -96,32 +95,32 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl, theRequestDetails).getId();
+			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl).getId();
 		} else {
-			return myCodeSystemResourceDao.update(theCodeSystemResource, theRequestDetails).getId();
+			return myCodeSystemResourceDao.update(theCodeSystemResource).getId();
 		}
 	}
 
 	@Override
-	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
+	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		if (isBlank(theConceptMap.getIdElement().getIdPart())) {
 			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-			myConceptMapResourceDao.update(theConceptMap, matchUrl, theRequestDetails).getId();
+			myConceptMapResourceDao.update(theConceptMap, matchUrl);
 		} else {
-			myConceptMapResourceDao.update(theConceptMap, theRequestDetails).getId();
+			myConceptMapResourceDao.update(theConceptMap);
 		}
 	}
 
 	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
+	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		if (isBlank(theValueSet.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(theValueSet, matchUrl, theRequestDetails);
+			myValueSetResourceDao.update(theValueSet, matchUrl);
 		} else {
-			myValueSetResourceDao.update(theValueSet, theRequestDetails);
+			myValueSetResourceDao.update(theValueSet);
 		}
 	}
 
