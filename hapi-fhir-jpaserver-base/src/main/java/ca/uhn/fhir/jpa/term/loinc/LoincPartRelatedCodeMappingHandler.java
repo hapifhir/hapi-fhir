@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements IRecordHandler {
@@ -69,7 +70,8 @@ public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements I
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
 		Enumerations.ConceptMapEquivalence equivalence;
-		switch (mapType) {
+		switch (trim(defaultString(mapType))) {
+			case "":
 			case "Exact":
 				// 'equal' is more exact than 'equivalent' in the equivalence codes
 				equivalence = Enumerations.ConceptMapEquivalence.EQUAL;
