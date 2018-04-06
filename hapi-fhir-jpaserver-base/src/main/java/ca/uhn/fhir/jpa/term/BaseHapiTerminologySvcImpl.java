@@ -63,6 +63,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -535,6 +536,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
+	private void processDeferredConceptMaps() {
+		int count = Math.min(myDeferredConceptMaps.size(), 5);
+		for (ConceptMap nextConceptMap : new ArrayList<>(myDeferredConceptMaps.subList(0, count))) {
+			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
+			createOrUpdateConceptMap(nextConceptMap);
+			myDeferredConceptMaps.remove(nextConceptMap);
+		}
+		ourLog.info("Saved {} deferred ConceptMap resources, have {} remaining", count, myDeferredConceptMaps.size());
+	}
+
 	private void processDeferredConcepts() {
 		int codeCount = 0, relCount = 0;
 		StopWatch stopwatch = new StopWatch();
@@ -575,6 +586,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
 			ourLog.info("All deferred concepts and relationships have now been synchronized to the database");
 		}
+	}
+
+	private void processDeferredValueSets() {
+		int count = Math.min(myDeferredValueSets.size(), 5);
+		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
+			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
+			createOrUpdateValueSet(nextValueSet);
+			myDeferredValueSets.remove(nextValueSet);
+		}
+		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredConceptMaps.size());
 	}
 
 	private void processReindexing() {
@@ -701,9 +722,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		tt.execute(t->{
-				processDeferredConcepts();
-				return null;
+		tt.execute(t -> {
+			processDeferredConcepts();
+			return null;
 		});
 
 		if (myDeferredValueSets.size() > 0) {
@@ -721,26 +742,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	}
 
-	private void processDeferredValueSets() {
-		int count = Math.min(myDeferredValueSets.size(), 5);
-		for (ValueSet nextValueSet : myDeferredValueSets.subList(0, count)) {
-			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
-			createOrUpdateValueSet(nextValueSet);
-			myDeferredValueSets.remove(nextValueSet);
-		}
-		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredConceptMaps.size());
-	}
-
-	private void processDeferredConceptMaps() {
-		int count = Math.min(myDeferredConceptMaps.size(), 5);
-		for (ConceptMap nextConceptMap : myDeferredConceptMaps.subList(0, count)) {
-			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
-			createOrUpdateConceptMap(nextConceptMap);
-			myDeferredConceptMaps.remove(nextConceptMap);
-		}
-		ourLog.info("Saved {} deferred ConceptMap resources, have {} remaining", count, myDeferredConceptMaps.size());
-	}
-
 	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
@@ -756,6 +757,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+
+		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
@@ -906,6 +909,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
+	}
+
+	private void verifyNoDuplicates(Collection<TermConcept> theConcepts, Set<String> theCodes) {
+		for (TermConcept next : theConcepts) {
+			if (!theCodes.add(next.getCode())) {
+				throw new InvalidRequestException("Duplicate code " + next.getCode() + " found in codesystem after checking " + theCodes.size() + " codes");
+			}
+			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
+		}
 	}
 
 	/**
