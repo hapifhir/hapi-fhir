@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -47,6 +48,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -66,6 +68,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -809,15 +813,40 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	// FIXME: Account for all permutations of input.
 	@Override
-	public List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theTargetCodeSystem, String theSourceCode) {
-		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
+	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
+		Root<TermConceptMapGroupElementTarget> root = query.from(TermConceptMapGroupElementTarget.class);
 
-		if (isNoneBlank(theSourceCodeSystem, theTargetCodeSystem, theSourceCode)) {
-			retVal = myConceptMapGroupElementTargetDao.findTargetsByCodeSystemsAndSourceCode(
-				theSourceCodeSystem,
-				theTargetCodeSystem,
-				theSourceCode);
+		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin = root.join("myConceptMapGroupElement");
+		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
+
+		ArrayList<Predicate> predicates = new ArrayList<>();
+
+		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
+
+			if (coding.hasCode()) {
+				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
+			} else {
+				throw new InvalidRequestException("A code must be provided for translation to occur.");
+			}
+
+			if (coding.hasSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
+			}
+
+			if (theTranslationRequest.hasTargetSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), theTranslationRequest.getTargetSystem().getValueAsString()));
+			}
 		}
+
+		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+		query.where(outerPredicate);
+
+		TypedQuery<TermConceptMapGroupElementTarget> select = myEntityManager.createQuery(query.select(root));
+		List<TermConceptMapGroupElementTarget> retVal = select.getResultList();
+
+		// FIXME: Use scrollable results.
 
 		return retVal;
 	}

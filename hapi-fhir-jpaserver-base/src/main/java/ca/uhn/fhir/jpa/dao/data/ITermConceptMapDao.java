@@ -28,7 +28,7 @@ import java.util.Optional;
  */
 
 public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
-	// TODO: URL should be globally unique. This requires a unique constraint.
+	// FIXME: URL should be globally unique. This requires a unique constraint.
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url")
 	Optional<TermConceptMap> findConceptMapByUrl(@Param("url") String theUrl);
 }

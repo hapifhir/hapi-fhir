@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -169,7 +171,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to multiple target codes">
-				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(CS_URL, CS_URL_3, "12345");
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 
@@ -203,8 +211,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to one target code">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_2));
+
 				List<TermConceptMapGroupElementTarget> targets =
-					myTermSvc.translate(CS_URL, CS_URL_2, "12345");
+					myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 
@@ -254,7 +268,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
-				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(CS_URL, CS_URL_3, "BOGUS");
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("BOGUS");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertTrue(targets.isEmpty());
 				// </editor-fold>

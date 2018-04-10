@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -68,6 +69,5 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-	// FIXME: Account for all permutations of input.
-	List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theTargetCodeSystem, String theSourceCode);
+	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
 }

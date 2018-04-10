@@ -2,10 +2,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /*
  * #%L
@@ -28,14 +24,5 @@ import java.util.List;
  */
 
 public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<TermConceptMapGroupElementTarget, Long> {
-	// FIXME: Account for all permutations of input.
-	@Query("SELECT t FROM TermConceptMapGroupElementTarget t " +
-		"WHERE t.myConceptMapGroupElement.myConceptMapGroup.mySource = :source_code_system " +
-		"AND t.myConceptMapGroupElement.myConceptMapGroup.myTarget = :target_code_system " +
-		"AND t.myConceptMapGroupElement.myCode = :source_code")
-	List<TermConceptMapGroupElementTarget> findTargetsByCodeSystemsAndSourceCode(
-		@Param("source_code_system") String theSourceCodeSystem,
-		@Param("target_code_system") String theTargetCodeSystem,
-		@Param("source_code") String theSourceCode
-	);
+
 }

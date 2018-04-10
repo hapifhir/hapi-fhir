@@ -41,14 +41,9 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		TranslationResult retVal = new TranslationResult();
 
-		// FIXME: Account for all permutations of input.
 		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
 		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
-			if (TranslationRequest.hasPartialCodingWithOnlyCodeAndSystem(coding)) {
-				if (theTranslationRequest.hasTargetSystem()) {
-					targets.addAll(myHapiTerminologySvc.translate(coding.getSystem(), theTranslationRequest.getTargetSystem().asStringValue(), coding.getCode()));
-				}
-			}
+			targets.addAll(myHapiTerminologySvc.translate(theTranslationRequest));
 		}
 
 		if (targets.isEmpty()) {
