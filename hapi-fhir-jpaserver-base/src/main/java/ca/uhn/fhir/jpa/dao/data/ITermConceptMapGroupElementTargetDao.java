@@ -28,6 +28,7 @@ import java.util.List;
  */
 
 public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<TermConceptMapGroupElementTarget, Long> {
+	// FIXME: Account for all permutations of input.
 	@Query("SELECT t FROM TermConceptMapGroupElementTarget t " +
 		"WHERE t.myConceptMapGroupElement.myConceptMapGroup.mySource = :source_code_system " +
 		"AND t.myConceptMapGroupElement.myConceptMapGroup.myTarget = :target_code_system " +
@@ -35,5 +36,6 @@ public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<Term
 	List<TermConceptMapGroupElementTarget> findTargetsByCodeSystemsAndSourceCode(
 		@Param("source_code_system") String theSourceCodeSystem,
 		@Param("target_code_system") String theTargetCodeSystem,
-		@Param("source_code") String theSourceCode);
+		@Param("source_code") String theSourceCode
+	);
 }

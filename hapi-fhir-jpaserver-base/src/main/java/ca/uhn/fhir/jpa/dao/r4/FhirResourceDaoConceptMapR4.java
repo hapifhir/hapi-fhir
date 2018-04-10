@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,27 +33,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
 
 	@Override
-	public TranslationResult translate(CodeableConcept theCodeableConcept, IPrimitiveType<String> theTargetCodeSystem, RequestDetails theRequestDetails) {
+	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		TranslationResult retVal = new TranslationResult();
 
-		String sourceCodeSystem;
-		String sourceCode;
-		String targetCodeSystem = theTargetCodeSystem.getValueAsString();
+		// FIXME: Account for all permutations of input.
 		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
-
-		for (Coding coding : theCodeableConcept.getCoding()) {
-			sourceCodeSystem = coding.getSystem();
-			sourceCode = coding.getCode();
-
-			if (isNoneBlank(sourceCodeSystem, targetCodeSystem, sourceCode)) {
-				targets.addAll(myHapiTerminologySvc.translate(sourceCodeSystem, targetCodeSystem, sourceCode));
+		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
+			if (TranslationRequest.hasPartialCodingWithOnlyCodeAndSystem(coding)) {
+				if (theTranslationRequest.hasTargetSystem()) {
+					targets.addAll(myHapiTerminologySvc.translate(coding.getSystem(), theTranslationRequest.getTargetSystem().asStringValue(), coding.getCode()));
+				}
 			}
 		}
 

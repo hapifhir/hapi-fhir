@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
+import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -60,20 +62,15 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			&& theSourceCode.hasCode();
 		boolean haveSourceCodeSystem = theSourceCodeSystem != null
 			&& theSourceCodeSystem.hasValue();
-		// FIXME: Handle source code system version.
 		boolean haveSourceCodeSystemVersion = theSourceCodeSystemVersion != null
 			&& theSourceCodeSystemVersion.hasValue();
-		// FIXME: Handle source value set.
 		boolean haveSourceValueSet = theSourceValueSet != null
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
-			&& theSourceCoding.hasCode()
-			&& theSourceCoding.hasSystem();
+			&& theSourceCoding.hasCode();
 		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
-			&& theSourceCodeableConcept.getCodingFirstRep().hasCode()
-			&& theSourceCodeableConcept.getCodingFirstRep().hasSystem();
-		// FIXME: Handle target value set.
+			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null
 			&& theTargetValueSet.hasValue();
 		boolean haveTargetCodeSystem = theTargetCodeSystem != null
@@ -84,31 +81,51 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
 
+//		// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
+//		if (haveSourceCode) {
+//			if (!haveSourceCodeSystem) {
+//				throw new InvalidRequestException("This implementation of the $translate operation requires a source code system to be identified.");
+//			}
+//		}
+//
+//		// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
+//		if (!haveTargetCodeSystem) {
+//			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
+//		}
+
+		TranslationRequest translationRequest = new TranslationRequest();
 		if (haveSourceCode) {
-			// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
-			if (!haveSourceCodeSystem) {
-				throw new InvalidRequestException("This implementation of the $translate operation requires a source code system to be identified.");
+			translationRequest.getCodeableConcept().addCoding().setCodeElement(theSourceCode);
+
+			if (haveSourceCodeSystem) {
+				translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement(theSourceCodeSystem);
 			}
-		}
 
-		// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
-		if (!haveTargetCodeSystem) {
-			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
-		}
-
-		CodeableConcept codeableConcept = new CodeableConcept();
-		if (haveSourceCode) {
-			codeableConcept.addCoding().setSystemElement(theSourceCodeSystem).setCodeElement(theSourceCode);
+			if (haveSourceCodeSystemVersion) {
+				translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement(theSourceCodeSystemVersion);
+			}
 		} else if (haveSourceCoding) {
-			codeableConcept.addCoding(theSourceCoding);
+			translationRequest.getCodeableConcept().addCoding(theSourceCoding);
 		} else {
-			codeableConcept = theSourceCodeableConcept;
+			translationRequest.setCodeableConcept(theSourceCodeableConcept);
+		}
+
+		if (haveSourceValueSet) {
+			translationRequest.setSource(theSourceValueSet);
+		}
+
+		if (haveTargetValueSet) {
+			translationRequest.setTarget(theTargetValueSet);
+		}
+
+		if (haveTargetCodeSystem) {
+			translationRequest.setTargetSystem(theTargetCodeSystem);
 		}
 
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
-			IFhirResourceDaoConceptMap.TranslationResult result = dao.translate(codeableConcept, theTargetCodeSystem, theRequestDetails);
+			TranslationResult result = dao.translate(translationRequest, theRequestDetails);
 			return result.toParameters();
 		} finally {
 			endRequest(theServletRequest);

@@ -1,21 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationMatch;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	@AfterClass
@@ -24,22 +19,20 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateOneToMany() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to multiple target codes">
-				CodeableConcept codeableConcept = new CodeableConcept();
-				codeableConcept.addCoding()
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(
-					codeableConcept,
-					new StringType(CS_URL_3),
-					null);
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
 				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
@@ -70,22 +63,20 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateOneToOne() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to one target code">
-				CodeableConcept codeableConcept = new CodeableConcept();
-				codeableConcept.addCoding()
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_2));
 
-				TranslationResult translationResult = myConceptMapDao.translate(
-					codeableConcept,
-					new StringType(CS_URL_2),
-					null);
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
 				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
@@ -107,22 +98,20 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateUnmapped() {
+	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
-				CodeableConcept codeableConcept = new CodeableConcept();
-				codeableConcept.addCoding()
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("BOGUS");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(
-					codeableConcept,
-					new StringType(CS_URL_3),
-					null);
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertFalse(translationResult.getResult().booleanValue());
 				assertEquals("No matches found!", translationResult.getMessage().getValueAsString());

@@ -807,6 +807,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
+	// FIXME: Account for all permutations of input.
 	@Override
 	public List<TermConceptMapGroupElementTarget> translate(String theSourceCodeSystem, String theTargetCodeSystem, String theSourceCode) {
 		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();

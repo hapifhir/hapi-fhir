@@ -162,7 +162,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateOneToMany() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -196,7 +196,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateOneToOne() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -247,7 +247,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateUnmapped() {
+	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {

@@ -20,106 +20,11 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
+import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFhirResourceDao<T> {
-	TranslationResult translate(CodeableConcept theCodeableConcept, IPrimitiveType<String> theTargetCodeSystem, RequestDetails theRequestDetails);
-
-	class TranslationResult {
-		private BooleanType myResult;
-		private StringType myMessage;
-		private List<TranslationMatch> myMatches;
-
-		public TranslationResult() {
-			super();
-
-			myMatches = new ArrayList<>();
-		}
-
-		public BooleanType getResult() {
-			return myResult;
-		}
-
-		public void setResult(BooleanType theMatched) {
-			myResult = theMatched;
-		}
-
-		public StringType getMessage() {
-			return myMessage;
-		}
-
-		public void setMessage(StringType theMessage) {
-			myMessage = theMessage;
-		}
-
-		public List<TranslationMatch> getMatches() {
-			return myMatches;
-		}
-
-		public void setMatches(List<TranslationMatch> theMatches) {
-			myMatches = theMatches;
-		}
-
-		public boolean addMatch(TranslationMatch theMatch) {
-			return myMatches.add(theMatch);
-		}
-
-		public Parameters toParameters() {
-			Parameters retVal = new Parameters();
-
-			retVal.addParameter().setName("result").setValue(myResult);
-
-			retVal.addParameter().setName("message").setValue(myMessage);
-
-			for (TranslationMatch translationMatch : myMatches) {
-				ParametersParameterComponent matchParam = retVal.addParameter().setName("match");
-				matchParam.addPart().setName("equivalence").setValue(translationMatch.getEquivalence());
-				matchParam.addPart().setName("concept").setValue(translationMatch.getConcept());
-				matchParam.addPart().setName("source").setValue(translationMatch.getSource());
-			}
-
-			return retVal;
-		}
-	}
-
-	class TranslationMatch {
-		private CodeType equivalence;
-		private Coding concept;
-		private UriType source;
-
-		public TranslationMatch() {
-			super();
-		}
-
-		public CodeType getEquivalence() {
-			return equivalence;
-		}
-
-		public void setEquivalence(CodeType theEquivalence) {
-			this.equivalence = theEquivalence;
-		}
-
-		public Coding getConcept() {
-			return concept;
-		}
-
-		public void setConcept(Coding theConcept) {
-			this.concept = theConcept;
-		}
-
-		public UriType getSource() {
-			return source;
-		}
-
-		public void setSource(UriType theSource) {
-			this.source = theSource;
-		}
-	}
+	TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails);
 }

@@ -22,7 +22,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testTranslateOneToMany() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		Parameters inParams = new Parameters();
@@ -79,7 +79,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testTranslateOneToOne() {
+	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		Parameters inParams = new Parameters();
@@ -123,7 +123,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testTranslateUnmapped() {
+	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
 		myTermSvc.storeNewConceptMap(createConceptMap());
 
 		Parameters inParams = new Parameters();
