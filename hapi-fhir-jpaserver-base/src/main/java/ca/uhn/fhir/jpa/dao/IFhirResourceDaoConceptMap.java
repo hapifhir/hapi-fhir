@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFhirResourceDao<T> {
-	TranslationResult translate(IPrimitiveType<String> theSourceCodeSystem, IPrimitiveType<String> theTargetCodeSystem, IPrimitiveType<String> theSourceCode, RequestDetails theRequestDetails);
+	TranslationResult translate(CodeableConcept theCodeableConcept, IPrimitiveType<String> theTargetCodeSystem, RequestDetails theRequestDetails);
 
 	class TranslationResult {
 		private BooleanType myResult;

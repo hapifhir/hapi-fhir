@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -43,6 +44,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -753,6 +755,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		if (theConceptMap != null) {
 			TermConceptMap termConceptMap = new TermConceptMap();
 			termConceptMap.setUrl(theConceptMap.getUrl());
+			try {
+				String source = theConceptMap.getSourceUriType().getValueAsString();
+				if (isNotBlank(source)) {
+					termConceptMap.setSource(source);
+				}
+				String target = theConceptMap.getTargetUriType().getValueAsString();
+				if (isNotBlank(target)) {
+					termConceptMap.setTarget(target);
+				}
+			} catch (FHIRException fe) {
+				throw new InternalErrorException(fe);
+			}
 			myConceptMapDao.save(termConceptMap);
 
 			if (theConceptMap.hasGroup()) {
@@ -761,7 +775,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
 					termConceptMapGroup.setSource(group.getSource());
+					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
 					termConceptMapGroup.setTarget(group.getTarget());
+					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
 					myConceptMapGroupDao.save(termConceptMapGroup);
 
 					if (group.hasElement()) {

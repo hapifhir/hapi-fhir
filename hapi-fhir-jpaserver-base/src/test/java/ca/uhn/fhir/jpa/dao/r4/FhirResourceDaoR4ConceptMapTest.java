@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationMatch;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.StringType;
@@ -30,10 +31,14 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to multiple target codes">
+				CodeableConcept codeableConcept = new CodeableConcept();
+				codeableConcept.addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+
 				TranslationResult translationResult = myConceptMapDao.translate(
-					new StringType(CS_URL),
+					codeableConcept,
 					new StringType(CS_URL_3),
-					new StringType("12345"),
 					null);
 
 				assertTrue(translationResult.getResult().booleanValue());
@@ -72,10 +77,14 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to one target code">
+				CodeableConcept codeableConcept = new CodeableConcept();
+				codeableConcept.addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+
 				TranslationResult translationResult = myConceptMapDao.translate(
-					new StringType(CS_URL),
+					codeableConcept,
 					new StringType(CS_URL_2),
-					new StringType("12345"),
 					null);
 
 				assertTrue(translationResult.getResult().booleanValue());
@@ -105,10 +114,14 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
+				CodeableConcept codeableConcept = new CodeableConcept();
+				codeableConcept.addCoding()
+					.setSystem(CS_URL)
+					.setCode("BOGUS");
+
 				TranslationResult translationResult = myConceptMapDao.translate(
-					new StringType(CS_URL),
+					codeableConcept,
 					new StringType(CS_URL_3),
-					new StringType("BOGUS"),
 					null);
 
 				assertFalse(translationResult.getResult().booleanValue());

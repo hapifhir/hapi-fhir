@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class FhirResourceDaoR4TermConceptMapTest extends BaseJpaR4Test {
@@ -21,5 +22,9 @@ public class FhirResourceDaoR4TermConceptMapTest extends BaseJpaR4Test {
 
 		Optional<TermConceptMap> optionalTermConceptMap = myTermConceptMapDao.findConceptMapByUrl(CM_URL);
 		assertTrue(optionalTermConceptMap.isPresent());
+		TermConceptMap conceptMap = optionalTermConceptMap.get();
+		assertEquals(VS_URL, conceptMap.getSource());
+		assertEquals(VS_URL_2, conceptMap.getTarget());
+		assertEquals(CM_URL, conceptMap.getUrl());
 	}
 }

@@ -61,6 +61,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
 	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
+	protected static final String VS_URL = "http://example.com/my_value_set";
+	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
 
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
@@ -358,10 +360,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
 
+		conceptMap.setSource(new UriType(VS_URL));
+		conceptMap.setTarget(new UriType(VS_URL_2));
+
 		// <editor-fold desc="ConceptMap.group(0)">
 		ConceptMapGroupComponent group = conceptMap.addGroup();
 		group.setSource(CS_URL);
+		group.setSourceVersion("Version 1");
 		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
 
 		// <editor-fold desc="ConceptMap.group(0).element(0))">
 		SourceElementComponent element = group.addElement();
@@ -401,7 +408,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		// <editor-fold desc="ConceptMap.group(1)">
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
+		group.setSourceVersion("Version 3");
 		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 4");
 
 		// <editor-fold desc="ConceptMap.group(1).element(0))">
 		element = group.addElement();

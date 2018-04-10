@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.entity;
 
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import javax.persistence.*;
@@ -29,8 +28,18 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@Column(name = "TARGET_EQUIVALENCE", length = 50)
 	private ConceptMapEquivalence myEquivalence;
 
-	private String mySystem;
 	private String myConceptMapUrl;
+	private String mySystem;
+	private String mySystemVersion;
+	private String myValueSet;
+
+	public String getCode() {
+		return myCode;
+	}
+
+	public void setCode(String theCode) {
+		myCode = theCode;
+	}
 
 	public TermConceptMapGroupElement getConceptMapGroupElement() {
 		return myConceptMapGroupElement;
@@ -40,12 +49,11 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 		myConceptMapGroupElement = theTermConceptMapGroupElement;
 	}
 
-	public String getCode() {
-		return myCode;
-	}
-
-	public void setCode(String theCode) {
-		myCode = theCode;
+	public String getConceptMapUrl() {
+		if (myConceptMapUrl == null) {
+			myConceptMapUrl = getConceptMapGroupElement().getConceptMapGroup().getConceptMap().getUrl();
+		}
+		return myConceptMapUrl;
 	}
 
 	public String getDisplay() {
@@ -71,12 +79,17 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 		return mySystem;
 	}
 
-	public String getConceptMapUrl() {
-		if (myConceptMapUrl == null) {
-			myConceptMapUrl = getConceptMapGroupElement().getConceptMapGroup().getConceptMap().getUrl();
-
-			CodeType code = new CodeType();
+	public String getSystemVersion() {
+		if (mySystemVersion == null) {
+			mySystemVersion = getConceptMapGroupElement().getConceptMapGroup().getTargetVersion();
 		}
-		return myConceptMapUrl;
+		return mySystemVersion;
+	}
+
+	public String getValueSet() {
+		if (myValueSet == null) {
+			myValueSet = getConceptMapGroupElement().getConceptMapGroup().getTargetValueSet();
+		}
+		return myValueSet;
 	}
 }

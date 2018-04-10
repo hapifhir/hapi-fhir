@@ -14,6 +14,12 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
+	@Column(name = "SOURCE_URL", nullable = false, length = 200)
+	private String mySource;
+
+	@Column(name = "TARGET_URL", nullable = false, length = 200)
+	private String myTarget;
+
 	@Column(name = "URL", length = 200)
 	private String myUrl;
 
@@ -26,6 +32,22 @@ public class TermConceptMap implements Serializable {
 		}
 
 		return myConceptMapGroups;
+	}
+
+	public String getSource() {
+		return mySource;
+	}
+
+	public void setSource(String source) {
+		mySource = source;
+	}
+
+	public String getTarget() {
+		return myTarget;
+	}
+
+	public void setTarget(String target) {
+		myTarget = target;
 	}
 
 	public String getUrl() {

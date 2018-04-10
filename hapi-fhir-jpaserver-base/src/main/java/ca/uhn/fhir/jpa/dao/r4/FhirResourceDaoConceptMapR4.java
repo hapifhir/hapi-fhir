@@ -41,15 +41,21 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	private IHapiTerminologySvc myHapiTerminologySvc;
 
 	@Override
-	public TranslationResult translate(IPrimitiveType<String> theSourceCodeSystem, IPrimitiveType<String> theTargetCodeSystem, IPrimitiveType<String> theSourceCode, RequestDetails theRequestDetails) {
+	public TranslationResult translate(CodeableConcept theCodeableConcept, IPrimitiveType<String> theTargetCodeSystem, RequestDetails theRequestDetails) {
 		TranslationResult retVal = new TranslationResult();
 
-		String sourceCodeSystem = theSourceCodeSystem.getValueAsString();
+		String sourceCodeSystem;
+		String sourceCode;
 		String targetCodeSystem = theTargetCodeSystem.getValueAsString();
-		String sourceCode = theSourceCode.getValueAsString();
 		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
-		if (isNoneBlank(sourceCodeSystem, targetCodeSystem, sourceCode)) {
-			targets = myHapiTerminologySvc.translate(sourceCodeSystem, targetCodeSystem, sourceCode);
+
+		for (Coding coding : theCodeableConcept.getCoding()) {
+			sourceCodeSystem = coding.getSystem();
+			sourceCode = coding.getCode();
+
+			if (isNoneBlank(sourceCodeSystem, targetCodeSystem, sourceCode)) {
+				targets.addAll(myHapiTerminologySvc.translate(sourceCodeSystem, targetCodeSystem, sourceCode));
+			}
 		}
 
 		if (targets.isEmpty()) {

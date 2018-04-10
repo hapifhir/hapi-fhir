@@ -27,12 +27,17 @@ public class TermConceptMapGroupElement implements Serializable {
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
 	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
 
-	public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
-		if (myConceptMapGroupElementTargets == null) {
-			myConceptMapGroupElementTargets = new ArrayList<>();
-		}
+	private String myConceptMapUrl;
+	private String mySystem;
+	private String mySystemVersion;
+	private String myValueSet;
 
-		return myConceptMapGroupElementTargets;
+	public String getCode() {
+		return myCode;
+	}
+
+	public void setCode(String theCode) {
+		myCode = theCode;
 	}
 
 	public TermConceptMapGroup getConceptMapGroup() {
@@ -43,12 +48,19 @@ public class TermConceptMapGroupElement implements Serializable {
 		myConceptMapGroup = theTermConceptMapGroup;
 	}
 
-	public String getCode() {
-		return myCode;
+	public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
+		if (myConceptMapGroupElementTargets == null) {
+			myConceptMapGroupElementTargets = new ArrayList<>();
+		}
+
+		return myConceptMapGroupElementTargets;
 	}
 
-	public void setCode(String theCode) {
-		myCode = theCode;
+	public String getConceptMapUrl() {
+		if (myConceptMapUrl == null) {
+			myConceptMapUrl = getConceptMapGroup().getConceptMap().getUrl();
+		}
+		return myConceptMapUrl;
 	}
 
 	public String getDisplay() {
@@ -57,5 +69,26 @@ public class TermConceptMapGroupElement implements Serializable {
 
 	public void setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
+	}
+
+	public String getSystem() {
+		if (mySystem == null) {
+			mySystem = getConceptMapGroup().getSource();
+		}
+		return mySystem;
+	}
+
+	public String getSystemVersion() {
+		if (mySystemVersion == null) {
+			mySystemVersion = getConceptMapGroup().getSourceVersion();
+		}
+		return mySystemVersion;
+	}
+
+	public String getValueSet() {
+		if (myValueSet == null) {
+			myValueSet = getConceptMapGroup().getSourceValueSet();
+		}
+		return myValueSet;
 	}
 }

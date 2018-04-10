@@ -21,11 +21,29 @@ public class TermConceptMapGroup implements Serializable {
 	@Column(name = "SOURCE_URL", nullable = false, length = 200)
 	private String mySource;
 
+	@Column(name = "SOURCE_VERSION", length = 50)
+	private String mySourceVersion;
+
 	@Column(name = "TARGET_URL", nullable = false, length = 200)
 	private String myTarget;
 
+	@Column(name = "TARGET_VERSION", length = 50)
+	private String myTargetVersion;
+
 	@OneToMany(mappedBy = "myConceptMapGroup")
 	private List<TermConceptMapGroupElement> myConceptMapGroupElements;
+
+	private String myConceptMapUrl;
+	private String mySourceValueSet;
+	private String myTargetValueSet;
+
+	public TermConceptMap getConceptMap() {
+		return myConceptMap;
+	}
+
+	public void setConceptMap(TermConceptMap theTermConceptMap) {
+		myConceptMap = theTermConceptMap;
+	}
 
 	public List<TermConceptMapGroupElement> getConceptMapGroupElements() {
 		if (myConceptMapGroupElements == null) {
@@ -35,12 +53,11 @@ public class TermConceptMapGroup implements Serializable {
 		return myConceptMapGroupElements;
 	}
 
-	public TermConceptMap getConceptMap() {
-		return myConceptMap;
-	}
-
-	public void setConceptMap(TermConceptMap theTermConceptMap) {
-		myConceptMap = theTermConceptMap;
+	public String getConceptMapUrl() {
+		if (myConceptMapUrl == null) {
+			myConceptMapUrl = getConceptMap().getUrl();
+		}
+		return myConceptMapUrl;
 	}
 
 	public String getSource() {
@@ -51,11 +68,41 @@ public class TermConceptMapGroup implements Serializable {
 		this.mySource = theSource;
 	}
 
+	public String getSourceValueSet() {
+		if (mySourceValueSet == null) {
+			mySourceValueSet = getConceptMap().getSource();
+		}
+		return mySourceValueSet;
+	}
+
+	public String getSourceVersion() {
+		return mySourceVersion;
+	}
+
+	public void setSourceVersion(String theSourceVersion) {
+		mySourceVersion = theSourceVersion;
+	}
+
 	public String getTarget() {
 		return myTarget;
 	}
 
 	public void setTarget(String theTarget) {
 		this.myTarget = theTarget;
+	}
+
+	public String getTargetValueSet() {
+		if (myTargetValueSet == null) {
+			myTargetValueSet = getConceptMap().getTarget();
+		}
+		return myTargetValueSet;
+	}
+
+	public String getTargetVersion() {
+		return myTargetVersion;
+	}
+
+	public void setTargetVersion(String theTargetVersion) {
+		myTargetVersion = theTargetVersion;
 	}
 }
