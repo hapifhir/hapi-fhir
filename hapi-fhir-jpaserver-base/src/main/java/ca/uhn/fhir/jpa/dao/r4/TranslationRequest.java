@@ -105,4 +105,6 @@ public class TranslationRequest {
 	public void setTargetSystem(UriType theTargetSystem) {
 		myTargetSystem = theTargetSystem;
 	}
+
+	// FIXME: Add an enum and methods to determine nature of request with respect to available information.
 }
