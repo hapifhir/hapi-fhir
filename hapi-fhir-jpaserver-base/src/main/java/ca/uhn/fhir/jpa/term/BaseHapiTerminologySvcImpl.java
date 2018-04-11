@@ -73,7 +73,8 @@ import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
@@ -811,46 +812,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
-	// FIXME: Account for all permutations of input.
-	@Override
-	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
-		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
-		Root<TermConceptMapGroupElementTarget> root = query.from(TermConceptMapGroupElementTarget.class);
-
-		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin = root.join("myConceptMapGroupElement");
-		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
-
-		ArrayList<Predicate> predicates = new ArrayList<>();
-
-		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
-
-			if (coding.hasCode()) {
-				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
-			} else {
-				throw new InvalidRequestException("A code must be provided for translation to occur.");
-			}
-
-			if (coding.hasSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
-			}
-
-			if (theTranslationRequest.hasTargetSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), theTranslationRequest.getTargetSystem().getValueAsString()));
-			}
-		}
-
-		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-		query.where(outerPredicate);
-
-		TypedQuery<TermConceptMapGroupElementTarget> select = myEntityManager.createQuery(query.select(root));
-		List<TermConceptMapGroupElementTarget> retVal = select.getResultList();
-
-		// FIXME: Use scrollable results.
-
-		return retVal;
-	}
-
 	@Override
 	public boolean supportsSystem(String theSystem) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -862,6 +823,61 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		for (TermConcept next : codes) {
 			retVal.add(new VersionIndependentConcept(theSystem, next.getCode()));
 		}
+		return retVal;
+	}
+
+	@Override
+	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
+		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
+		Root<TermConceptMapGroupElementTarget> root = query.from(TermConceptMapGroupElementTarget.class);
+
+		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin = root.join("myConceptMapGroupElement");
+		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
+		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
+
+		ArrayList<Predicate> predicates;
+
+		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
+			predicates = new ArrayList<>();
+
+			if (coding.hasCode()) {
+				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
+			} else {
+				throw new InvalidRequestException("A code must be provided for translation to occur.");
+			}
+
+			if (coding.hasSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
+			}
+
+			if (coding.hasVersion()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
+			}
+
+			if (theTranslationRequest.hasTargetSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), theTranslationRequest.getTargetSystem().getValueAsString()));
+			}
+
+			if (theTranslationRequest.hasSource()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), theTranslationRequest.getSource().getValueAsString()));
+			}
+
+			if (theTranslationRequest.hasTarget()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), theTranslationRequest.getTarget().getValueAsString()));
+			}
+
+			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+			query.where(outerPredicate);
+
+			TypedQuery<TermConceptMapGroupElementTarget> select = myEntityManager.createQuery(query.select(root));
+			retVal.addAll(select.getResultList());
+		}
+
+		// FIXME: Use scrollable results.
+
 		return retVal;
 	}
 

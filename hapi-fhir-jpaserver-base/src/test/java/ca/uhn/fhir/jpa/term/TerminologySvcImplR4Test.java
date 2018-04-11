@@ -281,4 +281,74 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	@Test
+	public void testTranslateUsingVariousPredicates() {
+		myTermSvc.storeNewConceptMap(createConceptMap());
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Only a source code is provided">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("12345");
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				// </editor-fold>
+			}
+		});
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Only a source code is provided">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				// </editor-fold>
+			}
+		});
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Only a source code is provided">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_2));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(1, targets.size());
+				// </editor-fold>
+			}
+		});
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Only a source code is provided">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+				// </editor-fold>
+			}
+		});
+	}
 }

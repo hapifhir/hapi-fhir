@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,10 +40,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		TranslationResult retVal = new TranslationResult();
 
-		List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
-		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
-			targets.addAll(myHapiTerminologySvc.translate(theTranslationRequest));
-		}
+		List<TermConceptMapGroupElementTarget> targets = myHapiTerminologySvc.translate(theTranslationRequest);
 
 		if (targets.isEmpty()) {
 
