@@ -758,8 +758,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
 
-		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
-
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
 		 */
@@ -808,8 +806,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
-		ArrayList<String> conceptsStack = new ArrayList<String>();
-		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
+		ArrayList<String> conceptsStack = new ArrayList<>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
@@ -909,15 +907,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
-	}
-
-	private void verifyNoDuplicates(Collection<TermConcept> theConcepts, Set<String> theCodes) {
-		for (TermConcept next : theConcepts) {
-			if (!theCodes.add(next.getCode())) {
-				throw new InvalidRequestException("Duplicate code " + next.getCode() + " found in codesystem after checking " + theCodes.size() + " codes");
-			}
-			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
-		}
 	}
 
 	/**

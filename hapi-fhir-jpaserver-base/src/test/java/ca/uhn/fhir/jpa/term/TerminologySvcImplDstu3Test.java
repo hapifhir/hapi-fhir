@@ -205,7 +205,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet outcome = myTermSvc.expandValueSet(vs);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
+		assertThat(codes, containsInAnyOrder("ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC", "ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
 	}
 
 	@Test
