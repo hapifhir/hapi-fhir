@@ -28,6 +28,8 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@Column(name = "TARGET_EQUIVALENCE", length = 50)
 	private ConceptMapEquivalence myEquivalence;
 
+	// FIXME: Implement ConceptMap.group.element.target.comment
+
 	private String myConceptMapUrl;
 	private String mySystem;
 	private String mySystemVersion;
