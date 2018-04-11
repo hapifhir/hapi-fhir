@@ -23,7 +23,7 @@ public class ObjectConverter  {
     this.context = context;
   }
 
-  public Element convert(Resource ig) throws IOException, FHIRFormatError, DefinitionException {
+  public Element convert(Resource ig) throws IOException, FHIRException {
     if (ig == null)
       return null;
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
@@ -123,6 +123,7 @@ public class ObjectConverter  {
     Reference r = new Reference();
     r.setDisplay(item.getNamedChildValue("display"));
     r.setReference(item.getNamedChildValue("reference"));
+    r.setType(item.getNamedChildValue("type"));
     List<Element> identifier = item.getChildrenByName("identifier");
     if (identifier.isEmpty() == false) {
       r.setIdentifier(readAsIdentifier(identifier.get(0)));

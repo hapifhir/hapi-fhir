@@ -26,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
@@ -63,14 +62,6 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
-	protected boolean subscriptionTypeApplies(IBaseResource theSubscription) {
-		FhirContext ctx = mySubscriptionDao.getContext();
-		return subscriptionTypeApplies(ctx, theSubscription);
-	}
-
-	/**
-	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
-	 */
 	protected boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription) {
 		Subscription.SubscriptionChannelType channelType = getChannelType();
 		return subscriptionTypeApplies(theCtx, theSubscription, channelType);
@@ -80,10 +71,12 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
 	static boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription, Subscription.SubscriptionChannelType theChannelType) {
-		IPrimitiveType<?> status = theCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class);
+		IPrimitiveType<?> subscriptionType = theCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class);
 		boolean subscriptionTypeApplies = false;
-		if (theChannelType.toCode().equals(status.getValueAsString())) {
-			subscriptionTypeApplies = true;
+ 		if (subscriptionType != null) {
+			if (theChannelType.toCode().equals(subscriptionType.getValueAsString())) {
+				subscriptionTypeApplies = true;
+			}
 		}
 		return subscriptionTypeApplies;
 	}

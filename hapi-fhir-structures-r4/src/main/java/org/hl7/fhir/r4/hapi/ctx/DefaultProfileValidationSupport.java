@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -141,27 +142,33 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
     ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
-    InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-    if (valuesetText != null) {
-      InputStreamReader reader = new InputStreamReader(valuesetText, Charsets.UTF_8);
+    InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
+    InputStreamReader reader = null;
+    if (inputStream != null) {
+      try {
+        reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 
-      Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-      for (BundleEntryComponent next : bundle.getEntry()) {
-        if (next.getResource() instanceof CodeSystem) {
-          CodeSystem nextValueSet = (CodeSystem) next.getResource();
-          nextValueSet.getText().setDivAsString("");
-          String system = nextValueSet.getUrl();
-          if (isNotBlank(system)) {
-            theCodeSystems.put(system, nextValueSet);
-          }
-        } else if (next.getResource() instanceof ValueSet) {
-          ValueSet nextValueSet = (ValueSet) next.getResource();
-          nextValueSet.getText().setDivAsString("");
-          String system = nextValueSet.getUrl();
-          if (isNotBlank(system)) {
-            theValueSets.put(system, nextValueSet);
+        Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
+        for (BundleEntryComponent next : bundle.getEntry()) {
+          if (next.getResource() instanceof CodeSystem) {
+            CodeSystem nextValueSet = (CodeSystem) next.getResource();
+            nextValueSet.getText().setDivAsString("");
+            String system = nextValueSet.getUrl();
+            if (isNotBlank(system)) {
+              theCodeSystems.put(system, nextValueSet);
+            }
+          } else if (next.getResource() instanceof ValueSet) {
+            ValueSet nextValueSet = (ValueSet) next.getResource();
+            nextValueSet.getText().setDivAsString("");
+            String system = nextValueSet.getUrl();
+            if (isNotBlank(system)) {
+              theValueSets.put(system, nextValueSet);
+            }
           }
         }
+      } finally {
+        IOUtils.closeQuietly(reader);
+        IOUtils.closeQuietly(inputStream);
       }
     } else {
       ourLog.warn("Unable to load resource: {}", theClasspath);

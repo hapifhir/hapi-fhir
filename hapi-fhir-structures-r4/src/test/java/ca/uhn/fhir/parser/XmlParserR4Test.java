@@ -4,17 +4,21 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 import static org.junit.Assert.*;
 
 public class XmlParserR4Test {
@@ -161,6 +165,26 @@ public class XmlParserR4Test {
 
 	}
 
+	/**
+	 * See #11
+	 */
+	@Test
+	public void testDuplicateContainedResources() {
+
+		Observation resA = new Observation();
+		resA.setComment("A");
+
+		Observation resB = new Observation();
+		resB.setComment("B");
+		resB.addHasMember(new Reference(resA));
+		resB.addHasMember(new Reference(resA));
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
+		ourLog.info(encoded);
+
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "<Observation", "</contained>"))));
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

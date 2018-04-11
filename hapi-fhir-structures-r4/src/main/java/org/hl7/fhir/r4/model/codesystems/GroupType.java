@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum GroupType {
          */
         ANIMAL, 
         /**
-         * Group contains healthcare practitioner resources
+         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole)
          */
         PRACTITIONER, 
         /**
@@ -99,7 +99,7 @@ public enum GroupType {
           switch (this) {
             case PERSON: return "Group contains \"person\" Patient resources";
             case ANIMAL: return "Group contains \"animal\" Patient resources";
-            case PRACTITIONER: return "Group contains healthcare practitioner resources";
+            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole)";
             case DEVICE: return "Group contains Device resources";
             case MEDICATION: return "Group contains Medication resources";
             case SUBSTANCE: return "Group contains Substance resources";

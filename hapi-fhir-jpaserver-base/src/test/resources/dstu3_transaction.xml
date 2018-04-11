@@ -1,0 +1,65 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="urn:uuid:f307ffe9-359d-49fe-9ebc-b56d853b85c6"/>
+		<resource>
+			<Patient xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="urn:hssc:musc:patientid"/>
+					<value value="005674000"/>
+				</identifier>
+			</Patient>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="/Patient"/>
+			<ifNoneExist value="Patient?identifier=urn%3Ahssc%3Amusc%3Apatientid|005674000"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="Encounter/ABC"/>
+		<resource>
+			<Encounter xmlns="http://hl7.org/fhir">
+				<id value="ABC"/>
+				<identifier>
+					<system value="urn:hssc:musc:encounterid"/>
+					<value value="1064100000"/>
+				</identifier>
+				<status value="in-progress"/>
+				<diagnosis>
+					<condition>
+						<reference value="urn:uuid:2c3d22b0-6c62-4f1a-b12a-a623546dd4d8"/>
+					</condition>
+				</diagnosis>
+			</Encounter>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="Encounter/ABC"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:2c3d22b0-6c62-4f1a-b12a-a623546dd4d8"/>
+		<resource>
+			<Condition xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="urn:hssc:musc:conditionid"/>
+					<value value="1064115000.1.5"/>
+				</identifier>
+				<code>
+					<coding>
+						<system value="http://www.icd10data.com/icd10pcs"/>
+						<code value="Z96.653"/>
+						<display value="Presence of artificial knee joint, bilateral"/>
+					</coding>
+				</code>
+				<onsetDateTime value="2016-05-23T17:56:33-04:00"/>
+				<abatementDateTime value="2017-05-23T17:56:33-04:00"/>
+			</Condition>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="/Condition?identifier=urn%3Ahssc%3Amusc%3Aconditionid|1064115000.1.5"/>
+		</request>
+	</entry>
+</Bundle>

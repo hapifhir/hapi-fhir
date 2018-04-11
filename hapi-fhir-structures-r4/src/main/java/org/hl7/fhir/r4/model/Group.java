@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class Group extends DomainResource {
          */
         ANIMAL, 
         /**
-         * Group contains healthcare practitioner resources
+         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole)
          */
         PRACTITIONER, 
         /**
@@ -123,7 +123,7 @@ public class Group extends DomainResource {
           switch (this) {
             case PERSON: return "Group contains \"person\" Patient resources";
             case ANIMAL: return "Group contains \"animal\" Patient resources";
-            case PRACTITIONER: return "Group contains healthcare practitioner resources";
+            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole)";
             case DEVICE: return "Group contains Device resources";
             case MEDICATION: return "Group contains Medication resources";
             case SUBSTANCE: return "Group contains Substance resources";
@@ -595,7 +595,7 @@ public class Group extends DomainResource {
         /**
          * A reference to the entity that is a member of the group. Must be consistent with Group.type.
          */
-        @Child(name = "entity", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "entity", type = {Patient.class, Practitioner.class, PractitionerRole.class, Device.class, Medication.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the group member", formalDefinition="A reference to the entity that is a member of the group. Must be consistent with Group.type." )
         protected Reference entity;
 
@@ -745,7 +745,7 @@ public class Group extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("entity", "Reference(Patient|Practitioner|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity));
+          children.add(new Property("entity", "Reference(Patient|Practitioner|PractitionerRole|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity));
           children.add(new Property("period", "Period", "The period that the member was in the group, if known.", 0, 1, period));
           children.add(new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, 1, inactive));
         }
@@ -753,7 +753,7 @@ public class Group extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1298275357: /*entity*/  return new Property("entity", "Reference(Patient|Practitioner|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity);
+          case -1298275357: /*entity*/  return new Property("entity", "Reference(Patient|Practitioner|PractitionerRole|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity);
           case -991726143: /*period*/  return new Property("period", "Period", "The period that the member was in the group, if known.", 0, 1, period);
           case 24665195: /*inactive*/  return new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, 1, inactive);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1712,7 +1712,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.member.entity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Medication.class, Patient.class, Practitioner.class, Substance.class } )
+  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Medication.class, Patient.class, Practitioner.class, PractitionerRole.class, Substance.class } )
   public static final String SP_MEMBER = "member";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>member</b>

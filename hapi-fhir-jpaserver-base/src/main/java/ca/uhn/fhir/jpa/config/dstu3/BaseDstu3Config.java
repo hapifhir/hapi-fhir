@@ -18,7 +18,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +66,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Lazy
 	public IValidatorModule instanceValidatorDstu3() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChainDstu3());
 		return val;
 	}

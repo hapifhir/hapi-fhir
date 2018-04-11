@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
@@ -39,7 +40,6 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-//@formatter:off
 @Indexed(interceptor = IndexNonDeletedInterceptor.class)
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
@@ -49,12 +49,17 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-//@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
 	static final int RESTYPE_LEN = 30;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
+
+//	@Transient
+//	private transient byte[] myResource;
+//
+//	@Transient
+//	private transient ResourceEncodingEnum myEncoding;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -213,6 +218,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getTags().add(tag);
 		return tag;
 	}
+
+//	public ResourceEncodingEnum getEncoding() {
+//		Validate.notNull(myEncoding, "myEncoding is null");
+//		return myEncoding;
+//	}
+//
+//	public void setEncoding(ResourceEncodingEnum theEncoding) {
+//		myEncoding = theEncoding;
+//	}
 
 	public String getHashSha256() {
 		return myHashSha256;
@@ -387,6 +401,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myProfile = theProfile;
 	}
 
+//	public byte[] getResource() {
+//		Validate.notNull(myEncoding, "myEncoding is null");
+//		return myResource;
+//	}
+//
+//	public void setResource(byte[] theResource) {
+//		myResource = theResource;
+//	}
+
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
 			myResourceLinks = new ArrayList<>();
@@ -527,8 +550,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myNarrativeText = theNarrativeText;
 	}
 
-	public ResourceHistoryTable toHistory(ResourceHistoryTable theResourceHistoryTable) {
-		ResourceHistoryTable retVal = theResourceHistoryTable != null ? theResourceHistoryTable : new ResourceHistoryTable();
+	public ResourceHistoryTable toHistory() {
+		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
@@ -536,9 +559,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 		retVal.setPublished(getPublished());
 		retVal.setUpdated(getUpdated());
-		retVal.setEncoding(getEncoding());
+//		retVal.setEncoding(getEncoding());
 		retVal.setFhirVersion(getFhirVersion());
-		retVal.setResource(getResource());
+//		retVal.setResource(getResource());
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 

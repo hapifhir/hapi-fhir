@@ -18,7 +18,7 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 	public PublicSecurityInterceptor() {
 		String passwordsString = System.getProperty("fhir.tdlpass");
 		String[] passwords = passwordsString.split(",");
-		myTokens = new HashSet<String>(Arrays.asList(passwords));
+		myTokens = new HashSet<>(Arrays.asList(passwords));
 		
 		ourLog.info("We have {} valid security tokens", myTokens.size());
 	}
@@ -27,7 +27,6 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 	public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 		String authHeader = theRequestDetails.getHeader("Authorization");
 
-		//@formatter:off
 		if (isBlank(authHeader)) {
 			return new RuleBuilder()
 				.deny().operation().named(BaseJpaSystemProvider.MARK_ALL_RESOURCES_FOR_REINDEXING).onServer().andThen()
@@ -35,8 +34,7 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 				.allowAll()
 				.build();
 		}
-		//@formatter:off
-		
+
 		if (!authHeader.startsWith("Bearer ")) {
 			throw new ForbiddenOperationException("Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
 		}

@@ -1,0 +1,33 @@
+﻿<Patient xmlns="http://hl7.org/fhir">
+  <identifier>
+    <use value="usual" />
+    <type>
+      <coding>
+        <system value="http://hl7.org/fhir/v2/0203" />
+        <code value="MR" />
+      </coding>
+    </type>
+    <system value="urn:oid:1.2.410.100110.10.41308301" />
+    <value value="88888888" />
+    <assigner>
+      <display value="Seoul Samsung" />
+    </assigner>
+  </identifier>
+  <active value="true" />
+  <name>
+    <use value="official" />
+    <family value="김" />
+    <given value="준수" />
+  </name>
+  <gender value="male" />
+  <birthDate value="1988-01-01" />
+  <contact>
+    <telecom>
+      <system value="phone" />
+      <value value="010-0000-1000" />
+    </telecom>
+  </contact>
+  <managingOrganization>
+    <display value="Seoul Samsung" />
+  </managingOrganization>
+</Patient>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-cli</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -189,6 +189,23 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-commons</artifactId>
+		</dependency>
+
+		<!--
+		These have been added as explicit dependencies
+		as JDK9 no longer includes them by default
+		-->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
 		</dependency>
 
 		<dependency>

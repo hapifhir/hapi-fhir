@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -495,6 +495,17 @@
 				<artifactId>hibernate-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>derby107</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.DerbyTenSevenDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_derby107.sql</outputFile>
+						</configuration>
+					</execution>
+					<execution>
 						<id>postgres94</id>
 						<phase>process-classes</phase>
 						<goals>
@@ -539,6 +550,27 @@
 						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<!--
+					These have been added as explicit dependencies
+					as JDK9 no longer includes them by default
+					-->
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${jaxb_api_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-core</artifactId>
+						<version>${jaxb_core_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${jaxb_core_version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>

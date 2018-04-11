@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -87,7 +87,7 @@ public enum ReferencerangeMeaning {
         /**
          * An expected range in an individual post-menopause.
          */
-        POSTMEOPAUSAL, 
+        POSTMENOPAUSAL, 
         /**
          * added to help the parsers
          */
@@ -119,8 +119,8 @@ public enum ReferencerangeMeaning {
           return MIDCYCLE;
         if ("luteal".equals(codeString))
           return LUTEAL;
-        if ("postmeopausal".equals(codeString))
-          return POSTMEOPAUSAL;
+        if ("postmenopausal".equals(codeString))
+          return POSTMENOPAUSAL;
         throw new FHIRException("Unknown ReferencerangeMeaning code '"+codeString+"'");
         }
         public String toCode() {
@@ -137,7 +137,7 @@ public enum ReferencerangeMeaning {
             case FOLLICULAR: return "follicular";
             case MIDCYCLE: return "midcycle";
             case LUTEAL: return "luteal";
-            case POSTMEOPAUSAL: return "postmeopausal";
+            case POSTMENOPAUSAL: return "postmenopausal";
             default: return "?";
           }
         }
@@ -158,7 +158,7 @@ public enum ReferencerangeMeaning {
             case FOLLICULAR: return "An expected range in an individual during the follicular stage of the cycle.";
             case MIDCYCLE: return "An expected range in an individual during the follicular stage of the cycle.";
             case LUTEAL: return "An expected range in an individual during the luteal stage of the cycle.";
-            case POSTMEOPAUSAL: return "An expected range in an individual post-menopause.";
+            case POSTMENOPAUSAL: return "An expected range in an individual post-menopause.";
             default: return "?";
           }
         }
@@ -176,7 +176,7 @@ public enum ReferencerangeMeaning {
             case FOLLICULAR: return "Follicular Stage";
             case MIDCYCLE: return "MidCycle";
             case LUTEAL: return "Luteal";
-            case POSTMEOPAUSAL: return "Post-Menopause";
+            case POSTMENOPAUSAL: return "Post-Menopause";
             default: return "?";
           }
     }

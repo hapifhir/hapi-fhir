@@ -23,11 +23,12 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -92,8 +94,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired(required = false)
 	@Qualifier("myEventDefinitionDaoR4")
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
-	@Autowired
+	@Autowired()
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
+	private AsyncTaskExecutor myAsyncTaskExecutor;
 
 	/**
 	 * Constructor
@@ -364,6 +369,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		});
 	}
 
+	@VisibleForTesting
+	public void setAsyncTaskExecutorForUnitTest(AsyncTaskExecutor theAsyncTaskExecutor) {
+		myAsyncTaskExecutor = theAsyncTaskExecutor;
+	}
+
 	public void setFhirContext(FhirContext theCtx) {
 		myCtx = theCtx;
 	}
@@ -455,7 +465,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();

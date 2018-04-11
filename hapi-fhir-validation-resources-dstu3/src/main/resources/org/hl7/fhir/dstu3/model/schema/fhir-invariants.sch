@@ -4503,7 +4503,7 @@
       <sch:assert test="not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))">que-1: Group items must have nested items, display items cannot have nested items</sch:assert>
     </sch:rule>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen">
-      <sch:assert test="count(f:*[starts-with(local-name(.), 'answer')]|self::f:hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
+      <sch:assert test="count(f:*[starts-with(local-name(.), 'answer')]|f:hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
     </sch:rule>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen/f:answerAttachment">
       <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: It the Attachment has data, it SHALL have a contentType</sch:assert>

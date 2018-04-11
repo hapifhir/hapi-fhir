@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -686,11 +686,11 @@ public class ValueSet extends MetadataResource {
         /**
          * Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.
          */
-        @Child(name = "valueSet", type = {UriType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "valueSet", type = {CanonicalType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Select only contents included in this value set", formalDefinition="Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url." )
-        protected List<UriType> valueSet;
+        protected List<CanonicalType> valueSet;
 
-        private static final long serialVersionUID = -1322183438L;
+        private static final long serialVersionUID = 969391146L;
 
     /**
      * Constructor
@@ -906,16 +906,16 @@ public class ValueSet extends MetadataResource {
         /**
          * @return {@link #valueSet} (Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
-        public List<UriType> getValueSet() { 
+        public List<CanonicalType> getValueSet() { 
           if (this.valueSet == null)
-            this.valueSet = new ArrayList<UriType>();
+            this.valueSet = new ArrayList<CanonicalType>();
           return this.valueSet;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ConceptSetComponent setValueSet(List<UriType> theValueSet) { 
+        public ConceptSetComponent setValueSet(List<CanonicalType> theValueSet) { 
           this.valueSet = theValueSet;
           return this;
         }
@@ -923,7 +923,7 @@ public class ValueSet extends MetadataResource {
         public boolean hasValueSet() { 
           if (this.valueSet == null)
             return false;
-          for (UriType item : this.valueSet)
+          for (CanonicalType item : this.valueSet)
             if (!item.isEmpty())
               return true;
           return false;
@@ -932,10 +932,10 @@ public class ValueSet extends MetadataResource {
         /**
          * @return {@link #valueSet} (Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
-        public UriType addValueSetElement() {//2 
-          UriType t = new UriType();
+        public CanonicalType addValueSetElement() {//2 
+          CanonicalType t = new CanonicalType();
           if (this.valueSet == null)
-            this.valueSet = new ArrayList<UriType>();
+            this.valueSet = new ArrayList<CanonicalType>();
           this.valueSet.add(t);
           return t;
         }
@@ -944,10 +944,10 @@ public class ValueSet extends MetadataResource {
          * @param value {@link #valueSet} (Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
         public ConceptSetComponent addValueSet(String value) { //1
-          UriType t = new UriType();
+          CanonicalType t = new CanonicalType();
           t.setValue(value);
           if (this.valueSet == null)
-            this.valueSet = new ArrayList<UriType>();
+            this.valueSet = new ArrayList<CanonicalType>();
           this.valueSet.add(t);
           return this;
         }
@@ -958,8 +958,8 @@ public class ValueSet extends MetadataResource {
         public boolean hasValueSet(String value) { 
           if (this.valueSet == null)
             return false;
-          for (UriType v : this.valueSet)
-            if (v.equals(value)) // uri
+          for (CanonicalType v : this.valueSet)
+            if (v.getValue().equals(value)) // canonical(ValueSet)
               return true;
           return false;
         }
@@ -970,7 +970,7 @@ public class ValueSet extends MetadataResource {
           children.add(new Property("version", "string", "The version of the code system that the codes are selected from.", 0, 1, version));
           children.add(new Property("concept", "", "Specifies a concept to be included or excluded.", 0, java.lang.Integer.MAX_VALUE, concept));
           children.add(new Property("filter", "", "Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.", 0, java.lang.Integer.MAX_VALUE, filter));
-          children.add(new Property("valueSet", "uri", "Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.", 0, java.lang.Integer.MAX_VALUE, valueSet));
+          children.add(new Property("valueSet", "canonical(ValueSet)", "Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.", 0, java.lang.Integer.MAX_VALUE, valueSet));
         }
 
         @Override
@@ -980,7 +980,7 @@ public class ValueSet extends MetadataResource {
           case 351608024: /*version*/  return new Property("version", "string", "The version of the code system that the codes are selected from.", 0, 1, version);
           case 951024232: /*concept*/  return new Property("concept", "", "Specifies a concept to be included or excluded.", 0, java.lang.Integer.MAX_VALUE, concept);
           case -1274492040: /*filter*/  return new Property("filter", "", "Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.", 0, java.lang.Integer.MAX_VALUE, filter);
-          case -1410174671: /*valueSet*/  return new Property("valueSet", "uri", "Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.", 0, java.lang.Integer.MAX_VALUE, valueSet);
+          case -1410174671: /*valueSet*/  return new Property("valueSet", "canonical(ValueSet)", "Selects concepts found in this value set. This is an absolute URI that is a reference to ValueSet.url.", 0, java.lang.Integer.MAX_VALUE, valueSet);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -993,7 +993,7 @@ public class ValueSet extends MetadataResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // ConceptReferenceComponent
         case -1274492040: /*filter*/ return this.filter == null ? new Base[0] : this.filter.toArray(new Base[this.filter.size()]); // ConceptSetFilterComponent
-        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : this.valueSet.toArray(new Base[this.valueSet.size()]); // UriType
+        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : this.valueSet.toArray(new Base[this.valueSet.size()]); // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1015,7 +1015,7 @@ public class ValueSet extends MetadataResource {
           this.getFilter().add((ConceptSetFilterComponent) value); // ConceptSetFilterComponent
           return value;
         case -1410174671: // valueSet
-          this.getValueSet().add(castToUri(value)); // UriType
+          this.getValueSet().add(castToCanonical(value)); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1033,7 +1033,7 @@ public class ValueSet extends MetadataResource {
         } else if (name.equals("filter")) {
           this.getFilter().add((ConceptSetFilterComponent) value);
         } else if (name.equals("valueSet")) {
-          this.getValueSet().add(castToUri(value));
+          this.getValueSet().add(castToCanonical(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1059,7 +1059,7 @@ public class ValueSet extends MetadataResource {
         case 351608024: /*version*/ return new String[] {"string"};
         case 951024232: /*concept*/ return new String[] {};
         case -1274492040: /*filter*/ return new String[] {};
-        case -1410174671: /*valueSet*/ return new String[] {"uri"};
+        case -1410174671: /*valueSet*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1102,8 +1102,8 @@ public class ValueSet extends MetadataResource {
             dst.filter.add(i.copy());
         };
         if (valueSet != null) {
-          dst.valueSet = new ArrayList<UriType>();
-          for (UriType i : valueSet)
+          dst.valueSet = new ArrayList<CanonicalType>();
+          for (CanonicalType i : valueSet)
             dst.valueSet.add(i.copy());
         };
         return dst;
@@ -1127,8 +1127,7 @@ public class ValueSet extends MetadataResource {
         if (!(other_ instanceof ConceptSetComponent))
           return false;
         ConceptSetComponent o = (ConceptSetComponent) other_;
-        return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(valueSet, o.valueSet, true)
-          ;
+        return compareValues(system, o.system, true) && compareValues(version, o.version, true);
       }
 
       public boolean isEmpty() {
@@ -2969,10 +2968,10 @@ public class ValueSet extends MetadataResource {
         protected BooleanType abstract_;
 
         /**
-         * If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
+         * If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).
          */
         @Child(name = "inactive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="If concept is inactive in the code system", formalDefinition="If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data." )
+        @Description(shortDefinition="If concept is inactive in the code system", formalDefinition="If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use)." )
         protected BooleanType inactive;
 
         /**
@@ -3114,7 +3113,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         * @return {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
          */
         public BooleanType getInactiveElement() { 
           if (this.inactive == null)
@@ -3134,7 +3133,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @param value {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         * @param value {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
          */
         public ValueSetExpansionContainsComponent setInactiveElement(BooleanType value) { 
           this.inactive = value;
@@ -3142,14 +3141,14 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
+         * @return If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).
          */
         public boolean getInactive() { 
           return this.inactive == null || this.inactive.isEmpty() ? false : this.inactive.getValue();
         }
 
         /**
-         * @param value If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
+         * @param value If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).
          */
         public ValueSetExpansionContainsComponent setInactive(boolean value) { 
             if (this.inactive == null)
@@ -3415,7 +3414,7 @@ public class ValueSet extends MetadataResource {
           super.listChildren(children);
           children.add(new Property("system", "uri", "An absolute URI which is the code system in which the code for this item in the expansion is defined.", 0, 1, system));
           children.add(new Property("abstract", "boolean", "If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.", 0, 1, abstract_));
-          children.add(new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.", 0, 1, inactive));
+          children.add(new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).", 0, 1, inactive));
           children.add(new Property("version", "string", "The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.", 0, 1, version));
           children.add(new Property("code", "code", "The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set.", 0, 1, code));
           children.add(new Property("display", "string", "The recommended display for this item in the expansion.", 0, 1, display));
@@ -3428,7 +3427,7 @@ public class ValueSet extends MetadataResource {
           switch (_hash) {
           case -887328209: /*system*/  return new Property("system", "uri", "An absolute URI which is the code system in which the code for this item in the expansion is defined.", 0, 1, system);
           case 1732898850: /*abstract*/  return new Property("abstract", "boolean", "If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.", 0, 1, abstract_);
-          case 24665195: /*inactive*/  return new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.", 0, 1, inactive);
+          case 24665195: /*inactive*/  return new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data. It might not be known or specified whether an concept is inactive (and it may depend on the context of use).", 0, 1, inactive);
           case 351608024: /*version*/  return new Property("version", "string", "The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.", 0, 1, version);
           case 3059181: /*code*/  return new Property("code", "code", "The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set.", 0, 1, code);
           case 1671764162: /*display*/  return new Property("display", "string", "The recommended display for this item in the expansion.", 0, 1, display);

@@ -114,19 +114,19 @@ public class JaxRsResponseDstu3Test {
 		boolean allowPrefer = true;
 		String resourceName = "Patient";
 		MethodOutcome methodOutcome = new MethodOutcome(theId);
-		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
+		response.getRequestDetails().addParameter(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/fhir+xml; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("<Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
 	
 	@Test
 	public void testNoOutcomeXml() throws IOException {
-		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
+		response.getRequestDetails().addParameter(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), null, theSummaryMode, 204, addContentLocationHeader, respondGzip, this.request);

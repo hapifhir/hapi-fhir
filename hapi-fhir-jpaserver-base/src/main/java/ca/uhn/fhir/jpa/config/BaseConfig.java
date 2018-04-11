@@ -49,6 +49,8 @@ import javax.annotation.Resource;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
 
+	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
+
 	@Autowired
 	protected Environment myEnv;
 	@Resource
@@ -87,18 +89,6 @@ public class BaseConfig implements SchedulingConfigurer {
 		return new StaleSearchDeletingSvcImpl();
 	}
 
-	@Bean
-	@Lazy
-	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
-		return new SubscriptionRestHookInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
-		return new SubscriptionWebsocketInterceptor();
-	}
-
 	/**
 	 * Note: If you're going to use this, you need to provide a bean
 	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
@@ -111,6 +101,18 @@ public class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
+	@Lazy
+	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
+		return new SubscriptionRestHookInterceptor();
+	}
+
+	@Bean
+	@Lazy
+	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
+		return new SubscriptionWebsocketInterceptor();
+	}
+
+	@Bean(name=TASK_EXECUTOR_NAME)
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());

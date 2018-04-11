@@ -12,6 +12,7 @@
   <sch:pattern>
     <sch:title>f:Contract</sch:title>
     <sch:rule context="f:Contract">
+      <sch:assert test="count(f:identifier) &lt;= 1">identifier: maximum cardinality of 'identifier' is 1</sch:assert>
       <sch:assert test="count(f:valuedItem) &lt;= 0">valuedItem: maximum cardinality of 'valuedItem' is 0</sch:assert>
       <sch:assert test="count(f:binding[x]) &gt;= 1">binding[x]: minimum cardinality of 'binding[x]' is 1</sch:assert>
       <sch:assert test="count(f:binding[x]) &lt;= 1">binding[x]: maximum cardinality of 'binding[x]' is 1</sch:assert>

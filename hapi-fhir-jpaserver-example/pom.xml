@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -71,6 +71,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-elasticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

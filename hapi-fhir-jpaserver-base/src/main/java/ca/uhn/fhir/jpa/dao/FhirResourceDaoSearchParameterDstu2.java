@@ -45,7 +45,9 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
 	protected void markAffectedResources(SearchParameter theResource) {
-		markResourcesMatchingExpressionAsNeedingReindexing(theResource != null ? theResource.getXpath() : null);
+		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
+		String expression = theResource != null ? theResource.getXpath() : null;
+		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
 	}
 
 	/**

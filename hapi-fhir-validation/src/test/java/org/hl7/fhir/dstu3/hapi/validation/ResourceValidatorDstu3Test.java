@@ -287,12 +287,11 @@ public class ResourceValidatorDstu3Test {
 	 * TODO: re-enable this
 	 */
 	@Test
-	@Ignore
 	public void testValidateQuestionnaireWithCanonicalUrl() {
 		String input = "{\n" +
 			"  \"resourceType\": \"Questionnaire\",\n" +
 			"  \"url\": \"http://some.example.url\",\n" +
-			"  \"status\": \"published\",\n" +
+			"  \"status\": \"active\",\n" +
 			"  \"subjectType\": [\n" +
 			"    \"Patient\"\n" +
 			"  ],\n" +
@@ -377,16 +376,15 @@ public class ResourceValidatorDstu3Test {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
 		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
 
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(myPatient);
-		ourLog.info(messageString);
+//		ourLog.info(messageString);
 
-		//@formatter:off
 		assertThat(messageString, stringContainsInOrder(
 			"meta",
 			"String Extension",
@@ -399,7 +397,6 @@ public class ResourceValidatorDstu3Test {
 			"extension",
 			"meta"
 		)));
-		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -426,7 +423,7 @@ public class ResourceValidatorDstu3Test {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
 		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));

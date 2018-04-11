@@ -84,7 +84,7 @@ public class ExceptionHandlingInterceptorTest {
 		}
 	}
 
-	
+
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {

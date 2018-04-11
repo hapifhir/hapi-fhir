@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Adjudication {
 
         /**
-         * Total submitted
+         * The total submitted amount for the claim or group or line item.
          */
-        TOTAL, 
+        SUBMITTED, 
         /**
          * Patient Co-Payment
          */
         COPAY, 
         /**
-         * Amount of the change which is considered for adjudication
+         * Amount of the change which is considered for adjudication.
          */
         ELIGIBLE, 
         /**
-         * Amount deducted from the eligible amount prior to adjudication
+         * Amount deducted from the eligible amount prior to adjudication.
          */
         DEDUCTIBLE, 
         /**
-         * Eligible Percentage
+         * The amount of deductable which could not allocated to other line items.
+         */
+        UNALLOCDEDUCT, 
+        /**
+         * Eligible Percentage.
          */
         ELIGPERCENT, 
         /**
-         * Emergency Department
+         * The amount of tax.
          */
         TAX, 
         /**
@@ -71,14 +75,16 @@ public enum Adjudication {
         public static Adjudication fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("total".equals(codeString))
-          return TOTAL;
+        if ("submitted".equals(codeString))
+          return SUBMITTED;
         if ("copay".equals(codeString))
           return COPAY;
         if ("eligible".equals(codeString))
           return ELIGIBLE;
         if ("deductible".equals(codeString))
           return DEDUCTIBLE;
+        if ("unallocdeduct".equals(codeString))
+          return UNALLOCDEDUCT;
         if ("eligpercent".equals(codeString))
           return ELIGPERCENT;
         if ("tax".equals(codeString))
@@ -89,10 +95,11 @@ public enum Adjudication {
         }
         public String toCode() {
           switch (this) {
-            case TOTAL: return "total";
+            case SUBMITTED: return "submitted";
             case COPAY: return "copay";
             case ELIGIBLE: return "eligible";
             case DEDUCTIBLE: return "deductible";
+            case UNALLOCDEDUCT: return "unallocdeduct";
             case ELIGPERCENT: return "eligpercent";
             case TAX: return "tax";
             case BENEFIT: return "benefit";
@@ -104,24 +111,26 @@ public enum Adjudication {
         }
         public String getDefinition() {
           switch (this) {
-            case TOTAL: return "Total submitted";
+            case SUBMITTED: return "The total submitted amount for the claim or group or line item.";
             case COPAY: return "Patient Co-Payment";
-            case ELIGIBLE: return "Amount of the change which is considered for adjudication";
-            case DEDUCTIBLE: return "Amount deducted from the eligible amount prior to adjudication";
-            case ELIGPERCENT: return "Eligible Percentage";
-            case TAX: return "Emergency Department";
+            case ELIGIBLE: return "Amount of the change which is considered for adjudication.";
+            case DEDUCTIBLE: return "Amount deducted from the eligible amount prior to adjudication.";
+            case UNALLOCDEDUCT: return "The amount of deductable which could not allocated to other line items.";
+            case ELIGPERCENT: return "Eligible Percentage.";
+            case TAX: return "The amount of tax.";
             case BENEFIT: return "Amount payable under the coverage";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case TOTAL: return "Total";
+            case SUBMITTED: return "Submitted Amount";
             case COPAY: return "CoPay";
             case ELIGIBLE: return "Eligible Amount";
             case DEDUCTIBLE: return "Deductable";
+            case UNALLOCDEDUCT: return "Unallocated Deductable";
             case ELIGPERCENT: return "Eligible %";
-            case TAX: return "Emergency Department";
+            case TAX: return "Tax";
             case BENEFIT: return "Benefit Amount";
             default: return "?";
           }

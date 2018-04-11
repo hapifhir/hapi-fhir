@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -29,26 +30,15 @@ public class PropertyTest {
     private StructureDefinition sd;
     private HapiWorkerContext workerContext;
 
-    @Before
-    public void setUp() throws IOException {
-        final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
-        final IParser parser = ourCtx.newXmlParser();
-        sd = parser.parseResource(StructureDefinition.class, sdString);
-        workerContext = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
-    }
-
-    @Test
-    public void getChildPropertiesPrimitiveTest() throws DefinitionException {
-        final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
+    @Test(expected = Error.class)
+    public void getChildPropertiesErrorTest() throws FHIRException {
+        final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
         property = new Property(workerContext, ed, sd);
-        final List<Property> result = property.getChildProperties("id", null);
-        assertFalse(result.isEmpty());
-        assertEquals(3, result.size());
-        assertEquals("id.id", result.get(0).getDefinition().getPath());
+        property.getChildProperties("birthdate", null);
     }
 
     @Test
-    public void getChildPropertiesOnlyExtensionElementTest() throws DefinitionException {
+    public void getChildPropertiesOnlyExtensionElementTest() throws FHIRException {
         final ElementDefinition ed = sd.getSnapshot().getElement().get(23);
         property = new Property(workerContext, ed, sd);
         final List<Property> result = property.getChildProperties("birthdate", null);
@@ -57,10 +47,21 @@ public class PropertyTest {
         assertEquals("date.id", result.get(0).getDefinition().getPath());
     }
 
-    @Test(expected = Error.class)
-    public void getChildPropertiesErrorTest() throws DefinitionException {
-        final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
+    @Test
+    public void getChildPropertiesPrimitiveTest() throws FHIRException {
+        final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
         property = new Property(workerContext, ed, sd);
-        property.getChildProperties("birthdate", null);
+        final List<Property> result = property.getChildProperties("id", null);
+        assertFalse(result.isEmpty());
+        assertEquals(3, result.size());
+        assertEquals("id.id", result.get(0).getDefinition().getPath());
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
+        final IParser parser = ourCtx.newXmlParser();
+        sd = parser.parseResource(StructureDefinition.class, sdString);
+        workerContext = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
     }
 }

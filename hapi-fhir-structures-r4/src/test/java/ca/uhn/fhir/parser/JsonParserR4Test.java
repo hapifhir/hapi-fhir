@@ -3,13 +3,15 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +22,115 @@ import static org.junit.Assert.*;
 public class JsonParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
+	private Bundle createBundleWithPatient() {
+		Bundle b = new Bundle();
+		b.setId("BUNDLEID");
+		b.getMeta().addProfile("http://FOO");
+
+		Patient p = new Patient();
+		p.setId("PATIENTID");
+		p.getMeta().addProfile("http://BAR");
+		p.addName().addGiven("GIVEN");
+		b.addEntry().setResource(p);
+		return b;
+	}
+
+	/**
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwice() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		md.setMedication(new Reference(med));
+		mr.setMedication(new Reference(med));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
+	}
+
+	/**
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.setId("#MR");
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		med.setId("#MED");
+		md.setMedication(new Reference(med));
+		mr.setMedication(new Reference(med));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
+	}
+
+	/*
+	 * See #814
+	 */
+	@Test
+	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIdsAndManualAddition() {
+		MedicationDispense md = new MedicationDispense();
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.setId("#MR");
+		md.addAuthorizingPrescription().setResource(mr);
+
+		Medication med = new Medication();
+		med.setId("#MED");
+
+		Reference medRef = new Reference();
+		medRef.setReference("#MED");
+		md.setMedication(medRef);
+		mr.setMedication(medRef);
+
+		md.getContained().add(mr);
+		md.getContained().add(med);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf("\"Medication\"");
+		assertNotEquals(-1, idx);
+
+		idx = encoded.indexOf("\"Medication\"", idx + 1);
+		assertEquals(-1, idx);
+
+	}
+
+	@Test
+	public void testEncodeAndParseUnicodeCharacterInNarrative() {
+		Patient p = new Patient();
+		p.getText().getDiv().setValueAsString("<div>Copy © 1999</div>");
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy &copy; 1999</div>", p.getText().getDivAsString());
+	}
 
 	@Test
 	public void testExcludeNothing() {
@@ -42,6 +153,32 @@ public class JsonParserR4Test {
 		b = parser.parseResource(Bundle.class, encoded);
 
 		assertEquals("BUNDLEID", b.getIdElement().getIdPart());
+		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
+		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
+	}
+
+	@Test
+	public void testExcludeRootStuff() {
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		Set<String> excludes = new HashSet<>();
+		excludes.add("id");
+		excludes.add("meta");
+		parser.setDontEncodeElements(excludes);
+
+		Bundle b = createBundleWithPatient();
+
+		String encoded = parser.encodeResourceToString(b);
+		ourLog.info(encoded);
+
+		assertThat(encoded, not(containsString("BUNDLEID")));
+		assertThat(encoded, not(containsString("http://FOO")));
+		assertThat(encoded, (containsString("PATIENTID")));
+		assertThat(encoded, (containsString("http://BAR")));
+		assertThat(encoded, containsString("GIVEN"));
+
+		b = parser.parseResource(Bundle.class, encoded);
+
+		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
 		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
@@ -72,45 +209,19 @@ public class JsonParserR4Test {
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
+	/**
+	 * Test that long JSON strings don't get broken up
+	 */
 	@Test
-	public void testExcludeRootStuff() {
-		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("id");
-		excludes.add("meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	}
-
-	private Bundle createBundleWithPatient() {
-		Bundle b = new Bundle();
-		b.setId("BUNDLEID");
-		b.getMeta().addProfile("http://FOO");
+	public void testNoBreakInLongString() {
+		String longString = StringUtils.leftPad("", 100000, 'A');
 
 		Patient p = new Patient();
-		p.setId("PATIENTID");
-		p.getMeta().addProfile("http://BAR");
-		p.addName().addGiven("GIVEN");
-		b.addEntry().setResource(p);
-		return b;
-	}
+		p.addName().setFamily(longString);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
+		assertThat(encoded, containsString(longString));
+	}
 
 	@Test
 	public void testParseAndEncodeExtensionWithValueWithExtension() {
@@ -155,6 +266,18 @@ public class JsonParserR4Test {
 
 	}
 
+	@Test
+	public void testParseExtensionOnPrimitive() throws IOException {
+		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"));
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		Patient pt = parser.parseResource(Patient.class, input);
+
+		StringType line0 = pt.getAddressFirstRep().getLine().get(0);
+		assertEquals("535 Sheppard Avenue West, Unit 1907", line0.getValue());
+		Extension houseNumberExt = line0.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber");
+		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -279,9 +279,9 @@ public class Endpoint extends DomainResource {
     /**
      * The uri that describes the actual end-point to connect to.
      */
-    @Child(name = "address", type = {UriType.class}, order=9, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "address", type = {UrlType.class}, order=9, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The technical base address for connecting to this endpoint", formalDefinition="The uri that describes the actual end-point to connect to." )
-    protected UriType address;
+    protected UrlType address;
 
     /**
      * Additional headers / information to send as part of the notification.
@@ -290,7 +290,7 @@ public class Endpoint extends DomainResource {
     @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Additional headers / information to send as part of the notification." )
     protected List<StringType> header;
 
-    private static final long serialVersionUID = 694168955L;
+    private static final long serialVersionUID = 755181080L;
 
   /**
    * Constructor
@@ -302,7 +302,7 @@ public class Endpoint extends DomainResource {
   /**
    * Constructor
    */
-    public Endpoint(Enumeration<EndpointStatus> status, Coding connectionType, UriType address) {
+    public Endpoint(Enumeration<EndpointStatus> status, Coding connectionType, UrlType address) {
       super();
       this.status = status;
       this.connectionType = connectionType;
@@ -710,7 +710,7 @@ public class Endpoint extends DomainResource {
       if (this.payloadMimeType == null)
         return false;
       for (CodeType v : this.payloadMimeType)
-        if (v.equals(value)) // code
+        if (v.getValue().equals(value)) // code
           return true;
       return false;
     }
@@ -718,12 +718,12 @@ public class Endpoint extends DomainResource {
     /**
      * @return {@link #address} (The uri that describes the actual end-point to connect to.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
      */
-    public UriType getAddressElement() { 
+    public UrlType getAddressElement() { 
       if (this.address == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Endpoint.address");
         else if (Configuration.doAutoCreate())
-          this.address = new UriType(); // bb
+          this.address = new UrlType(); // bb
       return this.address;
     }
 
@@ -738,7 +738,7 @@ public class Endpoint extends DomainResource {
     /**
      * @param value {@link #address} (The uri that describes the actual end-point to connect to.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
      */
-    public Endpoint setAddressElement(UriType value) { 
+    public Endpoint setAddressElement(UrlType value) { 
       this.address = value;
       return this;
     }
@@ -755,7 +755,7 @@ public class Endpoint extends DomainResource {
      */
     public Endpoint setAddress(String value) { 
         if (this.address == null)
-          this.address = new UriType();
+          this.address = new UrlType();
         this.address.setValue(value);
       return this;
     }
@@ -816,7 +816,7 @@ public class Endpoint extends DomainResource {
       if (this.header == null)
         return false;
       for (StringType v : this.header)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -832,7 +832,7 @@ public class Endpoint extends DomainResource {
         children.add(new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period));
         children.add(new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType));
         children.add(new Property("payloadMimeType", "code", "The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType).", 0, java.lang.Integer.MAX_VALUE, payloadMimeType));
-        children.add(new Property("address", "uri", "The uri that describes the actual end-point to connect to.", 0, 1, address));
+        children.add(new Property("address", "url", "The uri that describes the actual end-point to connect to.", 0, 1, address));
         children.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
       }
 
@@ -848,7 +848,7 @@ public class Endpoint extends DomainResource {
         case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period);
         case 909929960: /*payloadType*/  return new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType);
         case -1702836932: /*payloadMimeType*/  return new Property("payloadMimeType", "code", "The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType).", 0, java.lang.Integer.MAX_VALUE, payloadMimeType);
-        case -1147692044: /*address*/  return new Property("address", "uri", "The uri that describes the actual end-point to connect to.", 0, 1, address);
+        case -1147692044: /*address*/  return new Property("address", "url", "The uri that describes the actual end-point to connect to.", 0, 1, address);
         case -1221270899: /*header*/  return new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -867,7 +867,7 @@ public class Endpoint extends DomainResource {
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 909929960: /*payloadType*/ return this.payloadType == null ? new Base[0] : this.payloadType.toArray(new Base[this.payloadType.size()]); // CodeableConcept
         case -1702836932: /*payloadMimeType*/ return this.payloadMimeType == null ? new Base[0] : this.payloadMimeType.toArray(new Base[this.payloadMimeType.size()]); // CodeType
-        case -1147692044: /*address*/ return this.address == null ? new Base[0] : new Base[] {this.address}; // UriType
+        case -1147692044: /*address*/ return this.address == null ? new Base[0] : new Base[] {this.address}; // UrlType
         case -1221270899: /*header*/ return this.header == null ? new Base[0] : this.header.toArray(new Base[this.header.size()]); // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -906,7 +906,7 @@ public class Endpoint extends DomainResource {
           this.getPayloadMimeType().add(castToCode(value)); // CodeType
           return value;
         case -1147692044: // address
-          this.address = castToUri(value); // UriType
+          this.address = castToUrl(value); // UrlType
           return value;
         case -1221270899: // header
           this.getHeader().add(castToString(value)); // StringType
@@ -938,7 +938,7 @@ public class Endpoint extends DomainResource {
         } else if (name.equals("payloadMimeType")) {
           this.getPayloadMimeType().add(castToCode(value));
         } else if (name.equals("address")) {
-          this.address = castToUri(value); // UriType
+          this.address = castToUrl(value); // UrlType
         } else if (name.equals("header")) {
           this.getHeader().add(castToString(value));
         } else
@@ -977,7 +977,7 @@ public class Endpoint extends DomainResource {
         case -991726143: /*period*/ return new String[] {"Period"};
         case 909929960: /*payloadType*/ return new String[] {"CodeableConcept"};
         case -1702836932: /*payloadMimeType*/ return new String[] {"code"};
-        case -1147692044: /*address*/ return new String[] {"uri"};
+        case -1147692044: /*address*/ return new String[] {"url"};
         case -1221270899: /*header*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }

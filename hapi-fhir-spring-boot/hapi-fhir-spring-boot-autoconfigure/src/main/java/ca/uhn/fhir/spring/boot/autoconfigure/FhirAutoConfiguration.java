@@ -21,11 +21,6 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  */
 
 
-import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
@@ -47,16 +42,10 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import okhttp3.OkHttpClient;
 import org.apache.http.client.HttpClient;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ResourceCondition;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -67,8 +56,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.util.CollectionUtils;
+
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import java.util.List;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HAPI FHIR.
@@ -76,233 +73,251 @@ import org.springframework.util.CollectionUtils;
  * @author Mathieu Ouellet
  */
 @Configuration
-@AutoConfigureAfter({ DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @EnableConfigurationProperties(FhirProperties.class)
 public class FhirAutoConfiguration {
 
-    private final FhirProperties properties;
+	private final FhirProperties properties;
 
-    public FhirAutoConfiguration(FhirProperties properties) {
-        this.properties = properties;
-    }
+	public FhirAutoConfiguration(FhirProperties properties) {
+		this.properties = properties;
+	}
 
-    @Bean
-    @ConditionalOnMissingBean
-    public FhirContext fhirContext() {
-        FhirContext fhirContext = new FhirContext(properties.getVersion());
-        return fhirContext;
-    }
+	@Bean
+	@ConditionalOnMissingBean
+	public FhirContext fhirContext() {
+		FhirContext fhirContext = new FhirContext(properties.getVersion());
+		return fhirContext;
+	}
 
-    @Configuration
-    @ConditionalOnClass(AbstractJaxRsProvider.class)
-    @EnableConfigurationProperties(FhirProperties.class)
-    @ConfigurationProperties("hapi.fhir.rest")
-    @SuppressWarnings("serial")
-    static class FhirRestfulServerConfiguration extends RestfulServer {
 
-        private final FhirProperties properties;
+	@Configuration
+	@ConditionalOnClass(AbstractJaxRsProvider.class)
+	@EnableConfigurationProperties(FhirProperties.class)
+	@ConfigurationProperties("hapi.fhir.rest")
+	@SuppressWarnings("serial")
+	static class FhirRestfulServerConfiguration extends RestfulServer {
 
-        private final FhirContext fhirContext;
+		private final FhirProperties properties;
 
-        private final List<IResourceProvider> resourceProviders;
+		private final FhirContext fhirContext;
 
-        private final IPagingProvider pagingProvider;
+		private final List<IResourceProvider> resourceProviders;
 
-        private final List<IServerInterceptor> interceptors;
+		private final IPagingProvider pagingProvider;
 
-        private final List<FhirRestfulServerCustomizer> customizers;
+		private final List<IServerInterceptor> interceptors;
 
-        public FhirRestfulServerConfiguration(
-                FhirProperties properties,
-                FhirContext fhirContext,
-                ObjectProvider<List<IResourceProvider>> resourceProviders,
-                ObjectProvider<IPagingProvider> pagingProvider,
-                ObjectProvider<List<IServerInterceptor>> interceptors,
-                ObjectProvider<List<FhirRestfulServerCustomizer>> customizers) {
-            this.properties = properties;
-            this.fhirContext = fhirContext;
-            this.resourceProviders = resourceProviders.getIfAvailable();
-            this.pagingProvider = pagingProvider.getIfAvailable();
-            this.interceptors = interceptors.getIfAvailable();
-            this.customizers = customizers.getIfAvailable();
-        }
+		private final List<FhirRestfulServerCustomizer> customizers;
 
-        @Bean
-        public ServletRegistrationBean fhirServerRegistrationBean() {
-            ServletRegistrationBean registration = new ServletRegistrationBean(this, this.properties.getServer().getPath());
-            registration.setLoadOnStartup(1);
-            return registration;
-        }
+		public FhirRestfulServerConfiguration(
+			FhirProperties properties,
+			FhirContext fhirContext,
+			ObjectProvider<List<IResourceProvider>> resourceProviders,
+			ObjectProvider<IPagingProvider> pagingProvider,
+			ObjectProvider<List<IServerInterceptor>> interceptors,
+			ObjectProvider<List<FhirRestfulServerCustomizer>> customizers) {
+			this.properties = properties;
+			this.fhirContext = fhirContext;
+			this.resourceProviders = resourceProviders.getIfAvailable();
+			this.pagingProvider = pagingProvider.getIfAvailable();
+			this.interceptors = interceptors.getIfAvailable();
+			this.customizers = customizers.getIfAvailable();
+		}
 
-        @Override
-        protected void initialize() throws ServletException {
-            super.initialize();
+		private void customize() {
+			if (this.customizers != null) {
+				AnnotationAwareOrderComparator.sort(this.customizers);
+				for (FhirRestfulServerCustomizer customizer : this.customizers) {
+					customizer.customize(this);
+				}
+			}
+		}
 
-            setFhirContext(this.fhirContext);
-            setResourceProviders(this.resourceProviders);
-            setPagingProvider(this.pagingProvider);
-            setInterceptors(this.interceptors);
+		@Bean
+		public ServletRegistrationBean fhirServerRegistrationBean() {
+			ServletRegistrationBean registration = new ServletRegistrationBean(this, this.properties.getServer().getPath());
+			registration.setLoadOnStartup(1);
+			return registration;
+		}
 
-            setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getPath()));
+		@Override
+		protected void initialize() throws ServletException {
+			super.initialize();
 
-            customize();
-        }
+			setFhirContext(this.fhirContext);
+			setResourceProviders(this.resourceProviders);
+			setPagingProvider(this.pagingProvider);
+			setInterceptors(this.interceptors);
 
-        private void customize() {
-            if (this.customizers != null) {
-                AnnotationAwareOrderComparator.sort(this.customizers);
-                for (FhirRestfulServerCustomizer customizer : this.customizers) {
-                    customizer.customize(this);
-                }
-            }
-        }
-    }
+			setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getPath()));
 
-    @Configuration
-    @ConditionalOnClass(BaseJpaProvider.class)
-    @ConditionalOnBean(DataSource.class)
-    @EnableConfigurationProperties(FhirProperties.class)
-    static class FhirJpaServerConfiguration {
+			customize();
+		}
+	}
 
-        @Configuration
-        @EntityScan("ca.uhn.fhir.jpa.entity")
-        @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
-        static class FhirJpaDaoConfiguration {
+	@Configuration
+	@ConditionalOnClass(BaseJpaProvider.class)
+	@ConditionalOnBean(DataSource.class)
+	@EnableConfigurationProperties(FhirProperties.class)
+	static class FhirJpaServerConfiguration {
 
-            @Bean
-            @ConditionalOnMissingBean
-            @ConfigurationProperties("hapi.fhir.jpa")
-            public DaoConfig fhirDaoConfig() {
-                DaoConfig fhirDaoConfig = new DaoConfig();
-                return fhirDaoConfig;
-            }
-        }
+		@Bean
+		@ConditionalOnMissingBean
+		public ScheduledExecutorFactoryBean scheduledExecutorService() {
+			ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
+			b.setPoolSize(5);
+			return b;
+		}
 
-        @Configuration
-        @ConditionalOnBean({ DaoConfig.class, RestfulServer.class })
-        @SuppressWarnings("rawtypes")
-        static class RestfulServerCustomizer implements FhirRestfulServerCustomizer {
+		@Bean(name="hapiJpaTaskExecutor")
+		public AsyncTaskExecutor taskScheduler() {
+			ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
+			retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+			retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+			return retVal;
+		}
 
-            private final BaseJpaSystemProvider systemProviders;
+		@Configuration
+		@EntityScan("ca.uhn.fhir.jpa.entity")
+		@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
+		static class FhirJpaDaoConfiguration {
 
-            public RestfulServerCustomizer(ObjectProvider<BaseJpaSystemProvider> systemProviders) {
-                this.systemProviders = systemProviders.getIfAvailable();
-            }
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.jpa")
+			public DaoConfig fhirDaoConfig() {
+				DaoConfig fhirDaoConfig = new DaoConfig();
+				return fhirDaoConfig;
+			}
 
-            @Override
-            public void customize(RestfulServer server) {
-                server.setPlainProviders(systemProviders);
-            }
-        }
+		}
 
-        @Configuration
-        @ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
-        @ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU3")
-        static class Dstu3 extends BaseJavaConfigDstu3 {
-        }
+		@Configuration
+		@ConditionalOnBean({DaoConfig.class, RestfulServer.class})
+		@SuppressWarnings("rawtypes")
+		static class RestfulServerCustomizer implements FhirRestfulServerCustomizer {
 
-        @Configuration
-        @ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
-        @ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
-        static class Dstu2 extends BaseJavaConfigDstu2 {
-        }
-    }
+			private final BaseJpaSystemProvider systemProviders;
 
-    @Configuration
-    @Conditional(FhirValidationConfiguration.SchemaAvailableCondition.class)
-    @ConditionalOnProperty(name = "hapi.fhir.validation.enabled", matchIfMissing = true)
-    static class FhirValidationConfiguration {
+			public RestfulServerCustomizer(ObjectProvider<BaseJpaSystemProvider> systemProviders) {
+				this.systemProviders = systemProviders.getIfAvailable();
+			}
 
-        @Bean
-        @ConditionalOnMissingBean
-        public RequestValidatingInterceptor requestValidatingInterceptor() {
-            return new RequestValidatingInterceptor();
-        }
+			@Override
+			public void customize(RestfulServer server) {
+				server.setPlainProviders(systemProviders);
+			}
+		}
 
-        @Bean
-        @ConditionalOnMissingBean
-        @ConditionalOnProperty(name = "hapi.fhir.validation.request-only", havingValue = "false")
-        public ResponseValidatingInterceptor responseValidatingInterceptor() {
-            return new ResponseValidatingInterceptor();
-        }
+		@Configuration
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU3")
+		static class Dstu3 extends BaseJavaConfigDstu3 {
+		}
 
-        static class SchemaAvailableCondition extends ResourceCondition {
+		@Configuration
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
+		static class Dstu2 extends BaseJavaConfigDstu2 {
+		}
+	}
 
-            SchemaAvailableCondition() {
-                super("ValidationSchema",
-                        "hapi.fhir.validation",
-                        "schema-location",
-                        "classpath:/org/hl7/fhir/instance/model/schema",
-                        "classpath:/org/hl7/fhir/dstu2016may/model/schema",
-                        "classpath:/org/hl7/fhir/dstu3/model/schema");
-            }
-        }
-    }
+	@Configuration
+	@Conditional(FhirValidationConfiguration.SchemaAvailableCondition.class)
+	@ConditionalOnProperty(name = "hapi.fhir.validation.enabled", matchIfMissing = true)
+	static class FhirValidationConfiguration {
 
-    @Configuration
-    @ConditionalOnProperty("hapi.fhir.server.url")
-    @EnableConfigurationProperties(FhirProperties.class)
-    static class FhirRestfulClientConfiguration {
+		@Bean
+		@ConditionalOnMissingBean
+		public RequestValidatingInterceptor requestValidatingInterceptor() {
+			return new RequestValidatingInterceptor();
+		}
 
-        private final FhirProperties properties;
+		@Bean
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(name = "hapi.fhir.validation.request-only", havingValue = "false")
+		public ResponseValidatingInterceptor responseValidatingInterceptor() {
+			return new ResponseValidatingInterceptor();
+		}
 
-        private final List<IClientInterceptor> clientInterceptors;
+		static class SchemaAvailableCondition extends ResourceCondition {
 
-        public FhirRestfulClientConfiguration(FhirProperties properties, ObjectProvider<List<IClientInterceptor>> clientInterceptors) {
-            this.properties = properties;
-            this.clientInterceptors = clientInterceptors.getIfAvailable();
-        }
+			SchemaAvailableCondition() {
+				super("ValidationSchema",
+					"hapi.fhir.validation",
+					"schema-location",
+					"classpath:/org/hl7/fhir/instance/model/schema",
+					"classpath:/org/hl7/fhir/dstu2016may/model/schema",
+					"classpath:/org/hl7/fhir/dstu3/model/schema");
+			}
+		}
+	}
 
-        @Bean
-        @ConditionalOnBean(IRestfulClientFactory.class)
-        public IGenericClient fhirClient(final IRestfulClientFactory clientFactory) {
-            IGenericClient fhirClient = clientFactory.newGenericClient(this.properties.getServer().getUrl());
-            if (!CollectionUtils.isEmpty(this.clientInterceptors)) {
-                for (IClientInterceptor interceptor : this.clientInterceptors) {
-                    fhirClient.registerInterceptor(interceptor);
-                }
-            }
-            return fhirClient;
-        }
+	@Configuration
+	@ConditionalOnProperty("hapi.fhir.server.url")
+	@EnableConfigurationProperties(FhirProperties.class)
+	static class FhirRestfulClientConfiguration {
 
-        @Configuration
-        @ConditionalOnClass(HttpClient.class)
-        @ConditionalOnMissingClass("okhttp3.OkHttpClient")
-        static class Apache {
+		private final FhirProperties properties;
 
-            private final FhirContext context;
+		private final List<IClientInterceptor> clientInterceptors;
 
-            public Apache(FhirContext context) {
-                this.context = context;
-            }
+		public FhirRestfulClientConfiguration(FhirProperties properties, ObjectProvider<List<IClientInterceptor>> clientInterceptors) {
+			this.properties = properties;
+			this.clientInterceptors = clientInterceptors.getIfAvailable();
+		}
 
-            @Bean
-            @ConditionalOnMissingBean
-            @ConfigurationProperties("hapi.fhir.rest.client.apache")
-            public IRestfulClientFactory fhirRestfulClientFactory() {
-                ApacheRestfulClientFactory restfulClientFactory = new ApacheRestfulClientFactory(this.context);
-                return restfulClientFactory;
-            }
-        }
+		@Bean
+		@ConditionalOnBean(IRestfulClientFactory.class)
+		public IGenericClient fhirClient(final IRestfulClientFactory clientFactory) {
+			IGenericClient fhirClient = clientFactory.newGenericClient(this.properties.getServer().getUrl());
+			if (!CollectionUtils.isEmpty(this.clientInterceptors)) {
+				for (IClientInterceptor interceptor : this.clientInterceptors) {
+					fhirClient.registerInterceptor(interceptor);
+				}
+			}
+			return fhirClient;
+		}
 
-        @Configuration
-        @ConditionalOnClass(OkHttpClient.class)
-        static class OkHttp {
+		@Configuration
+		@ConditionalOnClass(HttpClient.class)
+		@ConditionalOnMissingClass("okhttp3.OkHttpClient")
+		static class Apache {
 
-            private final FhirContext context;
+			private final FhirContext context;
 
-            public OkHttp(FhirContext context) {
-                this.context = context;
-            }
+			public Apache(FhirContext context) {
+				this.context = context;
+			}
 
-            @Bean
-            @ConditionalOnMissingBean
-            @ConfigurationProperties("hapi.fhir.rest.client.okhttp")
-            public IRestfulClientFactory fhirRestfulClientFactory() {
-                OkHttpRestfulClientFactory restfulClientFactory = new OkHttpRestfulClientFactory(this.context);
-                return restfulClientFactory;
-            }
-        }
-    }
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.rest.client.apache")
+			public IRestfulClientFactory fhirRestfulClientFactory() {
+				ApacheRestfulClientFactory restfulClientFactory = new ApacheRestfulClientFactory(this.context);
+				return restfulClientFactory;
+			}
+		}
+
+		@Configuration
+		@ConditionalOnClass(OkHttpClient.class)
+		static class OkHttp {
+
+			private final FhirContext context;
+
+			public OkHttp(FhirContext context) {
+				this.context = context;
+			}
+
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.rest.client.okhttp")
+			public IRestfulClientFactory fhirRestfulClientFactory() {
+				OkHttpRestfulClientFactory restfulClientFactory = new OkHttpRestfulClientFactory(this.context);
+				return restfulClientFactory;
+			}
+		}
+	}
 
 }

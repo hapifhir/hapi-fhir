@@ -130,19 +130,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	// public IResource read(UriDt url) {
-	// return read(inferResourceClass(url), url);
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// public <T extends IResource> T read(final Class<T> theType, UriDt url) {
-	// return (T) invoke(theType, url, new ResourceResponseHandler<T>(theType));
-	// }
-	//
-	// public Bundle search(UriDt url) {
-	// return search(inferResourceClass(url), url);
-	// }
-
 	@Override
 	public IFetchConformanceUntyped fetchConformance() {
 		return new FetchConformanceInternal();
@@ -168,11 +155,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 		return theResource.getIdElement().getIdPart();
 	}
-
-	// @Override
-	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
-	// return doReadOrVRead(theType, theId, false, null, null);
-	// }
 
 	@Override
 	public IHistory history() {

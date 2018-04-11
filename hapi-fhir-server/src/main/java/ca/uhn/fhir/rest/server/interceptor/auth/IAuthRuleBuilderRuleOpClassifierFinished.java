@@ -20,6 +20,15 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import java.util.Collection;
+
 public interface IAuthRuleBuilderRuleOpClassifierFinished extends IAuthRuleFinished {
-	// nothing
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(String... theTenantId);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(Collection<String> theTenantId);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(String... theTenantIds);
+
+	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(Collection<String> theTenantIds);
 }

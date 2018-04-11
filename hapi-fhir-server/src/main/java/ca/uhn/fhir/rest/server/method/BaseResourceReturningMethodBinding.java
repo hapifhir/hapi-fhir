@@ -1,6 +1,41 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -20,32 +55,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlUtil;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
@@ -82,7 +91,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
 					throw new ConfigurationException(
-							"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+						"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 
@@ -98,7 +107,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
 			throw new ConfigurationException(
-					"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+				"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -114,154 +123,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	}
 
-	public MethodReturnTypeEnum getMethodReturnType() {
-		return myMethodReturnType;
-	}
-
-	@Override
-	public String getResourceName() {
-		return myResourceName;
-	}
-
-	/**
-	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
-	 */
-	protected abstract BundleTypeEnum getResponseBundleType();
-
-	public abstract ReturnTypeEnum getReturnType();
-
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
-		IBaseResource response = doInvokeServer(theServer, theRequest);
-
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, response);
-			if (!continueProcessing) {
-				return null;
-			}
-		}
-
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		return theRequest.getResponse().streamResponseAsResource(response, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(), isAddContentLocationHeader());
-
-	}
-
-	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		Object[] params = createMethodParams(theRequest);
-
-		Object resultObj = invokeServer(theServer, theRequest, params);
-
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
-
-		final IBaseResource responseObject;
-
-		switch (getReturnType()) {
-		case BUNDLE: {
-
-			/*
-			 * Figure out the self-link for this request
-			 */
-			String serverBase = theRequest.getServerBaseForRequest();
-			String linkSelf;
-			StringBuilder b = new StringBuilder();
-			b.append(serverBase);
-			if (isNotBlank(theRequest.getRequestPath())) {
-				b.append('/');
-				b.append(theRequest.getRequestPath());
-			}
-			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
-			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				boolean first = true;
-				Map<String, String[]> parameters = theRequest.getParameters();
-				for (String nextParamName : new TreeSet<>(parameters.keySet())) {
-					for (String nextParamValue : parameters.get(nextParamName)) {
-						if (first) {
-							b.append('?');
-							first = false;
-						} else {
-							b.append('&');
-						}
-						b.append(UrlUtil.escapeUrlParam(nextParamName));
-						b.append('=');
-						b.append(UrlUtil.escapeUrlParam(nextParamValue));
-					}
-				}
-			}
-			linkSelf = b.toString();
-
-			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
-				IBaseResource resource;
-				IPrimitiveType<Date> lastUpdated;
-				if (resultObj instanceof IBundleProvider) {
-					IBundleProvider result = (IBundleProvider) resultObj;
-					resource = result.getResources(0, 1).get(0);
-					lastUpdated = result.getPublished();
-				} else {
-					resource = (IBaseResource) resultObj;
-					lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
-				}
-
-				/*
-				 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
-				 */
-				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeWithBundleResource(resource);
-				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
-
-				responseObject = resource;
-			} else {
-				Set<Include> includes = getRequestIncludesFromParams(params);
-
-				IBundleProvider result = (IBundleProvider) resultObj;
-				if (count == null) {
-					count = result.preferredPageSize();
-				}
-
-				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-				if (offsetI == null || offsetI < 0) {
-					offsetI = 0;
-				}
-
-				Integer resultSize = result.size();
-				int start;
-				if (resultSize != null) {
-					start = Math.max(0, Math.min(offsetI, resultSize - 1));
-				} else {
-					start = offsetI;
-				}
-
-				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
-
-				responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
-			}
-			break;
-		}
-		case RESOURCE: {
-			IBundleProvider result = (IBundleProvider) resultObj;
-			if (result.size() == 0) {
-				throw new ResourceNotFoundException(theRequest.getId());
-			} else if (result.size() > 1) {
-				throw new InternalErrorException("Method returned multiple resources");
-			}
-
-			IBaseResource resource = result.getResources(0, 1).get(0);
-			responseObject = resource;
-			break;
-		}
-		default:
-			throw new IllegalStateException(); // should not happen
-		}
-		return responseObject;
-	}
-
 	protected IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
-			IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
+																			 IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 		int numToReturn;
@@ -308,6 +171,29 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
+		/*
+		 * Remove any null entries in the list - This generally shouldn't happen but can if
+		 * data has been manually purged from the JPA database
+		 */
+		boolean hasNull = false;
+		for (IBaseResource next : resourceList) {
+			if (next == null) {
+				hasNull = true;
+				break;
+			}
+		}
+		if (hasNull) {
+			for (Iterator<IBaseResource> iter = resourceList.iterator(); iter.hasNext(); ) {
+				if (iter.next() == null) {
+					iter.remove();
+				}
+			}
+		}
+
+		/*
+		 * Make sure all returned resources have an ID (if not, this is a bug
+		 * in the user server code)
+		 */
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
@@ -345,6 +231,177 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	}
 
+	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
+		Object[] params = createMethodParams(theRequest);
+
+		Object resultObj = invokeServer(theServer, theRequest, params);
+
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+
+		final IBaseResource responseObject;
+
+		switch (getReturnType()) {
+			case BUNDLE: {
+
+				/*
+				 * Figure out the self-link for this request
+				 */
+				String serverBase = theRequest.getServerBaseForRequest();
+				String linkSelf;
+				StringBuilder b = new StringBuilder();
+				b.append(serverBase);
+
+				if (isNotBlank(theRequest.getRequestPath())) {
+					b.append('/');
+					if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+						b.append(theRequest.getRequestPath().substring(theRequest.getTenantId().length() + 1));
+					} else {
+						b.append(theRequest.getRequestPath());
+					}
+				}
+				// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
+				if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+					boolean first = true;
+					Map<String, String[]> parameters = theRequest.getParameters();
+					for (String nextParamName : new TreeSet<>(parameters.keySet())) {
+						for (String nextParamValue : parameters.get(nextParamName)) {
+							if (first) {
+								b.append('?');
+								first = false;
+							} else {
+								b.append('&');
+							}
+							b.append(UrlUtil.escapeUrlParam(nextParamName));
+							b.append('=');
+							b.append(UrlUtil.escapeUrlParam(nextParamValue));
+						}
+					}
+				}
+				linkSelf = b.toString();
+
+				if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
+					IBaseResource resource;
+					IPrimitiveType<Date> lastUpdated;
+					if (resultObj instanceof IBundleProvider) {
+						IBundleProvider result = (IBundleProvider) resultObj;
+						resource = result.getResources(0, 1).get(0);
+						lastUpdated = result.getPublished();
+					} else {
+						resource = (IBaseResource) resultObj;
+						lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
+					}
+
+					/*
+					 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
+					 */
+					IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+					bundleFactory.initializeWithBundleResource(resource);
+					bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
+
+					responseObject = resource;
+				} else {
+					Set<Include> includes = getRequestIncludesFromParams(params);
+
+					IBundleProvider result = (IBundleProvider) resultObj;
+					if (count == null) {
+						count = result.preferredPageSize();
+					}
+
+					Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+					if (offsetI == null || offsetI < 0) {
+						offsetI = 0;
+					}
+
+					Integer resultSize = result.size();
+					int start;
+					if (resultSize != null) {
+						start = Math.max(0, Math.min(offsetI, resultSize - 1));
+					} else {
+						start = offsetI;
+					}
+
+					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+					EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
+
+					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
+				}
+				break;
+			}
+			case RESOURCE: {
+				IBundleProvider result = (IBundleProvider) resultObj;
+				if (result.size() == 0) {
+					throw new ResourceNotFoundException(theRequest.getId());
+				} else if (result.size() > 1) {
+					throw new InternalErrorException("Method returned multiple resources");
+				}
+
+				IBaseResource resource = result.getResources(0, 1).get(0);
+				responseObject = resource;
+				break;
+			}
+			default:
+				throw new IllegalStateException(); // should not happen
+		}
+		return responseObject;
+	}
+
+	public MethodReturnTypeEnum getMethodReturnType() {
+		return myMethodReturnType;
+	}
+
+	@Override
+	public String getResourceName() {
+		return myResourceName;
+	}
+
+	protected void setResourceName(String theResourceName) {
+		myResourceName = theResourceName;
+	}
+
+	/**
+	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
+	 */
+	protected abstract BundleTypeEnum getResponseBundleType();
+
+	public abstract ReturnTypeEnum getReturnType();
+
+	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+
+		IBaseResource response = doInvokeServer(theServer, theRequest);
+
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
+
+		ResponseDetails responseDetails = new ResponseDetails();
+		responseDetails.setResponseResource(response);
+		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
+			boolean continueProcessing = next.outgoingResponse(theRequest, response);
+			if (!continueProcessing) {
+				return null;
+			}
+
+			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
+			if (!continueProcessing) {
+				return null;
+			}
+		}
+
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+
+		return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
+
+	}
+
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	/**
@@ -352,10 +409,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	 */
 	protected boolean isAddContentLocationHeader() {
 		return true;
-	}
-
-	protected void setResourceName(String theResourceName) {
-		myResourceName = theResourceName;
 	}
 
 	public enum MethodReturnTypeEnum {

@@ -1,0 +1,47 @@
+{
+	"resourceType": "ProcedureRequest",
+	"meta": {
+		"extension": [
+			{
+				"url": "http://fhir.sjanic.com/timestamp",
+				"extension": [
+					{
+						"url": "http://fhir.sjanic.com/timestamp/user",
+						"valueReference": {
+							"reference": "sjanic"
+						}
+					},
+					{
+						"url": "http://fhir.sjanic.com/timestamp/instance",
+						"valueInstant": "2012-01-01T13:00:00Z"
+					},
+					{
+						"url": "http://fhir.sjanic.com/timestamp/organization",
+						"valueReference": {
+							"reference": "sjanic_org"
+						}
+					},
+					{
+						"url": "http://fhir.sjanic.com/timestamp/role",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "sjanic",
+									"code": "Doctor",
+									"display": "Doctorin"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"modifierExtension": [
+			{
+				"url": "http://fhir.sjanic.com/procedureRequest/requiresPatientPayment",
+				"valueBoolean": true
+			}
+		]
+	},
+	"status": "accepted"
+}

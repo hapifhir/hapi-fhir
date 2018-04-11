@@ -1,0 +1,96 @@
+{
+	"resourceType": "Patient",
+	"id": "Patient-6532",
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/Race",
+						"code": "2106-3",
+						"display": "White"
+					}
+				]
+			}
+		},
+		{
+			"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/Ethnicity",
+						"code": "2186-5",
+						"display": "Not Hispanic or Latino"
+					}
+				]
+			}
+		},
+		{
+			"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-religion",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/ReligiousAffiliation",
+						"code": "1041",
+						"display": "Roman Catholic Church"
+					}
+				]
+			}
+		}
+	],
+	"identifier": [
+		{
+			"use": "official",
+			"type": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/identifier-type",
+						"code": "SB",
+						"display": "Social Beneficiary Identifier"
+					}
+				],
+				"text": "US Social Security Number"
+			},
+			"system": "http://hl7.org/fhir/sid/us-ssn",
+			"value": "000006532"
+		}
+	],
+	"active": true,
+	"name": [
+		{
+			"family": "Brandt",
+			"given": [
+				"Edith",
+				"Elaine"
+			]
+		}
+	],
+	"telecom": [
+		{
+			"system": "phone",
+			"value": "616-555-1082",
+			"use": "home"
+		},
+		{
+			"system": "phone",
+			"value": "616-555-1211",
+			"use": "mobile"
+		}
+	],
+	"gender": "female",
+	"birthDate": "1987-07-16",
+	"address": [
+		{
+			"use": "home",
+			"type": "postal",
+			"line": [
+				"893 N Elm Drive"
+			],
+			"city": "Grand Rapids",
+			"district": "Kent County",
+			"state": "MI",
+			"postalCode": "49504"
+		}
+	]
+}

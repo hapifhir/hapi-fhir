@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,58 +39,10 @@ public class MessageEventsEnumFactory implements EnumFactory<MessageEvents> {
   public MessageEvents fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("MedicationAdministration-Complete".equals(codeString))
-      return MessageEvents.MEDICATIONADMINISTRATIONCOMPLETE;
-    if ("MedicationAdministration-Nullification".equals(codeString))
-      return MessageEvents.MEDICATIONADMINISTRATIONNULLIFICATION;
-    if ("MedicationAdministration-Recording".equals(codeString))
-      return MessageEvents.MEDICATIONADMINISTRATIONRECORDING;
-    if ("MedicationAdministration-Update".equals(codeString))
-      return MessageEvents.MEDICATIONADMINISTRATIONUPDATE;
-    if ("admin-notify".equals(codeString))
-      return MessageEvents.ADMINNOTIFY;
-    if ("codesystem-expand".equals(codeString))
-      return MessageEvents.CODESYSTEMEXPAND;
-    if ("communication-request".equals(codeString))
-      return MessageEvents.COMMUNICATIONREQUEST;
-    if ("diagnosticreport-provide".equals(codeString))
-      return MessageEvents.DIAGNOSTICREPORTPROVIDE;
-    if ("observation-provide".equals(codeString))
-      return MessageEvents.OBSERVATIONPROVIDE;
-    if ("patient-link".equals(codeString))
-      return MessageEvents.PATIENTLINK;
-    if ("patient-unlink".equals(codeString))
-      return MessageEvents.PATIENTUNLINK;
-    if ("valueset-expand".equals(codeString))
-      return MessageEvents.VALUESETEXPAND;
     throw new IllegalArgumentException("Unknown MessageEvents code '"+codeString+"'");
   }
 
   public String toCode(MessageEvents code) {
-    if (code == MessageEvents.MEDICATIONADMINISTRATIONCOMPLETE)
-      return "MedicationAdministration-Complete";
-    if (code == MessageEvents.MEDICATIONADMINISTRATIONNULLIFICATION)
-      return "MedicationAdministration-Nullification";
-    if (code == MessageEvents.MEDICATIONADMINISTRATIONRECORDING)
-      return "MedicationAdministration-Recording";
-    if (code == MessageEvents.MEDICATIONADMINISTRATIONUPDATE)
-      return "MedicationAdministration-Update";
-    if (code == MessageEvents.ADMINNOTIFY)
-      return "admin-notify";
-    if (code == MessageEvents.CODESYSTEMEXPAND)
-      return "codesystem-expand";
-    if (code == MessageEvents.COMMUNICATIONREQUEST)
-      return "communication-request";
-    if (code == MessageEvents.DIAGNOSTICREPORTPROVIDE)
-      return "diagnosticreport-provide";
-    if (code == MessageEvents.OBSERVATIONPROVIDE)
-      return "observation-provide";
-    if (code == MessageEvents.PATIENTLINK)
-      return "patient-link";
-    if (code == MessageEvents.PATIENTUNLINK)
-      return "patient-unlink";
-    if (code == MessageEvents.VALUESETEXPAND)
-      return "valueset-expand";
     return "?";
   }
 

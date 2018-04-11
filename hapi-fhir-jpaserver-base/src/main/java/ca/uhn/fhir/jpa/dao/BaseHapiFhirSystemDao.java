@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -66,13 +66,21 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
-
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 
 	private int doPerformReindexingPass(final Integer theCount) {
+		/*
+		 * If any search parameters have been recently added or changed,
+		 * this makes sure that the cache has been reloaded to reflect
+		 * them.
+		 */
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		return doPerformReindexingPassForResources(theCount, txTemplate);

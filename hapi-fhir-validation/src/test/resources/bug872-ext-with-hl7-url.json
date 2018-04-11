@@ -1,0 +1,9 @@
+{
+	"resourceType": "Patient",
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode",
+			"valueString": "test"
+		}
+	]
+}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,12 +39,12 @@ public class ConsentScopeEnumFactory implements EnumFactory<ConsentScope> {
   public ConsentScope fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("ADR".equals(codeString))
+    if ("adr".equals(codeString))
       return ConsentScope.ADR;
     if ("research".equals(codeString))
       return ConsentScope.RESEARCH;
-    if ("privacy".equals(codeString))
-      return ConsentScope.PRIVACY;
+    if ("patient-privacy".equals(codeString))
+      return ConsentScope.PATIENTPRIVACY;
     if ("treatment".equals(codeString))
       return ConsentScope.TREATMENT;
     throw new IllegalArgumentException("Unknown ConsentScope code '"+codeString+"'");
@@ -52,11 +52,11 @@ public class ConsentScopeEnumFactory implements EnumFactory<ConsentScope> {
 
   public String toCode(ConsentScope code) {
     if (code == ConsentScope.ADR)
-      return "ADR";
+      return "adr";
     if (code == ConsentScope.RESEARCH)
       return "research";
-    if (code == ConsentScope.PRIVACY)
-      return "privacy";
+    if (code == ConsentScope.PATIENTPRIVACY)
+      return "patient-privacy";
     if (code == ConsentScope.TREATMENT)
       return "treatment";
     return "?";

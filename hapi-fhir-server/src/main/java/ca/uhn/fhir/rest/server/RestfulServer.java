@@ -875,12 +875,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				next.processingCompletedNormally(requestDetails);
+				try {
+					next.processingCompletedNormally(requestDetails);
+				} catch (Throwable t) {
+					ourLog.error("Failure in interceptor method", t);
+				}
 			}
 
-			if (outputStreamOrWriter != null) {
-				outputStreamOrWriter.close();
-			}
+			IOUtils.closeQuietly(outputStreamOrWriter);
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -936,8 +938,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			/*
 			 * If we're handling an exception, no summary mode should be applied
 			 */
-			requestDetails.getParameters().remove(Constants.PARAM_SUMMARY);
-			requestDetails.getParameters().remove(Constants.PARAM_ELEMENTS);
+			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
+			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
 
 			/*
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.

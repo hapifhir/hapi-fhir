@@ -40,7 +40,7 @@ public class ExpressionNode {
     
     Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
     First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
-    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias;
+    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias, HtmlChecks, OfType;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -87,6 +87,8 @@ public class ExpressionNode {
       if (name.equals("hasValue")) return Function.HasValue;
       if (name.equals("alias")) return Function.Alias;
       if (name.equals("aliasAs")) return Function.AliasAs;
+      if (name.equals("htmlchecks")) return Function.HtmlChecks;
+      if (name.equals("ofType")) return Function.OfType;      
       return null;
     }
     public String toCode() {
@@ -135,6 +137,8 @@ public class ExpressionNode {
       case HasValue : return "hasValue";
       case Alias : return "alias";
       case AliasAs : return "aliasAs";
+      case HtmlChecks : return "htmlchecks";
+      case OfType : return "ofType";
       default: return "??";
       }
     }

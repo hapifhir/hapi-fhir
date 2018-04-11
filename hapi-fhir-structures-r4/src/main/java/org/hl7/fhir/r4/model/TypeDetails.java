@@ -45,7 +45,8 @@ public class TypeDetails {
     }
 
     public void addProfile(String profile) {
-      profiles = new ArrayList<String>();
+      if (profiles == null)
+        profiles = new ArrayList<String>();
       profiles.add(profile);
     }
 
@@ -56,6 +57,15 @@ public class TypeDetails {
 
     public boolean hasBinding(ElementDefinitionBindingComponent b) {
       return false; // todo: do we need to do this?
+    }
+
+    public void addProfiles(List<CanonicalType> list) {
+      if (profiles == null)
+        profiles = new ArrayList<String>();
+      for (UriType u : list)
+        profiles.add(u.getValue());
+        
+      
     }
   }
   

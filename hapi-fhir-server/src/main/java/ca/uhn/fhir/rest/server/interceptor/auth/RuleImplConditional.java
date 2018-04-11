@@ -20,47 +20,53 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Set;
 
 public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
 	private RestOperationTypeEnum myOperationType;
+	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
-	public RuleImplConditional(String theRuleName) {
+	RuleImplConditional(String theRuleName) {
 		super(theRuleName);
 	}
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-			IRuleApplier theRuleApplier) {
+									 IRuleApplier theRuleApplier) {
 
 		if (theInputResourceId != null) {
 			return null;
 		}
-		
+
 		if (theOperation == myOperationType) {
 			switch (myAppliesTo) {
-			case ALL_RESOURCES:
-			case INSTANCES:
-				break;
-			case TYPES:
-				if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
-					return null;
-				}
-				break;
+				case ALL_RESOURCES:
+				case INSTANCES:
+					break;
+				case TYPES:
+					if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
+						return null;
+					}
+					break;
 			}
 
 			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
 				return null;
+			}
+
+			if (myTenantApplicabilityChecker != null) {
+				if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
+					return null;
+				}
 			}
 
 			return newVerdict();
@@ -79,6 +85,10 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	void setOperationType(RestOperationTypeEnum theOperationType) {
 		myOperationType = theOperationType;
+	}
+
+	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
 	}
 
 }

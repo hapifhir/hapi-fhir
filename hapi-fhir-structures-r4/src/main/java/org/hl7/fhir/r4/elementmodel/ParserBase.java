@@ -31,7 +31,7 @@ public abstract class ParserBase {
   public enum ValidationPolicy { NONE, QUICK, EVERYTHING }
 
   public boolean isPrimitive(String code) {
-    return Utilities.existsInList(code, "boolean", "integer", "string", "decimal", "uri", "base64Binary", "instant", "date", "dateTime", "time", "code", "oid", "id", "markdown", "unsignedInt", "positiveInt", "xhtml");
+    return Utilities.existsInList(code, "boolean", "integer", "string", "decimal", "uri", "base64Binary", "instant", "date", "dateTime", "time", "code", "oid", "id", "markdown", "unsignedInt", "positiveInt", "xhtml", "url", "canonical");
     
 //    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
 //    return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;

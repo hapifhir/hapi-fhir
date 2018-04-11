@@ -1,0 +1,941 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "fiphr-ext-creatingapplication",
+	"meta": {
+		"lastUpdated": "2017-09-20T13:05:42.786+00:00"
+	},
+	"url": "http://phr.kanta.fi/StructureDefinition/fiphr-ext-creatingapplication",
+	"version": "0.1",
+	"name": "Finnish PHR Application Information extension",
+	"title": "Finnish PHR Application Information extension",
+	"status": "draft",
+	"experimental": true,
+	"date": "2017-09-12T05:53:10.958+00:00",
+	"publisher": "Kela",
+	"description": "Information about the application that created the resource instance",
+	"purpose": "Finnish PHR extension structure for information about application that has created the reource. Extension shall be included in all resources that are stored in PHR, except contained resources.",
+	"fhirVersion": "3.0.1",
+	"kind": "complex-type",
+	"abstract": false,
+	"contextType": "resource",
+	"context": [
+		"StructureDefinition"
+	],
+	"type": "Extension",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+	"derivation": "constraint",
+	"snapshot": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Application identification",
+				"definition": "Application identification information. SHALL have same values that has been registered for application in PHR application catalog. ",
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element",
+					"min": 0,
+					"max": "*"
+				},
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.id",
+				"path": "Extension.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": 0,
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension",
+				"path": "Extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:name",
+				"path": "Extension.extension",
+				"sliceName": "name",
+				"short": "Application name",
+				"definition": "Application name registered in PHR cataloque.",
+				"comment": ".",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:name.id",
+				"path": "Extension.extension.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": 0,
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:name.extension",
+				"path": "Extension.extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:name.url",
+				"path": "Extension.extension.url",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "identifies the meaning of the extension",
+				"definition": "Source of the definition for the extension code - a logical name or a URL.",
+				"comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.url",
+					"min": 1,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "name",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:name.value[x]:valueString",
+				"path": "Extension.extension.valueString",
+				"sliceName": "valueString",
+				"short": "Value of extension",
+				"definition": "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).",
+				"comment": "A stream of bytes, base64 encoded",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.value[x]",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId",
+				"path": "Extension.extension",
+				"sliceName": "applicationId",
+				"short": "Application identifier",
+				"definition": "Application id. A unique identifier, assigned to the client by Kela in registeration process",
+				"comment": ".",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId.id",
+				"path": "Extension.extension.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": 0,
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId.extension",
+				"path": "Extension.extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": 0,
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": 0,
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId.url",
+				"path": "Extension.extension.url",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "identifies the meaning of the extension",
+				"definition": "Source of the definition for the extension code - a logical name or a URL.",
+				"comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.url",
+					"min": 1,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "applicationId",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId.value[x]:valueString",
+				"path": "Extension.extension.valueString",
+				"sliceName": "valueString",
+				"short": "Value of extension",
+				"definition": "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).",
+				"comment": "A stream of bytes, base64 encoded",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.value[x]",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "identifies the meaning of the extension",
+				"definition": "Source of the definition for the extension code - a logical name or a URL.",
+				"comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+				"min": 1,
+				"max": "1",
+				"base": {
+					"path": "Extension.url",
+					"min": 1,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-ext-creatingapplication",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]",
+				"path": "Extension.value[x]",
+				"short": "Value of extension",
+				"definition": "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).",
+				"comment": "A stream of bytes, base64 encoded",
+				"min": 0,
+				"max": "0",
+				"base": {
+					"path": "Extension.value[x]",
+					"min": 0,
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "base64Binary"
+					},
+					{
+						"code": "boolean"
+					},
+					{
+						"code": "code"
+					},
+					{
+						"code": "date"
+					},
+					{
+						"code": "dateTime"
+					},
+					{
+						"code": "decimal"
+					},
+					{
+						"code": "id"
+					},
+					{
+						"code": "instant"
+					},
+					{
+						"code": "integer"
+					},
+					{
+						"code": "markdown"
+					},
+					{
+						"code": "oid"
+					},
+					{
+						"code": "positiveInt"
+					},
+					{
+						"code": "string"
+					},
+					{
+						"code": "time"
+					},
+					{
+						"code": "unsignedInt"
+					},
+					{
+						"code": "uri"
+					},
+					{
+						"code": "Address"
+					},
+					{
+						"code": "Age"
+					},
+					{
+						"code": "Annotation"
+					},
+					{
+						"code": "Attachment"
+					},
+					{
+						"code": "CodeableConcept"
+					},
+					{
+						"code": "Coding"
+					},
+					{
+						"code": "ContactPoint"
+					},
+					{
+						"code": "Count"
+					},
+					{
+						"code": "Distance"
+					},
+					{
+						"code": "Duration"
+					},
+					{
+						"code": "HumanName"
+					},
+					{
+						"code": "Identifier"
+					},
+					{
+						"code": "Money"
+					},
+					{
+						"code": "Period"
+					},
+					{
+						"code": "Quantity"
+					},
+					{
+						"code": "Range"
+					},
+					{
+						"code": "Ratio"
+					},
+					{
+						"code": "Reference"
+					},
+					{
+						"code": "SampledData"
+					},
+					{
+						"code": "Signature"
+					},
+					{
+						"code": "Timing"
+					},
+					{
+						"code": "Meta"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			}
+		]
+	},
+	"differential": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Application identification",
+				"definition": "Application identification information. SHALL have same values that has been registered for application in PHR application catalog. "
+			},
+			{
+				"id": "Extension.extension",
+				"path": "Extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"rules": "open"
+				}
+			},
+			{
+				"id": "Extension.extension:name",
+				"path": "Extension.extension",
+				"sliceName": "name",
+				"short": "Application name",
+				"definition": "Application name registered in PHR cataloque.",
+				"comment": ".",
+				"min": 1,
+				"max": "1"
+			},
+			{
+				"id": "Extension.extension:name.url",
+				"path": "Extension.extension.url",
+				"fixedUri": "name"
+			},
+			{
+				"id": "Extension.extension:name.value[x]:valueString",
+				"path": "Extension.extension.valueString",
+				"sliceName": "valueString",
+				"min": 1,
+				"type": [
+					{
+						"code": "string"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension:applicationId",
+				"path": "Extension.extension",
+				"sliceName": "applicationId",
+				"short": "Application identifier",
+				"definition": "Application id. A unique identifier, assigned to the client by Kela in registeration process",
+				"comment": ".",
+				"min": 1,
+				"max": "1"
+			},
+			{
+				"id": "Extension.extension:applicationId.url",
+				"path": "Extension.extension.url",
+				"fixedUri": "applicationId"
+			},
+			{
+				"id": "Extension.extension:applicationId.value[x]:valueString",
+				"path": "Extension.extension.valueString",
+				"sliceName": "valueString",
+				"min": 1,
+				"type": [
+					{
+						"code": "string"
+					}
+				]
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-ext-creatingapplication"
+			},
+			{
+				"id": "Extension.value[x]",
+				"path": "Extension.value[x]",
+				"max": "0"
+			}
+		]
+	}
+}

@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.Validate;
@@ -45,11 +46,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	public void before() {
 		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
+		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 	}
 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setCountSearchResultsUpTo(10000);
 	}
 
 	@Test
@@ -72,6 +75,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myDaoConfig.setExpireSearchResultsAfterMillis(1000L);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
 		long start = System.currentTimeMillis();
+		StaleSearchDeletingSvcImpl.setNowForUnitTests(start);
 
 		final String searchUuid1;
 		{
@@ -371,6 +375,8 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				assertNotNull(search);
 			}
 		});
+
+		mySearchCoordinatorSvc.cancelAllActiveSearches();
 
 		myDaoConfig.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();

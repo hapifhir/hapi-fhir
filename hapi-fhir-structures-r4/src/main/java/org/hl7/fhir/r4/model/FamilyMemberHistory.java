@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -614,10 +614,10 @@ public class FamilyMemberHistory extends DomainResource {
     protected Patient patientTarget;
 
     /**
-     * The date (and possibly time) when the family member history was taken.
+     * The date (and possibly time) when the family member history was recorded or last updated.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When history was captured/updated", formalDefinition="The date (and possibly time) when the family member history was taken." )
+    @Description(shortDefinition="When history was recorded or last updated", formalDefinition="The date (and possibly time) when the family member history was recorded or last updated." )
     protected DateTimeType date;
 
     /**
@@ -833,7 +833,7 @@ public class FamilyMemberHistory extends DomainResource {
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -952,7 +952,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date (and possibly time) when the family member history was taken.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date (and possibly time) when the family member history was recorded or last updated.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -972,7 +972,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date (and possibly time) when the family member history was taken.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date (and possibly time) when the family member history was recorded or last updated.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public FamilyMemberHistory setDateElement(DateTimeType value) { 
       this.date = value;
@@ -980,14 +980,14 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return The date (and possibly time) when the family member history was taken.
+     * @return The date (and possibly time) when the family member history was recorded or last updated.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date (and possibly time) when the family member history was taken.
+     * @param value The date (and possibly time) when the family member history was recorded or last updated.
      */
     public FamilyMemberHistory setDate(Date value) { 
       if (value == null)
@@ -1596,7 +1596,7 @@ public class FamilyMemberHistory extends DomainResource {
         children.add(new Property("status", "code", "A code specifying the status of the record of the family history of a specific family member.", 0, 1, status));
         children.add(new Property("dataAbsentReason", "CodeableConcept", "Describes why the family member's history is not available.", 0, 1, dataAbsentReason));
         children.add(new Property("patient", "Reference(Patient)", "The person who this history concerns.", 0, 1, patient));
-        children.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was taken.", 0, 1, date));
+        children.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was recorded or last updated.", 0, 1, date));
         children.add(new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, 1, name));
         children.add(new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, 1, relationship));
         children.add(new Property("gender", "code", "Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes.", 0, 1, gender));
@@ -1618,7 +1618,7 @@ public class FamilyMemberHistory extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "A code specifying the status of the record of the family history of a specific family member.", 0, 1, status);
         case 1034315687: /*dataAbsentReason*/  return new Property("dataAbsentReason", "CodeableConcept", "Describes why the family member's history is not available.", 0, 1, dataAbsentReason);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The person who this history concerns.", 0, 1, patient);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date (and possibly time) when the family member history was taken.", 0, 1, date);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date (and possibly time) when the family member history was recorded or last updated.", 0, 1, date);
         case 3373707: /*name*/  return new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, 1, name);
         case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, 1, relationship);
         case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes.", 0, 1, gender);
@@ -2024,17 +2024,17 @@ public class FamilyMemberHistory extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>When history was captured/updated</b><br>
+   * Description: <b>When history was recorded or last updated</b><br>
    * Type: <b>date</b><br>
    * Path: <b>FamilyMemberHistory.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date" )
+  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was recorded or last updated", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>When history was captured/updated</b><br>
+   * Description: <b>When history was recorded or last updated</b><br>
    * Type: <b>date</b><br>
    * Path: <b>FamilyMemberHistory.date</b><br>
    * </p>

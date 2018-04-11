@@ -157,6 +157,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
+	@Qualifier("myBinaryDaoR4")
+	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
@@ -179,6 +182,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected Object myResourceProviders;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -234,6 +239,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@After()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
@@ -312,7 +318,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		linkNext = linkNext.substring(linkNext.indexOf('?'));
 		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[0];
+		String uuid = uuidParams[ 0 ];
 		return uuid;
 	}
 

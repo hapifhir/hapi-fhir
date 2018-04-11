@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,9 +40,20 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	private static List<String> ourHeaders = new ArrayList<>();
 
 	@After
+	public void afterResetSubscriptionActivatingInterceptor() {
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
+	}
+
+	@After
 	public void afterUnregisterRestHookListener() {
 		ourRestServer.unregisterInterceptor(getRestHookSubscriptionInterceptor());
 	}
+
+	@Before
+	public void beforeSetSubscriptionActivatingInterceptor() {
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
+	}
+
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
@@ -93,6 +105,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		assertFalse(hasRestHookSubscriptionInterceptor());
 
 		ourRestServer.registerInterceptor(getRestHookSubscriptionInterceptor());
+		getRestHookSubscriptionInterceptor().initSubscriptions();
 
 		assertTrue(hasRestHookSubscriptionInterceptor());
 

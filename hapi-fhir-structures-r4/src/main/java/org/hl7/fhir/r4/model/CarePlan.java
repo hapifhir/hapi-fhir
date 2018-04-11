@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1265,10 +1265,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         protected StringType statusReason;
 
         /**
-         * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.
+         * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.
          */
         @Child(name = "prohibited", type = {BooleanType.class}, order=9, min=0, max=1, modifier=true, summary=false)
-        @Description(shortDefinition="Do NOT do", formalDefinition="If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan." )
+        @Description(shortDefinition="Do NOT do", formalDefinition="If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan." )
         protected BooleanType prohibited;
 
         /**
@@ -1756,7 +1756,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return {@link #prohibited} (If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.). This is the underlying object with id, value and extensions. The accessor "getProhibited" gives direct access to the value
+         * @return {@link #prohibited} (If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.). This is the underlying object with id, value and extensions. The accessor "getProhibited" gives direct access to the value
          */
         public BooleanType getProhibitedElement() { 
           if (this.prohibited == null)
@@ -1776,7 +1776,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @param value {@link #prohibited} (If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.). This is the underlying object with id, value and extensions. The accessor "getProhibited" gives direct access to the value
+         * @param value {@link #prohibited} (If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.). This is the underlying object with id, value and extensions. The accessor "getProhibited" gives direct access to the value
          */
         public CarePlanActivityDetailComponent setProhibitedElement(BooleanType value) { 
           this.prohibited = value;
@@ -1784,14 +1784,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.
+         * @return If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.
          */
         public boolean getProhibited() { 
           return this.prohibited == null || this.prohibited.isEmpty() ? false : this.prohibited.getValue();
         }
 
         /**
-         * @param value If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.
+         * @param value If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.
          */
         public CarePlanActivityDetailComponent setProhibited(boolean value) { 
             if (this.prohibited == null)
@@ -2117,7 +2117,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           children.add(new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal));
           children.add(new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status));
           children.add(new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason));
-          children.add(new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited));
+          children.add(new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited));
           children.add(new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled));
           children.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location));
           children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|RelatedPerson|Patient|CareTeam|HealthcareService|Device)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer));
@@ -2138,7 +2138,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           case 3178259: /*goal*/  return new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal);
           case -892481550: /*status*/  return new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status);
           case 2051346646: /*statusReason*/  return new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason);
-          case 663275198: /*prohibited*/  return new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited);
+          case 663275198: /*prohibited*/  return new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited);
           case 1162627251: /*scheduled[x]*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
           case -160710483: /*scheduled*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
           case 998483799: /*scheduledTiming*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
@@ -2802,7 +2802,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }

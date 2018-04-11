@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
 
 import java.util.*;
 
@@ -1353,23 +1353,35 @@ public class AllergyIntolerance extends DomainResource {
     protected Patient patientTarget;
 
     /**
+     * The encounter when the allergy or intolerance was asserted.
+     */
+    @Child(name = "encounter", type = {Encounter.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Encounter when the allergy or intolerance was asserted", formalDefinition="The encounter when the allergy or intolerance was asserted." )
+    protected Reference encounter;
+
+    /**
+     * The actual object that is the target of the reference (The encounter when the allergy or intolerance was asserted.)
+     */
+    protected Encounter encounterTarget;
+
+    /**
      * Estimated or actual date,  date-time, or age when allergy or intolerance was identified.
      */
-    @Child(name = "onset", type = {DateTimeType.class, Age.class, Period.class, Range.class, StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "onset", type = {DateTimeType.class, Age.class, Period.class, Range.class, StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When allergy or intolerance was identified", formalDefinition="Estimated or actual date,  date-time, or age when allergy or intolerance was identified." )
     protected Type onset;
 
     /**
      * The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.
      */
-    @Child(name = "assertedDate", type = {DateTimeType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "assertedDate", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Date record was believed accurate", formalDefinition="The date on which the existance of the AllergyIntolerance was first asserted or acknowledged." )
     protected DateTimeType assertedDate;
 
     /**
      * Individual who recorded the record and takes responsibility for its content.
      */
-    @Child(name = "recorder", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "recorder", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who recorded the sensitivity", formalDefinition="Individual who recorded the record and takes responsibility for its content." )
     protected Reference recorder;
 
@@ -1381,7 +1393,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * The source of the information about the allergy that is recorded.
      */
-    @Child(name = "asserter", type = {Patient.class, RelatedPerson.class, Practitioner.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "asserter", type = {Patient.class, RelatedPerson.class, Practitioner.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Source of the information about the allergy", formalDefinition="The source of the information about the allergy that is recorded." )
     protected Reference asserter;
 
@@ -1393,25 +1405,25 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * Represents the date and/or time of the last known occurrence of a reaction event.
      */
-    @Child(name = "lastOccurrence", type = {DateTimeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "lastOccurrence", type = {DateTimeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Date(/time) of last known occurrence of a reaction", formalDefinition="Represents the date and/or time of the last known occurrence of a reaction event." )
     protected DateTimeType lastOccurrence;
 
     /**
      * Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.
      */
-    @Child(name = "note", type = {Annotation.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional text not captured in other fields", formalDefinition="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields." )
     protected List<Annotation> note;
 
     /**
      * Details about each adverse reaction event linked to exposure to the identified substance.
      */
-    @Child(name = "reaction", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "reaction", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Details about each adverse reaction event linked to exposure to the identified substance." )
     protected List<AllergyIntoleranceReactionComponent> reaction;
 
-    private static final long serialVersionUID = 948924623L;
+    private static final long serialVersionUID = 325449518L;
 
   /**
    * Constructor
@@ -1807,6 +1819,50 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
+     * @return {@link #encounter} (The encounter when the allergy or intolerance was asserted.)
+     */
+    public Reference getEncounter() { 
+      if (this.encounter == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create AllergyIntolerance.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounter = new Reference(); // cc
+      return this.encounter;
+    }
+
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
+    }
+
+    /**
+     * @param value {@link #encounter} (The encounter when the allergy or intolerance was asserted.)
+     */
+    public AllergyIntolerance setEncounter(Reference value) { 
+      this.encounter = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter when the allergy or intolerance was asserted.)
+     */
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create AllergyIntolerance.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
+    }
+
+    /**
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter when the allergy or intolerance was asserted.)
+     */
+    public AllergyIntolerance setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public Type getOnset() { 
@@ -2182,6 +2238,7 @@ public class AllergyIntolerance extends DomainResource {
         children.add(new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified substance.", 0, 1, criticality));
         children.add(new Property("code", "CodeableConcept", "Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., \"Latex\"), an allergy or intolerance condition (e.g., \"Latex allergy\"), or a negated/excluded code for a specific substance or class (e.g., \"No latex allergy\") or a general or categorical negated statement (e.g.,  \"No known allergy\", \"No known drug allergies\").  Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.  If a receiving system is unable to confirm that AllergyIntolerance.reaction.substance falls within the semantic scope of AllergyIntolerance.code, then the receiving system should ignore AllergyIntolerance.reaction.substance.", 0, 1, code));
         children.add(new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, 1, patient));
+        children.add(new Property("encounter", "Reference(Encounter)", "The encounter when the allergy or intolerance was asserted.", 0, 1, encounter));
         children.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset));
         children.add(new Property("assertedDate", "dateTime", "The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.", 0, 1, assertedDate));
         children.add(new Property("recorder", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder));
@@ -2202,6 +2259,7 @@ public class AllergyIntolerance extends DomainResource {
         case -1608054609: /*criticality*/  return new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified substance.", 0, 1, criticality);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., \"Latex\"), an allergy or intolerance condition (e.g., \"Latex allergy\"), or a negated/excluded code for a specific substance or class (e.g., \"No latex allergy\") or a general or categorical negated statement (e.g.,  \"No known allergy\", \"No known drug allergies\").  Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.  If a receiving system is unable to confirm that AllergyIntolerance.reaction.substance falls within the semantic scope of AllergyIntolerance.code, then the receiving system should ignore AllergyIntolerance.reaction.substance.", 0, 1, code);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, 1, patient);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The encounter when the allergy or intolerance was asserted.", 0, 1, encounter);
         case -1886216323: /*onset[x]*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
         case 105901603: /*onset*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
         case -1701663010: /*onsetDateTime*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
@@ -2231,6 +2289,7 @@ public class AllergyIntolerance extends DomainResource {
         case -1608054609: /*criticality*/ return this.criticality == null ? new Base[0] : new Base[] {this.criticality}; // Enumeration<AllergyIntoleranceCriticality>
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // Type
         case -174231629: /*assertedDate*/ return this.assertedDate == null ? new Base[0] : new Base[] {this.assertedDate}; // DateTimeType
         case -799233858: /*recorder*/ return this.recorder == null ? new Base[0] : new Base[] {this.recorder}; // Reference
@@ -2274,6 +2333,9 @@ public class AllergyIntolerance extends DomainResource {
           return value;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
+          return value;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case 105901603: // onset
           this.onset = castToType(value); // Type
@@ -2324,6 +2386,8 @@ public class AllergyIntolerance extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("onset[x]")) {
           this.onset = castToType(value); // Type
         } else if (name.equals("assertedDate")) {
@@ -2354,6 +2418,7 @@ public class AllergyIntolerance extends DomainResource {
         case -1608054609:  return getCriticalityElement();
         case 3059181:  return getCode(); 
         case -791418107:  return getPatient(); 
+        case 1524132147:  return getEncounter(); 
         case -1886216323:  return getOnset(); 
         case 105901603:  return getOnset(); 
         case -174231629:  return getAssertedDateElement();
@@ -2378,6 +2443,7 @@ public class AllergyIntolerance extends DomainResource {
         case -1608054609: /*criticality*/ return new String[] {"code"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -791418107: /*patient*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case 105901603: /*onset*/ return new String[] {"dateTime", "Age", "Period", "Range", "string"};
         case -174231629: /*assertedDate*/ return new String[] {"dateTime"};
         case -799233858: /*recorder*/ return new String[] {"Reference"};
@@ -2417,6 +2483,10 @@ public class AllergyIntolerance extends DomainResource {
         else if (name.equals("patient")) {
           this.patient = new Reference();
           return this.patient;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("onsetDateTime")) {
           this.onset = new DateTimeType();
@@ -2486,6 +2556,7 @@ public class AllergyIntolerance extends DomainResource {
         dst.criticality = criticality == null ? null : criticality.copy();
         dst.code = code == null ? null : code.copy();
         dst.patient = patient == null ? null : patient.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.onset = onset == null ? null : onset.copy();
         dst.assertedDate = assertedDate == null ? null : assertedDate.copy();
         dst.recorder = recorder == null ? null : recorder.copy();
@@ -2518,9 +2589,10 @@ public class AllergyIntolerance extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(clinicalStatus, o.clinicalStatus, true)
            && compareDeep(verificationStatus, o.verificationStatus, true) && compareDeep(type, o.type, true)
            && compareDeep(category, o.category, true) && compareDeep(criticality, o.criticality, true) && compareDeep(code, o.code, true)
-           && compareDeep(patient, o.patient, true) && compareDeep(onset, o.onset, true) && compareDeep(assertedDate, o.assertedDate, true)
-           && compareDeep(recorder, o.recorder, true) && compareDeep(asserter, o.asserter, true) && compareDeep(lastOccurrence, o.lastOccurrence, true)
-           && compareDeep(note, o.note, true) && compareDeep(reaction, o.reaction, true);
+           && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true) && compareDeep(onset, o.onset, true)
+           && compareDeep(assertedDate, o.assertedDate, true) && compareDeep(recorder, o.recorder, true) && compareDeep(asserter, o.asserter, true)
+           && compareDeep(lastOccurrence, o.lastOccurrence, true) && compareDeep(note, o.note, true) && compareDeep(reaction, o.reaction, true)
+          ;
       }
 
       @Override
@@ -2538,8 +2610,8 @@ public class AllergyIntolerance extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, clinicalStatus
-          , verificationStatus, type, category, criticality, code, patient, onset, assertedDate
-          , recorder, asserter, lastOccurrence, note, reaction);
+          , verificationStatus, type, category, criticality, code, patient, encounter, onset
+          , assertedDate, recorder, asserter, lastOccurrence, note, reaction);
       }
 
   @Override

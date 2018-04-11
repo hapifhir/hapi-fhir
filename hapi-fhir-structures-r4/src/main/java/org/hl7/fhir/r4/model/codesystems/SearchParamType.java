@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum SearchParamType {
          */
         TOKEN, 
         /**
-         * A reference to another resource.
+         * A reference to another resource (Reference or canonical).
          */
         REFERENCE, 
         /**
@@ -115,7 +115,7 @@ public enum SearchParamType {
             case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.";
             case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.";
             case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used.";
-            case REFERENCE: return "A reference to another resource.";
+            case REFERENCE: return "A reference to another resource (Reference or canonical).";
             case COMPOSITE: return "A composite search parameter that combines a search on two values together.";
             case QUANTITY: return "A search parameter that searches on a quantity.";
             case URI: return "A search parameter that searches on a URI (RFC 3986).";

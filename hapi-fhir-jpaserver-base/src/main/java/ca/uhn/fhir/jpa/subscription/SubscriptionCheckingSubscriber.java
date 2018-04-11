@@ -102,25 +102,22 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			IBundleProvider results = performSearch(criteria);
 
-			ourLog.info("Subscription check found {} results for query: {}", results.size(), criteria);
+			ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
 			if (results.size() == 0) {
 				continue;
 			}
 
-			// should just be one resource as it was filtered by the id
-			for (IBaseResource nextBase : results.getResources(0, results.size())) {
-				ourLog.info("Found match: queueing rest-hook notification for resource: {}", nextBase.getIdElement());
+			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
-				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-				deliveryMsg.setPayload(getContext(), nextBase);
-				deliveryMsg.setSubscription(nextSubscription);
-				deliveryMsg.setOperationType(msg.getOperationType());
-				deliveryMsg.setPayloadId(msg.getId(getContext()));
+			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPayload(getContext(), msg.getNewPayload(getContext()));
+			deliveryMsg.setSubscription(nextSubscription);
+			deliveryMsg.setOperationType(msg.getOperationType());
+			deliveryMsg.setPayloadId(msg.getId(getContext()));
 
-				ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-				getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
-			}
+			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+			getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
 		}
 
 

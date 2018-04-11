@@ -7,6 +7,7 @@ import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -133,6 +134,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
+		extraProperties.put("hibernate.criteria.literal_handling_mode", LiteralHandlingMode.BIND);
+
 		return extraProperties;
 	}
 

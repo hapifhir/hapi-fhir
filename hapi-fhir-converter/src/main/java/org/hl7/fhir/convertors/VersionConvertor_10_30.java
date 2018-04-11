@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.dstu2.utils.ToolingExtensions;
+import org.hl7.fhir.instance.utils.ToolingExtensions;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.model.Annotation;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.SystemRestfulInteraction;
@@ -10974,7 +10974,7 @@ public class VersionConvertor_10_30 {
       tgt.setBase(t.asStringValue());
     tgt.setType(convertSearchParamType(src.getType()));
     tgt.setDescription(src.getDescription());
-    org.hl7.fhir.dstu2.utils.ToolingExtensions.setStringExtension(tgt, ToolingExtensions.EXT_EXPRESSION, src.getExpression());
+    org.hl7.fhir.instance.utils.ToolingExtensions.setStringExtension(tgt, ToolingExtensions.EXT_EXPRESSION, src.getExpression());
     tgt.setXpath(src.getXpath());
     tgt.setXpathUsage(convertXPathUsageType(src.getXpathUsage()));
     for (org.hl7.fhir.dstu3.model.CodeType t : src.getTarget())

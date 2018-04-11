@@ -166,7 +166,6 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 
   private void addCodeAndDescendents(CodeSystem cs, String system, ConceptDefinitionComponent def, ValueSetExpansionContainsComponent parent, ExpansionProfile profile, List<ValueSet> filters)
       throws FHIRException {
-//    def.checkNoModifiers("Code in Code System", "expanding");
     if (!CodeSystemUtilities.isDeprecated(cs, def)) {
       ValueSetExpansionContainsComponent np = null;
       boolean abs = CodeSystemUtilities.isNotSelectable(cs, def);
