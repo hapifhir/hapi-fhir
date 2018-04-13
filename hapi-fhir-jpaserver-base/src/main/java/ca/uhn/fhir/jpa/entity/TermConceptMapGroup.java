@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,6 +63,10 @@ public class TermConceptMapGroup implements Serializable {
 		return myConceptMapUrl;
 	}
 
+	public Long getId() {
+		return myId;
+	}
+
 	public String getSource() {
 		return mySource;
 	}
@@ -104,5 +111,21 @@ public class TermConceptMapGroup implements Serializable {
 
 	public void setTargetVersion(String theTargetVersion) {
 		myTargetVersion = theTargetVersion;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+			.append("myId", myId)
+			.append("myConceptMap - id", myConceptMap.getId())
+			.append("mySource", mySource)
+			.append("mySourceVersion", mySourceVersion)
+			.append("myTarget", myTarget)
+			.append("myTargetVersion", myTargetVersion)
+			.append("myConceptMapGroupElements - size", myConceptMapGroupElements.size())
+			.append("myConceptMapUrl", this.getConceptMapUrl())
+			.append("mySourceValueSet", this.getSourceValueSet())
+			.append("myTargetValueSet", this.getTargetValueSet())
+			.toString();
 	}
 }

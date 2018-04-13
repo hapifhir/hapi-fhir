@@ -7,10 +7,13 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -21,6 +24,7 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 
 public class TerminologySvcImplR4Test extends BaseJpaR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -29,7 +33,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreNewConceptMap() {
-		myTermSvc.storeNewConceptMap(createConceptMap());
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -39,6 +46,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertTrue(optionalConceptMap.isPresent());
 
 				TermConceptMap conceptMap = optionalConceptMap.get();
+
+				ourLog.info("ConceptMap:\n" + conceptMap.toString());
+
 				assertEquals(VS_URL, conceptMap.getSource());
 				assertEquals(VS_URL_2, conceptMap.getTarget());
 				assertEquals(CM_URL, conceptMap.getUrl());
@@ -46,6 +56,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(0)">
 				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
+
+				ourLog.info("ConceptMap.group(0):\n" + group.toString());
+
 				assertEquals(CS_URL, group.getSource());
 				assertEquals("Version 1", group.getSourceVersion());
 				assertEquals(VS_URL, group.getSourceValueSet());
@@ -57,6 +70,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(0).element(0)">
 				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+
+				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
+
 				assertEquals("12345", element.getCode());
 				assertEquals("Source Code 12345", element.getDisplay());
 				assertEquals(CS_URL, element.getSystem());
@@ -67,6 +83,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
 				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+
+				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
+
 				assertEquals("34567", target.getCode());
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
@@ -82,6 +101,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(0).element(1)">
 				element = group.getConceptMapGroupElements().get(1);
+
+				ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
+
 				assertEquals("23456", element.getCode());
 				assertEquals("Source Code 23456", element.getDisplay());
 				assertEquals(CS_URL, element.getSystem());
@@ -92,6 +114,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
 				target = element.getConceptMapGroupElementTargets().get(0);
+
+				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
+
 				assertEquals("45678", target.getCode());
 				assertEquals("Target Code 45678", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
@@ -110,6 +135,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(1)">
 				group = conceptMap.getConceptMapGroups().get(1);
+
+				ourLog.info("ConceptMap.group(1):\n" + group.toString());
+
 				assertEquals(CS_URL, group.getSource());
 				assertEquals("Version 3", group.getSourceVersion());
 				assertEquals(CS_URL_3, group.getTarget());
@@ -119,6 +147,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(1).element(0)">
 				element = group.getConceptMapGroupElements().get(0);
+
+				ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
+
 				assertEquals("12345", element.getCode());
 				assertEquals("Source Code 12345", element.getDisplay());
 				assertEquals(CS_URL, element.getSystem());
@@ -129,6 +160,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
 				target = element.getConceptMapGroupElementTargets().get(0);
+
+				ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
+
 				assertEquals("56789", target.getCode());
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
@@ -141,6 +175,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
 				target = element.getConceptMapGroupElementTargets().get(1);
+
+				ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
+
 				assertEquals("67890", target.getCode());
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
@@ -165,7 +202,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
-		myTermSvc.storeNewConceptMap(createConceptMap());
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -182,6 +222,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(2, targets.size());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
 				assertEquals("56789", target.getCode());
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
@@ -191,6 +234,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
 				assertEquals("67890", target.getCode());
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
@@ -205,7 +251,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
-		myTermSvc.storeNewConceptMap(createConceptMap());
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -223,6 +272,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(1, targets.size());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("ConceptMap.group.element.target:\n" + target.toString());
+
 				assertEquals("34567", target.getCode());
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
@@ -233,6 +285,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// <editor-fold desc="Access associated entities">
 				TermConceptMapGroupElement element = target.getConceptMapGroupElement();
+
+				ourLog.info("ConceptMap.group.element:\n" + element.toString());
+
 				assertEquals("12345", element.getCode());
 				assertEquals("Source Code 12345", element.getDisplay());
 				assertEquals(CS_URL, element.getSystem());
@@ -241,6 +296,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
 				TermConceptMapGroup group = element.getConceptMapGroup();
+
+				ourLog.info("ConceptMap.group:\n" + group.toString());
+
 				assertEquals(CS_URL, group.getSource());
 				assertEquals("Version 1", group.getSourceVersion());
 				assertEquals(VS_URL, group.getSourceValueSet());
@@ -250,6 +308,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(CM_URL, group.getConceptMapUrl());
 
 				TermConceptMap conceptMap = group.getConceptMap();
+
+				ourLog.info("ConceptMap:\n" + conceptMap.toString());
+
 				assertNotNull(conceptMap);
 				assertEquals(VS_URL, conceptMap.getSource());
 				assertEquals(VS_URL_2, conceptMap.getTarget());
@@ -262,7 +323,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
-		myTermSvc.storeNewConceptMap(createConceptMap());
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -283,13 +347,19 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTranslateUsingVariousPredicates() {
-		myTermSvc.storeNewConceptMap(createConceptMap());
+	public void testTranslateUsingPredicatesWithCodeOnly() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// <editor-fold desc="Only a source code is provided">
+				/*
+				 * Provided:
+				 *   source code
+				 */
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("12345");
@@ -297,14 +367,61 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				// </editor-fold>
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(2);
+
+				ourLog.info("target(2):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
 		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceSystem() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// <editor-fold desc="Only a source code is provided">
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 */
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -313,14 +430,156 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				// </editor-fold>
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(2);
+
+				ourLog.info("target(2):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
 		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceSystemAndVersion1() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// <editor-fold desc="Only a source code is provided">
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   source code system version #1
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345")
+					.setVersion("Version 1");
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(1, targets.size());
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target:\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceSystemAndVersion3() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   source code system version #3
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345")
+					.setVersion("Version 3");
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceAndTargetSystem2() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #2
+				 */
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -330,14 +589,38 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				// </editor-fold>
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target:\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
 		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceAndTargetSystem3() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// <editor-fold desc="Only a source code is provided">
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #3
+				 */
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -347,7 +630,156 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				// </editor-fold>
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithSourceValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source value set
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("12345");
+				translationRequest.setSource(new UriType(VS_URL));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(2);
+
+				ourLog.info("target(2):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateUsingPredicatesWithTargetValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   target value set
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("12345");
+				translationRequest.setTarget(new UriType(VS_URL_2));
+
+				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+
+				TermConceptMapGroupElementTarget target = targets.get(0);
+
+				ourLog.info("target(0):\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(1);
+
+				ourLog.info("target(1):\n" + target.toString());
+
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				target = targets.get(2);
+
+				ourLog.info("target(2):\n" + target.toString());
+
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
+				assertEquals("Version 4", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
 		});
 	}

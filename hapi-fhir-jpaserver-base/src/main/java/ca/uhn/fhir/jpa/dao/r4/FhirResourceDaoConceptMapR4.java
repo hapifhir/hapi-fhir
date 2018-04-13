@@ -42,6 +42,14 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 		List<TermConceptMapGroupElementTarget> targets = myHapiTerminologySvc.translate(theTranslationRequest);
 
+		// FIXME: Should we be doing more with the message returned?
+		/*
+		 * From spec:
+		 *
+		 * Error details, for display to a human. If this is provided when result = true, the message carries hints and
+		 * warnings (e.g. a note that the matches could be improved by providing additional detail)
+		 */
+
 		if (targets.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));

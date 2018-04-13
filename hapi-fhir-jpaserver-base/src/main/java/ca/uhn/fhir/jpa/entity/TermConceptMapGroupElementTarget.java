@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import javax.persistence.*;
@@ -72,6 +74,10 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 		myEquivalence = theEquivalence;
 	}
 
+	public Long getId() {
+		return myId;
+	}
+
 	public String getSystem() {
 		if (mySystem == null) {
 			mySystem = getConceptMapGroupElement().getConceptMapGroup().getTarget();
@@ -91,5 +97,20 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 			myValueSet = getConceptMapGroupElement().getConceptMapGroup().getTargetValueSet();
 		}
 		return myValueSet;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+			.append("myId", myId)
+			.append("myConceptMapGroupElement - id", myConceptMapGroupElement.getId())
+			.append("myCode", myCode)
+			.append("myDisplay", myDisplay)
+			.append("myEquivalence", myEquivalence.toCode())
+			.append("myConceptMapUrl", this.getConceptMapUrl())
+			.append("mySystem", this.getSystem())
+			.append("mySystemVersion", this.getSystemVersion())
+			.append("myValueSet", this.getValueSet())
+			.toString();
 	}
 }

@@ -23,5 +23,5 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 
 public class BaseJpaResourceProviderConceptMapDstu2 extends JpaResourceProviderDstu2<ConceptMap> {
-	// TODO: Convert version and use BaseJpaResourceProviderConceptMapR4 implementation.
+	// FIXME: Convert version and use BaseJpaResourceProviderConceptMapR4 implementation.
 }

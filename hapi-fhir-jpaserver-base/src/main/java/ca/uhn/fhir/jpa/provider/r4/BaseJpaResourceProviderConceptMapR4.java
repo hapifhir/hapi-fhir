@@ -50,6 +50,10 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
 		RequestDetails theRequestDetails
 	) {
+		// FIXME: Handle reverse input parameter.
+
+		// FIXME: Consider handling additional input and output parameters (dependency, product).
+
 		// FIXME: Leverage stored information for instance-level processing.
 		boolean haveId = theId != null && theId.hasIdPart();
 //		if (haveId) {
@@ -81,14 +85,14 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
 
-//		// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
+//		// FIXME: Investigate whether or not we want source code system to be required.
 //		if (haveSourceCode) {
 //			if (!haveSourceCodeSystem) {
 //				throw new InvalidRequestException("This implementation of the $translate operation requires a source code system to be identified.");
 //			}
 //		}
 //
-//		// FIXME: Investigate whether or not we want this to be optional. Presently, it's mandatory.
+//		// FIXME: Investigate whether or not we want target code system to be required.
 //		if (!haveTargetCodeSystem) {
 //			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
 //		}
