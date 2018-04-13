@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 
 public class TranslationMatch {
@@ -55,5 +56,19 @@ public class TranslationMatch {
 
 	public void setSource(UriType theSource) {
 		mySource = theSource;
+	}
+
+	public void toParameterParts(ParametersParameterComponent theParam) {
+		if (myEquivalence != null) {
+			theParam.addPart().setName("equivalence").setValue(myEquivalence);
+		}
+
+		if (myConcept != null) {
+			theParam.addPart().setName("concept").setValue(myConcept);
+		}
+
+		if (mySource != null) {
+			theParam.addPart().setName("source").setValue(mySource);
+		}
 	}
 }

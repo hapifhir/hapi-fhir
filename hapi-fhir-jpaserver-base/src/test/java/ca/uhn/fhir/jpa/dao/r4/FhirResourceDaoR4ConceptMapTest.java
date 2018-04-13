@@ -541,4 +541,49 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	@Test
+	public void testTranslateWithReverse() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(1, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	// FIXME: Additional testing for reverse is required.
 }

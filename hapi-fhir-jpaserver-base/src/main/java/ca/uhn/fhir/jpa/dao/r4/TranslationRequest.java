@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UriType;
@@ -29,11 +30,36 @@ public class TranslationRequest {
 	private CodeableConcept myCodeableConcept;
 	private UriType myTarget;
 	private UriType myTargetSystem;
+	private BooleanType myReverse;
 
 	public TranslationRequest() {
 		super();
 
 		myCodeableConcept = new CodeableConcept();
+	}
+
+	public boolean hasReverse() {
+		return myReverse != null;
+	}
+
+	public BooleanType getReverse() {
+		return myReverse;
+	}
+
+	public boolean getReverseAsBoolean() {
+		if (hasReverse()) {
+			return myReverse.booleanValue();
+		}
+
+		return false;
+	}
+
+	public void setReverse(BooleanType theReverse) {
+		myReverse = theReverse;
+	}
+
+	public void setReverse(boolean theReverse) {
+		myReverse = new BooleanType(theReverse);
 	}
 
 	public boolean hasSource() {

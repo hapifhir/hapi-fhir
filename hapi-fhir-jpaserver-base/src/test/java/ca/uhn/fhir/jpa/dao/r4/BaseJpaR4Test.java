@@ -61,6 +61,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
 	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
+	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
 
@@ -347,11 +348,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	 *     <li>
 	 *         One group with one element, identifying two targets.
 	 *     </li>
+	 *     <li>
+	 * 	 	  One group with one element, identifying a target that also appears
+	 * 	 	  in the first element of the first group.
+	 * 	 </li>
 	 * </ul>
 	 * </br>
-	 * Both groups identify the same source code system and different target code systems.
+	 * The first two groups identify the same source code system and different target code systems.
 	 * </br>
-	 * Both groups also include an element with the same source code.
+	 * The first two groups also include an element with the same source code.
 	 *
 	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
 	 */
@@ -437,6 +442,32 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		// </editor-fold>
 
 		// End ConceptMap.group(1)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(2)">
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 5");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		// <editor-fold desc="ConceptMap.group(2).element(0))">
+		element = group.addElement();
+		element.setCode("78901");
+		element.setDisplay("Source Code 78901");
+
+		// <editor-fold desc="ConceptMap.group(2).element(0).target(0)">
+		target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+		// End ConceptMap.group(2).element(0).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(2).element(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(2)
 		// </editor-fold>
 
 		// End ConceptMap

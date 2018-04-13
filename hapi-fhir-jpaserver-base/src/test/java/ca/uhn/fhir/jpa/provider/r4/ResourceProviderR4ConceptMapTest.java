@@ -825,6 +825,59 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
 
+	@Test
+	public void testTranslateWithReverse() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		/*
+		 * Provided:
+		 *   source code
+		 *   source code system
+		 *   target code system
+		 *   reverse = true
+		 */
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("34567"));
+		inParams.addParameter().setName("system").setValue(new UriType(CS_URL_2));
+		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_4));
+		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(2, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("78901", coding.getCode());
+		assertEquals("Source Code 78901", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_4, coding.getSystem());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+	// FIXME: Additional testing for reverse is required.
+
 	private static int getNumberOfParametersByName(Parameters theParameters, String theName) {
 		int retVal = 0;
 

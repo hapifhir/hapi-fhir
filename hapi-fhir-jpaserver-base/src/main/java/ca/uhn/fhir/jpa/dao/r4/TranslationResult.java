@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
 
 import java.util.ArrayList;
@@ -69,15 +70,17 @@ public class TranslationResult {
 	public Parameters toParameters() {
 		Parameters retVal = new Parameters();
 
-		retVal.addParameter().setName("result").setValue(myResult);
+		if (myResult != null) {
+			retVal.addParameter().setName("result").setValue(myResult);
+		}
 
-		retVal.addParameter().setName("message").setValue(myMessage);
+		if (myMessage != null) {
+			retVal.addParameter().setName("message").setValue(myMessage);
+		}
 
 		for (TranslationMatch translationMatch : myMatches) {
-			Parameters.ParametersParameterComponent matchParam = retVal.addParameter().setName("match");
-			matchParam.addPart().setName("equivalence").setValue(translationMatch.getEquivalence());
-			matchParam.addPart().setName("concept").setValue(translationMatch.getConcept());
-			matchParam.addPart().setName("source").setValue(translationMatch.getSource());
+			ParametersParameterComponent matchParam = retVal.addParameter().setName("match");
+			translationMatch.toParameterParts(matchParam);
 		}
 
 		return retVal;

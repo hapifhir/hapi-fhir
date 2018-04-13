@@ -52,7 +52,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(VS_URL, conceptMap.getSource());
 				assertEquals(VS_URL_2, conceptMap.getTarget());
 				assertEquals(CM_URL, conceptMap.getUrl());
-				assertEquals(2, conceptMap.getConceptMapGroups().size());
+				assertEquals(3, conceptMap.getConceptMapGroups().size());
 
 				// <editor-fold desc="ConceptMap.group(0)">
 				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
@@ -191,7 +191,53 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				// End ConceptMap.group(1).element(0)
 				// </editor-fold>
 
-				// End ConceptMap.group(0)
+				// End ConceptMap.group(1)
+				// </editor-fold>
+
+				// <editor-fold desc="ConceptMap.group(2)">
+				group = conceptMap.getConceptMapGroups().get(2);
+
+				ourLog.info("ConceptMap.group(2):\n" + group.toString());
+
+				assertEquals(CS_URL_4, group.getSource());
+				assertEquals("Version 5", group.getSourceVersion());
+				assertEquals(CS_URL_2, group.getTarget());
+				assertEquals("Version 2", group.getTargetVersion());
+				assertEquals(CM_URL, group.getConceptMapUrl());
+				assertEquals(1, group.getConceptMapGroupElements().size());
+
+				// <editor-fold desc="ConceptMap.group(2).element(0)">
+				element = group.getConceptMapGroupElements().get(0);
+
+				ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+
+				// <editor-fold desc="ConceptMap.group(2).element(0).target(0)">
+				target = element.getConceptMapGroupElementTargets().get(0);
+
+				ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
+
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.NARROWER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
+				// End ConceptMap.group(2).element(0).target(0)
+				// </editor-fold>
+
+				// End ConceptMap.group(2).element(0)
+				// </editor-fold>
+
+				// End ConceptMap.group(2)
 				// </editor-fold>
 
 				// End ConceptMap
@@ -783,4 +829,48 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	@Test
+	public void testTranslateWithReverse() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	// FIXME: Additional testing for reverse is required.
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -38,19 +39,25 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 	@Override
 	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		TranslationResult retVal = new TranslationResult();
+		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
+			return buildReverseTranslationResult(myHapiTerminologySvc.translateWithReverse(theTranslationRequest));
+		}
 
-		List<TermConceptMapGroupElementTarget> targets = myHapiTerminologySvc.translate(theTranslationRequest);
+		return buildTranslationResult(myHapiTerminologySvc.translate(theTranslationRequest));
+	}
+
+	private TranslationResult buildTranslationResult(List<TermConceptMapGroupElementTarget> theTargets) {
+		TranslationResult retVal = new TranslationResult();
 
 		// FIXME: Should we be doing more with the message returned?
 		/*
 		 * From spec:
 		 *
 		 * Error details, for display to a human. If this is provided when result = true, the message carries hints and
-		 * warnings (e.g. a note that the matches could be improved by providing additional detail)
+		 * warnings (e.g. a note that the matches could be improved by providing additional detail).
 		 */
 
-		if (targets.isEmpty()) {
+		if (theTargets.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));
 
@@ -63,7 +70,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 			retVal.setMessage(new StringType("Matches found!"));
 
 			TranslationMatch translationMatch;
-			for (TermConceptMapGroupElementTarget target : targets) {
+			for (TermConceptMapGroupElementTarget target : theTargets) {
 				translationMatch = new TranslationMatch();
 
 				translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
@@ -77,6 +84,50 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 				);
 
 				translationMatch.setSource(new UriType(target.getConceptMapUrl()));
+
+				retVal.addMatch(translationMatch);
+			}
+		}
+
+		return retVal;
+	}
+
+	private TranslationResult buildReverseTranslationResult(List<TermConceptMapGroupElement> theElements) {
+		TranslationResult retVal = new TranslationResult();
+
+		// FIXME: Should we be doing more with the message returned?
+		/*
+		 * From spec:
+		 *
+		 * Error details, for display to a human. If this is provided when result = true, the message carries hints and
+		 * warnings (e.g. a note that the matches could be improved by providing additional detail).
+		 */
+
+		if (theElements.isEmpty()) {
+
+			retVal.setResult(new BooleanType(false));
+
+			retVal.setMessage(new StringType("No matches found!"));
+
+		} else {
+
+			retVal.setResult(new BooleanType(true));
+
+			retVal.setMessage(new StringType("Matches found!"));
+
+			TranslationMatch translationMatch;
+			for (TermConceptMapGroupElement element : theElements) {
+				translationMatch = new TranslationMatch();
+
+				translationMatch.setConcept(
+					new Coding()
+						.setCode(element.getCode())
+						.setSystem(element.getSystem())
+						.setDisplay(element.getDisplay())
+						.setUserSelected(false)
+				);
+
+				translationMatch.setSource(new UriType(element.getConceptMapUrl()));
 
 				retVal.addMatch(translationMatch);
 			}

@@ -881,6 +881,61 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		return retVal;
 	}
 
+	@Override
+	public List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest) {
+		List<TermConceptMapGroupElement> retVal = new ArrayList<>();
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConceptMapGroupElement> query = criteriaBuilder.createQuery(TermConceptMapGroupElement.class);
+		Root<TermConceptMapGroupElement> root = query.from(TermConceptMapGroupElement.class);
+
+		Join<TermConceptMapGroupElement, TermConceptMapGroupElementTarget> targetJoin = root.join("myConceptMapGroupElementTargets");
+		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = root.join("myConceptMapGroup");
+		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
+
+		ArrayList<Predicate> predicates;
+
+		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
+			predicates = new ArrayList<>();
+
+			if (coding.hasCode()) {
+				predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+			} else {
+				throw new InvalidRequestException("A code must be provided for translation to occur.");
+			}
+
+			if (coding.hasSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
+			}
+
+			if (coding.hasVersion()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
+			}
+
+			if (theTranslationRequest.hasTargetSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), theTranslationRequest.getTargetSystem().getValueAsString()));
+			}
+
+			if (theTranslationRequest.hasSource()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), theTranslationRequest.getSource().getValueAsString()));
+			}
+
+			if (theTranslationRequest.hasTarget()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), theTranslationRequest.getTarget().getValueAsString()));
+			}
+
+			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+			query.where(outerPredicate);
+
+			TypedQuery<TermConceptMapGroupElement> select = myEntityManager.createQuery(query.select(root));
+			retVal.addAll(select.getResultList());
+		}
+
+		// FIXME: Use scrollable results.
+
+		return retVal;
+	}
+
 	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() != null, "CodesystemValue is null");

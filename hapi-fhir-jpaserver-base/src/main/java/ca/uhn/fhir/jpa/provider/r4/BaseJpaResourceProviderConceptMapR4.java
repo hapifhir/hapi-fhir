@@ -48,10 +48,9 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theSourceCodeableConcept,
 		@OperationParam(name = "target", min = 0, max = 1) UriType theTargetValueSet,
 		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
+		@OperationParam(name = "reverse", min = 0, max = 1) BooleanType theReverse,
 		RequestDetails theRequestDetails
 	) {
-		// FIXME: Handle reverse input parameter.
-
 		// FIXME: Consider handling additional input and output parameters (dependency, product).
 
 		// FIXME: Leverage stored information for instance-level processing.
@@ -79,6 +78,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			&& theTargetValueSet.hasValue();
 		boolean haveTargetCodeSystem = theTargetCodeSystem != null
 			&& theTargetCodeSystem.hasValue();
+		boolean haveReverse = theReverse != null;
 
 		if ((!haveSourceCode && !haveSourceCoding && !haveSourceCodeableConcept)
 			 || moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
@@ -91,7 +91,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 //				throw new InvalidRequestException("This implementation of the $translate operation requires a source code system to be identified.");
 //			}
 //		}
-		
+
 		// FIXME: Investigate whether or not we want target code system to be required.
 //		if (!haveTargetCodeSystem) {
 //			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
@@ -124,6 +124,10 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 
 		if (haveTargetCodeSystem) {
 			translationRequest.setTargetSystem(theTargetCodeSystem);
+		}
+
+		if (haveReverse) {
+			translationRequest.setReverse(theReverse);
 		}
 
 		startRequest(theServletRequest);
