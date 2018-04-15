@@ -168,6 +168,19 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
 			}
 
+			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
+				String stripVersionIds;
+				String deliverLatestVersion;
+				try {
+					stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+					deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+				} catch (FHIRException theE) {
+					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+				}
+				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
+				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
+			}
+
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(theE);
 		}
@@ -199,6 +212,19 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			}
 			retVal.getEmailDetails().setFrom(from);
 			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
+		}
+
+		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
+			String stripVersionIds;
+			String deliverLatestVersion;
+			try {
+				stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+				deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
+			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
 		}
 
 		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");

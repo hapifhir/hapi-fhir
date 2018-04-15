@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.subscription.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -172,7 +174,38 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
 	@Test
+	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
+		subscription1
+			.getChannel()
+			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+		subscription1
+			.getChannel()
+			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+		myClient.update().resource(subscription1).execute();
+		waitForQueueToDrain();
+
+		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		assertEquals(observation1.getIdElement().getIdPart(), ourUpdatedObservations.get(0).getIdElement().getIdPart());
+		assertEquals(null, ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+	}
+
+
+		@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
 
@@ -190,6 +223,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);

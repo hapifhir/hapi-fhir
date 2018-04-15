@@ -183,6 +183,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Ignore
+	public void test() throws IOException {
+		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E"+UrlUtil.escapeUrlParam("=2018-01-01")+"&context.organization=O3435");
+		ourLog.info("*** MAKING QUERY");
+		ourHttpClient.execute(get);
+		System.exit(0);
+	}
+
+	@Test
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = myClient;
 

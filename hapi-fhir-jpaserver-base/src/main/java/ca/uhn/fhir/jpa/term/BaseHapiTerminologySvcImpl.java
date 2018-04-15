@@ -808,8 +808,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
-		ArrayList<String> conceptsStack = new ArrayList<String>();
-		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
+		ArrayList<String> conceptsStack = new ArrayList<>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
