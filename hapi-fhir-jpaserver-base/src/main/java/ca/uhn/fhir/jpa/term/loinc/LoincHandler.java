@@ -57,6 +57,13 @@ public class LoincHandler implements IRecordHandler {
 			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
 			concept.setDisplay(display);
 
+			if (!display.equalsIgnoreCase(shortName)) {
+				concept
+					.addDesignation()
+					.setUseDisplay("ShortName")
+					.setValue(shortName);
+			}
+
 			for (String nextPropertyName : myPropertyNames) {
 				if (!theRecord.toMap().containsKey(nextPropertyName)) {
 					continue;
@@ -67,7 +74,7 @@ public class LoincHandler implements IRecordHandler {
 				}
 			}
 
-			Validate.isTrue(!myCode2Concept.containsKey(code));
+			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 			myCode2Concept.put(code, concept);
 		}
 	}

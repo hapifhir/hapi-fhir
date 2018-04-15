@@ -318,7 +318,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		for (int i = 0; i < theEntries.size(); i++) {
 
 			if (i % 100 == 0) {
-				ourLog.info("Processed {} non-GET entries out of {}", i, theEntries.size());
+				ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
 			}
 
 			BundleEntryComponent nextReqEntry = theEntries.get(i);

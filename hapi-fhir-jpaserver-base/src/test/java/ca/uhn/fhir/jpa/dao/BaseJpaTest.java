@@ -281,6 +281,7 @@ public abstract class BaseJpaTest {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
 				entityManager.createQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
 				for (TermCodeSystem next : entityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
 					next.setCurrentVersion(null);

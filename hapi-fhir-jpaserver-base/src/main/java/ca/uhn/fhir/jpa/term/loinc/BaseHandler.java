@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -85,7 +86,7 @@ abstract class BaseHandler implements IRecordHandler {
 	}
 
 
-	void addConceptMapEntry(ConceptMapping theMapping) {
+	void addConceptMapEntry(ConceptMapping theMapping, String theCopyright) {
 		if (isBlank(theMapping.getSourceCode())) {
 			return;
 		}
@@ -99,6 +100,13 @@ abstract class BaseHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
+			conceptMap.setPublisher("Regentrief Institute, Inc.");
+			conceptMap.addContact()
+				.setName("Regentrief Institute, Inc.")
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue("https://loinc.org");
+			conceptMap.setCopyright(theCopyright);
 			myIdToConceptMaps.put(theMapping.getConceptMapId(), conceptMap);
 			myConceptMaps.add(conceptMap);
 		} else {
@@ -164,6 +172,13 @@ abstract class BaseHandler implements IRecordHandler {
 			vs.setId(theValueSetId);
 			vs.setName(theValueSetName);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.setPublisher("Regenstrief Institute, Inc.");
+			vs.addContact()
+				.setName("Regenstrief Institute, Inc.")
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue("https://loinc.org");
+			vs.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
 		} else {

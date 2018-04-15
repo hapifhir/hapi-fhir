@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
+@TestPropertySource(properties = {
+	// Since scheduled tasks can cause searches, which messes up the
+	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
+	"scheduling_disabled=true"
+})
 public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UniqueSearchParamTest.class);

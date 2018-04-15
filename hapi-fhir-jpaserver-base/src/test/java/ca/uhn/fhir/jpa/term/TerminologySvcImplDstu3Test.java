@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -13,6 +14,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,14 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
 		TermConcept parentA = new TermConcept(cs, "ParentA");
 		cs.getConcepts().add(parentA);
 
@@ -56,6 +66,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept childAAB = new TermConcept(cs, "childAAB");
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
 		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
@@ -190,8 +205,74 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet outcome = myTermSvc.expandValueSet(vs);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
+		assertThat(codes, containsInAnyOrder("ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC", "ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
 	}
+
+	@Test
+	public void testPropertiesAndDesignationsPreservedInExpansion() {
+		createCodeSystem();
+
+		List<String> codes;
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include.addConcept().setCode("childAAB");
+		ValueSet outcome = myTermSvc.expandValueSet(vs);
+
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAB"));
+
+		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
+		assertEquals("childAAB", concept.getCode());
+		assertEquals("http://example.com/my_code_system", concept.getSystem());
+		assertEquals(null, concept.getDisplay());
+		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
+		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
+		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
+		assertEquals("D1V", concept.getDesignation().get(0).getValue());
+	}
+
+	@After
+	public void after() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+	}
+
+
+	@Test
+	public void testCreatePropertiesAndDesignationsWithDeferredConcepts() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+
+		createCodeSystem();
+
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include.addConcept().setCode("childAAB");
+		ValueSet outcome = myTermSvc.expandValueSet(vs);
+
+		List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAB"));
+
+		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
+		assertEquals("childAAB", concept.getCode());
+		assertEquals("http://example.com/my_code_system", concept.getSystem());
+		assertEquals(null, concept.getDisplay());
+		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
+		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
+		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
+		assertEquals("D1V", concept.getDesignation().get(0).getValue());
+	}
+
 
 	@Test
 	public void testFindCodesAbove() {

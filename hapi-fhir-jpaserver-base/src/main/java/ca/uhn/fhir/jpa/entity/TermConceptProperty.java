@@ -43,22 +43,22 @@ public class TermConceptProperty implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
 	@Column(name = "PID")
 	private Long myId;
-	@Column(name = "PROP_KEY", length = 200, nullable = false)
+	@Column(name = "PROP_KEY", length = 500, nullable = false)
 	@NotBlank
 	private String myKey;
-	@Column(name = "PROP_VAL", length = 200, nullable = true)
+	@Column(name = "PROP_VAL", length = 500, nullable = true)
 	private String myValue;
 	@Column(name = "PROP_TYPE", length = MAX_PROPTYPE_ENUM_LENGTH, nullable = false)
 	private TermConceptPropertyTypeEnum myType;
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
-	@Column(name = "PROP_CODESYSTEM", length = 200, nullable = true)
+	@Column(name = "PROP_CODESYSTEM", length = 500, nullable = true)
 	private String myCodeSystem;
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
-	@Column(name = "PROP_DISPLAY", length = 200, nullable = true)
+	@Column(name = "PROP_DISPLAY", length = 500, nullable = true)
 	private String myDisplay;
 
 	/**

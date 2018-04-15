@@ -209,7 +209,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
 
 			if (i % 100 == 0) {
-				ourLog.info("Processed {} non-GET entries out of {}", i, theRequest.getEntry().size());
+				ourLog.debug("Processed {} non-GET entries out of {}", i, theRequest.getEntry().size());
 			}
 
 			Entry nextReqEntry = theRequest.getEntry().get(i);

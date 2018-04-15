@@ -63,6 +63,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -78,6 +79,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@Autowired
 	protected ITermConceptPropertyDao myConceptPropertyDao;
 	@Autowired
+	protected ITermConceptDesignationDao myConceptDesignationDao;
+	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -87,7 +90,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private List<TermConceptParentChildLink> myConceptLinksToSaveLater = new ArrayList<>();
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-	private List<TermConcept> myConceptsToSaveLater = new ArrayList<>();
+	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
+	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private long myNextReindexPass;
@@ -103,6 +108,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			contains.setCode(theConcept.getCode());
 			contains.setSystem(theCodeSystem);
 			contains.setDisplay(theConcept.getDisplay());
+			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
+				contains
+					.addDesignation()
+					.setValue(nextDesignation.getValue())
+					.getUse()
+					.setSystem(nextDesignation.getUseSystem())
+					.setCode(nextDesignation.getUseCode())
+					.setDisplay(nextDesignation.getUseDisplay());
+			}
 		}
 	}
 
@@ -146,11 +160,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		return retVal;
 	}
 
-	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
 
-	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails);
+	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 
-	abstract void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails);
+	abstract void createOrUpdateValueSet(ValueSet theValueSet);
 
 	@Override
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
@@ -162,10 +176,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		myCodeSystemDao.save(cs);
 		myCodeSystemDao.flush();
 
+		int i = 0;
 		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
 				myConceptPropertyDao.delete(nextConcept.getProperties());
+				myConceptDesignationDao.delete(nextConcept.getDesignations());
 				myConceptDao.delete(nextConcept);
 			}
 			if (next.getCodeSystem().getCurrentVersion() == next) {
@@ -173,10 +189,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				myCodeSystemDao.save(next.getCodeSystem());
 			}
 			myCodeSystemVersionDao.delete(next);
+
+			if (i++ % 1000 == 0) {
+				myEntityManager.flush();
+			}
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
 		myCodeSystemDao.delete(theCodeSystem);
 
+		myEntityManager.flush();
 	}
 
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
@@ -223,11 +244,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 							haveIncludeCriteria = true;
 							TermConcept code = findCode(system, nextCode);
 							if (code != null) {
-								addedCodes.add(nextCode);
-								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
-								contains.setCode(nextCode);
-								contains.setSystem(system);
-								contains.setDisplay(code.getDisplay());
+								addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, code);
 							}
 						}
 					}
@@ -492,7 +509,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(theConcept);
 		} else {
-			myConceptsToSaveLater.add(theConcept);
+			myDeferredConcepts.add(theConcept);
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
@@ -507,10 +524,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 		}
 
-		for (TermConceptProperty next : theConcept.getProperties()) {
-			myConceptPropertyDao.save(next);
-		}
-
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
@@ -523,20 +536,30 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
+	private void processDeferredConceptMaps() {
+		int count = Math.min(myDeferredConceptMaps.size(), 5);
+		for (ConceptMap nextConceptMap : new ArrayList<>(myDeferredConceptMaps.subList(0, count))) {
+			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
+			createOrUpdateConceptMap(nextConceptMap);
+			myDeferredConceptMaps.remove(nextConceptMap);
+		}
+		ourLog.info("Saved {} deferred ConceptMap resources, have {} remaining", count, myDeferredConceptMaps.size());
+	}
+
 	private void processDeferredConcepts() {
 		int codeCount = 0, relCount = 0;
 		StopWatch stopwatch = new StopWatch();
 
-		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptsToSaveLater.size());
+		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myDeferredConcepts.size());
 		ourLog.info("Saving {} deferred concepts...", count);
-		while (codeCount < count && myConceptsToSaveLater.size() > 0) {
-			TermConcept next = myConceptsToSaveLater.remove(0);
+		while (codeCount < count && myDeferredConcepts.size() > 0) {
+			TermConcept next = myDeferredConcepts.remove(0);
 			codeCount += saveConcept(next);
 		}
 
 		if (codeCount > 0) {
 			ourLog.info("Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({}ms / code)",
-				new Object[] {codeCount, myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+				new Object[] {codeCount, myDeferredConcepts.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
 		}
 
 		if (codeCount == 0) {
@@ -560,9 +583,19 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				new Object[] {relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
 		}
 
-		if ((myConceptsToSaveLater.size() + myConceptLinksToSaveLater.size()) == 0) {
+		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
 			ourLog.info("All deferred concepts and relationships have now been synchronized to the database");
 		}
+	}
+
+	private void processDeferredValueSets() {
+		int count = Math.min(myDeferredValueSets.size(), 5);
+		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
+			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
+			createOrUpdateValueSet(nextValueSet);
+			myDeferredValueSets.remove(nextValueSet);
+		}
+		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredConceptMaps.size());
 	}
 
 	private void processReindexing() {
@@ -656,6 +689,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			myConceptDao.save(theConcept);
+
+			for (TermConceptProperty next : theConcept.getProperties()) {
+				myConceptPropertyDao.save(next);
+			}
+
+			for (TermConceptDesignation next : theConcept.getDesignations()) {
+				myConceptDesignationDao.save(next);
+			}
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
@@ -674,20 +715,31 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public synchronized void saveDeferred() {
 		if (!myProcessDeferred) {
 			return;
-		} else if (myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
+		} else if (myDeferredConcepts.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
 			processReindexing();
 			return;
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				processDeferredConcepts();
-			}
-
+		tt.execute(t -> {
+			processDeferredConcepts();
+			return null;
 		});
+
+		if (myDeferredValueSets.size() > 0) {
+			tt.execute(t -> {
+				processDeferredValueSets();
+				return null;
+			});
+		}
+		if (myDeferredConceptMaps.size() > 0) {
+			tt.execute(t -> {
+				processDeferredConceptMaps();
+				return null;
+			});
+		}
+
 	}
 
 	@Override
@@ -754,8 +806,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
-		ArrayList<String> conceptsStack = new ArrayList<String>();
-		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
+		ArrayList<String> conceptsStack = new ArrayList<>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
@@ -790,8 +842,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		ourLog.info("Done deleting old code system versions");
 
-		if (myConceptsToSaveLater.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
-			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size());
+		if (myDeferredConcepts.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
+			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myDeferredConcepts.size(), myConceptLinksToSaveLater.size());
 		}
 	}
 
@@ -800,7 +852,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
-		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource, theRequestDetails);
+		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource);
 
 		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
 		Long codeSystemResourcePid = resource.getId();
@@ -810,14 +862,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		theCodeSystemVersion.setResource(resource);
 		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
 
-		for (ValueSet nextValueSet : theValueSets) {
-			createOrUpdateValueSet(nextValueSet, theRequestDetails);
-		}
-
-		for (ConceptMap nextConceptMap : theConceptMaps) {
-			createOrUpdateConceptMap(nextConceptMap, theRequestDetails);
-		}
-
+		myDeferredConceptMaps.addAll(theConceptMaps);
+		myDeferredValueSets.addAll(theValueSets);
 	}
 
 	@Override

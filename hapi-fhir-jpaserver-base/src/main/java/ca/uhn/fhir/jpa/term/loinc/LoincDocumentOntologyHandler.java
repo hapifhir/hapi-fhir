@@ -35,8 +35,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincDocumentOntologyHandler extends BaseHandler implements IRecordHandler {
 
-	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "DOCUMENT-ONTOLOGY-CODES-VS";
-	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/document-ontology-codes";
+	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
+	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;

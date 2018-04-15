@@ -815,7 +815,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					predicate = join.<Object>get("myUri").as(String.class).in(toFind);
+					predicate = join.get("myUri").as(String.class).in(toFind);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 					predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
@@ -953,8 +953,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate lb = null;
 		if (lowerBound != null) {
-			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.<Date>get("myValueLow"), lowerBound);
-			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.<Date>get("myValueHigh"), lowerBound);
+			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
+			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBound);
 			if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER || theRange.getLowerBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 				lb = gt;
 			} else {
@@ -964,8 +964,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate ub = null;
 		if (upperBound != null) {
-			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.<Date>get("myValueLow"), upperBound);
-			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.<Date>get("myValueHigh"), upperBound);
+			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBound);
+			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
 			if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 				ub = lt;
 			} else {
@@ -2008,15 +2008,15 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
 				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}
 			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
 				lastUpdatedPredicates.add(predicateUpper);
 			}
 		}
@@ -2262,10 +2262,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myNext == null) {
 				fetchNext();
 			}
-			if (myNext == NO_MORE) {
-				return false;
-			}
-			return true;
+			return myNext != NO_MORE;
 		}
 
 		@Override
