@@ -432,7 +432,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		fetchParents(concept, retVal);
 
-		ourLog.info("Fetched {} codes above code {} in {}ms", new Object[] {retVal.size(), theCode, stopwatch.getMillis()});
+		ourLog.info("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.getMillis());
 		return retVal;
 	}
 
@@ -463,7 +463,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		fetchChildren(concept, retVal);
 
-		ourLog.info("Fetched {} codes below code {} in {}ms", new Object[] {retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS)});
+		ourLog.info("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 		return retVal;
 	}
 
@@ -537,7 +537,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	private void processDeferredConceptMaps() {
-		int count = Math.min(myDeferredConceptMaps.size(), 5);
+		int count = Math.min(myDeferredConceptMaps.size(), 20);
 		for (ConceptMap nextConceptMap : new ArrayList<>(myDeferredConceptMaps.subList(0, count))) {
 			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
 			createOrUpdateConceptMap(nextConceptMap);
@@ -559,7 +559,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		if (codeCount > 0) {
 			ourLog.info("Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({}ms / code)",
-				new Object[] {codeCount, myDeferredConcepts.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+				codeCount, myDeferredConcepts.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
 		}
 
 		if (codeCount == 0) {
@@ -580,7 +580,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		if (relCount > 0) {
 			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)",
-				new Object[] {relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
 		}
 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
@@ -589,13 +589,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	private void processDeferredValueSets() {
-		int count = Math.min(myDeferredValueSets.size(), 5);
+		int count = Math.min(myDeferredValueSets.size(), 20);
 		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
 			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
 			createOrUpdateValueSet(nextValueSet);
 			myDeferredValueSets.remove(nextValueSet);
 		}
-		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredConceptMaps.size());
+		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredValueSets.size());
 	}
 
 	private void processReindexing() {
@@ -668,7 +668,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 					count++;
 				}
 
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] {count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count)});
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count));
 			}
 		});
 
@@ -758,7 +758,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
 
-		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
+//		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions

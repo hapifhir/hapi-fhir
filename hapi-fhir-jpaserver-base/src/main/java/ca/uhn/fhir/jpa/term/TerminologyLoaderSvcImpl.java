@@ -240,7 +240,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		iterateOverZipFile(theDescriptors, LOINC_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Answer lists (ValueSets of potential answers/values for loinc "questions")
-		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, propertyNames, valueSets);
+		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
 		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Answer list links (connects loinc observation codes to answerlist codes)
