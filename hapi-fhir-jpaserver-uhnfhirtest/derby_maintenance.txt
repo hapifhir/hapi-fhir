@@ -108,7 +108,6 @@ where res_id in (
 
 drop table hfj_history_tag cascade constraints;
 drop table hfj_forced_id cascade constraints;
-drop table HFJ_SUBSCRIPTION_STATS cascade constraints;
 drop table hfj_res_link cascade constraints;
 drop table hfj_spidx_coords cascade constraints;
 drop table hfj_spidx_date cascade constraints;

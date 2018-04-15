@@ -67,6 +67,8 @@ public class CanonicalSubscription implements Serializable {
 	private CanonicalEventDefinition myTrigger;
 	@JsonProperty("emailDetails")
 	private EmailDetails myEmailDetails;
+	@JsonProperty("restHookDetails")
+	private RestHookDetails myRestHookDetails;
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
@@ -131,12 +133,10 @@ public class CanonicalSubscription implements Serializable {
 		return myHeaders;
 	}
 
-	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
+	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
-		for (IPrimitiveType<String> next : theHeader) {
-			if (isNotBlank(next.getValueAsString())) {
-				myHeaders.add(next.getValueAsString());
-			}
+		if (isNotBlank(theHeaders)) {
+			myHeaders.add(theHeaders);
 		}
 	}
 
@@ -158,6 +158,13 @@ public class CanonicalSubscription implements Serializable {
 
 	public void setPayloadString(String thePayloadString) {
 		myPayloadString = thePayloadString;
+	}
+
+	public RestHookDetails getRestHookDetails() {
+		if (myRestHookDetails == null) {
+			myRestHookDetails = new RestHookDetails();
+		}
+		return myRestHookDetails;
 	}
 
 	public Subscription.SubscriptionStatus getStatus() {
@@ -191,10 +198,12 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
-	public void setHeaders(String theHeaders) {
+	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
 		myHeaders = new ArrayList<>();
-		if (isNotBlank(theHeaders)) {
-			myHeaders.add(theHeaders);
+		for (IPrimitiveType<String> next : theHeader) {
+			if (isNotBlank(next.getValueAsString())) {
+				myHeaders.add(next.getValueAsString());
+			}
 		}
 	}
 
@@ -228,6 +237,32 @@ public class CanonicalSubscription implements Serializable {
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
 		}
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+	public static class RestHookDetails {
+		@JsonProperty("stripVersionId")
+		private boolean myStripVersionId;
+		@JsonProperty("deliverLatestVersion")
+		private boolean myDeliverLatestVersion;
+
+		public boolean isDeliverLatestVersion() {
+			return myDeliverLatestVersion;
+		}
+
+		public void setDeliverLatestVersion(boolean theDeliverLatestVersion) {
+			myDeliverLatestVersion = theDeliverLatestVersion;
+		}
+
+		public boolean isStripVersionId() {
+			return myStripVersionId;
+		}
+
+		public void setStripVersionId(boolean theStripVersionId) {
+			myStripVersionId = theStripVersionId;
+		}
+
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
