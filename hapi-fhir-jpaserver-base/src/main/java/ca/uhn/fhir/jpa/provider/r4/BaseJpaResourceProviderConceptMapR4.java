@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
@@ -55,11 +56,13 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 
 		// FIXME: Leverage stored information for instance-level processing.
 		boolean haveId = theId != null && theId.hasIdPart();
-//		if (haveId) {
-//			// Instance-level processing
-//		} else {
-//			// Type-level processing
-//		}
+		if (haveId) {
+			// Instance-level processing
+			IFhirResourceDao<ConceptMap> conceptMapDao = getDao();
+			ConceptMap theConceptMap = conceptMapDao.read(theId);
+		} else {
+			// Type-level processing
+		}
 
 		boolean haveSourceCode = theSourceCode != null
 			&& theSourceCode.hasCode();

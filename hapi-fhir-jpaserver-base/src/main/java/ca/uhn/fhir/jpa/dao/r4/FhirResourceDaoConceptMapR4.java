@@ -31,7 +31,9 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
@@ -70,22 +72,26 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 			retVal.setMessage(new StringType("Matches found!"));
 
 			TranslationMatch translationMatch;
+			Set<TermConceptMapGroupElementTarget> targetsToReturn = new HashSet<>();
 			for (TermConceptMapGroupElementTarget target : theTargets) {
-				translationMatch = new TranslationMatch();
+				if (targetsToReturn.add(target)) {
+					translationMatch = new TranslationMatch();
 
-				translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+					translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
 
-				translationMatch.setConcept(
-					new Coding()
-						.setCode(target.getCode())
-						.setSystem(target.getSystem())
-						.setDisplay(target.getDisplay())
-						.setUserSelected(false)
-				);
+					translationMatch.setConcept(
+						new Coding()
+							.setCode(target.getCode())
+							.setSystem(target.getSystem())
+							.setVersion(target.getSystemVersion())
+							.setDisplay(target.getDisplay())
+							.setUserSelected(false)
+					);
 
-				translationMatch.setSource(new UriType(target.getConceptMapUrl()));
+					translationMatch.setSource(new UriType(target.getConceptMapUrl()));
 
-				retVal.addMatch(translationMatch);
+					retVal.addMatch(translationMatch);
+				}
 			}
 		}
 
@@ -116,20 +122,24 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 			retVal.setMessage(new StringType("Matches found!"));
 
 			TranslationMatch translationMatch;
+			Set<TermConceptMapGroupElement> elementsToReturn = new HashSet<>();
 			for (TermConceptMapGroupElement element : theElements) {
-				translationMatch = new TranslationMatch();
+				if (elementsToReturn.add(element)) {
+					translationMatch = new TranslationMatch();
 
-				translationMatch.setConcept(
-					new Coding()
-						.setCode(element.getCode())
-						.setSystem(element.getSystem())
-						.setDisplay(element.getDisplay())
-						.setUserSelected(false)
-				);
+					translationMatch.setConcept(
+						new Coding()
+							.setCode(element.getCode())
+							.setSystem(element.getSystem())
+							.setVersion(element.getSystemVersion())
+							.setDisplay(element.getDisplay())
+							.setUserSelected(false)
+					);
 
-				translationMatch.setSource(new UriType(element.getConceptMapUrl()));
+					translationMatch.setSource(new UriType(element.getConceptMapUrl()));
 
-				retVal.addMatch(translationMatch);
+					retVal.addMatch(translationMatch);
+				}
 			}
 		}
 

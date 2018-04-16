@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
@@ -97,6 +99,32 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 			myValueSet = getConceptMapGroupElement().getConceptMapGroup().getTargetValueSet();
 		}
 		return myValueSet;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+
+		if (!(o instanceof TermConceptMapGroupElementTarget)) return false;
+
+		TermConceptMapGroupElementTarget that = (TermConceptMapGroupElementTarget) o;
+
+		return new EqualsBuilder()
+			.append(getCode(), that.getCode())
+			.append(getEquivalence(), that.getEquivalence())
+			.append(getSystem(), that.getSystem())
+			.append(getSystemVersion(), that.getSystemVersion())
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(getCode())
+			.append(getEquivalence())
+			.append(getSystem())
+			.append(getSystemVersion())
+			.toHashCode();
 	}
 
 	@Override

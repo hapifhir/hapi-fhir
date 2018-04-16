@@ -872,5 +872,367 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		});
 	}
 
-	// FIXME: Additional testing for reverse is required.
+	@Test
+	public void testTranslateWithReverseByCodeSystemsAndSourceCodeUnmapped() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Attempt to map unknown source code">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_3)
+					.setCode("BOGUS");
+				translationRequest.setTargetSystem(new UriType(CS_URL));
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertTrue(elements.isEmpty());
+				// </editor-fold>
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithCodeOnly() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				element = elements.get(1);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceSystem() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				element = elements.get(1);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceSystemAndVersion() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   source code system version
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567")
+					.setVersion("Version 2");
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				element = elements.get(1);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem1() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #1
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem4() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #4
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source value set
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setSource(new UriType(VS_URL_2));
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				element = elements.get(1);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithTargetValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   target value set
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setTarget(new UriType(VS_URL));
+				translationRequest.setReverse(true);
+
+				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+
+				TermConceptMapGroupElement element = elements.get(0);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
+				assertEquals("Version 1", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				element = elements.get(1);
+
+				ourLog.info("element:\n" + element.toString());
+
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
+				assertEquals("Version 5", element.getSystemVersion());
+				assertEquals(VS_URL, element.getValueSet());
+				assertEquals(CM_URL, element.getConceptMapUrl());
+			}
+		});
+	}
 }

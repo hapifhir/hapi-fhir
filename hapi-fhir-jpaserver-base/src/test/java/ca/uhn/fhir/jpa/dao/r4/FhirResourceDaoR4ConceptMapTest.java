@@ -53,6 +53,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -62,6 +63,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 				// </editor-fold>
@@ -99,6 +101,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 				// </editor-fold>
@@ -165,6 +168,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -174,6 +178,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -183,6 +188,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -222,6 +228,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -231,6 +238,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -240,6 +248,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -281,6 +290,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -322,6 +332,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -331,6 +342,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -372,6 +384,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -413,6 +426,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -422,6 +436,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -461,6 +476,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -470,6 +486,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -479,6 +496,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -518,6 +536,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
 				assertEquals(CS_URL_2, concept.getSystem());
+				assertEquals("Version 2", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -527,6 +546,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
@@ -536,6 +556,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
 				assertEquals(CS_URL_3, concept.getSystem());
+				assertEquals("Version 4", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
@@ -579,11 +600,387 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
 				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 			}
 		});
 	}
 
-	// FIXME: Additional testing for reverse is required.
+	@Test
+	public void testTranslateWithReverseByCodeSystemsAndSourceCodeUnmapped() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// <editor-fold desc="Attempt to map unknown source code">
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_3)
+					.setCode("BOGUS");
+				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertFalse(translationResult.getResult().booleanValue());
+				assertEquals("No matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(0, translationResult.getMatches().size());
+				// </editor-fold>
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithCodeOnly() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(2, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+
+				translationMatch = translationResult.getMatches().get(1);
+				assertNull(translationMatch.getEquivalence());
+				concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceSystem() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(2, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+
+				translationMatch = translationResult.getMatches().get(1);
+				assertNull(translationMatch.getEquivalence());
+				concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceSystemAndVersion() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   source code system version
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567")
+					.setVersion("Version 2");
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(2, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+
+				translationMatch = translationResult.getMatches().get(1);
+				assertNull(translationMatch.getEquivalence());
+				concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem1() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #1
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(1, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem4() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source code system
+				 *   target code system #4
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_2)
+					.setCode("34567");
+				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(1, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithSourceValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   source value set
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setSource(new UriType(VS_URL_2));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(2, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+
+				translationMatch = translationResult.getMatches().get(1);
+				assertNull(translationMatch.getEquivalence());
+				concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
+
+	@Test
+	public void testTranslateWithReverseUsingPredicatesWithTargetValueSet() {
+		ConceptMap conceptMap = createConceptMap();
+		myTermSvc.storeNewConceptMap(conceptMap);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				/*
+				 * Provided:
+				 *   source code
+				 *   target value set
+				 *   reverse = true
+				 */
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setCode("34567");
+				translationRequest.setTarget(new UriType(VS_URL));
+				translationRequest.setReverse(true);
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertTrue(translationResult.getResult().booleanValue());
+				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+				assertEquals(2, translationResult.getMatches().size());
+
+				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				assertNull(translationMatch.getEquivalence());
+				Coding concept = translationMatch.getConcept();
+				assertEquals("12345", concept.getCode());
+				assertEquals("Source Code 12345", concept.getDisplay());
+				assertEquals(CS_URL, concept.getSystem());
+				assertEquals("Version 1", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+
+				translationMatch = translationResult.getMatches().get(1);
+				assertNull(translationMatch.getEquivalence());
+				concept = translationMatch.getConcept();
+				assertEquals("78901", concept.getCode());
+				assertEquals("Source Code 78901", concept.getDisplay());
+				assertEquals(CS_URL_4, concept.getSystem());
+				assertEquals("Version 5", concept.getVersion());
+				assertFalse(concept.getUserSelected());
+				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+			}
+		});
+	}
 }
