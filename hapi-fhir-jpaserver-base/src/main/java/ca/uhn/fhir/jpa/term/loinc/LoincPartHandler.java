@@ -58,9 +58,13 @@ public class LoincPartHandler implements IRecordHandler {
 //			return;
 //		}
 
-		TermConcept concept = new TermConcept(myCodeSystemVersion, partNumber);
-		concept.setDisplay(partName);
-
+		TermConcept concept = myCode2Concept.get(partNumber);
+		if (concept == null) {
+			concept = new TermConcept(myCodeSystemVersion, partNumber);
+			concept.setDisplay(partName);
+			myCode2Concept.put(partNumber, concept);
+		}
+		
 		if (isNotBlank(partDisplayName)) {
 			concept.addDesignation()
 				.setConcept(concept)
@@ -68,7 +72,6 @@ public class LoincPartHandler implements IRecordHandler {
 				.setValue(partDisplayName);
 		}
 
-		myCode2Concept.put(partDisplayName, concept);
 	}
 
 }

@@ -241,7 +241,7 @@ public DaoConfig daoConfig() {
 				</p>
 				<div class="source">
 				<pre>
-					Cache-Control: nocache
+					Cache-Control: no-cache
 				</pre>
 				</div>
 				<p><b>Disable Paging at the Request Level</b></p>

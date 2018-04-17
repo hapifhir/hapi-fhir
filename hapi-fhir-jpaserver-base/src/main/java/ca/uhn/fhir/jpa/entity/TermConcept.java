@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.*;
 import org.hl7.fhir.r4.model.Coding;
+import org.springframework.validation.ValidationUtils;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -185,6 +187,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public void setCode(String theCode) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "Code must not be null or empty");
 		myCode = theCode;
 	}
 
