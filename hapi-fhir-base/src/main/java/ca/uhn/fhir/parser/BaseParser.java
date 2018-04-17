@@ -195,6 +195,19 @@ public abstract class BaseParser implements IParser {
 			List<IBaseReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
 			for (IBaseReference next : allElements) {
 				IBaseResource resource = next.getResource();
+				if (resource == null && next.getReferenceElement().isLocal()) {
+					if (existingIdToContainedResource != null) {
+						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReferenceElement().getValue());
+						if (potentialTarget != null) {
+							theContained.addContained(next.getReferenceElement(), potentialTarget);
+							containResourcesForEncoding(theContained, potentialTarget, theTarget);
+						}
+					}
+				}
+			}
+
+			for (IBaseReference next : allElements) {
+				IBaseResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
 						if (theContained.getResourceId(resource) != null) {
@@ -210,15 +223,8 @@ public abstract class BaseParser implements IParser {
 					}
 
 					containResourcesForEncoding(theContained, resource, theTarget);
-				} else if (next.getReferenceElement().isLocal()) {
-					if (existingIdToContainedResource != null) {
-						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReferenceElement().getValue());
-						if (potentialTarget != null) {
-							theContained.addContained(next.getReferenceElement(), potentialTarget);
-							containResourcesForEncoding(theContained, potentialTarget, theTarget);
-						}
-					}
 				}
+
 			}
 		}
 
@@ -1170,8 +1176,9 @@ public abstract class BaseParser implements IParser {
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
-		private List<IBaseResource> myResources = new ArrayList<IBaseResource>();
-		private IdentityHashMap<IBaseResource, IIdType> myResourceToId = new IdentityHashMap<IBaseResource, IIdType>();
+		private List<IBaseResource> myResources = new ArrayList<>();
+		private IdentityHashMap<IBaseResource, IIdType> myResourceToId = new IdentityHashMap<>();
+		private Set<String> myExistingLocalIds = new HashSet<>();
 
 		public void addContained(IBaseResource theResource) {
 			if (myResourceToId.containsKey(theResource)) {
@@ -1184,7 +1191,20 @@ public abstract class BaseParser implements IParser {
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());
-				newId = new IdDt(myNextContainedId++);
+
+				// Generally we won't even go into this loop once since
+				// our next ID shouldn't already exist, but there is
+				// always a chance that it does if someone is mixing
+				// manually assigned local IDs with HAPI assigned ones
+				// See JsonParser#testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst
+				// and JsonParser#testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast
+				// for examples of where this is needed...
+				while (!myExistingLocalIds.add("#" + myNextContainedId)) {
+					myNextContainedId++;
+				}
+				newId = new IdDt(myNextContainedId);
+
+				myNextContainedId++;
 			}
 
 			myResourceToId.put(theResource, newId);
@@ -1192,7 +1212,7 @@ public abstract class BaseParser implements IParser {
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
-			if (!hasId(theId)) {
+			if (myExistingLocalIds.add(theId.getValue())) {
 				myResourceToId.put(theResource, theId);
 				myResources.add(theResource);
 			}
@@ -1204,15 +1224,6 @@ public abstract class BaseParser implements IParser {
 
 		public IIdType getResourceId(IBaseResource theNext) {
 			return myResourceToId.get(theNext);
-		}
-
-		public boolean hasId(IIdType theId) {
-			for (IIdType next : myResourceToId.values()) {
-				if (Objects.equals(next.getValue(), theId.getValue())) {
-					return true;
-				}
-			}
-			return false;
 		}
 
 		public boolean isEmpty() {

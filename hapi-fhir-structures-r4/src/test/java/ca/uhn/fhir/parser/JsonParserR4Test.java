@@ -36,6 +36,64 @@ public class JsonParserR4Test {
 		return b;
 	}
 
+	@Test
+	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
+
+		Observation obs = new Observation();
+
+		Patient pt = new Patient();
+		pt.setId("#1");
+		pt.addName().setFamily("FAM");
+		obs.getSubject().setReference("#1");
+		obs.getContained().add(pt);
+
+		Encounter enc = new Encounter();
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		obs.getContext().setResource(enc);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals("#2", obs.getContained().get(1).getId());
+
+		pt = (Patient) obs.getSubject().getResource();
+		assertEquals("FAM", pt.getNameFirstRep().getFamily());
+
+		enc = (Encounter) obs.getContext().getResource();
+		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
+	}
+
+	@Test
+	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast() {
+
+		Observation obs = new Observation();
+
+		Patient pt = new Patient();
+		pt.addName().setFamily("FAM");
+		obs.getSubject().setResource(pt);
+
+		Encounter enc = new Encounter();
+		enc.setId("#1");
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		obs.getContext().setReference("#1");
+		obs.getContained().add(enc);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals("#2", obs.getContained().get(1).getId());
+
+		pt = (Patient) obs.getSubject().getResource();
+		assertEquals("FAM", pt.getNameFirstRep().getFamily());
+
+		enc = (Encounter) obs.getContext().getResource();
+		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
+	}
+
 	/**
 	 * See #814
 	 */
@@ -153,7 +211,7 @@ public class JsonParserR4Test {
 		b = parser.parseResource(Bundle.class, encoded);
 
 		assertEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
+		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
@@ -179,7 +237,7 @@ public class JsonParserR4Test {
 		b = parser.parseResource(Bundle.class, encoded);
 
 		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
+		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
@@ -205,7 +263,7 @@ public class JsonParserR4Test {
 		b = parser.parseResource(Bundle.class, encoded);
 
 		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertNotEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
+		assertNotEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
