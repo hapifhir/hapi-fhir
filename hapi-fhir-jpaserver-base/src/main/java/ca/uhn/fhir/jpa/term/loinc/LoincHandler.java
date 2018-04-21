@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term.loinc;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,13 +22,17 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -37,12 +41,14 @@ public class LoincHandler implements IRecordHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
-	private final Set<String> myPropertyNames;
+	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
+	private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
 
-	public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames) {
+	public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
+		myPartTypeAndPartNameToPartNumber = thePartTypeAndPartNameToPartNumber;
 	}
 
 	@Override
@@ -64,13 +70,57 @@ public class LoincHandler implements IRecordHandler {
 					.setValue(shortName);
 			}
 
-			for (String nextPropertyName : myPropertyNames) {
+			for (String nextPropertyName : myPropertyNames.keySet()) {
 				if (!theRecord.toMap().containsKey(nextPropertyName)) {
 					continue;
 				}
+
+				CodeSystem.PropertyType nextPropertyType = myPropertyNames.get(nextPropertyName);
+
 				String nextPropertyValue = theRecord.get(nextPropertyName);
 				if (isNotBlank(nextPropertyValue)) {
-					concept.addPropertyString(nextPropertyName, nextPropertyValue);
+					nextPropertyValue = trim(nextPropertyValue);
+
+					switch (nextPropertyType) {
+						case STRING:
+							concept.addPropertyString(nextPropertyName, nextPropertyValue);
+							break;
+						case CODING:
+							PartTypeAndPartName key = new PartTypeAndPartName(nextPropertyName, nextPropertyValue);
+							String partNumber = myPartTypeAndPartNameToPartNumber.get(key);
+
+							if (partNumber == null && nextPropertyName.equals("TIME_ASPCT")) {
+								key = new PartTypeAndPartName("TIME", nextPropertyValue);
+								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
+							}
+							if (partNumber == null && nextPropertyName.equals("METHOD_TYP")) {
+								key = new PartTypeAndPartName("METHOD", nextPropertyValue);
+								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
+							}
+							if (partNumber == null && nextPropertyName.equals("SCALE_TYP")) {
+								key = new PartTypeAndPartName("SCALE", nextPropertyValue);
+								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
+							}
+
+							if (partNumber == null && nextPropertyName.equals("SYSTEM") && nextPropertyValue.startsWith("^")) {
+								continue;
+							}
+
+//							Validate.notBlank(partNumber, "Unknown part: " + key);
+							if (isNotBlank(partNumber)) {
+								concept.addPropertyCoding(nextPropertyName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, nextPropertyValue);
+							} else {
+								ourLog.warn("Unable to find part code with TYPE[{}] and NAME[{}]", key.getPartType(), key.getPartName());
+							}
+							break;
+						case CODE:
+						case INTEGER:
+						case BOOLEAN:
+						case DATETIME:
+						case NULL:
+							throw new InternalErrorException("Don't know how to handle LOINC property of type: " + nextPropertyType);
+					}
+
 				}
 			}
 
@@ -78,5 +128,5 @@ public class LoincHandler implements IRecordHandler {
 			myCode2Concept.put(code, concept);
 		}
 	}
-
+private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
 }

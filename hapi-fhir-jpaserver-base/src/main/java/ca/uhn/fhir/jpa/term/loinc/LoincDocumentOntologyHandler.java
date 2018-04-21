@@ -20,33 +20,31 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincDocumentOntologyHandler extends BaseHandler implements IRecordHandler {
+public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	private final Map<String, TermConcept> myCode2Concept;
-	private final TermCodeSystemVersion myCodeSystemVersion;
-	private final Set<String> myPropertyNames;
 
-	public LoincDocumentOntologyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		super(theCode2concept, theValueSets, theConceptMaps);
-		myCodeSystemVersion = theCodeSystemVersion;
+	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 		myCode2Concept = theCode2concept;
-		myPropertyNames = thePropertyNames;
 	}
 
 	@Override
@@ -59,7 +57,7 @@ public class LoincDocumentOntologyHandler extends BaseHandler implements IRecord
 		String partName = trim(theRecord.get("PartName"));
 
 		// RSNA Codes VS
-		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME);
+		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME, null);
 		addCodeAsIncludeToValueSet(vs, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, null);
 
 		// Part Properties

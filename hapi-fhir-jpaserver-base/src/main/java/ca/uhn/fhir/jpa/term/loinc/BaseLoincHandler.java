@@ -30,21 +30,31 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-abstract class BaseHandler implements IRecordHandler {
+public abstract class BaseLoincHandler implements IRecordHandler {
 
+	public static final String LOINC_COPYRIGHT_STATEMENT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/";
+	/**
+	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
+	 * the website URL to LOINC.
+	 */
+	public static final String LOINC_WEBSITE_URL = "https://loinc.org";
+	public static final String REGENSTRIEF_INSTITUTE_INC = "Regenstrief Institute, Inc.";
 	private final List<ConceptMap> myConceptMaps;
 	private final Map<String, ConceptMap> myIdToConceptMaps = new HashMap<>();
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 	private final Map<String, TermConcept> myCode2Concept;
+	private final Properties myUploadProperties;
 
-	BaseHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		myValueSets = theValueSets;
 		myCode2Concept = theCode2Concept;
 		myConceptMaps = theConceptMaps;
+		myUploadProperties = theUploadProperties;
 	}
 
 	void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
@@ -100,20 +110,25 @@ abstract class BaseHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
-			conceptMap.setPublisher("Regentrief Institute, Inc.");
+			conceptMap.setVersion(myUploadProperties.getProperty("conceptmap.version"));
+			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			conceptMap.addContact()
-				.setName("Regentrief Institute, Inc.")
+				.setName(REGENSTRIEF_INSTITUTE_INC)
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue("https://loinc.org");
-			conceptMap.setCopyright(theCopyright);
+				.setValue(LOINC_WEBSITE_URL);
+			String copyright = theCopyright;
+			if (!copyright.contains("LOINC")) {
+				copyright = LOINC_COPYRIGHT_STATEMENT + ". " + copyright;
+			}
+			conceptMap.setCopyright(copyright);
 			myIdToConceptMaps.put(theMapping.getConceptMapId(), conceptMap);
 			myConceptMaps.add(conceptMap);
 		} else {
 			conceptMap = myIdToConceptMaps.get(theMapping.getConceptMapId());
 		}
 
-		if (isNotBlank(theMapping.getCopyright())) {
+		if (isBlank(theMapping.getCopyright())) {
 			conceptMap.setCopyright(theMapping.getCopyright());
 		}
 
@@ -164,21 +179,28 @@ abstract class BaseHandler implements IRecordHandler {
 		}
 	}
 
-	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName) {
+	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
+
+		String version = null;
+		if (isNotBlank(theVersionPropertyName)) {
+			version = myUploadProperties.getProperty(theVersionPropertyName);
+		}
+
 		ValueSet vs;
 		if (!myIdToValueSet.containsKey(theValueSetId)) {
 			vs = new ValueSet();
 			vs.setUrl(theValueSetUri);
 			vs.setId(theValueSetId);
+			vs.setVersion(version);
 			vs.setName(theValueSetName);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			vs.setPublisher("Regenstrief Institute, Inc.");
+			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			vs.addContact()
-				.setName("Regenstrief Institute, Inc.")
+				.setName(REGENSTRIEF_INSTITUTE_INC)
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue("https://loinc.org");
-			vs.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
+				.setValue(LOINC_WEBSITE_URL);
+			vs.setCopyright(LOINC_COPYRIGHT_STATEMENT);
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
 		} else {

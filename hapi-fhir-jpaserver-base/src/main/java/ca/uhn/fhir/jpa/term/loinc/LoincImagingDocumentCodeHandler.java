@@ -29,17 +29,18 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincImagingDocumentCodeHandler extends BaseHandler implements IRecordHandler {
+public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String VS_ID = "loinc-imaging-document-codes";
 	public static final String VS_URI = "http://loinc.org/fhir/loinc-imaging-document-codes";
 	public static final String VS_NAME = "LOINC Imaging Document Codes";
 
-	public LoincImagingDocumentCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		super(theCode2concept, theValueSets, theConceptMaps);
+	public LoincImagingDocumentCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class LoincImagingDocumentCodeHandler extends BaseHandler implements IRec
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
-		ValueSet valueSet = getValueSet(VS_ID, VS_URI, VS_NAME);
+		ValueSet valueSet = getValueSet(VS_ID, VS_URI, VS_NAME,null);
 		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 

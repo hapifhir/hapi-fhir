@@ -8,7 +8,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -21,9 +24,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -122,7 +125,7 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 			}
 		}
 
-		public Parameters toParameters() {
+		public Parameters toParameters(List<? extends IPrimitiveType<String>> theProperties) {
 			Parameters retVal = new Parameters();
 
 			retVal.addParameter().setName("name").setValue(new StringType(getCodeSystemDisplayName()));
@@ -133,7 +136,23 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 			retVal.addParameter().setName("abstract").setValue(new BooleanType(isCodeIsAbstract()));
 
 			if (myProperties != null) {
+
+				Set<String> properties = Collections.emptySet();
+				if (theProperties != null) {
+					properties = theProperties
+						.stream()
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toSet());
+				}
+
 				for (IContextValidationSupport.BaseConceptProperty next : myProperties) {
+
+					if (!properties.isEmpty()) {
+						if (!properties.contains(next.getPropertyName())) {
+							continue;
+						}
+					}
+
 					Parameters.ParametersParameterComponent property = retVal.addParameter().setName("property");
 					property
 						.addPart()

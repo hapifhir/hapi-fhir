@@ -64,6 +64,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
+	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
 	public static final String LOINC_FILE = "loinc.csv";
 	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
 	public static final String LOINC_PART_FILE = "Part_Beta_1.csv";
@@ -173,6 +174,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
 
 		List<String> optionalFilenameFragments = Arrays.asList(
+			LOINC_UPLOAD_PROPERTIES_FILE,
 			LOINC_ANSWERLIST_FILE,
 			LOINC_ANSWERLIST_LINK_FILE,
 			LOINC_PART_FILE,
@@ -222,17 +224,37 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			throw new InternalErrorException("Failed to load loinc.xml", e);
 		}
 
-		Set<String> propertyNames = new HashSet<>();
+		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
 		for (CodeSystem.PropertyComponent nextProperty : loincCs.getProperty()) {
-			if (isNotBlank(nextProperty.getCode())) {
-				propertyNames.add(nextProperty.getCode());
+			String nextPropertyCode = nextProperty.getCode();
+			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
+			if (isNotBlank(nextPropertyCode)) {
+				propertyNamesToTypes.put(nextPropertyCode, nextPropertyType);
 			}
 		}
 
 		IRecordHandler handler;
 
+		Properties uploadProperties = new Properties();
+		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
+			if (next.getFilename().endsWith("loincupload.properties")) {
+				try {
+					try (InputStream inputStream = next.getInputStream()) {
+						uploadProperties.load(inputStream);
+					}
+				} catch (IOException e) {
+					throw new InternalErrorException("Failed to read loincupload.properties", e);
+				}
+			}
+		}
+
+		// Part file
+		handler = new LoincPartHandler(codeSystemVersion, code2concept);
+		iterateOverZipFile(theDescriptors, LOINC_PART_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		Map<PartTypeAndPartName, String> partTypeAndPartNameToPartNumber = ((LoincPartHandler) handler).getPartTypeAndPartNameToPartNumber();
+
 		// Loinc Codes
-		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNames);
+		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFile(theDescriptors, LOINC_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Loinc Hierarchy
@@ -240,51 +262,47 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		iterateOverZipFile(theDescriptors, LOINC_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Answer lists (ValueSets of potential answers/values for loinc "questions")
-		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
+		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Answer list links (connects loinc observation codes to answerlist codes)
 		handler = new LoincAnswerListLinkHandler(code2concept, valueSets);
 		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
-		// Part file
-		handler = new LoincPartHandler(codeSystemVersion, code2concept);
-		iterateOverZipFile(theDescriptors, LOINC_PART_FILE, handler, ',', QuoteMode.NON_NUMERIC);
-
 		// Part link file
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
 		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Part related code mapping
-		handler = new LoincPartRelatedCodeMappingHandler(codeSystemVersion, code2concept, valueSets, conceptMaps);
+		handler = new LoincPartRelatedCodeMappingHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Document Ontology File
-		handler = new LoincDocumentOntologyHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
+		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_DOCUMENT_ONTOLOGY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// RSNA Playbook file
-		handler = new LoincRsnaPlaybookHandler(codeSystemVersion, code2concept, propertyNames, valueSets, conceptMaps);
+		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Top 2000 Codes - US
-		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps);
+		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Top 2000 Codes - SI
-		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps);
+		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Universal Lab Order ValueSet
-		handler = new LoincUniversalOrderSetHandler(code2concept, valueSets, conceptMaps);
+		handler = new LoincUniversalOrderSetHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// IEEE Medical Device Codes
-		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps);
+		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Imaging Document Codes
-		handler = new LoincImagingDocumentCodeHandler(code2concept, valueSets, conceptMaps);
+		handler = new LoincImagingDocumentCodeHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_IMAGING_DOCUMENT_CODES_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		IOUtils.closeQuietly(theDescriptors);
@@ -367,8 +385,8 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	private void storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.isTrue(theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT);
 
-		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.<ValueSet>emptyList());
-		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.<ConceptMap>emptyList());
+		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.emptyList());
+		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.emptyList());
 
 		myTermSvc.setProcessDeferred(false);
 		if (myTermSvcDstu3 != null) {

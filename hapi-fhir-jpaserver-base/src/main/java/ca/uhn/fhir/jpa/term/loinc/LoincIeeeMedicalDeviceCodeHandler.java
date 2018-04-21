@@ -30,10 +30,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincIeeeMedicalDeviceCodeHandler extends BaseHandler implements IRecordHandler {
+public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String LOINC_IEEE_CM_ID = "LOINC-IEEE-MEDICAL-DEVICE-CM";
 	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/fhir/loinc-ieee-device-code-mappings";
@@ -43,8 +44,8 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseHandler implements IR
 	/**
 	 * Constructor
 	 */
-	public LoincIeeeMedicalDeviceCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		super(theCode2concept, theValueSets, theConceptMaps);
+	public LoincIeeeMedicalDeviceCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
 	@Override

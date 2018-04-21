@@ -717,10 +717,10 @@
 		</plugins>
 		<resources>
 			<resource>
-				<directory>${basedir}/src/main/resources</directory>
+				<directory>${project.basedir}/src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>${basedir}/target/generated-resources/tinder</directory>
+				<directory>${project.basedir}/target/generated-resources/tinder</directory>
 			</resource>
 		</resources>
 	</build>

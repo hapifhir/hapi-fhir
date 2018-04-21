@@ -292,7 +292,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 							} else {
 
-//					bool.must(qb.keyword().onField("myProperties").matching(nextFilter.getStringProperty()+"="+nextFilter.getValue()).createQuery());
 								bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
 
 							}

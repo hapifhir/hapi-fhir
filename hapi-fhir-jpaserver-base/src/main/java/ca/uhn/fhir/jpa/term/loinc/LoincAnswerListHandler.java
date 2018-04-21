@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term.loinc;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,27 +27,21 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class LoincAnswerListHandler extends BaseHandler {
+public class LoincAnswerListHandler extends BaseLoincHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
-	private final Set<String> myPropertyNames;
-	private final List<ValueSet> myValueSets;
-	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 
-	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		super(theCode2concept, theValueSets, theConceptMaps);
+	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
-		myPropertyNames = thePropertyNames;
-		myValueSets = theValueSets;
 	}
 
 	@Override
@@ -91,11 +85,11 @@ public class LoincAnswerListHandler extends BaseHandler {
 		}
 
 		// Answer list ValueSet
-		ValueSet vs = getValueSet(answerListId, "urn:oid:" + answerListOid, answerListName);
+		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, "answerlist.version");
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
-				.setValue(answerListId);
+				.setSystem("urn:ietf:rfc:3986")
+				.setValue("urn:oid:" + answerListOid);
 		}
 
 		vs
