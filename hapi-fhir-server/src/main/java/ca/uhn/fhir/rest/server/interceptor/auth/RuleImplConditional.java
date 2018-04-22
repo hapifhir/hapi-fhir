@@ -69,6 +69,10 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 				}
 			}
 
+			if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+				return null;
+			}
+
 			return newVerdict();
 		}
 

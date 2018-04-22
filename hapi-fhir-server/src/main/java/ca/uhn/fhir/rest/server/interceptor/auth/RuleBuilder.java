@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -89,11 +89,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		return new RuleBuilderFinished(rule);
 	}
 
+	public interface ITenantApplicabilityChecker {
+		boolean applies(RequestDetails theRequest);
+	}
+
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {
 
 		private final RuleImplOp myOpRule;
 		private final OperationRule myOperationRule;
 		protected ITenantApplicabilityChecker myTenantApplicabilityChecker;
+		private List<IAuthRuleTester> myTesters;
 
 		RuleBuilderFinished(RuleImplOp theRule) {
 			myOpRule = theRule;
@@ -140,14 +145,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return this;
 		}
 
-		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-			if (myOpRule != null) {
-				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+		public List<IAuthRuleTester> getTesters() {
+			if (myTesters == null) {
+				return Collections.emptyList();
 			}
-			if (myOperationRule != null) {
-				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
-			}
+			return myTesters;
 		}
 
 		@Override
@@ -165,11 +167,32 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			});
 			return this;
 		}
-	}
 
-	public interface ITenantApplicabilityChecker
-	{
-		boolean applies(RequestDetails theRequest);
+		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
+			if (myOpRule != null) {
+				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+			}
+			if (myOperationRule != null) {
+				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
+			}
+		}
+
+		@Override
+		public IAuthRuleFinished withTester(IAuthRuleTester theTester) {
+			if (myTesters == null) {
+				myTesters = new ArrayList<>();
+			}
+			myTesters.add(theTester);
+			if (myOperationRule != null) {
+				myOperationRule.addTester(theTester);
+			}
+			if (myOpRule != null) {
+				myOpRule.addTester(theTester);
+			}
+
+			return this;
+		}
 	}
 
 	private class RuleBuilderRule implements IAuthRuleBuilderRule {
@@ -275,6 +298,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setAppliesTo(myAppliesTo);
 					rule.setAppliesToTypes(myAppliesToTypes);
 					rule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+					rule.addTesters(getTesters());
 					myRules.add(rule);
 
 				}

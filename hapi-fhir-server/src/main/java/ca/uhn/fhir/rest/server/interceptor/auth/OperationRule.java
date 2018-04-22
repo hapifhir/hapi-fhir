@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,6 +40,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
+
 	public OperationRule(String theRuleName) {
 		super(theRuleName);
 	}
@@ -133,6 +134,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 		}
 
 		if (myOperationName != null && !myOperationName.equals(theRequestDetails.getOperation())) {
+			return null;
+		}
+
+		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
 			return null;
 		}
 
