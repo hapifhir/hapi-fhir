@@ -53,6 +53,10 @@
 				a local ID that already existed, making the resulting 
 				serialization invalid. This has been corrected.
 			</action>
+			<action type="add">
+				The REST Generic Client now supports invoking an operation
+				on a specific version of a resource instance.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

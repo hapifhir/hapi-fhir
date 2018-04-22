@@ -262,9 +262,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+		purgeDatabase(mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before

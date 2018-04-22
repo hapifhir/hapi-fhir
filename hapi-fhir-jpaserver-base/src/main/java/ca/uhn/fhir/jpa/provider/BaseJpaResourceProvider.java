@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,16 +20,10 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Required;
-
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,6 +31,14 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.springframework.beans.factory.annotation.Required;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
@@ -51,17 +53,37 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		myDao = theDao;
 	}
 
+
+	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+
+		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
+
+		ExpungeOutcome outcome;
+		if (theIdParam != null) {
+			outcome = getDao().expunge(theIdParam, options);
+		} else {
+			outcome = getDao().expunge(options);
+		}
+
+		return createExpungeResponse(outcome);
+	}
+
 	public IFhirResourceDao<T> getDao() {
 		return myDao;
 	}
 
+	@Required
+	public void setDao(IFhirResourceDao<T> theDao) {
+		myDao = theDao;
+	}
+
 	@History
 	public IBundleProvider getHistoryForResourceInstance(
-			HttpServletRequest theRequest, 
-			@IdParam IIdType theId, 
-			@Since Date theSince, 
-			@At DateRangeParam theAt, 
-			RequestDetails theRequestDetails) {
+		HttpServletRequest theRequest,
+		@IdParam IIdType theId,
+		@Since Date theSince,
+		@At DateRangeParam theAt,
+		RequestDetails theRequestDetails) {
 
 		startRequest(theRequest);
 		try {
@@ -74,10 +96,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	@History
 	public IBundleProvider getHistoryForResourceType(
-			HttpServletRequest theRequest,
-			@Since Date theSince,
-			@At DateRangeParam theAt,
-			RequestDetails theRequestDetails) {
+		HttpServletRequest theRequest,
+		@Since Date theSince,
+		@At DateRangeParam theAt,
+		RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
@@ -92,16 +114,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return myDao.getResourceType();
 	}
 
-	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
-		startRequest(theRequest);
-		try {
-			return myDao.read(theId, theRequestDetails);
-		} finally {
-			endRequest(theRequest);
-		}
-	}
-
 	@Patch
 	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
 		startRequest(theRequest);
@@ -112,9 +124,14 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		}
 	}
 
-	@Required
-	public void setDao(IFhirResourceDao<T> theDao) {
-		myDao = theDao;
+	@Read(version = true)
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
+		startRequest(theRequest);
+		try {
+			return myDao.read(theId, theRequestDetails);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 }

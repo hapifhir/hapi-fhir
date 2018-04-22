@@ -30,6 +30,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 
+	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
+	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);
+
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("restype") String theResourceName);
 

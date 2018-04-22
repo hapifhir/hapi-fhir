@@ -4,12 +4,22 @@ public class ExpungeOptions {
 	private int myLimit = 1000;
 	private boolean myExpungeOldVersions;
 	private boolean myExpungeDeletedResources;
+	private boolean myExpungeEverything;
 
 	/**
 	 * The maximum number of resources versions to expunge
 	 */
 	public int getLimit() {
 		return myLimit;
+	}
+
+	public boolean isExpungeEverything() {
+		return myExpungeEverything;
+	}
+
+	public ExpungeOptions setExpungeEverything(boolean theExpungeEverything) {
+		myExpungeEverything = theExpungeEverything;
+		return this;
 	}
 
 	/**

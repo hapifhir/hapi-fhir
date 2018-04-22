@@ -1,21 +1,22 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ExpungeR4Test extends BaseResourceProviderR4Test {
+public class ExpungeProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
@@ -56,7 +57,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		p.setActive(true);
 		p.addIdentifier().setSystem("foo").setValue("bar");
-		p.addName().setFamily("FAM");
+		p.addName().addFamily("FAM");
 		myOneVersionPatientId = myPatientDao.update(p).getId();
 
 		p = new Patient();
@@ -80,17 +81,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		// Observation
 
 		Observation o = new Observation();
-		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setStatus(ObservationStatusEnum.FINAL);
 		myOneVersionObservationId = myObservationDao.create(o).getId();
 
+		o.setStatus(ObservationStatusEnum.FINAL);
 		o = new Observation();
-		o.setStatus(Observation.ObservationStatus.FINAL);
 		myTwoVersionObservationId = myObservationDao.create(o).getId();
-		o.setStatus(Observation.ObservationStatus.AMENDED);
+		o.setStatus(ObservationStatusEnum.AMENDED);
 		myTwoVersionObservationId = myObservationDao.update(o).getId();
 
 		o = new Observation();
-		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setStatus(ObservationStatusEnum.FINAL);
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
 
@@ -118,7 +119,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		p.setId("PT-TWOVERSION");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		p.setActive(true);
-		p.addName().setFamily("FOO");
+		p.addName().addFamily("FOO");
 		myPatientDao.update(p).getId();
 
 		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
@@ -158,7 +159,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		p.setId("PT-TWOVERSION");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		p.setActive(true);
-		p.addName().setFamily("FOO");
+		p.addName().addFamily("FOO");
 		myPatientDao.update(p).getId();
 
 		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
@@ -177,6 +178,25 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+	}
+
+	@Test
+	public void testExpungeSystemEverything() {
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true));
+
+		// Everything deleted
+		assertExpunged(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertExpunged(myDeletedPatientId.withVersion("1"));
+		assertExpunged(myDeletedPatientId);
+
+		// Everything deleted
+		assertExpunged(myOneVersionObservationId);
+		assertExpunged(myTwoVersionObservationId.withVersion("1"));
+		assertExpunged(myTwoVersionObservationId.withVersion("2"));
+		assertExpunged(myDeletedObservationId);
 	}
 
 	@Test
@@ -235,25 +255,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeSystemEverything() {
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
-
-		// Everything deleted
-		assertExpunged(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
-		assertExpunged(myDeletedPatientId);
-
-		// Everything deleted
-		assertExpunged(myOneVersionObservationId);
-		assertExpunged(myTwoVersionObservationId.withVersion("1"));
-		assertExpunged(myTwoVersionObservationId.withVersion("2"));
-		assertExpunged(myDeletedObservationId);
 	}
 
 	@Test

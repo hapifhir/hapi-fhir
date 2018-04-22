@@ -26,6 +26,7 @@ import org.apache.http.client.methods.*;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.junit.*;
@@ -215,7 +216,185 @@ public class GenericClientR4Test {
     assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
   }
 
-  @Test
+
+	@Test
+	public void testOperationServer() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		Parameters outputParams = new Parameters();
+		outputParams.addParameter().setName("name").setValue(new BooleanType(false));
+
+		final String respString = p.encodeResourceToString(outputParams);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Parameters result = client
+			.operation()
+			.onServer()
+			.named("opname")
+			.withParameters(inputParams)
+			.execute();
+
+		assertEquals("name", result.getParameterFirstRep().getName());
+		assertEquals("false", ((IPrimitiveType<?>)result.getParameterFirstRep().getValue()).getValueAsString());
+
+		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		validateUserAgent(capt);
+
+		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("name", output.getParameterFirstRep().getName());
+		assertEquals("true", ((IPrimitiveType<?>)output.getParameterFirstRep().getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testOperationType() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		Parameters outputParams = new Parameters();
+		outputParams.addParameter().setName("name").setValue(new BooleanType(false));
+
+		final String respString = p.encodeResourceToString(outputParams);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Parameters result = client
+			.operation()
+			.onType(Patient.class)
+			.named("opname")
+			.withParameters(inputParams)
+			.execute();
+
+		assertEquals("name", result.getParameterFirstRep().getName());
+		assertEquals("false", ((IPrimitiveType<?>)result.getParameterFirstRep().getValue()).getValueAsString());
+
+		assertEquals("http://example.com/fhir/Patient/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		validateUserAgent(capt);
+
+		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("name", output.getParameterFirstRep().getName());
+		assertEquals("true", ((IPrimitiveType<?>)output.getParameterFirstRep().getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testOperationInstance() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		Parameters outputParams = new Parameters();
+		outputParams.addParameter().setName("name").setValue(new BooleanType(false));
+
+		final String respString = p.encodeResourceToString(outputParams);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Parameters result = client
+			.operation()
+			.onInstance(new IdType("Patient/123/_history/456"))
+			.named("opname")
+			.withParameters(inputParams)
+			.execute();
+
+		assertEquals("name", result.getParameterFirstRep().getName());
+		assertEquals("false", ((IPrimitiveType<?>)result.getParameterFirstRep().getValue()).getValueAsString());
+
+		assertEquals("http://example.com/fhir/Patient/123/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		validateUserAgent(capt);
+
+		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("name", output.getParameterFirstRep().getName());
+		assertEquals("true", ((IPrimitiveType<?>)output.getParameterFirstRep().getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testOperationInstanceVersion() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		Parameters outputParams = new Parameters();
+		outputParams.addParameter().setName("name").setValue(new BooleanType(false));
+
+		final String respString = p.encodeResourceToString(outputParams);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Parameters result = client
+			.operation()
+			.onInstanceVersion(new IdType("Patient/123/_history/456"))
+			.named("opname")
+			.withParameters(inputParams)
+			.execute();
+
+		assertEquals("name", result.getParameterFirstRep().getName());
+		assertEquals("false", ((IPrimitiveType<?>)result.getParameterFirstRep().getValue()).getValueAsString());
+
+		assertEquals("http://example.com/fhir/Patient/123/_history/456/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		validateUserAgent(capt);
+
+		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("name", output.getParameterFirstRep().getName());
+		assertEquals("true", ((IPrimitiveType<?>)output.getParameterFirstRep().getValue()).getValueAsString());
+	}
+
+
+	@Test
   public void testBinaryCreateWithNoContentType() throws Exception {
     IParser p = ourCtx.newXmlParser();
 

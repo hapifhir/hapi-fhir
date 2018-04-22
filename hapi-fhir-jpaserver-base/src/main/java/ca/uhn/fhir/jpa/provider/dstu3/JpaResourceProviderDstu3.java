@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,25 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
@@ -61,7 +69,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	}
 
 	@Delete()
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple=true) String theConditional, RequestDetails theRequestDetails) {
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple = true) String theConditional, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -74,9 +82,42 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
+	@Operation(name = JpaResourceProviderR4.EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+	})
+	public Parameters expunge(
+		@IdParam IIdType theIdParam,
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+	) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+		try {
+			return VersionConvertor_30_40.convertParameters(retVal);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Operation(name = JpaResourceProviderR4.EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+	})
+	public Parameters expunge(
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+	) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+		try {
+			return VersionConvertor_30_40.convertParameters(retVal);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
 	//@formatter:off
-	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
 	//@formatter:on
 	public Parameters meta(RequestDetails theRequestDetails) {
@@ -87,8 +128,8 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	}
 
 	//@formatter:off
-	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
 	//@formatter:on
 	public Parameters meta(@IdParam IdType theId, RequestDetails theRequestDetails) {
@@ -99,8 +140,8 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	}
 
 	//@formatter:off
-	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_NAME_META_ADD, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
 	//@formatter:on
 	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
@@ -114,8 +155,8 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	}
 
 	//@formatter:off
-	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_NAME_META_DELETE, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
 	//@formatter:on
 	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
@@ -143,13 +184,13 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 
 	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-			@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
 		return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
-		
+
 	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdType theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-			@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
 		return getDao().validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
 

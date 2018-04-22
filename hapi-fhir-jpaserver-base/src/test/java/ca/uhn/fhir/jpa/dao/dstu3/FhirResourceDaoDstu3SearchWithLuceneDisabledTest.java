@@ -152,8 +152,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

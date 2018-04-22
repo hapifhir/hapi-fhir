@@ -1,22 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ExpungeR4Test extends BaseResourceProviderR4Test {
+public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -114,22 +112,33 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeInstanceOldVersionsAndDeleted() {
-		Patient p = new Patient();
-		p.setId("PT-TWOVERSION");
-		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
-		p.setActive(true);
-		p.addName().setFamily("FOO");
-		myPatientDao.update(p).getId();
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setValue(new IntegerType(1000));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setValue(new BooleanType(true));
 
-		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		// Patients
+		Parameters output = myClient
+			.operation()
+			.onInstance(myTwoVersionPatientId)
+			.named("expunge")
+			.withParameters(input)
+			.execute();
+
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+
+		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertStillThere(myTwoVersionPatientId.withVersion("3"));
+		assertStillThere(myTwoVersionPatientId.withVersion("2"));
 		assertGone(myDeletedPatientId);
 
 		// No observations deleted
@@ -137,130 +146,66 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
-	}
 
-	@Test
-	public void testExpungeInstanceVersionCurrentVersion() {
-
-		try {
-			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
-				.setExpungeDeletedResources(true)
-				.setExpungeOldVersions(true));
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals("Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testExpungeInstanceVersionOldVersionsAndDeleted() {
-		Patient p = new Patient();
-		p.setId("PT-TWOVERSION");
-		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
-		p.setActive(true);
-		p.addName().setFamily("FOO");
-		myPatientDao.update(p).getId();
-
-		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
-
-		// Patients
-		assertStillThere(myOneVersionPatientId);
-		assertStillThere(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertStillThere(myTwoVersionPatientId.withVersion("3"));
-		assertGone(myDeletedPatientId);
-
-		// No observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertStillThere(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeSystemOldVersionsAndDeleted() {
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
-
-		// Only deleted and prior patients
-		assertStillThere(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId);
-
-		// Also observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertExpunged(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertExpunged(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeTypeDeletedResources() {
-		myPatientDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(false));
-
-		// Only deleted and prior patients
-		assertStillThere(myOneVersionPatientId);
-		assertStillThere(myTwoVersionPatientId.withVersion("1"));
-		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId);
-
-		// No observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertStillThere(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeTypeOldVersions() {
-		myPatientDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(false)
-			.setExpungeOldVersions(true));
-
-		// Only deleted and prior patients
-		assertStillThere(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
-		assertGone(myDeletedPatientId);
-
-		// No observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertStillThere(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertGone(myDeletedObservationId);
 	}
 
 	@Test
 	public void testExpungeSystemEverything() {
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_EVERYTHING)
+			.setValue(new BooleanType(true));
 
-		// Everything deleted
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		Parameters output = myClient
+			.operation()
+			.onServer()
+			.named("expunge")
+			.withParameters(input)
+			.execute();
+
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+
+		// All patients deleted
 		assertExpunged(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
 		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
 		assertExpunged(myDeletedPatientId);
 
-		// Everything deleted
+		// All observations deleted
 		assertExpunged(myOneVersionObservationId);
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
+
 	}
 
 	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
-		myPatientDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setValue(new IntegerType(1000));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setValue(new BooleanType(true));
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		Parameters output = myClient
+			.operation()
+			.onType(Patient.class)
+			.named("expunge")
+			.withParameters(input)
+			.execute();
+
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -273,6 +218,53 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
+	}
+
+	@Test
+	public void testExpungeVersion() {
+		Patient p = new Patient();
+		p.setId("PT-TWOVERSION");
+		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		p.setActive(true);
+		p.addName().setFamily("FOO");
+		myPatientDao.update(p).getId();
+
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setValue(new IntegerType(1000));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		input.addParameter()
+			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setValue(new BooleanType(true));
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		Parameters output = myClient
+			.operation()
+			.onType(Patient.class)
+			.named("expunge")
+			.withParameters(input)
+			.execute();
+
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+
+		// Only deleted and prior patients
+		assertStillThere(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertStillThere(myTwoVersionPatientId.withVersion("2"));
+		assertExpunged(myDeletedPatientId);
+
+		// No observations deleted
+		assertStillThere(myOneVersionObservationId);
+		assertStillThere(myTwoVersionObservationId.withVersion("1"));
+		assertStillThere(myTwoVersionObservationId.withVersion("2"));
+		assertGone(myDeletedObservationId);
+
 	}
 
 	@AfterClass

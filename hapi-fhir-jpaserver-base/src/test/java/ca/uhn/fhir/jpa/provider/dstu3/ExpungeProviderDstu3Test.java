@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -6,16 +6,16 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ExpungeR4Test extends BaseResourceProviderR4Test {
+public class ExpungeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
@@ -180,6 +180,25 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testExpungeSystemEverything() {
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true));
+
+		// Everything deleted
+		assertExpunged(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertExpunged(myDeletedPatientId.withVersion("1"));
+		assertExpunged(myDeletedPatientId);
+
+		// Everything deleted
+		assertExpunged(myOneVersionObservationId);
+		assertExpunged(myTwoVersionObservationId.withVersion("1"));
+		assertExpunged(myTwoVersionObservationId.withVersion("2"));
+		assertExpunged(myDeletedObservationId);
+	}
+
+	@Test
 	public void testExpungeSystemOldVersionsAndDeleted() {
 		mySystemDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
@@ -235,25 +254,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeSystemEverything() {
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
-
-		// Everything deleted
-		assertExpunged(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
-		assertExpunged(myDeletedPatientId);
-
-		// Everything deleted
-		assertExpunged(myOneVersionObservationId);
-		assertExpunged(myTwoVersionObservationId.withVersion("1"));
-		assertExpunged(myTwoVersionObservationId.withVersion("2"));
-		assertExpunged(myDeletedObservationId);
 	}
 
 	@Test

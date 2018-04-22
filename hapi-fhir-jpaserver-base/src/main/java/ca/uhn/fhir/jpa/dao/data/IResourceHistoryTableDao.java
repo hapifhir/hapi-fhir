@@ -76,4 +76,10 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"WHERE v.myResourceVersion != t.myVersion AND " +
 		"t.myResourceType = :restype")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
+
+	@Query("" +
+		"SELECT v.myId FROM ResourceHistoryTable v " +
+		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
+		"WHERE v.myResourceVersion != t.myVersion")
+	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
 }
