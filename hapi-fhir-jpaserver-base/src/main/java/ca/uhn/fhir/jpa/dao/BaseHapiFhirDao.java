@@ -143,6 +143,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	protected IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired()
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired

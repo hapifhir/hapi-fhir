@@ -55,7 +55,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return myDao;
 	}
 
-	//@formatter:off
 	@History
 	public IBundleProvider getHistoryForResourceInstance(
 			HttpServletRequest theRequest, 
@@ -63,7 +62,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			@Since Date theSince, 
 			@At DateRangeParam theAt, 
 			RequestDetails theRequestDetails) {
-	//@formatter:on
 
 		startRequest(theRequest);
 		try {

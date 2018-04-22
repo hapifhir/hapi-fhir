@@ -137,6 +137,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myResource = theResource;
 	}
 
+	@Override
 	public Long getResourceId() {
 		return myResourceId;
 	}

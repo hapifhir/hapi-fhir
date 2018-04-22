@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
@@ -399,6 +398,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
 		}
 		myProfile = theProfile;
+	}
+
+	@Override
+	public Long getResourceId() {
+		return getId();
 	}
 
 //	public byte[] getResource() {

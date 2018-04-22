@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,15 +24,13 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.*;
@@ -47,15 +45,15 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ObjectUtil;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -70,6 +68,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -89,6 +88,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	private IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	private IResourceTagDao myResourceTagDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	private String myResourceName;
@@ -359,7 +362,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
-		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+		List<DeleteConflict> deleteConflicts = new ArrayList<>();
 
 		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
 
@@ -467,6 +470,63 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
+	private ExpungeOutcome doExpunge(Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
+
+		if (theExpungeOptions.isExpungeDeletedResources() && theVersion == null) {
+
+			/*
+			 * Delete historical versions of deleted resources
+			 */
+			Pageable page = new PageRequest(0, remainingCount.get());
+			Slice<Long> resourceIds;
+			if (theResourceId != null) {
+				resourceIds = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, getResourceName());
+			} else {
+				resourceIds = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, getResourceName());
+			}
+			for (Long next : resourceIds) {
+				expungeHistoricalVersionsOfId(next, remainingCount);
+				if (remainingCount.get() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+			/*
+			 * Delete current versions of deleted resources
+			 */
+			for (Long next : resourceIds) {
+				expungeCurrentVersionOfResource(next);
+				if (remainingCount.get() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+		}
+
+		if (theExpungeOptions.isExpungeOldVersions()) {
+
+			/*
+			 * Delete historical versions of non-deleted resources
+			 */
+			Pageable page = new PageRequest(0, remainingCount.get());
+			Slice<Long> historicalIds;
+			if (theResourceId != null && theVersion != null) {
+				historicalIds = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+			} else {
+				historicalIds = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, getResourceName());
+			}
+			for (Long next : historicalIds) {
+				expungeHistoricalVersion(next);
+				if (remainingCount.decrementAndGet() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+		}
+		return toExpungeOutcome(theExpungeOptions, remainingCount);
+	}
+
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
@@ -521,6 +581,80 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		myEntityManager.merge(entity);
+	}
+
+	@Override
+	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions) {
+		BaseHasResource entity = readEntity(theId);
+		if (theId.hasVersionIdPart()) {
+			BaseHasResource currentVersion = readEntity(theId.toVersionless());
+			if (entity.getVersion() == currentVersion.getVersion()) {
+				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
+			}
+
+			return doExpunge(entity.getResourceId(), entity.getVersion(), theExpungeOptions);
+		}
+
+		return doExpunge(entity.getResourceId(), null, theExpungeOptions);
+	}
+
+	@Override
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
+
+		return doExpunge(null, null, theExpungeOptions);
+	}
+
+	private void expungeCurrentVersionOfResource(Long theResourceId) {
+		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+
+		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
+		expungeHistoricalVersion(currentVersion.getId());
+
+		ourLog.info("Deleting current version of resource {}", resource.getIdDt().getValue());
+
+		myResourceIndexedSearchParamUriDao.delete(resource.getParamsUri());
+		myResourceIndexedSearchParamCoordsDao.delete(resource.getParamsCoords());
+		myResourceIndexedSearchParamDateDao.delete(resource.getParamsDate());
+		myResourceIndexedSearchParamNumberDao.delete(resource.getParamsNumber());
+		myResourceIndexedSearchParamQuantityDao.delete(resource.getParamsQuantity());
+		myResourceIndexedSearchParamStringDao.delete(resource.getParamsString());
+		myResourceIndexedSearchParamTokenDao.delete(resource.getParamsToken());
+
+		myResourceTagDao.delete(resource.getTags());
+		resource.getTags().clear();
+
+		if (resource.getForcedId() != null) {
+			ForcedId forcedId = resource.getForcedId();
+			resource.setForcedId(null);
+			myResourceTableDao.saveAndFlush(resource);
+			myForcedIdDao.delete(forcedId);
+		}
+
+		myResourceTableDao.delete(resource);
+
+	}
+
+	protected void expungeHistoricalVersion(Long theNextVersionId) {
+		ResourceHistoryTable version = myResourceHistoryTableDao.findOne(theNextVersionId);
+		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
+
+		myResourceHistoryTagDao.delete(version.getTags());
+		myResourceHistoryTableDao.delete(version);
+	}
+
+	protected void expungeHistoricalVersionsOfId(Long theResourceId, AtomicInteger theRemainingCount) {
+		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+
+		Pageable page = new PageRequest(0, theRemainingCount.get());
+
+		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
+		for (Long nextVersionId : versionIds) {
+			expungeHistoricalVersion(nextVersionId);
+			if (theRemainingCount.decrementAndGet() <= 0) {
+				return;
+			}
+		}
 	}
 
 	@Override
@@ -613,7 +747,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 				Integer updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
 					@Override
-					public @NonNull Integer doInTransaction(TransactionStatus theStatus) {
+					public @NonNull
+					Integer doInTransaction(TransactionStatus theStatus) {
 						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 					}
 				});
@@ -650,7 +785,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, history);
 		}
 
-		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
+		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[] {theResourceId, w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
@@ -684,7 +819,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.flush();
 
-		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
+		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[] {theResourceId.getValue(), w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
@@ -1048,6 +1183,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
 	}
 
+	private ExpungeOutcome toExpungeOutcome(ExpungeOptions theExpungeOptions, AtomicInteger theRemainingCount) {
+		return new ExpungeOutcome()
+			.setDeletedCount(theExpungeOptions.getLimit() - theRemainingCount.get());
+	}
+
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
 		MT retVal;
 		try {
@@ -1097,6 +1237,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		DaoMethodOutcome retVal = toMethodOutcome((BaseHasResource) theEntity, theResource);
 		retVal.setEntity(theEntity);
 		return retVal;
+	}
+
+	private Slice<Long> toSlice(ResourceHistoryTable theVersion) {
+		Validate.notNull(theVersion);
+		return new SliceImpl<>(Collections.singletonList(theVersion.getId()));
 	}
 
 	private ArrayList<TagDefinition> toTagList(IBaseMetaType theMeta) {
