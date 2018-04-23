@@ -293,7 +293,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	private void doExpungeEverything() {
 
-		ourLog.info("** BEGINNING GLOBAL EXPUNGE **");
+		ourLog.info("** BEGINNING GLOBAL OPERATION_NAME_EXPUNGE **");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		txTemplate.execute(new TransactionCallback<Void>() {

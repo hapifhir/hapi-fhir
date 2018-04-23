@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -39,12 +40,6 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 	public static final String OPERATION_NAME_META = "$meta";
 	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
 	public static final String OPERATION_NAME_META_ADD = "$meta-add";
-	public static final String EXPUNGE = "$expunge";
-	public static final String EXPUNGE_LIMIT = "limit";
-	public static final String EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
-	public static final String EXPUNGE_OLD_VERSIONS = "expungeOldVersions";
-	public static final String EXPUNGE_COUNT = "count";
-	public static final String EXPUNGE_EVERYTHING = "expungeEverything";
 
 	public JpaResourceProviderR4() {
 		// nothing
@@ -82,25 +77,25 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		}
 	}
 
-	@Operation(name = EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = EXPUNGE_COUNT, type = IntegerType.class)
+	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
 		@IdParam IIdType theIdParam,
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_LIMIT) IntegerType theLimit,
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions
 	) {
 		return super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 	}
 
-	@Operation(name = EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = EXPUNGE_COUNT, type = IntegerType.class)
+	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_LIMIT) IntegerType theLimit,
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions
 	) {
 		return super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 	}

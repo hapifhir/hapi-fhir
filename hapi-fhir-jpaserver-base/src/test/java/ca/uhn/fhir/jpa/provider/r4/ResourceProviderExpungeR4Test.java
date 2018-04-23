@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -114,13 +115,13 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeInstanceOldVersionsAndDeleted() {
 		Parameters input = new Parameters();
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
 			.setValue(new IntegerType(1000));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -153,7 +154,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeSystemEverything() {
 		Parameters input = new Parameters();
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_EVERYTHING)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -186,13 +187,13 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		Parameters input = new Parameters();
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
 			.setValue(new IntegerType(1000));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -232,13 +233,13 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters input = new Parameters();
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_LIMIT)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
 			.setValue(new IntegerType(1000));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_DELETED_RESOURCES)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));

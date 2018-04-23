@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -69,7 +69,7 @@ public class BaseJpaProvider {
 		Parameters retVal = new Parameters();
 		retVal
 			.addParameter()
-			.setName(JpaResourceProviderR4.EXPUNGE_COUNT)
+			.setName(JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT)
 			.setValue(new IntegerType(theOutcome.getDeletedCount()));
 		return retVal;
 	}
