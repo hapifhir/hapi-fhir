@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
@@ -54,16 +53,6 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 	) {
 		// FIXME: Consider handling additional input and output parameters (dependency, product).
 
-		// FIXME: Leverage stored information for instance-level processing.
-		boolean haveId = theId != null && theId.hasIdPart();
-		if (haveId) {
-			// Instance-level processing
-			IFhirResourceDao<ConceptMap> conceptMapDao = getDao();
-			ConceptMap theConceptMap = conceptMapDao.read(theId);
-		} else {
-			// Type-level processing
-		}
-
 		boolean haveSourceCode = theSourceCode != null
 			&& theSourceCode.hasCode();
 		boolean haveSourceCodeSystem = theSourceCodeSystem != null
@@ -82,9 +71,11 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		boolean haveTargetCodeSystem = theTargetCodeSystem != null
 			&& theTargetCodeSystem.hasValue();
 		boolean haveReverse = theReverse != null;
+//		boolean haveId = theId != null && theId.hasIdPart();
 
+		// <editor-fold desc="Filters">
 		if ((!haveSourceCode && !haveSourceCoding && !haveSourceCodeableConcept)
-			 || moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
+			|| moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
 			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
 
@@ -99,8 +90,10 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 //		if (!haveTargetCodeSystem) {
 //			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
 //		}
+		// </editor-fold>
 
 		TranslationRequest translationRequest = new TranslationRequest();
+
 		if (haveSourceCode) {
 			translationRequest.getCodeableConcept().addCoding().setCodeElement(theSourceCode);
 
@@ -132,6 +125,10 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		if (haveReverse) {
 			translationRequest.setReverse(theReverse);
 		}
+
+//		if (haveId) {
+//			translationRequest.setResourceId(theId.getIdPartAsLong());
+//		}
 
 		startRequest(theServletRequest);
 		try {

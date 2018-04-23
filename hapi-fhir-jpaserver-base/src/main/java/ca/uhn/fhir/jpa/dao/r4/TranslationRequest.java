@@ -22,20 +22,40 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UriType;
 
 public class TranslationRequest {
-	private UriType mySource;
 	private CodeableConcept myCodeableConcept;
+	private Long myResourceId;
+	private BooleanType myReverse;
+	private UriType mySource;
 	private UriType myTarget;
 	private UriType myTargetSystem;
-	private BooleanType myReverse;
 
 	public TranslationRequest() {
 		super();
 
 		myCodeableConcept = new CodeableConcept();
+	}
+
+	public CodeableConcept getCodeableConcept() {
+		return myCodeableConcept;
+	}
+
+	public void setCodeableConcept(CodeableConcept theCodeableConcept) {
+		myCodeableConcept = theCodeableConcept;
+	}
+
+	public boolean hasResourceId() {
+		return myResourceId != null;
+	}
+
+	public Long getResourceId() {
+		return myResourceId;
+	}
+
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	public boolean hasReverse() {
@@ -72,40 +92,6 @@ public class TranslationRequest {
 
 	public void setSource(UriType theSource) {
 		mySource = theSource;
-	}
-
-	public static boolean hasCompleteCoding(Coding theCoding) {
-		return theCoding != null
-			&& theCoding.hasCode()
-			&& theCoding.hasSystem()
-			&& theCoding.hasVersion();
-	}
-
-	public static boolean hasPartialCodingWithOnlyCode(Coding theCoding) {
-		return theCoding != null
-			&& theCoding.hasCode()
-			&& !theCoding.hasSystem()
-			&& !theCoding.hasVersion();
-	}
-
-	public static boolean hasPartialCodingWithOnlyCodeAndSystem(Coding theCoding) {
-		return theCoding != null
-			&& theCoding.hasCode()
-			&& theCoding.hasSystem()
-			&& !theCoding.hasVersion();
-	}
-
-	public boolean hasCodeableConceptWithCoding() {
-		return myCodeableConcept != null
-			&& myCodeableConcept.hasCoding();
-	}
-
-	public CodeableConcept getCodeableConcept() {
-		return myCodeableConcept;
-	}
-
-	public void setCodeableConcept(CodeableConcept theCodeableConcept) {
-		myCodeableConcept = theCodeableConcept;
 	}
 
 	public boolean hasTarget() {

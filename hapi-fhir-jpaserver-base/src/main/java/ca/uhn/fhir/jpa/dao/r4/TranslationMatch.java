@@ -26,20 +26,12 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 
 public class TranslationMatch {
-	private CodeType myEquivalence;
 	private Coding myConcept;
+	private CodeType myEquivalence;
 	private UriType mySource;
 
 	public TranslationMatch() {
 		super();
-	}
-
-	public CodeType getEquivalence() {
-		return myEquivalence;
-	}
-
-	public void setEquivalence(CodeType theEquivalence) {
-		myEquivalence = theEquivalence;
 	}
 
 	public Coding getConcept() {
@@ -48,6 +40,14 @@ public class TranslationMatch {
 
 	public void setConcept(Coding theConcept) {
 		myConcept = theConcept;
+	}
+
+	public CodeType getEquivalence() {
+		return myEquivalence;
+	}
+
+	public void setEquivalence(CodeType theEquivalence) {
+		myEquivalence = theEquivalence;
 	}
 
 	public UriType getSource() {

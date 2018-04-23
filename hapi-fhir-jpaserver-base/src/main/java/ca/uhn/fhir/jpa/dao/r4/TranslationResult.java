@@ -29,30 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TranslationResult {
-	private BooleanType myResult;
-	private StringType myMessage;
 	private List<TranslationMatch> myMatches;
+	private StringType myMessage;
+	private BooleanType myResult;
 
 	public TranslationResult() {
 		super();
 
 		myMatches = new ArrayList<>();
-	}
-
-	public BooleanType getResult() {
-		return myResult;
-	}
-
-	public void setResult(BooleanType theMatched) {
-		myResult = theMatched;
-	}
-
-	public StringType getMessage() {
-		return myMessage;
-	}
-
-	public void setMessage(StringType theMessage) {
-		myMessage = theMessage;
 	}
 
 	public List<TranslationMatch> getMatches() {
@@ -65,6 +49,22 @@ public class TranslationResult {
 
 	public boolean addMatch(TranslationMatch theMatch) {
 		return myMatches.add(theMatch);
+	}
+
+	public StringType getMessage() {
+		return myMessage;
+	}
+
+	public void setMessage(StringType theMessage) {
+		myMessage = theMessage;
+	}
+
+	public BooleanType getResult() {
+		return myResult;
+	}
+
+	public void setResult(BooleanType theMatched) {
+		myResult = theMatched;
 	}
 
 	public Parameters toParameters() {

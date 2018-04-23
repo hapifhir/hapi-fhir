@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,7 +29,13 @@ import java.util.Optional;
  */
 
 public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
-	// FIXME: URL should be globally unique. This requires a unique constraint.
+	@Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
+	@Modifying
+	void deleteTermConceptMapById(@Param("pid") Long theId);
+
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myResourcePid = :resource_pid")
+	Optional<TermConceptMap> findTermConceptMapByResourcePid(@Param("resource_pid") Long theResourcePid);
+
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url")
-	Optional<TermConceptMap> findConceptMapByUrl(@Param("url") String theUrl);
+	Optional<TermConceptMap> findTermConceptMapByUrl(@Param("url") String theUrl);
 }

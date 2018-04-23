@@ -59,7 +59,7 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
 
-	void storeNewConceptMap(ConceptMap theConceptMap);
+	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
 
 	boolean supportsSystem(String theCodeSystem);
 

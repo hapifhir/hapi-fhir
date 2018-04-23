@@ -35,6 +35,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
@@ -151,7 +153,11 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		myHapiTerminologySvc.storeNewConceptMap((ConceptMap) theResource);
+		ConceptMap conceptMap = (ConceptMap) theResource;
+
+		if (conceptMap != null && isNotBlank(conceptMap.getUrl())) {
+			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
+		}
 
 		return retVal;
 	}

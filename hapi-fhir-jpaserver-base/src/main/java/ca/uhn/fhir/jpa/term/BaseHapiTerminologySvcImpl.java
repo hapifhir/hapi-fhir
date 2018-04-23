@@ -50,9 +50,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
-import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
-import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -756,10 +753,46 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	@Transactional
-	public void storeNewConceptMap(ConceptMap theConceptMap) {
-		if (theConceptMap != null) {
-			TermConceptMap termConceptMap = new TermConceptMap();
-			termConceptMap.setUrl(theConceptMap.getUrl());
+	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
+		ourLog.info("Storing TermConceptMap...");
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied.");
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConceptMap.getUrl(), "No URL supplied.");
+
+		TermConceptMap termConceptMap = new TermConceptMap();
+		termConceptMap.setResource(theResourceTable);
+		termConceptMap.setUrl(theConceptMap.getUrl());
+
+		// Get existing entity so it can be deleted.
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(termConceptMap.getResourcePid());
+
+		/*
+		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
+		 */
+
+		if (optionalExistingTermConceptMapById.isPresent()) {
+			Long id = optionalExistingTermConceptMapById.get().getId();
+			ourLog.info("Deleting existing TermConceptMap {} and its children...", id);
+			myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(id);
+			myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(id);
+			myConceptMapGroupDao.deleteTermConceptMapGroupById(id);
+			myConceptMapDao.deleteTermConceptMapById(id);
+			ourLog.info("Done deleting existing TermConceptMap {} and its children.", id);
+
+			ourLog.info("Flushing...");
+			myConceptMapGroupElementTargetDao.flush();
+			myConceptMapGroupElementDao.flush();
+			myConceptMapGroupDao.flush();
+			myConceptMapDao.flush();
+			ourLog.info("Done flushing.");
+		}
+
+		/*
+		 * Do the upload.
+		 */
+		String conceptMapUrl = termConceptMap.getUrl();
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
 				String source = theConceptMap.getSourceUriType().getValueAsString();
 				if (isNotBlank(source)) {
@@ -776,7 +809,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
-				for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
 					termConceptMapGroup.setSource(group.getSource());
@@ -787,7 +820,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 					if (group.hasElement()) {
 						TermConceptMapGroupElement termConceptMapGroupElement;
-						for (SourceElementComponent element : group.getElement()) {
+						for (ConceptMap.SourceElementComponent element : group.getElement()) {
 							termConceptMapGroupElement = new TermConceptMapGroupElement();
 							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 							termConceptMapGroupElement.setCode(element.getCode());
@@ -796,20 +829,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
-								for (TargetElementComponent target : element.getTarget()) {
+								for (ConceptMap.TargetElementComponent target : element.getTarget()) {
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
 									termConceptMapGroupElementTarget.setCode(target.getCode());
 									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
 									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
-									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+									myConceptMapGroupElementTargetDao.saveAndFlush(termConceptMapGroupElementTarget);
 								}
 							}
 						}
 					}
 				}
 			}
+		} else {
+			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
+
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"cannotCreateDuplciateConceptMapUrl",
+				conceptMapUrl,
+				existingTermConceptMap.getResourcePid());
+
+			throw new UnprocessableEntityException(msg);
 		}
+
+		ourLog.info("Done storing TermConceptMap.");
 	}
 
 	@Override
@@ -869,6 +914,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), theTranslationRequest.getTarget().getValueAsString()));
 			}
 
+			if (theTranslationRequest.hasResourceId()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), theTranslationRequest.getResourceId()));
+			}
+
 			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 			query.where(outerPredicate);
 
@@ -922,6 +971,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 			if (theTranslationRequest.hasTarget()) {
 				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), theTranslationRequest.getTarget().getValueAsString()));
+			}
+
+			if (theTranslationRequest.hasResourceId()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), theTranslationRequest.getResourceId()));
 			}
 
 			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
