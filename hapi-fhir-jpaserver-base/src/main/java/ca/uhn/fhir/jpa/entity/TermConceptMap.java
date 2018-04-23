@@ -91,13 +91,12 @@ public class TermConceptMap implements Serializable {
 		myUrl = theUrl;
 	}
 
-	// FIXME: toString()
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 			.append("myId", myId)
-//			.append("myResource", myResource.toString())
-//			.append("myResourcePid", myResourcePid)
+			.append("myResource", myResource.toString())
+			.append("myResourcePid", myResourcePid)
 			.append("mySource", mySource)
 			.append("myTarget", myTarget)
 			.append("myUrl", myUrl)

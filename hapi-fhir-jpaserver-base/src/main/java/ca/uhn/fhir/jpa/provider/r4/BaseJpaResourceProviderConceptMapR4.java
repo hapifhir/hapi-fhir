@@ -71,7 +71,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		boolean haveTargetCodeSystem = theTargetCodeSystem != null
 			&& theTargetCodeSystem.hasValue();
 		boolean haveReverse = theReverse != null;
-//		boolean haveId = theId != null && theId.hasIdPart();
+		boolean haveId = theId != null && theId.hasIdPart();
 
 		// <editor-fold desc="Filters">
 		if ((!haveSourceCode && !haveSourceCoding && !haveSourceCodeableConcept)
@@ -126,9 +126,9 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			translationRequest.setReverse(theReverse);
 		}
 
-//		if (haveId) {
-//			translationRequest.setResourceId(theId.getIdPartAsLong());
-//		}
+		if (haveId) {
+			translationRequest.setResourceId(theId.getIdPartAsLong());
+		}
 
 		startRequest(theServletRequest);
 		try {

@@ -53,7 +53,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	private TranslationResult buildTranslationResult(List<TermConceptMapGroupElementTarget> theTargets) {
 		TranslationResult retVal = new TranslationResult();
 
-		// FIXME: Should we be doing more with the message returned?
+		// FIXME: Should we be doing more with the message returned? - translate
 		/*
 		 * From spec:
 		 *
@@ -103,7 +103,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	private TranslationResult buildReverseTranslationResult(List<TermConceptMapGroupElement> theElements) {
 		TranslationResult retVal = new TranslationResult();
 
-		// FIXME: Should we be doing more with the message returned?
+		// FIXME: Should we be doing more with the message returned? - translate with reverse
 		/*
 		 * From spec:
 		 *

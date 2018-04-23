@@ -2,14 +2,20 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -26,6 +32,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	private IIdType myConceptMapId;
 
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -38,6 +47,16 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
+	}
+
+	@Test
+	public void testDuplicateConceptMapUrls() {
+		persistConceptMap();
+
+		expectedException.expect(UnprocessableEntityException.class);
+		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: 1");
+
+		persistConceptMap();
 	}
 
 	@Test

@@ -847,7 +847,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 			String msg = myContext.getLocalizer().getMessage(
 				BaseHapiTerminologySvcImpl.class,
-				"cannotCreateDuplciateConceptMapUrl",
+				"cannotCreateDuplicateConceptMapUrl",
 				conceptMapUrl,
 				existingTermConceptMap.getResourcePid());
 
@@ -925,7 +925,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			retVal.addAll(select.getResultList());
 		}
 
-		// FIXME: Use scrollable results.
+		// FIXME: Use scrollable results for translate.
 
 		return retVal;
 	}
@@ -984,7 +984,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			retVal.addAll(select.getResultList());
 		}
 
-		// FIXME: Use scrollable results.
+		// FIXME: Use scrollable results for translate with reverse.
 
 		return retVal;
 	}

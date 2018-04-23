@@ -32,28 +32,6 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	// FIXME: In progress!
-	@Test
-	public void testTranslateWithInstance() {
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
-
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
-
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("code").setValue(new CodeType("12345"));
-
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
-
-		Parameters respParams = myClient
-			.operation()
-			.onInstance(myConceptMapId)
-			.named("translate")
-			.withParameters(inParams)
-			.execute();
-
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
-	}
-
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
@@ -872,6 +850,77 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
+	public void testTranslateWithInstance() {
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("12345"));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onInstance(myConceptMapId)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("equal", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("34567", coding.getCode());
+		assertEquals("Target Code 34567", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_2, coding.getSystem());
+		assertEquals("Version 2", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+
+		param = getParametersByName(respParams, "match").get(1);
+		assertEquals(3, param.getPart().size());
+		part = getPartByName(param, "equivalence");
+		assertEquals("equal", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		coding = (Coding) part.getValue();
+		assertEquals("56789", coding.getCode());
+		assertEquals("Target Code 56789", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_3, coding.getSystem());
+		assertEquals("Version 4", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+
+		param = getParametersByName(respParams, "match").get(2);
+		assertEquals(3, param.getPart().size());
+		part = getPartByName(param, "equivalence");
+		assertEquals("wider", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		coding = (Coding) part.getValue();
+		assertEquals("67890", coding.getCode());
+		assertEquals("Target Code 67890", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_3, coding.getSystem());
+		assertEquals("Version 4", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+	@Test
 	public void testTranslateWithReverse() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
@@ -1508,6 +1557,64 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(2, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertFalse(part.hasValue());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("12345", coding.getCode());
+		assertEquals("Source Code 12345", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL, coding.getSystem());
+		assertEquals("Version 1", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+
+		param = getParametersByName(respParams, "match").get(1);
+		assertEquals(2, param.getPart().size());
+		part = getPartByName(param, "equivalence");
+		assertFalse(part.hasValue());
+		part = getPartByName(param, "concept");
+		coding = (Coding) part.getValue();
+		assertEquals("78901", coding.getCode());
+		assertEquals("Source Code 78901", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_4, coding.getSystem());
+		assertEquals("Version 5", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testTranslateWithReverseAndInstance() {
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("34567"));
+		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onInstance(myConceptMapId)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
