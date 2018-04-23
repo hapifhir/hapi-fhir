@@ -770,6 +770,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
 
+		// FIXME: What happens if we delete the existing entities but then discover the newly proposed ConceptMap.url is already in use?
+
 		if (optionalExistingTermConceptMapById.isPresent()) {
 			Long id = optionalExistingTermConceptMapById.get().getId();
 			ourLog.info("Deleting existing TermConceptMap {} and its children...", id);
