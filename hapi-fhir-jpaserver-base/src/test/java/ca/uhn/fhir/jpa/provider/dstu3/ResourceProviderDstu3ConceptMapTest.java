@@ -11,9 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.*;
 
 public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDstu3Test {
@@ -88,58 +85,5 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals("Version 4", coding.getVersion());
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
-	}
-
-	private static int getNumberOfParametersByName(Parameters theParameters, String theName) {
-		int retVal = 0;
-
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				retVal++;
-			}
-		}
-
-		return retVal;
-	}
-
-	private static ParametersParameterComponent getParameterByName(Parameters theParameters, String theName) {
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				return param;
-			}
-		}
-
-		return new ParametersParameterComponent();
-	}
-
-	private static List<ParametersParameterComponent> getParametersByName(Parameters theParameters, String theName) {
-		List<ParametersParameterComponent> params = new ArrayList<>();
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				params.add(param);
-			}
-		}
-
-		return params;
-	}
-
-	private static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
-		for (ParametersParameterComponent part : theParameter.getPart()) {
-			if (part.getName().equals(theName)) {
-				return part;
-			}
-		}
-
-		return new ParametersParameterComponent();
-	}
-
-	private static boolean hasParameterByName(Parameters theParameters, String theName) {
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }
