@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -41,6 +42,8 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.search.Query;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
@@ -75,6 +78,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
+	public static final int DEFAULT_FETCH_SIZE = 250;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
@@ -115,6 +120,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private PlatformTransactionManager myTransactionMgr;
 	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
+
+	private int myFetchSize = DEFAULT_FETCH_SIZE;
 
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
 		if (theAddedCodes.add(theConcept.getCode())) {
@@ -1051,11 +1058,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 			query.where(outerPredicate);
 
-			TypedQuery<TermConceptMapGroupElementTarget> select = myEntityManager.createQuery(query.select(root));
-			retVal.addAll(select.getResultList());
-		}
+			// Use scrollable results.
+			final TypedQuery<TermConceptMapGroupElementTarget> typedQuery = myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
 
-		// FIXME: Use scrollable results for translate.
+			while (scrollableResultsIterator.hasNext()) {
+				retVal.add(scrollableResultsIterator.next());
+			}
+		}
 
 		return retVal;
 	}
@@ -1110,11 +1123,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 			query.where(outerPredicate);
 
-			TypedQuery<TermConceptMapGroupElement> select = myEntityManager.createQuery(query.select(root));
-			retVal.addAll(select.getResultList());
-		}
+			// Use scrollable results.
+			final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
 
-		// FIXME: Use scrollable results for translate with reverse.
+			while (scrollableResultsIterator.hasNext()) {
+				retVal.add(scrollableResultsIterator.next());
+			}
+		}
 
 		return retVal;
 	}

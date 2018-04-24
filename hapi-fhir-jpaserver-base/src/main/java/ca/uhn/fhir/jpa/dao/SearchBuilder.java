@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -59,9 +60,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.engine.spi.EntityKey;
-import org.hibernate.engine.spi.PersistenceContext;
-import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -2193,7 +2191,7 @@ public class SearchBuilder implements ISearchBuilder {
 				Query<Long> hibernateQuery = (Query<Long>) query;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				myResultsIterator = new ScrollableResultsIterator(scroll);
+				myResultsIterator = new ScrollableResultsIterator<>(scroll);
 
 				// If the query resulted in extra results being requested
 				if (myAlsoIncludePids != null) {
@@ -2273,42 +2271,6 @@ public class SearchBuilder implements ISearchBuilder {
 			Validate.isTrue(retVal != NO_MORE, "No more elements");
 			return retVal;
 		}
-	}
-
-	public class ScrollableResultsIterator extends BaseIterator<Long> implements Iterator<Long> {
-
-		private Long myNext;
-		private ScrollableResults myScroll;
-
-		public ScrollableResultsIterator(ScrollableResults theScroll) {
-			myScroll = theScroll;
-		}
-
-		private void ensureHaveNext() {
-			if (myNext == null) {
-				if (myScroll.next()) {
-					myNext = (Long) myScroll.get(0);
-				} else {
-					myNext = NO_MORE;
-				}
-			}
-		}
-
-		@Override
-		public boolean hasNext() {
-			ensureHaveNext();
-			return myNext != NO_MORE;
-		}
-
-		@Override
-		public Long next() {
-			ensureHaveNext();
-			Validate.isTrue(myNext != NO_MORE);
-			Long next = myNext;
-			myNext = null;
-			return next;
-		}
-
 	}
 
 	private class UniqueIndexIterator implements Iterator<Long> {
