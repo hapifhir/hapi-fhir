@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -62,18 +61,23 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails) {
+	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails) {
+	protected void createOrUpdateValueSet(ValueSet theValueSet) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected CodeSystem getCodeSystemFromContext(String theSystem) {
+		return null;
 	}
 
 	@Override

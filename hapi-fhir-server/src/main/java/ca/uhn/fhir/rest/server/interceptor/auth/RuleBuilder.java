@@ -362,6 +362,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					for (IIdType next : theOwners) {
 						validateOwner(next);
 					}
+					myInCompartmentName = theCompartmentName;
+					myInCompartmentOwners = theOwners;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}

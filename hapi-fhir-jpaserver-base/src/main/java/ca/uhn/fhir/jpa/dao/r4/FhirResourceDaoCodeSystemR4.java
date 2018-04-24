@@ -161,7 +161,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 			if (isNotBlank(next.getCode())) {
 				TermConcept termConcept = new TermConcept();
 				termConcept.setCode(next.getCode());
-				termConcept.setCodeSystem(theCodeSystemVersion);
+				termConcept.setCodeSystemVersion(theCodeSystemVersion);
 				termConcept.setDisplay(next.getDisplay());
 				termConcept.addChildren(toPersistedConcepts(next.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 				retVal.add(termConcept);

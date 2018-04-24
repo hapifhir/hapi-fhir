@@ -1,0 +1,421 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.108.12.1020",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2017-07-25T09:54:33.579+00:00"
+  },
+  "url": "http://measure.eval.kanvix.com/cql-measure-processor/baseDstu3/Valueset/2.16.840.1.113883.3.464.1003.108.12.1020",
+  "name": "Colonoscopy eMeasure",
+  "compose": {
+    "include": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "version": "2015.1.14AB",
+        "concept": [
+          {
+            "code": "44388"
+          },
+          {
+            "code": "44393"
+          },
+          {
+            "code": "44389"
+          },
+          {
+            "code": "44391"
+          },
+          {
+            "code": "44390"
+          },
+          {
+            "code": "44392"
+          },
+          {
+            "code": "44394"
+          },
+          {
+            "code": "44397"
+          },
+          {
+            "code": "45378"
+          },
+          {
+            "code": "45383"
+          },
+          {
+            "code": "45380"
+          },
+          {
+            "code": "45382"
+          },
+          {
+            "code": "45386"
+          },
+          {
+            "code": "45381"
+          },
+          {
+            "code": "45391"
+          },
+          {
+            "code": "45379"
+          },
+          {
+            "code": "45384"
+          },
+          {
+            "code": "45385"
+          },
+          {
+            "code": "45387"
+          },
+          {
+            "code": "45392"
+          },
+          {
+            "code": "45355"
+          },
+          {
+            "code": "44401"
+          },
+          {
+            "code": "44402"
+          },
+          {
+            "code": "44403"
+          },
+          {
+            "code": "44404"
+          },
+          {
+            "code": "44405"
+          },
+          {
+            "code": "44406"
+          },
+          {
+            "code": "44407"
+          },
+          {
+            "code": "44408"
+          },
+          {
+            "code": "45388"
+          },
+          {
+            "code": "45389"
+          },
+          {
+            "code": "45390"
+          },
+          {
+            "code": "45393"
+          },
+          {
+            "code": "45398"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2014.07.14AA",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "73761001"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2014.07.14AA",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "174184006"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "timestamp": "2016-09-20T13:07:55.271-04:00",
+    "total": 54,
+    "offset": 0,
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "310634005",
+        "display": "Check colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "73761001",
+        "display": "Colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "446745002",
+        "display": "Colonoscopy and biopsy of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "446521004",
+        "display": "Colonoscopy and excision of mucosa of colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "447021001",
+        "display": "Colonoscopy and tattooing"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "443998000",
+        "display": "Colonoscopy through colostomy with endoscopic biopsy of colon"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44388",
+        "display": "Colonoscopy through stoma; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44401",
+        "display": "Colonoscopy through stoma; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre-and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44393",
+        "display": "Colonoscopy through stoma; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44389",
+        "display": "Colonoscopy through stoma; with biopsy, single or multiple"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44391",
+        "display": "Colonoscopy through stoma; with control of bleeding, any method"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44408",
+        "display": "Colonoscopy through stoma; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44404",
+        "display": "Colonoscopy through stoma; with directed submucosal injection(s), any substance"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44403",
+        "display": "Colonoscopy through stoma; with endoscopic mucosal resection"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44402",
+        "display": "Colonoscopy through stoma; with endoscopic stent placement (including pre- and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44406",
+        "display": "Colonoscopy through stoma; with endoscopic ultrasound examination, limited to the sigmoid, descending, transverse, or ascending colon and cecum and adjacent structures"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44390",
+        "display": "Colonoscopy through stoma; with removal of foreign body(s)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44392",
+        "display": "Colonoscopy through stoma; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44394",
+        "display": "Colonoscopy through stoma; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44405",
+        "display": "Colonoscopy through stoma; with transendoscopic balloon dilation"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44397",
+        "display": "Colonoscopy through stoma; with transendoscopic stent placement (includes predilation)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "44407",
+        "display": "Colonoscopy through stoma; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s), includes endoscopic ultrasound examination limited to the sigmoid, descending, transverse, or ascending colon and cecum and adjacent structures"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "12350003",
+        "display": "Colonoscopy with rigid sigmoidoscope through colotomy"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45383",
+        "display": "Colonoscopy, flexible, proximal to splenic flexure; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45387",
+        "display": "Colonoscopy, flexible, proximal to splenic flexure; with transendoscopic stent placement (includes predilation)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45378",
+        "display": "Colonoscopy, flexible; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45388",
+        "display": "Colonoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre- and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45398",
+        "display": "Colonoscopy, flexible; with band ligation(s) (eg, hemorrhoids)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45380",
+        "display": "Colonoscopy, flexible; with biopsy, single or multiple"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45382",
+        "display": "Colonoscopy, flexible; with control of bleeding, any method"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45393",
+        "display": "Colonoscopy, flexible; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45381",
+        "display": "Colonoscopy, flexible; with directed submucosal injection(s), any substance"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45390",
+        "display": "Colonoscopy, flexible; with endoscopic mucosal resection"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45389",
+        "display": "Colonoscopy, flexible; with endoscopic stent placement (includes pre- and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45391",
+        "display": "Colonoscopy, flexible; with endoscopic ultrasound examination limited to the rectum, sigmoid, descending, transverse, or ascending colon and cecum, and adjacent structures"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45379",
+        "display": "Colonoscopy, flexible; with removal of foreign body(s)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45384",
+        "display": "Colonoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45385",
+        "display": "Colonoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45386",
+        "display": "Colonoscopy, flexible; with transendoscopic balloon dilation"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45392",
+        "display": "Colonoscopy, flexible; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s), includes endoscopic ultrasound examination limited to the rectum, sigmoid, descending, transverse, or ascending colon and cecum, and adjacent structures"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45355",
+        "display": "Colonoscopy, rigid or flexible, transabdominal via colotomy, single or multiple"
+      },
+      {
+        "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+        "code": "G0105",
+        "display": "Colorectal cancer screening; colonoscopy on individual at high risk"
+      },
+      {
+        "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+        "code": "G0121",
+        "display": "Colorectal cancer screening; colonoscopy on individual not meeting criteria for high risk"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "427459009",
+        "display": "Diagnostic endoscopic examination of colonic pouch and biopsy of colonic pouch using colonoscope"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "174184006",
+        "display": "Diagnostic endoscopic examination on colon"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "367535003",
+        "display": "Fiberoptic colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "8180007",
+        "display": "Fiberoptic colonoscopy through colostomy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "25732003",
+        "display": "Fiberoptic colonoscopy with biopsy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "34264006",
+        "display": "Intraoperative colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "235151005",
+        "display": "Limited colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "174158000",
+        "display": "Open colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "444783004",
+        "display": "Screening colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "303587008",
+        "display": "Therapeutic colonoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "235150006",
+        "display": "Total colonoscopy"
+      }
+    ]
+  }
+}

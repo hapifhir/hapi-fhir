@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
@@ -59,7 +58,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static Server ourServer;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	private TerminologyUploaderProvider myTerminologyUploaderProvider;
+	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
@@ -90,7 +89,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
+			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
 			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
 
 			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);

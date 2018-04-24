@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -44,7 +43,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -58,6 +59,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.engine.spi.EntityKey;
+import org.hibernate.engine.spi.PersistenceContext;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -103,6 +107,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
+	private int myFetchSize;
 
 	/**
 	 * Constructor
@@ -810,7 +815,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					predicate = join.<Object>get("myUri").as(String.class).in(toFind);
+					predicate = join.get("myUri").as(String.class).in(toFind);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 					predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
@@ -948,8 +953,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate lb = null;
 		if (lowerBound != null) {
-			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.<Date>get("myValueLow"), lowerBound);
-			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.<Date>get("myValueHigh"), lowerBound);
+			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
+			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBound);
 			if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER || theRange.getLowerBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 				lb = gt;
 			} else {
@@ -959,8 +964,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate ub = null;
 		if (upperBound != null) {
-			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.<Date>get("myValueLow"), upperBound);
-			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.<Date>get("myValueHigh"), upperBound);
+			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBound);
+			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
 			if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 				ub = lt;
 			} else {
@@ -1090,6 +1095,11 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (theParameter instanceof StringParam) {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
+			if (id.isContains()) {
+				if (!myCallingDao.getConfig().isAllowContainsSearches()) {
+					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
+				}
+			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;
 			rawSearchTerm = id.getValueAsString();
@@ -1103,7 +1113,13 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		likeExpression = createLeftMatchLikeExpression(likeExpression);
+		if (theParameter instanceof StringParam &&
+			((StringParam) theParameter).isContains() &&
+			myCallingDao.getConfig().isAllowContainsSearches()) {
+			likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+		} else {
+			likeExpression = createLeftMatchLikeExpression(likeExpression);
+		}
 
 		Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 		if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
@@ -1177,7 +1193,7 @@ public class SearchBuilder implements ISearchBuilder {
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
 
-		ArrayList<Predicate> singleCodePredicates = new ArrayList<Predicate>();
+		ArrayList<Predicate> singleCodePredicates = new ArrayList<>();
 		if (codes != null) {
 
 			if (codes.isEmpty()) {
@@ -1219,7 +1235,11 @@ public class SearchBuilder implements ISearchBuilder {
 			 */
 
 			if (StringUtils.isNotBlank(system)) {
-				singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
+				if (modifier != null && modifier == TokenParamModifier.NOT) {
+					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
+				} else {
+					singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
+				}
 			} else if (system == null) {
 				// don't check the system
 			} else {
@@ -1228,7 +1248,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			if (StringUtils.isNotBlank(code)) {
-				singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+				if (modifier != null && modifier == TokenParamModifier.NOT) {
+					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
+				} else {
+					singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+				}
 			} else {
 				/*
 				 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
@@ -1557,7 +1581,8 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 				if (valueSetUris.size() == 1) {
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
+					String valueSet = valueSetUris.iterator().next();
+					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSet);
 					for (VersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
@@ -1907,6 +1932,11 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
+	public void setFetchSize(int theFetchSize) {
+		myFetchSize = theFetchSize;
+	}
+
+	@Override
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
@@ -1978,19 +2008,23 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
 				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}
 			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.<Date>get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
 				lastUpdatedPredicates.add(predicateUpper);
 			}
 		}
 		return lastUpdatedPredicates;
+	}
+
+	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
+		return "%" + likeExpression.replace("%", "[%]") + "%";
 	}
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
@@ -2157,6 +2191,7 @@ public class SearchBuilder implements ISearchBuilder {
 				final TypedQuery<Long> query = createQuery(mySort, maximumResults);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
+				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 				myResultsIterator = new ScrollableResultsIterator(scroll);
 
@@ -2227,10 +2262,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myNext == null) {
 				fetchNext();
 			}
-			if (myNext == NO_MORE) {
-				return false;
-			}
-			return true;
+			return myNext != NO_MORE;
 		}
 
 		@Override

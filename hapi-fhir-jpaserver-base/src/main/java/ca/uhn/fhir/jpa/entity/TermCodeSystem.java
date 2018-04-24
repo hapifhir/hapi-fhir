@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -88,5 +91,16 @@ public class TermCodeSystem implements Serializable {
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("codeSystemUri", myCodeSystemUri)
+			.append("currentVersion", myCurrentVersion)
+			.append("pid", myPid)
+			.append("resourcePid", myResourcePid)
+			.append("name", myName)
+			.toString();
 	}
 }

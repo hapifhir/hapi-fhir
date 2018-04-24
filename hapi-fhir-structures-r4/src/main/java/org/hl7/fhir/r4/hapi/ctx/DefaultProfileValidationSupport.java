@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
@@ -32,19 +34,41 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   private Map<String, StructureDefinition> myStructureDefinitions;
   private Map<String, ValueSet> myValueSets;
 
+  private void addConcepts(ConceptSetComponent theInclude, ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<ConceptDefinitionComponent> theConcepts) {
+    for (ConceptDefinitionComponent next : theConcepts) {
+      if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
+        theRetVal
+          .addContains()
+          .setSystem(theInclude.getSystem())
+          .setCode(next.getCode())
+          .setDisplay(next.getDisplay());
+      }
+      addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
+    }
+  }
+
   @Override
   public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
     ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
 
-    Set<String> wantCodes = new HashSet<String>();
+    Set<String> wantCodes = new HashSet<>();
     for (ConceptReferenceComponent next : theInclude.getConcept()) {
       wantCodes.add(next.getCode());
     }
 
     CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
-    for (ConceptDefinitionComponent next : system.getConcept()) {
-      if (wantCodes.isEmpty() || wantCodes.contains(next.getCode())) {
-        retVal.addContains().setSystem(theInclude.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+    if (system != null) {
+      List<ConceptDefinitionComponent> concepts = system.getConcept();
+      addConcepts(theInclude, retVal, wantCodes, concepts);
+    }
+
+    for (UriType next : theInclude.getValueSet()) {
+      ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
+      if (vs != null) {
+        for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
+          ValueSetExpansionComponent contents = expandValueSet(theContext, nextInclude);
+          retVal.getContains().addAll(contents.getContains());
+        }
       }
     }
 
@@ -141,27 +165,33 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
     ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
-    InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-    if (valuesetText != null) {
-      InputStreamReader reader = new InputStreamReader(valuesetText, Charsets.UTF_8);
+    InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
+    InputStreamReader reader = null;
+    if (inputStream != null) {
+      try {
+        reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 
-      Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-      for (BundleEntryComponent next : bundle.getEntry()) {
-        if (next.getResource() instanceof CodeSystem) {
-          CodeSystem nextValueSet = (CodeSystem) next.getResource();
-          nextValueSet.getText().setDivAsString("");
-          String system = nextValueSet.getUrl();
-          if (isNotBlank(system)) {
-            theCodeSystems.put(system, nextValueSet);
-          }
-        } else if (next.getResource() instanceof ValueSet) {
-          ValueSet nextValueSet = (ValueSet) next.getResource();
-          nextValueSet.getText().setDivAsString("");
-          String system = nextValueSet.getUrl();
-          if (isNotBlank(system)) {
-            theValueSets.put(system, nextValueSet);
+        Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
+        for (BundleEntryComponent next : bundle.getEntry()) {
+          if (next.getResource() instanceof CodeSystem) {
+            CodeSystem nextValueSet = (CodeSystem) next.getResource();
+            nextValueSet.getText().setDivAsString("");
+            String system = nextValueSet.getUrl();
+            if (isNotBlank(system)) {
+              theCodeSystems.put(system, nextValueSet);
+            }
+          } else if (next.getResource() instanceof ValueSet) {
+            ValueSet nextValueSet = (ValueSet) next.getResource();
+            nextValueSet.getText().setDivAsString("");
+            String system = nextValueSet.getUrl();
+            if (isNotBlank(system)) {
+              theValueSets.put(system, nextValueSet);
+            }
           }
         }
+      } finally {
+        IOUtils.closeQuietly(reader);
+        IOUtils.closeQuietly(inputStream);
       }
     } else {
       ourLog.warn("Unable to load resource: {}", theClasspath);

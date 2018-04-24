@@ -28,12 +28,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.IdType;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -93,28 +92,68 @@ public class JaxRsRequest extends RequestDetails {
          FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
 
          if (StringUtils.isNotBlank(myVersion)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                 result.setId(
-                         new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                 result.setId(
-                         new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-             }
+             switch (fhirContextVersion) {
+                 case R4:
+                     result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU3:
+                     result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2_1:
+                     result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2_HL7ORG:
+                     result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2:
+                     result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 default:
+                     throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+            }
          } else if (StringUtils.isNotBlank(myId)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                 result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                 result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-             }
+             switch (fhirContextVersion) {
+                 case R4:
+                     result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU3:
+                     result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2_1:
+                     result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2_HL7ORG:
+                     result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2:
+                     result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 default:
+                     throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+              }
          }
 
          if (myRestOperation == RestOperationTypeEnum.UPDATE) {
              String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
              if (contentLocation != null) {
-                 if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                     result.setId(new IdType(contentLocation));
-                 } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                     result.setId(new IdDt(contentLocation));
+                 switch (fhirContextVersion) {
+                     case R4:
+                         result.setId(new org.hl7.fhir.r4.model.IdType(contentLocation));
+                         break;
+                     case DSTU3:
+                         result.setId(new org.hl7.fhir.dstu3.model.IdType(contentLocation));
+                         break;
+                     case DSTU2_1:
+                         result.setId(new org.hl7.fhir.dstu2016may.model.IdType(contentLocation));
+                         break;
+                     case DSTU2_HL7ORG:
+                         result.setId(new org.hl7.fhir.instance.model.IdType(contentLocation));
+                         break;
+                    case DSTU2:
+                         result.setId(new ca.uhn.fhir.model.primitive.IdDt(contentLocation));
+                         break;
+                    default:
+                         throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
                  }
              }
          }

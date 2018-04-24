@@ -1,0 +1,33 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "bcs-decision-support",
+  "status": "draft",
+  "library": {
+    "reference": "Library/patient-view"
+  },
+  "action": [
+    {
+      "condition": [
+        {
+          "kind": "applicability",
+          "language": "text/cql",
+          "expression": "Does Patient Qualify?"
+        }
+      ],
+      "action": [
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "language": "text/cql",
+              "expression": "Needs Mammogram"
+            }
+          ],
+          "definition": {
+            "reference": "ActivityDefinition/mammogram-service-request"
+          }
+        }
+      ]
+    }
+  ]
+}

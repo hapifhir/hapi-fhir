@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
@@ -38,9 +38,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -133,8 +133,8 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProvider terminologyUploaderProvider() {
-		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
+	public TerminologyUploaderProviderR4 terminologyUploaderProvider() {
+		TerminologyUploaderProviderR4 retVal = new TerminologyUploaderProviderR4();
 		retVal.setContext(fhirContextR4());
 		return retVal;
 	}

@@ -63,6 +63,11 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
+	private boolean myAllowContainsSearches = true;
+
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
@@ -134,6 +139,7 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
+
 
 	/**
 	 * Specifies the highest number that a client is permitted to use in a
@@ -374,9 +380,9 @@ public class DaoConfig {
 	 * of higher importance than raw write performance
 	 * </p>
 	 * <p>
-	 *    Note that this setting also has an impact on sorting (i.e. using the
-	 *    <code>_sort</code> parameter on searches): If the server is configured
-	 *    to not index missing field.
+	 * Note that this setting also has an impact on sorting (i.e. using the
+	 * <code>_sort</code> parameter on searches): If the server is configured
+	 * to not index missing field.
 	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
@@ -646,6 +652,26 @@ public class DaoConfig {
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 *
+	 * Default is <code>true</code>
+	 */
+	public boolean isAllowContainsSearches() {
+		return myAllowContainsSearches;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 *
+	 * Default is <code>true</code>
+	 */
+	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
+		this.myAllowContainsSearches = theAllowContainsSearches;
 	}
 
 	/**

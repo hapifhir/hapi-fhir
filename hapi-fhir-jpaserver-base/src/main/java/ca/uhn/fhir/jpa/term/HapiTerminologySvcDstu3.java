@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -103,39 +103,52 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
-		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
+	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
 		CodeSystem resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
+			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
+			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();
+		} else {
+			return myCodeSystemResourceDao.update(resourceToStore).getId();
+		}
 	}
 
 	@Override
-	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap, RequestDetails theRequestDetails) {
-		String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
 			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		myConceptMapResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
+			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+			myConceptMapResourceDao.update(resourceToStore, matchUrl);
+		} else {
+			myConceptMapResourceDao.update(resourceToStore);
+		}
 	}
 
 	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
-		String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
 			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
+
+		if (isBlank(valueSetDstu3.getIdElement().getIdPart())) {
+			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+			myValueSetResourceDao.update(valueSetDstu3, matchUrl);
+		} else {
+			myValueSetResourceDao.update(valueSetDstu3);
+		}
 	}
 
 	@Override
@@ -151,6 +164,24 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+	}
+
+	@Override
+	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
+		if (vs == null) {
+			return Collections.emptyList();
+		}
+
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+		try {
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(vs);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+
+
+		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4);
 	}
 
 	@Override
@@ -223,6 +254,16 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
+	protected org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
+		CodeSystem codeSystem = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		try {
+			return VersionConvertor_30_40.convertCodeSystem(codeSystem);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		return myTerminologySvc.supportsSystem(theSystem);
 	}
@@ -237,8 +278,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			def.setDisplay(code.getDisplay());
 			CodeValidationResult retVal = new CodeValidationResult(def);
 			retVal.setProperties(code.toValidationProperties());
-			// This came in from source branch loinc_loader_update
-//			retVal.setCodeSystemName(code.getCodeSystem().get);
+			retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
 			return retVal;
 		}
 

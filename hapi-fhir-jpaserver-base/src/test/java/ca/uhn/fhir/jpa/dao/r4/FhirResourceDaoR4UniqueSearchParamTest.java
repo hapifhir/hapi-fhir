@@ -19,6 +19,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -33,6 +34,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
+@TestPropertySource(properties = {
+	// Since scheduled tasks can cause searches, which messes up the
+	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
+	"scheduling_disabled=true"
+})
 public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UniqueSearchParamTest.class);

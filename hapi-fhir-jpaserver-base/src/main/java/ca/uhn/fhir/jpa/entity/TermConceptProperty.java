@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,22 +43,22 @@ public class TermConceptProperty implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
 	@Column(name = "PID")
 	private Long myId;
-	@Column(name = "PROP_KEY", length = 200, nullable = false)
+	@Column(name = "PROP_KEY", length = 500, nullable = false)
 	@NotBlank
 	private String myKey;
-	@Column(name = "PROP_VAL", length = 200, nullable = true)
+	@Column(name = "PROP_VAL", length = 500, nullable = true)
 	private String myValue;
 	@Column(name = "PROP_TYPE", length = MAX_PROPTYPE_ENUM_LENGTH, nullable = false)
 	private TermConceptPropertyTypeEnum myType;
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
-	@Column(name = "PROP_CODESYSTEM", length = 200, nullable = true)
+	@Column(name = "PROP_CODESYSTEM", length = 500, nullable = true)
 	private String myCodeSystem;
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
-	@Column(name = "PROP_DISPLAY", length = 200, nullable = true)
+	@Column(name = "PROP_DISPLAY", length = 500, nullable = true)
 	private String myDisplay;
 
 	/**

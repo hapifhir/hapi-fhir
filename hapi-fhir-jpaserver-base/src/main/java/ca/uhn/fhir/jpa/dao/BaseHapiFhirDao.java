@@ -44,10 +44,12 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
 import com.google.common.annotations.VisibleForTesting;
@@ -67,7 +69,6 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -110,6 +111,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 	private static boolean ourValidationDisabledForUnitTest;
+	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
@@ -129,7 +131,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		HashSet<String> excludeElementsInEncoded = new HashSet<String>();
 		excludeElementsInEncoded.add("id");
-		excludeElementsInEncoded.add("meta");
+		excludeElementsInEncoded.add("*.meta");
 		EXCLUDE_ELEMENTS_IN_ENCODED = Collections.unmodifiableSet(excludeElementsInEncoded);
 	}
 
@@ -832,6 +834,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		search = mySearchDao.save(search);
 
 		return new PersistedJpaBundleProvider(search.getUuid(), this);
+	}
+
+	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+		String newVersion;
+		long newVersionLong;
+		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
+			newVersion = "1";
+			newVersionLong = 1;
+		} else {
+			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
+			newVersion = Long.toString(newVersionLong);
+		}
+
+		IIdType newId = theResourceId.withVersion(newVersion);
+		theResource.getIdElement().setValue(newId.getValue());
+		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	@Override
@@ -1816,6 +1834,55 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
+	public ResourceTable updateInternal(T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
+		// Notify interceptors
+		ActionRequestDetails requestDetails = null;
+		if (theRequestDetails != null) {
+			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
+			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
+		}
+
+		// Notify IServerOperationInterceptors about pre-action call
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, theOldResource, theResource);
+			}
+		}
+
+		// Perform update
+		ResourceTable savedEntity = updateEntity(theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
+
+		/*
+		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
+		 * we'll manually increase the version. This is important because we want the updated version number
+		 * to be reflected in the resource shared with interceptors
+		 */
+		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation() && !ourDisableIncrementOnUpdateForUnitTest) {
+			if (theResourceId.hasVersionIdPart() == false) {
+				theResourceId = theResourceId.withVersion(Long.toString(savedEntity.getVersion()));
+			}
+			incrementId(theResource, savedEntity, theResourceId);
+		}
+
+		// Notify interceptors
+		if (!savedEntity.isUnchangedInCurrentOperation()) {
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theOldResource, theResource);
+				}
+			}
+		}
+		return savedEntity;
+	}
+
 	private void validateChildReferences(IBase theElement, String thePath) {
 		if (theElement == null) {
 			return;
@@ -2131,6 +2198,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		}
 		return b.toString();
+	}
+
+	@VisibleForTesting
+	public static void setDisableIncrementOnUpdateForUnitTest(boolean theDisableIncrementOnUpdateForUnitTest) {
+		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
 	}
 
 	/**

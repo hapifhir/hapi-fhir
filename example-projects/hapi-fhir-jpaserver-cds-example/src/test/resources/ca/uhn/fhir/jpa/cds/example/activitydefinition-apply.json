@@ -1,0 +1,32 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "ad-apply-example",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">ActivityDefinition $apply operation example.</div>"
+  },
+  "status": "draft",
+  "description": "This is a test.",
+  "library": [
+    {
+      "reference": "Library/activityDefinitionApplyTest"
+    }
+  ],
+  "kind": "ProcedureRequest",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "303653007",
+        "display": "Computed tomography of head"
+      }
+    ]
+  },
+  "dynamicValue": [
+    {
+      "description": "Set ProcedureRequest doNotPerform property",
+      "path": "doNotPerform",
+      "expression": "activityDefinitionApplyTest.\"Dynamic doNotPerform Setting\""
+    }
+  ]
+}

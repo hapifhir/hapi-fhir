@@ -1,0 +1,49 @@
+{
+  "resourceType": "Condition",
+  "id": "Condition-13",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2017-09-09T21:52:17.035-06:00"
+  },
+  "extension": [
+    {
+      "url": "http://mihin.org/fhir/templateId",
+      "valueString": "2.16.840.1.113883.10.20.22.4.3"
+    },
+    {
+      "url": "http://mihin.org/fhir/templateId",
+      "valueString": "2.16.840.1.113883.10.20.24.3.137"
+    }
+  ],
+  "clinicalStatus": "active",
+  "verificationStatus": "confirmed",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/condition-category",
+          "code": "diagnosis",
+          "display": "Diagnosis"
+        }
+      ],
+      "text": "This is a judgment made by a healthcare provider that the patient has a particular disease or condition"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "363414004"
+      }
+    ],
+    "text": "Diagnosis: Malignant Neoplasm Of Colon"
+  },
+  "subject": {
+    "reference": "Patient/Patient-12214",
+    "display": "2  N Geriatric Jr"
+  },
+  "asserter": {
+    "reference": "Practitioner/Practitioner-12208",
+    "display": "Jay McCann Sawyer MD"
+  }
+}

@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
@@ -695,6 +696,36 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionUpdateTwoResourcesWithSameId() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Transaction bundle contains multiple resources with ID: Patient/ABC"));
+		}
+	}
+
+	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch2() {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch2";
 		Bundle request = new Bundle();
@@ -1128,7 +1159,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateWithLinks() throws IOException {
+	public void testTransactionCreateWithLinks() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
 
@@ -1491,7 +1522,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
+	public void testTransactionDoesNotLeavePlaceholderIds() {
 		String input;
 		try {
 			input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
@@ -1511,6 +1542,213 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = find(list, Patient.class, 0);
 		assertTrue(p.getIdElement().isIdPartValidLong());
 		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
+	}
+
+	@Test
+	public void testTransactionDoesntUpdateUnchangesResourceWithPlaceholderIds() {
+		Bundle output, input;
+		BundleEntryResponseComponent respEntry;
+		IdType createdPatientId;
+		SearchParameterMap map;
+		IBundleProvider search;
+
+		input = new Bundle();
+
+		/*
+		 * Create a transaction with a patient and an observation using
+		 * placeholder IDs in them
+		 */
+		Patient pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Both resrouces should be created and have version 1
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		createdPatientId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdPatientId.getResourceType());
+		assertEquals("1", createdPatientId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("201 Created", respEntry.getStatus());
+		IdType createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0,1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0,1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+
+		/*
+		 * Now run the same transaction, which should not make any changes this time
+		 * around
+		 */
+
+		input = new Bundle();
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Should still have version 1 of both resources
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should still work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0,1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0,1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+
+		/*
+		 * Now run the transaction, but this time with an actual
+		 * change to the Observation
+		 */
+
+		input = new Bundle();
+		pat = new Patient();
+		pat.setId(IdType.newRandomUuid());
+		pat.addIdentifier().setSystem("foo").setValue("bar");
+		input
+			.addEntry()
+			.setResource(pat)
+			.setFullUrl(pat.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("dog");
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getSubject().setReference(pat.getId());
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("/Observation?identifier=foo|dog");
+		output = mySystemDao.transaction(mySrd, input);
+
+		/*
+		 * Observation should now be version 2
+		 */
+		respEntry = output.getEntry().get(0).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Patient", createdObservationId.getResourceType());
+		assertEquals("1", createdObservationId.getVersionIdPart());
+
+		respEntry = output.getEntry().get(1).getResponse();
+		assertEquals("200 OK", respEntry.getStatus());
+		createdObservationId = new IdType(respEntry.getLocation());
+		assertEquals("Observation", createdObservationId.getResourceType());
+		assertEquals("2", createdObservationId.getVersionIdPart());
+
+		/*
+		 * Searches for both resources should still work and the reference
+		 * should be substituted correctly
+		 */
+		// Patient
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
+		search = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		pat = (Patient) search.getResources(0,1).get(0);
+		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
+		// Observation
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
+		search = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		obs = (Observation) search.getResources(0,1).get(0);
+		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
+		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
 	}
 
 	@Test
@@ -1967,7 +2205,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getId());
-		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertThat(p.getId(), endsWith("/_history/2"));
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
@@ -2093,7 +2331,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWIthInvalidPlaceholder() throws Exception {
+	public void testTransactionWIthInvalidPlaceholder() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -2257,6 +2495,78 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		respEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 
+	}
+
+	@Test
+	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChange() {
+
+		Observation obs = new Observation();
+		obs.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertEquals(1, output.getEntry().size());
+		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id.getResourceType());
+		assertEquals("1", id.getVersionIdPart());
+
+		/*
+		 * Try again with same contents
+		 */
+
+		Observation obs2 = new Observation();
+		obs2.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs2
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs2.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs2.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input2 = new Bundle();
+		input2.setType(BundleType.TRANSACTION);
+		input2
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output2 = mySystemDao.transaction(mySrd, input2);
+		assertEquals(1, output2.getEntry().size());
+		IdType id2 = new IdType(output2.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id2.getResourceType());
+		assertEquals("1", id2.getVersionIdPart());
+
+		assertEquals(id.getValue(), id2.getValue());
 	}
 
 	@Test
@@ -2719,7 +3029,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWithRelativeOidIds() throws Exception {
+	public void testTransactionWithRelativeOidIds() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 
@@ -2862,7 +3172,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * This is not the correct way to do it, but we'll allow it to be lenient
 	 */
 	@Test
-	public void testTransactionWithRelativeOidIdsQualified() throws Exception {
+	public void testTransactionWithRelativeOidIdsQualified() {
 		Bundle res = new Bundle();
 		res.setType(BundleType.TRANSACTION);
 

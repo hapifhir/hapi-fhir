@@ -1,0 +1,208 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1010",
+  "meta": {
+    "versionId": "6",
+    "lastUpdated": "2017-07-25T09:54:33.579+00:00"
+  },
+  "url": "http://measure.eval.kanvix.com/cql-measure-processor/baseDstu3/Valueset/2.16.840.1.113883.3.464.1003.198.12.1010",
+  "name": "Flexible Sigmoidoscopy eMeasure",
+  "compose": {
+    "include": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "version": "2015.1.14AB",
+        "concept": [
+          {
+            "code": "45330"
+          },
+          {
+            "code": "45339"
+          },
+          {
+            "code": "45331"
+          },
+          {
+            "code": "45334"
+          },
+          {
+            "code": "45337"
+          },
+          {
+            "code": "45340"
+          },
+          {
+            "code": "45335"
+          },
+          {
+            "code": "45341"
+          },
+          {
+            "code": "45332"
+          },
+          {
+            "code": "45333"
+          },
+          {
+            "code": "45338"
+          },
+          {
+            "code": "45345"
+          },
+          {
+            "code": "45342"
+          },
+          {
+            "code": "45346"
+          },
+          {
+            "code": "45347"
+          },
+          {
+            "code": "45349"
+          },
+          {
+            "code": "45350"
+          }
+        ]
+      },
+      {
+        "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+        "version": "2016.1.15AB",
+        "concept": [
+          {
+            "code": "G0104"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2014.07.14AA",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "44441009"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "timestamp": "2016-09-20T13:20:03.237-04:00",
+    "total": 22,
+    "offset": 0,
+    "contains": [
+      {
+        "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+        "code": "G0104",
+        "display": "Colorectal cancer screening; flexible sigmoidoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "425634007",
+        "display": "Diagnostic endoscopic examination of lower bowel and sampling for bacterial overgrowth using fiberoptic sigmoidoscope"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "44441009",
+        "display": "Flexible fiberoptic sigmoidoscopy"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "112870002",
+        "display": "Flexible fiberoptic sigmoidoscopy for removal of foreign body"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "396226005",
+        "display": "Flexible fiberoptic sigmoidoscopy with biopsy"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45330",
+        "display": "Sigmoidoscopy, flexible; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45346",
+        "display": "Sigmoidoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre- and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45339",
+        "display": "Sigmoidoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45350",
+        "display": "Sigmoidoscopy, flexible; with band ligation(s) (eg, hemorrhoids)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45331",
+        "display": "Sigmoidoscopy, flexible; with biopsy, single or multiple"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45334",
+        "display": "Sigmoidoscopy, flexible; with control of bleeding, any method"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45337",
+        "display": "Sigmoidoscopy, flexible; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45335",
+        "display": "Sigmoidoscopy, flexible; with directed submucosal injection(s), any substance"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45349",
+        "display": "Sigmoidoscopy, flexible; with endoscopic mucosal resection"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45341",
+        "display": "Sigmoidoscopy, flexible; with endoscopic ultrasound examination"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45347",
+        "display": "Sigmoidoscopy, flexible; with placement of endoscopic stent (includes pre- and post-dilation and guide wire passage, when performed)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45332",
+        "display": "Sigmoidoscopy, flexible; with removal of foreign body(s)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45333",
+        "display": "Sigmoidoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45338",
+        "display": "Sigmoidoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45340",
+        "display": "Sigmoidoscopy, flexible; with transendoscopic balloon dilation"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45345",
+        "display": "Sigmoidoscopy, flexible; with transendoscopic stent placement (includes predilation)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "45342",
+        "display": "Sigmoidoscopy, flexible; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s)"
+      }
+    ]
+  }
+}

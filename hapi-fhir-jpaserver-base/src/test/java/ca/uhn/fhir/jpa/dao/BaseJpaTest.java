@@ -261,6 +261,7 @@ public abstract class BaseJpaTest {
 			public Void doInTransaction(TransactionStatus theStatus) {
 				entityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
 				entityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
+				entityManager.createQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null").executeUpdate();
 				return null;
 			}
 		});
@@ -292,6 +293,8 @@ public abstract class BaseJpaTest {
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
+				entityManager.createQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
 				for (TermCodeSystem next : entityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
 					next.setCurrentVersion(null);

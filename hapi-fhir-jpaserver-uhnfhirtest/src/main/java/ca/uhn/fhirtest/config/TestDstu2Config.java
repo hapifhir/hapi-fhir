@@ -68,6 +68,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu2");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		retVal.setFetchSizeDefaultMaximum(10000);
 		return retVal;
 	}
 

@@ -20,22 +20,18 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.r4.model.*;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
 
-	//@formatter:off
 	@SuppressWarnings("unchecked")
 	@Operation(name = "$lookup", idempotent = true, returnParameters= {
 		@OperationParam(name="name", type=StringType.class, min=1),
@@ -47,17 +43,17 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 			HttpServletRequest theServletRequest,
 			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding, 
-			RequestDetails theRequestDetails 
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
+			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
-		
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			result.throwNotFoundIfAppropriate();
-			return result.toParameters();
+			return result.toParameters(theProperties);
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -600,7 +600,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>
@@ -717,10 +717,10 @@
 		</plugins>
 		<resources>
 			<resource>
-				<directory>${basedir}/src/main/resources</directory>
+				<directory>${project.basedir}/src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>${basedir}/target/generated-resources/tinder</directory>
+				<directory>${project.basedir}/target/generated-resources/tinder</directory>
 			</resource>
 		</resources>
 	</build>
