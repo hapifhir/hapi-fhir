@@ -51,8 +51,6 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		@OperationParam(name = "reverse", min = 0, max = 1) BooleanType theReverse,
 		RequestDetails theRequestDetails
 	) {
-		// FIXME: Consider handling additional input and output parameters (dependency, product).
-
 		boolean haveSourceCode = theSourceCode != null
 			&& theSourceCode.hasCode();
 		boolean haveSourceCodeSystem = theSourceCodeSystem != null
@@ -78,19 +76,6 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			|| moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
 			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
-
-		// FIXME: Investigate whether or not we want source code system to be required.
-//		if (haveSourceCode) {
-//			if (!haveSourceCodeSystem) {
-//				throw new InvalidRequestException("This implementation of the $translate operation requires a source code system to be identified.");
-//			}
-//		}
-
-		// FIXME: Investigate whether or not we want target code system to be required.
-//		if (!haveTargetCodeSystem) {
-//			throw new InvalidRequestException("This implementation of the $translate operation requires a target code system to be identified.");
-//		}
-		// </editor-fold>
 
 		TranslationRequest translationRequest = new TranslationRequest();
 

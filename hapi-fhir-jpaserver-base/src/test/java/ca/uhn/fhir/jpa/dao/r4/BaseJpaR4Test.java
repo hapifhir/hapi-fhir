@@ -56,15 +56,6 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-
-	protected static final String CM_URL = "http://example.com/my_concept_map";
-	protected static final String CS_URL = "http://example.com/my_code_system";
-	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
-	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
-	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
-	protected static final String VS_URL = "http://example.com/my_value_set";
-	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
-
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
