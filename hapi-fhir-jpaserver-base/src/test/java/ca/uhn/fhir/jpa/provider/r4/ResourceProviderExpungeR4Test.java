@@ -134,7 +134,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertEquals(2, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -166,8 +166,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+//		assertEquals("count", output.getParameter().get(0).getName());
+//		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// All patients deleted
 		assertExpunged(myOneVersionPatientId);
@@ -206,7 +206,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertEquals(2, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -246,19 +246,19 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters output = myClient
 			.operation()
-			.onType(Patient.class)
+			.onInstanceVersion(myTwoVersionPatientId.withVersion("1"))
 			.named("expunge")
 			.withParameters(input)
 			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
 		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId);
+		assertGone(myDeletedPatientId);
 
 		// No observations deleted
 		assertStillThere(myOneVersionObservationId);
