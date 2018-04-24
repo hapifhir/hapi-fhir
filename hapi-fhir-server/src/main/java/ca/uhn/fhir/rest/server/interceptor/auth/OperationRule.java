@@ -40,9 +40,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
+	private boolean myAppliesAtAnyLevel;
 
 	public OperationRule(String theRuleName) {
 		super(theRuleName);
+	}
+
+	public void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
+		myAppliesAtAnyLevel = theAppliesAtAnyLevel;
 	}
 
 	public void appliesToAnyInstance() {
@@ -82,12 +87,12 @@ class OperationRule extends BaseRule implements IAuthRule {
 		boolean applies = false;
 		switch (theOperation) {
 			case EXTENDED_OPERATION_SERVER:
-				if (myAppliesToServer) {
+				if (myAppliesToServer || myAppliesAtAnyLevel) {
 					applies = true;
 				}
 				break;
 			case EXTENDED_OPERATION_TYPE:
-				if (myAppliesToAnyType) {
+				if (myAppliesToAnyType || myAppliesAtAnyLevel) {
 					applies = true;
 				} else if (myAppliesToTypes != null) {
 					// TODO: Convert to a map of strings and keep the result
@@ -101,7 +106,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 				}
 				break;
 			case EXTENDED_OPERATION_INSTANCE:
-				if (myAppliesToAnyInstance) {
+				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
 				} else if (theInputResourceId != null) {
 					if (myAppliesToIds != null) {

@@ -51,7 +51,7 @@ abstract class BaseRule implements IAuthRule {
 	public void addTesters(List<IAuthRuleTester> theTesters) {
 		theTesters.forEach(this::addTester);
 	}
-
+	
 	boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource) {
 		boolean retVal = true;
 		if (theOutputResource == null) {

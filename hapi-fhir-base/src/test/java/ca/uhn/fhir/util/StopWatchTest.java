@@ -122,6 +122,7 @@ public class StopWatchTest {
 
 		StopWatch.setNowForUnitTestForUnitTest(1600L);
 		String taskDurations = sw.formatTaskDurations();
+		ourLog.info(taskDurations);
 		assertEquals("TASK1: 500ms\nTASK2: 100ms", taskDurations);
 	}
 

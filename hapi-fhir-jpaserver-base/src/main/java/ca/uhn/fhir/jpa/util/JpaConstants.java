@@ -83,7 +83,7 @@ public class JpaConstants {
 	/**
 	 * Parameter name for the $expunge operation
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS = "expungeOldVersions";
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
 	/**
 	 * Parameter name for the $expunge operation
 	 */
