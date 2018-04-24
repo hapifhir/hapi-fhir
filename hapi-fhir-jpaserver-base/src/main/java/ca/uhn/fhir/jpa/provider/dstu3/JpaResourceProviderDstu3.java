@@ -89,7 +89,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		try {
@@ -105,7 +105,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	public Parameters expunge(
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		try {

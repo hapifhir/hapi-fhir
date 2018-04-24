@@ -59,7 +59,7 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanType theExpungeEverything
 	) {
 		return super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
@@ -71,7 +71,7 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 	public Parameters expunge(
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS) BooleanType theExpungeOldVersions,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanType theExpungeEverything
 	) {
 		return super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);

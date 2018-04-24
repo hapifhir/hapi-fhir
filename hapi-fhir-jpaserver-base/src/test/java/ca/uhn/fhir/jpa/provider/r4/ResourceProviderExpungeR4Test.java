@@ -121,7 +121,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -193,7 +193,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -239,7 +239,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
 		input.addParameter()
-			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_OLD_VERSIONS)
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));

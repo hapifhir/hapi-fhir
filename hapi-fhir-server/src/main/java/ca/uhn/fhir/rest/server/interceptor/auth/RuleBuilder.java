@@ -451,7 +451,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleFinished onAnyInstance() {
+				public IAuthRuleBuilderRuleOpClassifierFinished onAnyInstance() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyInstance();
 					myRules.add(rule);
@@ -459,7 +459,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleFinished onAnyType() {
+				public IAuthRuleBuilderRuleOpClassifierFinished atAnyLevel() {
+					OperationRule rule = createRule();
+					rule.appliesAtAnyLevel(true);
+					myRules.add(rule);
+					return new RuleBuilderFinished(rule);
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onAnyType() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyType();
 					myRules.add(rule);
@@ -473,7 +481,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
 
 					OperationRule rule = createRule();
-					ArrayList<IIdType> ids = new ArrayList<IIdType>();
+					ArrayList<IIdType> ids = new ArrayList<>();
 					ids.add(theInstanceId);
 					rule.appliesToInstances(ids);
 					myRules.add(rule);
@@ -509,7 +517,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				private HashSet<Class<? extends IBaseResource>> toTypeSet(Class<? extends IBaseResource> theType) {
-					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
+					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<>();
 					appliesToTypes.add(theType);
 					return appliesToTypes;
 				}
