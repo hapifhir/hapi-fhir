@@ -24,15 +24,14 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.*;
@@ -47,11 +46,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ObjectUtil;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,16 +74,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	protected IResourceTableDao myResourceTableDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	private String myResourceName;
@@ -359,7 +350,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
-		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+		List<DeleteConflict> deleteConflicts = new ArrayList<>();
 
 		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
 
@@ -467,6 +458,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
+
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
@@ -522,6 +514,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.merge(entity);
 	}
+
+	@Override
+	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions) {
+		BaseHasResource entity = readEntity(theId);
+		if (theId.hasVersionIdPart()) {
+			BaseHasResource currentVersion = readEntity(theId.toVersionless());
+			if (entity.getVersion() == currentVersion.getVersion()) {
+				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
+			}
+
+			return doExpunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
+		}
+
+		return doExpunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
+	}
+
+	@Override
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
+
+		return doExpunge(getResourceName(), null, null, theExpungeOptions);
+	}
+
 
 	@Override
 	public TagList getAllResourceTags(RequestDetails theRequestDetails) {
@@ -613,7 +628,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 				Integer updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
 					@Override
-					public @NonNull Integer doInTransaction(TransactionStatus theStatus) {
+					public @NonNull
+					Integer doInTransaction(TransactionStatus theStatus) {
 						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 					}
 				});
@@ -650,7 +666,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, history);
 		}
 
-		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
+		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[] {theResourceId, w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
@@ -684,7 +700,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.flush();
 
-		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
+		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[] {theResourceId.getValue(), w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);

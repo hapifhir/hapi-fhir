@@ -71,7 +71,7 @@ public class OperationServerR4Test {
 
 
 	@Test
-	public void testConformance() throws Exception {
+	public void testConformance() {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
 		myFhirClient.registerInterceptor(loggingInterceptor);
@@ -153,13 +153,29 @@ public class OperationServerR4Test {
 	}
 	
 	@Test
-	public void testInstanceEverythingHapiClient() throws Exception {
+	public void testInstanceEverythingHapiClient() {
 		ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 
 		assertEquals("instance $everything", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 		
+	}
+
+	@Test
+	public void testInstanceVersionEverythingHapiClient() {
+		ourCtx
+			.newRestfulGenericClient("http://localhost:" + ourPort)
+			.operation()
+			.onInstanceVersion(new IdType("Patient/123/_history/456"))
+			.named("$everything")
+			.withParameters(new Parameters())
+			.execute();
+
+		assertEquals("instance $everything", ourLastMethod);
+		assertEquals("Patient/123/_history/456", ourLastId.toUnqualified().getValue());
+
+
 	}
 
 	@Test

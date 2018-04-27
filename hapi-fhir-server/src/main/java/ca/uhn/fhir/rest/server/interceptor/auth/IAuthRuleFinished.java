@@ -34,4 +34,18 @@ public interface IAuthRuleFinished {
 	 */
 	List<IAuthRule> build();
 
+	/**
+	 * Add an additional tester that will be queried if all other conditions
+	 * of this rule already match. For example, given the following rule
+	 * <pre>
+	 * return new RuleBuilder()
+	 *   .allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).withTester(myTester)
+	 *   .build();
+	 * </pre>
+	 * ..the tester will be invoked on any $everything operations on Patient
+	 * resources as a final check as to whether the rule applies or not. In this
+	 * example, the tester is not invoked for other operations.
+	 */
+	IAuthRuleFinished withTester(IAuthRuleTester theTester);
+
 }

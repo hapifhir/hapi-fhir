@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -152,6 +154,12 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				return count;
 			}
 		});
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+		return doExpunge(null, null, null, theExpungeOptions);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)

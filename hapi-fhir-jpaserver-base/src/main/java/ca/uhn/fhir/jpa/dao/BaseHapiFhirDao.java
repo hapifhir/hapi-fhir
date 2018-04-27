@@ -29,6 +29,8 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -71,7 +73,14 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -85,6 +94,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -143,12 +153,32 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	protected IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired()
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	protected ISearchParamRegistry mySerarchParamRegistry;
 	@Autowired()
 	protected IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	protected IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceTagDao myResourceTagDao;
 	@Autowired(required = true)
 	private DaoConfig myConfig;
 	private FhirContext myContext;
@@ -156,8 +186,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 	@Autowired
 	private ISearchDao mySearchDao;
@@ -189,6 +217,200 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			fid.setForcedId(theId.getIdPart());
 			fid.setResource(theEntity);
 			theEntity.setForcedId(fid);
+		}
+	}
+
+	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
+
+		if (theResourceName == null && theResourceId == null && theVersion == null) {
+			if (theExpungeOptions.isExpungeEverything()) {
+				doExpungeEverything();
+			}
+		}
+
+		if (theExpungeOptions.isExpungeDeletedResources() && theVersion == null) {
+
+			/*
+			 * Delete historical versions of deleted resources
+			 */
+			Pageable page = new PageRequest(0, remainingCount.get());
+			Slice<Long> resourceIds;
+			if (theResourceId != null) {
+				resourceIds = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+			} else {
+				if (theResourceName != null) {
+					resourceIds = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+				} else {
+					resourceIds = myResourceTableDao.findIdsOfDeletedResources(page);
+				}
+			}
+			for (Long next : resourceIds) {
+				expungeHistoricalVersionsOfId(next, remainingCount);
+				if (remainingCount.get() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+			/*
+			 * Delete current versions of deleted resources
+			 */
+			for (Long next : resourceIds) {
+				expungeCurrentVersionOfResource(next);
+				if (remainingCount.get() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+		}
+
+		if (theExpungeOptions.isExpungeOldVersions()) {
+
+			/*
+			 * Delete historical versions of non-deleted resources
+			 */
+			Pageable page = new PageRequest(0, remainingCount.get());
+			Slice<Long> historicalIds;
+			if (theResourceId != null && theVersion != null) {
+				historicalIds = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+			} else {
+				if (theResourceName != null) {
+					historicalIds = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
+				} else {
+					historicalIds = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+				}
+			}
+			for (Long next : historicalIds) {
+				expungeHistoricalVersion(next);
+				if (remainingCount.decrementAndGet() <= 0) {
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
+			}
+
+		}
+		return toExpungeOutcome(theExpungeOptions, remainingCount);
+	}
+
+	private void doExpungeEverything() {
+
+		ourLog.info("** BEGINNING GLOBAL OPERATION_NAME_EXPUNGE **");
+		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
+				myEntityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
+				myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
+				myEntityManager.createQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null").executeUpdate();
+				return null;
+			}
+		});
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
+				myEntityManager.createQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + SearchParam.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
+				return null;
+			}
+		});
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
+				myEntityManager.createQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
+				for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
+					next.setCurrentVersion(null);
+					myEntityManager.merge(next);
+				}
+				return null;
+			}
+		});
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
+				myEntityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
+				return null;
+			}
+		});
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
+				myEntityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d").executeUpdate();
+				return null;
+			}
+		});
+	}
+
+	private void expungeCurrentVersionOfResource(Long theResourceId) {
+		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+
+		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
+		expungeHistoricalVersion(currentVersion.getId());
+
+		ourLog.info("Deleting current version of resource {}", resource.getIdDt().getValue());
+
+		myResourceIndexedSearchParamUriDao.delete(resource.getParamsUri());
+		myResourceIndexedSearchParamCoordsDao.delete(resource.getParamsCoords());
+		myResourceIndexedSearchParamDateDao.delete(resource.getParamsDate());
+		myResourceIndexedSearchParamNumberDao.delete(resource.getParamsNumber());
+		myResourceIndexedSearchParamQuantityDao.delete(resource.getParamsQuantity());
+		myResourceIndexedSearchParamStringDao.delete(resource.getParamsString());
+		myResourceIndexedSearchParamTokenDao.delete(resource.getParamsToken());
+
+		myResourceTagDao.delete(resource.getTags());
+		resource.getTags().clear();
+
+		if (resource.getForcedId() != null) {
+			ForcedId forcedId = resource.getForcedId();
+			resource.setForcedId(null);
+			myResourceTableDao.saveAndFlush(resource);
+			myForcedIdDao.delete(forcedId);
+		}
+
+		myResourceTableDao.delete(resource);
+
+	}
+
+	protected void expungeHistoricalVersion(Long theNextVersionId) {
+		ResourceHistoryTable version = myResourceHistoryTableDao.findOne(theNextVersionId);
+		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
+
+		myResourceHistoryTagDao.delete(version.getTags());
+		myResourceHistoryTableDao.delete(version);
+	}
+
+	protected void expungeHistoricalVersionsOfId(Long theResourceId, AtomicInteger theRemainingCount) {
+		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+
+		Pageable page = new PageRequest(0, theRemainingCount.get());
+
+		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
+		for (Long nextVersionId : versionIds) {
+			expungeHistoricalVersion(nextVersionId);
+			if (theRemainingCount.decrementAndGet() <= 0) {
+				return;
+			}
 		}
 	}
 
@@ -1278,6 +1500,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return false;
 	}
 
+	private ExpungeOutcome toExpungeOutcome(ExpungeOptions theExpungeOptions, AtomicInteger theRemainingCount) {
+		return new ExpungeOutcome()
+			.setDeletedCount(theExpungeOptions.getLimit() - theRemainingCount.get());
+	}
+
 	@Override
 	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
@@ -1387,6 +1614,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	String toResourceName(IBaseResource theResource) {
 		return myContext.getResourceDefinition(theResource).getName();
+	}
+
+	private Slice<Long> toSlice(ResourceHistoryTable theVersion) {
+		Validate.notNull(theVersion);
+		return new SliceImpl<>(Collections.singletonList(theVersion.getId()));
 	}
 
 	Long translateForcedIdToPid(String theResourceName, String theResourceId) {

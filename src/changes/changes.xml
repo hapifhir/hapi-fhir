@@ -53,6 +53,31 @@
 				a local ID that already existed, making the resulting 
 				serialization invalid. This has been corrected.
 			</action>
+			<action type="add">
+				The REST Generic Client now supports invoking an operation
+				on a specific version of a resource instance.
+			</action>
+			<action type="add">
+				A new operation has been added to the JPA server called
+				"$expunge". This operation can be used to physically delete
+				old versions of resources, logically deleted resources, or
+				even all resources in the database.
+			</action>
+			<action type="add">
+				An experimental new feature has been added to AuthorizationInterceptor which
+				allows user-supplied checkers to add additional checking logic
+				to determine whether a particular rule applies. This could be
+				used for example to restrict an auth rule to particular
+				source IPs, or to only allow operations with specific
+				parameter values.
+			</action>
+			<action type="add">
+				A new qualifier has been added to the AuthorizationInterceptor
+				RuleBuilder that allows a rule on an operation to match
+				<![CDATA[<code>atAnyLevel()</code>]]>, meaning that the rule
+				applies to the operation by name whether it is at the
+				server, type, or instance level.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

@@ -68,5 +68,28 @@ public class JpaConstants {
 	 * </p>
 	 */
 	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
-
+	/**
+	 * Operation name for the $expunge operation
+	 */
+	public static final String OPERATION_NAME_EXPUNGE = "$expunge";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	/**
+	 * Output parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
 }

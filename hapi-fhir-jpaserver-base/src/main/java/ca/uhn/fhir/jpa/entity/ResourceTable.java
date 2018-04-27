@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
@@ -399,6 +398,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
 		}
 		myProfile = theProfile;
+	}
+
+	@Override
+	public Long getResourceId() {
+		return getId();
 	}
 
 //	public byte[] getResource() {

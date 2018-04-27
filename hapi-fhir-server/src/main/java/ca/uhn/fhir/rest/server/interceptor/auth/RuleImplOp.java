@@ -87,6 +87,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				case HISTORY_INSTANCE:
 				case HISTORY_SYSTEM:
 				case HISTORY_TYPE:
+					if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+						return null;
+					}
 					return new Verdict(PolicyEnum.ALLOW, this);
 				default:
 					return null;
@@ -195,11 +198,20 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return null;
 			}
 		case ALLOW_ALL:
+			if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+				return null;
+			}
 			return new Verdict(PolicyEnum.ALLOW, this);
 		case DENY_ALL:
+			if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+				return null;
+			}
 			return new Verdict(PolicyEnum.DENY, this);
 		case METADATA:
 			if (theOperation == RestOperationTypeEnum.METADATA) {
+				if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+					return null;
+				}
 				return newVerdict();
 			}
 			return null;
@@ -220,12 +232,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					if (!next.getIdPart().equals(appliesToResourceId.getIdPart())) {
 						continue;
 					}
+					if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+						return null;
+					}
 					return newVerdict();
 				}
 			}
 			return null;
 		case ALL_RESOURCES:
 			if (appliesToResourceType != null) {
+				if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+					return null;
+				}
 				return new Verdict(PolicyEnum.ALLOW, this);
 			}
 			break;
@@ -244,6 +262,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			if (appliesToResourceType != null) {
 				Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceType).getImplementingClass();
 				if (myAppliesToTypes.contains(type)) {
+					if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+						return null;
+					}
 					return new Verdict(PolicyEnum.ALLOW, this);
 				}
 			}
@@ -278,6 +299,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			break;
 		default:
 			throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+		}
+
+		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+			return null;
 		}
 
 		return newVerdict();
