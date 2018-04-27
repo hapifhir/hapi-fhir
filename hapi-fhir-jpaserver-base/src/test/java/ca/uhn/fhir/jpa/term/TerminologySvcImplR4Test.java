@@ -67,6 +67,8 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		expectedException.expect(UnprocessableEntityException.class);
 		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: " + myConceptMapId.getIdPart());
 
+		// FIXME: Test locally with 1,000+ resources to check for comma in ID.
+
 		persistConceptMap();
 	}
 

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -119,6 +118,7 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
+		Locale.setDefault(Locale.GERMANY); // FIXME: Temporary for testing comma in ID part.
 		String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
 		String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
