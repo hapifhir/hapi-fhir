@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT")
+@Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT", indexes = {
+	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")
+})
 public class TermConceptMapGroupElement implements Serializable {
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_GRP_ELM_PID", sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_PID")

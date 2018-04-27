@@ -13,11 +13,13 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -38,6 +40,15 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@Before
+	public void beforeClearCache() {
+		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		baseHapiTerminologySvc.clearTranslationCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
+		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
 	private void persistConceptMap() {
@@ -294,6 +305,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -318,6 +330,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 				// </editor-fold>
 			}
 		});
@@ -343,6 +361,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -389,6 +408,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(VS_URL_2, conceptMap.getTarget());
 				assertEquals(CM_URL, conceptMap.getUrl());
 				// </editor-fold>
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(1, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 				// </editor-fold>
 			}
 		});
@@ -440,6 +465,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -476,6 +502,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -503,6 +535,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -539,6 +572,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -568,6 +607,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -580,6 +620,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(1, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -609,6 +655,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -633,6 +680,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -662,6 +715,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -674,6 +728,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(1, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -703,6 +763,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -727,6 +788,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(2, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -754,6 +821,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -790,6 +858,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -817,6 +891,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -853,6 +928,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+
+				// Test caching.
+				targets = myTermSvc.translate(translationRequest);
+				assertNotNull(targets);
+				assertEquals(3, targets.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -884,6 +965,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -895,6 +977,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -947,6 +1035,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -969,6 +1058,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -998,6 +1093,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1020,6 +1116,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -1051,6 +1153,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1073,6 +1176,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -1104,6 +1213,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1115,6 +1225,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -1146,6 +1262,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1157,6 +1274,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(1, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -1186,6 +1309,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1208,6 +1332,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -1237,6 +1367,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
+				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -1259,6 +1390,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
+
+				// Test caching.
+				elements = myTermSvc.translateWithReverse(translationRequest);
+				assertNotNull(elements);
+				assertEquals(2, elements.size());
+				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}

@@ -12,7 +12,6 @@ import java.util.List;
 @Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL"})
 })
-//@Table(name = "TRM_CONCEPT_MAP")
 public class TermConceptMap implements Serializable {
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_PID", sequenceName = "SEQ_CONCEPT_MAP_PID")

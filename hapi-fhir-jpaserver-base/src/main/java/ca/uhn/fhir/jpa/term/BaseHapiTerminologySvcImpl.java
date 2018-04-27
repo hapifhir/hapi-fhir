@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.r4.TranslationQuery;
 import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -36,6 +37,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
@@ -65,6 +68,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -83,6 +87,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
+	private static boolean ourLastResultsFromTranslationCache; // For testing.
+	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
@@ -120,6 +126,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private PlatformTransactionManager myTransactionMgr;
 	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
+
+	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
+	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 
@@ -179,6 +188,21 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 		}
 		return retVal;
+	}
+
+	@PostConstruct
+	public void buildTranslationCaches() {
+		myTranslationCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(1, TimeUnit.HOURS)
+				.build();
+
+		myTranslationWithReverseCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(1, TimeUnit.HOURS)
+				.build();
 	}
 
 	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
@@ -1020,53 +1044,68 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
+		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
+		List<TermConceptMapGroupElementTarget> cachedTargets;
 		ArrayList<Predicate> predicates;
+		Coding coding;
+		for (TranslationQuery translationQuery : translationQueries) {
+			cachedTargets = myTranslationCache.getIfPresent(translationQuery);
+			if (cachedTargets == null) {
+				final List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
 
-		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
-			predicates = new ArrayList<>();
+				predicates = new ArrayList<>();
 
-			if (coding.hasCode()) {
-				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
+				coding = translationQuery.getCoding();
+				if (coding.hasCode()) {
+					predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
+				} else {
+					throw new InvalidRequestException("A code must be provided for translation to occur.");
+				}
+
+				if (coding.hasSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
+				}
+
+				if (coding.hasVersion()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
+				}
+
+				if (translationQuery.hasTargetSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
+				}
+
+				if (translationQuery.hasSource()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
+				}
+
+				if (translationQuery.hasTarget()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget().getValueAsString()));
+				}
+
+				if (translationQuery.hasResourceId()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+				}
+
+				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+				query.where(outerPredicate);
+
+				// Use scrollable results.
+				final TypedQuery<TermConceptMapGroupElementTarget> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
+				hibernateQuery.setFetchSize(myFetchSize);
+				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+				Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+
+				while (scrollableResultsIterator.hasNext()) {
+					targets.add(scrollableResultsIterator.next());
+				}
+
+				ourLastResultsFromTranslationCache = false; // For testing.
+				myTranslationCache.get(translationQuery, k -> targets);
+				retVal.addAll(targets);
 			} else {
-				throw new InvalidRequestException("A code must be provided for translation to occur.");
-			}
-
-			if (coding.hasSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
-			}
-
-			if (coding.hasVersion()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
-			}
-
-			if (theTranslationRequest.hasTargetSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), theTranslationRequest.getTargetSystem().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasSource()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), theTranslationRequest.getSource().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasTarget()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), theTranslationRequest.getTarget().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasResourceId()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), theTranslationRequest.getResourceId()));
-			}
-
-			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-			query.where(outerPredicate);
-
-			// Use scrollable results.
-			final TypedQuery<TermConceptMapGroupElementTarget> typedQuery = myEntityManager.createQuery(query.select(root));
-			org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
-			hibernateQuery.setFetchSize(myFetchSize);
-			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-			Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
-
-			while (scrollableResultsIterator.hasNext()) {
-				retVal.add(scrollableResultsIterator.next());
+				ourLastResultsFromTranslationCache = true; // For testing.
+				retVal.addAll(cachedTargets);
 			}
 		}
 
@@ -1085,53 +1124,68 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = root.join("myConceptMapGroup");
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
+		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
+		List<TermConceptMapGroupElement> cachedElements;
 		ArrayList<Predicate> predicates;
+		Coding coding;
+		for (TranslationQuery translationQuery : translationQueries) {
+			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
+			if (cachedElements == null) {
+				final List<TermConceptMapGroupElement> elements = new ArrayList<>();
 
-		for (Coding coding : theTranslationRequest.getCodeableConcept().getCoding()) {
-			predicates = new ArrayList<>();
+				predicates = new ArrayList<>();
 
-			if (coding.hasCode()) {
-				predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+				coding = translationQuery.getCoding();
+				if (coding.hasCode()) {
+					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+				} else {
+					throw new InvalidRequestException("A code must be provided for translation to occur.");
+				}
+
+				if (coding.hasSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
+				}
+
+				if (coding.hasVersion()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
+				}
+
+				if (translationQuery.hasTargetSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem().getValueAsString()));
+				}
+
+				if (translationQuery.hasSource()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource().getValueAsString()));
+				}
+
+				if (translationQuery.hasTarget()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget().getValueAsString()));
+				}
+
+				if (translationQuery.hasResourceId()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+				}
+
+				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+				query.where(outerPredicate);
+
+				// Use scrollable results.
+				final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
+				hibernateQuery.setFetchSize(myFetchSize);
+				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+				Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+
+				while (scrollableResultsIterator.hasNext()) {
+					elements.add(scrollableResultsIterator.next());
+				}
+
+				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
+				myTranslationWithReverseCache.get(translationQuery, k -> elements);
+				retVal.addAll(elements);
 			} else {
-				throw new InvalidRequestException("A code must be provided for translation to occur.");
-			}
-
-			if (coding.hasSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
-			}
-
-			if (coding.hasVersion()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
-			}
-
-			if (theTranslationRequest.hasTargetSystem()) {
-				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), theTranslationRequest.getTargetSystem().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasSource()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), theTranslationRequest.getSource().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasTarget()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), theTranslationRequest.getTarget().getValueAsString()));
-			}
-
-			if (theTranslationRequest.hasResourceId()) {
-				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), theTranslationRequest.getResourceId()));
-			}
-
-			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-			query.where(outerPredicate);
-
-			// Use scrollable results.
-			final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
-			org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
-			hibernateQuery.setFetchSize(myFetchSize);
-			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-			Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
-
-			while (scrollableResultsIterator.hasNext()) {
-				retVal.add(scrollableResultsIterator.next());
+				ourLastResultsFromTranslationWithReverseCache = true; // For testing.
+				retVal.addAll(cachedElements);
 			}
 		}
 
@@ -1180,9 +1234,55 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
+	static void clearOurLastResultsFromTranslationCache() {
+		ourLastResultsFromTranslationCache = false;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	static void clearOurLastResultsFromTranslationWithReverseCache() {
+		ourLastResultsFromTranslationWithReverseCache = false;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	void clearTranslationCache() {
+		myTranslationCache.invalidateAll();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting()
+	void clearTranslationWithReverseCache() {
+		myTranslationWithReverseCache.invalidateAll();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	static boolean isOurLastResultsFromTranslationCache() {
+		return ourLastResultsFromTranslationCache;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	static boolean isOurLastResultsFromTranslationWithReverseCache() {
+		return ourLastResultsFromTranslationWithReverseCache;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
-
-
 }

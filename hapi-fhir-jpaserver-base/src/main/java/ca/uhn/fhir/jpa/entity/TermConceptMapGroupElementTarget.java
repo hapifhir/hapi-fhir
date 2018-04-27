@@ -10,7 +10,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP_GRP_ELM_TGT")
+@Table(name = "TRM_CONCEPT_MAP_GRP_ELM_TGT", indexes = {
+	@Index(name = "IDX_CNCPT_MP_GRP_ELM_TGT_CD", columnList = "TARGET_CODE")
+})
 public class TermConceptMapGroupElementTarget implements Serializable {
 	@Id()
 	@SequenceGenerator(name = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID", sequenceName = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID")
