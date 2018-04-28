@@ -72,11 +72,13 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myDaoConfig.getInterceptors().clear();
+		myResourceCountsCache.clear();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Before
 	public void before() throws Exception {
+		myResourceCountsCache.clear();
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());

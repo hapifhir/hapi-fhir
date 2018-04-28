@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -39,6 +40,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +63,7 @@ public abstract class BaseJpaTest {
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
 	protected abstract FhirContext getContext();

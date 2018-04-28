@@ -19,11 +19,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
@@ -192,6 +194,7 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		Parameters retVal = new Parameters();
 
 		Map<String, Long> counts = mySystemDao.getResourceCountsFromCache();
+		counts = defaultIfNull(counts, Collections.emptyMap());
 		counts = new TreeMap<>(counts);
 		for (Entry<String, Long> nextEntry : counts.entrySet()) {
 			retVal.addParameter().setName((nextEntry.getKey())).setValue(new IntegerType(nextEntry.getValue().intValue()));

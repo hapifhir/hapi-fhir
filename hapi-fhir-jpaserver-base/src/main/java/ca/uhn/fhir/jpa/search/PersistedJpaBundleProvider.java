@@ -248,6 +248,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Override
 	public Integer size() {
 		ensureSearchEntityLoaded();
+		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
+
 		Integer size = mySearchEntity.getTotalCount();
 		if (size == null) {
 			return null;
