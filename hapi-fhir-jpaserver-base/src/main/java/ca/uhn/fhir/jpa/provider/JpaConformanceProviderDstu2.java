@@ -60,6 +60,16 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
+	@CoverageIgnore
+	public JpaConformanceProviderDstu2(){
+		super();
+		super.setCache(false);
+		setIncludeResourceCounts(true);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
