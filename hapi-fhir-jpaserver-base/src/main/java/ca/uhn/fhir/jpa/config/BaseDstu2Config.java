@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
@@ -16,6 +18,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.Map;
 
 /*
  * #%L
@@ -110,6 +114,13 @@ public class BaseDstu2Config extends BaseConfig {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
 		retVal.setDao(systemDaoDstu2());
 		retVal.setContext(fhirContextDstu2());
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public SingleItemLoadingCache<Map<String, Long>> resourceCountsCache() {
+		SingleItemLoadingCache<Map<String, Long>> retVal = new SingleItemLoadingCache<>(() -> systemDaoDstu2().getResourceCounts());
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

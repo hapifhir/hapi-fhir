@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -40,6 +41,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,6 +63,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
+	protected SingleItemLoadingCache<Map<String, Long>> ourResourceCountsCache;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -99,6 +102,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourResourceCountsCache = (SingleItemLoadingCache<Map<String, Long>>) myAppCtx.getBean("myResourceCountsCache");
 
 			Server server = new Server(ourPort);
 

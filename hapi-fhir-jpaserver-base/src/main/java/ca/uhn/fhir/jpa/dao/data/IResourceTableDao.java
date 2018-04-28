@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.Map;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -41,6 +44,9 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL")
 	Slice<Long> findUnindexed(Pageable thePageRequest);
+
+	@Query("SELECT t.myResourceType as type, COUNT(*) as count FROM ResourceTable t GROUP BY t.myResourceType")
+	List<Map<?,?>> getResourceCounts();
 
 	@Modifying
 	@Query("UPDATE ResourceTable r SET r.myIndexStatus = null WHERE r.myResourceType = :restype")

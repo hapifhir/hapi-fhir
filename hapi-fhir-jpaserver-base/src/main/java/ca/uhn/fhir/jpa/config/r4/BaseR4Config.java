@@ -15,8 +15,10 @@ import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
@@ -29,6 +31,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.util.Map;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -38,9 +42,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -89,6 +93,13 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 jpaValidationSupportR4() {
 		ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4 retVal = new ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4();
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public SingleItemLoadingCache<Map<String, Long>> resourceCountsCache() {
+		SingleItemLoadingCache<Map<String, Long>> retVal = new SingleItemLoadingCache<>(() -> systemDaoR4().getResourceCounts());
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -79,35 +81,33 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerDt.class)
 	})
 	public Parameters expunge(
 		@IdParam IIdType theIdParam,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		return JpaSystemProviderDstu2.toExpungeResponse(retVal);
 	}
 
 	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerDt.class)
 	})
 	public Parameters expunge(
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		return JpaSystemProviderDstu2.toExpungeResponse(retVal);
 	}
 
-	//@formatter:off
 	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		MetaDt metaGetOperation = getDao().metaGetOperation(MetaDt.class, theRequestDetails);
@@ -115,11 +115,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
 	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters meta(@IdParam IdDt theId, RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		MetaDt metaGetOperation = getDao().metaGetOperation(MetaDt.class, theId, theRequestDetails);
