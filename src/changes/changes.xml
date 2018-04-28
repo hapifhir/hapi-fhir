@@ -78,6 +78,13 @@
 				applies to the operation by name whether it is at the
 				server, type, or instance level.
 			</action>
+			<action type="fix">
+				Fix a significant performance regression in 3.3.0 when validating DSTU3 content using the
+				InstanceValidator. From 3.3.0 onward, StructureDefinitions are converted to FHIR R4
+				content on the fly in order to reduct duplication in the codebase. These conversions
+				happened upon every validation however, instead of only happening once which adversely
+				affected performance. A cache has been added.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

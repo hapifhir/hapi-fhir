@@ -438,6 +438,7 @@
 
 		<!-- Dependency Versions -->
 		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.10</commons_codec_version>
 		<commons_io_version>2.5</commons_io_version>
 		<commons_lang3_version>3.6</commons_lang3_version>
@@ -523,6 +524,11 @@
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
 				<version>2.9.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.ben-manes.caffeine</groupId>
+				<artifactId>caffeine</artifactId>
+				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>

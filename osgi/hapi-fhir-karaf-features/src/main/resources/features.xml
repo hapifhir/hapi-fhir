@@ -98,6 +98,7 @@
 		<feature version='${project.version}'>hapi-fhir</feature>
 		<feature version='${project.version}'>hapi-fhir-utilities</feature>
 		<feature version='${project.version}'>hapi-fhir-ph-schematron</feature>
+		<bundle dependency='true'>mvn:com.github.ben-manes.caffeine/caffeine/${caffeine_version}</bundle>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-converter/${project.version}</bundle>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-validation/${project.version}</bundle>
 	</feature>

@@ -6,10 +6,15 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -38,6 +43,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
@@ -49,6 +55,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+	private volatile WorkerContextWrapper myWrappedWorkerContext;
 
 	/**
 	 * Constructor
@@ -136,6 +143,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
+		myWrappedWorkerContext = null;
 	}
 
 	/**
@@ -174,9 +182,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myStructureDefintion = theStructureDefintion;
 	}
 
+
+
 	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
-		HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
-		WorkerContextWrapper wrappedWorkerContext = new WorkerContextWrapper(workerContext);
+
+		WorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
+		if (wrappedWorkerContext == null) {
+			HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
+			wrappedWorkerContext = new WorkerContextWrapper(workerContext);
+		}
+		myWrappedWorkerContext = wrappedWorkerContext;
 
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
@@ -191,7 +206,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
 
-		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+		List<ValidationMessage> messages = new ArrayList<>();
 
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
@@ -253,6 +268,42 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		private final HapiWorkerContext myWrap;
 		private final VersionConvertor_30_40 myConverter;
 		private volatile List<org.hl7.fhir.r4.model.StructureDefinition> myAllStructures;
+		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache
+			= Caffeine.newBuilder()
+			.expireAfterWrite(10, TimeUnit.SECONDS)
+			.maximumSize(10000)
+			.build(new CacheLoader<ResourceKey, org.hl7.fhir.r4.model.Resource>() {
+				@Override
+				public org.hl7.fhir.r4.model.Resource load(FhirInstanceValidator.ResourceKey key) throws Exception {
+					org.hl7.fhir.dstu3.model.Resource fetched;
+					switch (key.getResourceName()) {
+						case "StructureDefinition":
+							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
+							break;
+						case "ValueSet":
+							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
+							break;
+						case "CodeSystem":
+							fetched = myWrap.fetchResource(CodeSystem.class, key.getUri());
+							break;
+						case "Questionnaire":
+							fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
+							break;
+						default:
+							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
+					}
+
+					if (fetched == null) {
+						return null;
+					}
+
+					try {
+						return VersionConvertor_30_40.convertResource(fetched);
+					} catch (FHIRException e) {
+						throw new InternalErrorException(e);
+					}
+				}
+			});
 
 		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
 			myWrap = theWorkerContext;
@@ -372,33 +423,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public <T extends org.hl7.fhir.r4.model.Resource> T fetchResource(Class<T> class_, String uri) {
-			org.hl7.fhir.dstu3.model.Resource fetched;
-			switch (class_.getSimpleName()) {
-				case "StructureDefinition":
-					fetched = myWrap.fetchResource(StructureDefinition.class, uri);
-					break;
-				case "ValueSet":
-					fetched = myWrap.fetchResource(ValueSet.class, uri);
-					break;
-				case "CodeSystem":
-					fetched = myWrap.fetchResource(CodeSystem.class, uri);
-					break;
-				case "Questionnaire":
-					fetched = myWrap.fetchResource(Questionnaire.class, uri);
-					break;
-				default:
-					throw new UnsupportedOperationException("Don't know how to fetch " + class_.getSimpleName());
-			}
 
-			if (fetched == null) {
-				return null;
-			}
+			ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
+			@SuppressWarnings("unchecked")
+			T retVal = (T) myFetchResourceCache.get(key);
 
-			try {
-				return (T) VersionConvertor_30_40.convertResource(fetched);
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
+			return retVal;
 		}
 
 		@Override
@@ -465,6 +495,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public org.hl7.fhir.r4.model.StructureMap getTransform(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
 		}
@@ -487,6 +522,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public boolean isNoTerminologyServer() {
 			return myWrap.isNoTerminologyServer();
+		}
+
+		@Override
+		public List<org.hl7.fhir.r4.model.StructureMap> listTransforms() {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -521,16 +561,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public TranslationServices translator() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<org.hl7.fhir.r4.model.StructureMap> listTransforms() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public org.hl7.fhir.r4.model.StructureMap getTransform(String url) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -614,6 +644,53 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, conceptSetComponent);
 			return convertValidationResult(result);
+		}
+
+	}
+
+	private static class ResourceKey {
+		private final int myHashCode;
+		private String myResourceName;
+		private String myUri;
+
+		private ResourceKey(String theResourceName, String theUri) {
+			myResourceName = theResourceName;
+			myUri = theUri;
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(myResourceName)
+				.append(myUri)
+				.toHashCode();
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+
+			ResourceKey that = (ResourceKey) theO;
+
+			return new EqualsBuilder()
+				.append(myResourceName, that.myResourceName)
+				.append(myUri, that.myUri)
+				.isEquals();
+		}
+
+		public String getResourceName() {
+			return myResourceName;
+		}
+
+		public String getUri() {
+			return myUri;
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
 		}
 	}
 }
