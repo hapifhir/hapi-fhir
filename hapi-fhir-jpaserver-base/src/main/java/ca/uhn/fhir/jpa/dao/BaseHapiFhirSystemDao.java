@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,16 +25,10 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.Query;
-import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -74,6 +70,10 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	public SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
+
 
 	private int doPerformReindexingPass(final Integer theCount) {
 		/*
@@ -165,21 +165,21 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Map<String, Long> getResourceCounts() {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-		Root<?> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myResourceType").as(String.class), builder.count(from.get("myResourceType")).as(Long.class));
-		cq.groupBy(from.get("myResourceType"));
-
-		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-
 		Map<String, Long> retVal = new HashMap<>();
-		for (Tuple next : q.getResultList()) {
-			String resourceName = next.get(0, String.class);
-			Long count = next.get(1, Long.class);
-			retVal.put(resourceName, count);
+
+		List<Map<?,?>> counts = myResourceTableDao.getResourceCounts();
+		for (Map<?, ?> next : counts) {
+			retVal.put(next.get("type").toString(), Long.parseLong(next.get("count").toString()));
 		}
+
 		return retVal;
+	}
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	@Nullable
+	@Override
+	public Map<String, Long> getResourceCountsFromCache() {
+		return myResourceCountsCache.get();
 	}
 
 	@Override

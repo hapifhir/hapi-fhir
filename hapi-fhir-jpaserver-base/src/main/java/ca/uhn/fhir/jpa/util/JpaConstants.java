@@ -92,4 +92,11 @@ public class JpaConstants {
 	 * Output parameter name for the $expunge operation
 	 */
 	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+	/**
+	 * Header name for the "X-Meta-Snapshot-Mode" header, which
+	 * specifies that properties in meta (tags, profiles, security labels)
+	 * should be treated as a snapshot, meaning that these things will
+	 * be removed if they are nt explicitly included in updates
+	 */
+	public static final String HEADER_META_SNAPSHOT_MODE = "X-Meta-Snapshot-Mode";
 }

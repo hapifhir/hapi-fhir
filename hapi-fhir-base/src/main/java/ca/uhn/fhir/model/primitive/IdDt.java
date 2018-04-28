@@ -619,12 +619,14 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	/**
 	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 *
-	 * @param theVersion The actual version string, e.g. "1"
+	 * @param theVersion The actual version string, e.g. "1". If theVersion is blank or null, returns the same as {@link #toVersionless()}}
 	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 */
 	@Override
 	public IdDt withVersion(String theVersion) {
-		Validate.notBlank(theVersion, "Version may not be null or empty");
+		if (isBlank(theVersion)) {
+			return toVersionless();
+		}
 
 		if (isLocal() || isUrn()) {
 			return new IdDt(getValueAsString());

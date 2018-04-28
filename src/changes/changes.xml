@@ -78,6 +78,37 @@
 				applies to the operation by name whether it is at the
 				server, type, or instance level.
 			</action>
+			<action type="add">
+				Calling <![CDATA[<code>IdType#withVersion(String)</code>]]>
+				with a null/blank parameter will now return a copy of the
+				ID with the version removed. Previously this call would
+				deliberately cause an IllegalArgumentException.
+			</action>
+			<action type="fix">
+				When updating resources on the JPA server, tags did not always
+				consistently follow FHIR's recommended rules for tag retention. According
+				to FHIR's rules, if a tag is not explicitly present on an update but
+				was present on the previous version, it should be carried forward anyhow.
+				Due to a bug, this happened when more than one tag was present
+				but not when only one was present. This has been corrected. In
+				addition, a new request header called
+				<![CDATA[<code>X-Meta-Snapshot-Mode</code>]]>
+				has been added that can be used by the client to override
+				this behaviour.
+			</action>
+			<action type="fix">
+				The JPA server's resource counts query has been optimized to
+				give the database a bit more flexibility to
+				optimize, which should increase performance for this query.
+			</action>
+			<action type="add">
+				The JPA server CapabilityStatement generator has been tuned
+				so that resource counts are no longer calculated synchronously
+				as a part of building the CapabilityStatement response. With
+				this change, counts are calculated in the background and cached
+				which can yield significant performance improvements on
+				hevaily loaded servers.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

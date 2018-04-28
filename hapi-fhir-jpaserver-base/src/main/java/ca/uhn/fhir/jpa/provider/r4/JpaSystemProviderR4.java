@@ -177,8 +177,8 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 	public Parameters getResourceCounts() {
 		Parameters retVal = new Parameters();
 
-		Map<String, Long> counts = mySystemDao.getResourceCounts();
-		counts = new TreeMap<String, Long>(counts);
+		Map<String, Long> counts = mySystemDao.getResourceCountsFromCache();
+		counts = new TreeMap<>(counts);
 		for (Entry<String, Long> nextEntry : counts.entrySet()) {
 			retVal.addParameter().setName((nextEntry.getKey())).setValue(new IntegerType(nextEntry.getValue().intValue()));
 		}
