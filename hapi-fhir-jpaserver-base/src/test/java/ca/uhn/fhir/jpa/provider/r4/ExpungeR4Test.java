@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +25,16 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+
+	@After
+	public void afterDisableExpunge() {
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+	}
+
+	@Before
+	public void beforeEnableExpunge() {
+		myDaoConfig.setExpungeEnabled(true);
+	}
 
 	private void assertExpunged(IIdType theId) {
 		try {

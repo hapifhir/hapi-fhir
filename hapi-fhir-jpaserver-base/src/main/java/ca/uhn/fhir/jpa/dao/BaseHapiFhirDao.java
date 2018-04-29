@@ -225,6 +225,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+
+		if (!getConfig().isExpungeEnabled()) {
+			throw new MethodNotAllowedException("$expunge is not enabled on this server");
+		}
+
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {
@@ -295,75 +300,68 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toExpungeOutcome(theExpungeOptions, remainingCount);
 	}
 
+	private void doExpungeEverythingQuery(String theQuery) {
+		StopWatch sw = new StopWatch();
+		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
+		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+	}
+
 	private void doExpungeEverything() {
 
-		ourLog.info("** BEGINNING GLOBAL OPERATION_NAME_EXPUNGE **");
+		ourLog.info("** BEGINNING GLOBAL $expunge **");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				myEntityManager.createQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null");
+			doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null");
+			doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchParam.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchParam.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
-				for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
-					next.setCurrentVersion(null);
-					myEntityManager.merge(next);
-				}
-				return null;
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d");
+			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
+				next.setCurrentVersion(null);
+				myEntityManager.merge(next);
 			}
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d");
+			return null;
 		});
+
+		ourLog.info("** COMPLETED GLOBAL $expunge **");
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId) {

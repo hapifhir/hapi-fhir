@@ -1632,6 +1632,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
+		myResourceCountsCache.clear();
 		myResourceCountsCache.update();
 
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -10,20 +11,25 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ExpungeProviderDstu2Test extends BaseResourceProviderDstu2Test {
-
+public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2Test {
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+
+	@After
+	public void afterDisableExpunge() {
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+	}
 
 	private void assertExpunged(IIdType theId) {
 		try {
@@ -95,6 +101,11 @@ public class ExpungeProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
 
+	}
+
+	@Before
+	public void beforeEnableExpunge() {
+		myDaoConfig.setExpungeEnabled(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {

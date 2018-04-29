@@ -245,11 +245,13 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
-
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 
+		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		theDaoConfig.setExpungeEnabled(true);
 		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+		theDaoConfig.setExpungeEnabled(expungeEnabled);
 
 		theSearchParamPresenceSvc.flushCachesForUnitTest();
 		theSearchParamRegistry.forceRefresh();

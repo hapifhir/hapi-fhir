@@ -1690,6 +1690,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
+		myResourceCountsCache.clear();
+		myResourceCountsCache.update();
+
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {

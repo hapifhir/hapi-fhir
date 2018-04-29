@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -56,6 +57,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	protected SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
@@ -273,7 +277,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before

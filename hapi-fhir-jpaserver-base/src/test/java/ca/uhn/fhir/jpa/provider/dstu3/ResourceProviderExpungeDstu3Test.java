@@ -1,28 +1,38 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
-public class ExpungeProviderDstu3Test extends BaseResourceProviderDstu3Test {
+public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderExpungeDstu3Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+
+	@After
+	public void afterDisableExpunge() {
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+	}
 
 	private void assertExpunged(IIdType theId) {
 		try {
@@ -94,6 +104,11 @@ public class ExpungeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
 
+	}
+
+	@Before
+	public void beforeEnableExpunge() {
+		myDaoConfig.setExpungeEnabled(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -273,6 +288,21 @@ public class ExpungeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+	}
+
+	@Test
+	public void testParameters() {
+		Parameters p = new Parameters();
+		p.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT)
+			.setValue(new IntegerType(1000));
+		p.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
+		p.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(p));
 	}
 
 	@AfterClass
