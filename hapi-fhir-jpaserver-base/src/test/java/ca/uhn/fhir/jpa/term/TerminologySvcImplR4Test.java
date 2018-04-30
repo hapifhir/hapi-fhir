@@ -51,6 +51,24 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
+	// FIXME: Test locally with 1,000+ resources to check for comma in ID.
+	@Test
+	public void testCommaBug() {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				ConceptMap conceptMap;
+				for (int i = 0; i < 1500; i++) {
+					conceptMap = createConceptMap();
+					conceptMap.setUrl(conceptMap.getUrl().concat("-" + (i + 1)));
+					myConceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
+
+					ourLog.info(conceptMap.getUrl() + "|" + myConceptMapId.getIdPart());
+				}
+			}
+		});
+	}
+
 	private void persistConceptMap() {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -66,8 +84,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		expectedException.expect(UnprocessableEntityException.class);
 		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: " + myConceptMapId.getIdPart());
-
-		// FIXME: Test locally with 1,000+ resources to check for comma in ID.
 
 		persistConceptMap();
 	}
