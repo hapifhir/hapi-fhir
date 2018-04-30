@@ -1,22 +1,24 @@
 package ca.uhn.fhir.cli;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.fusesource.jansi.Ansi.ansi;
-
-import java.io.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
+import com.phloc.commons.io.file.FileUtils;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.dstu3.hapi.validation.*;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import com.phloc.commons.io.file.FileUtils;
+import java.io.*;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.*;
+import static org.apache.commons.lang3.StringUtils.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 public class ValidateCommand extends BaseCommand {
 
@@ -54,7 +56,9 @@ public class ValidateCommand extends BaseCommand {
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws ParseException, Exception {
+	public void run(CommandLine theCommandLine) throws ParseException {
+		parseFhirContext(theCommandLine);
+
 		String fileName = theCommandLine.getOptionValue("n");
 		String contents = theCommandLine.getOptionValue("c");
 		if (isNotBlank(fileName) && isNotBlank(contents)) {
@@ -68,7 +72,11 @@ public class ValidateCommand extends BaseCommand {
 			String encoding = theCommandLine.getOptionValue("e", "UTF-8");
 			ourLog.info("Reading file '{}' using encoding {}", fileName, encoding);
 
-			contents = IOUtils.toString(new InputStreamReader(new FileInputStream(fileName), encoding));
+			try {
+				contents = IOUtils.toString(new InputStreamReader(new FileInputStream(fileName), encoding));
+			} catch (IOException e) {
+				throw new CommandFailureException(e);
+			}
 			ourLog.info("Fully read - Size is {}", FileUtils.getFileSizeDisplay(contents.length()));
 		}
 
@@ -77,7 +85,7 @@ public class ValidateCommand extends BaseCommand {
 			throw new ParseException("Could not detect encoding (json/xml) of contents");
 		}
 
-		FhirContext ctx = getSpecVersionContext(theCommandLine);
+		FhirContext ctx = getFhirContext();
 		FhirValidator val = ctx.newValidator();
 
 		IBaseResource localProfileResource = null;

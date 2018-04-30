@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import net.sf.ehcache.transaction.xa.commands.Command;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 
 public class IgPackUploader extends BaseCommand {
@@ -48,20 +51,31 @@ public class IgPackUploader extends BaseCommand {
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws ParseException, Exception {
-		FhirContext ctx = getSpecVersionContext(theCommandLine);
+	public void run(CommandLine theCommandLine) throws ParseException{
+		parseFhirContext(theCommandLine);
 
-		String targetServer = theCommandLine.getOptionValue("t");
-		IGenericClient client = ctx.newRestfulGenericClient(targetServer);
+		IGenericClient client = newClient(theCommandLine);
 
 		String url = theCommandLine.getOptionValue("u");
 
-		Collection<File> files = loadFile(ctx, url, null, false);
+		Collection<File> files = null;
+		try {
+			files = loadFile(url, null, false);
+		} catch (IOException e) {
+			throw new CommandFailureException(e);
+		}
+
 		for (File nextFile : files) {
+			FhirContext ctx = getFhirContext();
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU3:
 					IgPackParserDstu3 packParser = new IgPackParserDstu3(ctx);
-					IValidationSupport ig = packParser.parseIg(new FileInputStream(nextFile), nextFile.getName());
+					IValidationSupport ig = null;
+					try {
+						ig = packParser.parseIg(new FileInputStream(nextFile), nextFile.getName());
+					} catch (FileNotFoundException e) {
+						throw new CommandFailureException(e);
+					}
 					Iterable<IBaseResource> conformanceResources = ig.fetchAllConformanceResources(ctx);
 					for (IBaseResource nextResource : conformanceResources) {
 						String nextResourceUrl = ((IPrimitiveType<?>)ctx.newTerser().getSingleValueOrNull(nextResource, "url")).getValueAsString();

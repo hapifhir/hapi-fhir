@@ -1,7 +1,7 @@
+package ca.uhn.fhir.cli;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import ca.uhn.fhir.cli.App;
 
 public class ValidateTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateTest.class);
@@ -16,7 +16,7 @@ public class ValidateTest {
 		String resourcePath = ValidateTest.class.getResource("/patient-uslab-example1.xml").getFile();
 		ourLog.info(resourcePath);
 		
-		App.main(new String[] {"validate", "-p", "-n", resourcePath});
+		App.main(new String[] {"validate", "-v", "dstu3", "-p", "-n", resourcePath});
 	}
 	
 

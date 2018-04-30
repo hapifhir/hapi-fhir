@@ -34,13 +34,14 @@ public class RunServerCommand extends BaseCommand {
 	private static final String OPTION_P = "p";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RunServerCommand.class);
+	public static final String RUN_SERVER_COMMAND = "run-server";
 	private int myPort;
 
 	private Server myServer;
 
 	@Override
 	public String getCommandName() {
-		return "run-server";
+		return RUN_SERVER_COMMAND;
 	}
 
 	@Override
@@ -68,6 +69,8 @@ public class RunServerCommand extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
+		parseFhirContext(theCommandLine);
+
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
 		
 		if (theCommandLine.hasOption(OPTION_LOWMEM)) {
@@ -104,7 +107,7 @@ public class RunServerCommand extends BaseCommand {
 			}
 		}
 
-		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));
+		ContextHolder.setCtx(getFhirContext());
 
 		ourLog.info("Preparing HAPI FHIR JPA server on port {}", myPort);
 		File tempWarFile;

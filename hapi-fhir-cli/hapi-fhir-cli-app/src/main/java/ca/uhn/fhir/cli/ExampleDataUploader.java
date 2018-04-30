@@ -33,7 +33,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.*;
 import java.util.*;
@@ -327,6 +326,8 @@ public class ExampleDataUploader extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
+		addBasicAuthOption(options);
+
 		return options;
 	}
 
@@ -573,8 +574,9 @@ public class ExampleDataUploader extends BaseCommand {
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws Exception {
-		FhirContext ctx = getSpecVersionContext(theCommandLine);
+	public void run(CommandLine theCommandLine) throws ParseException {
+		parseFhirContext(theCommandLine);
+		FhirContext ctx = getFhirContext();
 
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
@@ -613,17 +615,22 @@ public class ExampleDataUploader extends BaseCommand {
 
 		boolean cacheFile = theCommandLine.hasOption('c');
 
-		Collection<File> inputFiles = loadFile(ctx, specUrl, filepath, cacheFile);
-
-		for (File inputFile : inputFiles) {
-			IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
-			processBundle(ctx, bundle);
-			sendBundleToTarget(targetServer, ctx, bundle);
+		Collection<File> inputFiles = null;
+		try {
+			inputFiles = loadFile(specUrl, filepath, cacheFile);
+			for (File inputFile : inputFiles) {
+				IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
+				processBundle(ctx, bundle);
+				sendBundleToTarget(targetServer, ctx, bundle, theCommandLine);
+			}
+		} catch (Exception e) {
+			throw new CommandFailureException(e);
 		}
+
 
 	}
 
-	private void sendBundleToTarget(String targetServer, FhirContext ctx, IBaseBundle bundle) throws Exception {
+	private void sendBundleToTarget(String targetServer, FhirContext ctx, IBaseBundle bundle, CommandLine theCommandLine) throws Exception {
 		List<IBaseResource> resources = BundleUtil.toListOfResources(ctx, bundle);
 
 		for (Iterator<IBaseResource> iter = resources.iterator(); iter.hasNext(); ) {
@@ -707,7 +714,7 @@ public class ExampleDataUploader extends BaseCommand {
 			} else {
 				ourLog.info("Uploading bundle to server: " + targetServer);
 
-				IGenericClient fhirClient = newClient(ctx, targetServer);
+				IGenericClient fhirClient = newClient(theCommandLine);
 				fhirClient.registerInterceptor(new GZipContentInterceptor());
 
 				long start = System.currentTimeMillis();

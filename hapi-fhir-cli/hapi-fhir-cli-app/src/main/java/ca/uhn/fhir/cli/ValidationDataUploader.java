@@ -100,9 +100,11 @@ public class ValidationDataUploader extends BaseCommand {
 
 		addFhirVersionOption(options);
 
-		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
+		opt = new Option(BASE_URL_PARAM, "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
 		opt.setRequired(true);
 		options.addOption(opt);
+
+		addBasicAuthOption(options);
 
 		opt = new Option("e", "exclude", true, "Exclude uploading the given resources, e.g. \"-e dicom-dcim,foo\"");
 		opt.setRequired(false);
@@ -113,6 +115,8 @@ public class ValidationDataUploader extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
+		parseFhirContext(theCommandLine);
+
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
 			throw new ParseException("No target server (-t) specified");
@@ -120,7 +124,7 @@ public class ValidationDataUploader extends BaseCommand {
 			throw new ParseException("Invalid target server specified, must begin with 'http'");
 		}
 
-		FhirContext ctx = getSpecVersionContext(theCommandLine);
+		FhirContext ctx = getFhirContext();
 		String exclude = theCommandLine.getOptionValue("e");
 
 		if (isNotBlank(exclude)) {
@@ -134,18 +138,19 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
-			uploadDefinitionsDstu2(targetServer, ctx);
+			uploadDefinitionsDstu2(theCommandLine, ctx);
 		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			uploadDefinitionsDstu3(targetServer, ctx);
+			uploadDefinitionsDstu3(theCommandLine, ctx);
 		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			uploadDefinitionsR4(targetServer, ctx);
+			uploadDefinitionsR4(theCommandLine, ctx);
 		}
 
 	}
 
-	private void uploadDefinitionsDstu2(String targetServer, FhirContext ctx) throws CommandFailureException {
-		IGenericClient client = newClient(ctx, targetServer);
-		ourLog.info("Uploading definitions to server: " + targetServer);
+	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException {
+		IGenericClient client = newClient(theCommandLine);
+
+		ourLog.info("Uploading definitions to server");
 
 		long start = System.currentTimeMillis();
 
@@ -242,9 +247,9 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsDstu3(String targetServer, FhirContext ctx) throws CommandFailureException {
-		IGenericClient client = newClient(ctx, targetServer);
-		ourLog.info("Uploading definitions to server: " + targetServer);
+	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+		IGenericClient client = newClient(theCommandLine);
+		ourLog.info("Uploading definitions to server");
 
 		long start = System.currentTimeMillis();
 		int total = 0;
@@ -253,12 +258,12 @@ public class ValidationDataUploader extends BaseCommand {
 		String vsContents;
 
 		try {
-			ctx.getVersion().getPathToSchemaDefinitions();
+			theCtx.getVersion().getPathToSchemaDefinitions();
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
-		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		filterBundle(bundle);
 
 		total = bundle.getEntry().size();
@@ -267,7 +272,7 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			int bytes = ctx.newXmlParser().encodeResourceToString(next).length();
+			int bytes = theCtx.newXmlParser().encodeResourceToString(next).length();
 
 			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] {count, total, next.getIdElement().getValue(), bytes});
 			try {
@@ -287,7 +292,7 @@ public class ValidationDataUploader extends BaseCommand {
 			throw new CommandFailureException(e.toString());
 		}
 
-		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		filterBundle(bundle);
 
 		total = bundle.getEntry().size();
@@ -310,7 +315,7 @@ public class ValidationDataUploader extends BaseCommand {
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
-		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		filterBundle(bundle);
 		total = bundle.getEntry().size();
 		count = 1;
@@ -329,9 +334,9 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading ValueSets");
 
 
-		uploadDstu3Profiles(ctx, client, "profiles-resources");
-		uploadDstu3Profiles(ctx, client, "profiles-types");
-		uploadDstu3Profiles(ctx, client, "profiles-others");
+		uploadDstu3Profiles(theCtx, client, "profiles-resources");
+		uploadDstu3Profiles(theCtx, client, "profiles-types");
+		uploadDstu3Profiles(theCtx, client, "profiles-others");
 
 		ourLog.info("Finished uploading ValueSets");
 
@@ -340,9 +345,9 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsR4(String theTargetServer, FhirContext theCtx) throws CommandFailureException {
-		IGenericClient client = newClient(theCtx, theTargetServer);
-		ourLog.info("Uploading definitions to server: " + theTargetServer);
+	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+		IGenericClient client = newClient(theCommandLine);
+		ourLog.info("Uploading definitions to server");
 
 		long start = System.currentTimeMillis();
 		int total = 0;

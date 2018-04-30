@@ -127,6 +127,9 @@ fi
 
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+COLUMNS=$(tput cols)
+
 exec "$JAVACMD" \
+  -Dcolumns=$COLUMNS \
   $CLI_OPTS \
   -jar $SCRIPTDIR/hapi-fhir-cli.jar "$@"
