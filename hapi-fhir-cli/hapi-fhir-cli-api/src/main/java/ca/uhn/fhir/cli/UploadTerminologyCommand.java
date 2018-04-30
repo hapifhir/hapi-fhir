@@ -37,27 +37,12 @@ public class UploadTerminologyCommand extends BaseCommand {
 	@Override
 	public Options getOptions() {
 		Options options = new Options();
-		Option opt;
 
 		addFhirVersionOption(options);
-
-		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
-		opt.setRequired(true);
-		options.addOption(opt);
-
-		opt = new Option("u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
-		opt.setRequired(false);
-		options.addOption(opt);
-
-		opt = new Option("d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
-		opt.setRequired(false);
-		options.addOption(opt);
-
+		addRequiredOption(options, "t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
+		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
+		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addBasicAuthOption(options);
-
-		opt = new Option("v", "verbose", false, "Verbose output");
-		opt.setRequired(false);
-		options.addOption(opt);
 
 		return options;
 	}

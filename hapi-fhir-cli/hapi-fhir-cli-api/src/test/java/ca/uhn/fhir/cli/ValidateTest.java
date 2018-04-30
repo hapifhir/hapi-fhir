@@ -8,7 +8,7 @@ public class ValidateTest {
 
 	@Before
 	public void before() {
-		System.setProperty("noexit", "true");
+		System.setProperty("test", "true");
 	}
 	
 	@Test
