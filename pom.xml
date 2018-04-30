@@ -40,7 +40,6 @@
 	</scm>
 
 	<repositories>
-		<!--
 		<repository>
 			<snapshots>
 				<enabled>false</enabled>
@@ -53,7 +52,6 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		-->
 	</repositories>
 
 	<description>
