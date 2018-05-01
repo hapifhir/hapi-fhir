@@ -27,10 +27,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +41,8 @@ public abstract class BaseTerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTerminologyUploaderProvider.class);
+	public static final String CONCEPT_COUNT = "conceptCount";
+	public static final String TARGET = "target";
 
 	@Autowired
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
@@ -125,7 +124,8 @@ public abstract class BaseTerminologyUploaderProvider extends BaseJpaProvider {
 			}
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("conceptCount").setValue(new IntegerType(stats.getConceptCount()));
+			retVal.addParameter().setName(CONCEPT_COUNT).setValue(new IntegerType(stats.getConceptCount()));
+			retVal.addParameter().setName(TARGET).setValue(new Reference(stats.getTarget().getValue()));
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);

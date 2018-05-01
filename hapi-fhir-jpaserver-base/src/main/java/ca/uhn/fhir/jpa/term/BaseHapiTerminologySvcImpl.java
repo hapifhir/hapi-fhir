@@ -850,7 +850,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource);
@@ -865,6 +865,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		myDeferredConceptMaps.addAll(theConceptMaps);
 		myDeferredValueSets.addAll(theValueSets);
+
+		return csId;
 	}
 
 	@Override
@@ -874,7 +876,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>(codes.size());
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>(codes.size());
 		for (TermConcept next : codes) {
 			retVal.add(new VersionIndependentConcept(theSystem, next.getCode()));
 		}
