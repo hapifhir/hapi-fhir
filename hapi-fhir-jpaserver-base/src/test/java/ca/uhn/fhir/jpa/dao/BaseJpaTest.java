@@ -54,7 +54,7 @@ public abstract class BaseJpaTest {
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
 	@Rule
-	private LoggingRule myLoggingRule = new LoggingRule();
+	public LoggingRule myLoggingRule = new LoggingRule();
 
 	@After
 	public final void afterPerformCleanup() {

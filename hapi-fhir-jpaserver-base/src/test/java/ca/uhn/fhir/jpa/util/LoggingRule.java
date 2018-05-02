@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
 /**
  * This JUnit rule generates log messages to delineate the start and finish of a JUnit test case and also to note any exceptions
@@ -33,22 +32,6 @@ import java.util.ResourceBundle;
  * @version 1.0.0
  */
 public class LoggingRule implements TestRule {
-    /**
-     * The key for the message used to log the start of the test case.
-     */
-    private static final String START = "com.btmatthews.junit.rules.logging.START";
-    /**
-     * The key for the message used to log any exception thrown by the test case.
-     */
-    private static final String EXCEPTION = "com.btmatthews.junit.rules.logging.EXCEPTION";
-    /**
-     * The key for the message used to log the finish of the test case.
-     */
-    private static final String FINISH = "com.btmatthews.junit.rules.logging.FINISH";
-    /**
-     * The resource bundle from which the log messages are loaded.
-     */
-    private static final ResourceBundle messages = ResourceBundle.getBundle("com.btmatthews.junit.rules.messages");
 
     /**
      * Apply the test rule by building a wrapper {@link Statement} that logs a messages before and after evaluating
@@ -62,14 +45,14 @@ public class LoggingRule implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 final Logger logger = LoggerFactory.getLogger(description.getTestClass());
-                logger.info(MessageFormat.format(messages.getString(START), description.getDisplayName()));
+                logger.info(MessageFormat.format("Starting test case [{0}]", description.getDisplayName()));
                 try {
                     statement.evaluate();
                 } catch (final Throwable e) {
-                    logger.info(MessageFormat.format(messages.getString(EXCEPTION), description.getDisplayName()), e);
+                    logger.info(MessageFormat.format("Exception thrown in test case [{0}]", description.getDisplayName()), e);
                     throw e;
                 } finally {
-                    logger.info(MessageFormat.format(messages.getString(FINISH), description.getDisplayName()));
+                    logger.info(MessageFormat.format("Finished test case [{0}]", description.getDisplayName()));
                 }
             }
         };
