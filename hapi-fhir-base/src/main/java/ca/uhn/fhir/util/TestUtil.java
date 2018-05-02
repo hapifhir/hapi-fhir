@@ -118,7 +118,6 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
-		Locale.setDefault(Locale.GERMANY); // FIXME: Temporary for testing comma in ID part.
 		String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
 		String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
