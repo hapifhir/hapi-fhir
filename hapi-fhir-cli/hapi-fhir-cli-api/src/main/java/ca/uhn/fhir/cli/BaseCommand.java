@@ -69,6 +69,10 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		super();
 	}
 
+	protected void addBaseUrlOption(Options theOptions) {
+		addRequiredOption(theOptions, BASE_URL_PARAM, "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
+	}
+
 	protected void addBasicAuthOption(Options theOptions) {
 		addOptionalOption(theOptions, BASIC_AUTH_OPTION, BASIC_AUTH_LONGOPT, true, "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header");
 		addOptionalOption(theOptions, null, BEARER_TOKEN_LONGOPT, true, "If specified, this parameter supplies a Bearer Token to supply with the request");
@@ -307,12 +311,17 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return inputFiles;
 	}
 
-	protected IGenericClient newClient(CommandLine theCommandLine) {
+	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
 		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_OPTION, BEARER_TOKEN_LONGOPT);
 	}
 
-	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) {
+	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
+		if (isBlank(baseUrl)) {
+			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified");
+		} else if (!baseUrl.startsWith("http") && !baseUrl.startsWith("file")) {
+			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
+		}
 
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(baseUrl);
