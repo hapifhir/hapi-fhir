@@ -71,7 +71,7 @@ public class ExportConceptMapToCsvCommandTest {
 	}
 
 	@Test
-	public void testServer() throws IOException {
+	public void testExportConceptMapToCsvCommand() throws IOException {
 		App.main(new String[] {"export-conceptmap-to-csv",
 			"-v", "r4",
 			"-t", ourBase,
