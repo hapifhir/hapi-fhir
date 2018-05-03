@@ -18,7 +18,7 @@ spring:
       enabled: true
 hapi:
   fhir:
-    version: r4
+    version: dstu3
     server:
       path: /fhir/*
     rest:
