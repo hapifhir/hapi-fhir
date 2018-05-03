@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
@@ -59,7 +60,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myResourceCountsCache")
-	protected SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
+	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired

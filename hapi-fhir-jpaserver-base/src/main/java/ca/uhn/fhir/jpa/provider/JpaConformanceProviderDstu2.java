@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -55,7 +56,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
-	private SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
+	private ResourceCountCache myResourceCountsCache;
 
 	/**
 	 * Constructor

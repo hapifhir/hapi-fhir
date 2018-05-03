@@ -5,10 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.ExpungeOutcome;
-import ca.uhn.fhir.jpa.util.ReindexFailureException;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
+import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -72,7 +69,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
-	public SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
+	public ResourceCountCache myResourceCountsCache;
 
 
 	private int doPerformReindexingPass(final Integer theCount) {
