@@ -265,7 +265,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 		ourLog.info("Finished to exporting to {}" + path.concat(filename));
 	}
 
-	public enum Headers {
+	private enum Headers {
 		CONCEPTMAP_URL,
 		SOURCE_VALUE_SET,
 		TARGET_VALUE_SET,

@@ -167,7 +167,7 @@ public class ValidationDataUploader extends BaseCommand {
 
 	}
 
-	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException {
+	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 
 		ourLog.info("Uploading definitions to server");
@@ -267,7 +267,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 
@@ -365,7 +365,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 
