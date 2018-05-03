@@ -6,6 +6,9 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,8 +16,13 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class ExportConceptMapToCsvCommandTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandTest.class);
@@ -24,6 +32,8 @@ public class ExportConceptMapToCsvCommandTest {
 	private static final String CS_URL_1 = "http://example.com/codesystem/1";
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
+	private static final String FILENAME = "output.csv";
+	private static final String PATH = "./target/";
 
 	private static String ourBase;
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -61,12 +71,18 @@ public class ExportConceptMapToCsvCommandTest {
 	}
 
 	@Test
-	public void testServer() {
+	public void testServer() throws IOException {
 		App.main(new String[] {"export-conceptmap-to-csv",
 			"-v", "r4",
 			"-t", ourBase,
 			"-u", CM_URL,
-			"-f", "output.csv"});
+			"-f", FILENAME,
+			"-p", PATH});
+
+		String result = IOUtils.toString(new FileInputStream(PATH.concat(FILENAME)), Charsets.UTF_8);
+		Assert.assertEquals("", result);
+
+		FileUtils.deleteQuietly(new File(PATH.concat(FILENAME)));
 	}
 
 	private static ConceptMap createConceptMap() {
