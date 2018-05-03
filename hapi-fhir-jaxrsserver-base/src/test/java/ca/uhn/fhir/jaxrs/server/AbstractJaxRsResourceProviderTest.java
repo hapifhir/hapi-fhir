@@ -17,6 +17,7 @@ import org.junit.*;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -127,7 +128,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testConformance() {
 		final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
-		assertEquals(conf.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
+		assertEquals(conf.getRest().get(0).getResource().get(0).getType(), "Patient");
 	}
 
 	@Test
@@ -154,7 +155,7 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	@Test
-	public void testConditionalDelete() throws Exception {
+	public void testConditionalDelete() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
@@ -226,9 +227,12 @@ public class AbstractJaxRsResourceProviderTest {
 	/** */
 	@Test
 	public void testSearchPost() {
-		when(mock.search(any(StringParam.class), Matchers.isNull(StringAndListParam.class)))
+		when(mock.search(isNull(), isNull()))
 				.thenReturn(createPatients(1, 13));
-		Bundle result = client.search().forResource("Patient").usingStyle(SearchStyleEnum.POST)
+		Bundle result = client
+			.search()
+			.forResource("Patient")
+			.usingStyle(SearchStyleEnum.POST)
 				.returnBundle(Bundle.class).execute();
 		IResource resource = result.getEntry().get(0).getResource();
 		compareResultId(1, resource);
@@ -253,12 +257,12 @@ public class AbstractJaxRsResourceProviderTest {
 	/** Search - Multi-valued Parameters (ANY/OR) */
 	@Test
 	public void testSearchUsingGenericClientBySearchWithMultiValues() {
-		when(mock.search(any(StringParam.class), Matchers.isNotNull(StringAndListParam.class)))
+		when(mock.search(any(StringParam.class), any(StringAndListParam.class)))
 				.thenReturn(Arrays.asList(createPatient(1)));
 		Bundle results = client.search().forResource(Patient.class)
 				.where(Patient.ADDRESS.matches().values("Toronto")).and(Patient.ADDRESS.matches().values("Ontario"))
 				.and(Patient.ADDRESS.matches().values("Canada"))
-				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SHORTNAME", "TOYS")).returnBundle(Bundle.class).execute();
+				.where(Patient.NAME.matches().value("SHORTNAME")).returnBundle(Bundle.class).execute();
 		IResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);
@@ -269,7 +273,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testSearchWithPaging() {
 		// Perform a search
-		when(mock.search(any(StringParam.class), Matchers.isNull(StringAndListParam.class)))
+		when(mock.search(isNull(), isNull()))
 				.thenReturn(createPatients(1, 13));
 		final Bundle results = client.search().forResource(Patient.class).limitTo(8).returnBundle(Bundle.class)
 				.execute();
@@ -370,24 +374,17 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	private <T> T withId(final T id) {
-		return argThat(new BaseMatcher<T>() {
-			@Override
-			public void describeTo(Description arg0) {
+		return argThat(other -> {
+			IdDt thisId;
+			IdDt otherId;
+			if (id instanceof IdDt) {
+				thisId = (IdDt) id;
+				otherId = (IdDt) other;
+			} else {
+				thisId = ((IResource) id).getId();
+				otherId = ((IResource) other).getId();
 			}
-
-			@Override
-			public boolean matches(Object other) {
-				IdDt thisId;
-				IdDt otherId;
-				if (id instanceof IdDt) {
-					thisId = (IdDt) id;
-					otherId = (IdDt) other;
-				} else {
-					thisId = ((IResource) id).getId();
-					otherId = ((IResource) other).getId();
-				}
-				return thisId.getIdPartAsLong().equals(otherId.getIdPartAsLong());
-			}
+			return thisId.getIdPartAsLong().equals(otherId.getIdPartAsLong());
 		});
 	}
 
@@ -399,17 +396,16 @@ public class AbstractJaxRsResourceProviderTest {
 		System.out.println(ourPort);
 		jettyServer = new Server(ourPort);
 		jettyServer.setHandler(context);
-		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
 
 		//@formatter:off
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames",
+		jerseyServlet.setInitParameter("resteasy.resources",
 				StringUtils.join(Arrays.asList(
 					TestJaxRsMockPatientRestProvider.class.getCanonicalName(),
-					JaxRsExceptionInterceptor.class.getCanonicalName(),
 					TestJaxRsConformanceRestProvider.class.getCanonicalName(),
 					TestJaxRsMockPageProvider.class.getCanonicalName()
-						), ";"));
+						), ","));
 		//@formatter:on
 
 		jettyServer.start();
@@ -424,7 +420,7 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	@AfterClass
-	public static void tearDownClass() throws Exception {
+	public static void tearDownClass() {
 		try {
 			jettyServer.destroy();
 		} catch (Exception e) {

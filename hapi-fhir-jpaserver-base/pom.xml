@@ -210,7 +210,17 @@
 		    <scope>provided</scope>
 		</dependency>
 
-
+		<!--
+		Dependencies that need to be added since JDK9
+		-->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
 
 		<!-- Test Database -->
 		<dependency>

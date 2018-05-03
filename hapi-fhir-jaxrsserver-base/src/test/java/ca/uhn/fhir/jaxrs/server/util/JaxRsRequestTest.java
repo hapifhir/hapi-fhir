@@ -1,31 +1,22 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.internal.MapPropertiesDelegate;
-import org.glassfish.jersey.server.ContainerRequest;
-import org.junit.Before;
-import org.junit.Test;
-
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class JaxRsRequestTest {
 	
@@ -35,7 +26,7 @@ public class JaxRsRequestTest {
 	
 	private JaxRsRequest details;
 	private MultivaluedMap<String, String> queryParameters = new MultivaluedHashMap<String, String>();
-	private ContainerRequest headers;
+	private ResteasyHttpHeaders headers;
 	private TestJaxRsDummyPatientProvider provider;
 	
 	@Before
@@ -49,11 +40,11 @@ public class JaxRsRequestTest {
 		String headerValue = "location_value";
 		String headerValue2 = "location_value_2";
 		assertTrue(StringUtils.isBlank(details.getHeader(headerKey)));
-		headers.header(headerKey, headerValue);
+		queryParameters.add(headerKey, headerValue);
 		assertEquals(headerValue, details.getHeader(headerKey));
 		assertEquals(Arrays.asList(headerValue), details.getHeaders(headerKey));
 		
-		headers.header(headerKey, headerValue2);
+		queryParameters.add(headerKey, headerValue2);
 		assertEquals(headerValue, details.getHeader(headerKey));
 		assertEquals(Arrays.asList(headerValue, headerValue2), details.getHeaders(headerKey));
 	}
@@ -96,8 +87,10 @@ public class JaxRsRequestTest {
 	}
 
 	public JaxRsRequest createRequestDetails() throws URISyntaxException {
-		//headers
-		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null, new MapPropertiesDelegate());
+		// headers
+//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
+//				new MapPropertiesDelegate());
+		headers = new ResteasyHttpHeaders(queryParameters);
 		
 		//uri info
 		UriInfo uriInfo = mock(UriInfo.class);

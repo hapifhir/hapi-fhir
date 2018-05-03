@@ -1,27 +1,24 @@
 package ca.uhn.fhir.jaxrs.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2_1;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2_1;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
+import org.junit.Before;
+import org.junit.Test;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.*;
-
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2_1;
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2_1;
-import org.glassfish.jersey.internal.MapPropertiesDelegate;
-import org.glassfish.jersey.server.ContainerRequest;
-import org.junit.Before;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AbstractJaxRsConformanceProviderDstu2_1Test {
 
@@ -29,19 +26,20 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 	private static final String REQUESTURI = BASEURI + "/metadata";
 	AbstractJaxRsConformanceProvider provider;
 	private ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers;
-	private ContainerRequest headers;
+	private ResteasyHttpHeaders headers;
 	private MultivaluedHashMap<String, String> queryParameters;
 
 	@Before
 	public void setUp() throws Exception {
-		// headers
-		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
-				new MapPropertiesDelegate());
 		// uri info
-		queryParameters = new MultivaluedHashMap<String, String>();
+		queryParameters = new MultivaluedHashMap<>();
+		// headers
+//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
+//				new MapPropertiesDelegate());
+		headers = new ResteasyHttpHeaders(queryParameters);
 
 
-		providers = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
+		providers = new ConcurrentHashMap<>();
 		provider = createConformanceProvider(providers);
 	}
 
