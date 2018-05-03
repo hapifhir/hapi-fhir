@@ -57,7 +57,7 @@ public class ExportConceptMapToCsvCommandTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourBase);
 
-		client.create().resource(createConceptMapForAdministrativeGender()).execute();
+		client.create().resource(createConceptMap()).execute();
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ExportConceptMapToCsvCommandTest {
 			"-f", "output.csv"});
 	}
 
-	private static ConceptMap createConceptMapForAdministrativeGender() {
+	private static ConceptMap createConceptMap() {
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap
 			.setUrl(CM_URL)
