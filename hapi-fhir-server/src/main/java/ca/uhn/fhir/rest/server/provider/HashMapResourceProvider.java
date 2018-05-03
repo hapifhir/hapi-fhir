@@ -54,7 +54,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
-	private Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new HashMap<>();
+	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new HashMap<>();
 	private long myNextId;
 
 	/**

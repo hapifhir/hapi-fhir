@@ -86,7 +86,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 	public Options getOptions() {
 		Options options = new Options();
 
-		addFhirVersionOption(options);
+		this.addFhirVersionOption(options);
 		addBaseUrlOption(options);
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, "url", true, "The URL of the ConceptMap resource to be exported ( i.e. ConceptMap.url )");
 		addRequiredOption(options, FILENAME_PARAM, "filename", true, "The name of the exported CSV file ( e.g. output.csv )");
