@@ -415,6 +415,10 @@
 			<name>John Poth</name>
 			<organization>Red Hat</organization>
 		</developer>
+		<developer>
+			<id>t4deon</id>
+			<name>Andreas Keil</name>
+		</developer>
 	</developers>
 
 	<licenses>
