@@ -217,7 +217,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 			IOUtils.closeQuietly(csvPrinter);
 			IOUtils.closeQuietly(bufferedWriter);
 		}
-		ourLog.info("Finished to exporting to {}" + path.concat(filename));
+		ourLog.info("Finished exporting to {}", path.concat(filename));
 	}
 
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
@@ -252,7 +252,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 						columns.add(defaultString(target.getEquivalence().toCode()));
 						columns.add(defaultString(target.getComment()));
 
-						csvPrinter.print(columns);
+						csvPrinter.printRecord(columns);
 					}
 				}
 			}
@@ -262,7 +262,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 			IOUtils.closeQuietly(csvPrinter);
 			IOUtils.closeQuietly(bufferedWriter);
 		}
-		ourLog.info("Finished to exporting to {}" + path.concat(filename));
+		ourLog.info("Finished exporting to {}", path.concat(filename));
 	}
 
 	private enum Headers {

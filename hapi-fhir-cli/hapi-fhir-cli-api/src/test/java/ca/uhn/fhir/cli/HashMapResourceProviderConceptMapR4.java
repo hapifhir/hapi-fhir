@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.provider.r4;
+package ca.uhn.fhir.cli;
 
 /*-
  * #%L
@@ -35,8 +35,9 @@ import java.util.TreeMap;
 
 /**
  * This is a subclass to implement FHIR operations specific to R4 ConceptMap
- * resources. Its superclass is a simple implementation of the resource provider
- * interface that uses a HashMap to store all resources in memory.
+ * resources. Its superclass, {@link HashMapResourceProvider}, is a simple
+ * implementation of the resource provider interface that uses a HashMap to
+ * store all resources in memory.
  * <p>
  * This subclass currently supports the following FHIR operations:
  * </p>
@@ -44,7 +45,7 @@ import java.util.TreeMap;
  * <li>Search for R4 ConceptMap resources by ConceptMap.url</li>
  * </ul>
  */
-public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider {
+public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider<ConceptMap> {
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderConceptMapR4.class);
 
 	@SuppressWarnings("unchecked")
@@ -63,7 +64,6 @@ public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider
 	public List<ConceptMap> search(@RequiredParam(name=ConceptMap.SP_URL) String theConceptMapUrl) {
 		List<ConceptMap> retVal = new ArrayList<>();
 
-		// FIXME: TreeMap<Long, T> next is what it looks like in superclass.
 		for (TreeMap<Long, ConceptMap> next : myIdToVersionToResourceMap.values()) {
 			if (!next.isEmpty()) {
 				ConceptMap conceptMap = (ConceptMap) next.lastEntry().getValue();
