@@ -203,6 +203,14 @@
 			<groupId>org.fusesource.jansi</groupId>
 			<artifactId>jansi</artifactId>
 		</dependency>
+
+		<!-- System Rules for testing main() methods with System.exit() -->
+		<dependency>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-rules</artifactId>
+			<version>1.17.0</version>
+			<scope>test</scope>
+		</dependency>
 		
 	</dependencies>
 

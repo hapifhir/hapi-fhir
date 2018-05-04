@@ -16,13 +16,14 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
 
 public class ExportConceptMapToCsvCommandTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandTest.class);
@@ -39,6 +40,10 @@ public class ExportConceptMapToCsvCommandTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
+
+	static {
+		System.setProperty("test", "true");
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -79,8 +84,21 @@ public class ExportConceptMapToCsvCommandTest {
 			"-f", FILENAME,
 			"-p", PATH});
 
+		String expected = "CONCEPTMAP_URL,SOURCE_VALUE_SET,TARGET_VALUE_SET,SOURCE_CODE_SYSTEM,SOURCE_CODE_SYSTEM_VERSION,TARGET_CODE_SYSTEM,TARGET_CODE_SYSTEM_VERSION,SOURCE_CODE,SOURCE_DISPLAY,TARGET_CODE,TARGET_DISPLAY,EQUIVALENCE,COMMENT\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1a,Display 1a,Code 2a,Display 2a,equal,2a This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1b,Display 1b,Code 2b,Display 2b,equal,2b This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1c,Display 1c,Code 2c,Display 2c,equal,2c This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1d,Display 1d,Code 2d,Display 2d,equal,2d This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1a,Display 1a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1b,Display 1b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1c,Display 1c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1d,Display 1d,Code 3d,Display 3d,equal,3d This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2a,Display 2a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2b,Display 2b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2c,Display 2c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
+			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2d,Display 2d,Code 3d,Display 3d,equal,3d This is a comment.\n";
 		String result = IOUtils.toString(new FileInputStream(PATH.concat(FILENAME)), Charsets.UTF_8);
-		Assert.assertEquals("", result);
+		assertEquals(expected, result);
 
 		FileUtils.deleteQuietly(new File(PATH.concat(FILENAME)));
 	}
