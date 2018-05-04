@@ -62,7 +62,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	public static final String BASIC_AUTH_LONGOPT = "basic-auth";
 	public static final String BEARER_TOKEN_LONGOPT = "bearer-token";
 	public static final String FHIR_VERSION_OPTION = "v";
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
+	// Don't use qualified names for loggers in HAPI CLI.
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class.getSimpleName());
 	private FhirContext myFhirCtx;
 
 	public BaseCommand() {
@@ -357,5 +358,4 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;
-
 }

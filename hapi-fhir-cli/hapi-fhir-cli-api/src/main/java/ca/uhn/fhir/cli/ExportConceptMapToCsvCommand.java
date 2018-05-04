@@ -20,12 +20,8 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
@@ -39,38 +35,17 @@ import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ExportConceptMapToCsvCommand extends BaseCommand {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
-	private static final String DEFAULT_OUTPUT_PATH = "./";
-	private static final String CONCEPTMAP_URL_PARAM = "u";
-	private static final String FILENAME_PARAM = "f";
-	private static final String PATH_PARAM = "p";
-
-	private IGenericClient client;
-	private String conceptMapUrl;
-	private FhirVersionEnum fhirVersion;
-	private String filename;
-	private String path;
-
-	@Override
-	protected void addFhirVersionOption(Options theOptions) {
-		String versions = Arrays.stream(FhirVersionEnum.values())
-			.filter(t -> t != FhirVersionEnum.DSTU2_1 && t != FhirVersionEnum.DSTU2_HL7ORG && t != FhirVersionEnum.DSTU2)
-			.map(t -> t.name().toLowerCase())
-			.sorted()
-			.collect(Collectors.joining(", "));
-		addRequiredOption(theOptions, FHIR_VERSION_OPTION, "fhir-version", "version", "The FHIR version being used. Valid values: " + versions);
-	}
+public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
+	// Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class.getSimpleName());
 
 	@Override
 	public String getCommandDescription() {
@@ -90,57 +65,18 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 		addBaseUrlOption(options);
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, "url", true, "The URL of the ConceptMap resource to be exported ( i.e. ConceptMap.url )");
 		addRequiredOption(options, FILENAME_PARAM, "filename", true, "The name of the exported CSV file ( e.g. output.csv )");
-		addOptionalOption(options, PATH_PARAM, "path", true, "The target directory of the exported CSV file ( e.g. /home/user/Downloads )");
+		addOptionalOption(options, PATH_PARAM, "path", true, "The target directory of the exported CSV file ( e.g. /home/user/Downloads/ )");
 		addBasicAuthOption(options);
 
 		return options;
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws ParseException {
-		parseFhirContext(theCommandLine);
-		FhirContext ctx = getFhirContext();
-
-		String targetServer = theCommandLine.getOptionValue(BASE_URL_PARAM);
-		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified");
-		} else if (!targetServer.startsWith("http") && !targetServer.startsWith("file")) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
-		}
-
-		conceptMapUrl = theCommandLine.getOptionValue(CONCEPTMAP_URL_PARAM);
-		if (isBlank(conceptMapUrl)) {
-			throw new ParseException("No ConceptMap URL (" + CONCEPTMAP_URL_PARAM + ") specified");
-		}
-
-		filename = theCommandLine.getOptionValue(FILENAME_PARAM);
-		if (isBlank(filename)) {
-			throw new ParseException("No filename (" + FILENAME_PARAM + ") specified");
-		}
-		if (!filename.endsWith(".csv")) {
-			filename = filename.concat(".csv");
-		}
-
-		path = theCommandLine.getOptionValue(PATH_PARAM);
-		if (isBlank(path)) {
-			path = DEFAULT_OUTPUT_PATH;
-		}
-
-		client = super.newClient(theCommandLine);
-		fhirVersion = ctx.getVersion().getVersion();
-		if (fhirVersion != FhirVersionEnum.DSTU3
-			&& fhirVersion != FhirVersionEnum.R4) {
-			throw new ParseException("This command does not support FHIR version " + fhirVersion);
-		}
-
-		if (theCommandLine.hasOption('v')) {
-			client.registerInterceptor(new LoggingInterceptor(true));
-		}
-
-		searchByConceptMapUrl();
+	protected void process() throws ParseException {
+		searchForConceptMapByUrl();
 	}
 
-	private void searchByConceptMapUrl() {
+	private void searchForConceptMapByUrl() {
 		ourLog.info("Searching for ConceptMap with specified ConceptMap.url: {}", conceptMapUrl);
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			org.hl7.fhir.dstu3.model.Bundle response = client
@@ -186,7 +122,7 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 				CSVFormat
 					.DEFAULT
 					.withRecordSeparator("\n")
-					.withHeader(Headers.class));
+					.withHeader(Header.class));
 
 			for (org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 				for (org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent element : group.getElement()) {
@@ -222,16 +158,16 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
 		ourLog.info("Exporting ConceptMap to CSV...");
-		BufferedWriter bufferedWriter = null;
+		Writer writer = null;
 		CSVPrinter csvPrinter = null;
 		try {
-			bufferedWriter = Files.newBufferedWriter(Paths.get(path.concat(filename)));
+			writer = Files.newBufferedWriter(Paths.get(path.concat(filename)));
 			csvPrinter = new CSVPrinter(
-				bufferedWriter,
+				writer,
 				CSVFormat
 					.DEFAULT
 					.withRecordSeparator("\n")
-					.withHeader(Headers.class));
+					.withHeader(Header.class));
 
 			for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 				for (SourceElementComponent element : group.getElement()) {
@@ -260,24 +196,8 @@ public class ExportConceptMapToCsvCommand extends BaseCommand {
 			throw new InternalErrorException(e);
 		} finally {
 			IOUtils.closeQuietly(csvPrinter);
-			IOUtils.closeQuietly(bufferedWriter);
+			IOUtils.closeQuietly(writer);
 		}
 		ourLog.info("Finished exporting to {}", path.concat(filename));
-	}
-
-	private enum Headers {
-		CONCEPTMAP_URL,
-		SOURCE_VALUE_SET,
-		TARGET_VALUE_SET,
-		SOURCE_CODE_SYSTEM,
-		SOURCE_CODE_SYSTEM_VERSION,
-		TARGET_CODE_SYSTEM,
-		TARGET_CODE_SYSTEM_VERSION,
-		SOURCE_CODE,
-		SOURCE_DISPLAY,
-		TARGET_CODE,
-		TARGET_DISPLAY,
-		EQUIVALENCE,
-		COMMENT
 	}
 }

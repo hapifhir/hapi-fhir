@@ -53,8 +53,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationDataUploader extends BaseCommand {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationDataUploader.class);
+	// Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationDataUploader.class.getSimpleName());
 
 	private ArrayList<IIdType> myExcludes = new ArrayList<>();
 

@@ -133,6 +133,7 @@ public abstract class BaseApp {
 		commands.add(new UploadTerminologyCommand());
 		commands.add(new IgPackUploader());
 		commands.add(new ExportConceptMapToCsvCommand());
+		commands.add(new ImportCsvToConceptMapCommand());
 		return commands;
 	}
 

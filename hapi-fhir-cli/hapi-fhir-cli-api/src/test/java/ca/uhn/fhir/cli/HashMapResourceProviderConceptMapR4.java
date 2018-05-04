@@ -26,8 +26,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +44,6 @@ import java.util.TreeMap;
  * </ul>
  */
 public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider<ConceptMap> {
-	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderConceptMapR4.class);
-
 	@SuppressWarnings("unchecked")
 	public HashMapResourceProviderConceptMapR4(FhirContext theFhirContext) {
 		super(theFhirContext, ConceptMap.class);

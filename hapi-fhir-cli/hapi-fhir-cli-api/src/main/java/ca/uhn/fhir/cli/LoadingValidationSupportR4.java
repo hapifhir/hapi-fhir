@@ -34,8 +34,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IValidationSupport {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportR4.class);
+	// Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportR4.class.getSimpleName());
 	private FhirContext myCtx = FhirContext.forR4();
 
 	@Override

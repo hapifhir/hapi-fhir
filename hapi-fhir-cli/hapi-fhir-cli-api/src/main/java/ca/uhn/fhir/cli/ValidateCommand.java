@@ -41,8 +41,8 @@ import static org.apache.commons.lang3.StringUtils.*;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class ValidateCommand extends BaseCommand {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCommand.class);
+	// Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCommand.class.getSimpleName());
 
 	@Override
 	public String getCommandDescription() {
