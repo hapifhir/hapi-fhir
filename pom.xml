@@ -419,6 +419,10 @@
 			<id>t4deon</id>
 			<name>Andreas Keil</name>
 		</developer>
+		<developer>
+			<id>dgileadi</id>
+			<name>David Gileadi</name>
+		</developer>
 	</developers>
 
 	<licenses>
