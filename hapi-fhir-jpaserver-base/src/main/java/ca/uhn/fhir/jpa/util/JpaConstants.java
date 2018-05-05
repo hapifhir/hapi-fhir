@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
+
 public class JpaConstants {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
@@ -133,6 +135,12 @@ public class JpaConstants {
 	public static final String OPERATION_META = "$meta";
 
 	/**
+	 * Operation name for the $validate operation
+	 */
+	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java
+	public static final String OPERATION_VALIDATE = Constants.EXTOP_VALIDATE;
+
+	/**
 	 * Operation name for the $suggest-keywords operation
 	 */
 	public static final String OPERATION_SUGGEST_KEYWORDS = "$suggest-keywords";
@@ -141,4 +149,15 @@ public class JpaConstants {
 	 * Operation name for the $everything operation
 	 */
 	public static final String OPERATION_EVERYTHING = "$everything";
+
+	/**
+	 * Operation name for the $meta-delete operation
+	 */
+	public static final String OPERATION_META_DELETE = "$meta-delete";
+
+	/**
+	 * Operation name for the $meta-add operation
+	 */
+	public static final String OPERATION_META_ADD = "$meta-add";
+
 }

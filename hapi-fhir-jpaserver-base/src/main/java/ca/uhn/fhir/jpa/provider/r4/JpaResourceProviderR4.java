@@ -35,11 +35,11 @@ import org.hl7.fhir.r4.model.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
 
-	public static final String OPERATION_NAME_META = "$meta";
-	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
-	public static final String OPERATION_NAME_META_ADD = "$meta-add";
+public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
 	public JpaResourceProviderR4() {
 		// nothing
@@ -100,7 +100,7 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 	}
 
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
 	public Parameters meta(RequestDetails theRequestDetails) {
@@ -110,11 +110,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(@IdParam IdType theId, RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId, theRequestDetails);
@@ -122,11 +120,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META_ADD, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_ADD, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -137,11 +133,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META_DELETE, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_DELETE, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
