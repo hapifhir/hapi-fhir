@@ -77,7 +77,7 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		}
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
@@ -89,7 +89,7 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
