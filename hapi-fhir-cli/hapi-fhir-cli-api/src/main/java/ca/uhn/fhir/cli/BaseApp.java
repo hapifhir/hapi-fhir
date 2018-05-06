@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import com.phloc.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -60,7 +60,7 @@ public abstract class BaseApp {
 		System.out.println("------------------------------------------------------------");
 		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 		System.out.println("------------------------------------------------------------");
-		System.out.println("Max configured JVM memory (Xmx): " + FileUtils.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		System.out.println("Max configured JVM memory (Xmx): " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		System.out.println("Detected Java version: " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
 	}

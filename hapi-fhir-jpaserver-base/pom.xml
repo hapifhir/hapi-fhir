@@ -124,11 +124,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>net.ttddyy</groupId>
 			<artifactId>datasource-proxy</artifactId>
 			<scope>test</scope>
@@ -146,8 +141,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -157,8 +152,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -468,6 +463,11 @@
 			<artifactId>greenmail-spring</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -556,19 +556,9 @@
 					as JDK9 no longer includes them by default
 					-->
 					<dependency>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-						<version>${jaxb_api_version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-core</artifactId>
-						<version>${jaxb_core_version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-						<version>${jaxb_core_version}</version>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-runtime</artifactId>
+						<version>${jaxb_runtime_version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

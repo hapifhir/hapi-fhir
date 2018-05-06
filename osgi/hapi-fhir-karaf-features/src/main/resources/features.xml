@@ -90,8 +90,8 @@
 			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
 		</bundle>
 		<bundle dependency='true'>mvn:com.google.code.findbugs/jsr305/${jsr305_version}</bundle>
-		<bundle>mvn:com.phloc/phloc-schematron/${phloc_schematron_version}</bundle>
-		<bundle>mvn:com.phloc/phloc-commons/${phloc_commons_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-schematron/${ph_schematron_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-commons/${ph_commons_version}</bundle>
 	</feature>
 
 	<feature name='hapi-fhir-validation' version='${project.version}' start-level='50'>

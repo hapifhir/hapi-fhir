@@ -142,7 +142,7 @@
 
 				<p>
 					In order to use HAPI's Schematron support, a libaray called
-					<a href="https://code.google.com/p/phloc-schematron/">Phloc-Schematron</a>
+					<a href="https://github.com/phax/ph-schematron">Ph-Schematron</a>
 					is used, so this library must be added to your classpath (or Maven POM file, Gradle
 					file, etc.)
 					Note that this library is specified as an optional dependency

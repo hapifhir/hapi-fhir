@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import com.phloc.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -68,7 +68,7 @@ public class ValidateCommand extends BaseCommand {
 		retVal.addOption("s", "sch", false, "Validate using Schematrons");
 		retVal.addOption("p", "profile", false, "Validate using Profiles (StructureDefinition / ValueSet)");
 		retVal.addOption("r", "fetch-remote", false,
-				"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
+			"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
 		retVal.addOption(new Option("l", "fetch-local", true, "Fetch a profile locally and use it if referenced"));
 		retVal.addOption("e", "encoding", false, "File encoding (default is UTF-8)");
 
@@ -97,7 +97,7 @@ public class ValidateCommand extends BaseCommand {
 			} catch (IOException e) {
 				throw new CommandFailureException(e);
 			}
-			ourLog.info("Fully read - Size is {}", FileUtils.getFileSizeDisplay(contents.length()));
+			ourLog.info("Fully read - Size is {}", FileHelper.getFileSizeDisplay(contents.length()));
 		}
 
 		ca.uhn.fhir.rest.api.EncodingEnum enc = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(defaultString(contents));
@@ -124,36 +124,36 @@ public class ValidateCommand extends BaseCommand {
 
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
-			case DSTU2: {
-				org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator();
-				val.registerValidatorModule(instanceValidator);
-				org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
+				case DSTU2: {
+					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator();
+					val.registerValidatorModule(instanceValidator);
+					org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
 						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
-				if (localProfileResource != null) {
-					org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
-					instanceValidator.setStructureDefintion(convertedSd);
+					if (localProfileResource != null) {
+						org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
+						instanceValidator.setStructureDefintion(convertedSd);
+					}
+					if (theCommandLine.hasOption("r")) {
+						validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
+					}
+					instanceValidator.setValidationSupport(validationSupport);
+					break;
 				}
-				if (theCommandLine.hasOption("r")) {
-					validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
+				case DSTU3: {
+					FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+					val.registerValidatorModule(instanceValidator);
+					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
+					if (localProfileResource != null) {
+						instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
+					}
+					if (theCommandLine.hasOption("r")) {
+						validationSupport.addValidationSupport(new LoadingValidationSupportDstu3());
+					}
+					instanceValidator.setValidationSupport(validationSupport);
+					break;
 				}
-				instanceValidator.setValidationSupport(validationSupport);
-				break;
-			}
-			case DSTU3: {
-				FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
-				val.registerValidatorModule(instanceValidator);
-				ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
-				if (localProfileResource != null) {
-					instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
-				}
-				if (theCommandLine.hasOption("r")) {
-					validationSupport.addValidationSupport(new LoadingValidationSupportDstu3());
-				}
-				instanceValidator.setValidationSupport(validationSupport);
-				break;
-			}
-			default:
-				throw new ParseException("Profile validation (-p) is not supported for this FHIR version");
+				default:
+					throw new ParseException("Profile validation (-p) is not supported for this FHIR version");
 			}
 		}
 
