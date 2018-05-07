@@ -89,9 +89,14 @@
 		<bundle dependency='true'>
 			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
 		</bundle>
+		<bundle dependency="true">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries_spifly_version}</bundle>
 		<bundle dependency='true'>mvn:com.google.code.findbugs/jsr305/${jsr305_version}</bundle>
-		<bundle dependency='true'>mvn:com.helger/ph-schematron/${ph_schematron_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-commons/${ph_commons_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-collection/${ph_commons_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-xml/${ph_commons_version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/${jaxb_bundle_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-jaxb/${ph_commons_version}</bundle>
+		<bundle dependency='true'>mvn:com.helger/ph-schematron/${ph_schematron_version}</bundle>
 	</feature>
 
 	<feature name='hapi-fhir-validation' version='${project.version}' start-level='50'>
