@@ -26,17 +26,17 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 public class ExportConceptMapToCsvCommandTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandTest.class.getSimpleName());
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandTest.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
 	private static final String VS_URL_1 = "http://example.com/valueset/1";
 	private static final String VS_URL_2 = "http://example.com/valueset/2";
 	private static final String CS_URL_1 = "http://example.com/codesystem/1";
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
-	private static final String FILENAME = "output.csv";
-	private static final String PATH = "./target/";
+	private static final String FILE = "./target/output.csv";
 
 	private static String ourBase;
+	private static IGenericClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
@@ -70,40 +70,41 @@ public class ExportConceptMapToCsvCommandTest {
 
 		ourBase = "http://localhost:" + ourPort;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient(ourBase);
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 
-		client.create().resource(createConceptMap()).execute();
+		ourClient.create().resource(createConceptMap()).execute();
 	}
 
 	@Test
 	public void testExportConceptMapToCsvCommand() throws IOException {
+		ourLog.info("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+
 		App.main(new String[] {"export-conceptmap-to-csv",
 			"-v", "r4",
 			"-t", ourBase,
 			"-u", CM_URL,
-			"-f", FILENAME,
-			"-p", PATH});
+			"-f", FILE});
 
-		String expected = "CONCEPTMAP_URL,SOURCE_VALUE_SET,TARGET_VALUE_SET,SOURCE_CODE_SYSTEM,SOURCE_CODE_SYSTEM_VERSION,TARGET_CODE_SYSTEM,TARGET_CODE_SYSTEM_VERSION,SOURCE_CODE,SOURCE_DISPLAY,TARGET_CODE,TARGET_DISPLAY,EQUIVALENCE,COMMENT\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1a,Display 1a,Code 2a,Display 2a,equal,2a This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1b,Display 1b,Code 2b,Display 2b,equal,2b This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1c,Display 1c,Code 2c,Display 2c,equal,2c This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1d,Display 1d,Code 2d,Display 2d,equal,2d This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1a,Display 1a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1b,Display 1b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1c,Display 1c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1d,Display 1d,Code 3d,Display 3d,equal,3d This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2a,Display 2a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2b,Display 2b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2c,Display 2c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
-			"http://example.com/conceptmap,http://example.com/valueset/1,http://example.com/valueset/2,http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2d,Display 2d,Code 3d,Display 3d,equal,3d This is a comment.\n";
-		String result = IOUtils.toString(new FileInputStream(PATH.concat(FILENAME)), Charsets.UTF_8);
+		String expected = "SOURCE_CODE_SYSTEM,SOURCE_CODE_SYSTEM_VERSION,TARGET_CODE_SYSTEM,TARGET_CODE_SYSTEM_VERSION,SOURCE_CODE,SOURCE_DISPLAY,TARGET_CODE,TARGET_DISPLAY,EQUIVALENCE,COMMENT\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1a,Display 1a,Code 2a,Display 2a,equal,2a This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1b,Display 1b,Code 2b,Display 2b,equal,2b This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1c,Display 1c,Code 2c,Display 2c,equal,2c This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1d,Display 1d,Code 2d,Display 2d,equal,2d This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1a,Display 1a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1b,Display 1b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1c,Display 1c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
+			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1d,Display 1d,Code 3d,Display 3d,equal,3d This is a comment.\n" +
+			"http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2a,Display 2a,Code 3a,Display 3a,equal,3a This is a comment.\n" +
+			"http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2b,Display 2b,Code 3b,Display 3b,equal,3b This is a comment.\n" +
+			"http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2c,Display 2c,Code 3c,Display 3c,equal,3c This is a comment.\n" +
+			"http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2d,Display 2d,Code 3d,Display 3d,equal,3d This is a comment.\n";
+		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
 		assertEquals(expected, result);
 
-		FileUtils.deleteQuietly(new File(PATH.concat(FILENAME)));
+		FileUtils.deleteQuietly(new File(FILE));
 	}
 
-	private static ConceptMap createConceptMap() {
+	static ConceptMap createConceptMap() {
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap
 			.setUrl(CM_URL)

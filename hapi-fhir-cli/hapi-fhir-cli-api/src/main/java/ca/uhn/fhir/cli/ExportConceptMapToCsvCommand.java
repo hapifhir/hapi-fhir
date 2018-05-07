@@ -27,7 +27,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -44,8 +43,8 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
-	// Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class.getSimpleName());
+	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
 
 	@Override
 	public String getCommandDescription() {
@@ -63,9 +62,8 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 
 		this.addFhirVersionOption(options);
 		addBaseUrlOption(options);
-		addRequiredOption(options, CONCEPTMAP_URL_PARAM, "url", true, "The URL of the ConceptMap resource to be exported ( i.e. ConceptMap.url )");
-		addRequiredOption(options, FILENAME_PARAM, "filename", true, "The name of the exported CSV file ( e.g. output.csv )");
-		addOptionalOption(options, PATH_PARAM, "path", true, "The target directory of the exported CSV file ( e.g. /home/user/Downloads/ )");
+		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
+		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
 		addBasicAuthOption(options);
 
 		return options;
@@ -77,7 +75,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	}
 
 	private void searchForConceptMapByUrl() {
-		ourLog.info("Searching for ConceptMap with specified ConceptMap.url: {}", conceptMapUrl);
+		ourLog.info("Searching for ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			org.hl7.fhir.dstu3.model.Bundle response = client
 				.search()
@@ -87,11 +85,11 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 				.execute();
 
 			if (response.hasEntry()) {
-				ourLog.info("Found ConceptMap with specified ConceptMap.url: {}", conceptMapUrl);
+				ourLog.info("Found ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 				org.hl7.fhir.dstu3.model.ConceptMap conceptMap = (org.hl7.fhir.dstu3.model.ConceptMap) response.getEntryFirstRep().getResource();
 				convertConceptMapToCsv(conceptMap);
 			} else {
-				ourLog.info("No ConceptMap exists with specified ConceptMap.url: {}", conceptMapUrl);
+				ourLog.info("No ConceptMap exists with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 			}
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			Bundle response = client
@@ -102,11 +100,11 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 				.execute();
 
 			if (response.hasEntry()) {
-				ourLog.info("Found ConceptMap with specified ConceptMap.url: {}", conceptMapUrl);
+				ourLog.info("Found ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 				ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 				convertConceptMapToCsv(conceptMap);
 			} else {
-				ourLog.info("No ConceptMap exists with specified ConceptMap.url: {}", conceptMapUrl);
+				ourLog.info("No ConceptMap exists with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 			}
 		}
 	}
@@ -116,7 +114,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 		BufferedWriter bufferedWriter = null;
 		CSVPrinter csvPrinter = null;
 		try {
-			bufferedWriter = Files.newBufferedWriter(Paths.get(path.concat(filename)));
+			bufferedWriter = Files.newBufferedWriter(Paths.get(file));
 			csvPrinter = new CSVPrinter(
 				bufferedWriter,
 				CSVFormat
@@ -129,9 +127,6 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 					for (org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent target : element.getTarget()) {
 
 						List<String> columns = new ArrayList<>();
-						columns.add(defaultString(theConceptMap.getUrl()));
-						columns.add(defaultString(theConceptMap.getSourceUriType().getValueAsString()));
-						columns.add(defaultString(theConceptMap.getTargetUriType().getValueAsString()));
 						columns.add(defaultString(group.getSource()));
 						columns.add(defaultString(group.getSourceVersion()));
 						columns.add(defaultString(group.getTarget()));
@@ -147,13 +142,13 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 					}
 				}
 			}
-		} catch (IOException | FHIRException e) {
-			throw new InternalErrorException(e);
+		} catch (IOException ioe) {
+			throw new InternalErrorException(ioe);
 		} finally {
 			IOUtils.closeQuietly(csvPrinter);
 			IOUtils.closeQuietly(bufferedWriter);
 		}
-		ourLog.info("Finished exporting to {}", path.concat(filename));
+		ourLog.info("Finished exporting to {}", file);
 	}
 
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
@@ -161,7 +156,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 		Writer writer = null;
 		CSVPrinter csvPrinter = null;
 		try {
-			writer = Files.newBufferedWriter(Paths.get(path.concat(filename)));
+			writer = Files.newBufferedWriter(Paths.get(file));
 			csvPrinter = new CSVPrinter(
 				writer,
 				CSVFormat
@@ -174,9 +169,6 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 					for (ConceptMap.TargetElementComponent target : element.getTarget()) {
 
 						List<String> columns = new ArrayList<>();
-						columns.add(defaultString(theConceptMap.getUrl()));
-						columns.add(defaultString(theConceptMap.getSourceUriType().getValueAsString()));
-						columns.add(defaultString(theConceptMap.getTargetUriType().getValueAsString()));
 						columns.add(defaultString(group.getSource()));
 						columns.add(defaultString(group.getSourceVersion()));
 						columns.add(defaultString(group.getTarget()));
@@ -192,12 +184,12 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 					}
 				}
 			}
-		} catch (IOException | FHIRException e) {
-			throw new InternalErrorException(e);
+		} catch (IOException ioe) {
+			throw new InternalErrorException(ioe);
 		} finally {
 			IOUtils.closeQuietly(csvPrinter);
 			IOUtils.closeQuietly(writer);
 		}
-		ourLog.info("Finished exporting to {}", path.concat(filename));
+		ourLog.info("Finished exporting to {}", file);
 	}
 }

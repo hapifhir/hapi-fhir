@@ -7,24 +7,32 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class AbstractImportExportCsvConceptMapCommand extends BaseCommand {
-	protected static final String DEFAULT_PATH = "./";
+	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractImportExportCsvConceptMapCommand.class);
+
 	protected static final String CONCEPTMAP_URL_PARAM = "u";
-	protected static final String FILENAME_PARAM = "f";
-	protected static final String PATH_PARAM = "p";
+	protected static final String CONCEPTMAP_URL_PARAM_LONGOPT = "url";
+	protected static final String CONCEPTMAP_URL_PARAM_NAME = "url";
+	protected static final String CONCEPTMAP_URL_PARAM_DESC = "The URL of the ConceptMap resource to be imported/exported (i.e. ConceptMap.url).";
+	protected static final String FILE_PARAM = "f";
+	protected static final String FILE_PARAM_LONGOPT = "filename";
+	protected static final String FILE_PARAM_NAME = "filename";
+	protected static final String FILE_PARAM_DESC = "The path and filename of the CSV file to be imported/exported (e.g. ./input.csv, ./output.csv, etc.).";
 
 	protected IGenericClient client;
 	protected String conceptMapUrl;
 	protected FhirVersionEnum fhirVersion;
-	protected String filename;
-	protected String path;
+	protected String file;
 
 	@Override
 	protected void addFhirVersionOption(Options theOptions) {
@@ -33,7 +41,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 			.map(t -> t.name().toLowerCase())
 			.sorted()
 			.collect(Collectors.joining(", "));
-		addRequiredOption(theOptions, FHIR_VERSION_OPTION, "fhir-version", "version", "The FHIR version being used. Valid values: " + versions);
+		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
 	}
 
 	@Override
@@ -43,49 +51,47 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 
 		String targetServer = theCommandLine.getOptionValue(BASE_URL_PARAM);
 		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified");
+			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified.");
 		} else if (!targetServer.startsWith("http") && !targetServer.startsWith("file")) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
+			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
 		conceptMapUrl = theCommandLine.getOptionValue(CONCEPTMAP_URL_PARAM);
 		if (isBlank(conceptMapUrl)) {
-			throw new ParseException("No ConceptMap URL (" + CONCEPTMAP_URL_PARAM + ") specified");
+			throw new ParseException("No ConceptMap URL (" + CONCEPTMAP_URL_PARAM + ") specified.");
+		} else {
+			ourLog.info("Specified ConceptMap URL (ConceptMap.url): {}", conceptMapUrl);
 		}
 
-		filename = theCommandLine.getOptionValue(FILENAME_PARAM);
-		if (isBlank(filename)) {
-			throw new ParseException("No filename (" + FILENAME_PARAM + ") specified");
+		file = theCommandLine.getOptionValue(FILE_PARAM);
+		if (isBlank(file)) {
+			throw new ParseException("No file (" + FILE_PARAM + ") specified.");
 		}
-		if (!filename.endsWith(".csv")) {
-			filename = filename.concat(".csv");
+		if (!file.endsWith(".csv")) {
+			file = file.concat(".csv");
 		}
 
-		path = theCommandLine.getOptionValue(PATH_PARAM);
-		if (isBlank(path)) {
-			path = DEFAULT_PATH;
-		}
+		parseAdditionalParameters(theCommandLine);
 
 		client = super.newClient(theCommandLine);
 		fhirVersion = ctx.getVersion().getVersion();
 		if (fhirVersion != FhirVersionEnum.DSTU3
 			&& fhirVersion != FhirVersionEnum.R4) {
-			throw new ParseException("This command does not support FHIR version " + fhirVersion);
+			throw new ParseException("This command does not support FHIR version " + fhirVersion + ".");
 		}
 
-		if (theCommandLine.hasOption('v')) {
+		if (theCommandLine.hasOption(FHIR_VERSION_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
 		process();
 	}
 
-	protected abstract void process() throws ParseException;
+	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {}
+
+	protected abstract void process() throws ParseException, ExecutionException;
 
 	protected enum Header {
-		CONCEPTMAP_URL,
-		SOURCE_VALUE_SET,
-		TARGET_VALUE_SET,
 		SOURCE_CODE_SYSTEM,
 		SOURCE_CODE_SYSTEM_VERSION,
 		TARGET_CODE_SYSTEM,
@@ -96,5 +102,268 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 		TARGET_DISPLAY,
 		EQUIVALENCE,
 		COMMENT
+	}
+
+	protected class TemporaryConceptMapGroup {
+		private String source;
+		private String sourceVersion;
+		private String target;
+		private String targetVersion;
+
+		public TemporaryConceptMapGroup() {
+		}
+
+		public TemporaryConceptMapGroup(String theSource, String theSourceVersion, String theTarget, String theTargetVersion) {
+			this.source = theSource;
+			this.sourceVersion = theSourceVersion;
+			this.target = theTarget;
+			this.targetVersion = theTargetVersion;
+		}
+
+		public boolean hasSource() {
+			return isNotBlank(source);
+		}
+
+		public String getSource() {
+			return source;
+		}
+
+		public TemporaryConceptMapGroup setSource(String theSource) {
+			this.source = theSource;
+			return this;
+		}
+
+		public boolean hasSourceVersion() {
+			return isNotBlank(sourceVersion);
+		}
+
+		public String getSourceVersion() {
+			return sourceVersion;
+		}
+
+		public TemporaryConceptMapGroup setSourceVersion(String theSourceVersion) {
+			this.sourceVersion = theSourceVersion;
+			return this;
+		}
+
+		public boolean hasTarget() {
+			return isNotBlank(target);
+		}
+
+		public String getTarget() {
+			return target;
+		}
+
+		public TemporaryConceptMapGroup setTarget(String theTarget) {
+			this.target = theTarget;
+			return this;
+		}
+
+		public boolean hasTargetVersion() {
+			return isNotBlank(targetVersion);
+		}
+
+		public String getTargetVersion() {
+			return targetVersion;
+		}
+
+		public TemporaryConceptMapGroup setTargetVersion(String theTargetVersion) {
+			this.targetVersion = theTargetVersion;
+			return this;
+		}
+
+		public boolean hasValues() {
+			return !isAllBlank(getSource(), getSourceVersion(), getTarget(), getTargetVersion());
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+
+			if (!(o instanceof TemporaryConceptMapGroup)) return false;
+
+			TemporaryConceptMapGroup that = (TemporaryConceptMapGroup) o;
+
+			return new EqualsBuilder()
+				.append(getSource(), that.getSource())
+				.append(getSourceVersion(), that.getSourceVersion())
+				.append(getTarget(), that.getTarget())
+				.append(getTargetVersion(), that.getTargetVersion())
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(getSource())
+				.append(getSourceVersion())
+				.append(getTarget())
+				.append(getTargetVersion())
+				.toHashCode();
+		}
+	}
+
+	protected class TemporaryConceptMapGroupElement {
+		private String code;
+		private String display;
+
+		public TemporaryConceptMapGroupElement() {
+		}
+
+		public TemporaryConceptMapGroupElement(String theCode, String theDisplay) {
+			this.code = theCode;
+			this.display = theDisplay;
+		}
+
+		public boolean hasCode() {
+			return isNotBlank(code);
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		public TemporaryConceptMapGroupElement setCode(String theCode) {
+			this.code = theCode;
+			return this;
+		}
+
+		public boolean hasDisplay() {
+			return isNotBlank(display);
+		}
+
+		public String getDisplay() {
+			return display;
+		}
+
+		public TemporaryConceptMapGroupElement setDisplay(String theDisplay) {
+			this.display = theDisplay;
+			return this;
+		}
+
+		public boolean hasValues() {
+			return !isAllBlank(getCode(), getDisplay());
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+
+			if (!(o instanceof TemporaryConceptMapGroupElement)) return false;
+
+			TemporaryConceptMapGroupElement that = (TemporaryConceptMapGroupElement) o;
+
+			return new EqualsBuilder()
+				.append(getCode(), that.getCode())
+				.append(getDisplay(), that.getDisplay())
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(getCode())
+				.append(getDisplay())
+				.toHashCode();
+		}
+	}
+
+	protected class TemporaryConceptMapGroupElementTarget {
+		private String code;
+		private String display;
+		private String equivalence;
+		private String comment;
+
+		public TemporaryConceptMapGroupElementTarget() {
+		}
+
+		public TemporaryConceptMapGroupElementTarget(String theCode, String theDisplay, String theEquivalence, String theComment) {
+			this.code = theCode;
+			this.display = theDisplay;
+			this.equivalence = theEquivalence;
+			this.comment = theComment;
+		}
+
+		public boolean hasCode() {
+			return isNotBlank(code);
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		public TemporaryConceptMapGroupElementTarget setCode(String theCode) {
+			this.code = theCode;
+			return this;
+		}
+
+		public boolean hasDisplay() {
+			return isNotBlank(display);
+		}
+
+		public String getDisplay() {
+			return display;
+		}
+
+		public TemporaryConceptMapGroupElementTarget setDisplay(String theDisplay) {
+			this.display = theDisplay;
+			return this;
+		}
+
+		public boolean hasEquivalence() {
+			return isNotBlank(equivalence);
+		}
+
+		public String getEquivalence() {
+			return equivalence;
+		}
+
+		public TemporaryConceptMapGroupElementTarget setEquivalence(String theEquivalence) {
+			this.equivalence = theEquivalence;
+			return this;
+		}
+
+		public boolean hasComment() {
+			return isNotBlank(comment);
+		}
+
+		public String getComment() {
+			return comment;
+		}
+
+		public TemporaryConceptMapGroupElementTarget setComment(String theComment) {
+			this.comment = theComment;
+			return this;
+		}
+
+		public boolean hasValues() {
+			return !isAllBlank(getCode(), getDisplay(), getEquivalence(), getComment());
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+
+			if (!(o instanceof TemporaryConceptMapGroupElementTarget)) return false;
+
+			TemporaryConceptMapGroupElementTarget that = (TemporaryConceptMapGroupElementTarget) o;
+
+			return new EqualsBuilder()
+				.append(getCode(), that.getCode())
+				.append(getDisplay(), that.getDisplay())
+				.append(getEquivalence(), that.getEquivalence())
+				.append(getComment(), that.getComment())
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(getCode())
+				.append(getDisplay())
+				.append(getEquivalence())
+				.append(getComment())
+				.toHashCode();
+		}
 	}
 }
